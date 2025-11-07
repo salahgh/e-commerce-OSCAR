@@ -5,15 +5,15 @@
 
 ## 1. Vue d'ensemble
 
-Le back-office est l'interface d'administration permettant de gérer l'ensemble de la plateforme e-commerce OSCAR Fashion. Il offre aux administrateurs les outils nécessaires pour gérer les produits, commandes, clients, statistiques et configurations.
+Le back-office est l'interface d'administration développée en **React.js** avec **Tailwind CSS** et **GraphQL**, permettant de gérer l'ensemble de la plateforme e-commerce OSCAR Fashion. Il offre aux administrateurs les outils nécessaires pour gérer les produits, commandes, clients, statistiques et configurations.
 
 ### Objectifs Principaux
 - Fournir une interface d'administration complète et intuitive
-- Centraliser la gestion de tous les aspects de la plateforme
-- Offrir des tableaux de bord et statistiques en temps réel
-- Permettre la génération de rapports et documents (PDF)
+- Centraliser la gestion via GraphQL API
+- Offrir des tableaux de bord avec **MUI X Charts**
+- Permettre la génération de rapports et documents (PDF via backend)
 - Gérer les utilisateurs et les permissions
-- Faciliter la configuration de la plateforme
+- Design moderne avec **Tailwind CSS**
 
 ---
 
@@ -23,40 +23,46 @@ Le back-office est l'interface d'administration permettant de gérer l'ensemble 
 - **Bibliothèque**: React.js 18+
 - **Build Tool**: Vite
 - **Langage**: TypeScript
-- **Package Manager**: npm ou yarn
+- **Package Manager**: npm
+
+### GraphQL & Data Management
+- **GraphQL Client**: **Apollo Client**
+- **Code Generation**: GraphQL Code Generator (@graphql-codegen)
+- **Schema**: Auto-generated types from backend
+- **Cache**: Apollo InMemory Cache
 
 ### UI & Styling
-- **Component Library**: Material-UI (MUI) v5
-- **Admin Template**: MUI-X (optionnel, ou développement custom)
-- **Styling**: Emotion (MUI default)
-- **Icônes**: Material Icons
-- **Charts**: MUI X Charts (pour les graphiques)
+- **CSS Framework**: **Tailwind CSS 3.x**
+- **Charts**: **MUI X Charts** (only for analytics/dashboard)
+- **Icons**: Heroicons, Lucide Icons, ou React Icons
+- **Animations**: Framer Motion (optional)
+- **Utility**: clsx, tailwind-merge
 
 ### State Management
-- **Global State**: Redux Toolkit ou Zustand
-- **Server State**: React Query (TanStack Query)
-
-### Routing
-- **Router**: React Router v6
-- **Layout**: Sidebar + Topbar layout
+- **Global State**: **Redux Toolkit**
+- **Server State**: Apollo Client cache
+- **Forms State**: Formik
 
 ### Forms & Validation
-- **Formulaires**: React Hook Form
-- **Validation**: Yup ou Zod
-- **Rich Text Editor**: TinyMCE ou Draft.js (descriptions produits)
+- **Forms**: **Formik**
+- **Validation**: **Yup**
 
-### Data Visualization
-- **Charts**: MUI X Charts, Recharts, ou Chart.js
-- **Tables**: MUI DataGrid (avec pagination, tri, filtrage)
-- **Export**: Export CSV/Excel
+### Dates
+- **Library**: date-fns
 
-### API & Communication
-- **HTTP Client**: Axios
-- **API Integration**: React Query
+### Data Tables
+- **Option 1**: Custom table with Tailwind (recommended)
+- **Option 2**: Keep MUI DataGrid (if needed for complex features)
 
-### Testing
-- **Unit Tests**: Jest + React Testing Library
-- **Coverage**: > 70%
+### Code Quality
+- **Formatter**: **Prettier** (no ESLint)
+- **Type Checking**: TypeScript strict mode
+
+### Développement
+- **Hot Reload**: Vite HMR
+- **Environment**: .env.local, .env.production
+
+**Note**: Pas de testing, CI/CD, git hooks pour le moment
 
 ---
 
@@ -67,736 +73,1217 @@ Le back-office est l'interface d'administration permettant de gérer l'ensemble 
 ```
 oscar-backoffice/
 ├── public/
-│   └── index.html
+│   └── images/
 ├── src/
-│   ├── assets/
 │   ├── components/
-│   │   ├── common/         # Composants réutilisables
-│   │   ├── layout/         # Sidebar, Topbar, Layout
-│   │   ├── charts/         # Graphiques
-│   │   └── tables/         # Tables de données
-│   ├── features/
-│   │   ├── dashboard/      # Tableau de bord
-│   │   ├── products/       # Gestion produits
-│   │   ├── orders/         # Gestion commandes
-│   │   ├── customers/      # Gestion clients
-│   │   ├── users/          # Gestion utilisateurs admin
-│   │   ├── reports/        # Rapports et stats
-│   │   ├── settings/       # Configuration
-│   │   └── auth/           # Authentification admin
+│   │   ├── ui/              # UI components (Tailwind)
+│   │   │   ├── Button.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── Card.tsx
+│   │   │   ├── Table.tsx
+│   │   │   └── Modal.tsx
+│   │   ├── layout/          # Layout components
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── TopBar.tsx
+│   │   │   └── MainLayout.tsx
+│   │   ├── charts/          # MUI X Charts wrappers
+│   │   │   ├── LineChart.tsx
+│   │   │   ├── BarChart.tsx
+│   │   │   └── PieChart.tsx
+│   │   ├── dashboard/
+│   │   ├── products/
+│   │   ├── orders/
+│   │   └── customers/
 │   ├── pages/
+│   │   ├── Dashboard.tsx
+│   │   ├── Products/
+│   │   │   ├── ProductList.tsx
+│   │   │   ├── ProductForm.tsx
+│   │   │   └── ProductDetail.tsx
+│   │   ├── Orders/
+│   │   ├── Customers/
+│   │   ├── Reports/
+│   │   ├── Settings/
+│   │   └── Login.tsx
+│   ├── graphql/
+│   │   ├── queries/         # GraphQL queries
+│   │   ├── mutations/       # GraphQL mutations
+│   │   ├── fragments/       # GraphQL fragments
+│   │   └── generated/       # Auto-generated types
+│   ├── store/               # Redux store
+│   │   ├── slices/
+│   │   │   ├── authSlice.ts
+│   │   │   ├── productsSlice.ts
+│   │   │   └── ordersSlice.ts
+│   │   └── store.ts
+│   ├── lib/
+│   │   ├── apollo-client.ts
+│   │   ├── utils.ts
+│   │   └── validators.ts    # Yup schemas
 │   ├── hooks/
-│   ├── services/           # API calls
-│   ├── store/
-│   ├── routes/
-│   ├── utils/
-│   ├── constants/
-│   ├── theme/
 │   ├── types/
+│   ├── constants/
+│   ├── styles/
+│   │   └── index.css        # Tailwind imports
 │   ├── App.tsx
-│   └── index.tsx
-├── .env.development
+│   └── main.tsx
+├── .env.local
 ├── .env.production
-└── package.json
+├── codegen.ts               # GraphQL Code Generator config
+├── vite.config.ts
+├── tailwind.config.ts
+├── tsconfig.json
+├── package.json
+└── .prettierrc
 ```
 
 ---
 
-## 4. Modules & Fonctionnalités
-
-### 4.1 Authentification Admin
-
-#### Pages
-- **Login**: Connexion administrateur
-- **Forgot Password**: Récupération mot de passe
-
-#### Fonctionnalités
-- Connexion sécurisée (email + mot de passe)
-- Authentification JWT
-- Sessions sécurisées
-- Déconnexion
-- Protection des routes admin
-
-#### Sécurité
-- Authentification 2FA (optionnel)
-- Rate limiting
-- Logs de connexion
-- Permissions basées sur rôles (ADMIN, SUPER_ADMIN)
-
----
-
-### 4.2 Dashboard (Tableau de Bord)
-
-#### Vue d'ensemble
-
-Page principale affichant les métriques clés en temps réel.
-
-#### Widgets & Statistiques
-
-1. **KPIs (Indicateurs Clés)**
-   - Revenus du jour/semaine/mois
-   - Nombre de commandes (aujourd'hui, ce mois)
-   - Nombre de clients actifs
-   - Taux de conversion
-   - Valeur moyenne du panier
-
-2. **Graphiques**
-   - **Évolution des ventes** (ligne, 30 derniers jours)
-   - **Répartition des ventes par catégorie** (pie chart)
-   - **Commandes par statut** (bar chart)
-   - **Revenus par mois** (bar chart, 12 derniers mois)
-
-3. **Listes Récentes**
-   - **Dernières commandes** (5-10 dernières)
-   - **Produits faibles en stock** (alertes)
-   - **Nouveaux clients** (dernières inscriptions)
-
-4. **Notifications**
-   - Commandes en attente
-   - Produits en rupture de stock
-   - Retours/annulations à traiter
-
-#### Filtres
-- Période (aujourd'hui, cette semaine, ce mois, personnalisé)
-- Comparaison période précédente
-
----
-
-### 4.3 Gestion Produits
-
-#### Liste des Produits
-
-**Composants**:
-- Table DataGrid (MUI) avec:
-  - Colonnes: Image, Nom, SKU, Catégorie, Prix, Stock, Statut, Actions
-  - Pagination
-  - Tri par colonne
-  - Filtres (catégorie, statut, prix)
-  - Recherche (nom, SKU)
-  - Sélection multiple (actions en masse)
-
-**Actions**:
-- Ajouter nouveau produit
-- Modifier produit
-- Supprimer produit(s)
-- Activer/Désactiver produit
-- Dupliquer produit
-- Export CSV/Excel
-
----
-
-#### Formulaire Produit (Ajout/Modification)
-
-**Sections**:
-
-1. **Informations Générales**
-   - Nom (multilingue: AR, FR, EN)
-   - SKU (auto-généré ou manuel)
-   - Description courte
-   - Description détaillée (Rich Text Editor)
-   - Slug (URL-friendly)
-
-2. **Tarification**
-   - Prix de base
-   - Prix promotionnel (optionnel)
-   - Dates promotion (début/fin)
-
-3. **Catégories & Attributs**
-   - Catégorie principale
-   - Catégories secondaires
-   - Attributs (taille, couleur, matière)
-
-4. **Stock**
-   - Quantité en stock
-   - Seuil d'alerte stock faible
-   - Gestion stock activée/désactivée
-
-5. **Images**
-   - Upload multiple images
-   - Drag & drop pour réorganiser
-   - Définir image principale
-   - Crop/resize
-
-6. **SEO**
-   - Meta title
-   - Meta description
-   - Keywords
-
-7. **Statut**
-   - Actif / Brouillon / Inactif
-   - Visibilité (public/privé)
-
-**Validation**:
-- Champs obligatoires
-- Format SKU unique
-- Prix valides
-- Images requises
-
----
-
-#### Gestion Catégories
-
-**Fonctionnalités**:
-- Liste des catégories (hiérarchique/tree view)
-- Ajouter catégorie/sous-catégorie
-- Modifier catégorie
-- Supprimer catégorie
-- Réorganiser (drag & drop)
-- Catégorie parente/enfant
-- Image de catégorie
-- Ordre d'affichage
-
----
-
-#### Gestion Attributs
-
-**Fonctionnalités**:
-- Liste des attributs (Taille, Couleur, Matière, etc.)
-- Ajouter attribut
-- Gérer valeurs d'attribut (S, M, L, XL)
-- Supprimer attribut
-
----
-
-### 4.4 Gestion Commandes
-
-#### Liste des Commandes
-
-**Composants**:
-- Table DataGrid avec:
-  - Colonnes: Numéro, Date, Client, Statut, Total, Paiement, Actions
-  - Filtres:
-    - Statut (Pending, Confirmed, Shipped, Delivered, Cancelled)
-    - Date (période personnalisée)
-    - Montant (min-max)
-    - Mode paiement
-  - Recherche (numéro commande, nom client)
-  - Export CSV/Excel
-
-**Actions**:
-- Voir détails commande
-- Modifier statut
-- Imprimer facture (PDF)
-- Imprimer bon de livraison (PDF)
-- Annuler commande
-- Remboursement
-
----
-
-#### Détail Commande
-
-**Sections**:
-
-1. **Informations Client**
-   - Nom, email, téléphone
-   - Adresse de livraison
-   - Adresse de facturation
-
-2. **Articles Commandés**
-   - Liste des produits (image, nom, quantité, prix unitaire, total)
-   - Sous-total
-
-3. **Récapitulatif**
-   - Sous-total
-   - Frais de livraison
-   - Réduction
-   - Total
-
-4. **Paiement**
-   - Méthode de paiement
-   - Statut paiement
-   - Transaction ID
-   - Date paiement
-
-5. **Livraison**
-   - Méthode de livraison
-   - Numéro de tracking
-   - Date d'expédition
-   - Date de livraison estimée
-
-6. **Historique Statuts**
-   - Timeline des changements de statut
-   - Commentaires
-
-**Actions**:
-- Modifier statut
-- Ajouter numéro tracking
-- Envoyer notification client
-- Imprimer facture
-- Imprimer bon de livraison
-- Rembourser
-
----
-
-### 4.5 Gestion Clients
-
-#### Liste des Clients
-
-**Composants**:
-- Table DataGrid avec:
-  - Colonnes: Nom, Email, Téléphone, Commandes, Total dépensé, Date inscription, Actions
-  - Filtres:
-    - Date d'inscription
-    - Nombre de commandes (min-max)
-    - Total dépensé (min-max)
-  - Recherche (nom, email)
-  - Export CSV/Excel
-
-**Actions**:
-- Voir détails client
-- Modifier client
-- Bloquer/Débloquer client
-- Supprimer client
-- Envoyer email
-
----
-
-#### Détail Client
-
-**Sections**:
-
-1. **Informations Personnelles**
-   - Nom, prénom
-   - Email, téléphone
-   - Date d'inscription
-   - Statut (actif, inactif, bloqué)
-
-2. **Adresses**
-   - Liste des adresses
-   - Adresse par défaut
-
-3. **Statistiques**
-   - Nombre total de commandes
-   - Total dépensé
-   - Panier moyen
-   - Dernière commande
-
-4. **Historique Commandes**
-   - Liste des commandes du client
-   - Liens vers détails commandes
-
-**Actions**:
-- Modifier informations
-- Bloquer/Débloquer
-- Réinitialiser mot de passe
-- Envoyer email
-
----
-
-### 4.6 Rapports & Statistiques
-
-#### Rapports Disponibles
-
-1. **Rapport des Ventes**
-   - Période sélectionnable
-   - Ventes par jour/semaine/mois
-   - Évolution graphique
-   - Comparaison période précédente
-   - Export PDF/CSV
-
-2. **Top Produits**
-   - Produits les plus vendus
-   - Par quantité ou revenus
-   - Période sélectionnable
-   - Export
-
-3. **Rapport Clients**
-   - Nouveaux clients (période)
-   - Clients actifs/inactifs
-   - Segmentation (dépenses)
-   - Export
-
-4. **Rapport Commandes**
-   - Nombre de commandes (période)
-   - Répartition par statut
-   - Taux de conversion
-   - Panier moyen
-   - Export
-
-5. **Rapport Stock**
-   - Produits en stock
-   - Produits faibles en stock
-   - Produits en rupture
-   - Valeur totale du stock
-   - Export
-
-6. **Rapport Revenus**
-   - Revenus par période
-   - Revenus par catégorie
-   - Revenus par mode de paiement
-   - Graphiques
-   - Export
-
-#### Génération PDF
-
-**Fonctionnalités**:
-- Génération de rapports en PDF (via backend Jasper Reports)
-- Personnalisation de la période
-- Inclusion de graphiques
-- Logo et en-tête OSCAR
-- Téléchargement direct
-
----
-
-### 4.7 Gestion Utilisateurs (Administrateurs)
-
-#### Liste Utilisateurs Admin
-
-**Composants**:
-- Table avec:
-  - Colonnes: Nom, Email, Rôle, Statut, Dernière connexion, Actions
-  - Filtres (rôle, statut)
-
-**Rôles**:
-- **SUPER_ADMIN**: Accès complet
-- **ADMIN**: Accès gestion produits, commandes, clients
-- **MANAGER**: Accès lecture seule + modification commandes
-- **SUPPORT**: Accès lecture seule
-
-**Actions**:
-- Ajouter utilisateur admin
-- Modifier utilisateur
-- Changer rôle
-- Bloquer/Débloquer
-- Supprimer
-
----
-
-#### Formulaire Utilisateur Admin
-
-**Champs**:
-- Prénom, nom
-- Email
-- Mot de passe (création)
-- Rôle
-- Statut (actif/inactif)
-- Permissions spécifiques (optionnel)
-
----
-
-### 4.8 Configuration & Paramètres
-
-#### Paramètres Généraux
-
-**Sections**:
-
-1. **Informations Boutique**
-   - Nom de la boutique
-   - Email contact
-   - Téléphone
-   - Adresse physique
-   - Logo
-   - Favicon
-
-2. **Paramètres Régionaux**
-   - Langue par défaut
-   - Devise (DZD)
-   - Format date/heure
-   - Fuseau horaire
-
-3. **Emails**
-   - Configuration SMTP
-   - Email expéditeur
-   - Templates emails
-   - Test email
-
-4. **Notifications**
-   - Notifications email activées
-   - Notifications SMS activées
-   - Notifications push activées
-
-5. **Paiement**
-   - Configuration CIB (Merchant ID, API Key)
-   - Configuration Baridimob
-   - Paiement à la livraison (activé/désactivé)
-
-6. **Livraison**
-   - Frais de livraison standard
-   - Frais de livraison express
-   - Zones de livraison
-   - Délais de livraison
-
-7. **SEO**
-   - Meta title site
-   - Meta description
-   - Google Analytics ID
-   - Facebook Pixel
-
-8. **Sécurité**
-   - Force HTTPS
-   - Durée session
-   - Tentatives login max
-
-**Actions**:
-- Sauvegarder paramètres
-- Réinitialiser valeurs par défaut
-
----
-
-#### Synchronisation ERP/WMS
-
-**Fonctionnalités**:
-- Configuration endpoints ERP/WMS
-- Credentials API
-- Synchronisation manuelle (trigger)
-- Synchronisation automatique (planification)
-- Logs de synchronisation
-- Statut synchronisation (dernière sync, succès/échec)
-- Test de connexion
-
----
-
-### 4.9 Notifications Admin
-
-#### Centre de Notifications
-
-**Fonctionnalités**:
-- Liste des notifications
-- Types:
-  - Nouvelle commande
-  - Commande annulée
-  - Produit en rupture de stock
-  - Nouveau client
-  - Problème synchronisation
-- Marquer comme lu
-- Filtrer par type
-- Notifications temps réel (WebSocket)
-
----
-
-## 5. Layout & Navigation
-
-### Layout Principal
-
-```
-┌─────────────────────────────────────────────┐
-│ Top Bar (Logo, Search, Notifications, User)│
-├──────────┬──────────────────────────────────┤
-│          │                                  │
-│ Sidebar  │                                  │
-│          │        Content Area              │
-│ Menu     │                                  │
-│          │                                  │
-│          │                                  │
-└──────────┴──────────────────────────────────┘
+## 4. GraphQL Integration
+
+### Configuration Apollo Client
+
+**lib/apollo-client.ts**:
+```typescript
+import { ApolloClient, InMemoryCache, HttpLink, from } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
+import { onError } from '@apollo/client/link/error';
+
+const httpLink = new HttpLink({
+  uri: import.meta.env.VITE_GRAPHQL_URL || 'http://localhost:8080/graphql',
+});
+
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem('admin_token');
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : '',
+    },
+  };
+});
+
+const errorLink = onError(({ graphQLErrors, networkError }) => {
+  if (graphQLErrors) {
+    graphQLErrors.forEach(({ message, locations, path }) => {
+      console.error(`[GraphQL error]: Message: ${message}, Path: ${path}`);
+    });
+  }
+  if (networkError) {
+    console.error(`[Network error]: ${networkError}`);
+  }
+});
+
+export const apolloClient = new ApolloClient({
+  link: from([errorLink, authLink, httpLink]),
+  cache: new InMemoryCache(),
+  defaultOptions: {
+    watchQuery: {
+      fetchPolicy: 'cache-and-network',
+    },
+  },
+});
 ```
 
-### Sidebar Menu
+### GraphQL Code Generator
 
-- **Dashboard** (icône: dashboard)
-- **Produits** (icône: inventory)
-  - Liste des produits
-  - Ajouter produit
-  - Catégories
-  - Attributs
-- **Commandes** (icône: shopping_cart)
-  - Toutes les commandes
-  - En attente
-  - En cours
-  - Livrées
-- **Clients** (icône: people)
-  - Liste clients
-- **Rapports** (icône: bar_chart)
-  - Dashboard ventes
-  - Top produits
-  - Rapport clients
-  - Rapport stock
-- **Utilisateurs** (icône: admin_panel_settings)
-  - Administrateurs
-- **Paramètres** (icône: settings)
-  - Général
-  - Paiement
-  - Livraison
-  - Synchronisation
-- **Déconnexion** (icône: logout)
+**codegen.ts**:
+```typescript
+import type { CodegenConfig } from '@graphql-codegen/cli';
 
----
+const config: CodegenConfig = {
+  schema: 'http://localhost:8080/graphql',
+  documents: ['src/graphql/**/*.ts'],
+  generates: {
+    './src/graphql/generated/': {
+      preset: 'client',
+      plugins: [],
+      presetConfig: {
+        gqlTagName: 'gql',
+      },
+    },
+  },
+  ignoreNoDocuments: true,
+};
 
-## 6. Composants Communs
+export default config;
+```
 
-### 6.1 Data Table (MUI DataGrid)
+**package.json scripts**:
+```json
+{
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "codegen": "graphql-codegen --config codegen.ts",
+    "codegen:watch": "graphql-codegen --config codegen.ts --watch",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+  }
+}
+```
 
-**Fonctionnalités**:
-- Pagination
-- Tri par colonne
-- Filtrage avancé
-- Recherche
-- Sélection multiple
-- Actions en masse
-- Export CSV/Excel
-- Colonnes redimensionnables
-- Responsive
+### Exemple Queries GraphQL
 
----
+**graphql/queries/products.ts**:
+```typescript
+import { gql } from '@apollo/client';
 
-### 6.2 Charts (MUI X Charts)
+export const GET_PRODUCTS = gql`
+  query GetProducts($page: Int!, $size: Int!, $filter: ProductFilter) {
+    products(page: $page, size: $size, filter: $filter) {
+      edges {
+        node {
+          id
+          sku
+          name {
+            fr
+            ar
+            en
+          }
+          slug
+          category {
+            id
+            name { fr }
+          }
+          basePrice
+          salePrice
+          stockQuantity
+          status
+          images {
+            id
+            url
+          }
+          createdAt
+          updatedAt
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        endCursor
+      }
+      totalCount
+    }
+  }
+`;
 
-**Types de graphiques**:
-- Line Chart (évolution dans le temps)
-- Bar Chart (comparaisons)
-- Pie Chart (répartitions)
-- Area Chart (tendances)
+export const GET_PRODUCT = gql`
+  query GetProduct($id: ID!) {
+    product(id: $id) {
+      id
+      sku
+      name { fr ar en }
+      description { fr ar en }
+      slug
+      category { id name { fr } }
+      basePrice
+      salePrice
+      stockQuantity
+      status
+      images { id url order isMain }
+      attributes { id name values }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+```
 
-**Fonctionnalités**:
-- Responsive
-- Tooltips
-- Légendes
-- Filtres de période
-- Export image
+**graphql/mutations/products.ts**:
+```typescript
+import { gql } from '@apollo/client';
 
----
+export const CREATE_PRODUCT = gql`
+  mutation CreateProduct($input: ProductInput!) {
+    createProduct(input: $input) {
+      id
+      sku
+      name { fr ar en }
+      slug
+      basePrice
+      status
+    }
+  }
+`;
 
-### 6.3 Stats Cards
+export const UPDATE_PRODUCT = gql`
+  mutation UpdateProduct($id: ID!, $input: ProductInput!) {
+    updateProduct(id: $id, input: $input) {
+      id
+      sku
+      name { fr ar en }
+      updatedAt
+    }
+  }
+`;
 
-**Widget statistique**:
-- Icône
-- Titre (ex: "Revenus du mois")
-- Valeur (ex: "1,250,000 DZD")
-- Évolution (ex: "+12% vs mois dernier")
-- Couleur indicateur (vert/rouge)
-
----
-
-### 6.4 Formulaires
-
-**Composants**:
-- Text Input
-- Select/Dropdown
-- Date Picker
-- File Upload (drag & drop)
-- Rich Text Editor
-- Switch/Toggle
-- Checkbox
-- Radio
-- Multi-select
-
-**Validation**:
-- Temps réel
-- Messages d'erreur clairs
-- Indication champs obligatoires
-
----
-
-## 7. Permissions & Rôles
-
-### Matrice de Permissions
-
-| Module | SUPER_ADMIN | ADMIN | MANAGER | SUPPORT |
-|--------|-------------|-------|---------|---------|
-| Dashboard | Lecture | Lecture | Lecture | Lecture |
-| Produits | Tout | Tout | Lecture | Lecture |
-| Commandes | Tout | Tout | Modifier statut | Lecture |
-| Clients | Tout | Tout | Lecture | Lecture |
-| Rapports | Tout | Lecture | Lecture | Lecture |
-| Utilisateurs | Tout | - | - | - |
-| Paramètres | Tout | Limité | - | - |
-
-**Légende**:
-- **Tout**: Création, lecture, modification, suppression
-- **Lecture**: Consultation uniquement
-- **Modifier**: Lecture + modification
-- **-**: Pas d'accès
-
----
-
-## 8. Sécurité
-
-### Mesures de Sécurité
-
-1. **Authentification**
-   - JWT tokens
-   - Session timeout (30 min inactivité)
-   - Remember me (optionnel)
-
-2. **Autorisation**
-   - Vérification rôles
-   - Permissions granulaires
-   - Protection routes
-
-3. **Audit Logs**
-   - Logs des actions critiques:
-     - Connexions admin
-     - Modifications produits
-     - Modifications commandes
-     - Modifications paramètres
-   - Traçabilité (qui, quoi, quand)
-
-4. **Protection Données**
-   - HTTPS obligatoire
-   - Sanitisation inputs
-   - Protection XSS
-   - Protection CSRF
+export const DELETE_PRODUCT = gql`
+  mutation DeleteProduct($id: ID!) {
+    deleteProduct(id: $id)
+  }
+`;
+```
 
 ---
 
-## 9. Performance & Optimisation
+## 5. Redux Toolkit Configuration
 
-### Stratégies
+### Store Setup
 
-1. **Lazy Loading**
-   - Code splitting par route
-   - Chargement différé des graphiques
+**store/store.ts**:
+```typescript
+import { configureStore } from '@reduxjs/toolkit';
+import authReducer from './slices/authSlice';
+import productsReducer from './slices/productsSlice';
+import ordersReducer from './slices/ordersSlice';
 
-2. **Caching**
-   - React Query pour cache API
-   - Cache des statistiques
+export const store = configureStore({
+  reducer: {
+    auth: authReducer,
+    products: productsReducer,
+    orders: ordersReducer,
+  },
+});
 
-3. **Pagination**
-   - Pagination serveur (pas client)
-   - Limite résultats (50-100 par page)
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+```
 
-4. **Optimisation Images**
-   - Thumbnails pour listes
-   - Lazy loading
+**store/slices/authSlice.ts**:
+```typescript
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: 'ADMIN' | 'SUPER_ADMIN';
+}
+
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+}
+
+const initialState: AuthState = {
+  user: null,
+  token: localStorage.getItem('admin_token'),
+  isAuthenticated: !!localStorage.getItem('admin_token'),
+};
+
+const authSlice = createSlice({
+  name: 'auth',
+  initialState,
+  reducers: {
+    setCredentials: (state, action: PayloadAction<{ user: User; token: string }>) => {
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.isAuthenticated = true;
+      localStorage.setItem('admin_token', action.payload.token);
+    },
+    logout: (state) => {
+      state.user = null;
+      state.token = null;
+      state.isAuthenticated = false;
+      localStorage.removeItem('admin_token');
+    },
+  },
+});
+
+export const { setCredentials, logout } = authSlice.actions;
+export default authSlice.reducer;
+```
 
 ---
 
-## 10. Responsive & Mobile
+## 6. Tailwind CSS Setup
 
-### Adaptation Mobile
+### Configuration
 
-- **Sidebar**: Transformée en drawer (menu hamburger)
-- **Tables**: Scroll horizontal ou cartes empilées
-- **Formulaires**: Layout adaptatif
-- **Charts**: Responsive, tactile-friendly
+**tailwind.config.ts**:
+```typescript
+import type { Config } from 'tailwindcss';
 
-### Breakpoints
-- **Desktop**: > 1280px (sidebar toujours visible)
-- **Tablet**: 768px - 1279px (sidebar collapsible)
-- **Mobile**: < 768px (drawer menu)
+const config: Config = {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: '#2C3E50',
+          light: '#3F5568',
+          dark: '#1F2D3D',
+        },
+        secondary: {
+          DEFAULT: '#E8D5C4',
+          light: '#F0E4D7',
+          dark: '#D4C3B0',
+        },
+        accent: {
+          DEFAULT: '#C9A992',
+          light: '#D9BCA9',
+          dark: '#B8957D',
+        },
+        gray: {
+          50: '#F9FAFB',
+          100: '#F3F4F6',
+          200: '#E5E7EB',
+          300: '#D1D5DB',
+          400: '#9CA3AF',
+          500: '#6B7280',
+          600: '#4B5563',
+          700: '#374151',
+          800: '#1F2937',
+          900: '#111827',
+        },
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+      },
+    },
+  },
+  plugins: [require('@tailwindcss/forms')],
+};
+
+export default config;
+```
+
+**src/styles/index.css**:
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-dark;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6;
+  }
+
+  .input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary;
+  }
+
+  .table {
+    @apply min-w-full divide-y divide-gray-200;
+  }
+
+  .table-header {
+    @apply bg-gray-50;
+  }
+
+  .table-cell {
+    @apply px-6 py-4 whitespace-nowrap text-sm;
+  }
+}
+```
+
+### UI Components avec Tailwind
+
+**components/ui/Button.tsx**:
+```typescript
+import { ButtonHTMLAttributes } from 'react';
+import { clsx } from 'clsx';
+
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'danger' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
+  loading?: boolean;
+}
+
+export default function Button({
+  children,
+  variant = 'primary',
+  size = 'md',
+  loading = false,
+  className,
+  disabled,
+  ...props
+}: ButtonProps) {
+  return (
+    <button
+      className={clsx(
+        'btn',
+        {
+          'btn-primary': variant === 'primary',
+          'btn-secondary': variant === 'secondary',
+          'btn-danger': variant === 'danger',
+          'border-2 border-primary text-primary hover:bg-primary hover:text-white':
+            variant === 'outline',
+          'px-3 py-1.5 text-sm': size === 'sm',
+          'px-4 py-2 text-base': size === 'md',
+          'px-6 py-3 text-lg': size === 'lg',
+          'opacity-50 cursor-not-allowed': disabled || loading,
+        },
+        className
+      )}
+      disabled={disabled || loading}
+      {...props}
+    >
+      {loading ? (
+        <span className="flex items-center">
+          <svg className="animate-spin -ml-1 mr-3 h-5 w-5" viewBox="0 0 24 24">
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+              fill="none"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            />
+          </svg>
+          Chargement...
+        </span>
+      ) : (
+        children
+      )}
+    </button>
+  );
+}
+```
+
+**components/ui/Table.tsx**:
+```typescript
+import { ReactNode } from 'react';
+
+interface Column<T> {
+  key: string;
+  header: string;
+  render?: (item: T) => ReactNode;
+}
+
+interface TableProps<T> {
+  columns: Column<T>[];
+  data: T[];
+  loading?: boolean;
+  emptyMessage?: string;
+}
+
+export default function Table<T extends { id: string }>({
+  columns,
+  data,
+  loading,
+  emptyMessage = 'Aucune donnée disponible',
+}: TableProps<T>) {
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (data.length === 0) {
+    return (
+      <div className="text-center py-12 text-gray-500">{emptyMessage}</div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="table">
+        <thead className="table-header">
+          <tr>
+            {columns.map((column) => (
+              <th
+                key={column.key}
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                {column.header}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {data.map((item) => (
+            <tr key={item.id} className="hover:bg-gray-50">
+              {columns.map((column) => (
+                <td key={column.key} className="table-cell">
+                  {column.render
+                    ? column.render(item)
+                    : (item[column.key as keyof T] as ReactNode)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+```
 
 ---
 
-## 11. Tests
+## 7. Pages & Fonctionnalités
 
-### Types de Tests
+### 7.1 Login (Authentification Admin)
 
-1. **Tests Unitaires**
-   - Composants
-   - Hooks
-   - Utilitaires
-   - Couverture > 70%
+**pages/Login.tsx**:
+```typescript
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import { useAppDispatch } from '../hooks/redux';
+import { setCredentials } from '../store/slices/authSlice';
+import { LOGIN_MUTATION } from '../graphql/mutations/auth';
+import Button from '../components/ui/Button';
 
-2. **Tests d'Intégration**
-   - Flows complets (création produit, gestion commande)
-   - Intégration API
+const loginSchema = Yup.object({
+  email: Yup.string().email('Email invalide').required('Email requis'),
+  password: Yup.string().required('Mot de passe requis'),
+});
 
-3. **Tests E2E**
-   - Parcours critiques (connexion, ajout produit, traitement commande)
+export default function Login() {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const [login, { loading, error }] = useMutation(LOGIN_MUTATION);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+        <h1 className="text-3xl font-bold text-center mb-8">
+          OSCAR Fashion Admin
+        </h1>
+        <Formik
+          initialValues={{ email: '', password: '' }}
+          validationSchema={loginSchema}
+          onSubmit={async (values) => {
+            const { data } = await login({ variables: { input: values } });
+            dispatch(setCredentials({
+              user: data.login.user,
+              token: data.login.token,
+            }));
+            navigate('/dashboard');
+          }}
+        >
+          <Form className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <Field name="email" type="email" className="input" />
+              <ErrorMessage
+                name="email"
+                component="div"
+                className="text-red-500 text-sm mt-1"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Mot de passe
+              </label>
+              <Field name="password" type="password" className="input" />
+              <ErrorMessage
+                name="password"
+                component="div"
+                className="text-red-500 text-sm mt-1"
+              />
+            </div>
+            {error && (
+              <div className="text-red-500 text-sm">{error.message}</div>
+            )}
+            <Button type="submit" className="w-full" loading={loading}>
+              Se connecter
+            </Button>
+          </Form>
+        </Formik>
+      </div>
+    </div>
+  );
+}
+```
 
 ---
 
-## 12. Documentation
+### 7.2 Dashboard (MUI X Charts)
 
-### Livrables
+**pages/Dashboard.tsx**:
+```typescript
+import { useQuery } from '@apollo/client';
+import { LineChart, BarChart, PieChart } from '@mui/x-charts';
+import { GET_SALES_STATS } from '../graphql/queries/reports';
+import StatsCard from '../components/dashboard/StatsCard';
 
-- Guide d'utilisation administrateur
-- Documentation technique
-- Guide de déploiement
-- FAQ
+export default function Dashboard() {
+  const { data, loading } = useQuery(GET_SALES_STATS, {
+    variables: { period: 'MONTH' },
+  });
+
+  if (loading) return <div>Chargement...</div>;
+
+  return (
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-8">Tableau de Bord</h1>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <StatsCard
+          title="Revenus du mois"
+          value={`${data.stats.monthlyRevenue.toLocaleString()} DZD`}
+          change="+12%"
+          positive
+        />
+        <StatsCard
+          title="Commandes"
+          value={data.stats.totalOrders}
+          change="+8%"
+          positive
+        />
+        <StatsCard
+          title="Clients actifs"
+          value={data.stats.activeCustomers}
+          change="+15%"
+          positive
+        />
+        <StatsCard
+          title="Panier moyen"
+          value={`${data.stats.averageCart} DZD`}
+          change="-3%"
+          positive={false}
+        />
+      </div>
+
+      {/* Charts avec MUI X Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Line Chart - Évolution des ventes */}
+        <div className="card">
+          <h2 className="text-xl font-semibold mb-4">Évolution des ventes</h2>
+          <LineChart
+            xAxis={[{ data: data.salesTrend.dates, scaleType: 'time' }]}
+            series={[
+              {
+                data: data.salesTrend.values,
+                area: true,
+                color: '#2C3E50',
+              },
+            ]}
+            width={500}
+            height={300}
+          />
+        </div>
+
+        {/* Pie Chart - Ventes par catégorie */}
+        <div className="card">
+          <h2 className="text-xl font-semibold mb-4">Ventes par catégorie</h2>
+          <PieChart
+            series={[
+              {
+                data: data.categorySales.map((cat: any) => ({
+                  id: cat.id,
+                  value: cat.value,
+                  label: cat.name,
+                })),
+              },
+            ]}
+            width={500}
+            height={300}
+          />
+        </div>
+
+        {/* Bar Chart - Top produits */}
+        <div className="card lg:col-span-2">
+          <h2 className="text-xl font-semibold mb-4">Top 10 Produits</h2>
+          <BarChart
+            xAxis={[
+              { scaleType: 'band', data: data.topProducts.map((p: any) => p.name) },
+            ]}
+            series={[
+              {
+                data: data.topProducts.map((p: any) => p.sales),
+                color: '#C9A992',
+              },
+            ]}
+            width={1000}
+            height={300}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+```
 
 ---
 
-**Version**: 1.0
+### 7.3 Liste Produits
+
+**pages/Products/ProductList.tsx**:
+```typescript
+import { useState } from 'react';
+import { useQuery, useMutation } from '@apollo/client';
+import { Link } from 'react-router-dom';
+import { GET_PRODUCTS } from '../../graphql/queries/products';
+import { DELETE_PRODUCT } from '../../graphql/mutations/products';
+import Table from '../../components/ui/Table';
+import Button from '../../components/ui/Button';
+import Badge from '../../components/ui/Badge';
+
+export default function ProductList() {
+  const [page, setPage] = useState(1);
+  const { data, loading, refetch } = useQuery(GET_PRODUCTS, {
+    variables: { page, size: 20 },
+  });
+
+  const [deleteProduct] = useMutation(DELETE_PRODUCT, {
+    onCompleted: () => refetch(),
+  });
+
+  const columns = [
+    {
+      key: 'image',
+      header: 'Image',
+      render: (product: any) => (
+        <img
+          src={product.images[0]?.url}
+          alt={product.name.fr}
+          className="w-12 h-12 object-cover rounded"
+        />
+      ),
+    },
+    {
+      key: 'name',
+      header: 'Nom',
+      render: (product: any) => product.name.fr,
+    },
+    { key: 'sku', header: 'SKU' },
+    {
+      key: 'category',
+      header: 'Catégorie',
+      render: (product: any) => product.category.name.fr,
+    },
+    {
+      key: 'basePrice',
+      header: 'Prix',
+      render: (product: any) => `${product.basePrice} DZD`,
+    },
+    { key: 'stockQuantity', header: 'Stock' },
+    {
+      key: 'status',
+      header: 'Statut',
+      render: (product: any) => (
+        <Badge
+          variant={
+            product.status === 'ACTIVE'
+              ? 'success'
+              : product.status === 'DRAFT'
+              ? 'warning'
+              : 'danger'
+          }
+        >
+          {product.status}
+        </Badge>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (product: any) => (
+        <div className="flex space-x-2">
+          <Link to={`/products/${product.id}/edit`}>
+            <Button size="sm" variant="secondary">
+              Modifier
+            </Button>
+          </Link>
+          <Button
+            size="sm"
+            variant="danger"
+            onClick={() => {
+              if (confirm('Êtes-vous sûr ?')) {
+                deleteProduct({ variables: { id: product.id } });
+              }
+            }}
+          >
+            Supprimer
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Produits</h1>
+        <Link to="/products/new">
+          <Button>+ Nouveau produit</Button>
+        </Link>
+      </div>
+
+      <div className="card">
+        <Table
+          columns={columns}
+          data={data?.products.edges.map((e: any) => e.node) || []}
+          loading={loading}
+        />
+
+        {/* Pagination */}
+        {data && (
+          <div className="flex justify-between items-center mt-6">
+            <Button
+              variant="secondary"
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+            >
+              Précédent
+            </Button>
+            <span className="text-gray-600">Page {page}</span>
+            <Button
+              variant="secondary"
+              disabled={!data.products.pageInfo.hasNextPage}
+              onClick={() => setPage(page + 1)}
+            >
+              Suivant
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+### 7.4 Formulaire Produit (Formik + Yup)
+
+**pages/Products/ProductForm.tsx**:
+```typescript
+import { useNavigate, useParams } from 'react-router-dom';
+import { useQuery, useMutation } from '@apollo/client';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import { GET_PRODUCT } from '../../graphql/queries/products';
+import { CREATE_PRODUCT, UPDATE_PRODUCT } from '../../graphql/mutations/products';
+import Button from '../../components/ui/Button';
+
+const productSchema = Yup.object({
+  sku: Yup.string().required('SKU requis'),
+  name_fr: Yup.string().required('Nom en français requis'),
+  name_ar: Yup.string().required('Nom en arabe requis'),
+  name_en: Yup.string().required('Nom en anglais requis'),
+  description_fr: Yup.string().required('Description en français requise'),
+  categoryId: Yup.string().required('Catégorie requise'),
+  basePrice: Yup.number().min(0, 'Prix invalide').required('Prix requis'),
+  stockQuantity: Yup.number().min(0, 'Stock invalide').required('Stock requis'),
+});
+
+export default function ProductForm() {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = !!id;
+
+  const { data: productData, loading: loadingProduct } = useQuery(GET_PRODUCT, {
+    variables: { id },
+    skip: !isEdit,
+  });
+
+  const [createProduct, { loading: creating }] = useMutation(CREATE_PRODUCT, {
+    onCompleted: () => navigate('/products'),
+  });
+
+  const [updateProduct, { loading: updating }] = useMutation(UPDATE_PRODUCT, {
+    onCompleted: () => navigate('/products'),
+  });
+
+  const initialValues = isEdit && productData
+    ? {
+        sku: productData.product.sku,
+        name_fr: productData.product.name.fr,
+        name_ar: productData.product.name.ar,
+        name_en: productData.product.name.en,
+        description_fr: productData.product.description.fr,
+        description_ar: productData.product.description.ar || '',
+        description_en: productData.product.description.en || '',
+        categoryId: productData.product.category.id,
+        basePrice: productData.product.basePrice,
+        salePrice: productData.product.salePrice || '',
+        stockQuantity: productData.product.stockQuantity,
+        status: productData.product.status,
+      }
+    : {
+        sku: '',
+        name_fr: '',
+        name_ar: '',
+        name_en: '',
+        description_fr: '',
+        description_ar: '',
+        description_en: '',
+        categoryId: '',
+        basePrice: 0,
+        salePrice: '',
+        stockQuantity: 0,
+        status: 'DRAFT',
+      };
+
+  if (loadingProduct) return <div>Chargement...</div>;
+
+  return (
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-8">
+        {isEdit ? 'Modifier le produit' : 'Nouveau produit'}
+      </h1>
+
+      <div className="card max-w-4xl">
+        <Formik
+          initialValues={initialValues}
+          validationSchema={productSchema}
+          onSubmit={async (values) => {
+            const input = {
+              sku: values.sku,
+              name: {
+                fr: values.name_fr,
+                ar: values.name_ar,
+                en: values.name_en,
+              },
+              description: {
+                fr: values.description_fr,
+                ar: values.description_ar,
+                en: values.description_en,
+              },
+              categoryId: values.categoryId,
+              basePrice: parseFloat(values.basePrice.toString()),
+              salePrice: values.salePrice ? parseFloat(values.salePrice.toString()) : null,
+              stockQuantity: parseInt(values.stockQuantity.toString()),
+              status: values.status,
+            };
+
+            if (isEdit) {
+              await updateProduct({ variables: { id, input } });
+            } else {
+              await createProduct({ variables: { input } });
+            }
+          }}
+        >
+          {({ isSubmitting }) => (
+            <Form className="space-y-6">
+              {/* SKU */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  SKU *
+                </label>
+                <Field name="sku" className="input" />
+                <ErrorMessage
+                  name="sku"
+                  component="div"
+                  className="text-red-500 text-sm mt-1"
+                />
+              </div>
+
+              {/* Nom multilingue */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nom (Français) *
+                  </label>
+                  <Field name="name_fr" className="input" />
+                  <ErrorMessage
+                    name="name_fr"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nom (Arabe) *
+                  </label>
+                  <Field name="name_ar" className="input" dir="rtl" />
+                  <ErrorMessage
+                    name="name_ar"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nom (Anglais) *
+                  </label>
+                  <Field name="name_en" className="input" />
+                  <ErrorMessage
+                    name="name_en"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description (Français) *
+                </label>
+                <Field name="description_fr" as="textarea" rows={4} className="input" />
+                <ErrorMessage
+                  name="description_fr"
+                  component="div"
+                  className="text-red-500 text-sm mt-1"
+                />
+              </div>
+
+              {/* Prix */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Prix de base (DZD) *
+                  </label>
+                  <Field name="basePrice" type="number" className="input" />
+                  <ErrorMessage
+                    name="basePrice"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Prix promo (DZD)
+                  </label>
+                  <Field name="salePrice" type="number" className="input" />
+                </div>
+              </div>
+
+              {/* Stock */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Quantité en stock *
+                </label>
+                <Field name="stockQuantity" type="number" className="input" />
+                <ErrorMessage
+                  name="stockQuantity"
+                  component="div"
+                  className="text-red-500 text-sm mt-1"
+                />
+              </div>
+
+              {/* Statut */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Statut
+                </label>
+                <Field as="select" name="status" className="input">
+                  <option value="DRAFT">Brouillon</option>
+                  <option value="ACTIVE">Actif</option>
+                  <option value="OUT_OF_STOCK">Rupture de stock</option>
+                </Field>
+              </div>
+
+              {/* Actions */}
+              <div className="flex space-x-4">
+                <Button
+                  type="submit"
+                  loading={isSubmitting || creating || updating}
+                >
+                  {isEdit ? 'Mettre à jour' : 'Créer le produit'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => navigate('/products')}
+                >
+                  Annuler
+                </Button>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## 8. Dépendances Principales
+
+**package.json**:
+```json
+{
+  "name": "oscar-backoffice",
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "codegen": "graphql-codegen --config codegen.ts",
+    "codegen:watch": "graphql-codegen --config codegen.ts --watch",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.18.0",
+    "@apollo/client": "^3.8.0",
+    "graphql": "^16.8.0",
+    "@reduxjs/toolkit": "^1.9.7",
+    "react-redux": "^8.1.3",
+    "tailwindcss": "^3.3.0",
+    "@mui/x-charts": "^6.18.0",
+    "formik": "^2.4.5",
+    "yup": "^1.3.3",
+    "date-fns": "^2.30.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.292.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@vitejs/plugin-react": "^4.2.0",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0",
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/client-preset": "^4.1.0",
+    "@tailwindcss/forms": "^0.5.7",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31",
+    "prettier": "^3.1.0",
+    "prettier-plugin-tailwindcss": "^0.5.7"
+  }
+}
+```
+
+---
+
+## 9. Variables d'Environnement
+
+**.env.local**:
+```
+VITE_GRAPHQL_URL=http://localhost:8080/graphql
+```
+
+**.env.production**:
+```
+VITE_GRAPHQL_URL=https://api.oscarfashion.dz/graphql
+```
+
+---
+
+**Version**: 2.0 (React + Apollo + Tailwind + Redux)
 **Date**: Novembre 2025
-**Statut**: Spécification technique détaillée
+**Statut**: Spécification technique détaillée (Mise à jour complète)

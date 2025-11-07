@@ -5,14 +5,14 @@
 
 ## 1. Vue d'ensemble
 
-Le backend constitue le cœur de la plateforme OSCAR Fashion. Il fournit l'ensemble des API graphql nécessaires au fonctionnement du site web, de l'application mobile et du back-office administrateur.
+Le backend constitue le cœur de la plateforme OSCAR Fashion. Il fournit une **API GraphQL** complète pour le site web Next.js, l'application mobile et le back-office administrateur.
 
 ### Objectifs Principaux
-- Fournir des API graphql sécurisées et performantes
+- Fournir une API GraphQL sécurisée et performante
 - Gérer l'authentification et l'autorisation des utilisateurs
 - Assurer la synchronisation en temps réel avec les systèmes existants (ERP, WMS, POS)
 - Intégrer les passerelles de paiement algériennes (CIB, Baridimob)
-- Générer des documents (factures, bons de livraison) via Jasper Reports
+- Générer des documents (factures, bons de livraison) via iText
 - Gérer les notifications (Email, SMS, Push)
 
 ---
@@ -24,34 +24,45 @@ Le backend constitue le cœur de la plateforme OSCAR Fashion. Il fournit l'ensem
 - **Build Tool**: Maven
 - **Architecture**: Monolithique modulaire
 
+### GraphQL
+- **GraphQL Library**: SPQR (GraphQL SPQR - Spring Boot starter)
+- **Schema Generation**: Automatic from Java code (annotations)
+- **Subscriptions**: WebSocket support for real-time updates
+- **DataLoader**: Batch loading and caching pour optimisation N+1
+
 ### Sécurité
 - **Spring Security**: Authentification et autorisation
 - **JWT (JSON Web Tokens)**: Gestion des sessions stateless
 - **BCrypt**: Hachage des mots de passe
 - **CORS**: Configuration pour le web et mobile
+- **GraphQL Security**: Query complexity analysis, depth limiting
 - **OAuth2**: Pour l'authentification sociale (optionnel)
 
 ### Accès aux Données
 - **Spring Data JPA**: Couche d'abstraction
 - **Hibernate**: ORM
 - **PostgreSQL**: Base de données principale
+- **Connection Pooling**: HikariCP
 
 ### Génération de Documents
-- **Jasper Reports**: Génération de factures PDF, bons de livraison
-- **iText**: Alternative pour documents simples
+- **iText 7**: Génération de factures PDF, bons de livraison
+- **Template Engine**: Thymeleaf pour templates HTML → PDF
 
 ### Communication & Notifications
 - **Spring Mail**: Envoi d'emails
 - **SMS Gateway Integration**: Service SMS algérien
-- **WebSocket (Spring WebSocket)**: Notifications temps réel
+- **WebSocket (Spring WebSocket)**: Notifications temps réel via GraphQL Subscriptions
 
 ### API & Documentation
-- **OpenAPI/Swagger**: Documentation automatique des API
+- **GraphQL Playground**: Interface interactive pour tester l'API
+- **GraphQL Voyager**: Visualisation du schéma GraphQL
+- **Schema Introspection**: Documentation automatique via introspection
 
 ### Monitoring & Logging
 - **Spring Actuator**: Endpoints de monitoring
 - **SLF4J + Logback**: Logging
 - **Micrometer + Prometheus**: Métriques
+
 ---
 
 ## 3. Architecture Backend
@@ -62,526 +73,672 @@ Le backend constitue le cœur de la plateforme OSCAR Fashion. Il fournit l'ensem
 oscar-backend/
 ├── src/main/java/com/oscar/ecommerce/
 │   ├── config/              # Configurations Spring
+│   │   ├── SecurityConfig.java
+│   │   ├── GraphQLConfig.java
+│   │   └── WebSocketConfig.java
 │   ├── security/            # Sécurité (JWT, Filters)
-│   ├── modules/
-│   │   ├── auth/           # Authentification
-│   │   ├── user/           # Gestion utilisateurs
-│   │   ├── product/        # Gestion produits
-│   │   ├── category/       # Catégories
-│   │   ├── cart/           # Panier
-│   │   ├── order/          # Commandes
-│   │   ├── payment/        # Paiements
-│   │   ├── notification/   # Notifications
-│   │   ├── report/         # Rapports & Statistiques
-│   │   └── sync/           # Synchronisation ERP/WMS
-│   ├── shared/
-│   │   ├── dto/            # Data Transfer Objects
-│   │   ├── exception/      # Gestion des exceptions
-│   │   ├── util/           # Utilitaires
-│   │   └── constant/       # Constantes
+│   ├── graphql/
+│   │   ├── resolvers/      # GraphQL Resolvers (Query, Mutation, Subscription)
+│   │   │   ├── UserResolver.java
+│   │   │   ├── ProductResolver.java
+│   │   │   ├── OrderResolver.java
+│   │   │   └── ...
+│   │   ├── types/          # GraphQL Types (DTOs)
+│   │   ├── inputs/         # GraphQL Input Types
+│   │   ├── scalars/        # Custom Scalars (Date, DateTime, etc.)
+│   │   └── directives/     # Custom Directives (@auth, @hasRole, etc.)
+│   ├── domain/              # Entities JPA
+│   │   ├── User.java
+│   │   ├── Product.java
+│   │   ├── Order.java
+│   │   └── ...
+│   ├── repository/          # Spring Data JPA Repositories
+│   ├── service/             # Business Logic
+│   ├── dataloader/          # DataLoaders for batching
+│   ├── exception/           # Custom Exceptions
+│   ├── util/                # Utilitaires
 │   └── Application.java
 ├── src/main/resources/
 │   ├── application.yml
 │   ├── application-dev.yml
 │   ├── application-prod.yml
-│   └── jasper/             # Templates Jasper Reports
+│   ├── graphql/             # GraphQL Schema (optionnel si SPQR génère tout)
+│   └── pdf-templates/       # Templates PDF (HTML pour iText)
 └── src/test/
 ```
 
-### Couches Applicatives
+### Architecture GraphQL avec SPQR
 
-1. **Controller Layer**: Endpoints REST
-2. **Service Layer**: Logique métier
-3. **Repository Layer**: Accès aux données
-4. **DTO Layer**: Objets de transfert
-5. **Entity Layer**: Entités JPA
+**SPQR (GraphQL SPQR)**: Library qui génère automatiquement le schéma GraphQL à partir des classes Java annotées.
+
+**Avantages**:
+- Code-first approach
+- Pas besoin de fichiers .graphql séparés
+- Type safety complet
+- Génération automatique de documentation
+
+**Exemple Resolver**:
+```java
+@GraphQLApi
+@Service
+public class ProductResolver {
+
+    @Autowired
+    private ProductService productService;
+
+    @GraphQLQuery(name = "products")
+    public Page<Product> getProducts(
+        @GraphQLArgument(name = "page") int page,
+        @GraphQLArgument(name = "size") int size,
+        @GraphQLArgument(name = "filter") ProductFilter filter
+    ) {
+        return productService.findAll(page, size, filter);
+    }
+
+    @GraphQLQuery(name = "product")
+    public Product getProduct(@GraphQLArgument(name = "id") UUID id) {
+        return productService.findById(id);
+    }
+
+    @GraphQLMutation(name = "createProduct")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Product createProduct(@GraphQLArgument(name = "input") ProductInput input) {
+        return productService.create(input);
+    }
+}
+```
 
 ---
 
-## 4. Modules Fonctionnels Détaillés
+## 4. Schéma GraphQL Principal
 
-### 4.1 Module Authentification & Utilisateurs
+### Types de Base
+
+```graphql
+type User {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  role: UserRole!
+  addresses: [Address!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Product {
+  id: ID!
+  sku: String!
+  name: LocalizedString!
+  description: LocalizedString!
+  slug: String!
+  category: Category!
+  basePrice: Float!
+  salePrice: Float
+  status: ProductStatus!
+  stockQuantity: Int!
+  images: [ProductImage!]!
+  attributes: [Attribute!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Order {
+  id: ID!
+  orderNumber: String!
+  user: User!
+  status: OrderStatus!
+  items: [OrderItem!]!
+  shippingAddress: Address!
+  billingAddress: Address!
+  subtotal: Float!
+  shippingCost: Float!
+  discount: Float!
+  total: Float!
+  paymentMethod: PaymentMethod!
+  paymentStatus: PaymentStatus!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type LocalizedString {
+  ar: String
+  fr: String
+  en: String
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum ProductStatus {
+  ACTIVE
+  DRAFT
+  OUT_OF_STOCK
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+```
+
+### Queries
+
+```graphql
+type Query {
+  # Auth & Users
+  me: User
+  user(id: ID!): User
+  users(page: Int!, size: Int!, filter: UserFilter): UserConnection!
+
+  # Products
+  product(id: ID!): Product
+  products(page: Int!, size: Int!, filter: ProductFilter, sort: ProductSort): ProductConnection!
+  searchProducts(query: String!, limit: Int): [Product!]!
+  featuredProducts(limit: Int): [Product!]!
+  newArrivals(limit: Int): [Product!]!
+
+  # Categories
+  category(id: ID!): Category
+  categories: [Category!]!
+
+  # Cart
+  cart: Cart
+
+  # Orders
+  order(id: ID!): Order
+  myOrders(page: Int!, size: Int!): OrderConnection!
+  orders(page: Int!, size: Int!, filter: OrderFilter): OrderConnection! # Admin only
+
+  # Reports (Admin)
+  salesReport(from: Date!, to: Date!): SalesReport!
+  topProducts(limit: Int!): [ProductSales!]!
+  revenueReport(period: ReportPeriod!): RevenueReport!
+}
+```
+
+### Mutations
+
+```graphql
+type Mutation {
+  # Auth
+  register(input: RegisterInput!): AuthPayload!
+  login(input: LoginInput!): AuthPayload!
+  refreshToken(token: String!): AuthPayload!
+  forgotPassword(email: String!): Boolean!
+  resetPassword(token: String!, newPassword: String!): Boolean!
+
+  # User Profile
+  updateProfile(input: UpdateProfileInput!): User!
+  addAddress(input: AddressInput!): Address!
+  updateAddress(id: ID!, input: AddressInput!): Address!
+  deleteAddress(id: ID!): Boolean!
+
+  # Products (Admin)
+  createProduct(input: ProductInput!): Product!
+  updateProduct(id: ID!, input: ProductInput!): Product!
+  deleteProduct(id: ID!): Boolean!
+
+  # Categories (Admin)
+  createCategory(input: CategoryInput!): Category!
+  updateCategory(id: ID!, input: CategoryInput!): Category!
+  deleteCategory(id: ID!): Boolean!
+
+  # Cart
+  addToCart(productId: ID!, quantity: Int!): Cart!
+  updateCartItem(itemId: ID!, quantity: Int!): Cart!
+  removeFromCart(itemId: ID!): Cart!
+  clearCart: Boolean!
+  applyPromoCode(code: String!): Cart!
+
+  # Orders
+  createOrder(input: OrderInput!): Order!
+  cancelOrder(id: ID!): Order!
+  updateOrderStatus(id: ID!, status: OrderStatus!): Order! # Admin only
+
+  # Payments
+  initiatePayment(orderId: ID!, method: PaymentMethod!): PaymentIntent!
+  confirmPayment(paymentId: ID!): Payment!
+}
+```
+
+### Subscriptions
+
+```graphql
+type Subscription {
+  # Real-time notifications
+  orderStatusChanged(userId: ID!): Order!
+  newNotification(userId: ID!): Notification!
+  stockUpdated(productId: ID!): Product!
+}
+```
+
+---
+
+## 5. Modules Fonctionnels Détaillés
+
+### 5.1 Module Authentification & Utilisateurs
 
 #### Fonctionnalités
 - Inscription (Email + Mot de passe)
 - Connexion (JWT Token)
-- Déconnexion
+- Refresh token
 - Récupération de mot de passe (Email)
 - Validation d'email
 - Gestion de profil utilisateur
-- Authentification sociale (Google, Facebook - optionnel)
+- Gestion des adresses
 
-#### Entités Principales
-```
-User
-├── id (UUID)
-├── firstName
-├── lastName
-├── email (unique)
-├── password (encrypted)
-├── phone
-├── emailVerified
-├── status (ACTIVE, INACTIVE, BLOCKED)
-├── role (CUSTOMER, ADMIN, SUPER_ADMIN)
-├── addresses (OneToMany)
-├── createdAt
-└── updatedAt
+#### GraphQL Types
 
-Address
-├── id (UUID)
-├── userId (FK)
-├── street
-├── city
-├── wilaya
-├── postalCode
-├── country
-├── isDefault
-└── type (SHIPPING, BILLING)
+```graphql
+input RegisterInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+  phone: String
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type AuthPayload {
+  token: String!
+  refreshToken: String!
+  user: User!
+}
 ```
 
-#### API Endpoints
-```
-POST   /api/v1/auth/register
-POST   /api/v1/auth/login
-POST   /api/v1/auth/logout
-POST   /api/v1/auth/refresh-token
-POST   /api/v1/auth/forgot-password
-POST   /api/v1/auth/reset-password
-POST   /api/v1/auth/verify-email
-GET    /api/v1/users/me
-PUT    /api/v1/users/me
-GET    /api/v1/users/me/addresses
-POST   /api/v1/users/me/addresses
-PUT    /api/v1/users/me/addresses/{id}
-DELETE /api/v1/users/me/addresses/{id}
-```
+#### Entités JPA
 
----
+```java
+@Entity
+@Table(name = "users")
+public class User {
+    @Id
+    @GeneratedValue
+    private UUID id;
 
-### 4.2 Module Produits & Catalogue
+    @Column(nullable = false)
+    private String firstName;
 
-#### Fonctionnalités
-- CRUD Produits
-- Gestion des catégories
-- Gestion des attributs (taille, couleur, matière)
-- Gestion des variations produits
-- Recherche et filtrage avancés
-- Gestion des images
-- Gestion du stock
-- Synchronisation avec ERP/WMS
+    @Column(nullable = false)
+    private String lastName;
 
-#### Entités Principales
-```
-Product
-├── id (UUID)
-├── sku (unique)
-├── name (Map<Locale, String>)
-├── description (Map<Locale, String>)
-├── slug
-├── categoryId (FK)
-├── basePrice
-├── salePrice
-├── status (ACTIVE, DRAFT, OUT_OF_STOCK)
-├── stockQuantity
-├── images (OneToMany)
-├── attributes (ManyToMany)
-├── createdAt
-└── updatedAt
+    @Column(nullable = false, unique = true)
+    private String email;
 
-Category
-├── id (UUID)
-├── name (Map<Locale, String>)
-├── slug
-├── parentId (self-reference)
-├── order
-├── image
-└── active
+    @Column(nullable = false)
+    private String password; // BCrypt hashed
 
-ProductImage
-├── id (UUID)
-├── productId (FK)
-├── url
-├── order
-└── isMain
+    private String phone;
 
-Attribute
-├── id (UUID)
-├── name (color, size, material)
-├── values (List)
-```
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
 
-#### API Endpoints
-```
-GET    /api/v1/products
-GET    /api/v1/products/{id}
-GET    /api/v1/products/search?q=&category=&minPrice=&maxPrice=
-GET    /api/v1/products/featured
-GET    /api/v1/products/new-arrivals
-GET    /api/v1/categories
-GET    /api/v1/categories/{id}
-GET    /api/v1/categories/{id}/products
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Address> addresses;
 
-Admin endpoints:
-POST   /api/v1/admin/products
-PUT    /api/v1/admin/products/{id}
-DELETE /api/v1/admin/products/{id}
-POST   /api/v1/admin/categories
-PUT    /api/v1/admin/categories/{id}
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}
 ```
 
 ---
 
-### 4.3 Module Panier
+### 5.2 Module Produits & Catalogue
 
-#### Fonctionnalités
-- Ajouter au panier (produit + quantité)
-- Modifier la quantité
-- Supprimer un article
-- Vider le panier
-- Calcul du total
-- Persistance du panier (utilisateur connecté)
-- Gestion panier invité (session)
+#### GraphQL Types
 
-#### Entités Principales
-```
-Cart
-├── id (UUID)
-├── userId (FK, nullable)
-├── sessionId (pour invités)
-├── items (OneToMany)
-├── subtotal
-├── discount
-├── total
-├── createdAt
-└── updatedAt
+```graphql
+input ProductInput {
+  sku: String!
+  name: LocalizedStringInput!
+  description: LocalizedStringInput!
+  categoryId: ID!
+  basePrice: Float!
+  salePrice: Float
+  stockQuantity: Int!
+  images: [String!]!
+  attributes: [AttributeInput!]
+}
 
-CartItem
-├── id (UUID)
-├── cartId (FK)
-├── productId (FK)
-├── quantity
-├── unitPrice
-└── total
-```
+input ProductFilter {
+  categoryId: ID
+  minPrice: Float
+  maxPrice: Float
+  status: ProductStatus
+  searchQuery: String
+}
 
-#### API Endpoints
-```
-GET    /api/v1/cart
-POST   /api/v1/cart/items
-PUT    /api/v1/cart/items/{id}
-DELETE /api/v1/cart/items/{id}
-DELETE /api/v1/cart
-POST   /api/v1/cart/merge (merge guest cart with user cart on login)
+type ProductConnection {
+  edges: [ProductEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
 ```
 
----
+#### DataLoader pour Optimisation
 
-### 4.4 Module Commandes
+```java
+@Component
+public class ProductDataLoader implements DataLoader<UUID, Product> {
 
-#### Fonctionnalités
-- Création de commande
-- Calcul frais de livraison
-- Gestion des adresses de livraison
-- Statuts de commande (PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED)
-- Historique des commandes
-- Détails de commande
-- Annulation de commande (si autorisé)
-- Génération de facture PDF
+    @Autowired
+    private ProductRepository productRepository;
 
-#### Entités Principales
-```
-Order
-├── id (UUID)
-├── orderNumber (unique)
-├── userId (FK)
-├── status (ENUM)
-├── shippingAddress (JSON)
-├── billingAddress (JSON)
-├── items (OneToMany)
-├── subtotal
-├── shippingCost
-├── discount
-├── tax
-├── total
-├── paymentMethod
-├── paymentStatus
-├── trackingNumber
-├── notes
-├── createdAt
-└── updatedAt
-
-OrderItem
-├── id (UUID)
-├── orderId (FK)
-├── productId (FK)
-├── productName
-├── productSku
-├── quantity
-├── unitPrice
-└── total
-
-OrderStatusHistory
-├── id (UUID)
-├── orderId (FK)
-├── status
-├── comment
-├── createdBy
-└── createdAt
-```
-
-#### API Endpoints
-```
-POST   /api/v1/orders
-GET    /api/v1/orders
-GET    /api/v1/orders/{id}
-POST   /api/v1/orders/{id}/cancel
-GET    /api/v1/orders/{id}/invoice (PDF)
-
-Admin endpoints:
-GET    /api/v1/admin/orders
-PUT    /api/v1/admin/orders/{id}/status
-POST   /api/v1/admin/orders/{id}/tracking
+    @Override
+    public CompletableFuture<List<Product>> load(List<UUID> ids) {
+        return CompletableFuture.supplyAsync(() ->
+            productRepository.findAllById(ids)
+        );
+    }
+}
 ```
 
 ---
 
-### 4.5 Module Paiement
+### 5.3 Module Commandes
 
-#### Fonctionnalités
-- Intégration CIB (Centre Interbancaire de Monétique)
-- Intégration Baridimob
-- Paiement à la livraison (Cash on Delivery)
-- Gestion des callbacks de paiement
-- Vérification de paiement
-- Remboursements
-- Logs de transactions
+#### GraphQL Types
 
-#### Entités Principales
-```
-Payment
-├── id (UUID)
-├── orderId (FK)
-├── amount
-├── currency (DZD)
-├── method (CIB, BARIDIMOB, COD)
-├── status (PENDING, SUCCESS, FAILED, REFUNDED)
-├── transactionId (gateway)
-├── gatewayResponse (JSON)
-├── createdAt
-└── updatedAt
-```
+```graphql
+input OrderInput {
+  items: [OrderItemInput!]!
+  shippingAddressId: ID!
+  billingAddressId: ID
+  shippingMethod: ShippingMethod!
+  paymentMethod: PaymentMethod!
+}
 
-#### API Endpoints
-```
-POST   /api/v1/payments/initiate
-POST   /api/v1/payments/callback/cib
-POST   /api/v1/payments/callback/baridimob
-GET    /api/v1/payments/{id}/status
-POST   /api/v1/admin/payments/{id}/refund
+input OrderItemInput {
+  productId: ID!
+  quantity: Int!
+}
+
+enum PaymentMethod {
+  CIB
+  BARIDIMOB
+  CASH_ON_DELIVERY
+}
+
+enum ShippingMethod {
+  STANDARD
+  EXPRESS
+}
 ```
 
 ---
 
-### 4.6 Module Notifications
+### 5.4 Module Paiement
 
-#### Fonctionnalités
-- Envoi d'emails (confirmation inscription, récupération MDP, confirmation commande)
-- Envoi de SMS (confirmation commande, statut livraison)
-- Notifications push mobile (promotions, statut commande)
-- Templates de notifications multilingues
-- Centre de notifications utilisateur
+#### Mutations Paiement
 
-#### Entités Principales
-```
-Notification
-├── id (UUID)
-├── userId (FK)
-├── type (EMAIL, SMS, PUSH)
-├── channel (ORDER, PROMO, ACCOUNT)
-├── title
-├── message
-├── isRead
-├── createdAt
-└── readAt
-```
+```java
+@GraphQLApi
+@Service
+public class PaymentResolver {
 
-#### API Endpoints
-```
-GET    /api/v1/notifications
-PUT    /api/v1/notifications/{id}/read
-PUT    /api/v1/notifications/read-all
-GET    /api/v1/notifications/unread-count
+    @GraphQLMutation
+    public PaymentIntent initiatePayment(
+        @GraphQLArgument(name = "orderId") UUID orderId,
+        @GraphQLArgument(name = "method") PaymentMethod method
+    ) {
+        // Create payment intent, generate redirect URL
+        return paymentService.initiate(orderId, method);
+    }
+
+    @GraphQLMutation
+    public Payment confirmPayment(@GraphQLArgument(name = "paymentId") UUID paymentId) {
+        // Verify payment with gateway, update order status
+        return paymentService.confirm(paymentId);
+    }
+}
 ```
 
 ---
 
-### 4.7 Module Reporting & Statistiques
+### 5.5 Module Reporting (iText)
 
-#### Fonctionnalités
-- Statistiques de ventes (jour, semaine, mois, année)
-- Produits les plus vendus
-- Analyse des revenus
-- Taux de conversion
-- Rapports clients
-- Génération de rapports PDF (Jasper Reports)
-- Export de données (CSV, Excel)
+#### Génération PDF avec iText
 
-#### API Endpoints
+```java
+@Service
+public class PdfReportService {
+
+    public byte[] generateInvoicePdf(Order order) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(baos);
+        PdfDocument pdf = new PdfDocument(writer);
+        Document document = new Document(pdf, PageSize.A4);
+
+        // Add logo
+        Image logo = new Image(ImageDataFactory.create("logo.png"));
+        document.add(logo);
+
+        // Add invoice header
+        Paragraph header = new Paragraph("FACTURE")
+            .setFontSize(24)
+            .setBold()
+            .setTextAlignment(TextAlignment.CENTER);
+        document.add(header);
+
+        // Add order details
+        Table table = new Table(UnitValue.createPercentArray(new float[]{3, 1, 1, 1}));
+        table.addHeaderCell("Produit");
+        table.addHeaderCell("Quantité");
+        table.addHeaderCell("Prix Unit.");
+        table.addHeaderCell("Total");
+
+        for (OrderItem item : order.getItems()) {
+            table.addCell(item.getProductName());
+            table.addCell(String.valueOf(item.getQuantity()));
+            table.addCell(String.format("%.2f DZD", item.getUnitPrice()));
+            table.addCell(String.format("%.2f DZD", item.getTotal()));
+        }
+
+        document.add(table);
+
+        // Add total
+        Paragraph total = new Paragraph("TOTAL: " + order.getTotal() + " DZD")
+            .setFontSize(16)
+            .setBold()
+            .setTextAlignment(TextAlignment.RIGHT);
+        document.add(total);
+
+        document.close();
+        return baos.toByteArray();
+    }
+}
 ```
-GET    /api/v1/admin/reports/sales?period=daily|weekly|monthly
-GET    /api/v1/admin/reports/top-products?limit=10
-GET    /api/v1/admin/reports/revenue?from=&to=
-GET    /api/v1/admin/reports/customers
-GET    /api/v1/admin/reports/orders-summary
-POST   /api/v1/admin/reports/generate (PDF)
-GET    /api/v1/admin/reports/export?type=csv|excel
+
+#### GraphQL Query pour PDF
+
+```graphql
+type Query {
+  orderInvoicePdf(orderId: ID!): String! # Returns base64 encoded PDF
+}
 ```
 
 ---
 
-### 4.8 Module Synchronisation (ERP/WMS/POS)
+## 6. GraphQL Documentation
 
-#### Fonctionnalités
-- Synchronisation des produits (bidirectionnelle)
-- Synchronisation des stocks en temps réel
-- Transmission des commandes vers ERP
-- Mise à jour des statuts de livraison
-- Logs de synchronisation
-- Gestion des erreurs de sync
-- Configuration des endpoints externes
+### Approches de Documentation
 
-#### API Endpoints
+1. **GraphQL Playground**
+   - Interface interactive intégrée
+   - Explore le schéma via introspection
+   - Test des queries/mutations en temps réel
+   - URL: `http://localhost:8080/graphql`
+
+2. **GraphQL Voyager**
+   - Visualisation graphique du schéma
+   - Relations entre types
+   - URL: `http://localhost:8080/voyager`
+
+3. **Schema Introspection**
+   - Introspection Query pour générer documentation
+   - Utilisé par les outils frontend pour code generation
+
+Configuration:
+```yaml
+graphql:
+  spqr:
+    gui:
+      enabled: true
+      endpoint: /graphql
+      page-title: "OSCAR Fashion API"
+  voyager:
+    enabled: true
+    endpoint: /voyager
 ```
-POST   /api/v1/sync/products/pull (from ERP)
-POST   /api/v1/sync/stocks/pull
-POST   /api/v1/sync/orders/push (to ERP)
-GET    /api/v1/sync/status
-GET    /api/v1/sync/logs
-POST   /api/v1/admin/sync/trigger
+
+---
+
+## 7. Sécurité GraphQL
+
+### Mesures de Sécurité Spécifiques
+
+1. **Query Complexity Analysis**
+```java
+@Configuration
+public class GraphQLSecurityConfig {
+
+    @Bean
+    public QueryComplexityInstrumentation queryComplexity() {
+        return QueryComplexityInstrumentation.builder()
+            .maxComplexity(1000)
+            .build();
+    }
+}
 ```
 
----
+2. **Depth Limiting**
+```java
+@Bean
+public MaxQueryDepthInstrumentation maxDepth() {
+    return new MaxQueryDepthInstrumentation(10);
+}
+```
 
-## 5. Sécurité
+3. **Authentication Directive**
+```java
+@GraphQLDirective(name = "auth")
+public @interface AuthDirective {
+    String[] roles() default {};
+}
+```
 
-### Authentification JWT
-- Token d'accès (durée: 15 min)
-- Refresh token (durée: 7 jours)
-- Stockage sécurisé côté client
-- Rotation des refresh tokens
-
-### Autorisations
-- Rôles: CUSTOMER, ADMIN, SUPER_ADMIN
-- Permissions granulaires par endpoint
-- @PreAuthorize sur les méthodes sensibles
-
-### Protection
-- Rate limiting (prévention DDoS)
-- Validation des entrées (Spring Validator)
-- Protection CSRF (pour formulaires)
-- Sanitisation des données
-- Protection SQL Injection (via JPA)
-- HTTPS obligatoire en production
-
-### Données Sensibles
-- Chiffrement des mots de passe (BCrypt)
-- Chiffrement des données de paiement
-- Logs anonymisés (pas de données sensibles)
-- Conformité RGPD (si applicable)
+4. **Rate Limiting**
+- Limiter nombre de requêtes par utilisateur/IP
+- Utiliser annotations Spring Security
 
 ---
 
-## 6. Performance & Optimisation
+## 8. Performance & Optimisation
 
-### Stratégies de Cache
-- Cache des produits (Redis)
-- Cache des catégories
-- Cache des statistiques
-- Cache des configurations
+### Stratégies
 
-### Optimisation Base de Données
-- Index sur colonnes fréquemment interrogées
-- Pagination des résultats
-- Lazy loading JPA
-- Query optimization
-- Connection pooling (HikariCP)
+1. **DataLoader Pattern**
+   - Batch loading pour éviter N+1 queries
+   - Cache au niveau requête
 
-### Optimisation API
-- Compression des réponses (GZIP)
-- Pagination
-- Filtrage des champs (Sparse Fieldsets)
-- Rate limiting
-- CDN pour les images
+2. **Pagination**
+   - Cursor-based pagination (Relay spec)
+   - Connection pattern
+
+3. **Field Selection**
+   - Charger uniquement les champs demandés
+   - Projection JPA dynamique
+
+4. **Query Optimization**
+   - Index database
+   - Fetch joins JPA
+   - Query plan analysis
 
 ---
 
-## 7. Tests
+## 9. Tests
 
 ### Types de Tests
-- **Tests Unitaires**: JUnit 5 + Mockito (couverture > 80%)
-- **Tests d'Intégration**: Spring Boot Test
-- **Tests API**: RestAssured ou MockMvc
-- **Tests de Performance**: JMeter
-- **Tests de Sécurité**: OWASP ZAP
 
-### CI/CD
-- Pipeline automatisé (Jenkins/GitLab CI)
-- Tests automatiques à chaque commit
-- Analyse de code (SonarQube)
-- Déploiement automatique sur staging
+1. **Tests Unitaires**: Service layer (JUnit 5 + Mockito)
+2. **Tests d'Intégration GraphQL**:
+   ```java
+   @GraphQLTest
+   @AutoConfigureGraphQl
+   class ProductResolverTest {
+       @Autowired
+       private GraphQlTester graphQlTester;
 
----
+       @Test
+       void shouldGetProduct() {
+           graphQlTester.query("""
+               query {
+                   product(id: "123") {
+                       name { fr }
+                   }
+               }
+           """)
+           .execute()
+           .path("product.name.fr")
+           .entity(String.class)
+           .isEqualTo("Test Product");
+       }
+   }
+   ```
 
-## 8. Déploiement
-
-### Environnements
-- **Development**: localhost
-- **Staging**: serveur de pré-production
-- **Production**: serveur principal
-
-### Infrastructure
-- **Containerisation**: Docker
-- **Orchestration**: Docker Compose ou Kubernetes
-- **Hébergement**: AWS, Azure, OVH, ou serveur local
-- **Base de données**: PostgreSQL (cluster HA en prod)
-- **Fichiers statiques**: S3 ou stockage local
-
-### Monitoring
-- Health checks (Spring Actuator)
-- Logs centralisés
-- Alertes automatiques
-- Métriques de performance
+**Note**: Tests minimaux pour le moment (selon requirements)
 
 ---
 
-## 9. Documentation
+## 10. Déploiement
 
-### Livrables
-- Documentation API (Swagger/OpenAPI)
-- Schéma de base de données (ERD)
-- Guide d'installation
-- Guide de déploiement
-- Guide de maintenance
-- Documentation technique développeur
+### Configuration Production
+
+```yaml
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+graphql:
+  spqr:
+    gui:
+      enabled: false # Désactiver en production
+```
 
 ---
 
-## 10. Annexes
+## 11. Variables d'Environnement
 
-### Variables d'Environnement
 ```
 DATABASE_URL
 DATABASE_USERNAME
 DATABASE_PASSWORD
 JWT_SECRET
 JWT_EXPIRATION
-REDIS_HOST
-REDIS_PORT
 SMTP_HOST
 SMTP_USERNAME
 SMTP_PASSWORD
 SMS_API_KEY
-FCM_SERVER_KEY
 CIB_MERCHANT_ID
 CIB_API_KEY
 BARIDIMOB_MERCHANT_ID
@@ -590,25 +747,90 @@ ERP_API_URL
 ERP_API_KEY
 ```
 
-### Dépendances Principales (pom.xml)
+---
+
+## 12. Dépendances Maven Principales
+
 ```xml
-spring-boot-starter-web
-spring-boot-starter-security
-spring-boot-starter-data-jpa
-spring-boot-starter-validation
-spring-boot-starter-mail
-spring-boot-starter-actuator
-postgresql
-jjwt (JWT)
-jasperreports
-lombok
-springdoc-openapi-ui (Swagger)
-redis
-firebase-admin (FCM)
+<dependencies>
+    <!-- Spring Boot -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <!-- GraphQL SPQR -->
+    <dependency>
+        <groupId>io.leangen.graphql</groupId>
+        <artifactId>graphql-spqr-spring-boot-starter</artifactId>
+        <version>0.0.6</version>
+    </dependency>
+
+    <!-- Security -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+
+    <!-- JWT -->
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-api</artifactId>
+        <version>0.11.5</version>
+    </dependency>
+
+    <!-- Database -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+    </dependency>
+
+    <!-- iText for PDF -->
+    <dependency>
+        <groupId>com.itextpdf</groupId>
+        <artifactId>itext7-core</artifactId>
+        <version>7.2.5</version>
+        <type>pom</type>
+    </dependency>
+
+    <!-- Mail -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+
+    <!-- Validation -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+
+    <!-- WebSocket -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-websocket</artifactId>
+    </dependency>
+
+    <!-- Actuator -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+    <!-- Lombok -->
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+    </dependency>
+</dependencies>
 ```
 
 ---
 
-**Version**: 1.0
+**Version**: 2.0 (GraphQL + iText)
 **Date**: Novembre 2025
-**Statut**: Spécification technique détaillée
+**Statut**: Spécification technique détaillée (Mise à jour)

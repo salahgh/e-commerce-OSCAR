@@ -1,18 +1,19 @@
 # Frontend Web - Spécifications Détaillées
-## OSCAR Fashion E-commerce Platform
+## OSCAR Fashion E-commerce Platform (Next.js)
 
 ---
 
 ## 1. Vue d'ensemble
 
-Le frontend web constitue l'interface client principale de la plateforme OSCAR Fashion. Il offre une expérience d'achat moderne, responsive et performante pour les utilisateurs desktop, tablette et mobile.
+Le frontend web constitue l'interface client principale de la plateforme OSCAR Fashion, développée avec **Next.js 14+** utilisant l'App Router. Il offre une expérience d'achat moderne, responsive et performante avec rendu côté serveur (SSR) et génération statique (SSG).
 
 ### Objectifs Principaux
-- Créer une expérience utilisateur fluide et intuitive
-- Implémenter un design moderne conforme à la charte graphique OSCAR
-- Assurer une performance optimale (temps de chargement < 3s)
-- Support multilingue (Arabe, Français, Anglais) avec RTL pour l'Arabe
-- SEO optimisé pour un meilleur référencement
+- Créer une expérience utilisateur fluide avec Next.js App Router
+- Performance optimale grâce au SSR/SSG
+- Intégration GraphQL avec code generation
+- Design moderne avec Tailwind CSS
+- Support multilingue (Arabe RTL, Français, Anglais)
+- SEO optimisé natif avec Next.js
 - Accessibilité (WCAG 2.1 niveau AA)
 
 ---
@@ -20,794 +21,909 @@ Le frontend web constitue l'interface client principale de la plateforme OSCAR F
 ## 2. Stack Technique
 
 ### Core Framework
-- **Bibliothèque**: React.js 18+
-- **Build Tool**: Vite ou Create React App
-- **Langage**: TypeScript (recommandé) ou JavaScript ES6+
-- **Package Manager**: npm ou yarn
+- **Framework**: Next.js 14+ (App Router)
+- **Build Tool**: Vite
+- **Langage**: TypeScript
+- **Package Manager**: npm
+- **Runtime**: Node.js 18+
+
+### GraphQL & Data Fetching
+- **GraphQL Client**: Proposition - Apollo Client, urql, ou graphql-request
+- **Code Generation**: GraphQL Code Generator (@graphql-codegen)
+- **Schema**: Auto-generated types from backend
+- **SSR Support**: GraphQL queries compatibles avec Next.js SSR
 
 ### UI & Styling
-- **Component Library**: Material-UI (MUI) v5
-- **Styling**:
-  - Emotion (MUI default)
-  - CSS Modules (optionnel)
-  - Styled Components (alternative)
-- **Icônes**: Material Icons, React Icons
-- **Animations**: Framer Motion ou React Spring
+- **CSS Framework**: Tailwind CSS 3.x
+- **Icons**: Heroicons, Lucide Icons, ou React Icons
+- **Animations**: Framer Motion
+- **Utility**: clsx, tailwind-merge
 
 ### State Management
-- **Global State**: Redux Toolkit ou Zustand
-- **Server State**: React Query (TanStack Query)
-- **Context API**: Pour thèmes et i18n
+- **Server State**: Géré par GraphQL (Apollo cache ou urql)
+- **Client State**: React Context API, Zustand (si nécessaire)
+- **URL State**: Next.js searchParams
 
 ### Routing & Navigation
-- **Router**: React Router v6
-- **Code Splitting**: React.lazy + Suspense
-- **SEO**: React Helmet Async
+- **Router**: Next.js App Router (app directory)
+- **Navigation**: next/link, useRouter
+- **Parallel Routes**: Pour modals et layouts complexes
+- **Intercepting Routes**: Pour optimiser UX
 
 ### Formulaires & Validation
-- **Formulaires**: React Hook Form
-- **Validation**: Yup ou Zod
-- **Date/Time**: date-fns ou Day.js
+- **Forms**: Formik
+- **Validation**: Yup
+- **File Upload**: next-cloudinary ou custom
 
-### API & Communication
-- **HTTP Client**: Axios
-- **WebSocket**: socket.io-client (notifications temps réel)
-- **API Integration**: React Query pour le caching
+### Dates
+- **Library**: date-fns
 
 ### Internationalisation
-- **i18n**: react-i18next
-- **RTL Support**: MUI RTL configuration
-- **Format**: i18next JSON files
+- **i18n**: next-intl
+- **RTL Support**: Tailwind RTL utilities
+- **Locales**: ar, fr, en
 
-### Optimisation & Performance
-- **Images**: react-image-lazy-load, WebP format
-- **Compression**: Image optimization (sharp)
-- **Caching**: Service Workers (PWA)
-- **Bundle Optimization**: Code splitting, tree shaking
+### Images & Optimisation
+- **Images**: next/image (optimisation automatique)
+- **Fonts**: next/font (Google Fonts)
+- **Lazy Loading**: React.lazy + Suspense
 
-### Testing
-- **Unit Tests**: Jest + React Testing Library
-- **E2E Tests**: Cypress ou Playwright
-- **Coverage**: > 70%
+### Code Quality
+- **Formatter**: Prettier
+- **Type Checking**: TypeScript strict mode
 
-### DevOps & Qualité
-- **Linting**: ESLint + Prettier
-- **Git Hooks**: Husky + lint-staged
-- **CI/CD**: GitHub Actions / GitLab CI
+### Développement
+- **Hot Reload**: Next.js Fast Refresh
+- **Environment**: .env.local, .env.production
+
+**Note**: Pas de testing, CI/CD, ESLint, git hooks, Storybook pour le moment
 
 ---
 
 ## 3. Architecture Frontend
 
-### Structure du Projet
+### Structure du Projet (App Router)
 
 ```
 oscar-frontend/
 ├── public/
-│   ├── locales/           # Fichiers de traduction
-│   │   ├── ar/
-│   │   ├── fr/
-│   │   └── en/
 │   ├── images/
-│   └── index.html
+│   ├── icons/
+│   └── locales/           # Fichiers traduction (si nécessaire)
 ├── src/
-│   ├── assets/            # Images, fonts, icons
-│   ├── components/        # Composants réutilisables
-│   │   ├── common/       # Button, Input, Card, etc.
-│   │   ├── layout/       # Header, Footer, Navbar
-│   │   └── product/      # ProductCard, ProductGrid
-│   ├── features/          # Features modulaires
-│   │   ├── auth/
+│   ├── app/                # Next.js App Router
+│   │   ├── (shop)/        # Route group pour shop
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx   # Homepage
+│   │   │   ├── products/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [slug]/
+│   │   │   │       └── page.tsx
+│   │   │   ├── cart/
+│   │   │   │   └── page.tsx
+│   │   │   ├── checkout/
+│   │   │   │   └── page.tsx
+│   │   │   └── profile/
+│   │   │       └── page.tsx
+│   │   ├── (auth)/        # Route group pour auth
+│   │   │   ├── login/
+│   │   │   │   └── page.tsx
+│   │   │   └── register/
+│   │   │       └── page.tsx
+│   │   ├── api/           # API routes (si nécessaire)
+│   │   ├── layout.tsx     # Root layout
+│   │   └── globals.css    # Tailwind directives
+│   ├── components/
+│   │   ├── ui/            # Composants UI de base
+│   │   │   ├── Button.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── Card.tsx
+│   │   │   └── ...
+│   │   ├── layout/        # Layout components
+│   │   │   ├── Header.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   └── Navbar.tsx
+│   │   ├── product/       # Product components
+│   │   │   ├── ProductCard.tsx
+│   │   │   ├── ProductGrid.tsx
+│   │   │   └── ProductFilters.tsx
 │   │   ├── cart/
 │   │   ├── checkout/
-│   │   ├── products/
-│   │   └── user/
-│   ├── pages/             # Pages principales
-│   │   ├── HomePage/
-│   │   ├── ProductPage/
-│   │   ├── CartPage/
-│   │   ├── CheckoutPage/
-│   │   └── ProfilePage/
-│   ├── hooks/             # Custom hooks
-│   ├── services/          # API calls
-│   ├── store/             # Redux/Zustand store
-│   ├── routes/            # Configuration routing
-│   ├── utils/             # Fonctions utilitaires
-│   ├── constants/         # Constantes
-│   ├── theme/             # MUI theme configuration
+│   │   └── forms/
+│   ├── graphql/
+│   │   ├── queries/       # GraphQL queries
+│   │   ├── mutations/     # GraphQL mutations
+│   │   ├── fragments/     # GraphQL fragments
+│   │   └── generated/     # Auto-generated types
+│   ├── lib/
+│   │   ├── apollo-client.ts  # Apollo setup (ou autre client)
+│   │   ├── utils.ts
+│   │   └── validators.ts  # Yup schemas
+│   ├── hooks/             # Custom React hooks
+│   ├── contexts/          # React contexts
 │   ├── types/             # TypeScript types
-│   ├── App.tsx
-│   └── index.tsx
-├── .env.development
+│   ├── constants/         # Constantes
+│   └── styles/            # Styles globaux supplémentaires
+├── .env.local
 ├── .env.production
+├── codegen.ts             # GraphQL Code Generator config
+├── next.config.js
+├── tailwind.config.ts
+├── tsconfig.json
 ├── package.json
-└── tsconfig.json
+└── .prettierrc
 ```
 
 ---
 
-## 4. Pages & Fonctionnalités
+## 4. GraphQL Integration
 
-### 4.1 Page d'Accueil
+### Configuration GraphQL Code Generator
 
-#### Composants
-- **Hero Section**: Bannière principale avec slider
-- **Featured Products**: Produits mis en avant
-- **New Arrivals**: Nouvelles collections
-- **Categories Grid**: Grille des catégories
-- **Promotions Banner**: Bannières promotionnelles
-- **Newsletter**: Inscription newsletter
-
-#### Fonctionnalités
-- Slider automatique (autoplay)
-- Lazy loading des images
-- Personnalisation (si utilisateur connecté)
-- Responsive design (mobile, tablet, desktop)
-
-#### Performance
-- Above-the-fold optimization
-- Preload critical assets
-- Defer non-critical JS
-- Image optimization (WebP, lazy load)
-
----
-
-### 4.2 Catalogue Produits
-
-#### Composants
-- **Product Grid**: Grille de produits
-- **Product Card**: Carte produit (image, nom, prix, CTA)
-- **Filters Sidebar**: Filtres (catégorie, prix, taille, couleur)
-- **Sort Options**: Tri (pertinence, prix, nouveauté)
-- **Pagination**: Navigation pages
-- **Breadcrumb**: Fil d'Ariane
-
-#### Fonctionnalités
-- Recherche en temps réel (debounce)
-- Filtrage multi-critères
-- Tri dynamique
-- Pagination ou infinite scroll
-- Vue grille/liste
-- Quick view produit (modal)
-- Ajout rapide au panier
-
-#### États
+**codegen.ts**:
 ```typescript
-interface CatalogState {
-  products: Product[];
-  filters: {
-    categories: string[];
-    priceRange: [number, number];
-    sizes: string[];
-    colors: string[];
-  };
-  sort: 'relevance' | 'price_asc' | 'price_desc' | 'newest';
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-  };
-  loading: boolean;
-  error: string | null;
-}
-```
+import type { CodegenConfig } from '@graphql-codegen/cli';
 
----
-
-### 4.3 Page Détail Produit
-
-#### Composants
-- **Product Images Gallery**: Galerie photos (zoom, lightbox)
-- **Product Info**: Nom, prix, description
-- **Variants Selector**: Sélection taille, couleur
-- **Quantity Selector**: Sélecteur quantité
-- **Add to Cart Button**: Bouton ajout panier
-- **Product Tabs**: Tabs (description, caractéristiques, avis)
-- **Related Products**: Produits similaires
-- **Breadcrumb**: Fil d'Ariane
-
-#### Fonctionnalités
-- Galerie d'images interactive
-- Zoom sur image
-- Sélection de variantes (taille, couleur)
-- Vérification stock en temps réel
-- Ajout au panier avec animation
-- Wishlist (favoris)
-- Partage social
-
-#### États
-```typescript
-interface ProductDetailState {
-  product: Product | null;
-  selectedVariant: {
-    size?: string;
-    color?: string;
-  };
-  quantity: number;
-  inStock: boolean;
-  loading: boolean;
-  error: string | null;
-}
-```
-
----
-
-### 4.4 Recherche
-
-#### Composants
-- **Search Bar**: Barre de recherche
-- **Search Suggestions**: Suggestions (autocomplete)
-- **Search Results**: Résultats de recherche
-- **Filters**: Filtres de recherche
-
-#### Fonctionnalités
-- Autocomplete avec debounce
-- Recherche en temps réel
-- Historique de recherche (localStorage)
-- Suggestions intelligentes
-- Filtrage des résultats
-- Highlighting des termes recherchés
-
----
-
-### 4.5 Panier
-
-#### Composants
-- **Cart Items List**: Liste articles
-- **Cart Item**: Article (image, nom, variante, quantité, prix)
-- **Quantity Controls**: Augmenter/diminuer quantité
-- **Remove Button**: Supprimer article
-- **Cart Summary**: Récapitulatif (sous-total, livraison, total)
-- **Promo Code**: Champ code promo
-- **Checkout Button**: Bouton passer commande
-
-#### Fonctionnalités
-- Mise à jour quantité en temps réel
-- Suppression d'article avec confirmation
-- Calcul automatique du total
-- Application de code promo
-- Vérification stock avant checkout
-- Persistance du panier (localStorage + backend)
-- Panier invité (localStorage)
-- Merge panier lors de la connexion
-
-#### États
-```typescript
-interface CartState {
-  items: CartItem[];
-  subtotal: number;
-  shippingCost: number;
-  discount: number;
-  total: number;
-  promoCode: string | null;
-  loading: boolean;
-  error: string | null;
-}
-
-interface CartItem {
-  id: string;
-  productId: string;
-  name: string;
-  image: string;
-  variant: {
-    size?: string;
-    color?: string;
-  };
-  quantity: number;
-  unitPrice: number;
-  total: number;
-}
-```
-
----
-
-### 4.6 Tunnel de Commande (Checkout)
-
-#### Étapes
-1. **Informations de livraison**
-2. **Méthode de livraison**
-3. **Méthode de paiement**
-4. **Confirmation**
-
-#### Composants
-- **Stepper**: Indicateur d'étape
-- **Shipping Form**: Formulaire adresse de livraison
-- **Shipping Method Selector**: Choix mode livraison
-- **Payment Method Selector**: Choix mode paiement
-- **Order Summary**: Récapitulatif commande
-- **Terms Checkbox**: Acceptation CGV
-- **Place Order Button**: Bouton validation
-
-#### Fonctionnalités
-- Navigation entre étapes
-- Sauvegarde des étapes
-- Validation à chaque étape
-- Récapitulatif persistant
-- Adresses sauvegardées (utilisateur connecté)
-- Calcul frais de livraison
-- Sécurisation (HTTPS, validation)
-
-#### États
-```typescript
-interface CheckoutState {
-  step: number;
-  shippingAddress: Address;
-  billingAddress: Address;
-  shippingMethod: 'standard' | 'express';
-  paymentMethod: 'cib' | 'baridimob' | 'cod';
-  termsAccepted: boolean;
-  loading: boolean;
-  error: string | null;
-}
-```
-
----
-
-### 4.7 Authentification
-
-#### Pages
-- **Login**: Connexion
-- **Register**: Inscription
-- **Forgot Password**: Mot de passe oublié
-- **Reset Password**: Réinitialisation
-- **Email Verification**: Vérification email
-
-#### Composants
-- **Login Form**: Email + mot de passe
-- **Register Form**: Inscription complète
-- **Social Login**: Connexion Google/Facebook (optionnel)
-- **Password Strength Indicator**: Indicateur force MDP
-
-#### Fonctionnalités
-- Validation en temps réel
-- Messages d'erreur clairs
-- Redirection après connexion
-- Persistance session (JWT dans localStorage/cookie)
-- Auto-login (remember me)
-- Protection routes privées
-
-#### États
-```typescript
-interface AuthState {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  loading: boolean;
-  error: string | null;
-}
-
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  role: 'customer' | 'admin';
-}
-```
-
----
-
-### 4.8 Profil Utilisateur
-
-#### Sections
-- **Informations personnelles**
-- **Mes adresses**
-- **Historique des commandes**
-- **Mes favoris** (optionnel)
-- **Paramètres**
-
-#### Composants
-- **Profile Form**: Modification profil
-- **Address List**: Liste adresses
-- **Address Form**: Ajout/modification adresse
-- **Order History**: Liste commandes
-- **Order Details**: Détails commande
-
-#### Fonctionnalités
-- Modification des informations
-- Gestion des adresses multiples
-- Consultation de l'historique
-- Suivi de commande
-- Téléchargement facture PDF
-- Annulation de commande (si autorisée)
-
----
-
-### 4.9 Confirmation de Commande
-
-#### Composants
-- **Success Message**: Message de succès
-- **Order Number**: Numéro de commande
-- **Order Summary**: Récapitulatif
-- **Next Steps**: Prochaines étapes
-- **Continue Shopping Button**: Bouton continuer achats
-
-#### Fonctionnalités
-- Affichage des détails de commande
-- Envoi email de confirmation
-- Téléchargement facture
-- Tracking (si disponible)
-
----
-
-## 5. Composants Communs Réutilisables
-
-### 5.1 Layout Components
-
-#### Header
-```tsx
-<Header>
-  <TopBar />      // Livraison gratuite, langues, devises
-  <MainNav>       // Logo, recherche, navigation
-    <Logo />
-    <SearchBar />
-    <Navigation />
-    <IconButtons>  // Compte, favoris, panier
-      <AccountIcon />
-      <WishlistIcon />
-      <CartIcon badge={itemCount} />
-    </IconButtons>
-  </MainNav>
-  <CategoryNav /> // Navigation catégories (optionnel)
-</Header>
-```
-
-#### Footer
-```tsx
-<Footer>
-  <FooterTop>
-    <CompanyInfo />
-    <QuickLinks />
-    <CustomerService />
-    <Newsletter />
-  </FooterTop>
-  <FooterBottom>
-    <Copyright />
-    <PaymentMethods />
-    <SocialLinks />
-  </FooterBottom>
-</Footer>
-```
-
----
-
-### 5.2 UI Components
-
-- **Button**: Variants (primary, secondary, outlined, text)
-- **Input**: Text, email, password, number
-- **Select**: Dropdown
-- **Checkbox**: Case à cocher
-- **Radio**: Bouton radio
-- **Switch**: Interrupteur
-- **Badge**: Pastille de notification
-- **Chip**: Étiquette
-- **Alert**: Message d'alerte
-- **Snackbar**: Toast notification
-- **Dialog**: Modal
-- **Drawer**: Panneau latéral
-- **Breadcrumb**: Fil d'Ariane
-- **Pagination**: Pagination
-- **Tabs**: Onglets
-- **Stepper**: Indicateur d'étapes
-- **Skeleton**: Loading placeholder
-- **Spinner**: Loader
-
----
-
-### 5.3 Product Components
-
-- **ProductCard**: Carte produit
-- **ProductGrid**: Grille de produits
-- **ProductList**: Liste de produits
-- **ProductImage**: Image produit avec lazy load
-- **ProductPrice**: Prix avec ancien prix barré
-- **ProductRating**: Notation étoiles
-- **ProductBadge**: Badge (Nouveau, Promo, Rupture)
-- **AddToCartButton**: Bouton ajout panier
-- **QuantitySelector**: Sélecteur quantité
-
----
-
-## 6. Thème & Design System
-
-### 6.1 Charte Graphique
-
-#### Palette de Couleurs
-```typescript
-const theme = {
-  palette: {
-    primary: {
-      main: '#2C3E50',      // Bleu marine
-      light: '#3F5568',
-      dark: '#1F2D3D',
+const config: CodegenConfig = {
+  schema: 'http://localhost:8080/graphql', // Backend GraphQL endpoint
+  documents: ['src/graphql/**/*.{ts,tsx}'],
+  generates: {
+    './src/graphql/generated/': {
+      preset: 'client',
+      plugins: [],
+      presetConfig: {
+        gqlTagName: 'gql',
+      },
     },
-    secondary: {
-      main: '#E8D5C4',      // Beige/crème
-      light: '#F0E4D7',
-      dark: '#D4C3B0',
-    },
-    accent: {
-      main: '#C9A992',      // Terracotta/sable
-      light: '#D9BCA9',
-      dark: '#B8957D',
-    },
-    neutral: {
-      main: '#F5F5F5',      // Gris clair
-      light: '#FAFAFA',
-      dark: '#E0E0E0',
-    },
-    success: '#4CAF50',
-    error: '#F44336',
-    warning: '#FF9800',
-    info: '#2196F3',
   },
-  typography: {
-    fontFamily: '"Roboto", "Arial", sans-serif',
-    h1: { fontSize: '2.5rem', fontWeight: 600 },
-    h2: { fontSize: '2rem', fontWeight: 600 },
-    h3: { fontSize: '1.75rem', fontWeight: 500 },
-    body1: { fontSize: '1rem', lineHeight: 1.5 },
-    button: { textTransform: 'none' },
-  },
-  spacing: 8, // Base spacing unit
-  shape: {
-    borderRadius: 8,
-  },
+  ignoreNoDocuments: true,
 };
+
+export default config;
 ```
 
----
-
-### 6.2 Responsive Breakpoints
-
-```typescript
-const breakpoints = {
-  xs: 0,       // Mobile
-  sm: 600,     // Tablet
-  md: 960,     // Laptop
-  lg: 1280,    // Desktop
-  xl: 1920,    // Large Desktop
-};
+**package.json scripts**:
+```json
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "codegen": "graphql-codegen --config codegen.ts",
+    "codegen:watch": "graphql-codegen --config codegen.ts --watch"
+  }
+}
 ```
 
----
+### Proposition: Apollo Client avec Next.js
 
-### 6.3 Support RTL (Arabe)
-
+**lib/apollo-client.ts**:
 ```typescript
-import { createTheme } from '@mui/material/styles';
-import { prefixer } from 'stylis';
-import rtlPlugin from 'stylis-plugin-rtl';
-import { CacheProvider } from '@emotion/react';
-import createCache from '@emotion/cache';
+import { ApolloClient, InMemoryCache, HttpLink, from } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
 
-// Configuration RTL
-const cacheRtl = createCache({
-  key: 'muirtl',
-  stylisPlugins: [prefixer, rtlPlugin],
+const httpLink = new HttpLink({
+  uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8080/graphql',
 });
 
-// Utilisation
-<CacheProvider value={cacheRtl}>
-  <ThemeProvider theme={themeRtl}>
-    <App />
-  </ThemeProvider>
-</CacheProvider>
+const authLink = setContext((_, { headers }) => {
+  // Get token from storage
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : '',
+    },
+  };
+});
+
+export const apolloClient = new ApolloClient({
+  link: from([authLink, httpLink]),
+  cache: new InMemoryCache(),
+  ssrMode: typeof window === 'undefined', // SSR support
+});
+```
+
+**Alternative: urql** (plus léger):
+```typescript
+import { createClient, ssrExchange, cacheExchange, fetchExchange } from 'urql';
+
+const isServerSide = typeof window === 'undefined';
+const ssrCache = ssrExchange({ isClient: !isServerSide });
+
+export const urqlClient = createClient({
+  url: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8080/graphql',
+  exchanges: [cacheExchange, ssrCache, fetchExchange],
+  fetchOptions: () => {
+    const token = !isServerSide ? localStorage.getItem('token') : null;
+    return {
+      headers: { authorization: token ? `Bearer ${token}` : '' },
+    };
+  },
+});
+```
+
+### Exemple Query avec Code Generation
+
+**graphql/queries/products.ts**:
+```typescript
+import { gql } from '@apollo/client';
+
+export const GET_PRODUCTS = gql`
+  query GetProducts($page: Int!, $size: Int!, $filter: ProductFilter) {
+    products(page: $page, size: $size, filter: $filter) {
+      edges {
+        node {
+          id
+          sku
+          name {
+            fr
+            ar
+            en
+          }
+          slug
+          basePrice
+          salePrice
+          images {
+            id
+            url
+          }
+          status
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+    }
+  }
+`;
+```
+
+**Usage dans Component (Server Component)**:
+```typescript
+// app/products/page.tsx
+import { apolloClient } from '@/lib/apollo-client';
+import { GET_PRODUCTS } from '@/graphql/queries/products';
+import ProductGrid from '@/components/product/ProductGrid';
+
+export default async function ProductsPage() {
+  const { data } = await apolloClient.query({
+    query: GET_PRODUCTS,
+    variables: { page: 1, size: 20 },
+  });
+
+  return (
+    <div>
+      <h1>Produits</h1>
+      <ProductGrid products={data.products.edges.map(e => e.node)} />
+    </div>
+  );
+}
+```
+
+**Usage dans Client Component**:
+```typescript
+'use client';
+
+import { useQuery } from '@apollo/client';
+import { GET_PRODUCTS } from '@/graphql/queries/products';
+
+export default function ProductList() {
+  const { data, loading, error } = useQuery(GET_PRODUCTS, {
+    variables: { page: 1, size: 20 },
+  });
+
+  if (loading) return <Skeleton />;
+  if (error) return <Error />;
+
+  return <ProductGrid products={data.products.edges.map(e => e.node)} />;
+}
 ```
 
 ---
 
-## 7. Internationalisation (i18n)
+## 5. Tailwind CSS Setup
 
 ### Configuration
 
+**tailwind.config.ts**:
 ```typescript
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import HttpBackend from 'i18next-http-backend';
-import LanguageDetector from 'i18next-browser-languagedetector';
+import type { Config } from 'tailwindcss';
 
-i18n
-  .use(HttpBackend)
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    fallbackLng: 'fr',
-    supportedLngs: ['ar', 'fr', 'en'],
-    backend: {
-      loadPath: '/locales/{{lng}}/{{ns}}.json',
-    },
-    interpolation: {
-      escapeValue: false,
-    },
-  });
-```
-
-### Structure des Fichiers
-```
-/public/locales/
-├── ar/
-│   ├── common.json
-│   ├── products.json
-│   ├── cart.json
-│   └── checkout.json
-├── fr/
-│   └── ...
-└── en/
-    └── ...
-```
-
----
-
-## 8. Gestion d'État
-
-### Redux Toolkit (Exemple)
-
-```typescript
-// store/slices/cartSlice.ts
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-interface CartState {
-  items: CartItem[];
-  total: number;
-}
-
-const cartSlice = createSlice({
-  name: 'cart',
-  initialState: { items: [], total: 0 } as CartState,
-  reducers: {
-    addItem: (state, action: PayloadAction<CartItem>) => {
-      state.items.push(action.payload);
-      state.total = calculateTotal(state.items);
-    },
-    removeItem: (state, action: PayloadAction<string>) => {
-      state.items = state.items.filter(item => item.id !== action.payload);
-      state.total = calculateTotal(state.items);
-    },
-    updateQuantity: (state, action: PayloadAction<{id: string, quantity: number}>) => {
-      const item = state.items.find(i => i.id === action.payload.id);
-      if (item) {
-        item.quantity = action.payload.quantity;
-        state.total = calculateTotal(state.items);
-      }
+const config: Config = {
+  content: [
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: '#2C3E50',
+          light: '#3F5568',
+          dark: '#1F2D3D',
+        },
+        secondary: {
+          DEFAULT: '#E8D5C4',
+          light: '#F0E4D7',
+          dark: '#D4C3B0',
+        },
+        accent: {
+          DEFAULT: '#C9A992',
+          light: '#D9BCA9',
+          dark: '#B8957D',
+        },
+      },
+      fontFamily: {
+        sans: ['var(--font-inter)'],
+      },
     },
   },
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+  ],
+};
+
+export default config;
+```
+
+**app/globals.css**:
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-inter: 'Inter', sans-serif;
+  }
+
+  [dir='rtl'] {
+    direction: rtl;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6;
+  }
+}
+```
+
+### Composants UI avec Tailwind
+
+**components/ui/Button.tsx**:
+```typescript
+import { ButtonHTMLAttributes } from 'react';
+import { clsx } from 'clsx';
+
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
+}
+
+export default function Button({
+  children,
+  variant = 'primary',
+  size = 'md',
+  className,
+  ...props
+}: ButtonProps) {
+  return (
+    <button
+      className={clsx(
+        'rounded-lg font-medium transition-colors',
+        {
+          'bg-primary text-white hover:bg-primary-dark': variant === 'primary',
+          'bg-secondary text-primary hover:bg-secondary-dark': variant === 'secondary',
+          'border-2 border-primary text-primary hover:bg-primary hover:text-white':
+            variant === 'outline',
+          'px-3 py-1.5 text-sm': size === 'sm',
+          'px-4 py-2 text-base': size === 'md',
+          'px-6 py-3 text-lg': size === 'lg',
+        },
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+```
+
+---
+
+## 6. Pages & Fonctionnalités Principales
+
+### 6.1 Homepage (SSG)
+
+**app/page.tsx**:
+```typescript
+import { apolloClient } from '@/lib/apollo-client';
+import { GET_FEATURED_PRODUCTS, GET_CATEGORIES } from '@/graphql/queries';
+import HeroSection from '@/components/home/HeroSection';
+import FeaturedProducts from '@/components/home/FeaturedProducts';
+import CategoriesGrid from '@/components/home/CategoriesGrid';
+
+export default async function HomePage() {
+  const [{ data: productsData }, { data: categoriesData }] = await Promise.all([
+    apolloClient.query({ query: GET_FEATURED_PRODUCTS }),
+    apolloClient.query({ query: GET_CATEGORIES }),
+  ]);
+
+  return (
+    <div>
+      <HeroSection />
+      <FeaturedProducts products={productsData.featuredProducts} />
+      <CategoriesGrid categories={categoriesData.categories} />
+    </div>
+  );
+}
+
+export const revalidate = 3600; // Revalidate every hour (ISR)
+```
+
+---
+
+### 6.2 Catalogue Produits (SSR avec Filters)
+
+**app/products/page.tsx**:
+```typescript
+import { apolloClient } from '@/lib/apollo-client';
+import { GET_PRODUCTS } from '@/graphql/queries/products';
+import ProductGrid from '@/components/product/ProductGrid';
+import ProductFilters from '@/components/product/ProductFilters';
+
+interface SearchParams {
+  page?: string;
+  category?: string;
+  minPrice?: string;
+  maxPrice?: string;
+}
+
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const page = parseInt(searchParams.page || '1');
+  const filter = {
+    categoryId: searchParams.category,
+    minPrice: searchParams.minPrice ? parseFloat(searchParams.minPrice) : undefined,
+    maxPrice: searchParams.maxPrice ? parseFloat(searchParams.maxPrice) : undefined,
+  };
+
+  const { data } = await apolloClient.query({
+    query: GET_PRODUCTS,
+    variables: { page, size: 20, filter },
+  });
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <aside className="lg:col-span-1">
+          <ProductFilters />
+        </aside>
+        <main className="lg:col-span-3">
+          <ProductGrid products={data.products.edges.map((e) => e.node)} />
+        </main>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+### 6.3 Détail Produit (SSG)
+
+**app/products/[slug]/page.tsx**:
+```typescript
+import { apolloClient } from '@/lib/apollo-client';
+import { GET_PRODUCT_BY_SLUG } from '@/graphql/queries/products';
+import ProductGallery from '@/components/product/ProductGallery';
+import ProductInfo from '@/components/product/ProductInfo';
+import AddToCartButton from '@/components/product/AddToCartButton';
+
+export default async function ProductPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
+  const { data } = await apolloClient.query({
+    query: GET_PRODUCT_BY_SLUG,
+    variables: { slug: params.slug },
+  });
+
+  const product = data.product;
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <ProductGallery images={product.images} />
+        <div>
+          <ProductInfo product={product} />
+          <AddToCartButton productId={product.id} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Generate static params for all products
+export async function generateStaticParams() {
+  const { data } = await apolloClient.query({
+    query: GET_ALL_PRODUCT_SLUGS,
+  });
+
+  return data.products.edges.map((edge) => ({
+    slug: edge.node.slug,
+  }));
+}
+```
+
+---
+
+### 6.4 Panier (Client Component)
+
+**app/cart/page.tsx**:
+```typescript
+'use client';
+
+import { useQuery, useMutation } from '@apollo/client';
+import { GET_CART, UPDATE_CART_ITEM, REMOVE_FROM_CART } from '@/graphql/queries/cart';
+import CartItem from '@/components/cart/CartItem';
+import CartSummary from '@/components/cart/CartSummary';
+
+export default function CartPage() {
+  const { data, loading } = useQuery(GET_CART);
+  const [updateItem] = useMutation(UPDATE_CART_ITEM);
+  const [removeItem] = useMutation(REMOVE_FROM_CART);
+
+  if (loading) return <LoadingSkeleton />;
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Mon Panier</h1>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          {data.cart.items.map((item) => (
+            <CartItem
+              key={item.id}
+              item={item}
+              onUpdateQuantity={(quantity) =>
+                updateItem({ variables: { itemId: item.id, quantity } })
+              }
+              onRemove={() => removeItem({ variables: { itemId: item.id } })}
+            />
+          ))}
+        </div>
+        <div className="lg:col-span-1">
+          <CartSummary cart={data.cart} />
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+### 6.5 Checkout (Multi-step avec Formik)
+
+**app/checkout/page.tsx**:
+```typescript
+'use client';
+
+import { useState } from 'react';
+import { Formik, Form } from 'formik';
+import * as Yup from 'yup';
+import ShippingAddressForm from '@/components/checkout/ShippingAddressForm';
+import ShippingMethodSelector from '@/components/checkout/ShippingMethodSelector';
+import PaymentMethodSelector from '@/components/checkout/PaymentMethodSelector';
+import OrderSummary from '@/components/checkout/OrderSummary';
+
+const checkoutSchema = Yup.object({
+  shippingAddress: Yup.object({
+    fullName: Yup.string().required('Nom complet requis'),
+    phone: Yup.string().required('Téléphone requis'),
+    address: Yup.string().required('Adresse requise'),
+    city: Yup.string().required('Ville requise'),
+    wilaya: Yup.string().required('Wilaya requise'),
+  }),
+  shippingMethod: Yup.string().required(),
+  paymentMethod: Yup.string().required(),
+  acceptTerms: Yup.boolean().oneOf([true], 'Vous devez accepter les CGV'),
 });
+
+export default function CheckoutPage() {
+  const [step, setStep] = useState(1);
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <Formik
+        initialValues={{
+          shippingAddress: {},
+          shippingMethod: '',
+          paymentMethod: '',
+          acceptTerms: false,
+        }}
+        validationSchema={checkoutSchema}
+        onSubmit={async (values) => {
+          // GraphQL mutation CREATE_ORDER
+        }}
+      >
+        {({ isValid }) => (
+          <Form>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
+                {step === 1 && <ShippingAddressForm />}
+                {step === 2 && <ShippingMethodSelector />}
+                {step === 3 && <PaymentMethodSelector />}
+                <div className="flex justify-between mt-8">
+                  {step > 1 && (
+                    <Button onClick={() => setStep(step - 1)}>Retour</Button>
+                  )}
+                  {step < 3 ? (
+                    <Button onClick={() => setStep(step + 1)}>Continuer</Button>
+                  ) : (
+                    <Button type="submit" disabled={!isValid}>
+                      Passer la commande
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <div className="lg:col-span-1">
+                <OrderSummary />
+              </div>
+            </div>
+          </Form>
+        )}
+      </Formik>
+    </div>
+  );
+}
 ```
 
 ---
 
-## 9. Performance & Optimisation
+## 7. Authentification
 
-### Stratégies
+### Login Page
 
-1. **Code Splitting**
-```tsx
-const ProductPage = React.lazy(() => import('./pages/ProductPage'));
-const CheckoutPage = React.lazy(() => import('./pages/CheckoutPage'));
+**app/(auth)/login/page.tsx**:
+```typescript
+'use client';
+
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import { useMutation } from '@apollo/client';
+import { LOGIN_MUTATION } from '@/graphql/mutations/auth';
+import { useRouter } from 'next/navigation';
+
+const loginSchema = Yup.object({
+  email: Yup.string().email('Email invalide').required('Email requis'),
+  password: Yup.string().min(6, 'Minimum 6 caractères').required('Mot de passe requis'),
+});
+
+export default function LoginPage() {
+  const [login, { loading, error }] = useMutation(LOGIN_MUTATION);
+  const router = useRouter();
+
+  return (
+    <div className="max-w-md mx-auto mt-16 p-8 card">
+      <h1 className="text-2xl font-bold mb-6">Connexion</h1>
+      <Formik
+        initialValues={{ email: '', password: '' }}
+        validationSchema={loginSchema}
+        onSubmit={async (values) => {
+          const { data } = await login({ variables: { input: values } });
+          localStorage.setItem('token', data.login.token);
+          router.push('/');
+        }}
+      >
+        <Form className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Email</label>
+            <Field
+              name="email"
+              type="email"
+              className="w-full px-4 py-2 border rounded-lg"
+            />
+            <ErrorMessage
+              name="email"
+              component="div"
+              className="text-red-500 text-sm mt-1"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Mot de passe</label>
+            <Field
+              name="password"
+              type="password"
+              className="w-full px-4 py-2 border rounded-lg"
+            />
+            <ErrorMessage
+              name="password"
+              component="div"
+              className="text-red-500 text-sm mt-1"
+            />
+          </div>
+          {error && <div className="text-red-500">{error.message}</div>}
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Connexion...' : 'Se connecter'}
+          </Button>
+        </Form>
+      </Formik>
+    </div>
+  );
+}
 ```
 
-2. **Image Optimization**
-- Format WebP avec fallback
-- Lazy loading
-- Responsive images (srcset)
-- CDN pour les images
-
-3. **Caching**
-- React Query pour cache API
-- Service Workers (PWA)
-- localStorage pour panier invité
-
-4. **Bundle Optimization**
-- Tree shaking
-- Minification
-- Compression (gzip/brotli)
-- Vendor splitting
-
-5. **Performance Monitoring**
-- Web Vitals (LCP, FID, CLS)
-- Lighthouse CI
-- Bundle analyzer
-
 ---
 
-## 10. SEO
+## 8. Internationalisation & RTL
 
-### Métadonnées
+### Setup next-intl
 
-```tsx
-import { Helmet } from 'react-helmet-async';
+**middleware.ts**:
+```typescript
+import createMiddleware from 'next-intl/middleware';
 
-<Helmet>
-  <title>OSCAR Fashion - Vêtements de Mode en Algérie</title>
-  <meta name="description" content="..." />
-  <meta property="og:title" content="..." />
-  <meta property="og:image" content="..." />
-  <link rel="canonical" href="..." />
-</Helmet>
+export default createMiddleware({
+  locales: ['ar', 'fr', 'en'],
+  defaultLocale: 'fr',
+  localePrefix: 'as-needed',
+});
+
+export const config = {
+  matcher: ['/((?!api|_next|.*\\..*).*)'],
+};
 ```
 
-### Stratégies
-- URLs SEO-friendly (slugs)
-- Sitemap.xml
-- Robots.txt
-- Structured data (JSON-LD)
-- Open Graph tags
-- Alt tags sur images
-- Semantic HTML
+**app/[locale]/layout.tsx**:
+```typescript
+import { NextIntlClientProvider } from 'next-intl';
+import { notFound } from 'next/navigation';
+
+export default async function LocaleLayout({
+  children,
+  params: { locale },
+}: {
+  children: React.ReactNode;
+  params: { locale: string };
+}) {
+  let messages;
+  try {
+    messages = (await import(`../../messages/${locale}.json`)).default;
+  } catch (error) {
+    notFound();
+  }
+
+  return (
+    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+      <body>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          {children}
+        </NextIntlClientProvider>
+      </body>
+    </html>
+  );
+}
+```
 
 ---
 
-## 11. Accessibilité (A11y)
+## 9. Performance & SEO
 
-### Standards WCAG 2.1 AA
+### Métadonnées (SEO)
 
-- Contraste de couleurs (4.5:1 minimum)
-- Navigation au clavier
-- Aria labels
-- Focus visible
-- Alt text sur images
-- Formulaires accessibles
-- Lecteurs d'écran compatibles
+**app/products/[slug]/page.tsx**:
+```typescript
+import { Metadata } from 'next';
 
----
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const { data } = await apolloClient.query({
+    query: GET_PRODUCT_BY_SLUG,
+    variables: { slug: params.slug },
+  });
 
-## 12. Sécurité
+  const product = data.product;
 
-- **XSS Protection**: Sanitisation des inputs
-- **CSRF Protection**: Tokens CSRF
-- **HTTPS Only**: Toutes les communications
-- **Content Security Policy**: CSP headers
-- **Secure Storage**: JWT dans httpOnly cookies
-- **Input Validation**: Client-side + server-side
-- **Rate Limiting**: Anti-spam
+  return {
+    title: product.name.fr,
+    description: product.description.fr,
+    openGraph: {
+      title: product.name.fr,
+      description: product.description.fr,
+      images: [product.images[0]?.url],
+    },
+  };
+}
+```
 
----
-
-## 13. Tests
-
-### Types de Tests
+### Images Optimisées
 
 ```typescript
-// Test unitaire (Jest + RTL)
-describe('ProductCard', () => {
-  it('renders product information correctly', () => {
-    render(<ProductCard product={mockProduct} />);
-    expect(screen.getByText(mockProduct.name)).toBeInTheDocument();
-  });
-});
+import Image from 'next/image';
 
-// Test d'intégration
-describe('Add to Cart flow', () => {
-  it('adds product to cart and updates badge', async () => {
-    // Test flow complet
-  });
-});
-
-// Test E2E (Cypress)
-describe('Checkout flow', () => {
-  it('completes purchase successfully', () => {
-    cy.visit('/products');
-    cy.contains('Acheter').click();
-    // ... suite du test
-  });
-});
+<Image
+  src={product.images[0].url}
+  alt={product.name.fr}
+  width={600}
+  height={800}
+  priority
+  className="rounded-lg"
+/>
 ```
 
 ---
 
-## 14. Documentation
+## 10. Variables d'Environnement
 
-### Livrables
-- Storybook pour composants
-- Documentation technique
-- Guide de style
-- Guide de contribution
-- README complet
+**.env.local**:
+```
+NEXT_PUBLIC_GRAPHQL_URL=http://localhost:8080/graphql
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+**.env.production**:
+```
+NEXT_PUBLIC_GRAPHQL_URL=https://api.oscarfashion.dz/graphql
+NEXT_PUBLIC_SITE_URL=https://oscarfashion.dz
+```
 
 ---
 
-**Version**: 1.0
+## 11. Dépendances Principales
+
+**package.json**:
+```json
+{
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.2.0",
+    "@apollo/client": "^3.8.0",
+    "graphql": "^16.8.0",
+    "tailwindcss": "^3.3.0",
+    "formik": "^2.4.0",
+    "yup": "^1.3.0",
+    "date-fns": "^2.30.0",
+    "next-intl": "^3.0.0",
+    "framer-motion": "^10.16.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.292.0"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/client-preset": "^4.1.0",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
+    "@types/node": "^20.8.0",
+    "@types/react": "^18.2.0",
+    "prettier": "^3.0.0",
+    "prettier-plugin-tailwindcss": "^0.5.6"
+  }
+}
+```
+
+---
+
+**Version**: 2.0 (Next.js + GraphQL + Tailwind)
 **Date**: Novembre 2025
-**Statut**: Spécification technique détaillée
+**Statut**: Spécification technique détaillée (Mise à jour)
