@@ -7,8 +7,8 @@
 
 **Durée**: 12 semaines (3 mois)
 **Heures totales**: 1,440 heures
-**Taux horaire moyen**: 1,000 DZD/heure
-**Coût total**: 1,440,000 DZD
+**Taux horaire moyen**: 185 DZD/heure
+**Coût total**: 266,400 DZD
 
 ---
 
@@ -18,15 +18,15 @@
 
 | Rôle | Nombre | Taux/heure | Allocation | Heures | Coût |
 |------|--------|------------|------------|--------|------|
-| UI/UX Developer | 1 | 1,200 | 100% | 480 | 576,000 |
-| Développeur Frontend Senior | 2 | 1,100 | 100% | 960 | 1,056,000 |
-| QA/Test Engineer | 1 | 900 | 25% | 120 | 108,000 |
+| Développeur Next.js Mid-Level | 1 | 185 | 100% | 480 | 88,800 |
+| Développeur Frontend Junior | 2 | 185 | 100% | 960 | 177,600 |
+| Testeur | 1 | 185 | 25% | 120 | 22,200 |
 
-**Sous-total RH**: 1,740,000 DZD
+**Sous-total RH**: 288,600 DZD
 
 ### 2.2 Taux Moyen Pondéré
 
-Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
+Équipe junior/mid-level avec taux uniforme: **185 DZD/heure**
 
 ---
 
@@ -53,7 +53,7 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 | - Composants UI de base | 24 | 24,000 |
 | - Setup routing | 8 | 8,000 |
 
-**Total Phase 1**: 240 heures = **240,000 DZD**
+**Total Phase 1**: 240 heures = **44,400 DZD**
 
 ---
 
@@ -77,7 +77,7 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 | - Service User API | 8 | 8,000 |
 | - Tests | 8 | 8,000 |
 
-**Total Phase 2**: 240 heures = **240,000 DZD**
+**Total Phase 2**: 240 heures = **44,400 DZD**
 
 ---
 
@@ -107,7 +107,7 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 | - SearchBar avec autocomplete | 24 | 24,000 |
 | - Page Search Results | 8 | 8,000 |
 
-**Total Phase 3**: 360 heures = **360,000 DZD**
+**Total Phase 3**: 360 heures = **66,600 DZD**
 
 ---
 
@@ -140,7 +140,7 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 | - Callback pages (CIB, Baridimob) | 16 | 16,000 |
 | - Tests E2E checkout | 16 | 16,000 |
 
-**Total Phase 4**: 360 heures = **360,000 DZD**
+**Total Phase 4**: 360 heures = **66,600 DZD**
 
 ---
 
@@ -166,7 +166,7 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 | - Tests E2E finaux | 16 | 16,000 |
 | - Documentation finale | 8 | 8,000 |
 
-**Total Phase 5**: 240 heures = **240,000 DZD**
+**Total Phase 5**: 240 heures = **44,400 DZD**
 
 ---
 
@@ -174,13 +174,13 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 
 | Phase | Semaines | Heures | Coût | % Total |
 |-------|----------|--------|------|---------|
-| Phase 1: Setup & Fondations | 1-2 | 240 | 240,000 | 16.7% |
-| Phase 2: Auth & Profil | 3-4 | 240 | 240,000 | 16.7% |
-| Phase 3: Catalogue & Produits | 5-7 | 360 | 360,000 | 25% |
-| Phase 4: Panier & Checkout | 8-10 | 360 | 360,000 | 25% |
-| Phase 5: Accueil & Finitions | 11-12 | 240 | 240,000 | 16.7% |
+| Phase 1: Setup & Fondations | 1-2 | 240 | 44,400 | 16.7% |
+| Phase 2: Auth & Profil | 3-4 | 240 | 44,400 | 16.7% |
+| Phase 3: Catalogue & Produits | 5-7 | 360 | 66,600 | 25% |
+| Phase 4: Panier & Checkout | 8-10 | 360 | 66,600 | 25% |
+| Phase 5: Accueil & Finitions | 11-12 | 240 | 44,400 | 16.7% |
 
-**Total Développement**: 1,440 heures = **1,440,000 DZD**
+**Total Développement**: 1,440 heures = **266,400 DZD**
 
 ---
 
@@ -190,14 +190,13 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 
 | Item | Coût Mensuel | Durée | Coût Total |
 |------|--------------|-------|------------|
-| Figma (Design) | 10,000 | 3 mois | 30,000 |
+| Figma (plan gratuit) | 0 | - | 0 |
 | VS Code (Gratuit) | 0 | - | 0 |
-| GitHub/GitLab (privé) | 5,000 | 3 mois | 15,000 |
-| Vercel/Netlify (preview) | Gratuit | - | 0 |
+| GitHub (plan gratuit) | 0 | - | 0 |
+| Vercel (plan gratuit) | 0 | - | 0 |
 | Lighthouse CI | Gratuit | - | 0 |
-| Chromatic (Storybook) | 8,000 | 3 mois | 24,000 |
 
-**Sous-total Outils**: 69,000 DZD
+**Sous-total Outils**: 0 DZD
 
 ---
 
@@ -205,13 +204,12 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 
 | Item | Coût Mensuel | Durée | Coût Total |
 |------|--------------|-------|------------|
-| Hébergement Dev (Vercel Pro) | 8,000 | 3 mois | 24,000 |
-| Hébergement Staging (Netlify) | 6,000 | 3 mois | 18,000 |
-| CDN (Cloudflare) | Gratuit | - | 0 |
-| Domain & SSL | 2,000 | 1 an | 2,000 |
-| CI/CD (GitHub Actions) | 3,000 | 3 mois | 9,000 |
+| Hébergement Dev+Staging (Vercel gratuit) | 0 | - | 0 |
+| CDN (Cloudflare gratuit) | 0 | - | 0 |
+| Domain & SSL | 500 | 1 an | 500 |
+| CI/CD (GitHub Actions gratuit) | 0 | - | 0 |
 
-**Sous-total Infrastructure**: 53,000 DZD
+**Sous-total Infrastructure**: 500 DZD
 
 ---
 
@@ -219,12 +217,11 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 
 | Service | Coût Setup | Coût Mensuel | Durée | Coût Total |
 |---------|------------|--------------|-------|------------|
-| Images CDN (Cloudinary) | 0 | 4,000 | 3 mois | 12,000 |
+| Images CDN (Cloudinary gratuit) | 0 | 0 | - | 0 |
 | Analytics (Google Analytics) | Gratuit | 0 | - | 0 |
-| Sentry (Error tracking) | 0 | 3,000 | 3 mois | 9,000 |
-| Hotjar (User testing) | 0 | 5,000 | 3 mois | 15,000 |
+| Sentry (plan gratuit) | 0 | 0 | - | 0 |
 
-**Sous-total Services**: 36,000 DZD
+**Sous-total Services**: 0 DZD
 
 ---
 
@@ -266,35 +263,22 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 
 | Catégorie | Coût | % Total |
 |-----------|------|---------|
-| **Développement (RH)** | 1,440,000 | 89.4% |
-| **Licences & Outils** | 69,000 | 4.3% |
-| **Infrastructure** | 53,000 | 3.3% |
-| **Services Externes** | 36,000 | 2.2% |
-| **Traductions** | 12,000 | 0.8% |
-| **TOTAL FRONTEND (Base)** | **1,610,000** | **100%** |
+| **Développement (RH)** | 266,400 | 99.8% |
+| **Licences & Outils** | 0 | 0% |
+| **Infrastructure** | 500 | 0.2% |
+| **Services Externes** | 0 | 0% |
+| **Traductions** | 0 | 0% |
+| **TOTAL FRONTEND (Base)** | **266,900** | **100%** |
 
 ---
-
-### 7.2 Scénario Complet (Incluant design UI/UX)
-
-| Catégorie | Coût | % Total |
-|-----------|------|---------|
-| **Développement (RH)** | 1,440,000 | 76.8% |
-| **Design UI/UX** | 264,000 | 14.1% |
-| **Licences & Outils** | 69,000 | 3.7% |
-| **Infrastructure** | 53,000 | 2.8% |
-| **Services Externes** | 36,000 | 1.9% |
-| **Traductions & Contenu** | 12,000 | 0.6% |
-| **TOTAL FRONTEND (Complet)** | **1,874,000** | **100%** |
 
 ---
 
 ## 8. Provision pour Risques & Imprévus
 
-**Contingence recommandée (10%)**: 161,000 - 187,400 DZD
+**Contingence (10%)**: 26,690 DZD
 
 Couvre:
-- Révisions design imprévues
 - Bugs cross-browser complexes
 - Optimisation performance supplémentaire
 - Ajustements responsiveness
@@ -304,35 +288,25 @@ Couvre:
 
 ## 9. Budget Total Recommandé
 
-### Option 1: Avec designs fournis
 | Item | Coût |
 |------|------|
-| Coût de base | 1,610,000 |
-| Contingence (10%) | 161,000 |
-| **TOTAL RECOMMANDÉ** | **1,771,000 DZD** |
-
-### Option 2: Incluant design UI/UX
-| Item | Coût |
-|------|------|
-| Coût de base | 1,874,000 |
-| Contingence (10%) | 187,400 |
-| **TOTAL RECOMMANDÉ** | **2,061,400 DZD** |
+| Coût de base | 266,900 |
+| Contingence (10%) | 26,690 |
+| **TOTAL RECOMMANDÉ** | **293,590 DZD** |
 
 ---
 
 ## 10. Paiement Échelonné (Recommandation)
 
-### Scénario 1: Avec designs fournis (1,771,000 DZD)
-
 | Jalon | % | Montant | Date |
 |-------|---|---------|------|
-| Signature contrat | 20% | 354,200 | Semaine 0 |
-| Fin Phase 2 (Auth complète) | 20% | 354,200 | Semaine 4 |
-| Fin Phase 3 (Catalogue OK) | 25% | 442,750 | Semaine 7 |
-| Fin Phase 4 (Checkout complet) | 20% | 354,200 | Semaine 10 |
-| Livraison finale & tests | 15% | 265,650 | Semaine 12 |
+| Signature contrat | 20% | 53,380 | Semaine 0 |
+| Fin Phase 2 (Auth complète) | 20% | 53,380 | Semaine 4 |
+| Fin Phase 3 (Catalogue OK) | 25% | 66,725 | Semaine 7 |
+| Fin Phase 4 (Checkout complet) | 20% | 53,380 | Semaine 10 |
+| Livraison finale & tests | 15% | 40,035 | Semaine 12 |
 
-**Total**: 1,771,000 DZD
+**Total**: 266,900 DZD
 
 ---
 
@@ -342,20 +316,20 @@ Couvre:
 
 | Service | Coût/mois |
 |---------|-----------|
-| Support bugs critiques | 50,000 |
-| Maintenance corrective | 40,000 |
-| Évolutions mineures | 80,000 |
-| **Total Support** | **170,000 DZD/mois** |
+| Support bugs critiques | 10,000 |
+| Maintenance corrective | 8,000 |
+| Évolutions mineures | 15,000 |
+| **Total Support** | **33,000 DZD/mois** |
 
 ### Infrastructure Production (Mensuel)
 
 | Service | Coût/mois |
 |---------|-----------|
-| Hébergement production (Vercel Pro+) | 25,000 |
-| CDN premium | 15,000 |
-| Monitoring & analytics | 10,000 |
-| Backup & sécurité | 5,000 |
-| **Total Infrastructure** | **55,000 DZD/mois** |
+| Hébergement production (Vercel Pro) | 5,000 |
+| CDN (Cloudflare) | 0 |
+| Monitoring & analytics | 1,000 |
+| Backup & sécurité | 1,000 |
+| **Total Infrastructure** | **7,000 DZD/mois** |
 
 ---
 
@@ -363,34 +337,29 @@ Couvre:
 
 ### Pourquoi ce budget?
 
-1. **Équipe qualifiée**:
-   - Développeurs React seniors avec expertise TypeScript, MUI, performance
-   - UI/UX developer pour une interface moderne et accessible
+1. **Équipe optimisée**:
+   - Développeurs Next.js junior/mid-level avec encadrement technique
+   - Focus sur la qualité avec un coût maîtrisé
 
-2. **Qualité supérieure**:
-   - Tests rigoureux (> 70% couverture)
-   - Performance optimale (Lighthouse > 90)
-   - Accessibilité WCAG AA
-   - SEO optimisé
+2. **Technologies modernes**:
+   - Next.js 14 avec App Router et TypeScript
+   - Tailwind CSS pour un design moderne
+   - Apollo Client pour GraphQL
+   - PWA pour expérience mobile optimale
    - Support multilingue avec RTL
 
-3. **Technologies modernes**:
-   - React 18 avec TypeScript
-   - Material-UI pour une UI cohérente
-   - PWA pour expérience mobile optimale
-   - State management professionnel
+3. **Budget optimisé**:
+   - Taux horaire junior/mid-level: 185 DZD/heure
+   - Outils gratuits: VS Code, GitHub, Vercel, Figma free
+   - Infrastructure économique: Vercel gratuit, Cloudflare gratuit
+   - Focus sur l'essentiel sans over-engineering
 
-4. **Livraison complète**:
-   - Documentation (Storybook, README)
-   - Tests E2E complets
-   - Code review systématique
-   - Support initial
-
-### Comparaison
-
-- **Solution low-cost**: 600,000 - 900,000 DZD (template basique, peu de personnalisation)
-- **Solution proposée**: 1,771,000 DZD (sur-mesure, qualité professionnelle)
-- **Solution premium**: 2,500,000 - 3,500,000 DZD (agence internationale)
+4. **Qualité assurée**:
+   - Tests rigoureux
+   - Performance optimale (Lighthouse > 90)
+   - SEO optimisé avec Next.js
+   - Documentation complète
+   - Support initial inclus
 
 ---
 

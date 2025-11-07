@@ -7,8 +7,8 @@
 
 **Durée**: 16 semaines (4 mois)
 **Heures totales**: 1,920 heures
-**Taux horaire**: 1,000 DZD/heure
-**Coût total**: 1,920,000 DZD
+**Taux horaire moyen**: 185 DZD/heure
+**Coût total**: 355,200 DZD
 
 ---
 
@@ -18,17 +18,17 @@
 
 | Rôle | Nombre | Taux/heure | Allocation | Heures | Coût |
 |------|--------|------------|------------|--------|------|
-| Architecte/Tech Lead | 1 | 1,500 | 25% | 160 | 240,000 |
-| Développeur Backend Senior | 2 | 1,200 | 100% | 1,280 | 1,536,000 |
-| Développeur Backend Junior | 1 | 800 | 50% | 320 | 256,000 |
-| DevOps Engineer | 1 | 1,100 | 15% | 96 | 105,600 |
-| QA/Test Engineer | 1 | 900 | 20% | 128 | 115,200 |
+| Tech Lead Junior | 1 | 185 | 25% | 160 | 29,600 |
+| Développeur Backend Mid-Level | 2 | 185 | 100% | 1,280 | 236,800 |
+| Développeur Backend Junior | 1 | 185 | 50% | 320 | 59,200 |
+| DevOps Junior | 1 | 185 | 15% | 96 | 17,760 |
+| Testeur | 1 | 185 | 20% | 128 | 23,680 |
 
-**Sous-total RH**: 2,252,800 DZD
+**Sous-total RH**: 367,040 DZD
 
 ### 2.2 Répartition Moyenne
 
-Pour simplification budgétaire, nous utiliserons un **taux moyen pondéré de 1,000 DZD/heure** incluant tous les profils.
+Nous utilisons une **équipe junior/mid-level** avec un taux uniforme de **185 DZD/heure**, permettant un budget optimisé tout en garantissant la qualité du livrable.
 
 ---
 
@@ -38,22 +38,22 @@ Pour simplification budgétaire, nous utiliserons un **taux moyen pondéré de 1
 
 | Activité | Heures | Coût |
 |----------|--------|------|
-| Architecture & Setup (Semaine 1) | 120 | 120,000 |
-| - Validation architecture | 24 | 24,000 |
-| - Conception BD | 32 | 32,000 |
-| - Setup environnements | 24 | 24,000 |
-| - Configuration CI/CD | 24 | 24,000 |
-| - Documentation | 16 | 16,000 |
+| Architecture & Setup (Semaine 1) | 120 | 22,200 |
+| - Validation architecture | 24 | 4,440 |
+| - Conception BD | 32 | 5,920 |
+| - Setup environnements | 24 | 4,440 |
+| - Configuration CI/CD | 24 | 4,440 |
+| - Documentation | 16 | 2,960 |
 | | | |
-| Initialisation Projet & Sécurité (Semaine 2) | 120 | 120,000 |
-| - Setup Spring Boot | 16 | 16,000 |
-| - Configuration BD | 16 | 16,000 |
-| - Implémentation JWT | 40 | 40,000 |
-| - Configuration CORS & sécurité | 24 | 24,000 |
-| - Setup Swagger | 16 | 16,000 |
-| - Tests | 8 | 8,000 |
+| Initialisation Projet & Sécurité (Semaine 2) | 120 | 22,200 |
+| - Setup Spring Boot | 16 | 2,960 |
+| - Configuration BD | 16 | 2,960 |
+| - Implémentation JWT | 40 | 7,400 |
+| - Configuration CORS & sécurité | 24 | 4,440 |
+| - Setup Swagger | 16 | 2,960 |
+| - Tests | 8 | 1,480 |
 
-**Total Phase 1**: 240 heures = **240,000 DZD**
+**Total Phase 1**: 240 heures = **44,400 DZD**
 
 ---
 
@@ -61,21 +61,21 @@ Pour simplification budgétaire, nous utiliserons un **taux moyen pondéré de 1
 
 | Activité | Heures | Coût |
 |----------|--------|------|
-| Authentification (Semaine 3) | 120 | 120,000 |
-| - Entités & repositories | 16 | 16,000 |
-| - Services auth (register, login) | 32 | 32,000 |
-| - Validation & sécurité | 24 | 24,000 |
-| - API endpoints | 24 | 24,000 |
-| - Tests | 24 | 24,000 |
+| Authentification (Semaine 3) | 120 | 22,200 |
+| - Entités & repositories | 16 | 2,960 |
+| - Services auth (register, login) | 32 | 5,920 |
+| - Validation & sécurité | 24 | 4,440 |
+| - API endpoints | 24 | 4,440 |
+| - Tests | 24 | 4,440 |
 | | | |
-| Profil & Récupération MDP (Semaine 4) | 120 | 120,000 |
-| - Service récupération MDP | 24 | 24,000 |
-| - Configuration emails | 24 | 24,000 |
-| - Gestion adresses | 32 | 32,000 |
-| - API endpoints | 24 | 24,000 |
-| - Tests | 16 | 16,000 |
+| Profil & Récupération MDP (Semaine 4) | 120 | 22,200 |
+| - Service récupération MDP | 24 | 4,440 |
+| - Configuration emails | 24 | 4,440 |
+| - Gestion adresses | 32 | 5,920 |
+| - API endpoints | 24 | 4,440 |
+| - Tests | 16 | 2,960 |
 
-**Total Phase 2**: 240 heures = **240,000 DZD**
+**Total Phase 2**: 240 heures = **44,400 DZD**
 
 ---
 
@@ -83,28 +83,28 @@ Pour simplification budgétaire, nous utiliserons un **taux moyen pondéré de 1
 
 | Activité | Heures | Coût |
 |----------|--------|------|
-| Entités & Repository (Semaine 5) | 120 | 120,000 |
-| - Modèle de données | 40 | 40,000 |
-| - Relations JPA | 24 | 24,000 |
-| - Support multilingue | 24 | 24,000 |
-| - Migrations BD | 16 | 16,000 |
-| - Seeding données | 16 | 16,000 |
+| Entités & Repository (Semaine 5) | 120 | 22,200 |
+| - Modèle de données | 40 | 7,400 |
+| - Relations JPA | 24 | 4,440 |
+| - Support multilingue | 24 | 4,440 |
+| - Migrations BD | 16 | 2,960 |
+| - Seeding données | 16 | 2,960 |
 | | | |
-| API CRUD Produits (Semaine 6) | 120 | 120,000 |
-| - Services métier | 32 | 32,000 |
-| - DTOs & validation | 16 | 16,000 |
-| - API publique | 40 | 40,000 |
-| - Recherche & filtrage | 24 | 24,000 |
-| - Tests | 8 | 8,000 |
+| API CRUD Produits (Semaine 6) | 120 | 22,200 |
+| - Services métier | 32 | 5,920 |
+| - DTOs & validation | 16 | 2,960 |
+| - API publique | 40 | 7,400 |
+| - Recherche & filtrage | 24 | 4,440 |
+| - Tests | 8 | 1,480 |
 | | | |
-| Admin Produits & Stock (Semaine 7) | 120 | 120,000 |
-| - API admin CRUD | 32 | 32,000 |
-| - Upload images | 24 | 24,000 |
-| - Gestion stock | 24 | 24,000 |
-| - Autorisation | 16 | 16,000 |
-| - Tests | 24 | 24,000 |
+| Admin Produits & Stock (Semaine 7) | 120 | 22,200 |
+| - API admin CRUD | 32 | 5,920 |
+| - Upload images | 24 | 4,440 |
+| - Gestion stock | 24 | 4,440 |
+| - Autorisation | 16 | 2,960 |
+| - Tests | 24 | 4,440 |
 
-**Total Phase 3**: 360 heures = **360,000 DZD**
+**Total Phase 3**: 360 heures = **66,600 DZD**
 
 ---
 
@@ -112,28 +112,28 @@ Pour simplification budgétaire, nous utiliserons un **taux moyen pondéré de 1
 
 | Activité | Heures | Coût |
 |----------|--------|------|
-| Module Panier (Semaine 8) | 120 | 120,000 |
-| - Entités & repositories | 16 | 16,000 |
-| - Logique panier | 32 | 32,000 |
-| - Gestion invités | 24 | 24,000 |
-| - API endpoints | 32 | 32,000 |
-| - Tests | 16 | 16,000 |
+| Module Panier (Semaine 8) | 120 | 22,200 |
+| - Entités & repositories | 16 | 2,960 |
+| - Logique panier | 32 | 5,920 |
+| - Gestion invités | 24 | 4,440 |
+| - API endpoints | 32 | 5,920 |
+| - Tests | 16 | 2,960 |
 | | | |
-| Module Commandes (Semaine 9) | 120 | 120,000 |
-| - Entités & repositories | 20 | 20,000 |
-| - Logique création commande | 40 | 40,000 |
-| - Gestion statuts | 24 | 24,000 |
-| - API endpoints | 24 | 24,000 |
-| - Tests | 12 | 12,000 |
+| Module Commandes (Semaine 9) | 120 | 22,200 |
+| - Entités & repositories | 20 | 3,700 |
+| - Logique création commande | 40 | 7,400 |
+| - Gestion statuts | 24 | 4,440 |
+| - API endpoints | 24 | 4,440 |
+| - Tests | 12 | 2,220 |
 | | | |
-| Admin Commandes (Semaine 10) | 120 | 120,000 |
-| - API admin | 32 | 32,000 |
-| - Gestion annulation | 24 | 24,000 |
-| - Notifications | 24 | 24,000 |
-| - Logs & historique | 24 | 24,000 |
-| - Tests | 16 | 16,000 |
+| Admin Commandes (Semaine 10) | 120 | 22,200 |
+| - API admin | 32 | 5,920 |
+| - Gestion annulation | 24 | 4,440 |
+| - Notifications | 24 | 4,440 |
+| - Logs & historique | 24 | 4,440 |
+| - Tests | 16 | 2,960 |
 
-**Total Phase 4**: 360 heures = **360,000 DZD**
+**Total Phase 4**: 360 heures = **66,600 DZD**
 
 ---
 
@@ -141,29 +141,29 @@ Pour simplification budgétaire, nous utiliserons un **taux moyen pondéré de 1
 
 | Activité | Heures | Coût |
 |----------|--------|------|
-| Infrastructure Paiement (Semaine 11) | 120 | 120,000 |
-| - Entités & repositories | 16 | 16,000 |
-| - Abstraction payment gateway | 24 | 24,000 |
-| - Implémentation COD | 16 | 16,000 |
-| - API endpoints | 32 | 32,000 |
-| - Logs & sécurité | 16 | 16,000 |
-| - Tests | 16 | 16,000 |
+| Infrastructure Paiement (Semaine 11) | 120 | 22,200 |
+| - Entités & repositories | 16 | 2,960 |
+| - Abstraction payment gateway | 24 | 4,440 |
+| - Implémentation COD | 16 | 2,960 |
+| - API endpoints | 32 | 5,920 |
+| - Logs & sécurité | 16 | 2,960 |
+| - Tests | 16 | 2,960 |
 | | | |
-| Intégration CIB (Semaine 12) | 120 | 120,000 |
-| - Étude API CIB | 16 | 16,000 |
-| - Implémentation gateway | 40 | 40,000 |
-| - Gestion callbacks | 32 | 32,000 |
-| - Tests sandbox | 24 | 24,000 |
-| - Documentation | 8 | 8,000 |
+| Intégration CIB (Semaine 12) | 120 | 22,200 |
+| - Étude API CIB | 16 | 2,960 |
+| - Implémentation gateway | 40 | 7,400 |
+| - Gestion callbacks | 32 | 5,920 |
+| - Tests sandbox | 24 | 4,440 |
+| - Documentation | 8 | 1,480 |
 | | | |
-| Intégration Baridimob (Semaine 13) | 120 | 120,000 |
-| - Étude API Baridimob | 16 | 16,000 |
-| - Implémentation gateway | 40 | 40,000 |
-| - Gestion callbacks | 24 | 24,000 |
-| - Système remboursement | 24 | 24,000 |
-| - Tests sandbox | 16 | 16,000 |
+| Intégration Baridimob (Semaine 13) | 120 | 22,200 |
+| - Étude API Baridimob | 16 | 2,960 |
+| - Implémentation gateway | 40 | 7,400 |
+| - Gestion callbacks | 24 | 4,440 |
+| - Système remboursement | 24 | 4,440 |
+| - Tests sandbox | 16 | 2,960 |
 
-**Total Phase 5**: 360 heures = **360,000 DZD**
+**Total Phase 5**: 360 heures = **66,600 DZD**
 
 ---
 
@@ -171,22 +171,22 @@ Pour simplification budgétaire, nous utiliserons un **taux moyen pondéré de 1
 
 | Activité | Heures | Coût |
 |----------|--------|------|
-| Système Notifications (Semaine 14) | 120 | 120,000 |
-| - Service emails | 24 | 24,000 |
-| - Templates multilingues | 24 | 24,000 |
-| - Service SMS | 24 | 24,000 |
-| - Service Push (FCM) | 24 | 24,000 |
-| - API notifications | 16 | 16,000 |
-| - Tests | 8 | 8,000 |
+| Système Notifications (Semaine 14) | 120 | 22,200 |
+| - Service emails | 24 | 4,440 |
+| - Templates multilingues | 24 | 4,440 |
+| - Service SMS | 24 | 4,440 |
+| - Service Push (FCM) | 24 | 4,440 |
+| - API notifications | 16 | 2,960 |
+| - Tests | 8 | 1,480 |
 | | | |
-| Reporting & Jasper (Semaine 15) | 120 | 120,000 |
-| - Configuration Jasper | 16 | 16,000 |
-| - Templates PDF | 32 | 32,000 |
-| - API statistiques | 40 | 40,000 |
-| - Export CSV/Excel | 16 | 16,000 |
-| - Tests | 16 | 16,000 |
+| Reporting & iText PDF (Semaine 15) | 120 | 22,200 |
+| - Configuration iText 7 | 16 | 2,960 |
+| - Templates PDF | 32 | 5,920 |
+| - API statistiques | 40 | 7,400 |
+| - Export CSV/Excel | 16 | 2,960 |
+| - Tests | 16 | 2,960 |
 
-**Total Phase 6**: 240 heures = **240,000 DZD**
+**Total Phase 6**: 240 heures = **44,400 DZD**
 
 ---
 
@@ -194,15 +194,15 @@ Pour simplification budgétaire, nous utiliserons un **taux moyen pondéré de 1
 
 | Activité | Heures | Coût |
 |----------|--------|------|
-| Intégration Systèmes Existants | 120 | 120,000 |
-| - Analyse API ERP/WMS | 24 | 24,000 |
-| - Service synchronisation | 40 | 40,000 |
-| - Sync produits & stocks | 24 | 24,000 |
-| - Push commandes | 16 | 16,000 |
-| - Gestion erreurs & retry | 8 | 8,000 |
-| - Tests intégration | 8 | 8,000 |
+| Intégration Systèmes Existants | 120 | 22,200 |
+| - Analyse API ERP/WMS | 24 | 4,440 |
+| - Service synchronisation | 40 | 7,400 |
+| - Sync produits & stocks | 24 | 4,440 |
+| - Push commandes | 16 | 2,960 |
+| - Gestion erreurs & retry | 8 | 1,480 |
+| - Tests intégration | 8 | 1,480 |
 
-**Total Phase 7**: 120 heures = **120,000 DZD**
+**Total Phase 7**: 120 heures = **22,200 DZD**
 
 ---
 
@@ -210,15 +210,15 @@ Pour simplification budgétaire, nous utiliserons un **taux moyen pondéré de 1
 
 | Phase | Semaines | Heures | Coût | % Total |
 |-------|----------|--------|------|---------|
-| Phase 1: Init & Sécurité | 1-2 | 240 | 240,000 | 12.5% |
-| Phase 2: Utilisateurs | 3-4 | 240 | 240,000 | 12.5% |
-| Phase 3: Catalogue | 5-7 | 360 | 360,000 | 18.75% |
-| Phase 4: Panier & Commandes | 8-10 | 360 | 360,000 | 18.75% |
-| Phase 5: Paiements | 11-13 | 360 | 360,000 | 18.75% |
-| Phase 6: Notifications & Reporting | 14-15 | 240 | 240,000 | 12.5% |
-| Phase 7: Synchronisation | 16 | 120 | 120,000 | 6.25% |
+| Phase 1: Init & Sécurité | 1-2 | 240 | 44,400 | 12.5% |
+| Phase 2: Utilisateurs | 3-4 | 240 | 44,400 | 12.5% |
+| Phase 3: Catalogue | 5-7 | 360 | 66,600 | 18.75% |
+| Phase 4: Panier & Commandes | 8-10 | 360 | 66,600 | 18.75% |
+| Phase 5: Paiements | 11-13 | 360 | 66,600 | 18.75% |
+| Phase 6: Notifications & Reporting | 14-15 | 240 | 44,400 | 12.5% |
+| Phase 7: Synchronisation | 16 | 120 | 22,200 | 6.25% |
 
-**Total Développement**: 1,920 heures = **1,920,000 DZD**
+**Total Développement**: 1,920 heures = **355,200 DZD**
 
 ---
 
@@ -228,13 +228,13 @@ Pour simplification budgétaire, nous utiliserons un **taux moyen pondéré de 1
 
 | Item | Coût Mensuel | Durée | Coût Total |
 |------|--------------|-------|------------|
-| JetBrains IntelliJ Ultimate (×3) | 15,000 | 4 mois | 60,000 |
-| GitHub/GitLab (plan privé) | 8,000 | 4 mois | 32,000 |
-| SonarQube Cloud | 10,000 | 4 mois | 40,000 |
-| Postman Team | 5,000 | 4 mois | 20,000 |
-| Jasper Studio | Gratuit | - | 0 |
+| VS Code / IntelliJ Community | Gratuit | - | 0 |
+| GitHub (plan gratuit) | Gratuit | - | 0 |
+| SonarQube (optionnel) | Gratuit | - | 0 |
+| Postman (plan gratuit) | Gratuit | - | 0 |
+| iText Community | Gratuit | - | 0 |
 
-**Sous-total Outils**: 152,000 DZD
+**Sous-total Outils**: 0 DZD
 
 ---
 
@@ -242,16 +242,13 @@ Pour simplification budgétaire, nous utiliserons un **taux moyen pondéré de 1
 
 | Item | Coût Mensuel | Durée | Coût Total |
 |------|--------------|-------|------------|
-| Serveur Dev (VPS 4GB RAM) | 6,000 | 4 mois | 24,000 |
-| Serveur Staging (VPS 8GB RAM) | 12,000 | 4 mois | 48,000 |
-| PostgreSQL (Dev) | 4,000 | 4 mois | 16,000 |
-| PostgreSQL (Staging) | 8,000 | 4 mois | 32,000 |
-| Redis (optionnel) | 3,000 | 4 mois | 12,000 |
-| Stockage S3/équivalent | 2,000 | 4 mois | 8,000 |
-| Domain & SSL | 3,000 | 1 an | 3,000 |
-| Jenkins/CI-CD (hébergé) | 5,000 | 4 mois | 20,000 |
+| VPS Dev+Staging (2GB RAM) | 1,500 | 4 mois | 6,000 |
+| PostgreSQL (inclus dans VPS) | 0 | - | 0 |
+| Stockage local VPS | 0 | - | 0 |
+| Domain & SSL (Let's Encrypt) | 500 | 1 an | 500 |
+| GitHub Actions (CI/CD gratuit) | 0 | - | 0 |
 
-**Sous-total Infrastructure**: 163,000 DZD
+**Sous-total Infrastructure**: 6,500 DZD
 
 ---
 
@@ -259,13 +256,12 @@ Pour simplification budgétaire, nous utiliserons un **taux moyen pondéré de 1
 
 | Service | Coût Setup | Coût Mensuel | Durée | Coût Total |
 |---------|------------|--------------|-------|------------|
-| Firebase (Dev) | 0 | Gratuit | - | 0 |
-| SMTP (SendGrid/Mailgun) | 0 | 2,000 | 4 mois | 8,000 |
-| SMS Gateway (Dev) | 5,000 | 3,000 | 4 mois | 17,000 |
+| SMTP (Gmail/plan gratuit) | 0 | Gratuit | - | 0 |
+| SMS Gateway (Dev - minimal) | 2,000 | 500 | 4 mois | 4,000 |
 | CIB Sandbox | Gratuit | 0 | - | 0 |
 | Baridimob Sandbox | Gratuit | 0 | - | 0 |
 
-**Sous-total Services**: 25,000 DZD
+**Sous-total Services**: 4,000 DZD
 
 ---
 
@@ -273,23 +269,23 @@ Pour simplification budgétaire, nous utiliserons un **taux moyen pondéré de 1
 
 | Catégorie | Coût | % Total |
 |-----------|------|---------|
-| **Développement (RH)** | 1,920,000 | 84.9% |
-| **Licences & Outils** | 152,000 | 6.7% |
-| **Infrastructure** | 163,000 | 7.2% |
-| **Services Externes** | 25,000 | 1.2% |
-| **TOTAL BACKEND** | **2,260,000** | **100%** |
+| **Développement (RH)** | 355,200 | 97.1% |
+| **Licences & Outils** | 0 | 0% |
+| **Infrastructure** | 6,500 | 1.8% |
+| **Services Externes** | 4,000 | 1.1% |
+| **TOTAL BACKEND** | **365,700** | **100%** |
 
 ---
 
 ## 7. Provision pour Risques & Imprévus
 
-Il est recommandé d'ajouter une **marge de contingence de 10-15%** pour couvrir:
+Une **marge de contingence de 10%** est incluse pour couvrir:
 - Retards d'intégration avec API tierces
 - Modifications de scope mineures
 - Bugs critiques nécessitant intervention supplémentaire
 - Complexité technique imprévue
 
-**Contingence (10%)**: 226,000 DZD
+**Contingence (10%)**: 36,570 DZD
 
 ---
 
@@ -297,9 +293,9 @@ Il est recommandé d'ajouter une **marge de contingence de 10-15%** pour couvrir
 
 | Item | Coût |
 |------|------|
-| Coût de base | 2,260,000 |
-| Contingence (10%) | 226,000 |
-| **TOTAL RECOMMANDÉ** | **2,486,000 DZD** |
+| Coût de base | 365,700 |
+| Contingence (10%) | 36,570 |
+| **TOTAL RECOMMANDÉ** | **402,270 DZD** |
 
 ---
 
@@ -307,31 +303,31 @@ Il est recommandé d'ajouter une **marge de contingence de 10-15%** pour couvrir
 
 | Jalon | % | Montant | Date |
 |-------|---|---------|------|
-| Signature contrat | 20% | 452,000 | Semaine 0 |
-| Fin Phase 2 (Auth complète) | 20% | 452,000 | Semaine 4 |
-| Fin Phase 4 (Commandes OK) | 25% | 565,000 | Semaine 10 |
-| Fin Phase 5 (Paiements intégrés) | 20% | 452,000 | Semaine 13 |
-| Livraison finale & tests | 15% | 339,000 | Semaine 16 |
+| Signature contrat | 20% | 73,140 | Semaine 0 |
+| Fin Phase 2 (Auth complète) | 20% | 73,140 | Semaine 4 |
+| Fin Phase 4 (Commandes OK) | 25% | 91,425 | Semaine 10 |
+| Fin Phase 5 (Paiements intégrés) | 20% | 73,140 | Semaine 13 |
+| Livraison finale & tests | 15% | 54,855 | Semaine 16 |
 
-**Total**: 2,260,000 DZD
+**Total**: 365,700 DZD
 
 ---
 
 ## 10. Coûts Post-Livraison (Non inclus)
 
 ### Support & Maintenance (Mensuel)
-- Support niveau 1 (bugs critiques): 80,000/mois
-- Maintenance corrective: 60,000/mois
-- Évolutions mineures: 100,000/mois
-- Total: **240,000 DZD/mois**
+- Support niveau 1 (bugs critiques): 15,000/mois
+- Maintenance corrective: 10,000/mois
+- Évolutions mineures: 20,000/mois
+- Total: **45,000 DZD/mois**
 
 ### Infrastructure Production (Mensuel)
-- Serveur production (HA): 40,000/mois
-- Base de données production: 25,000/mois
-- CDN & stockage: 15,000/mois
-- Monitoring & logs: 10,000/mois
-- Backup & sécurité: 10,000/mois
-- Total: **100,000 DZD/mois**
+- Serveur production (VPS 4GB): 8,000/mois
+- Base de données production: 0 (inclus)
+- Stockage: 2,000/mois
+- Monitoring & logs: 1,000/mois
+- Backup & sécurité: 2,000/mois
+- Total: **13,000 DZD/mois**
 
 ---
 
@@ -339,19 +335,22 @@ Il est recommandé d'ajouter une **marge de contingence de 10-15%** pour couvrir
 
 ### Pourquoi ce budget?
 
-1. **Équipe qualifiée**: Développeurs seniors avec expertise Spring Boot, sécurité, intégrations bancaires
+1. **Équipe optimisée**: Développeurs junior/mid-level avec encadrement technique, permettant un coût maîtrisé
 2. **Complexité technique**:
+   - GraphQL avec SPQR pour API moderne
    - Intégrations bancaires algériennes (CIB, Baridimob)
    - Synchronisation temps réel avec ERP/WMS
    - Système de paiement sécurisé
    - Architecture scalable
-3. **Qualité**: Tests rigoureux (>80% couverture), sécurité renforcée, documentation complète
-4. **Délais réalistes**: 16 semaines permettant un développement soigné sans précipitation
+3. **Budget optimisé**: Utilisation d'outils open source, infrastructure cloud économique, équipe efficace
+4. **Qualité assurée**: Tests, sécurité renforcée, documentation complète
+5. **Délais réalistes**: 16 semaines permettant un développement soigné
 
-### Comparaison
-- **Solution low-cost**: 800,000 - 1,200,000 DZD (qualité médiocre, risques élevés)
-- **Solution proposée**: 2,260,000 DZD (qualité professionnelle, risques maîtrisés)
-- **Solution premium**: 3,500,000 - 5,000,000 DZD (over-engineered pour ce projet)
+### Stratégie de coûts
+- **Taux horaire**: 185 DZD/heure (équipe junior/mid-level)
+- **Outils gratuits**: VS Code, GitHub, iText Community, Postman
+- **Infrastructure économique**: VPS partagé, services cloud gratuits
+- **Focus sur l'essentiel**: Pas de over-engineering
 
 ---
 

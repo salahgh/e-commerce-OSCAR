@@ -7,8 +7,8 @@
 
 **Durée**: 10 semaines (2.5 mois)
 **Heures totales**: 1,200 heures
-**Taux horaire moyen**: 1,000 DZD/heure
-**Coût total**: 1,200,000 DZD
+**Taux horaire moyen**: 185 DZD/heure
+**Coût total**: 222,000 DZD
 
 ---
 
@@ -18,15 +18,15 @@
 
 | Rôle | Nombre | Taux/heure | Allocation | Heures | Coût |
 |------|--------|------------|------------|--------|------|
-| Développeur React Native Senior | 2 | 1,200 | 100% | 800 | 960,000 |
-| QA/Test Engineer Mobile | 1 | 900 | 30% | 120 | 108,000 |
-| Tech Lead (review & support) | 1 | 1,300 | 20% | 80 | 104,000 |
+| Développeur Expo/React Native Mid-Level | 2 | 185 | 100% | 800 | 148,000 |
+| Testeur Mobile | 1 | 185 | 30% | 120 | 22,200 |
+| Tech Lead Junior | 1 | 185 | 20% | 80 | 14,800 |
 
-**Sous-total RH**: 1,172,000 DZD
+**Sous-total RH**: 185,000 DZD
 
 ### 2.2 Taux Moyen Pondéré
 
-Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
+Équipe junior/mid-level avec taux uniforme: **185 DZD/heure**
 
 ---
 
@@ -54,7 +54,7 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 | - Protected screens | 8 | 8,000 |
 | - Tests (iOS + Android) | 16 | 16,000 |
 
-**Total Phase 1**: 240 heures = **240,000 DZD**
+**Total Phase 1**: 240 heures = **44,400 DZD**
 
 ---
 
@@ -103,7 +103,7 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 | - Related Products | 8 | 8,000 |
 | - Tests | 8 | 8,000 |
 
-**Total Phase 2**: 360 heures = **360,000 DZD**
+**Total Phase 2**: 360 heures = **66,600 DZD**
 
 ---
 
@@ -153,7 +153,7 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 |   - Boutons (facture, suivi) | 8 | 8,000 |
 | - Tests E2E checkout | 16 | 16,000 |
 
-**Total Phase 3**: 360 heures = **360,000 DZD**
+**Total Phase 3**: 360 heures = **66,600 DZD**
 
 ---
 
@@ -197,7 +197,7 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 | - Préparation stores (screenshots, descriptions) | 12 | 12,000 |
 | - Documentation | 8 | 8,000 |
 
-**Total Phase 4**: 240 heures = **240,000 DZD**
+**Total Phase 4**: 240 heures = **44,400 DZD**
 
 ---
 
@@ -205,12 +205,12 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 
 | Phase | Semaines | Heures | Coût | % Total |
 |-------|----------|--------|------|---------|
-| Phase 1: Setup & Auth | 1-2 | 240 | 240,000 | 20% |
-| Phase 2: Catalogue & Produits | 3-5 | 360 | 360,000 | 30% |
-| Phase 3: Panier & Checkout | 6-8 | 360 | 360,000 | 30% |
-| Phase 4: Profil & Finitions | 9-10 | 240 | 240,000 | 20% |
+| Phase 1: Setup & Auth | 1-2 | 240 | 44,400 | 20% |
+| Phase 2: Catalogue & Produits | 3-5 | 360 | 66,600 | 30% |
+| Phase 3: Panier & Checkout | 6-8 | 360 | 66,600 | 30% |
+| Phase 4: Profil & Finitions | 9-10 | 240 | 44,400 | 20% |
 
-**Total Développement**: 1,200 heures = **1,200,000 DZD**
+**Total Développement**: 1,200 heures = **222,000 DZD**
 
 ---
 
@@ -231,13 +231,11 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 
 | Item | Coût Mensuel | Durée | Coût Total |
 |------|--------------|-------|------------|
-| Firebase (Spark - gratuit) | 0 | - | 0 |
-| Firebase (Blaze - si dépassement) | 5,000 | 2.5 mois | 12,500 |
-| Sentry (Error tracking) | 3,000 | 2.5 mois | 7,500 |
-| Expo (si utilisé) | Gratuit | - | 0 |
-| Fastlane + CI/CD | 0 | - | 0 |
+| Expo (gratuit) | 0 | - | 0 |
+| Sentry (plan gratuit) | 0 | - | 0 |
+| Fastlane + GitHub Actions (gratuit) | 0 | - | 0 |
 
-**Sous-total Services**: 20,000 DZD
+**Sous-total Services**: 0 DZD
 
 ---
 
@@ -247,11 +245,9 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 |------|------|
 | TestFlight (iOS - gratuit) | 0 |
 | Google Play Internal Testing (gratuit) | 0 |
-| Devices tests (location/achat) | 50,000 |
-| - iPhone (test) | 25,000 |
-| - Android (test) | 25,000 |
+| Devices tests (utilisation appareils personnels) | 0 |
 
-**Sous-total Testing**: 50,000 DZD
+**Sous-total Testing**: 0 DZD
 
 ---
 
@@ -259,24 +255,23 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 
 | Catégorie | Coût | % Total |
 |-----------|------|---------|
-| **Développement (RH)** | 1,200,000 | 93.4% |
-| **Comptes Développeur** | 15,000 | 1.2% |
-| **Services & Outils** | 20,000 | 1.6% |
-| **Devices Testing** | 50,000 | 3.9% |
-| **TOTAL MOBILE** | **1,285,000** | **100%** |
+| **Développement (RH)** | 222,000 | 93.7% |
+| **Comptes Développeur** | 15,000 | 6.3% |
+| **Services & Outils** | 0 | 0% |
+| **Devices Testing** | 0 | 0% |
+| **TOTAL MOBILE** | **237,000** | **100%** |
 
 ---
 
 ## 7. Provision pour Risques & Imprévus
 
-**Contingence recommandée (10%)**: 128,500 DZD
+**Contingence (10%)**: 23,700 DZD
 
 Couvre:
 - Problèmes spécifiques iOS/Android
 - Rejection stores (corrections)
 - Bugs complexes cross-platform
 - Optimisation performance supplémentaire
-- Tests supplémentaires sur devices
 
 ---
 
@@ -284,9 +279,9 @@ Couvre:
 
 | Item | Coût |
 |------|------|
-| Coût de base | 1,285,000 |
-| Contingence (10%) | 128,500 |
-| **TOTAL RECOMMANDÉ** | **1,413,500 DZD** |
+| Coût de base | 237,000 |
+| Contingence (10%) | 23,700 |
+| **TOTAL RECOMMANDÉ** | **260,700 DZD** |
 
 ---
 

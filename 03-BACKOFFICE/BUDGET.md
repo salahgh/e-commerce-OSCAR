@@ -7,8 +7,8 @@
 
 **Durée**: 8 semaines (2 mois)
 **Heures totales**: 960 heures
-**Taux horaire moyen**: 1,000 DZD/heure
-**Coût total**: 960,000 DZD
+**Taux horaire moyen**: 185 DZD/heure
+**Coût total**: 177,600 DZD
 
 ---
 
@@ -18,15 +18,15 @@
 
 | Rôle | Nombre | Taux/heure | Allocation | Heures | Coût |
 |------|--------|------------|------------|--------|------|
-| Développeur Frontend Senior | 2 | 1,100 | 100% | 640 | 704,000 |
-| QA/Test Engineer | 1 | 900 | 25% | 80 | 72,000 |
-| Tech Lead (review & support) | 1 | 1,200 | 20% | 64 | 76,800 |
+| Développeur React Mid-Level | 2 | 185 | 100% | 640 | 118,400 |
+| Testeur | 1 | 185 | 25% | 80 | 14,800 |
+| Tech Lead Junior | 1 | 185 | 20% | 64 | 11,840 |
 
-**Sous-total RH**: 852,800 DZD
+**Sous-total RH**: 145,040 DZD
 
 ### 2.2 Taux Moyen Pondéré
 
-Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
+Équipe junior/mid-level avec taux uniforme: **185 DZD/heure**
 
 ---
 
@@ -56,7 +56,7 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 | - Service Stats API | 8 | 8,000 |
 | - Tests | 8 | 8,000 |
 
-**Total Phase 1**: 240 heures = **240,000 DZD**
+**Total Phase 1**: 240 heures = **44,400 DZD**
 
 ---
 
@@ -88,7 +88,7 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 | - Validation & intégration API | 12 | 12,000 |
 | - Page Gestion Catégories | 12 | 12,000 |
 
-**Total Phase 2**: 240 heures = **240,000 DZD**
+**Total Phase 2**: 240 heures = **44,400 DZD**
 
 ---
 
@@ -121,7 +121,7 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 | - Integration PDF API | 12 | 12,000 |
 | - Tests | 20 | 20,000 |
 
-**Total Phase 3**: 240 heures = **240,000 DZD**
+**Total Phase 3**: 240 heures = **44,400 DZD**
 
 ---
 
@@ -164,7 +164,7 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 | - Tests E2E finaux | 12 | 12,000 |
 | - Documentation | 4 | 4,000 |
 
-**Total Phase 4**: 240 heures = **240,000 DZD**
+**Total Phase 4**: 240 heures = **44,400 DZD**
 
 ---
 
@@ -172,12 +172,12 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 
 | Phase | Semaines | Heures | Coût | % Total |
 |-------|----------|--------|------|---------|
-| Phase 1: Setup & Dashboard | 1-2 | 240 | 240,000 | 25% |
-| Phase 2: Gestion Produits | 3-4 | 240 | 240,000 | 25% |
-| Phase 3: Gestion Commandes | 5-6 | 240 | 240,000 | 25% |
-| Phase 4: Clients, Rapports & Finitions | 7-8 | 240 | 240,000 | 25% |
+| Phase 1: Setup & Dashboard | 1-2 | 240 | 44,400 | 25% |
+| Phase 2: Gestion Produits | 3-4 | 240 | 44,400 | 25% |
+| Phase 3: Gestion Commandes | 5-6 | 240 | 44,400 | 25% |
+| Phase 4: Clients, Rapports & Finitions | 7-8 | 240 | 44,400 | 25% |
 
-**Total Développement**: 960 heures = **960,000 DZD**
+**Total Développement**: 960 heures = **177,600 DZD**
 
 ---
 
@@ -187,14 +187,12 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 
 | Item | Coût Mensuel | Durée | Coût Total |
 |------|--------------|-------|------------|
-| TinyMCE (Rich Text Editor) | 8,000 | 2 mois | 16,000 |
-| MUI X DataGrid Pro (licence) | 0 | - | 0 |
+| TinyMCE (plan gratuit) | 0 | - | 0 |
+| MUI X DataGrid Community | 0 | - | 0 |
 | VS Code (Gratuit) | 0 | - | 0 |
-| GitHub/GitLab | 3,000 | 2 mois | 6,000 |
+| GitHub (plan gratuit) | 0 | - | 0 |
 
-**Sous-total Outils**: 22,000 DZD
-
-**Note**: MUI X DataGrid Community (gratuit) peut être utilisé, sinon MUI X DataGrid Pro coûte ~40,000 DZD licence annuelle (optionnel).
+**Sous-total Outils**: 0 DZD
 
 ---
 
@@ -202,12 +200,11 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 
 | Item | Coût Mensuel | Durée | Coût Total |
 |------|--------------|-------|------------|
-| Hébergement Dev (Vercel/Netlify) | Gratuit | - | 0 |
-| Hébergement Staging | 5,000 | 2 mois | 10,000 |
-| Domain & SSL (partagé avec frontend) | 0 | - | 0 |
-| CI/CD (GitHub Actions) | 2,000 | 2 mois | 4,000 |
+| Hébergement Dev+Staging (Vercel gratuit) | 0 | - | 0 |
+| Domain & SSL (partagé) | 0 | - | 0 |
+| CI/CD (GitHub Actions gratuit) | 0 | - | 0 |
 
-**Sous-total Infrastructure**: 14,000 DZD
+**Sous-total Infrastructure**: 0 DZD
 
 ---
 
@@ -215,9 +212,9 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 
 | Service | Coût Setup | Coût Mensuel | Durée | Coût Total |
 |---------|------------|--------------|-------|------------|
-| Sentry (Error tracking) | 0 | 2,000 | 2 mois | 4,000 |
+| Sentry (plan gratuit) | 0 | 0 | - | 0 |
 
-**Sous-total Services**: 4,000 DZD
+**Sous-total Services**: 0 DZD
 
 ---
 
@@ -225,17 +222,17 @@ Pour simplification budgétaire: **1,000 DZD/heure** (incluant tous profils)
 
 | Catégorie | Coût | % Total |
 |-----------|------|---------|
-| **Développement (RH)** | 960,000 | 96% |
-| **Licences & Outils** | 22,000 | 2.2% |
-| **Infrastructure** | 14,000 | 1.4% |
-| **Services Externes** | 4,000 | 0.4% |
-| **TOTAL BACK-OFFICE** | **1,000,000** | **100%** |
+| **Développement (RH)** | 177,600 | 100% |
+| **Licences & Outils** | 0 | 0% |
+| **Infrastructure** | 0 | 0% |
+| **Services Externes** | 0 | 0% |
+| **TOTAL BACK-OFFICE** | **177,600** | **100%** |
 
 ---
 
 ## 7. Provision pour Risques & Imprévus
 
-**Contingence recommandée (10%)**: 100,000 DZD
+**Contingence (10%)**: 17,760 DZD
 
 Couvre:
 - Complexité imprévue des DataGrids
@@ -249,9 +246,9 @@ Couvre:
 
 | Item | Coût |
 |------|------|
-| Coût de base | 1,000,000 |
-| Contingence (10%) | 100,000 |
-| **TOTAL RECOMMANDÉ** | **1,100,000 DZD** |
+| Coût de base | 177,600 |
+| Contingence (10%) | 17,760 |
+| **TOTAL RECOMMANDÉ** | **195,360 DZD** |
 
 ---
 
@@ -259,12 +256,12 @@ Couvre:
 
 | Jalon | % | Montant | Date |
 |-------|---|---------|------|
-| Signature contrat | 25% | 275,000 | Semaine 0 |
-| Fin Phase 2 (Gestion produits OK) | 25% | 275,000 | Semaine 4 |
-| Fin Phase 3 (Gestion commandes OK) | 25% | 275,000 | Semaine 6 |
-| Livraison finale & tests | 25% | 275,000 | Semaine 8 |
+| Signature contrat | 25% | 44,400 | Semaine 0 |
+| Fin Phase 2 (Gestion produits OK) | 25% | 44,400 | Semaine 4 |
+| Fin Phase 3 (Gestion commandes OK) | 25% | 44,400 | Semaine 6 |
+| Livraison finale & tests | 25% | 44,400 | Semaine 8 |
 
-**Total**: 1,100,000 DZD
+**Total**: 177,600 DZD
 
 ---
 
@@ -274,10 +271,10 @@ Couvre:
 
 | Service | Coût/mois |
 |---------|-----------|
-| Support bugs critiques | 40,000 |
-| Maintenance corrective | 30,000 |
-| Évolutions mineures | 60,000 |
-| **Total Support** | **130,000 DZD/mois** |
+| Support bugs critiques | 8,000 |
+| Maintenance corrective | 6,000 |
+| Évolutions mineures | 12,000 |
+| **Total Support** | **26,000 DZD/mois** |
 
 ### Infrastructure Production (Mensuel)
 

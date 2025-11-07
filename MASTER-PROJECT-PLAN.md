@@ -185,19 +185,19 @@ Phase 5: Tests finaux & Déploiement (Sem 23-26) - Intégré
 
 | Composant | Heures | Coût Base | Contingence (10%) | **Total** |
 |-----------|--------|-----------|-------------------|-----------|
-| **Backend** | 1,920 | 2,260,000 | 226,000 | **2,486,000** |
-| **Frontend Web** | 1,440 | 1,610,000 | 161,000 | **1,771,000** |
-| **Back-Office** | 960 | 1,000,000 | 100,000 | **1,100,000** |
-| **Mobile** | 1,200 | 1,285,000 | 128,500 | **1,413,500** |
-| **TOTAL** | **5,520** | **6,155,000** | **615,500** | **6,770,500** |
+| **Backend** | 1,920 | 365,700 | 36,570 | **402,270** |
+| **Frontend Web** | 1,440 | 266,900 | 26,690 | **293,590** |
+| **Back-Office** | 960 | 177,600 | 17,760 | **195,360** |
+| **Mobile** | 1,200 | 237,000 | 23,700 | **260,700** |
+| **TOTAL** | **5,520** | **1,047,200** | **104,720** | **1,151,920** |
 
 ### 4.2 Répartition Budgétaire
 
 ```
-Backend:     37% ████████████████████████
-Frontend:    26% ████████████████
-BackOffice:  16% ██████████
-Mobile:      21% █████████████
+Backend:     35% ████████████████████
+Frontend:    25% ███████████████
+BackOffice:  17% ██████████
+Mobile:      23% █████████████
 ```
 
 ### 4.3 Détail des Coûts
@@ -205,36 +205,33 @@ Mobile:      21% █████████████
 #### Ressources Humaines (RH)
 | Poste | Heures Totales | Coût Total |
 |-------|----------------|------------|
-| Architecte/Tech Lead | 240 | 300,000 |
-| Développeurs Backend Senior | 1,280 | 1,536,000 |
-| Développeurs Frontend Senior | 2,240 | 2,464,000 |
-| Développeurs React Native | 800 | 960,000 |
-| UI/UX Developer | 480 | 576,000 |
-| QA/Test Engineers | 328 | 295,200 |
-| DevOps Engineer | 96 | 105,600 |
-| **Total RH** | **5,464** | **6,236,800** |
+| Développeurs Backend Mid-Level | 1,920 | 355,200 |
+| Développeurs Frontend Junior/Mid | 2,400 | 444,000 |
+| Développeurs React Native Mid | 1,200 | 222,000 |
+| Tech Lead Junior | 224 | 41,440 |
+| Testeurs | 448 | 82,880 |
+| **Total RH** | **6,192** | **1,145,520** |
 
-**Taux moyen pondéré**: ~1,140 DZD/heure
+**Taux moyen pondéré**: 185 DZD/heure
 
 #### Infrastructure & Outils
 
 | Catégorie | Coût Total |
 |-----------|------------|
-| Licences & Outils (4 mois) | 243,000 |
-| Infrastructure Dev & Staging (4 mois) | 230,000 |
-| Services Externes (4 mois) | 65,000 |
+| Licences & Outils | 0 |
+| Infrastructure Dev & Staging | 7,000 |
+| Services Externes | 4,000 |
 | Comptes Développeur (Apple + Google) | 15,000 |
-| Devices Testing | 50,000 |
-| **Total Infrastructure** | **603,000** |
+| **Total Infrastructure** | **26,000** |
 
 ### 4.4 Budget Total Projet
 
 | Catégorie | Montant | % |
 |-----------|---------|---|
-| Développement (RH) | 5,520,000 | 81.5% |
-| Infrastructure & Outils | 635,000 | 9.4% |
-| Contingence (10%) | 615,500 | 9.1% |
-| **TOTAL PROJET** | **6,770,500 DZD** | **100%** |
+| Développement (RH) | 1,021,200 | 88.7% |
+| Infrastructure & Outils | 26,000 | 2.3% |
+| Contingence (10%) | 104,720 | 9.1% |
+| **TOTAL PROJET** | **1,151,920 DZD** | **100%** |
 
 ---
 
@@ -382,13 +379,13 @@ Conception UX/UI (Sem 3-4)
 
 | Jalon | % | Montant (DZD) | Date/Événement |
 |-------|---|---------------|----------------|
-| **Acompte - Signature contrat** | 20% | 1,354,100 | Semaine 0 |
-| **Jalon 1 - Backend Auth + Produits** | 20% | 1,354,100 | Semaine 8 |
-| **Jalon 2 - Frontend/Mobile Catalogue OK** | 20% | 1,354,100 | Semaine 12 |
-| **Jalon 3 - Paiements intégrés** | 20% | 1,354,100 | Semaine 14 |
-| **Livraison finale - Tests validés** | 15% | 1,015,575 | Semaine 16 |
-| **Support post-livraison (2 semaines)** | 5% | 338,525 | Semaine 18 |
-| **TOTAL** | **100%** | **6,770,500** | - |
+| **Acompte - Signature contrat** | 20% | 230,384 | Semaine 0 |
+| **Jalon 1 - Backend Auth + Produits** | 20% | 230,384 | Semaine 8 |
+| **Jalon 2 - Frontend/Mobile Catalogue OK** | 20% | 230,384 | Semaine 12 |
+| **Jalon 3 - Paiements intégrés** | 20% | 230,384 | Semaine 14 |
+| **Livraison finale - Tests validés** | 15% | 172,788 | Semaine 16 |
+| **Support post-livraison (2 semaines)** | 5% | 57,596 | Semaine 18 |
+| **TOTAL** | **100%** | **1,151,920** | - |
 
 ### 8.2 Conditions de Paiement
 
@@ -757,7 +754,7 @@ Ce document constitue le plan de projet officiel pour le développement de la pl
 |----------|--------|
 | **Durée Totale** | 26 semaines (6.5 mois) |
 | **Heures Totales** | 5,520 heures |
-| **Budget Total** | **6,770,500 DZD** |
+| **Budget Total** | **1,151,920 DZD** |
 | **Composants** | 4 (Backend, Frontend, BackOffice, Mobile) |
 | **Équipe** | 12 personnes (temps plein et partiel) |
 | **Technologies** | Spring Boot, React.js, React Native, PostgreSQL |
