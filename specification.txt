@@ -1,0 +1,211 @@
+📜 1. Vue d'ensemble du Projet
+Ce document présente le plan de développement pour la création d'une solution e-commerce unifiée pour la marque OSCAR Fashion. Le projet comprend une plateforme web (React), une application mobile (React Native) et une API back-end (Spring Boot), avec un panneau d'administration intégré pour la gestion, le reporting (MUI X Charts) et la génération de documents (Jasper Reports).
+
+L'objectif est de fournir une expérience client moderne, d'intégrer les paiements locaux algériens (CIB, Baridimob) et d'assurer une synchronisation en temps réel avec les systèmes de gestion existants.
+
+🛠️ 2. Stack Technique
+La solution sera développée en utilisant les technologies suivantes, conformément à la demande :
+
+Backend (API & Logique Métier) :
+
+Framework : Spring Boot (Java)
+
+Sécurité : Spring Security (Gestion des authentifications, JWT)
+
+Accès aux données : Spring Data JPA / Hibernate
+
+Génération de Rapports (PDF/Factures) : Jasper Reports
+
+Frontend (Plateforme Web) :
+
+Bibliothèque : React.js
+
+UI Components : Material-UI (MUI)
+
+State Management : Redux Toolkit ou React Context
+
+Frontend (Back-Office / Admin) :
+
+Bibliothèque : React.js (via le même projet ou un projet séparé)
+
+Reporting & Graphiques : MUI X Charts
+
+Application Mobile (iOS & Android) :
+
+Framework : React Native
+
+Navigation : React Navigation
+
+Notifications Push : Firebase Cloud Messaging (FCM) ou service similaire
+
+Base de Données : PostgreSQL (Recommandé pour sa robustesse et scalabilité)
+
+Infrastructure & Déploiement : Docker, CI/CD (Jenkins/GitLab CI), Serveur (ex: AWS, Azure, ou OVH/Hébergeur local).
+
+📅 3. Calendrier Détaillé du Projet (Estimé : 26 Semaines)
+Le projet sera divisé en 5 phases principales, suivies d'une phase de support.
+
+Phase 1 : Découverte et Conception (Semaines 1-4)
+Objectif : Finaliser l'architecture et le design.
+
+Semaine 1-2 : Analyse & Architecture
+
+Ateliers de cadrage pour valider les spécifications.
+
+Définition de l'architecture technique (microservices vs monolithique, flux de données).
+
+Conception du schéma de la base de données.
+
+Finalisation du contrat d'API (OpenAPI/Swagger) pour la synchronisation ERP/WMS.
+
+Semaine 3-4 : Conception UX/UI
+
+Création des wireframes pour le web, le mobile et l'admin.
+
+Conception des maquettes haute-fidélité (UI) en respectant la charte (tons neutres, pastels, etc.).
+
+Création d'un prototype interactif (Figma/Sketch).
+
+Validation des parcours utilisateurs (inscription, achat, etc.).
+
+Phase 2 : Fondations et Backend (Semaines 5-10)
+Objectif : Mettre en place la structure du projet et les fonctionnalités de base.
+
+Semaine 5-6 : Initialisation & Sécurité
+
+Mise en place des environnements (Dev, Staging, Prod).
+
+Configuration du CI/CD.
+
+Backend (Spring Boot) : Initialisation du projet, configuration de Spring Security (JWT).
+
+Backend (Spring Boot) : Implémentation de la Gestion Utilisateurs (Inscription, Connexion, Profil, Récupération MDP).
+
+Frontend (React) : Initialisation du projet web et admin.
+
+Semaine 7-8 : Gestion Produits & Stocks
+
+Backend (Spring Boot) : Développement des API REST (CRUD) pour les Produits, Catégories, Attributs.
+
+Backend (Spring Boot) : Mise en place de l'API de synchronisation (stocks, produits) avec les systèmes externes.
+
+Admin (React) : Développement de l'interface de gestion des produits et des stocks.
+
+Semaine 9-10 : Panier & Début Commande
+
+Backend (Spring Boot) : Développement de la logique d'API pour le panier et le début du tunnel de commande.
+
+Web (React) : Développement des pages Catalogue, Détail Produit, et Recherche/Filtrage.
+
+Mobile (React Native) : Initialisation du projet et implémentation des écrans de base (Auth, Catalogue).
+
+Phase 3 : Fonctionnalités E-commerce & Mobile (Semaines 11-16)
+Objectif : Construire l'expérience d'achat complète.
+
+Semaine 11-12 : Tunnel de Commande & Paiements
+
+Backend (Spring Boot) : Implémentation du processus de commande complet (validation, adresses).
+
+Backend (Spring Boot) : Intégration des API de paiement (CIB, Baridimob) et logique du Paiement à la Livraison.
+
+Web (React) : Développement du tunnel de commande sécurisé (Panier, Livraison, Paiement).
+
+Semaine 13-14 : Finalisation Web & Admin
+
+Web (React) : Développement de la "Page d'Accueil Intelligente" (logique de personnalisation).
+
+Web (React) : Finalisation du profil utilisateur (Historique des commandes).
+
+Admin (React) : Développement de l'interface de gestion des commandes et des utilisateurs.
+
+Semaine 15-16 : Développement Mobile (React Native)
+
+Mobile (React Native) : Implémentation du tunnel de commande complet (Panier, Paiement).
+
+Mobile (React Native) : Implémentation du profil utilisateur et de l'historique.
+
+Phase 4 : Fonctionnalités Avancées & Intégrations (Semaines 17-22)
+Objectif : Intégrer les notifications, le reporting et finaliser la synchronisation.
+
+Semaine 17-18 : Notifications
+
+Backend (Spring Boot) : Mise en place du service de notification (Email, SMS, Push).
+
+Mobile (React Native) : Intégration des notifications Push (FCM).
+
+Web (React) : Intégration du centre de notifications.
+
+Semaine 19-20 : Reporting & Facturation
+
+Backend (Spring Boot) : Développement des API pour les statistiques de ventes.
+
+Backend (Spring Boot) : Intégration de Jasper Reports pour la génération de factures PDF et bons de livraison.
+
+Admin (React) : Intégration de MUI X Charts pour les tableaux de bord (ventes, produits populaires).
+
+Semaine 21-22 : Finalisation & Optimisation
+
+Implémentation du support multilingue (Ar/Fr/En), y compris le support RTL (Right-to-Left) pour l'Arabe.
+
+Optimisations SEO (Web) et ASO (Mobile).
+
+Optimisation des performances (mise en cache, compression d'images).
+
+Phase 5 : Tests, Déploiement et Recette (Semaines 23-26)
+Objectif : Assurer la qualité et la stabilité avant le lancement.
+
+Semaine 23-24 : Phase de QA (Quality Assurance)
+
+Tests fonctionnels (tous les parcours utilisateurs).
+
+Tests de la synchronisation en temps réel.
+
+Tests des transactions de paiement (sandbox CIB/Baridimob).
+
+Tests de performance (temps de chargement < 3s).
+
+Semaine 25 : UAT (User Acceptance Testing) & Sécurité
+
+Recette par le client (OSCAR Fashion).
+
+Corrections des retours UAT.
+
+Tests de sécurité (protection des données, tests d'intrusion basiques).
+
+Semaine 26 : Déploiement
+
+Mise en production de la plateforme web et du backend.
+
+Soumission des applications sur l'App Store (iOS) et le Google Play Store (Android).
+
+Formation des administrateurs.
+
+💰 4. Estimation Budgétaire
+Cette estimation est basée sur le calendrier ci-dessus et un taux horaire de 1 000 par heure (devise non spécifiée). L'estimation couvre une équipe pluridisciplinaire (Chef de projet, Développeurs Backend, Développeurs Frontend/Mobile, QA, UX/UI).
+
+Phase 1 (Découverte & Design) : ~320 heures
+
+Phase 2 (Fondations & Backend) : ~960 heures
+
+Phase 3 (Fonctionnalités E-commerce) : ~960 heures
+
+Phase 4 (Fonctionnalités Avancées) : ~960 heures
+
+Phase 5 (Tests & Déploiement) : ~640 heures
+
+Total des Heures Estimées : 3 840 heures
+
+Budget Total Estimé : 3 840 heures * 1 000 / heure = 3 840 000
+
+Note : Cette estimation est une approximation. Le nombre d'heures réel peut varier en fonction de la complexité des intégrations (API de l'ERP existant, API des banques) et des retours lors des phases de recette.
+
+⚠️ 5. Risques et Hypothèses
+Hypothèse Critique (Synchronisation) : Nous supposons que les systèmes de gestion existants (ERP, WMS, POS) disposent d'une API documentée, stable et accessible pour permettre une synchronisation en temps réel. Si ce n'est pas le cas, un développement d'API côté ERP sera nécessaire, ce qui n'est pas inclus dans ce chiffrage.
+
+Risque (Paiement) : L'intégration des passerelles de paiement algériennes (CIB, Baridimob) peut nécessiter des processus d'approbation et de test techniques complexes. Des retards indépendants de notre volonté peuvent survenir.
+
+Hypothèse (Contenu) : Le client (OSCAR Fashion) fournira l'ensemble du contenu (photos produits haute résolution, descriptions, textes marketing) dans les langues requises avant le début des phases de développement concernées.
+
+Risque (Scope Creep) : Toute demande de fonctionnalité non explicitement mentionnée dans le document de spécifications initial devra faire l'objet d'un avenant et d'une réévaluation du calendrier et du budget.
+
+
