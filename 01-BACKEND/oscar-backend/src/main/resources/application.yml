@@ -1,0 +1,115 @@
+spring:
+  application:
+    name: oscar-ecommerce-api
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/oscar_ecommerce
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+    open-in-view: false
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# GraphQL Configuration
+graphql:
+  spqr:
+    gui:
+      enabled: true
+      endpoint: /graphql
+      page-title: OSCAR Fashion GraphQL API
+    http:
+      enabled: true
+      endpoint: /graphql
+  playground:
+    enabled: true
+    endpoint: /playground
+  voyager:
+    enabled: true
+    endpoint: /voyager
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:OscarFashionSecretKeyForJWTTokenGenerationAndValidation2024}
+  expiration: 86400000  # 24 hours in milliseconds
+  refresh-expiration: 604800000  # 7 days in milliseconds
+
+# Application Configuration
+oscar:
+  app:
+    name: OSCAR Fashion
+    base-url: ${APP_BASE_URL:http://localhost:3000}
+    admin-email: ${ADMIN_EMAIL:admin@oscarfashion.dz}
+
+  # Payment Configuration
+  payment:
+    cib:
+      merchant-id: ${CIB_MERCHANT_ID:}
+      api-key: ${CIB_API_KEY:}
+      api-url: ${CIB_API_URL:https://sandbox.cib.dz}
+      callback-url: ${APP_BASE_URL:http://localhost:3000}/payment/cib/callback
+
+    baridimob:
+      merchant-id: ${BARIDIMOB_MERCHANT_ID:}
+      api-key: ${BARIDIMOB_API_KEY:}
+      api-url: ${BARIDIMOB_API_URL:https://sandbox.baridimob.dz}
+      callback-url: ${APP_BASE_URL:http://localhost:3000}/payment/baridimob/callback
+
+  # SMS Configuration
+  sms:
+    provider: ${SMS_PROVIDER:mobilis}
+    api-key: ${SMS_API_KEY:}
+    sender-name: ${SMS_SENDER:OSCAR}
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.oscar.ecommerce: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.springframework.security: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Actuator Endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+  compression:
+    enabled: true
