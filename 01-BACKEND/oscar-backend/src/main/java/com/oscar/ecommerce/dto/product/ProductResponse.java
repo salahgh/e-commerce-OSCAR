@@ -44,7 +44,7 @@ public class ProductResponse {
 
     // Flags
     private Boolean isFeatured;
-    private Integer viewCount;
+    private Long viewCount;
 
     // Timestamps
     private LocalDateTime createdAt;

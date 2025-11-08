@@ -167,7 +167,7 @@ public class ProductService {
         product.setAvailableColors(request.getAvailableColors());
         product.setIsFeatured(request.getIsFeatured() != null ? request.getIsFeatured() : false);
         product.setIsActive(true);
-        product.setViewCount(0);
+        product.setViewCount(0L);
 
         product = productRepository.save(product);
         log.info("Product created: {} (SKU: {})", product.getNameEn(), product.getSku());

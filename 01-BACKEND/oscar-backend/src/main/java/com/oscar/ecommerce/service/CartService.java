@@ -1,9 +1,6 @@
 package com.oscar.ecommerce.service;
 
-import com.oscar.ecommerce.domain.Cart;
-import com.oscar.ecommerce.domain.CartItem;
-import com.oscar.ecommerce.domain.Product;
-import com.oscar.ecommerce.domain.User;
+import com.oscar.ecommerce.domain.*;
 import com.oscar.ecommerce.dto.cart.AddToCartRequest;
 import com.oscar.ecommerce.dto.cart.CartResponse;
 import com.oscar.ecommerce.dto.cart.UpdateCartItemRequest;
@@ -18,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Service for managing shopping cart operations
@@ -83,9 +81,6 @@ public class CartService {
             }
 
             item.setQuantity(newQuantity);
-            item.setSubtotal(product.getSalePrice() != null
-                    ? product.getSalePrice().multiply(BigDecimal.valueOf(newQuantity))
-                    : product.getBasePrice().multiply(BigDecimal.valueOf(newQuantity)));
         } else {
             // Add new item
             CartItem newItem = new CartItem();
@@ -94,8 +89,6 @@ public class CartService {
             newItem.setQuantity(request.getQuantity());
             newItem.setSelectedSize(request.getSelectedSize());
             newItem.setSelectedColor(request.getSelectedColor());
-            newItem.setPrice(product.getSalePrice() != null ? product.getSalePrice() : product.getBasePrice());
-            newItem.setSubtotal(newItem.getPrice().multiply(BigDecimal.valueOf(request.getQuantity())));
 
             cart.getItems().add(newItem);
         }
@@ -130,9 +123,8 @@ public class CartService {
             throw new IllegalArgumentException("Insufficient stock for product: " + item.getProduct().getNameEn());
         }
 
-        // Update quantity and subtotal
+        // Update quantity
         item.setQuantity(request.getQuantity());
-        item.setSubtotal(item.getPrice().multiply(BigDecimal.valueOf(request.getQuantity())));
 
         // Update cart total
         updateCartTotal(cart);
@@ -177,7 +169,6 @@ public class CartService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user", "userId", userId));
 
         cart.getItems().clear();
-        cart.setTotalAmount(BigDecimal.ZERO);
 
         cartRepository.save(cart);
         log.info("Cleared cart for user {}", user.getEmail());
@@ -189,19 +180,15 @@ public class CartService {
     private Cart createCartForUser(User user) {
         Cart cart = new Cart();
         cart.setUser(user);
-        cart.setTotalAmount(BigDecimal.ZERO);
         return cartRepository.save(cart);
     }
 
     /**
      * Update cart total amount
+     * Note: Cart.getTotalAmount() is computed automatically from items
      */
     private void updateCartTotal(Cart cart) {
-        BigDecimal total = cart.getItems().stream()
-                .map(CartItem::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        cart.setTotalAmount(total);
+        // No need to manually set total - it's computed from items
     }
 
     /**
@@ -222,10 +209,10 @@ public class CartService {
                                 .quantity(item.getQuantity())
                                 .selectedSize(item.getSelectedSize())
                                 .selectedColor(item.getSelectedColor())
-                                .price(item.getPrice())
+                                .price(item.getProduct().getEffectivePrice())
                                 .subtotal(item.getSubtotal())
                                 .build())
-                        .toList())
+                        .collect(Collectors.toList()))
                 .totalAmount(cart.getTotalAmount())
                 .createdAt(cart.getCreatedAt())
                 .updatedAt(cart.getUpdatedAt())

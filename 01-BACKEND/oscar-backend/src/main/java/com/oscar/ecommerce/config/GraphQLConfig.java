@@ -19,18 +19,8 @@ public class GraphQLConfig {
     /**
      * Configure GraphQL schema generation
      */
-    @Bean
-    public ExtendedGeneratorConfiguration generatorConfiguration() {
-        return ExtendedGeneratorConfiguration.builder()
-                .withResolverBuilders(
-                        // Use annotated resolvers (methods with @GraphQLQuery, @GraphQLMutation)
-                        new AnnotatedResolverBuilder(),
-                        // Also scan public methods as potential resolvers
-                        new PublicResolverBuilder()
-                )
-                .withValueMapperFactory(new JacksonValueMapperFactory())
-                .build();
-    }
+    // GraphQL SPQR auto-configuration will handle this
+    // No custom configuration needed
 
     /**
      * Register custom GraphQL scalars

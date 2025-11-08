@@ -68,8 +68,8 @@ public class OrderService {
         order.setStatus(OrderStatus.PENDING);
         order.setPaymentMethod(PaymentMethod.valueOf(request.getPaymentMethod()));
         order.setShippingAddress(request.getShippingAddress());
-        order.setPhoneNumber(request.getPhoneNumber());
-        order.setNotes(request.getNotes());
+        order.setShippingPhone(request.getPhoneNumber());
+        order.setCustomerNotes(request.getNotes());
 
         // Calculate amounts
         BigDecimal subtotal = cart.getTotalAmount();
@@ -89,8 +89,15 @@ public class OrderService {
             orderItem.setQuantity(cartItem.getQuantity());
             orderItem.setSelectedSize(cartItem.getSelectedSize());
             orderItem.setSelectedColor(cartItem.getSelectedColor());
-            orderItem.setPrice(cartItem.getPrice());
-            orderItem.setSubtotal(cartItem.getSubtotal());
+            orderItem.setUnitPrice(cartItem.getProduct().getEffectivePrice());
+            // Store product details
+            orderItem.setProductNameFr(cartItem.getProduct().getNameFr());
+            orderItem.setProductNameAr(cartItem.getProduct().getNameAr());
+            orderItem.setProductNameEn(cartItem.getProduct().getNameEn());
+            orderItem.setProductSku(cartItem.getProduct().getSku());
+            if (!cartItem.getProduct().getImageUrls().isEmpty()) {
+                orderItem.setProductImageUrl(cartItem.getProduct().getImageUrls().get(0));
+            }
 
             orderItems.add(orderItem);
 
@@ -282,7 +289,7 @@ public class OrderService {
                                 .quantity(item.getQuantity())
                                 .selectedSize(item.getSelectedSize())
                                 .selectedColor(item.getSelectedColor())
-                                .price(item.getPrice())
+                                .price(item.getUnitPrice())
                                 .subtotal(item.getSubtotal())
                                 .build())
                         .collect(Collectors.toList()))
@@ -290,8 +297,8 @@ public class OrderService {
                 .shippingCost(order.getShippingCost())
                 .totalAmount(order.getTotalAmount())
                 .shippingAddress(order.getShippingAddress())
-                .phoneNumber(order.getPhoneNumber())
-                .notes(order.getNotes())
+                .phoneNumber(order.getShippingPhone())
+                .notes(order.getCustomerNotes())
                 .trackingNumber(order.getTrackingNumber())
                 .paidAt(order.getPaidAt())
                 .deliveredAt(order.getDeliveredAt())

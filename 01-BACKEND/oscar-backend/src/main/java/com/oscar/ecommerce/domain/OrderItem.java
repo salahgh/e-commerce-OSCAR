@@ -53,6 +53,9 @@ public class OrderItem {
     @Column(name = "product_name_ar")
     private String productNameAr;
 
+    @Column(name = "product_name_en")
+    private String productNameEn;
+
     @Column(name = "product_sku")
     private String productSku;
 

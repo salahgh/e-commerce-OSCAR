@@ -1,4 +1,4 @@
-package com.oscar.ecommerce.domain;
+package com.oscar.ecommerce.repository;
 
 import com.oscar.ecommerce.domain.Cart;
 import com.oscar.ecommerce.domain.User;
