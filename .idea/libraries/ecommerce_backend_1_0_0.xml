@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="ecommerce-backend-1.0.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/01-BACKEND/oscar-backend/target/ecommerce-backend-1.0.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

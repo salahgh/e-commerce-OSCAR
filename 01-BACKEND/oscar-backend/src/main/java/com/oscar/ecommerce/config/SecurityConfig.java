@@ -5,6 +5,8 @@ import com.oscar.ecommerce.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -34,6 +36,7 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final Environment environment;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -63,27 +66,40 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session ->
                     session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
-                        .requestMatchers("/graphql").permitAll()
-                        .requestMatchers("/playground").permitAll()
-                        .requestMatchers("/voyager").permitAll()
-                        .requestMatchers("/graphiql").permitAll()
-                        .requestMatchers("/gui/**").permitAll()
-                        .requestMatchers("/vendor/**").permitAll()
-                        .requestMatchers("/actuator/health").permitAll()
-                        .requestMatchers("/actuator/info").permitAll()
-
-                        // Admin endpoints
-                        .requestMatchers("/actuator/**").hasRole("ADMIN")
-
-                        // All other requests must be authenticated
-                        .anyRequest().authenticated()
                 );
 
-        http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        // Check if dev profile is active
+        boolean isDevMode = Arrays.asList(environment.getActiveProfiles()).contains("dev");
+
+        if (isDevMode) {
+            // Development mode: Allow all requests without authentication
+            http.authorizeHttpRequests(auth -> auth
+                    .anyRequest().permitAll()
+            );
+            System.out.println("⚠️  SECURITY DISABLED - Running in development mode");
+        } else {
+            // Production mode: Enforce authentication
+            http.authorizeHttpRequests(auth -> auth
+                    // Public endpoints
+                    .requestMatchers("/graphql").permitAll()
+                    .requestMatchers("/playground").permitAll()
+                    .requestMatchers("/voyager").permitAll()
+                    .requestMatchers("/graphiql").permitAll()
+                    .requestMatchers("/gui/**").permitAll()
+                    .requestMatchers("/vendor/**").permitAll()
+                    .requestMatchers("/actuator/health").permitAll()
+                    .requestMatchers("/actuator/info").permitAll()
+
+                    // Admin endpoints
+                    .requestMatchers("/actuator/**").hasRole("ADMIN")
+
+                    // All other requests must be authenticated
+                    .anyRequest().authenticated()
+            );
+
+            http.authenticationProvider(authenticationProvider());
+            http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        }
 
         return http.build();
     }

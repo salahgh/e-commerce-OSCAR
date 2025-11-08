@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/e-commerce-OSCAR.iml" filepath="$PROJECT_DIR$/.idea/e-commerce-OSCAR.iml" />
+      <module fileurl="file://$PROJECT_DIR$/01-BACKEND/oscar-backend/oscar-backend.iml" filepath="$PROJECT_DIR$/01-BACKEND/oscar-backend/oscar-backend.iml" />
     </modules>
   </component>
 </project>

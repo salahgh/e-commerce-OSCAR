@@ -1,11 +1,14 @@
+
 spring:
   application:
     name: oscar-ecommerce-api
 
+  # Active profile - use 'dev' to disable security for local development
+
   datasource:
     url: jdbc:postgresql://localhost:5432/oscar_ecommerce
     username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    password: ${DB_PASSWORD:majmajBS13..}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -107,9 +110,11 @@ management:
       show-details: when-authorized
 
 server:
-  port: 8080
+  port: 8085
   error:
     include-message: always
     include-binding-errors: always
   compression:
     enabled: true
+
+
