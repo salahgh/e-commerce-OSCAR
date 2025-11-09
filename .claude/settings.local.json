@@ -16,7 +16,8 @@
       "Bash(npm uninstall:*)",
       "Bash(npm run codegen:*)",
       "Bash(npx get-graphql-schema:*)",
-      "Bash(schema.graphql)"
+      "Bash(schema.graphql)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

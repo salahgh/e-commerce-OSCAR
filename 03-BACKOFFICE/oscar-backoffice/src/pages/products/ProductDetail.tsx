@@ -9,58 +9,62 @@ import { Tabs } from '../../components/ui/Tabs';
 import { formatPrice, formatDate } from '../../lib/utils';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
-
-// Mock data - TODO: Replace with GraphQL query
-const mockProduct = {
-  id: '101',
-  sku: 'MTS-001-BLK',
-  nameFr: 'T-Shirt Classique Noir',
-  nameAr: 'تي شيرت كلاسيكي أسود',
-  nameEn: 'Classic Black T-Shirt',
-  descriptionFr: 'T-shirt en coton 100% de qualité supérieure',
-  descriptionAr: 'تي شيرت قطن 100% عالي الجودة',
-  descriptionEn: '100% premium cotton t-shirt',
-  basePrice: 2500,
-  salePrice: 1999,
-  stockQuantity: 150,
-  minStockAlert: 20,
-  weightKg: 0.25,
-  isActive: true,
-  isFeatured: true,
-  viewCount: 245,
-  imageUrls: [
-    'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab',
-    'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a',
-  ],
-  availableSizes: ['S', 'M', 'L', 'XL', 'XXL'],
-  availableColors: ['Noir', 'Blanc', 'Gris'],
-  category: { id: '11', nameFr: 'Hommes - T-Shirts' },
-  createdAt: '2024-11-01T10:00:00Z',
-  updatedAt: '2024-11-08T15:30:00Z',
-};
+import { ProductDocument, DeleteProductDocument, ProductsDocument } from '../../graphql/generated/graphql';
+import { Spinner } from '../../components/ui/Spinner';
+import { useMutation, useQuery } from '@apollo/client';
 
 export const ProductDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+
+  // Fetch product data
+  const { data, loading, error } = useQuery(ProductDocument, {
+    variables: { id: id ? parseInt(id) : 0 },
+    skip: !id,
+  });
+
+  const [deleteProduct, { loading: deleting }] = useMutation(DeleteProductDocument, {
+    refetchQueries: [{ query: ProductsDocument, variables: { page: 0, size: 20, sortBy: 'createdAt', sortDirection: 'DESC' } }],
+  });
 
   const handleDelete = async () => {
-    setDeleting(true);
+    if (!id) return;
+
     try {
-      // TODO: Replace with GraphQL mutation
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await deleteProduct({
+        variables: { id: parseInt(id) },
+      });
 
       dispatch(addToast({ message: 'Produit supprimé avec succès', type: 'success' }));
       navigate('/products');
     } catch (error: any) {
+      console.error('Delete product error:', error);
       dispatch(addToast({ message: error.message || 'Erreur lors de la suppression', type: 'error' }));
     } finally {
-      setDeleting(false);
       setShowDeleteDialog(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error || !data?.product) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <p className="text-red-500 text-lg mb-4">Erreur: {error?.message || 'Produit non trouvé'}</p>
+        <Button onClick={() => navigate('/products')}>Retour aux produits</Button>
+      </div>
+    );
+  }
+
+  const product = data.product;
 
   return (
     <div className="space-y-6">
@@ -71,8 +75,8 @@ export const ProductDetail: React.FC = () => {
             Retour
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{mockProduct.nameFr}</h1>
-            <p className="text-gray-600 mt-1">SKU: {mockProduct.sku}</p>
+            <h1 className="text-3xl font-bold text-gray-900">{product.nameFr}</h1>
+            <p className="text-gray-600 mt-1">SKU: {product.sku}</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -95,11 +99,15 @@ export const ProductDetail: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {mockProduct.imageUrls.map((url, index) => (
-                  <div key={index} className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200">
-                    <img src={url} alt={`Product ${index + 1}`} className="w-full h-full object-cover" />
-                  </div>
-                ))}
+                {product.imageUrls && product.imageUrls.length > 0 ? (
+                  product.imageUrls.map((url, index) => (
+                    <div key={index} className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200">
+                      <img src={url || ''} alt={`Product ${index + 1}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 col-span-4">Aucune image disponible</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -117,8 +125,8 @@ export const ProductDetail: React.FC = () => {
                     label: 'Français',
                     content: (
                       <div>
-                        <h3 className="font-semibold text-lg mb-2">{mockProduct.nameFr}</h3>
-                        <p className="text-gray-600">{mockProduct.descriptionFr}</p>
+                        <h3 className="font-semibold text-lg mb-2">{product.nameFr}</h3>
+                        <p className="text-gray-600">{product.descriptionFr || 'Aucune description'}</p>
                       </div>
                     ),
                   },
@@ -127,8 +135,8 @@ export const ProductDetail: React.FC = () => {
                     label: 'العربية',
                     content: (
                       <div className="text-right">
-                        <h3 className="font-semibold text-lg mb-2">{mockProduct.nameAr}</h3>
-                        <p className="text-gray-600">{mockProduct.descriptionAr}</p>
+                        <h3 className="font-semibold text-lg mb-2">{product.nameAr}</h3>
+                        <p className="text-gray-600">{product.descriptionAr || 'لا يوجد وصف'}</p>
                       </div>
                     ),
                   },
@@ -137,8 +145,8 @@ export const ProductDetail: React.FC = () => {
                     label: 'English',
                     content: (
                       <div>
-                        <h3 className="font-semibold text-lg mb-2">{mockProduct.nameEn}</h3>
-                        <p className="text-gray-600">{mockProduct.descriptionEn}</p>
+                        <h3 className="font-semibold text-lg mb-2">{product.nameEn || 'N/A'}</h3>
+                        <p className="text-gray-600">{product.descriptionEn || 'No description'}</p>
                       </div>
                     ),
                   },
@@ -156,21 +164,29 @@ export const ProductDetail: React.FC = () => {
               <div>
                 <h4 className="font-medium text-gray-900 mb-2">Tailles disponibles</h4>
                 <div className="flex flex-wrap gap-2">
-                  {mockProduct.availableSizes.map((size) => (
-                    <Badge key={size} variant="default">
-                      {size}
-                    </Badge>
-                  ))}
+                  {product.availableSizes && product.availableSizes.length > 0 ? (
+                    product.availableSizes.map((size) => (
+                      <Badge key={size} variant="default">
+                        {size}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-gray-500 text-sm">Aucune taille disponible</span>
+                  )}
                 </div>
               </div>
               <div>
                 <h4 className="font-medium text-gray-900 mb-2">Couleurs disponibles</h4>
                 <div className="flex flex-wrap gap-2">
-                  {mockProduct.availableColors.map((color) => (
-                    <Badge key={color} variant="default">
-                      {color}
-                    </Badge>
-                  ))}
+                  {product.availableColors && product.availableColors.length > 0 ? (
+                    product.availableColors.map((color) => (
+                      <Badge key={color} variant="default">
+                        {color}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-gray-500 text-sm">Aucune couleur disponible</span>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -186,22 +202,16 @@ export const ProductDetail: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">État</span>
-                <Badge variant={mockProduct.isActive ? 'success' : 'default'}>
-                  {mockProduct.isActive ? 'Actif' : 'Inactif'}
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">En vedette</span>
-                <Badge variant={mockProduct.isFeatured ? 'info' : 'default'}>
-                  {mockProduct.isFeatured ? 'Oui' : 'Non'}
+                <Badge variant={product.isFeatured ? 'info' : 'default'}>
+                  {product.isFeatured ? 'Oui' : 'Non'}
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Vues</span>
                 <div className="flex items-center gap-1">
                   <Eye className="h-4 w-4 text-gray-400" />
-                  <span className="font-medium">{mockProduct.viewCount}</span>
+                  <span className="font-medium">{product.viewCount || 0}</span>
                 </div>
               </div>
             </CardContent>
@@ -215,12 +225,12 @@ export const ProductDetail: React.FC = () => {
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Prix de base</span>
-                <span className="font-semibold">{formatPrice(mockProduct.basePrice)}</span>
+                <span className="font-semibold">{formatPrice(Number(product.basePrice))}</span>
               </div>
-              {mockProduct.salePrice && (
+              {product.salePrice && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Prix en promo</span>
-                  <span className="font-semibold text-green-600">{formatPrice(mockProduct.salePrice)}</span>
+                  <span className="font-semibold text-green-600">{formatPrice(Number(product.salePrice))}</span>
                 </div>
               )}
             </CardContent>
@@ -234,17 +244,9 @@ export const ProductDetail: React.FC = () => {
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Quantité</span>
-                <Badge variant={mockProduct.stockQuantity > 50 ? 'success' : 'warning'}>
-                  {mockProduct.stockQuantity} unités
+                <Badge variant={(product.stockQuantity || 0) > 50 ? 'success' : 'warning'}>
+                  {product.stockQuantity || 0} unités
                 </Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Alerte minimum</span>
-                <span className="font-medium">{mockProduct.minStockAlert}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Poids</span>
-                <span className="font-medium">{mockProduct.weightKg} kg</span>
               </div>
             </CardContent>
           </Card>
@@ -257,7 +259,7 @@ export const ProductDetail: React.FC = () => {
             <CardContent>
               <div className="flex items-center gap-2">
                 <Package2 className="h-5 w-5 text-gray-400" />
-                <span className="font-medium">{mockProduct.category.nameFr}</span>
+                <span className="font-medium">{product.categoryName || 'Non catégorisé'}</span>
               </div>
             </CardContent>
           </Card>
@@ -270,11 +272,11 @@ export const ProductDetail: React.FC = () => {
             <CardContent className="space-y-2 text-sm">
               <div>
                 <span className="text-gray-600">Créé le:</span>
-                <p className="font-medium">{formatDate(mockProduct.createdAt)}</p>
+                <p className="font-medium">{formatDate(String(product.createdAt))}</p>
               </div>
               <div>
                 <span className="text-gray-600">Modifié le:</span>
-                <p className="font-medium">{formatDate(mockProduct.updatedAt)}</p>
+                <p className="font-medium">{formatDate(String(product.updatedAt))}</p>
               </div>
             </CardContent>
           </Card>
@@ -287,7 +289,7 @@ export const ProductDetail: React.FC = () => {
         onClose={() => setShowDeleteDialog(false)}
         onConfirm={handleDelete}
         title="Supprimer le produit"
-        message={`Êtes-vous sûr de vouloir supprimer "${mockProduct.nameFr}" ? Cette action est irréversible.`}
+        message={`Êtes-vous sûr de vouloir supprimer "${product.nameFr}" ? Cette action est irréversible.`}
         confirmText="Supprimer"
         loading={deleting}
       />

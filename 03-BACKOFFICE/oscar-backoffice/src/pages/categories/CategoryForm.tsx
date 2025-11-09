@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { useQuery, useMutation } from '@apollo/client';
 import { ArrowLeft, FolderTree } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -11,6 +12,12 @@ import { Select } from '../../components/ui/Select';
 import { Tabs } from '../../components/ui/Tabs';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
+import {
+  CategoriesDocument,
+  CategoryDocument,
+  CreateCategoryDocument,
+  UpdateCategoryDocument,
+} from '../../graphql/generated/graphql';
 
 const CategorySchema = Yup.object().shape({
   slug: Yup.string()
@@ -28,20 +35,29 @@ const CategorySchema = Yup.object().shape({
   isActive: Yup.boolean(),
 });
 
-// Mock parent categories
-const mockParentCategories = [
-  { value: '', label: 'Aucune (Catégorie racine)' },
-  { value: '1', label: 'Hommes' },
-  { value: '2', label: 'Femmes' },
-  { value: '3', label: 'Enfants' },
-  { value: '4', label: 'Accessoires' },
-];
-
 export const CategoryForm: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const dispatch = useAppDispatch();
   const isEditMode = Boolean(id);
+
+  // Fetch all categories for parent selection (exclude current category in edit mode)
+  const { data: categoriesData } = useQuery(CategoriesDocument);
+
+  // Fetch category data if in edit mode
+  const { data: categoryData, loading: categoryLoading } = useQuery(CategoryDocument, {
+    variables: { id: id ? parseInt(id) : 0 },
+    skip: !isEditMode,
+  });
+
+  // Mutations
+  const [createCategory, { loading: creating }] = useMutation(CreateCategoryDocument, {
+    refetchQueries: [{ query: CategoriesDocument }],
+  });
+
+  const [updateCategory, { loading: updating }] = useMutation(UpdateCategoryDocument, {
+    refetchQueries: [{ query: CategoriesDocument }],
+  });
 
   const formik = useFormik({
     initialValues: {
@@ -60,8 +76,32 @@ export const CategoryForm: React.FC = () => {
     validationSchema: CategorySchema,
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        // TODO: Replace with GraphQL mutation
-        console.log('Category data:', values);
+        const input = {
+          slug: values.slug,
+          nameFr: values.nameFr,
+          nameAr: values.nameAr,
+          nameEn: values.nameEn || null,
+          descriptionFr: values.descriptionFr || null,
+          descriptionAr: values.descriptionAr || null,
+          descriptionEn: values.descriptionEn || null,
+          parentId: values.parentId ? parseInt(values.parentId) : null,
+          displayOrder: values.displayOrder,
+          imageUrl: values.imageUrl || null,
+          isActive: values.isActive,
+        };
+
+        if (isEditMode && id) {
+          await updateCategory({
+            variables: {
+              id: parseInt(id),
+              input,
+            },
+          });
+        } else {
+          await createCategory({
+            variables: { input },
+          });
+        }
 
         dispatch(
           addToast({
@@ -72,6 +112,7 @@ export const CategoryForm: React.FC = () => {
 
         navigate('/categories');
       } catch (error: any) {
+        console.error('Category mutation error:', error);
         dispatch(
           addToast({
             message: error.message || 'Une erreur est survenue',
@@ -83,6 +124,46 @@ export const CategoryForm: React.FC = () => {
       }
     },
   });
+
+  // Populate form with category data in edit mode
+  useEffect(() => {
+    if (categoryData?.category) {
+      const category = categoryData.category;
+      formik.setValues({
+        slug: category.slug || '',
+        nameFr: category.nameFr || '',
+        nameAr: category.nameAr || '',
+        nameEn: category.nameEn || '',
+        descriptionFr: category.descriptionFr || '',
+        descriptionAr: category.descriptionAr || '',
+        descriptionEn: category.descriptionEn || '',
+        parentId: category.parentId ? String(category.parentId) : '',
+        displayOrder: category.displayOrder || 1,
+        imageUrl: category.imageUrl || '',
+        isActive: category.isActive || true,
+      });
+    }
+  }, [categoryData]);
+
+  // Prepare parent categories for dropdown (exclude current category in edit mode)
+  const parentCategoryOptions = [
+    { value: '', label: 'Aucune (Catégorie racine)' },
+    ...(categoriesData?.categories
+      ?.filter((cat) => !isEditMode || cat.id !== parseInt(id || '0'))
+      .map((cat) => ({
+        value: String(cat.id),
+        label: cat.nameFr || '',
+      })) || []),
+  ];
+
+  // Show loading state when fetching category in edit mode
+  if (isEditMode && categoryLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-500">Chargement de la catégorie...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -122,7 +203,7 @@ export const CategoryForm: React.FC = () => {
               <Select
                 label="Catégorie parente"
                 {...formik.getFieldProps('parentId')}
-                options={mockParentCategories}
+                options={parentCategoryOptions}
               />
             </div>
 
@@ -234,7 +315,7 @@ export const CategoryForm: React.FC = () => {
           <Button type="button" variant="ghost" onClick={() => navigate('/categories')}>
             Annuler
           </Button>
-          <Button type="submit" loading={formik.isSubmitting}>
+          <Button type="submit" loading={formik.isSubmitting || creating || updating}>
             {isEditMode ? 'Enregistrer les modifications' : 'Créer la catégorie'}
           </Button>
         </div>

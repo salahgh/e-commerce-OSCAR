@@ -5,31 +5,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { formatDate } from '../../lib/utils';
-import { graphql } from '../../graphql/generated';
-
-const USERS_QUERY = graphql(`
-  query Users($page: Int, $size: Int, $sortBy: String, $sortDirection: String) {
-    users(page: $page, size: $size, sortBy: $sortBy, sortDirection: $sortDirection) {
-      content {
-        id
-        email
-        firstName
-        lastName
-        role
-        isActive
-        createdAt
-      }
-      totalElements
-      totalPages
-    }
-  }
-`);
+import { UsersDocument } from '../../graphql/generated/graphql';
 
 export const UserList: React.FC = () => {
   const [page, setPage] = useState(0);
   const [size] = useState(20);
 
-  const { data, loading, error } = useQuery(USERS_QUERY, {
+  const { data, loading, error } = useQuery(UsersDocument, {
     variables: {
       page,
       size,

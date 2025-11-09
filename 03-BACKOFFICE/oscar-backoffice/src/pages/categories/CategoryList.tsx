@@ -1,29 +1,56 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@apollo/client';
-import { Plus } from 'lucide-react';
+import { useQuery, useMutation } from '@apollo/client';
+import { Plus, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/Table';
 import { Badge } from '../../components/ui/Badge';
-import { graphql } from '../../graphql/generated';
-
-const CATEGORIES_QUERY = graphql(`
-  query Categories {
-    categories {
-      id
-      slug
-      nameFr
-      displayOrder
-      isActive
-      productCount
-    }
-  }
-`);
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { CategoriesDocument, DeleteCategoryDocument } from '../../graphql/generated/graphql';
+import { useAppDispatch } from '../../hooks/useAppDispatch';
+import { addToast } from '../../store/slices/uiSlice';
 
 export const CategoryList: React.FC = () => {
   const navigate = useNavigate();
-  const { data, loading, error } = useQuery(CATEGORIES_QUERY);
+  const dispatch = useAppDispatch();
+  const [categoryToDelete, setCategoryToDelete] = useState<{ id: number; name: string } | null>(null);
+
+  const { data, loading, error } = useQuery(CategoriesDocument);
+
+  const [deleteCategory, { loading: deleting }] = useMutation(DeleteCategoryDocument, {
+    refetchQueries: [{ query: CategoriesDocument }],
+  });
+
+  const handleDeleteClick = (id: number, name: string) => {
+    setCategoryToDelete({ id, name });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!categoryToDelete) return;
+
+    try {
+      await deleteCategory({
+        variables: { id: categoryToDelete.id },
+      });
+
+      dispatch(
+        addToast({
+          message: 'Catégorie supprimée avec succès',
+          type: 'success',
+        })
+      );
+      setCategoryToDelete(null);
+    } catch (error: any) {
+      console.error('Delete category error:', error);
+      dispatch(
+        addToast({
+          message: error.message || 'Erreur lors de la suppression',
+          type: 'error',
+        })
+      );
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -89,6 +116,12 @@ export const CategoryList: React.FC = () => {
                         >
                           Modifier
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteClick(Number(category.id), category.nameFr || '')}
+                          icon={<Trash2 className="h-4 w-4 text-red-600" />}
+                        />
                       </div>
                     </TableCell>
                   </TableRow>
@@ -98,6 +131,18 @@ export const CategoryList: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={categoryToDelete !== null}
+        onClose={() => setCategoryToDelete(null)}
+        onConfirm={handleDeleteConfirm}
+        title="Supprimer la catégorie"
+        message={`Êtes-vous sûr de vouloir supprimer "${categoryToDelete?.name}" ? Cette action est irréversible.`}
+        confirmText="Supprimer"
+        cancelText="Annuler"
+        loading={deleting}
+      />
     </div>
   );
 };

@@ -8,34 +8,18 @@ import { Input } from '../components/ui/Input';
 import { Alert } from '../components/ui/Alert';
 import { useAppDispatch } from '../hooks/useAppDispatch';
 import { loginSuccess } from '../store/slices/authSlice';
-import { graphql } from '../graphql/generated';
+import { LoginDocument } from '../graphql/generated/graphql';
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email('Email invalide').required('Email requis'),
   password: Yup.string().min(6, 'Minimum 6 caractères').required('Mot de passe requis'),
 });
 
-const LOGIN_MUTATION = graphql(`
-  mutation Login($input: LoginRequestInput!) {
-    login(input: $input) {
-      accessToken
-      refreshToken
-      tokenType
-      expiresIn
-      userId
-      email
-      firstName
-      lastName
-      role
-    }
-  }
-`);
-
 export const Login: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [error, setError] = React.useState('');
-  const [loginMutation, { loading }] = useMutation(LOGIN_MUTATION);
+  const [loginMutation, { loading }] = useMutation(LoginDocument);
 
   const formik = useFormik({
     initialValues: {

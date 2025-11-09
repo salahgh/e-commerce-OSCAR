@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useQuery, useMutation } from '@apollo/client';
 import { ArrowLeft, Package, User, MapPin, CreditCard, Truck, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -11,54 +12,8 @@ import { PAYMENT_STATUS_LABELS } from '../../constants';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
 import type { OrderStatus } from '../../types';
-
-// Mock data
-const mockOrder = {
-  id: '1',
-  orderNumber: 'OSC-2025-0001',
-  user: { id: '3', firstName: 'Ahmed', lastName: 'Benali', email: 'ahmed.benali@gmail.com', phoneNumber: '0555123456' },
-  status: 'DELIVERED' as OrderStatus,
-  paymentMethod: 'CASH_ON_DELIVERY',
-  paymentStatus: 'PAID',
-  subtotal: 37497,
-  shippingCost: 800,
-  discountAmount: 0,
-  totalAmount: 38297,
-  shippingFullName: 'Ahmed Benali',
-  shippingPhone: '0555123456',
-  shippingAddress: 'Cité 200 Logements, Bâtiment A, N°15',
-  shippingCity: 'Alger Centre',
-  shippingWilaya: 'Alger',
-  shippingPostalCode: '16000',
-  customerNotes: 'Livraison avant 18h SVP',
-  trackingNumber: 'YLD-DZ-2025-001234',
-  items: [
-    {
-      id: '1',
-      productNameFr: 'T-Shirt Classique Noir',
-      productSku: 'MTS-001-BLK',
-      quantity: 2,
-      unitPrice: 1999,
-      selectedSize: 'L',
-      selectedColor: 'Noir',
-      productImageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab',
-    },
-    {
-      id: '2',
-      productNameFr: 'Jean Slim Bleu Foncé',
-      productSku: 'MJN-001-BLU',
-      quantity: 1,
-      unitPrice: 7999,
-      selectedSize: '32',
-      selectedColor: 'Bleu foncé',
-      productImageUrl: 'https://images.unsplash.com/photo-1542272604-787c3835535d',
-    },
-  ],
-  createdAt: '2025-01-15T10:30:00Z',
-  shippedAt: '2025-01-17T14:00:00Z',
-  deliveredAt: '2025-01-20T16:30:00Z',
-  paidAt: '2025-01-20T16:30:00Z',
-};
+import { OrderDocument, UpdateOrderStatusDocument, AllOrdersDocument } from '../../graphql/generated/graphql';
+import { Spinner } from '../../components/ui/Spinner';
 
 const statusOptions = [
   { value: 'PENDING', label: 'En attente' },
@@ -70,25 +25,69 @@ const statusOptions = [
 ];
 
 export const OrderDetail: React.FC = () => {
-  const {} = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const [status, setStatus] = useState(mockOrder.status);
-  const [updating, setUpdating] = useState(false);
+  const [status, setStatus] = useState<string>('');
+
+  // Fetch order data
+  const { data, loading, error } = useQuery(OrderDocument, {
+    variables: { id: id ? parseInt(id) : 0 },
+    skip: !id,
+  });
+
+  const [updateOrderStatus, { loading: updating }] = useMutation(UpdateOrderStatusDocument, {
+    refetchQueries: [
+      { query: AllOrdersDocument, variables: { page: 0, size: 20 } },
+      { query: OrderDocument, variables: { id: id ? parseInt(id) : 0 } },
+    ],
+  });
+
+  // Set initial status when data loads
+  useEffect(() => {
+    if (data?.order?.status) {
+      setStatus(data.order.status);
+    }
+  }, [data]);
 
   const handleStatusUpdate = async () => {
-    setUpdating(true);
+    if (!id) return;
+
     try {
-      // TODO: Replace with GraphQL mutation
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await updateOrderStatus({
+        variables: {
+          id: parseInt(id),
+          input: {
+            status,
+          },
+        },
+      });
 
       dispatch(addToast({ message: 'Statut de la commande mis à jour', type: 'success' }));
     } catch (error: any) {
+      console.error('Update order status error:', error);
       dispatch(addToast({ message: error.message || 'Erreur lors de la mise à jour', type: 'error' }));
-    } finally {
-      setUpdating(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error || !data?.order) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <p className="text-red-500 text-lg mb-4">Erreur: {error?.message || 'Commande non trouvée'}</p>
+        <Button onClick={() => navigate('/orders')}>Retour aux commandes</Button>
+      </div>
+    );
+  }
+
+  const order = data.order;
 
   return (
     <div className="space-y-6">
@@ -99,8 +98,8 @@ export const OrderDetail: React.FC = () => {
             Retour
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Commande {mockOrder.orderNumber}</h1>
-            <p className="text-gray-600 mt-1">Passée le {formatDateTime(mockOrder.createdAt)}</p>
+            <h1 className="text-3xl font-bold text-gray-900">Commande {order.orderNumber}</h1>
+            <p className="text-gray-600 mt-1">Passée le {formatDateTime(String(order.createdAt))}</p>
           </div>
         </div>
         <Button variant="outline" icon={<Download className="h-5 w-5" />}>
@@ -116,7 +115,7 @@ export const OrderDetail: React.FC = () => {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Package className="h-5 w-5 text-blue-600" />
-                <CardTitle>Articles ({mockOrder.items.length})</CardTitle>
+                <CardTitle>Articles ({order.items?.length || 0})</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -131,31 +130,41 @@ export const OrderDetail: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockOrder.items.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={item.productImageUrl}
-                            alt={item.productNameFr}
-                            className="w-12 h-12 rounded object-cover"
-                          />
-                          <div>
-                            <p className="font-medium">{item.productNameFr}</p>
-                            <p className="text-sm text-gray-500">
-                              {item.selectedSize} - {item.selectedColor}
-                            </p>
+                  {order.items && order.items.length > 0 ? (
+                    order.items.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            {item.productImage && (
+                              <img
+                                src={item.productImage}
+                                alt={item.productName || ''}
+                                className="w-12 h-12 rounded object-cover"
+                              />
+                            )}
+                            <div>
+                              <p className="font-medium">{item.productName}</p>
+                              <p className="text-sm text-gray-500">
+                                {item.selectedSize && `${item.selectedSize} - `}{item.selectedColor}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">{item.productSku}</TableCell>
-                      <TableCell>{formatPrice(item.unitPrice)}</TableCell>
-                      <TableCell>{item.quantity}</TableCell>
-                      <TableCell className="font-semibold">
-                        {formatPrice(item.unitPrice * item.quantity)}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">{item.productId}</TableCell>
+                        <TableCell>{formatPrice(Number(item.price))}</TableCell>
+                        <TableCell>{item.quantity}</TableCell>
+                        <TableCell className="font-semibold">
+                          {formatPrice(Number(item.subtotal))}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-gray-500">
+                        Aucun article
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
 
@@ -164,23 +173,15 @@ export const OrderDetail: React.FC = () => {
                 <div className="space-y-2 max-w-sm ml-auto">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Sous-total</span>
-                    <span className="font-medium">{formatPrice(mockOrder.subtotal)}</span>
+                    <span className="font-medium">{formatPrice(Number(order.subtotal))}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Livraison</span>
-                    <span className="font-medium">{formatPrice(mockOrder.shippingCost)}</span>
+                    <span className="font-medium">{formatPrice(Number(order.shippingCost))}</span>
                   </div>
-                  {mockOrder.discountAmount > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Réduction</span>
-                      <span className="font-medium text-green-600">
-                        -{formatPrice(mockOrder.discountAmount)}
-                      </span>
-                    </div>
-                  )}
                   <div className="flex justify-between text-lg font-bold pt-2 border-t">
                     <span>Total</span>
-                    <span>{formatPrice(mockOrder.totalAmount)}</span>
+                    <span>{formatPrice(Number(order.totalAmount))}</span>
                   </div>
                 </div>
               </div>
@@ -197,18 +198,12 @@ export const OrderDetail: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <p className="text-sm text-gray-600">Nom</p>
-                <p className="font-medium">
-                  {mockOrder.user.firstName} {mockOrder.user.lastName}
-                </p>
-              </div>
-              <div>
                 <p className="text-sm text-gray-600">Email</p>
-                <p className="font-medium">{mockOrder.user.email}</p>
+                <p className="font-medium">{order.userEmail || 'N/A'}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Téléphone</p>
-                <p className="font-medium">{mockOrder.user.phoneNumber}</p>
+                <p className="font-medium">{order.phoneNumber || 'N/A'}</p>
               </div>
             </CardContent>
           </Card>
@@ -223,19 +218,16 @@ export const OrderDetail: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <p className="font-medium">{mockOrder.shippingFullName}</p>
-                <p className="text-sm text-gray-600">{mockOrder.shippingPhone}</p>
+                <p className="text-sm text-gray-600">Téléphone</p>
+                <p className="font-medium">{order.phoneNumber || 'N/A'}</p>
               </div>
               <div>
-                <p className="text-gray-900">{mockOrder.shippingAddress}</p>
-                <p className="text-gray-600">
-                  {mockOrder.shippingCity}, {mockOrder.shippingWilaya} {mockOrder.shippingPostalCode}
-                </p>
+                <p className="text-gray-900">{order.shippingAddress || 'Adresse non fournie'}</p>
               </div>
-              {mockOrder.customerNotes && (
+              {order.notes && (
                 <div className="pt-3 border-t">
-                  <p className="text-sm text-gray-600 mb-1">Notes du client</p>
-                  <p className="text-sm italic">{mockOrder.customerNotes}</p>
+                  <p className="text-sm text-gray-600 mb-1">Notes</p>
+                  <p className="text-sm italic">{order.notes}</p>
                 </div>
               )}
             </CardContent>
@@ -258,7 +250,7 @@ export const OrderDetail: React.FC = () => {
                   options={statusOptions}
                 />
               </div>
-              {status !== mockOrder.status && (
+              {status !== order.status && (
                 <Button onClick={handleStatusUpdate} loading={updating} className="w-full">
                   Mettre à jour le statut
                 </Button>
@@ -278,28 +270,22 @@ export const OrderDetail: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Méthode</span>
                 <span className="font-medium">
-                  {mockOrder.paymentMethod === 'CASH_ON_DELIVERY'
+                  {order.paymentMethod === 'CASH_ON_DELIVERY'
                     ? 'Paiement à la livraison'
-                    : mockOrder.paymentMethod}
+                    : order.paymentMethod}
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Statut</span>
-                <Badge variant={mockOrder.paymentStatus === 'PAID' ? 'success' : 'warning'}>
-                  {PAYMENT_STATUS_LABELS[mockOrder.paymentStatus as keyof typeof PAYMENT_STATUS_LABELS]}
-                </Badge>
-              </div>
-              {mockOrder.paidAt && (
+              {order.paidAt && (
                 <div>
                   <p className="text-sm text-gray-600">Payé le</p>
-                  <p className="text-sm font-medium">{formatDateTime(mockOrder.paidAt)}</p>
+                  <p className="text-sm font-medium">{formatDateTime(String(order.paidAt))}</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Tracking */}
-          {mockOrder.trackingNumber && (
+          {order.trackingNumber && (
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -310,18 +296,12 @@ export const OrderDetail: React.FC = () => {
               <CardContent className="space-y-3">
                 <div>
                   <p className="text-sm text-gray-600">Numéro de suivi</p>
-                  <p className="font-mono font-medium">{mockOrder.trackingNumber}</p>
+                  <p className="font-mono font-medium">{order.trackingNumber}</p>
                 </div>
-                {mockOrder.shippedAt && (
-                  <div>
-                    <p className="text-sm text-gray-600">Expédié le</p>
-                    <p className="text-sm">{formatDateTime(mockOrder.shippedAt)}</p>
-                  </div>
-                )}
-                {mockOrder.deliveredAt && (
+                {order.deliveredAt && (
                   <div>
                     <p className="text-sm text-gray-600">Livré le</p>
-                    <p className="text-sm">{formatDateTime(mockOrder.deliveredAt)}</p>
+                    <p className="text-sm">{formatDateTime(String(order.deliveredAt))}</p>
                   </div>
                 )}
               </CardContent>
@@ -339,24 +319,24 @@ export const OrderDetail: React.FC = () => {
                   <div className="w-2 h-2 rounded-full bg-green-600 mt-2"></div>
                   <div>
                     <p className="text-sm font-medium">Commande créée</p>
-                    <p className="text-xs text-gray-500">{formatDateTime(mockOrder.createdAt)}</p>
+                    <p className="text-xs text-gray-500">{formatDateTime(String(order.createdAt))}</p>
                   </div>
                 </div>
-                {mockOrder.shippedAt && (
+                {order.updatedAt && order.updatedAt !== order.createdAt && (
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 rounded-full bg-blue-600 mt-2"></div>
                     <div>
-                      <p className="text-sm font-medium">Expédiée</p>
-                      <p className="text-xs text-gray-500">{formatDateTime(mockOrder.shippedAt)}</p>
+                      <p className="text-sm font-medium">Mise à jour</p>
+                      <p className="text-xs text-gray-500">{formatDateTime(String(order.updatedAt))}</p>
                     </div>
                   </div>
                 )}
-                {mockOrder.deliveredAt && (
+                {order.deliveredAt && (
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 rounded-full bg-green-600 mt-2"></div>
                     <div>
                       <p className="text-sm font-medium">Livrée</p>
-                      <p className="text-xs text-gray-500">{formatDateTime(mockOrder.deliveredAt)}</p>
+                      <p className="text-xs text-gray-500">{formatDateTime(String(order.deliveredAt))}</p>
                     </div>
                   </div>
                 )}

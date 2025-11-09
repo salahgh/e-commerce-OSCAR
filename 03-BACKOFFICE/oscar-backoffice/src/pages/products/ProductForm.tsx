@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { useQuery, useMutation } from '@apollo/client';
 import { ArrowLeft, Globe, Package, DollarSign, Image as ImageIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -13,6 +14,13 @@ import { ImageUpload } from '../../components/ui/ImageUpload';
 import { AVAILABLE_SIZES, AVAILABLE_COLORS } from '../../constants';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
+import {
+  CategoriesDocument,
+  ProductDocument,
+  CreateProductDocument,
+  UpdateProductDocument,
+  ProductsDocument,
+} from '../../graphql/generated/graphql';
 
 const ProductSchema = Yup.object().shape({
   sku: Yup.string().required('SKU requis'),
@@ -35,15 +43,6 @@ const ProductSchema = Yup.object().shape({
   availableColors: Yup.array().of(Yup.string()),
 });
 
-// Mock categories - TODO: Replace with GraphQL query
-const mockCategories = [
-  { value: '11', label: 'Hommes - T-Shirts' },
-  { value: '12', label: 'Hommes - Chemises' },
-  { value: '13', label: 'Hommes - Pantalons' },
-  { value: '21', label: 'Femmes - Robes' },
-  { value: '22', label: 'Femmes - Hauts' },
-];
-
 export const ProductForm: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -52,6 +51,24 @@ export const ProductForm: React.FC = () => {
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
 
   const isEditMode = Boolean(id);
+
+  // Fetch categories for dropdown
+  const { data: categoriesData } = useQuery(CategoriesDocument);
+
+  // Fetch product data if in edit mode
+  const { data: productData, loading: productLoading } = useQuery(ProductDocument, {
+    variables: { id: id ? parseInt(id) : 0 },
+    skip: !isEditMode,
+  });
+
+  // Mutations
+  const [createProduct, { loading: creating }] = useMutation(CreateProductDocument, {
+    refetchQueries: [{ query: ProductsDocument, variables: { page: 0, size: 20, sortBy: 'createdAt', sortDirection: 'DESC' } }],
+  });
+
+  const [updateProduct, { loading: updating }] = useMutation(UpdateProductDocument, {
+    refetchQueries: [{ query: ProductsDocument, variables: { page: 0, size: 20, sortBy: 'createdAt', sortDirection: 'DESC' } }],
+  });
 
   const formik = useFormik({
     initialValues: {
@@ -77,8 +94,39 @@ export const ProductForm: React.FC = () => {
     validationSchema: ProductSchema,
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        // TODO: Replace with GraphQL mutation
-        console.log('Product data:', { ...values, availableSizes: selectedSizes, availableColors: selectedColors });
+        const input = {
+          sku: values.sku,
+          nameFr: values.nameFr,
+          nameAr: values.nameAr,
+          nameEn: values.nameEn || null,
+          descriptionFr: values.descriptionFr || null,
+          descriptionAr: values.descriptionAr || null,
+          descriptionEn: values.descriptionEn || null,
+          basePrice: values.basePrice,
+          salePrice: values.salePrice,
+          stockQuantity: values.stockQuantity,
+          minStockAlert: values.minStockAlert,
+          categoryId: parseInt(values.categoryId),
+          weightKg: values.weightKg,
+          isActive: values.isActive,
+          isFeatured: values.isFeatured,
+          imageUrls: values.imageUrls,
+          availableSizes: selectedSizes,
+          availableColors: selectedColors,
+        };
+
+        if (isEditMode && id) {
+          await updateProduct({
+            variables: {
+              id: parseInt(id),
+              input,
+            },
+          });
+        } else {
+          await createProduct({
+            variables: { input },
+          });
+        }
 
         dispatch(
           addToast({
@@ -89,6 +137,7 @@ export const ProductForm: React.FC = () => {
 
         navigate('/products');
       } catch (error: any) {
+        console.error('Product mutation error:', error);
         dispatch(
           addToast({
             message: error.message || 'Une erreur est survenue',
@@ -101,6 +150,35 @@ export const ProductForm: React.FC = () => {
     },
   });
 
+  // Populate form with product data in edit mode
+  useEffect(() => {
+    if (productData?.product) {
+      const product = productData.product;
+      formik.setValues({
+        sku: product.sku || '',
+        nameFr: product.nameFr || '',
+        nameAr: product.nameAr || '',
+        nameEn: product.nameEn || '',
+        descriptionFr: product.descriptionFr || '',
+        descriptionAr: product.descriptionAr || '',
+        descriptionEn: product.descriptionEn || '',
+        basePrice: Number(product.basePrice) || 0,
+        salePrice: product.salePrice ? Number(product.salePrice) : null,
+        stockQuantity: product.stockQuantity || 0,
+        minStockAlert: 10, // Not in schema, using default
+        categoryId: product.categoryId ? String(product.categoryId) : '',
+        weightKg: null, // Not in schema
+        isActive: true, // Not in schema, using default
+        isFeatured: product.isFeatured || false,
+        imageUrls: product.imageUrls || [],
+        availableSizes: product.availableSizes || [],
+        availableColors: product.availableColors || [],
+      });
+      setSelectedSizes(product.availableSizes || []);
+      setSelectedColors(product.availableColors || []);
+    }
+  }, [productData]);
+
   const toggleSize = (size: string) => {
     setSelectedSizes((prev) =>
       prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
@@ -112,6 +190,24 @@ export const ProductForm: React.FC = () => {
       prev.includes(color) ? prev.filter((c) => c !== color) : [...prev, color]
     );
   };
+
+  // Prepare categories for dropdown
+  const categoryOptions = [
+    { value: '', label: 'Sélectionner une catégorie' },
+    ...(categoriesData?.categories?.map((cat) => ({
+      value: String(cat.id),
+      label: cat.nameFr || '',
+    })) || []),
+  ];
+
+  // Show loading state when fetching product in edit mode
+  if (isEditMode && productLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-500">Chargement du produit...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -150,7 +246,7 @@ export const ProductForm: React.FC = () => {
               <Select
                 label="Catégorie *"
                 {...formik.getFieldProps('categoryId')}
-                options={[{ value: '', label: 'Sélectionner une catégorie' }, ...mockCategories]}
+                options={categoryOptions}
                 error={formik.touched.categoryId ? formik.errors.categoryId : undefined}
               />
             </div>
@@ -379,7 +475,7 @@ export const ProductForm: React.FC = () => {
           <Button type="button" variant="ghost" onClick={() => navigate('/products')}>
             Annuler
           </Button>
-          <Button type="submit" loading={formik.isSubmitting}>
+          <Button type="submit" loading={formik.isSubmitting || creating || updating}>
             {isEditMode ? 'Enregistrer les modifications' : 'Créer le produit'}
           </Button>
         </div>
