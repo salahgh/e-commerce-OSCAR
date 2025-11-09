@@ -12,9 +12,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.stream.Collectors;
 
-/**
- * JWT Token Provider for generating and validating JWT tokens
- */
+
+ // JWT Token Provider for generating and validating JWT tokens
+
+
 @Component
 public class JwtTokenProvider {
 
@@ -32,9 +33,9 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    /**
-     * Generate JWT access token
-     */
+// Generate JWT access token
+
+
     public String generateToken(Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         Date now = new Date();
@@ -54,9 +55,9 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    /**
-     * Generate JWT refresh token from Authentication
-     */
+// Generate JWT refresh token from Authentication
+
+
     public String generateRefreshToken(Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         Date now = new Date();
@@ -70,9 +71,9 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    /**
-     * Generate JWT refresh token from user ID
-     */
+// Generate JWT refresh token from user ID
+
+
     public String generateRefreshToken(Long userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + refreshExpirationMs);
@@ -85,9 +86,9 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    /**
-     * Get user ID from JWT token
-     */
+// Get user ID from JWT token
+
+
     public Long getUserIdFromToken(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -98,9 +99,9 @@ public class JwtTokenProvider {
         return Long.parseLong(claims.getSubject());
     }
 
-    /**
-     * Validate JWT token
-     */
+// Validate JWT token
+
+
     public boolean validateToken(String authToken) {
         try {
             Jwts.parser()
@@ -122,9 +123,9 @@ public class JwtTokenProvider {
         return false;
     }
 
-    /**
-     * Get JWT expiration time in milliseconds
-     */
+// Get JWT expiration time in milliseconds
+
+
     public Long getJwtExpirationMs() {
         return jwtExpirationMs;
     }

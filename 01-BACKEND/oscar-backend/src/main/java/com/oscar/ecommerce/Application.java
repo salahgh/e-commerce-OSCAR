@@ -22,10 +22,10 @@ public class Application {
         System.out.println("""
 
             ╔═══════════════════════════════════════════════════════╗
-            ║   OSCAR Fashion E-commerce API                       ║
-            ║   GraphQL Endpoint: http://localhost:8080/graphql   ║
-            ║   Playground: http://localhost:8080/playground       ║
-            ║   Voyager: http://localhost:8080/voyager            ║
+            ║   OSCAR Fashion E-commerce API                        ║
+            ║   GraphQL Endpoint: http://localhost:8080/graphql     ║
+            ║   Playground: http://localhost:8080/playground        ║
+            ║   Voyager: http://localhost:8080/voyager              ║
             ╚═══════════════════════════════════════════════════════╝
 
             """);

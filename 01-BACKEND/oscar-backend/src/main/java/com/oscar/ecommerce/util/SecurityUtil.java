@@ -4,17 +4,13 @@ import com.oscar.ecommerce.security.UserPrincipal;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-/**
- * Utility class for security-related operations
- */
+// Utility class for security-related operations
+
+
 public class SecurityUtil {
 
-    /**
-     * Get the currently authenticated user's ID
-     *
-     * @return User ID
-     * @throws IllegalStateException if no user is authenticated
-     */
+
+
     public static Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -31,12 +27,9 @@ public class SecurityUtil {
         throw new IllegalStateException("Invalid authentication principal");
     }
 
-    /**
-     * Get the currently authenticated user's email
-     *
-     * @return User email
-     * @throws IllegalStateException if no user is authenticated
-     */
+
+
+
     public static String getCurrentUserEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -53,12 +46,9 @@ public class SecurityUtil {
         throw new IllegalStateException("Invalid authentication principal");
     }
 
-    /**
-     * Get the currently authenticated UserPrincipal
-     *
-     * @return UserPrincipal
-     * @throws IllegalStateException if no user is authenticated
-     */
+
+
+
     public static UserPrincipal getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -75,11 +65,8 @@ public class SecurityUtil {
         throw new IllegalStateException("Invalid authentication principal");
     }
 
-    /**
-     * Check if a user is currently authenticated
-     *
-     * @return true if authenticated, false otherwise
-     */
+
+
     public static boolean isAuthenticated() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null

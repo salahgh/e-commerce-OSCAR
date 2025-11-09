@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+//import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -307,7 +308,7 @@ public class ProductResolver {
      * }
      */
     @GraphQLQuery(name = "lowStockProducts", description = "Get products with low stock (Admin only)")
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     public List<ProductResponse> getLowStockProducts(
             @GraphQLArgument(name = "threshold", description = "Stock threshold", defaultValue = "10")
             Integer threshold) {
@@ -342,7 +343,7 @@ public class ProductResolver {
      * }
      */
     @GraphQLMutation(name = "createProduct", description = "Create a new product (Admin only)")
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     public ProductResponse createProduct(
             @GraphQLArgument(name = "input", description = "Product creation details")
             @Valid CreateProductRequest input) {
@@ -369,7 +370,7 @@ public class ProductResolver {
      * }
      */
     @GraphQLMutation(name = "updateProduct", description = "Update a product (Admin only)")
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     public ProductResponse updateProduct(
             @GraphQLArgument(name = "id", description = "Product ID")
             Long id,
@@ -389,7 +390,7 @@ public class ProductResolver {
      * }
      */
     @GraphQLMutation(name = "deleteProduct", description = "Delete a product (soft delete - Admin only)")
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     public Boolean deleteProduct(
             @GraphQLArgument(name = "id", description = "Product ID")
             Long id) {

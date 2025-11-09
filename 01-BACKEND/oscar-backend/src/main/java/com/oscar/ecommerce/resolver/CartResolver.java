@@ -4,7 +4,7 @@ import com.oscar.ecommerce.dto.cart.AddToCartRequest;
 import com.oscar.ecommerce.dto.cart.CartResponse;
 import com.oscar.ecommerce.dto.cart.UpdateCartItemRequest;
 import com.oscar.ecommerce.service.CartService;
-import com.oscar.ecommerce.util.SecurityUtil;
+ import com.oscar.ecommerce.util.SecurityUtil;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;

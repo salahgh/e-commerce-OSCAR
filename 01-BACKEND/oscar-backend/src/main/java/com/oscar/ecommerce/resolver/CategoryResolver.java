@@ -216,7 +216,7 @@ public class CategoryResolver {
      * }
      */
     @GraphQLMutation(name = "createCategory", description = "Create a new category (Admin only)")
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     public CategoryResponse createCategory(
             @GraphQLArgument(name = "input", description = "Category creation details")
             @Valid CreateCategoryRequest input) {
@@ -244,7 +244,7 @@ public class CategoryResolver {
      * }
      */
     @GraphQLMutation(name = "updateCategory", description = "Update a category (Admin only)")
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     public CategoryResponse updateCategory(
             @GraphQLArgument(name = "id", description = "Category ID")
             Long id,
@@ -264,7 +264,7 @@ public class CategoryResolver {
      * }
      */
     @GraphQLMutation(name = "deleteCategory", description = "Delete a category (Admin only)")
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     public Boolean deleteCategory(
             @GraphQLArgument(name = "id", description = "Category ID")
             Long id) {

@@ -141,7 +141,7 @@ public class ProductResolver {
     }
 
     @GraphQLMutation(name = "createProduct")
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     public Product createProduct(@GraphQLArgument(name = "input") ProductInput input) {
         return productService.create(input);
     }

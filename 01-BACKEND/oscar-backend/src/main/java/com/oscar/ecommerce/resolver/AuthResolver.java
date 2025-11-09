@@ -26,27 +26,6 @@ public class AuthResolver {
 
     private final AuthService authService;
 
-    /**
-     * Register a new user account
-     *
-     * Example GraphQL mutation:
-     * mutation {
-     *   register(input: {
-     *     firstName: "John"
-     *     lastName: "Doe"
-     *     email: "john@example.com"
-     *     password: "password123"
-     *   }) {
-     *     accessToken
-     *     refreshToken
-     *     userId
-     *     email
-     *     firstName
-     *     lastName
-     *     role
-     *   }
-     * }
-     */
     @GraphQLMutation(name = "register", description = "Register a new user account")
     public LoginResponse register(
             @GraphQLArgument(name = "input", description = "User registration details")
@@ -56,25 +35,6 @@ public class AuthResolver {
         return authService.register(input);
     }
 
-    /**
-     * Authenticate a user and get tokens
-     *
-     * Example GraphQL mutation:
-     * mutation {
-     *   login(input: {
-     *     email: "john@example.com"
-     *     password: "password123"
-     *   }) {
-     *     accessToken
-     *     refreshToken
-     *     userId
-     *     email
-     *     firstName
-     *     lastName
-     *     role
-     *   }
-     * }
-     */
     @GraphQLMutation(name = "login", description = "Authenticate user and receive access tokens")
     public LoginResponse login(
             @GraphQLArgument(name = "input", description = "Login credentials")
@@ -84,21 +44,7 @@ public class AuthResolver {
         return authService.login(input);
     }
 
-    /**
-     * Refresh access token using refresh token
-     *
-     * Example GraphQL mutation:
-     * mutation {
-     *   refreshToken(input: {
-     *     refreshToken: "your-refresh-token"
-     *   }) {
-     *     accessToken
-     *     refreshToken
-     *     userId
-     *     email
-     *   }
-     * }
-     */
+
     @GraphQLMutation(name = "refreshToken", description = "Refresh access token using refresh token")
     public LoginResponse refreshToken(
             @GraphQLArgument(name = "input", description = "Refresh token")
@@ -108,14 +54,7 @@ public class AuthResolver {
         return authService.refreshToken(input);
     }
 
-    /**
-     * Request password reset
-     *
-     * Example GraphQL mutation:
-     * mutation {
-     *   forgotPassword(email: "john@example.com")
-     * }
-     */
+
     @GraphQLMutation(name = "forgotPassword", description = "Request password reset email")
     public Boolean forgotPassword(
             @GraphQLArgument(name = "email", description = "User email address")
@@ -126,14 +65,7 @@ public class AuthResolver {
         return true;
     }
 
-    /**
-     * Reset password using reset token
-     *
-     * Example GraphQL mutation:
-     * mutation {
-     *   resetPassword(token: "reset-token", newPassword: "newpassword123")
-     * }
-     */
+
     @GraphQLMutation(name = "resetPassword", description = "Reset password using reset token")
     public Boolean resetPassword(
             @GraphQLArgument(name = "token", description = "Password reset token")

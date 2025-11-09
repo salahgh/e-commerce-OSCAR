@@ -74,7 +74,7 @@ public class UserResolver {
      * }
      */
     @GraphQLQuery(name = "user", description = "Get user by ID (Admin only)")
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     public UserProfileResponse getUserById(
             @GraphQLArgument(name = "id", description = "User ID")
             Long id) {
@@ -104,7 +104,7 @@ public class UserResolver {
      * }
      */
     @GraphQLQuery(name = "users", description = "Get all users (Admin only)")
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     public Page<UserProfileResponse> getAllUsers(
             @GraphQLArgument(name = "page", description = "Page number (0-based)", defaultValue = "0")
             int page,
@@ -140,7 +140,7 @@ public class UserResolver {
      * }
      */
     @GraphQLQuery(name = "usersByRole", description = "Get users by role (Admin only)")
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     public Page<UserProfileResponse> getUsersByRole(
             @GraphQLArgument(name = "role", description = "User role (CUSTOMER, ADMIN, SUPER_ADMIN)")
             String role,
@@ -242,7 +242,7 @@ public class UserResolver {
      * }
      */
     @GraphQLMutation(name = "toggleUserStatus", description = "Activate/Deactivate user account (Admin only)")
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     public UserProfileResponse toggleUserStatus(
             @GraphQLArgument(name = "userId", description = "User ID")
             Long userId) {

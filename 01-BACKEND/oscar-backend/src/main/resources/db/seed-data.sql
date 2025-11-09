@@ -153,260 +153,260 @@ INSERT INTO products (id, sku, name_fr, name_ar, name_en, description_fr, descri
 (1401, 'WTC-001-SLV', 'Montre Classique Argentée', 'ساعة كلاسيكية فضية', 'Silver Classic Watch', 'Montre élégante pour homme et femme', 'ساعة أنيقة للرجال والنساء', 'Elegant watch for men and women', 8500.00, 6999.00, 40, 10, 43, true, true, 345, 0.15, NOW(), NOW()),
 (1402, 'WTC-002-GLD', 'Montre Dorée Premium', 'ساعة ذهبية فاخرة', 'Gold Premium Watch', 'Montre dorée de luxe', 'ساعة ذهبية فاخرة', 'Luxury gold watch', 25000.00, 19999.00, 20, 5, 43, true, true, 289, 0.18, NOW(), NOW());
 
+--=====================================================
+--products IMAGES (stored in image_urls as array)
+--=====================================================
+-- Men's T-Shirts Images
+INSERT INTO product_images (product_id, image_url) VALUES
+(101, 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab'),
+(101, 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a'),
+(102, 'https://images.unsplash.com/photo-1622445275463-afa2ab738c34'),
+(102, 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990'),
+(103, 'https://images.unsplash.com/photo-1576566588028-4147f3842f27'),
+
+-- Men's Shirts Images
+(201, 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf'),
+(201, 'https://images.unsplash.com/photo-1603252109303-2751441dd157'),
+(202, 'https://images.unsplash.com/photo-1620012253295-c15cc3e65df4'),
+(203, 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c'),
+
+-- Women's Dresses Images
+(601, 'https://images.unsplash.com/photo-1595777457583-95e059d581b8'),
+(601, 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1'),
+(602, 'https://images.unsplash.com/photo-1566174053879-31528523f8ae'),
+(603, 'https://images.unsplash.com/photo-1591369822096-ffd140ec948f'),
+
+-- Hijabs Images
+(901, 'https://images.unsplash.com/photo-1601925662308-a3303c64c5ba'),
+(902, 'https://images.unsplash.com/photo-1583003873002-c9b803585e18'),
+(903, 'https://images.unsplash.com/photo-1609709295948-17d77cb2a69b');
+
 -- =====================================================
--- products IMAGES (stored in image_urls as array)
+-- products SIZES (stored as array)
 -- =====================================================
--- -- Men's T-Shirts Images
--- INSERT INTO product_images (products_id, image_urls) VALUES
--- (101, 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab'),
--- (101, 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a'),
--- (102, 'https://images.unsplash.com/photo-1622445275463-afa2ab738c34'),
--- (102, 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990'),
--- (103, 'https://images.unsplash.com/photo-1576566588028-4147f3842f27'),
---
--- -- Men's Shirts Images
--- (201, 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf'),
--- (201, 'https://images.unsplash.com/photo-1603252109303-2751441dd157'),
--- (202, 'https://images.unsplash.com/photo-1620012253295-c15cc3e65df4'),
--- (203, 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c'),
---
--- -- Women's Dresses Images
--- (601, 'https://images.unsplash.com/photo-1595777457583-95e059d581b8'),
--- (601, 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1'),
--- (602, 'https://images.unsplash.com/photo-1566174053879-31528523f8ae'),
--- (603, 'https://images.unsplash.com/photo-1591369822096-ffd140ec948f'),
---
--- -- Hijabs Images
--- (901, 'https://images.unsplash.com/photo-1601925662308-a3303c64c5ba'),
--- (902, 'https://images.unsplash.com/photo-1583003873002-c9b803585e18'),
--- (903, 'https://images.unsplash.com/photo-1609709295948-17d77cb2a69b');
---
--- -- =====================================================
--- -- products SIZES (stored as array)
--- -- =====================================================
--- -- Clothing Sizes
--- INSERT INTO products_available_sizes (products_id, available_sizes) VALUES
--- -- Men's T-Shirts & Shirts
--- (101, 'S'), (101, 'M'), (101, 'L'), (101, 'XL'), (101, 'XXL'),
--- (102, 'S'), (102, 'M'), (102, 'L'), (102, 'XL'), (102, 'XXL'),
--- (103, 'S'), (103, 'M'), (103, 'L'), (103, 'XL'),
--- (201, 'S'), (201, 'M'), (201, 'L'), (201, 'XL'), (201, 'XXL'),
--- (202, 'M'), (202, 'L'), (202, 'XL'), (202, 'XXL'),
--- (203, 'S'), (203, 'M'), (203, 'L'), (203, 'XL'),
---
--- -- Men's Pants & Jeans (Waist sizes)
--- (301, '30'), (301, '32'), (301, '34'), (301, '36'), (301, '38'),
--- (302, '30'), (302, '32'), (302, '34'), (302, '36'), (302, '38'),
--- (401, '30'), (401, '32'), (401, '34'), (401, '36'), (401, '38'), (401, '40'),
--- (402, '30'), (402, '32'), (402, '34'), (402, '36'), (402, '38'), (402, '40'),
--- (403, '28'), (403, '30'), (403, '32'), (403, '34'), (403, '36'),
---
--- -- Men's Jackets
--- (501, 'M'), (501, 'L'), (501, 'XL'), (501, 'XXL'),
--- (502, 'S'), (502, 'M'), (502, 'L'), (502, 'XL'),
---
--- -- Women's Dresses & Tops
--- (601, 'S'), (601, 'M'), (601, 'L'), (601, 'XL'),
--- (602, 'S'), (602, 'M'), (602, 'L'), (602, 'XL'),
--- (603, 'S'), (603, 'M'), (603, 'L'),
--- (701, 'S'), (701, 'M'), (701, 'L'), (701, 'XL'),
--- (702, 'S'), (702, 'M'), (702, 'L'), (702, 'XL'),
--- (703, 'S'), (703, 'M'), (703, 'L'),
---
--- -- Women's Pants
--- (801, 'S'), (801, 'M'), (801, 'L'), (801, 'XL'),
--- (802, 'S'), (802, 'M'), (802, 'L'),
---
--- -- Shoes (EU sizes)
--- (1301, '39'), (1301, '40'), (1301, '41'), (1301, '42'), (1301, '43'), (1301, '44'),
--- (1302, '39'), (1302, '40'), (1302, '41'), (1302, '42'), (1302, '43'),
---
--- -- Kids
--- (1001, '4-5'), (1001, '6-7'), (1001, '8-9'), (1001, '10-11'),
--- (1002, '4-5'), (1002, '6-7'), (1002, '8-9'), (1002, '10-11'),
--- (1101, '3-4'), (1101, '5-6'), (1101, '7-8'), (1101, '9-10'),
--- (1102, '3-4'), (1102, '5-6'), (1102, '7-8');
---
--- -- =====================================================
--- -- products COLORS (stored as array)
--- -- =====================================================
--- INSERT INTO products_available_colors (products_id, available_colors) VALUES
--- -- Basic colors for most clothing
--- (101, 'Noir'), (101, 'Blanc'), (101, 'Gris'),
--- (102, 'Blanc'), (102, 'Bleu clair'),
--- (103, 'Marine'), (103, 'Noir'), (103, 'Gris'),
--- (201, 'Bleu'), (201, 'Blanc'),
--- (202, 'Blanc'), (202, 'Bleu clair'),
--- (203, 'Bleu/Blanc'), (203, 'Noir/Blanc'),
--- (301, 'Noir'), (301, 'Marine'), (301, 'Gris'),
--- (302, 'Beige'), (302, 'Kaki'),
--- (401, 'Bleu foncé'), (401, 'Bleu moyen'),
--- (402, 'Noir'),
--- (403, 'Bleu clair'), (403, 'Bleu délavé'),
--- (501, 'Noir'), (501, 'Marine'),
--- (502, 'Bleu denim'), (502, 'Noir'),
---
--- -- Women's productss
--- (601, 'Rose/Blanc'), (601, 'Bleu/Blanc'),
--- (602, 'Noir'),
--- (603, 'Marron'), (603, 'Beige'),
--- (701, 'Blanc'), (701, 'Crème'),
--- (702, 'Rose'), (702, 'Rose poudré'),
--- (703, 'Marine'), (703, 'Bleu royal'),
--- (801, 'Noir'), (801, 'Gris foncé'),
--- (802, 'Gris'), (802, 'Beige'),
---
--- -- Hijabs
--- (901, 'Noir'),
--- (902, 'Beige'), (902, 'Nude'), (902, 'Camel'),
--- (903, 'Marine'), (903, 'Bleu foncé'),
---
--- -- Kids
--- (1001, 'Bleu/Rouge'), (1001, 'Noir/Blanc'),
--- (1002, 'Bleu'), (1002, 'Noir'),
--- (1101, 'Rose'), (1101, 'Rose/Blanc'),
--- (1102, 'Multicolore'),
---
--- -- Accessories
--- (1201, 'Marron'), (1201, 'Cognac'),
--- (1202, 'Noir'), (1202, 'Gris foncé'),
--- (1301, 'Blanc'), (1301, 'Blanc/Noir'),
--- (1302, 'Noir'),
--- (1401, 'Argenté'), (1401, 'Argent/Noir'),
--- (1402, 'Or'), (1402, 'Or rose');
---
--- -- =====================================================
--- -- cartsS
--- -- =====================================================
--- -- Create cartss for some customers
--- INSERT INTO carts (id, user_id, created_at, updated_at) VALUES
--- (1, 3, NOW(), NOW()),
--- (2, 4, NOW(), NOW()),
--- (3, 5, NOW(), NOW());
---
--- -- =====================================================
--- -- carts ITEMS
--- -- =====================================================
--- -- Ahmed's carts (User 3)
--- INSERT INTO cart_items (id, carts_id, products_id, quantity, selected_size, selected_color, created_at, updated_at) VALUES
--- (1, 1, 101, 2, 'L', 'Noir', NOW(), NOW()),
--- (2, 1, 401, 1, '32', 'Bleu foncé', NOW(), NOW()),
--- (3, 1, 501, 1, 'L', 'Noir', NOW(), NOW());
---
--- -- Fatima's carts (User 4)
--- INSERT INTO cart_items (id, carts_id, products_id, quantity, selected_size, selected_color, created_at, updated_at) VALUES
--- (4, 2, 601, 1, 'M', 'Rose/Blanc', NOW(), NOW()),
--- (5, 2, 901, 3, NULL, 'Noir', NOW(), NOW()),
--- (6, 2, 1201, 1, NULL, 'Marron', NOW(), NOW());
---
--- -- Karim's carts (User 5)
--- INSERT INTO cart_items (id, carts_id, products_id, quantity, selected_size, selected_color, created_at, updated_at) VALUES
--- (7, 3, 1301, 1, '42', 'Blanc', NOW(), NOW()),
--- (8, 3, 102, 2, 'M', 'Blanc', NOW(), NOW());
---
--- -- =====================================================
--- -- ORDERS
--- -- =====================================================
--- INSERT INTO orders (id, order_number, user_id, status, payment_method, subtotal, shipping_cost, discount_amount, total_amount, shipping_full_name, shipping_phone, shipping_address, shipping_city, shipping_wilaya, shipping_postal_code, customer_notes, payment_status, created_at, updated_at) VALUES
--- -- Order 1: Delivered
--- (1, 'OSC-2025-0001', 3, 'DELIVERED', 'CASH_ON_DELIVERY', 37497.00, 800.00, 0.00, 38297.00, 'Ahmed Benali', '0555123456', 'Cité 200 Logements, Bâtiment A, N°15', 'Alger Centre', 'Alger', '16000', 'Livraison avant 18h SVP', 'PAID', NOW() - INTERVAL '15 days', NOW() - INTERVAL '8 days'),
---
--- -- Order 2: Shipped
--- (2, 'OSC-2025-0002', 4, 'SHIPPED', 'CIB', 24297.00, 800.00, 1000.00, 24097.00, 'Fatima Bouazza', '0666234567', 'Rue Larbi Ben M''hidi, Résidence El Yasmine, App 23', 'Oran', 'Oran', '31000', NULL, 'PAID', NOW() - INTERVAL '5 days', NOW() - INTERVAL '2 days'),
---
--- -- Order 3: Processing
--- (3, 'OSC-2025-0003', 5, 'PROCESSING', 'BARIDIMOB', 13499.00, 600.00, 500.00, 13599.00, 'Karim Meziani', '0777345678', 'Avenue de l''Indépendance, N°87', 'Constantine', 'Constantine', '25000', 'Emballer soigneusement', 'PAID', NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days'),
---
--- -- Order 4: Confirmed
--- (4, 'OSC-2025-0004', 6, 'CONFIRMED', 'CASH_ON_DELIVERY', 21996.00, 800.00, 0.00, 22796.00, 'Amina Saidi', '0555456789', 'Cité El Maghreb El Arabi, Bloc C, N°42', 'Annaba', 'Annaba', '23000', NULL, 'PENDING', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day'),
---
--- -- Order 5: Pending
--- (5, 'OSC-2025-0005', 8, 'PENDING', 'CIB', 8999.00, 600.00, 0.00, 9599.00, 'Sarah Brahimi', '0777678901', 'Boulevard Mohamed V, Résidence Les Oliviers, N°12', 'Tlemcen', 'Tlemcen', '13000', 'Appeler avant livraison', 'PENDING', NOW() - INTERVAL '3 hours', NOW() - INTERVAL '3 hours'),
---
--- -- Order 6: Cancelled
--- (6, 'OSC-2025-0006', 3, 'CANCELLED', 'CASH_ON_DELIVERY', 15998.00, 800.00, 0.00, 16798.00, 'Ahmed Benali', '0555123456', 'Cité 200 Logements, Bâtiment A, N°15', 'Alger Centre', 'Alger', '16000', NULL, 'CANCELLED', NOW() - INTERVAL '20 days', NOW() - INTERVAL '18 days');
---
--- -- Update Order 1 with shipping details
--- UPDATE orders SET
---     tracking_number = 'YLD-DZ-2025-001234',
---     shipped_at = NOW() - INTERVAL '10 days',
---     delivered_at = NOW() - INTERVAL '8 days',
---     paid_at = NOW() - INTERVAL '8 days'
--- WHERE id = 1;
---
--- -- Update Order 2 with shipping details
--- UPDATE orders SET
---     tracking_number = 'YLD-DZ-2025-001567',
---     shipped_at = NOW() - INTERVAL '2 days',
---     paid_at = NOW() - INTERVAL '4 days',
---     payment_id = 'CIB-PAY-20250103-45678'
--- WHERE id = 2;
---
--- -- Update Order 3 with payment details
--- UPDATE orders SET
---     paid_at = NOW() - INTERVAL '2 days',
---     payment_id = 'BRDM-PAY-20250106-12345'
--- WHERE id = 3;
---
--- -- Update Order 6 with cancellation details
--- UPDATE orders SET
---     cancelled_at = NOW() - INTERVAL '18 days',
---     cancellation_reason = 'Client a changé d''avis'
--- WHERE id = 6;
---
--- -- =====================================================
--- -- ORDER ITEMS
--- -- =====================================================
--- -- Order 1 Items (Delivered - Ahmed)
--- INSERT INTO order_items (id, order_id, products_id, quantity, unit_price, selected_size, selected_color, products_name_fr, products_name_ar, products_name_en, products_sku, products_image_url) VALUES
--- (1, 1, 101, 2, 1999.00, 'L', 'Noir', 'T-Shirt Classique Noir', 'تي شيرت كلاسيكي أسود', 'Classic Black T-Shirt', 'MTS-001-BLK', 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab'),
--- (2, 1, 401, 1, 7999.00, '32', 'Bleu foncé', 'Jean Slim Bleu Foncé', 'جينز سليم أزرق داكن', 'Dark Blue Slim Jeans', 'MJN-001-BLU', 'https://images.unsplash.com/photo-1542272604-787c3835535d'),
--- (3, 1, 501, 1, 12999.00, 'L', 'Noir', 'Veste Bomber Noire', 'سترة بومبر سوداء', 'Black Bomber Jacket', 'MJK-001-BLK', 'https://images.unsplash.com/photo-1551028719-00167b16eac5'),
--- (4, 1, 1301, 1, 8999.00, '42', 'Blanc', 'Baskets Sport Blanches', 'حذاء رياضي أبيض', 'White Sport Sneakers', 'SHO-001-SNK', 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a'),
--- (5, 1, 1401, 1, 6999.00, NULL, 'Argenté', 'Montre Classique Argentée', 'ساعة كلاسيكية فضية', 'Silver Classic Watch', 'WTC-001-SLV', 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49');
---
--- -- Order 2 Items (Shipped - Fatima)
--- INSERT INTO order_items (id, order_id, products_id, quantity, unit_price, selected_size, selected_color, products_name_fr, products_name_ar, products_name_en, products_sku, products_image_url) VALUES
--- (6, 2, 601, 1, 9999.00, 'M', 'Rose/Blanc', 'Robe Florale Été', 'فستان زهري صيفي', 'Floral Summer Dress', 'WDR-001-FLR', 'https://images.unsplash.com/photo-1595777457583-95e059d581b8'),
--- (7, 2, 901, 3, 1299.00, NULL, 'Noir', 'Hijab Jersey Noir', 'حجاب جيرسي أسود', 'Black Jersey Hijab', 'WHJ-001-BLK', 'https://images.unsplash.com/photo-1601925662308-a3303c64c5ba'),
--- (8, 2, 1201, 1, 12999.00, NULL, 'Marron', 'Sac à Main Cuir Marron', 'حقيبة يد جلد بني', 'Brown Leather Handbag', 'BAG-001-BRN', 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa');
---
--- -- Order 3 Items (Processing - Karim)
--- INSERT INTO order_items (id, order_id, products_id, quantity, unit_price, selected_size, selected_color, products_name_fr, products_name_ar, products_name_en, products_sku, products_image_url) VALUES
--- (9, 3, 102, 2, 2500.00, 'M', 'Blanc', 'T-Shirt Basique Blanc', 'تي شيرت أساسي أبيض', 'Basic White T-Shirt', 'MTS-002-WHT', 'https://images.unsplash.com/photo-1622445275463-afa2ab738c34'),
--- (10, 3, 1301, 1, 8999.00, '42', 'Blanc', 'Baskets Sport Blanches', 'حذاء رياضي أبيض', 'White Sport Sneakers', 'SHO-001-SNK', 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a');
---
--- -- Order 4 Items (Confirmed - Amina)
--- INSERT INTO order_items (id, order_id, products_id, quantity, unit_price, selected_size, selected_color, products_name_fr, products_name_ar, products_name_en, products_sku, products_image_url) VALUES
--- (11, 4, 702, 2, 4500.00, 'L', 'Rose', 'Top Rose Casual', 'بلوزة وردية كاجوال', 'Pink Casual Top', 'WTP-002-PNK', 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3'),
--- (12, 4, 902, 3, 2999.00, NULL, 'Beige', 'Hijab Soie Beige', 'حجاب حرير بيج', 'Beige Silk Hijab', 'WHJ-002-BEG', 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a'),
--- (13, 4, 1101, 2, 5299.00, '5-6', 'Rose', 'Robe Fille Rose', 'فستان بنت وردي', 'Girls Pink Dress', 'KGL-001-DRS', 'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7');
---
--- -- Order 5 Items (Pending - Sarah)
--- INSERT INTO order_items (id, order_id, products_id, quantity, unit_price, selected_size, selected_color, products_name_fr, products_name_ar, products_name_en, products_sku, products_image_url) VALUES
--- (14, 5, 1301, 1, 8999.00, '40', 'Blanc', 'Baskets Sport Blanches', 'حذاء رياضي أبيض', 'White Sport Sneakers', 'SHO-001-SNK', 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a');
---
--- -- Order 6 Items (Cancelled - Ahmed)
--- INSERT INTO order_items (id, order_id, products_id, quantity, unit_price, selected_size, selected_color, products_name_fr, products_name_ar, products_name_en, products_sku, products_image_url) VALUES
--- (15, 6, 602, 1, 15999.00, 'M', 'Noir', 'Robe de Soirée Noire', 'فستان سهرة أسود', 'Black Evening Dress', 'WDR-002-BLK', 'https://images.unsplash.com/photo-1566174053879-31528523f8ae');
---
--- -- =====================================================
--- -- COMPLETION MESSAGE
--- -- =====================================================
--- DO $$
--- BEGIN
---     RAISE NOTICE '✅ Database seeding completed successfully!';
---     RAISE NOTICE '-------------------------------------------';
---     RAISE NOTICE 'Summary:';
---     RAISE NOTICE '  - Users: 8 (2 admins, 6 customers)';
---     RAISE NOTICE '  - Categories: 16 (4 root + 12 subcategories)';
---     RAISE NOTICE '  - productss: 35 (across all categories)';
---     RAISE NOTICE '  - cartss: 3 (with items)';
---     RAISE NOTICE '  - Orders: 6 (various statuses)';
---     RAISE NOTICE '-------------------------------------------';
---     RAISE NOTICE 'Default credentials:';
---     RAISE NOTICE '  Admin: admin@oscarfashion.dz / password123';
---     RAISE NOTICE '  Manager: manager@oscarfashion.dz / password123';
---     RAISE NOTICE '  Customer: ahmed.benali@gmail.com / password123';
---     RAISE NOTICE '-------------------------------------------';
--- END $$;
+-- Clothing Sizes
+INSERT INTO product_sizes (product_id, size) VALUES
+-- Men's T-Shirts & Shirts
+(101, 'S'), (101, 'M'), (101, 'L'), (101, 'XL'), (101, 'XXL'),
+(102, 'S'), (102, 'M'), (102, 'L'), (102, 'XL'), (102, 'XXL'),
+(103, 'S'), (103, 'M'), (103, 'L'), (103, 'XL'),
+(201, 'S'), (201, 'M'), (201, 'L'), (201, 'XL'), (201, 'XXL'),
+(202, 'M'), (202, 'L'), (202, 'XL'), (202, 'XXL'),
+(203, 'S'), (203, 'M'), (203, 'L'), (203, 'XL'),
+
+-- Men's Pants & Jeans (Waist sizes)
+(301, '30'), (301, '32'), (301, '34'), (301, '36'), (301, '38'),
+(302, '30'), (302, '32'), (302, '34'), (302, '36'), (302, '38'),
+(401, '30'), (401, '32'), (401, '34'), (401, '36'), (401, '38'), (401, '40'),
+(402, '30'), (402, '32'), (402, '34'), (402, '36'), (402, '38'), (402, '40'),
+(403, '28'), (403, '30'), (403, '32'), (403, '34'), (403, '36'),
+
+-- Men's Jackets
+(501, 'M'), (501, 'L'), (501, 'XL'), (501, 'XXL'),
+(502, 'S'), (502, 'M'), (502, 'L'), (502, 'XL'),
+
+-- Women's Dresses & Tops
+(601, 'S'), (601, 'M'), (601, 'L'), (601, 'XL'),
+(602, 'S'), (602, 'M'), (602, 'L'), (602, 'XL'),
+(603, 'S'), (603, 'M'), (603, 'L'),
+(701, 'S'), (701, 'M'), (701, 'L'), (701, 'XL'),
+(702, 'S'), (702, 'M'), (702, 'L'), (702, 'XL'),
+(703, 'S'), (703, 'M'), (703, 'L'),
+
+-- Women's Pants
+(801, 'S'), (801, 'M'), (801, 'L'), (801, 'XL'),
+(802, 'S'), (802, 'M'), (802, 'L'),
+
+-- Shoes (EU sizes)
+(1301, '39'), (1301, '40'), (1301, '41'), (1301, '42'), (1301, '43'), (1301, '44'),
+(1302, '39'), (1302, '40'), (1302, '41'), (1302, '42'), (1302, '43'),
+
+-- Kids
+(1001, '4-5'), (1001, '6-7'), (1001, '8-9'), (1001, '10-11'),
+(1002, '4-5'), (1002, '6-7'), (1002, '8-9'), (1002, '10-11'),
+(1101, '3-4'), (1101, '5-6'), (1101, '7-8'), (1101, '9-10'),
+(1102, '3-4'), (1102, '5-6'), (1102, '7-8');
+
+-- =====================================================
+-- products COLORS (stored as array)
+-- =====================================================
+INSERT INTO product_colors (product_id, color) VALUES
+-- Basic colors for most clothing
+(101, 'Noir'), (101, 'Blanc'), (101, 'Gris'),
+(102, 'Blanc'), (102, 'Bleu clair'),
+(103, 'Marine'), (103, 'Noir'), (103, 'Gris'),
+(201, 'Bleu'), (201, 'Blanc'),
+(202, 'Blanc'), (202, 'Bleu clair'),
+(203, 'Bleu/Blanc'), (203, 'Noir/Blanc'),
+(301, 'Noir'), (301, 'Marine'), (301, 'Gris'),
+(302, 'Beige'), (302, 'Kaki'),
+(401, 'Bleu foncé'), (401, 'Bleu moyen'),
+(402, 'Noir'),
+(403, 'Bleu clair'), (403, 'Bleu délavé'),
+(501, 'Noir'), (501, 'Marine'),
+(502, 'Bleu denim'), (502, 'Noir'),
+
+-- Women's productss
+(601, 'Rose/Blanc'), (601, 'Bleu/Blanc'),
+(602, 'Noir'),
+(603, 'Marron'), (603, 'Beige'),
+(701, 'Blanc'), (701, 'Crème'),
+(702, 'Rose'), (702, 'Rose poudré'),
+(703, 'Marine'), (703, 'Bleu royal'),
+(801, 'Noir'), (801, 'Gris foncé'),
+(802, 'Gris'), (802, 'Beige'),
+
+-- Hijabs
+(901, 'Noir'),
+(902, 'Beige'), (902, 'Nude'), (902, 'Camel'),
+(903, 'Marine'), (903, 'Bleu foncé'),
+
+-- Kids
+(1001, 'Bleu/Rouge'), (1001, 'Noir/Blanc'),
+(1002, 'Bleu'), (1002, 'Noir'),
+(1101, 'Rose'), (1101, 'Rose/Blanc'),
+(1102, 'Multicolore'),
+
+-- Accessories
+(1201, 'Marron'), (1201, 'Cognac'),
+(1202, 'Noir'), (1202, 'Gris foncé'),
+(1301, 'Blanc'), (1301, 'Blanc/Noir'),
+(1302, 'Noir'),
+(1401, 'Argenté'), (1401, 'Argent/Noir'),
+(1402, 'Or'), (1402, 'Or rose');
+
+-- =====================================================
+-- cartsS
+-- =====================================================
+-- Create cartss for some customers
+INSERT INTO carts (id, user_id, created_at, updated_at) VALUES
+(1, 3, NOW(), NOW()),
+(2, 4, NOW(), NOW()),
+(3, 5, NOW(), NOW());
+
+-- =====================================================
+-- carts ITEMS
+-- =====================================================
+-- Ahmed's carts (User 3)
+INSERT INTO cart_items (id, cart_id, product_id, quantity, selected_size, selected_color, created_at, updated_at) VALUES
+(1, 1, 101, 2, 'L', 'Noir', NOW(), NOW()),
+(2, 1, 401, 1, '32', 'Bleu foncé', NOW(), NOW()),
+(3, 1, 501, 1, 'L', 'Noir', NOW(), NOW());
+
+-- Fatima's carts (User 4)
+INSERT INTO cart_items (id, cart_id, product_id, quantity, selected_size, selected_color, created_at, updated_at) VALUES
+(4, 2, 601, 1, 'M', 'Rose/Blanc', NOW(), NOW()),
+(5, 2, 901, 3, NULL, 'Noir', NOW(), NOW()),
+(6, 2, 1201, 1, NULL, 'Marron', NOW(), NOW());
+
+-- Karim's carts (User 5)
+INSERT INTO cart_items (id, cart_id, product_id, quantity, selected_size, selected_color, created_at, updated_at) VALUES
+(7, 3, 1301, 1, '42', 'Blanc', NOW(), NOW()),
+(8, 3, 102, 2, 'M', 'Blanc', NOW(), NOW());
+
+-- =====================================================
+-- ORDERS
+-- =====================================================
+INSERT INTO orders (id, order_number, user_id, status, payment_method, subtotal, shipping_cost, discount_amount, total_amount, shipping_full_name, shipping_phone, shipping_address, shipping_city, shipping_wilaya, shipping_postal_code, customer_notes, payment_status, created_at, updated_at) VALUES
+-- Order 1: Delivered
+(1, 'OSC-2025-0001', 3, 'DELIVERED', 'CASH_ON_DELIVERY', 37497.00, 800.00, 0.00, 38297.00, 'Ahmed Benali', '0555123456', 'Cité 200 Logements, Bâtiment A, N°15', 'Alger Centre', 'Alger', '16000', 'Livraison avant 18h SVP', 'PAID', NOW() - INTERVAL '15 days', NOW() - INTERVAL '8 days'),
+
+-- Order 2: Shipped
+(2, 'OSC-2025-0002', 4, 'SHIPPED', 'CIB', 24297.00, 800.00, 1000.00, 24097.00, 'Fatima Bouazza', '0666234567', 'Rue Larbi Ben M''hidi, Résidence El Yasmine, App 23', 'Oran', 'Oran', '31000', NULL, 'PAID', NOW() - INTERVAL '5 days', NOW() - INTERVAL '2 days'),
+
+-- Order 3: Processing
+(3, 'OSC-2025-0003', 5, 'PROCESSING', 'BARIDIMOB', 13499.00, 600.00, 500.00, 13599.00, 'Karim Meziani', '0777345678', 'Avenue de l''Indépendance, N°87', 'Constantine', 'Constantine', '25000', 'Emballer soigneusement', 'PAID', NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days'),
+
+-- Order 4: Confirmed
+(4, 'OSC-2025-0004', 6, 'CONFIRMED', 'CASH_ON_DELIVERY', 21996.00, 800.00, 0.00, 22796.00, 'Amina Saidi', '0555456789', 'Cité El Maghreb El Arabi, Bloc C, N°42', 'Annaba', 'Annaba', '23000', NULL, 'PENDING', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day'),
+
+-- Order 5: Pending
+(5, 'OSC-2025-0005', 8, 'PENDING', 'CIB', 8999.00, 600.00, 0.00, 9599.00, 'Sarah Brahimi', '0777678901', 'Boulevard Mohamed V, Résidence Les Oliviers, N°12', 'Tlemcen', 'Tlemcen', '13000', 'Appeler avant livraison', 'PENDING', NOW() - INTERVAL '3 hours', NOW() - INTERVAL '3 hours'),
+
+-- Order 6: Cancelled
+(6, 'OSC-2025-0006', 3, 'CANCELLED', 'CASH_ON_DELIVERY', 15998.00, 800.00, 0.00, 16798.00, 'Ahmed Benali', '0555123456', 'Cité 200 Logements, Bâtiment A, N°15', 'Alger Centre', 'Alger', '16000', NULL, 'CANCELLED', NOW() - INTERVAL '20 days', NOW() - INTERVAL '18 days');
+
+-- Update Order 1 with shipping details
+UPDATE orders SET
+    tracking_number = 'YLD-DZ-2025-001234',
+    shipped_at = NOW() - INTERVAL '10 days',
+    delivered_at = NOW() - INTERVAL '8 days',
+    paid_at = NOW() - INTERVAL '8 days'
+WHERE id = 1;
+
+-- Update Order 2 with shipping details
+UPDATE orders SET
+    tracking_number = 'YLD-DZ-2025-001567',
+    shipped_at = NOW() - INTERVAL '2 days',
+    paid_at = NOW() - INTERVAL '4 days',
+    payment_id = 'CIB-PAY-20250103-45678'
+WHERE id = 2;
+
+-- Update Order 3 with payment details
+UPDATE orders SET
+    paid_at = NOW() - INTERVAL '2 days',
+    payment_id = 'BRDM-PAY-20250106-12345'
+WHERE id = 3;
+
+-- Update Order 6 with cancellation details
+UPDATE orders SET
+    cancelled_at = NOW() - INTERVAL '18 days',
+    cancellation_reason = 'Client a changé d''avis'
+WHERE id = 6;
+
+-- =====================================================
+-- ORDER ITEMS
+-- =====================================================
+-- Order 1 Items (Delivered - Ahmed)
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price, selected_size, selected_color, product_name_fr, product_name_ar, product_name_en, product_sku, product_image_url) VALUES
+(1, 1, 101, 2, 1999.00, 'L', 'Noir', 'T-Shirt Classique Noir', 'تي شيرت كلاسيكي أسود', 'Classic Black T-Shirt', 'MTS-001-BLK', 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab'),
+(2, 1, 401, 1, 7999.00, '32', 'Bleu foncé', 'Jean Slim Bleu Foncé', 'جينز سليم أزرق داكن', 'Dark Blue Slim Jeans', 'MJN-001-BLU', 'https://images.unsplash.com/photo-1542272604-787c3835535d'),
+(3, 1, 501, 1, 12999.00, 'L', 'Noir', 'Veste Bomber Noire', 'سترة بومبر سوداء', 'Black Bomber Jacket', 'MJK-001-BLK', 'https://images.unsplash.com/photo-1551028719-00167b16eac5'),
+(4, 1, 1301, 1, 8999.00, '42', 'Blanc', 'Baskets Sport Blanches', 'حذاء رياضي أبيض', 'White Sport Sneakers', 'SHO-001-SNK', 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a'),
+(5, 1, 1401, 1, 6999.00, NULL, 'Argenté', 'Montre Classique Argentée', 'ساعة كلاسيكية فضية', 'Silver Classic Watch', 'WTC-001-SLV', 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49');
+
+-- Order 2 Items (Shipped - Fatima)
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price, selected_size, selected_color, product_name_fr, product_name_ar, product_name_en, product_sku, product_image_url) VALUES
+(6, 2, 601, 1, 9999.00, 'M', 'Rose/Blanc', 'Robe Florale Été', 'فستان زهري صيفي', 'Floral Summer Dress', 'WDR-001-FLR', 'https://images.unsplash.com/photo-1595777457583-95e059d581b8'),
+(7, 2, 901, 3, 1299.00, NULL, 'Noir', 'Hijab Jersey Noir', 'حجاب جيرسي أسود', 'Black Jersey Hijab', 'WHJ-001-BLK', 'https://images.unsplash.com/photo-1601925662308-a3303c64c5ba'),
+(8, 2, 1201, 1, 12999.00, NULL, 'Marron', 'Sac à Main Cuir Marron', 'حقيبة يد جلد بني', 'Brown Leather Handbag', 'BAG-001-BRN', 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa');
+
+-- Order 3 Items (Processing - Karim)
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price, selected_size, selected_color, product_name_fr, product_name_ar, product_name_en, product_sku, product_image_url) VALUES
+(9, 3, 102, 2, 2500.00, 'M', 'Blanc', 'T-Shirt Basique Blanc', 'تي شيرت أساسي أبيض', 'Basic White T-Shirt', 'MTS-002-WHT', 'https://images.unsplash.com/photo-1622445275463-afa2ab738c34'),
+(10, 3, 1301, 1, 8999.00, '42', 'Blanc', 'Baskets Sport Blanches', 'حذاء رياضي أبيض', 'White Sport Sneakers', 'SHO-001-SNK', 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a');
+
+-- Order 4 Items (Confirmed - Amina)
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price, selected_size, selected_color, product_name_fr, product_name_ar, product_name_en, product_sku, product_image_url) VALUES
+(11, 4, 702, 2, 4500.00, 'L', 'Rose', 'Top Rose Casual', 'بلوزة وردية كاجوال', 'Pink Casual Top', 'WTP-002-PNK', 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3'),
+(12, 4, 902, 3, 2999.00, NULL, 'Beige', 'Hijab Soie Beige', 'حجاب حرير بيج', 'Beige Silk Hijab', 'WHJ-002-BEG', 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a'),
+(13, 4, 1101, 2, 5299.00, '5-6', 'Rose', 'Robe Fille Rose', 'فستان بنت وردي', 'Girls Pink Dress', 'KGL-001-DRS', 'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7');
+
+-- Order 5 Items (Pending - Sarah)
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price, selected_size, selected_color, product_name_fr, product_name_ar, product_name_en, product_sku, product_image_url) VALUES
+(14, 5, 1301, 1, 8999.00, '40', 'Blanc', 'Baskets Sport Blanches', 'حذاء رياضي أبيض', 'White Sport Sneakers', 'SHO-001-SNK', 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a');
+
+-- Order 6 Items (Cancelled - Ahmed)
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price, selected_size, selected_color, product_name_fr, product_name_ar, product_name_en, product_sku, product_image_url) VALUES
+(15, 6, 602, 1, 15999.00, 'M', 'Noir', 'Robe de Soirée Noire', 'فستان سهرة أسود', 'Black Evening Dress', 'WDR-002-BLK', 'https://images.unsplash.com/photo-1566174053879-31528523f8ae');
+
+-- =====================================================
+-- COMPLETION MESSAGE
+-- =====================================================
+DO $$
+BEGIN
+    RAISE NOTICE '✅ Database seeding completed successfully!';
+    RAISE NOTICE '-------------------------------------------';
+    RAISE NOTICE 'Summary:';
+    RAISE NOTICE '  - Users: 8 (2 admins, 6 customers)';
+    RAISE NOTICE '  - Categories: 16 (4 root + 12 subcategories)';
+    RAISE NOTICE '  - productss: 35 (across all categories)';
+    RAISE NOTICE '  - cartss: 3 (with items)';
+    RAISE NOTICE '  - Orders: 6 (various statuses)';
+    RAISE NOTICE '-------------------------------------------';
+    RAISE NOTICE 'Default credentials:';
+    RAISE NOTICE '  Admin: admin@oscarfashion.dz / password123';
+    RAISE NOTICE '  Manager: manager@oscarfashion.dz / password123';
+    RAISE NOTICE '  Customer: ahmed.benali@gmail.com / password123';
+    RAISE NOTICE '-------------------------------------------';
+END $$;

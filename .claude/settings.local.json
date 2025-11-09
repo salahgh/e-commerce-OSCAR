@@ -7,7 +7,16 @@
       "Bash(./mvnw clean compile:*)",
       "Bash(mvn clean compile:*)",
       "Bash(mvn compile:*)",
-      "Bash(mvn clean package:*)"
+      "Bash(mvn clean package:*)",
+      "Bash(npm create:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm run codegen:*)",
+      "Bash(npx get-graphql-schema:*)",
+      "Bash(schema.graphql)"
     ],
     "deny": [],
     "ask": []

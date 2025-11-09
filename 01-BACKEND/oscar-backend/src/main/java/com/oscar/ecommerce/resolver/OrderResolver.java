@@ -5,6 +5,7 @@ import com.oscar.ecommerce.dto.order.CreateOrderRequest;
 import com.oscar.ecommerce.dto.order.OrderResponse;
 import com.oscar.ecommerce.dto.order.UpdateOrderStatusRequest;
 import com.oscar.ecommerce.service.OrderService;
+// import com.oscar.ecommerce.util.SecurityUtil;
 import com.oscar.ecommerce.util.SecurityUtil;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+//import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -252,7 +254,7 @@ public class OrderResolver {
      * }
      */
     @GraphQLQuery(name = "ordersByStatus", description = "Get orders by status (Admin only)")
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     public Page<OrderResponse> getOrdersByStatus(
             @GraphQLArgument(name = "status", description = "Order status")
             String status,
@@ -286,7 +288,7 @@ public class OrderResolver {
      * }
      */
     @GraphQLMutation(name = "updateOrderStatus", description = "Update order status (Admin only)")
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     public OrderResponse updateOrderStatus(
             @GraphQLArgument(name = "id", description = "Order ID")
             Long id,

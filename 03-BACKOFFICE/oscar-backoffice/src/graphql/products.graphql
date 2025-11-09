@@ -1,0 +1,258 @@
+# Product Queries
+
+query Products($page: Int = 0, $size: Int = 20, $sortBy: String = "createdAt", $sortDirection: String = "DESC") {
+  products(page: $page, size: $size, sortBy: $sortBy, sortDirection: $sortDirection) {
+    content {
+      id
+      sku
+      nameFr
+      nameAr
+      nameEn
+      descriptionFr
+      descriptionAr
+      descriptionEn
+      basePrice
+      salePrice
+      stockQuantity
+      categoryId
+      categoryName
+      isFeatured
+      imageUrls
+      availableSizes
+      availableColors
+      viewCount
+      createdAt
+      updatedAt
+    }
+    totalElements
+    totalPages
+    number
+    size
+    first
+    last
+    hasNext
+    hasPrevious
+  }
+}
+
+query Product($id: Long!) {
+  product(id: $id) {
+    id
+    sku
+    nameFr
+    nameAr
+    nameEn
+    descriptionFr
+    descriptionAr
+    descriptionEn
+    basePrice
+    salePrice
+    stockQuantity
+    categoryId
+    categoryName
+    isFeatured
+    imageUrls
+    availableSizes
+    availableColors
+    viewCount
+    createdAt
+    updatedAt
+  }
+}
+
+query ProductBySku($sku: String!) {
+  productBySku(sku: $sku) {
+    id
+    sku
+    nameFr
+    nameAr
+    nameEn
+    descriptionFr
+    descriptionAr
+    descriptionEn
+    basePrice
+    salePrice
+    stockQuantity
+    categoryId
+    categoryName
+    isFeatured
+    imageUrls
+    availableSizes
+    availableColors
+    viewCount
+    createdAt
+    updatedAt
+  }
+}
+
+query SearchProducts($keyword: String!, $page: Int = 0, $size: Int = 20) {
+  searchProducts(keyword: $keyword, page: $page, size: $size) {
+    content {
+      id
+      sku
+      nameFr
+      nameAr
+      nameEn
+      basePrice
+      salePrice
+      stockQuantity
+      categoryId
+      categoryName
+      isFeatured
+      imageUrls
+      createdAt
+    }
+    totalElements
+    totalPages
+    number
+    size
+  }
+}
+
+query ProductsByCategory($categoryId: Long!, $page: Int = 0, $size: Int = 20) {
+  productsByCategory(categoryId: $categoryId, page: $page, size: $size) {
+    content {
+      id
+      sku
+      nameFr
+      nameAr
+      nameEn
+      basePrice
+      salePrice
+      stockQuantity
+      categoryName
+      isFeatured
+      imageUrls
+      createdAt
+    }
+    totalElements
+    totalPages
+  }
+}
+
+query FeaturedProducts {
+  featuredProducts {
+    id
+    sku
+    nameFr
+    nameAr
+    nameEn
+    basePrice
+    salePrice
+    stockQuantity
+    categoryName
+    imageUrls
+  }
+}
+
+query PopularProducts($page: Int = 0, $size: Int = 20) {
+  popularProducts(page: $page, size: $size) {
+    content {
+      id
+      sku
+      nameFr
+      nameAr
+      nameEn
+      basePrice
+      salePrice
+      imageUrls
+      viewCount
+    }
+    totalElements
+  }
+}
+
+query NewArrivals($page: Int = 0, $size: Int = 20) {
+  newArrivals(page: $page, size: $size) {
+    content {
+      id
+      sku
+      nameFr
+      nameAr
+      nameEn
+      basePrice
+      salePrice
+      imageUrls
+      createdAt
+    }
+    totalElements
+  }
+}
+
+query LowStockProducts($threshold: Int = 10) {
+  lowStockProducts(threshold: $threshold) {
+    id
+    sku
+    nameFr
+    stockQuantity
+    categoryName
+  }
+}
+
+query ProductsByPriceRange($minPrice: BigDecimal!, $maxPrice: BigDecimal!, $page: Int = 0, $size: Int = 20) {
+  productsByPriceRange(minPrice: $minPrice, maxPrice: $maxPrice, page: $page, size: $size) {
+    content {
+      id
+      sku
+      nameFr
+      basePrice
+      salePrice
+      imageUrls
+    }
+    totalElements
+  }
+}
+
+# Product Mutations
+
+mutation CreateProduct($input: CreateProductRequestInput!) {
+  createProduct(input: $input) {
+    id
+    sku
+    nameFr
+    nameAr
+    nameEn
+    descriptionFr
+    descriptionAr
+    descriptionEn
+    basePrice
+    salePrice
+    stockQuantity
+    categoryId
+    categoryName
+    isFeatured
+    imageUrls
+    availableSizes
+    availableColors
+    createdAt
+    updatedAt
+  }
+}
+
+mutation UpdateProduct($id: Long!, $input: UpdateProductRequestInput!) {
+  updateProduct(id: $id, input: $input) {
+    id
+    sku
+    nameFr
+    nameAr
+    nameEn
+    descriptionFr
+    descriptionAr
+    descriptionEn
+    basePrice
+    salePrice
+    stockQuantity
+    categoryId
+    categoryName
+    isFeatured
+    imageUrls
+    availableSizes
+    availableColors
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeleteProduct($id: Long!) {
+  deleteProduct(id: $id)
+}

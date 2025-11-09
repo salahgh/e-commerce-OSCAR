@@ -208,11 +208,11 @@ public class ProductResolver {
     List<ProductResponse> featuredProducts()
 
     @GraphQLMutation
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     ProductResponse createProduct(CreateProductRequest input)
 
     @GraphQLMutation
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     ProductResponse updateProduct(Long id, UpdateProductRequest input)
 }
 ```
@@ -252,11 +252,11 @@ public class OrderResolver {
     OrderResponse cancelOrder(Long id)
 
     @GraphQLQuery
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     Page<OrderResponse> allOrders(Pageable pageable)
 
     @GraphQLMutation
-    @PreAuthorize("hasRole('ADMIN')")
+   @PreAuthorize("hasRole('ADMIN')")
     OrderResponse updateOrderStatus(Long id, UpdateOrderStatusRequest input)
 }
 ```

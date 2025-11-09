@@ -1,0 +1,72 @@
+# User Queries
+
+query Users($page: Int = 0, $size: Int = 20, $sortBy: String = "createdAt", $sortDirection: String = "DESC") {
+  users(page: $page, size: $size, sortBy: $sortBy, sortDirection: $sortDirection) {
+    content {
+      id
+      email
+      firstName
+      lastName
+      phone
+      role
+      isActive
+      emailVerified
+      createdAt
+      updatedAt
+    }
+    totalElements
+    totalPages
+    number
+    size
+    first
+    last
+    hasNext
+    hasPrevious
+  }
+}
+
+query User($id: Long!) {
+  user(id: $id) {
+    id
+    email
+    firstName
+    lastName
+    phone
+    role
+    isActive
+    emailVerified
+    createdAt
+    updatedAt
+  }
+}
+
+query UsersByRole($role: String!, $page: Int = 0, $size: Int = 20) {
+  usersByRole(role: $role, page: $page, size: $size) {
+    content {
+      id
+      email
+      firstName
+      lastName
+      phone
+      role
+      isActive
+      emailVerified
+      createdAt
+    }
+    totalElements
+    totalPages
+  }
+}
+
+# User Mutations
+
+mutation ToggleUserStatus($userId: Long!) {
+  toggleUserStatus(userId: $userId) {
+    id
+    email
+    firstName
+    lastName
+    isActive
+    updatedAt
+  }
+}
