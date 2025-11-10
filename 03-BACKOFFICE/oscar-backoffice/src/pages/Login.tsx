@@ -6,9 +6,11 @@ import { useMutation } from '@apollo/client';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Alert } from '../components/ui/Alert';
+import { Modal } from '../components/ui/Modal';
 import { useAppDispatch } from '../hooks/useAppDispatch';
+import { addToast } from '../store/slices/uiSlice';
 import { loginSuccess } from '../store/slices/authSlice';
-import { LoginDocument } from '../graphql/generated/graphql';
+import { LoginDocument, ForgotPasswordDocument } from '../graphql/generated/graphql';
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email('Email invalide').required('Email requis'),
@@ -19,7 +21,25 @@ export const Login: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [error, setError] = React.useState('');
+  const [showForgotPassword, setShowForgotPassword] = React.useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = React.useState('');
   const [loginMutation, { loading }] = useMutation(LoginDocument);
+  const [forgotPasswordMutation, { loading: forgotPasswordLoading }] = useMutation(ForgotPasswordDocument, {
+    onCompleted: () => {
+      dispatch(addToast({
+        message: 'Un email de réinitialisation a été envoyé à votre adresse',
+        type: 'success'
+      }));
+      setShowForgotPassword(false);
+      setForgotPasswordEmail('');
+    },
+    onError: (error) => {
+      dispatch(addToast({
+        message: error.message || 'Erreur lors de l\'envoi de l\'email',
+        type: 'error'
+      }));
+    },
+  });
 
   const formik = useFormik({
     initialValues: {
@@ -79,6 +99,15 @@ export const Login: React.FC = () => {
     },
   });
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotPasswordEmail || !/\S+@\S+\.\S+/.test(forgotPasswordEmail)) {
+      dispatch(addToast({ message: 'Veuillez entrer un email valide', type: 'error' }));
+      return;
+    }
+    await forgotPasswordMutation({ variables: { email: forgotPasswordEmail } });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -112,13 +141,24 @@ export const Login: React.FC = () => {
               placeholder="admin@oscarfashion.dz"
             />
 
-            <Input
-              label="Mot de passe"
-              type="password"
-              {...formik.getFieldProps('password')}
-              error={formik.touched.password ? formik.errors.password : undefined}
-              placeholder="••••••••"
-            />
+            <div>
+              <Input
+                label="Mot de passe"
+                type="password"
+                {...formik.getFieldProps('password')}
+                error={formik.touched.password ? formik.errors.password : undefined}
+                placeholder="••••••••"
+              />
+              <div className="text-right mt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  Mot de passe oublié ?
+                </button>
+              </div>
+            </div>
 
             <Button
               type="submit"
@@ -142,6 +182,51 @@ export const Login: React.FC = () => {
           © 2025 OSCAR Fashion. Tous droits réservés.
         </p>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <Modal
+          isOpen={showForgotPassword}
+          onClose={() => {
+            setShowForgotPassword(false);
+            setForgotPasswordEmail('');
+          }}
+          title="Mot de passe oublié"
+        >
+          <form onSubmit={handleForgotPassword} className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.
+            </p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email <span className="text-red-500">*</span>
+              </label>
+              <Input
+                type="email"
+                value={forgotPasswordEmail}
+                onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                placeholder="email@exemple.com"
+                autoComplete="email"
+              />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button type="submit" disabled={forgotPasswordLoading}>
+                {forgotPasswordLoading ? 'Envoi...' : 'Envoyer le lien'}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setShowForgotPassword(false);
+                  setForgotPasswordEmail('');
+                }}
+              >
+                Annuler
+              </Button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 };

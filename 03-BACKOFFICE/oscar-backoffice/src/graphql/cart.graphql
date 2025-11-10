@@ -1,0 +1,81 @@
+# Cart Queries
+
+query MyCart {
+  myCart {
+    id
+    userId
+    items {
+      id
+      productId
+      productName
+      productImage
+      quantity
+      price
+      selectedSize
+      selectedColor
+      subtotal
+    }
+    totalAmount
+    createdAt
+    updatedAt
+  }
+}
+
+# Cart Mutations
+
+mutation AddToCart($input: AddToCartRequestInput!) {
+  addToCart(input: $input) {
+    id
+    userId
+    items {
+      id
+      productId
+      productName
+      productImage
+      quantity
+      price
+      selectedSize
+      selectedColor
+      subtotal
+    }
+    totalAmount
+    updatedAt
+  }
+}
+
+mutation UpdateCartItem($itemId: Long!, $input: UpdateCartItemRequestInput!) {
+  updateCartItem(itemId: $itemId, input: $input) {
+    id
+    userId
+    items {
+      id
+      productId
+      productName
+      quantity
+      price
+      subtotal
+    }
+    totalAmount
+    updatedAt
+  }
+}
+
+mutation RemoveFromCart($itemId: Long!) {
+  removeFromCart(itemId: $itemId) {
+    id
+    userId
+    items {
+      id
+      productId
+      productName
+      quantity
+      price
+    }
+    totalAmount
+    updatedAt
+  }
+}
+
+mutation ClearCart {
+  clearCart
+}

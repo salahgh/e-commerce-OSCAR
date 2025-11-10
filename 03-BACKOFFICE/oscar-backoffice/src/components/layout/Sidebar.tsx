@@ -9,6 +9,8 @@ import {
   BarChart3,
   Settings,
   ChevronLeft,
+  ShoppingBag,
+  UserCircle,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAppSelector } from '../../hooks/useAppSelector';
@@ -21,6 +23,8 @@ const menuItems = [
   { icon: FolderTree, label: 'Catégories', path: '/categories' },
   { icon: ShoppingCart, label: 'Commandes', path: '/orders' },
   { icon: Users, label: 'Utilisateurs', path: '/users' },
+  { icon: ShoppingBag, label: 'Panier', path: '/cart' },
+  { icon: UserCircle, label: 'Mon Profil', path: '/profile' },
   { icon: BarChart3, label: 'Rapports', path: '/reports' },
   { icon: Settings, label: 'Paramètres', path: '/settings' },
 ];

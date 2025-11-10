@@ -16,6 +16,9 @@ import {
   CategoriesDocument,
   ProductsByCategoryDocument,
   ProductsByPriceRangeDocument,
+  ProductBySkuDocument,
+  FeaturedProductsDocument,
+  NewArrivalsDocument,
 } from '../../graphql/generated/graphql';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
@@ -28,6 +31,8 @@ export const ProductList: React.FC = () => {
   const [size] = useState(20);
   const [productToDelete, setProductToDelete] = useState<{ id: number; name: string } | null>(null);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchType, setSearchType] = useState<'keyword' | 'sku'>('keyword');
+  const [productTypeFilter, setProductTypeFilter] = useState<'all' | 'featured' | 'new'>('all');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
@@ -36,14 +41,23 @@ export const ProductList: React.FC = () => {
   const { data: categoriesData } = useQuery(CategoriesDocument);
 
   // Determine which query to use based on filters
-  const useSearchQuery = searchKeyword.trim() !== '';
-  const useCategoryQuery = !useSearchQuery && selectedCategory !== '';
-  const usePriceQuery = !useSearchQuery && !useCategoryQuery && minPrice !== '' && maxPrice !== '';
+  const useSearchQuery = searchKeyword.trim() !== '' && searchType === 'keyword';
+  const useSkuQuery = searchKeyword.trim() !== '' && searchType === 'sku';
+  const useCategoryQuery = !useSearchQuery && !useSkuQuery && selectedCategory !== '';
+  const usePriceQuery = !useSearchQuery && !useSkuQuery && !useCategoryQuery && minPrice !== '' && maxPrice !== '';
+  const useFeaturedQuery = !useSearchQuery && !useSkuQuery && !useCategoryQuery && !usePriceQuery && productTypeFilter === 'featured';
+  const useNewArrivalsQuery = !useSearchQuery && !useSkuQuery && !useCategoryQuery && !usePriceQuery && productTypeFilter === 'new';
 
-  // Search query
+  // Keyword search query
   const { data: searchData, loading: searchLoading, error: searchError } = useQuery(SearchProductsDocument, {
     variables: { keyword: searchKeyword, page, size },
     skip: !useSearchQuery,
+  });
+
+  // SKU search query
+  const { data: skuData, loading: skuLoading, error: skuError } = useQuery(ProductBySkuDocument, {
+    variables: { sku: searchKeyword },
+    skip: !useSkuQuery,
   });
 
   // Category query
@@ -58,16 +72,59 @@ export const ProductList: React.FC = () => {
     skip: !usePriceQuery,
   });
 
+  // Featured products query
+  const { data: featuredData, loading: featuredLoading, error: featuredError } = useQuery(FeaturedProductsDocument, {
+    skip: !useFeaturedQuery,
+  });
+
+  // New arrivals query
+  const { data: newArrivalsData, loading: newArrivalsLoading, error: newArrivalsError } = useQuery(NewArrivalsDocument, {
+    variables: { page, size },
+    skip: !useNewArrivalsQuery,
+  });
+
   // Default query
   const { data: defaultData, loading: defaultLoading, error: defaultError } = useQuery(ProductsDocument, {
     variables: { page, size, sortBy: 'createdAt', sortDirection: 'DESC' },
-    skip: useSearchQuery || useCategoryQuery || usePriceQuery,
+    skip: useSearchQuery || useSkuQuery || useCategoryQuery || usePriceQuery || useFeaturedQuery || useNewArrivalsQuery,
   });
 
   // Select the appropriate data based on active query
-  const data = useSearchQuery ? searchData?.searchProducts : useCategoryQuery ? categoryData?.productsByCategory : usePriceQuery ? priceData?.productsByPriceRange : defaultData;
-  const loading = useSearchQuery ? searchLoading : useCategoryQuery ? categoryLoading : usePriceQuery ? priceLoading : defaultLoading;
-  const error = useSearchQuery ? searchError : useCategoryQuery ? categoryError : usePriceQuery ? priceError : defaultError;
+  let data: any;
+  let loading: boolean;
+  let error: any;
+
+  if (useSearchQuery) {
+    data = searchData?.searchProducts;
+    loading = searchLoading;
+    error = searchError;
+  } else if (useSkuQuery) {
+    // SKU search returns single product, wrap in array
+    data = skuData?.productBySku ? { content: [skuData.productBySku], totalElements: 1, totalPages: 1 } : { content: [], totalElements: 0, totalPages: 0 };
+    loading = skuLoading;
+    error = skuError;
+  } else if (useCategoryQuery) {
+    data = categoryData?.productsByCategory;
+    loading = categoryLoading;
+    error = categoryError;
+  } else if (usePriceQuery) {
+    data = priceData?.productsByPriceRange;
+    loading = priceLoading;
+    error = priceError;
+  } else if (useFeaturedQuery) {
+    // Featured products returns array, wrap in paginated structure
+    data = featuredData?.featuredProducts ? { content: featuredData.featuredProducts, totalElements: featuredData.featuredProducts.length, totalPages: 1 } : { content: [], totalElements: 0, totalPages: 0 };
+    loading = featuredLoading;
+    error = featuredError;
+  } else if (useNewArrivalsQuery) {
+    data = newArrivalsData?.newArrivals;
+    loading = newArrivalsLoading;
+    error = newArrivalsError;
+  } else {
+    data = defaultData;
+    loading = defaultLoading;
+    error = defaultError;
+  }
 
   const [deleteProduct, { loading: deleting }] = useMutation(DeleteProductDocument, {
     refetchQueries: [
@@ -79,6 +136,8 @@ export const ProductList: React.FC = () => {
 
   const handleClearFilters = () => {
     setSearchKeyword('');
+    setSearchType('keyword');
+    setProductTypeFilter('all');
     setSelectedCategory('');
     setMinPrice('');
     setMaxPrice('');
@@ -128,19 +187,65 @@ export const ProductList: React.FC = () => {
         </Button>
       </div>
 
+      {/* Product Type Filter Tabs */}
+      <div className="flex gap-2 border-b border-gray-200">
+        <button
+          onClick={() => { setProductTypeFilter('all'); setPage(0); }}
+          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+            productTypeFilter === 'all'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Tous les produits
+        </button>
+        <button
+          onClick={() => { setProductTypeFilter('featured'); setPage(0); }}
+          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+            productTypeFilter === 'featured'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Produits vedettes
+        </button>
+        <button
+          onClick={() => { setProductTypeFilter('new'); setPage(0); }}
+          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+            productTypeFilter === 'new'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Nouveautés
+        </button>
+      </div>
+
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <Input
-              placeholder="Rechercher un produit..."
-              icon={<Search className="h-5 w-5" />}
-              value={searchKeyword}
-              onChange={(e) => {
-                setSearchKeyword(e.target.value);
-                setPage(0);
-              }}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+            <div className="md:col-span-2 flex gap-2">
+              <Select
+                value={searchType}
+                onChange={(e) => setSearchType(e.target.value as 'keyword' | 'sku')}
+                options={[
+                  { value: 'keyword', label: 'Par mot-clé' },
+                  { value: 'sku', label: 'Par SKU' },
+                ]}
+                className="w-32"
+              />
+              <Input
+                placeholder={searchType === 'sku' ? 'Rechercher par SKU...' : 'Rechercher un produit...'}
+                icon={<Search className="h-5 w-5" />}
+                value={searchKeyword}
+                onChange={(e) => {
+                  setSearchKeyword(e.target.value);
+                  setPage(0);
+                }}
+                className="flex-1"
+              />
+            </div>
             <Select
               value={selectedCategory}
               onChange={(e) => {

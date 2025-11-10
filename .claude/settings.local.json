@@ -17,7 +17,9 @@
       "Bash(npm run codegen:*)",
       "Bash(npx get-graphql-schema:*)",
       "Bash(schema.graphql)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "WebSearch",
+      "Bash(npm run dev)"
     ],
     "deny": [],
     "ask": []
