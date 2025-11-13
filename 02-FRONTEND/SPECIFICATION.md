@@ -28,20 +28,20 @@ Le frontend web constitue l'interface client principale de la plateforme OSCAR F
 - **Runtime**: Node.js 18+
 
 ### GraphQL & Data Fetching
-- **GraphQL Client**: Proposition - Apollo Client, urql, ou graphql-request
+- **GraphQL Client**: Proposition - Apollo Client
 - **Code Generation**: GraphQL Code Generator (@graphql-codegen)
 - **Schema**: Auto-generated types from backend
 - **SSR Support**: GraphQL queries compatibles avec Next.js SSR
 
 ### UI & Styling
 - **CSS Framework**: Tailwind CSS 3.x
-- **Icons**: Heroicons, Lucide Icons, ou React Icons
+- **Icons**: Lucide Icons
 - **Animations**: Framer Motion
 - **Utility**: clsx, tailwind-merge
 
 ### State Management
-- **Server State**: Géré par GraphQL (Apollo cache ou urql)
-- **Client State**: React Context API, Zustand (si nécessaire)
+- **Server State**: Géré par GraphQL (Apollo cache)
+- **Client State**: redux
 - **URL State**: Next.js searchParams
 
 ### Routing & Navigation
@@ -70,7 +70,7 @@ Le frontend web constitue l'interface client principale de la plateforme OSCAR F
 
 ### Code Quality
 - **Formatter**: Prettier
-- **Type Checking**: TypeScript strict mode
+- **Type Checking**: no typescript strict mode
 
 ### Développement
 - **Hot Reload**: Next.js Fast Refresh
@@ -224,73 +224,27 @@ export const apolloClient = new ApolloClient({
 });
 ```
 
-**Alternative: urql** (plus léger):
-```typescript
-import { createClient, ssrExchange, cacheExchange, fetchExchange } from 'urql';
-
-const isServerSide = typeof window === 'undefined';
-const ssrCache = ssrExchange({ isClient: !isServerSide });
-
-export const urqlClient = createClient({
-  url: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8080/graphql',
-  exchanges: [cacheExchange, ssrCache, fetchExchange],
-  fetchOptions: () => {
-    const token = !isServerSide ? localStorage.getItem('token') : null;
-    return {
-      headers: { authorization: token ? `Bearer ${token}` : '' },
-    };
-  },
-});
-```
 
 ### Exemple Query avec Code Generation
+queries and mutations are defined in .graphql files
+code generation script should be executed to generate Documents 
+for quries and mutaiions
 
-**graphql/queries/products.ts**:
-```typescript
-import { gql } from '@apollo/client';
-
-export const GET_PRODUCTS = gql`
-  query GetProducts($page: Int!, $size: Int!, $filter: ProductFilter) {
-    products(page: $page, size: $size, filter: $filter) {
-      edges {
-        node {
-          id
-          sku
-          name {
-            fr
-            ar
-            en
-          }
-          slug
-          basePrice
-          salePrice
-          images {
-            id
-            url
-          }
-          status
-        }
-      }
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
-      totalCount
-    }
-  }
-`;
-```
+example : const {data, loading, error} = await apolloClient.query({
+    query: GetProductsDocument,
+    variables: { page: 1, size: 20 },
+  });
 
 **Usage dans Component (Server Component)**:
 ```typescript
 // app/products/page.tsx
 import { apolloClient } from '@/lib/apollo-client';
-import { GET_PRODUCTS } from '@/graphql/queries/products';
+import { GetProductsDocument } from '@generated';
 import ProductGrid from '@/components/product/ProductGrid';
 
 export default async function ProductsPage() {
   const { data } = await apolloClient.query({
-    query: GET_PRODUCTS,
+    query: GetProductsDocument,
     variables: { page: 1, size: 20 },
   });
 
@@ -308,10 +262,10 @@ export default async function ProductsPage() {
 'use client';
 
 import { useQuery } from '@apollo/client';
-import { GET_PRODUCTS } from '@/graphql/queries/products';
+import { GetProductsDocument } from '@/graphql/queries/products';
 
 export default function ProductList() {
-  const { data, loading, error } = useQuery(GET_PRODUCTS, {
+  const { data, loading, error } = useQuery(GetProductsDocument, {
     variables: { page: 1, size: 20 },
   });
 

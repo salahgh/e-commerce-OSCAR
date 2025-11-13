@@ -1,0 +1,145 @@
+# Product Queries
+
+query GetProducts($page: Int, $size: Int, $sortBy: String, $sortDirection: String) {
+  products(page: $page, size: $size, sortBy: $sortBy, sortDirection: $sortDirection) {
+    content {
+      id
+      sku
+      nameAr
+      nameFr
+      nameEn
+      descriptionAr
+      descriptionFr
+      descriptionEn
+      basePrice
+      salePrice
+      stockQuantity
+      imageUrls
+      categoryId
+      categoryName
+      isFeatured
+      availableSizes
+      availableColors
+      viewCount
+      createdAt
+      updatedAt
+    }
+    totalElements
+    totalPages
+    number
+    size
+    first
+    last
+    hasNext
+    hasPrevious
+  }
+}
+
+query GetProduct($id: Long!) {
+  product(id: $id) {
+    id
+    sku
+    nameAr
+    nameFr
+    nameEn
+    descriptionAr
+    descriptionFr
+    descriptionEn
+    basePrice
+    salePrice
+    stockQuantity
+    imageUrls
+    categoryId
+    categoryName
+    isFeatured
+    availableSizes
+    availableColors
+    viewCount
+    createdAt
+    updatedAt
+  }
+}
+
+query GetProductBySku($sku: String!) {
+  productBySku(sku: $sku) {
+    id
+    sku
+    nameAr
+    nameFr
+    nameEn
+    descriptionAr
+    descriptionFr
+    descriptionEn
+    basePrice
+    salePrice
+    stockQuantity
+    imageUrls
+    categoryId
+    categoryName
+    isFeatured
+    availableSizes
+    availableColors
+    viewCount
+    createdAt
+    updatedAt
+  }
+}
+
+query GetFeaturedProducts {
+  featuredProducts {
+    id
+    sku
+    nameAr
+    nameFr
+    nameEn
+    basePrice
+    salePrice
+    stockQuantity
+    imageUrls
+    categoryId
+    categoryName
+    isFeatured
+  }
+}
+
+query SearchProducts($keyword: String!, $page: Int, $size: Int) {
+  searchProducts(keyword: $keyword, page: $page, size: $size) {
+    content {
+      id
+      sku
+      nameAr
+      nameFr
+      nameEn
+      basePrice
+      salePrice
+      stockQuantity
+      imageUrls
+      categoryId
+      categoryName
+      isFeatured
+    }
+    totalElements
+    totalPages
+  }
+}
+
+query GetProductsByCategory($categoryId: Long!, $page: Int, $size: Int) {
+  productsByCategory(categoryId: $categoryId, page: $page, size: $size) {
+    content {
+      id
+      sku
+      nameAr
+      nameFr
+      nameEn
+      basePrice
+      salePrice
+      stockQuantity
+      imageUrls
+      categoryId
+      categoryName
+      isFeatured
+    }
+    totalElements
+    totalPages
+  }
+}

@@ -51,7 +51,7 @@ public class CartService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
-        Product product = productRepository.findById(request.getProductId())
+        Product product = productRepository.findProductById(request.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", request.getProductId()));
 
         // Check stock availability

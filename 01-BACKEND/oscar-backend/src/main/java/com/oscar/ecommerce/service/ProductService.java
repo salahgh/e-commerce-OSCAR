@@ -42,9 +42,9 @@ public class ProductService {
     /**
      * Get product by ID
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public ProductResponse getProductById(Long id) {
-        Product product = productRepository.findById(id)
+        Product product = productRepository.findProductById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
 
         // Increment view count
@@ -180,7 +180,7 @@ public class ProductService {
      */
     @Transactional
     public ProductResponse updateProduct(Long id, UpdateProductRequest request) {
-        Product product = productRepository.findById(id)
+        Product product = productRepository.findProductById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
 
         // Update category if provided
@@ -216,7 +216,7 @@ public class ProductService {
      */
     @Transactional
     public void deleteProduct(Long id) {
-        Product product = productRepository.findById(id)
+        Product product = productRepository.findProductById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
 
         product.setIsActive(false);

@@ -1,0 +1,10 @@
+{
+  "HomePage": {
+    "title": "Welcome to OSCAR Fashion",
+    "subtitle": "Fashion & Elegance"
+  },
+  "Common": {
+    "loading": "Loading...",
+    "error": "An error occurred"
+  }
+}

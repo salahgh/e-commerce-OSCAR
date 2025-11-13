@@ -19,7 +19,19 @@
       "Bash(schema.graphql)",
       "Bash(find:*)",
       "WebSearch",
-      "Bash(npm run dev)"
+      "Bash(npm run dev)",
+      "Bash(npx create-next-app@latest oscar-frontend --typescript --app --tailwind --no-eslint --use-npm)",
+      "Bash(curl:*)",
+      "Bash(./mvnw spring-boot:run:*)",
+      "Bash(mvn spring-boot:run:*)",
+      "Bash(timeout 5 bash -c \"while ! curl -s http://localhost:8085/actuator/health > /dev/null 2>&1; do sleep 1; done; echo ''Backend is ready!''\")",
+      "Bash(set NEXT_PUBLIC_GRAPHQL_URL=http://localhost:8085/graphql)",
+      "Bash(python -m json.tool:*)",
+      "Bash(npm run fetch-schema:*)",
+      "Bash(cat:*)",
+      "Bash(taskkill:*)",
+      "Bash(nul)",
+      "Bash(timeout 30 bash:*)"
     ],
     "deny": [],
     "ask": []

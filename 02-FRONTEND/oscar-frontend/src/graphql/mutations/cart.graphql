@@ -1,0 +1,66 @@
+# Cart Mutations
+
+mutation AddToCart($input: AddToCartRequestInput!) {
+  addToCart(input: $input) {
+    id
+    userId
+    items {
+      id
+      productId
+      productName
+      productImage
+      quantity
+      price
+      subtotal
+      selectedSize
+      selectedColor
+    }
+    totalAmount
+    createdAt
+    updatedAt
+  }
+}
+
+mutation UpdateCartItem($itemId: Long!, $input: UpdateCartItemRequestInput!) {
+  updateCartItem(itemId: $itemId, input: $input) {
+    id
+    userId
+    items {
+      id
+      productId
+      productName
+      productImage
+      quantity
+      price
+      subtotal
+      selectedSize
+      selectedColor
+    }
+    totalAmount
+    updatedAt
+  }
+}
+
+mutation RemoveFromCart($itemId: Long!) {
+  removeFromCart(itemId: $itemId) {
+    id
+    userId
+    items {
+      id
+      productId
+      productName
+      productImage
+      quantity
+      price
+      subtotal
+      selectedSize
+      selectedColor
+    }
+    totalAmount
+    updatedAt
+  }
+}
+
+mutation ClearCart {
+  clearCart
+}
