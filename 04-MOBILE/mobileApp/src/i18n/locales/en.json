@@ -1,0 +1,115 @@
+{
+  "common": {
+    "appName": "OSCAR Fashion",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "viewAll": "View All",
+    "close": "Close",
+    "done": "Done",
+    "continue": "Continue",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phone": "Phone",
+    "forgotPassword": "Forgot Password?",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "loginSuccess": "Login successful",
+    "registerSuccess": "Registration successful",
+    "logoutSuccess": "Logout successful"
+  },
+  "home": {
+    "title": "Home",
+    "featuredProducts": "Featured Products",
+    "newArrivals": "New Arrivals",
+    "categories": "Categories",
+    "popularProducts": "Popular Products"
+  },
+  "products": {
+    "title": "Products",
+    "addToCart": "Add to Cart",
+    "buyNow": "Buy Now",
+    "price": "Price",
+    "sale": "Sale",
+    "outOfStock": "Out of Stock",
+    "inStock": "In Stock",
+    "size": "Size",
+    "color": "Color",
+    "quantity": "Quantity",
+    "description": "Description",
+    "specifications": "Specifications",
+    "reviews": "Reviews"
+  },
+  "cart": {
+    "title": "Cart",
+    "emptyCart": "Your cart is empty",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total",
+    "checkout": "Checkout",
+    "itemRemoved": "Item removed from cart",
+    "itemAdded": "Item added to cart"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "shippingAddress": "Shipping Address",
+    "shippingMethod": "Shipping Method",
+    "payment": "Payment",
+    "confirmation": "Confirmation",
+    "placeOrder": "Place Order",
+    "orderSuccess": "Order Successful!",
+    "orderNumber": "Order Number"
+  },
+  "profile": {
+    "title": "Profile",
+    "myOrders": "My Orders",
+    "myAddresses": "My Addresses",
+    "settings": "Settings",
+    "help": "Help",
+    "about": "About",
+    "language": "Language",
+    "notifications": "Notifications"
+  },
+  "orders": {
+    "title": "Orders",
+    "orderHistory": "Order History",
+    "orderDetails": "Order Details",
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    }
+  },
+  "errors": {
+    "networkError": "Network Error",
+    "invalidCredentials": "Invalid email or password",
+    "requiredField": "This field is required",
+    "invalidEmail": "Invalid email",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "genericError": "An error occurred"
+  }
+}

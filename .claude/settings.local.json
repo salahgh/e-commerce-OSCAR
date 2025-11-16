@@ -31,7 +31,11 @@
       "Bash(cat:*)",
       "Bash(taskkill:*)",
       "Bash(nul)",
-      "Bash(timeout 30 bash:*)"
+      "Bash(timeout 30 bash:*)",
+      "Bash(npm run format:*)",
+      "Bash(npm run format:payment:*)",
+      "Bash(del \"src\\graphql\\queries\\user.graphql\")",
+      "Bash(del \"src\\graphql\\mutations\\user.graphql\")"
     ],
     "deny": [],
     "ask": []

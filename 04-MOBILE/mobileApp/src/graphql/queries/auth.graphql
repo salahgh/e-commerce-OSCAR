@@ -1,0 +1,16 @@
+# Authentication Queries
+
+query GetCurrentUser {
+  me {
+    id
+    email
+    firstName
+    lastName
+    phone
+    role
+    isActive
+    emailVerified
+    createdAt
+    updatedAt
+  }
+}
