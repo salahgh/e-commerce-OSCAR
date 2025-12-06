@@ -238,9 +238,11 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     if (analysisError) console.error('Analysis error:', analysisError);
   }
 
-  // Check if any critical query has an auth error - if so, we have data issues but not loading
-  const hasAuthError = statsError?.message?.includes('not currently authorized') ||
-    recentError?.message?.includes('not currently authorized');
+  // Check if queries have completed (either with data or error)
+  const statsComplete = !statsLoading;
+  const recentComplete = !recentLoading;
+  const lowStockComplete = !lowStockLoading;
+  const analysisComplete = !analysisLoading;
 
   // Process KPI data
   const kpis: KPIData = useMemo(() => {
@@ -409,9 +411,8 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     return result.sort((a, b) => a.stockOnHand - b.stockOnHand).slice(0, 10);
   }, [lowStockData]);
 
-  // Only block on essential queries, not the analysis query
-  // If there's an auth error, don't keep showing loading
-  const loading = !hasAuthError && (statsLoading || recentLoading || lowStockLoading);
+  // Loading states - only true if actually loading, not if errored
+  const loading = statsLoading || recentLoading || lowStockLoading;
   const chartsLoading = analysisLoading;
 
   return {
@@ -423,6 +424,10 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     lowStockProducts,
     loading,
     chartsLoading,
+    // Expose individual loading states for granular control
+    kpisLoading: statsLoading,
+    recentOrdersLoading: recentLoading,
+    lowStockLoading: lowStockLoading,
     hasError: !!statsError || !!recentError,
   };
 }
