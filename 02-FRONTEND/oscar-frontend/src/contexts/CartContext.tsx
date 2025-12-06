@@ -1,228 +1,162 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
-import type { Cart } from '@/types';
 import {
-  useAddToCartMutation,
-  useUpdateCartItemMutation,
-  useRemoveFromCartMutation,
-  useClearCartMutation,
-  useGetCartQuery,
+  useGetActiveOrderQuery,
+  useAddItemToOrderMutation,
+  useAdjustOrderLineMutation,
+  useRemoveOrderLineMutation,
+  useRemoveAllOrderLinesMutation,
+  OrderFieldsFragment,
 } from '@/graphql/generated/graphql';
-import { apolloClient } from '@/lib/apollo/apollo-client';
-import { mapCart } from '@/lib/utils/mappers';
+
+// Simplified cart item type based on Vendure Order
+interface CartItem {
+  id: string;
+  productVariantId: string;
+  productName: string;
+  variantName: string;
+  sku: string;
+  quantity: number;
+  unitPrice: number;
+  linePrice: number;
+  imageUrl?: string;
+  productSlug?: string;
+}
+
+interface Cart {
+  id: string;
+  code: string;
+  state: string;
+  items: CartItem[];
+  totalQuantity: number;
+  subTotal: number;
+  shipping: number;
+  total: number;
+  currencyCode: string;
+}
 
 interface CartContextType {
   cart: Cart | null;
   loading: boolean;
-  addToCart: (
-    productId: string,
-    quantity: number,
-    options?: { selectedSize?: string; selectedColor?: string }
-  ) => Promise<void>;
-  updateQuantity: (itemId: string, quantity: number) => Promise<void>;
-  removeItem: (itemId: string) => Promise<void>;
+  addToCart: (productVariantId: string, quantity: number) => Promise<void>;
+  updateQuantity: (orderLineId: string, quantity: number) => Promise<void>;
+  removeItem: (orderLineId: string) => Promise<void>;
   clearCart: () => Promise<void>;
-  applyCoupon: (code: string) => Promise<void>;
-  removeCoupon: () => Promise<void>;
   itemCount: number;
-  isInCart: (productId: string, variantId?: string) => boolean;
+  refetchCart: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+// Map Vendure Order to our Cart type
+function mapOrderToCart(order: OrderFieldsFragment): Cart {
+  return {
+    id: order.id,
+    code: order.code,
+    state: order.state,
+    items: order.lines.map((line) => ({
+      id: line.id,
+      productVariantId: line.productVariant.id,
+      productName: line.productVariant.product.name,
+      variantName: line.productVariant.name,
+      sku: line.productVariant.sku,
+      quantity: line.quantity,
+      unitPrice: line.unitPriceWithTax / 100, // Convert from cents
+      linePrice: line.linePriceWithTax / 100,
+      imageUrl: line.featuredAsset?.preview || line.productVariant.product.featuredAsset?.preview,
+      productSlug: line.productVariant.product.slug,
+    })),
+    totalQuantity: order.totalQuantity,
+    subTotal: order.subTotalWithTax / 100,
+    shipping: order.shippingWithTax / 100,
+    total: order.totalWithTax / 100,
+    currencyCode: order.currencyCode,
+  };
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
   const [cart, setCart] = useState<Cart | null>(null);
-  const [loading, setLoading] = useState(true);
+
+  // GraphQL query for active order
+  const { data, loading, refetch } = useGetActiveOrderQuery({
+    fetchPolicy: 'cache-and-network',
+  });
 
   // GraphQL mutations
-  const [addToCartMutation] = useAddToCartMutation();
-  const [updateCartItemMutation] = useUpdateCartItemMutation();
-  const [removeFromCartMutation] = useRemoveFromCartMutation();
-  const [clearCartMutation] = useClearCartMutation();
+  const [addItemMutation] = useAddItemToOrderMutation();
+  const [adjustLineMutation] = useAdjustOrderLineMutation();
+  const [removeLineMutation] = useRemoveOrderLineMutation();
+  const [removeAllLinesMutation] = useRemoveAllOrderLinesMutation();
 
-  // Load cart from localStorage for guests or fetch from server for authenticated users
+  // Update cart when data changes
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchCart();
+    if (data?.activeOrder) {
+      setCart(mapOrderToCart(data.activeOrder));
     } else {
-      loadGuestCart();
+      setCart(null);
     }
-  }, [isAuthenticated]);
+  }, [data]);
 
-  const fetchCart = async () => {
+  const refetchCart = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
+
+  const addToCart = async (productVariantId: string, quantity: number) => {
     try {
-      setLoading(true);
-      const { data } = await apolloClient.query({
-        query: useGetCartQuery.query,
-        fetchPolicy: 'network-only',
+      const { data: result } = await addItemMutation({
+        variables: { productVariantId, quantity },
       });
 
-      if (data?.myCart) {
-        const mappedCart = mapCart(data.myCart);
-        setCart(mappedCart);
-      }
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching cart:', error);
-      setLoading(false);
-    }
-  };
+      if (result?.addItemToOrder) {
+        const response = result.addItemToOrder;
 
-  const loadGuestCart = () => {
-    try {
-      const storedCart = localStorage.getItem('guestCart');
-      if (storedCart) {
-        setCart(JSON.parse(storedCart));
-      }
-      setLoading(false);
-    } catch (error) {
-      console.error('Error loading guest cart:', error);
-      setLoading(false);
-    }
-  };
+        // Check for errors
+        if ('errorCode' in response) {
+          if (response.errorCode === 'INSUFFICIENT_STOCK_ERROR') {
+            toast.error(`Stock insuffisant. Disponible: ${(response as any).quantityAvailable}`);
+          } else {
+            toast.error((response as any).message || 'Erreur lors de l\'ajout au panier');
+          }
+          return;
+        }
 
-  const saveGuestCart = (updatedCart: Cart) => {
-    localStorage.setItem('guestCart', JSON.stringify(updatedCart));
-  };
-
-  const addToCart = async (
-    productId: string,
-    quantity: number,
-    options?: { selectedSize?: string; selectedColor?: string }
-  ) => {
-    try {
-      if (isAuthenticated) {
-        const { data } = await addToCartMutation({
-          variables: {
-            input: {
-              productId: Number(productId),
-              quantity,
-              selectedSize: options?.selectedSize,
-              selectedColor: options?.selectedColor,
-            },
-          },
-        });
-
-        if (data?.addToCart) {
-          const mappedCart = mapCart(data.addToCart);
-          setCart(mappedCart);
+        // Success - update cart
+        if ('id' in response) {
+          setCart(mapOrderToCart(response as OrderFieldsFragment));
           toast.success('Produit ajouté au panier');
         }
-      } else {
-        // Handle guest cart
-        const currentCart = cart || {
-          id: 'guest',
-          items: [],
-          subtotal: 0,
-          discount: 0,
-          shippingCost: 0,
-          total: 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        // Check if item already exists
-        const existingItemIndex = currentCart.items.findIndex(
-          (item) =>
-            item.product.id === productId &&
-            item.variant?.size === options?.selectedSize &&
-            item.variant?.color === options?.selectedColor
-        );
-
-        if (existingItemIndex >= 0) {
-          // Update quantity
-          currentCart.items[existingItemIndex].quantity += quantity;
-          currentCart.items[existingItemIndex].total =
-            currentCart.items[existingItemIndex].price *
-            currentCart.items[existingItemIndex].quantity;
-        } else {
-          // Add new item (simplified - in real app, fetch product details)
-          currentCart.items.push({
-            id: Date.now().toString(),
-            productId,
-            product: {
-              id: productId,
-              slug: productId,
-              name: { ar: '', fr: 'Produit', en: '' },
-              basePrice: 0,
-              images: [],
-            },
-            quantity,
-            price: 0,
-            total: 0,
-            variant: options?.selectedSize || options?.selectedColor
-              ? {
-                  id: `${productId}-variant`,
-                  size: options?.selectedSize,
-                  color: options?.selectedColor,
-                  price: 0,
-                }
-              : undefined,
-          });
-        }
-
-        // Recalculate totals
-        currentCart.subtotal = currentCart.items.reduce((sum, item) => sum + item.total, 0);
-        currentCart.total = currentCart.subtotal + currentCart.shippingCost - currentCart.discount;
-        currentCart.updatedAt = new Date().toISOString();
-
-        setCart(currentCart);
-        saveGuestCart(currentCart);
-        toast.success('Produit ajouté au panier');
       }
     } catch (error: any) {
       console.error('Error adding to cart:', error);
-      toast.error(error.message || "Erreur lors de l'ajout au panier");
+      toast.error(error.message || 'Erreur lors de l\'ajout au panier');
     }
   };
 
-  const updateQuantity = async (itemId: string, quantity: number) => {
+  const updateQuantity = async (orderLineId: string, quantity: number) => {
     try {
       if (quantity < 1) {
-        await removeItem(itemId);
+        await removeItem(orderLineId);
         return;
       }
 
-      if (isAuthenticated) {
-        const { data } = await updateCartItemMutation({
-          variables: {
-            itemId: Number(itemId),
-            input: {
-              quantity,
-            },
-          },
-        });
+      const { data: result } = await adjustLineMutation({
+        variables: { orderLineId, quantity },
+      });
 
-        if (data?.updateCartItem) {
-          const mappedCart = mapCart(data.updateCartItem);
-          setCart(mappedCart);
-          toast.success('Quantité mise à jour');
+      if (result?.adjustOrderLine) {
+        const response = result.adjustOrderLine;
+
+        if ('errorCode' in response) {
+          toast.error((response as any).message || 'Erreur lors de la mise à jour');
+          return;
         }
-      } else {
-        if (cart) {
-          const updatedCart = {
-            ...cart,
-            items: cart.items.map((item) => {
-              if (item.id === itemId) {
-                const updatedItem = { ...item, quantity };
-                updatedItem.total = updatedItem.price * quantity;
-                return updatedItem;
-              }
-              return item;
-            }),
-          };
-          // Recalculate totals
-          updatedCart.subtotal = updatedCart.items.reduce((sum, item) => sum + item.total, 0);
-          updatedCart.total =
-            updatedCart.subtotal + updatedCart.shippingCost - updatedCart.discount;
-          updatedCart.updatedAt = new Date().toISOString();
 
-          setCart(updatedCart);
-          saveGuestCart(updatedCart);
+        if ('id' in response) {
+          setCart(mapOrderToCart(response as OrderFieldsFragment));
           toast.success('Quantité mise à jour');
         }
       }
@@ -232,34 +166,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const removeItem = async (itemId: string) => {
+  const removeItem = async (orderLineId: string) => {
     try {
-      if (isAuthenticated) {
-        const { data } = await removeFromCartMutation({
-          variables: {
-            itemId: Number(itemId),
-          },
-        });
+      const { data: result } = await removeLineMutation({
+        variables: { orderLineId },
+      });
 
-        if (data?.removeFromCart) {
-          const mappedCart = mapCart(data.removeFromCart);
-          setCart(mappedCart);
-          toast.success('Produit retiré du panier');
+      if (result?.removeOrderLine) {
+        const response = result.removeOrderLine;
+
+        if ('errorCode' in response) {
+          toast.error((response as any).message || 'Erreur lors de la suppression');
+          return;
         }
-      } else {
-        if (cart) {
-          const updatedCart = {
-            ...cart,
-            items: cart.items.filter((item) => item.id !== itemId),
-          };
-          // Recalculate totals
-          updatedCart.subtotal = updatedCart.items.reduce((sum, item) => sum + item.total, 0);
-          updatedCart.total =
-            updatedCart.subtotal + updatedCart.shippingCost - updatedCart.discount;
-          updatedCart.updatedAt = new Date().toISOString();
 
-          setCart(updatedCart);
-          saveGuestCart(updatedCart);
+        if ('id' in response) {
+          setCart(mapOrderToCart(response as OrderFieldsFragment));
           toast.success('Produit retiré du panier');
         }
       }
@@ -271,46 +193,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = async () => {
     try {
-      if (isAuthenticated) {
-        await clearCartMutation();
+      const { data: result } = await removeAllLinesMutation();
+
+      if (result?.removeAllOrderLines) {
+        const response = result.removeAllOrderLines;
+
+        if ('errorCode' in response) {
+          toast.error((response as any).message || 'Erreur lors du vidage du panier');
+          return;
+        }
+
+        if ('id' in response) {
+          setCart(mapOrderToCart(response as OrderFieldsFragment));
+          toast.success('Panier vidé');
+        }
       }
-      setCart(null);
-      localStorage.removeItem('guestCart');
-      toast.success('Panier vidé');
     } catch (error: any) {
       console.error('Error clearing cart:', error);
       toast.error(error.message || 'Erreur lors du vidage du panier');
     }
   };
 
-  const applyCoupon = async (code: string) => {
-    try {
-      // TODO: Implement with GraphQL mutation
-      toast.success('Code promo appliqué');
-    } catch (error) {
-      console.error('Error applying coupon:', error);
-      toast.error('Code promo invalide');
-    }
-  };
-
-  const removeCoupon = async () => {
-    try {
-      // TODO: Implement with GraphQL mutation
-      toast.success('Code promo retiré');
-    } catch (error) {
-      console.error('Error removing coupon:', error);
-    }
-  };
-
-  const itemCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
-
-  const isInCart = (productId: string, variantId?: string) => {
-    if (!cart) return false;
-    return cart.items.some(
-      (item) =>
-        item.product.id === productId && (!variantId || item.variant?.id === variantId)
-    );
-  };
+  const itemCount = cart?.totalQuantity || 0;
 
   return (
     <CartContext.Provider
@@ -321,10 +225,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         updateQuantity,
         removeItem,
         clearCart,
-        applyCoupon,
-        removeCoupon,
         itemCount,
-        isInCart,
+        refetchCart,
       }}
     >
       {children}

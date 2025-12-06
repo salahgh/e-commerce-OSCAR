@@ -4,48 +4,115 @@
 
 @layer base {
   :root {
+    /* OSCAR Fashion - Elegant Warm Theme */
+    /* Light mode */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --foreground: 210 20% 20%;
+
+    /* Primary - Corporate Navy Blue (#2C3E50) */
     --primary: 210 29% 24%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 24 34% 85%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 24 25% 73%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --primary-foreground: 0 0% 98%;
+
+    /* Secondary - Warm Beige (#E8D5C4) */
+    --secondary: 30 30% 90%;
+    --secondary-foreground: 210 20% 20%;
+
+    /* Accent - Taupe Gold (#C9A992) */
+    --accent: 30 35% 69%;
+    --accent-foreground: 210 20% 20%;
+
+    /* Muted backgrounds */
+    --muted: 30 20% 96%;
+    --muted-foreground: 210 10% 45%;
+
+    /* Cards & Popovers */
+    --card: 0 0% 100%;
+    --card-foreground: 210 20% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 20% 20%;
+
+    /* Borders & Inputs */
+    --border: 30 15% 88%;
+    --input: 30 15% 88%;
     --ring: 210 29% 24%;
+
+    /* Status Colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Border Radius - Slightly rounded for elegance */
     --radius: 0.5rem;
+
+    /* Chart colors */
+    --chart-1: 210 29% 24%;
+    --chart-2: 30 35% 69%;
+    --chart-3: 142 76% 36%;
+    --chart-4: 38 92% 50%;
+    --chart-5: 0 84% 60%;
+
+    /* Sidebar */
+    --sidebar-background: 30 20% 98%;
+    --sidebar-foreground: 210 20% 20%;
+    --sidebar-primary: 210 29% 24%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 30 35% 69%;
+    --sidebar-accent-foreground: 210 20% 20%;
+    --sidebar-border: 30 15% 88%;
+    --sidebar-ring: 210 29% 24%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    /* OSCAR Fashion - Dark Mode */
+    --background: 210 20% 8%;
+    --foreground: 30 20% 95%;
+
+    /* Primary - Taupe Gold in dark mode */
+    --primary: 30 35% 69%;
+    --primary-foreground: 210 20% 8%;
+
+    /* Secondary - Dark Navy */
+    --secondary: 210 20% 15%;
+    --secondary-foreground: 30 20% 95%;
+
+    /* Accent - Warm Taupe */
+    --accent: 30 30% 55%;
+    --accent-foreground: 210 20% 8%;
+
+    /* Muted */
+    --muted: 210 15% 15%;
+    --muted-foreground: 30 10% 60%;
+
+    /* Cards & Popovers */
+    --card: 210 18% 10%;
+    --card-foreground: 30 20% 95%;
+    --popover: 210 18% 10%;
+    --popover-foreground: 30 20% 95%;
+
+    /* Borders & Inputs */
+    --border: 210 15% 20%;
+    --input: 210 15% 20%;
+    --ring: 30 35% 69%;
+
+    /* Status Colors */
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Chart colors - dark mode */
+    --chart-1: 30 35% 69%;
+    --chart-2: 210 29% 50%;
+    --chart-3: 142 60% 45%;
+    --chart-4: 38 80% 55%;
+    --chart-5: 0 70% 55%;
+
+    /* Sidebar - dark mode */
+    --sidebar-background: 210 20% 6%;
+    --sidebar-foreground: 30 20% 95%;
+    --sidebar-primary: 30 35% 69%;
+    --sidebar-primary-foreground: 210 20% 8%;
+    --sidebar-accent: 210 20% 15%;
+    --sidebar-accent-foreground: 30 20% 95%;
+    --sidebar-border: 210 15% 20%;
+    --sidebar-ring: 30 35% 69%;
   }
 
   * {
@@ -74,15 +141,15 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-gray-100;
+    @apply bg-muted;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-400 rounded-full;
+    @apply bg-muted-foreground/40 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-500;
+    @apply bg-muted-foreground/60;
   }
 }
 
@@ -142,7 +209,7 @@
 
   /* Skeleton loading */
   .skeleton {
-    @apply animate-pulse bg-gray-200 rounded;
+    @apply animate-pulse bg-muted rounded;
   }
 
   /* Badge */

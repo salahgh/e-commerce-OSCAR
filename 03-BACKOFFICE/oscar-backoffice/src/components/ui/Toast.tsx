@@ -8,10 +8,10 @@ import { removeToast } from '../../store/slices/uiSlice';
 
 const ToastIcon: React.FC<{ type: string }> = ({ type }) => {
   const icons = {
-    success: <CheckCircle className="h-5 w-5 text-green-600" />,
-    error: <XCircle className="h-5 w-5 text-red-600" />,
-    warning: <AlertCircle className="h-5 w-5 text-yellow-600" />,
-    info: <Info className="h-5 w-5 text-blue-600" />,
+    success: <CheckCircle className="h-5 w-5 text-green-400" />,
+    error: <XCircle className="h-5 w-5 text-red-400" />,
+    warning: <AlertCircle className="h-5 w-5 text-yellow-400" />,
+    info: <Info className="h-5 w-5 text-blue-400" />,
   };
   return icons[type as keyof typeof icons] || icons.info;
 };
@@ -32,26 +32,26 @@ const ToastItem: React.FC<ToastItemProps> = ({ id, message, type, onClose }) => 
   }, [id, onClose]);
 
   const typeClasses = {
-    success: 'bg-white border-green-200',
-    error: 'bg-white border-red-200',
-    warning: 'bg-white border-yellow-200',
-    info: 'bg-white border-blue-200',
+    success: 'bg-gray-800 border-green-500',
+    error: 'bg-gray-800 border-red-500',
+    warning: 'bg-gray-800 border-yellow-500',
+    info: 'bg-gray-800 border-blue-500',
   };
 
   return (
     <div
       className={cn(
-        'flex items-start gap-3 p-4 rounded-lg shadow-lg border-l-4 max-w-sm w-full',
+        'flex items-start gap-3 p-4 rounded-lg shadow-lg border-l-4 max-w-sm w-full border border-gray-700',
         typeClasses[type]
       )}
     >
       <div className="flex-shrink-0">
         <ToastIcon type={type} />
       </div>
-      <div className="flex-1 text-sm text-gray-900">{message}</div>
+      <div className="flex-1 text-sm text-gray-100">{message}</div>
       <button
         onClick={onClose}
-        className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+        className="flex-shrink-0 text-gray-500 hover:text-gray-300 transition-colors"
       >
         <X className="h-4 w-4" />
       </button>

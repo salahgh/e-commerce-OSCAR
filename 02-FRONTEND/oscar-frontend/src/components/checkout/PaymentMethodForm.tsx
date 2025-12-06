@@ -48,7 +48,7 @@ export default function PaymentMethodForm({
         <Form className="space-y-6">
           <div>
             <h2 className="text-2xl font-bold mb-2">Mode de paiement</h2>
-            <p className="text-gray-600 mb-6">Choisissez votre mode de paiement</p>
+            <p className="text-muted-foreground mb-6">Choisissez votre mode de paiement</p>
 
             <div className="space-y-3">
               {paymentMethods.map((method) => {
@@ -76,18 +76,18 @@ export default function PaymentMethodForm({
                               'w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors',
                               isSelected && method.available
                                 ? 'border-primary bg-primary'
-                                : 'border-gray-300 bg-white'
+                                : 'border-input bg-background'
                             )}
                           >
                             {isSelected && method.available && (
-                              <div className="w-2 h-2 bg-white rounded-full" />
+                              <div className="w-2 h-2 bg-primary-foreground rounded-full" />
                             )}
                           </div>
                         </div>
 
                         {/* Icon */}
                         <div className="flex-shrink-0">
-                          <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
                             <Icon className="h-6 w-6 text-primary" />
                           </div>
                         </div>
@@ -96,11 +96,11 @@ export default function PaymentMethodForm({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <div>
-                              <h3 className="font-semibold text-gray-900">{method.name}</h3>
-                              <p className="text-sm text-gray-600 mt-1">{method.description}</p>
+                              <h3 className="font-semibold text-foreground">{method.name}</h3>
+                              <p className="text-sm text-muted-foreground mt-1">{method.description}</p>
                             </div>
                             {!method.available && (
-                              <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                              <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded">
                                 Bientôt disponible
                               </span>
                             )}
@@ -119,11 +119,11 @@ export default function PaymentMethodForm({
 
             {/* Payment Info */}
             {values.paymentMethodId === 'cash_on_delivery' && (
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h4 className="font-medium text-blue-900 mb-2">
+              <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                <h4 className="font-medium text-blue-700 dark:text-blue-300 mb-2">
                   Informations sur le paiement à la livraison
                 </h4>
-                <ul className="text-sm text-blue-800 space-y-1">
+                <ul className="text-sm text-blue-600 dark:text-blue-400 space-y-1">
                   <li>• Payez en espèces lors de la réception de votre commande</li>
                   <li>• Vérifiez votre commande avant de payer</li>
                   <li>• Ayez le montant exact si possible</li>

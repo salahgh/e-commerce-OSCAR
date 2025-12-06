@@ -83,6 +83,14 @@ export function buildFacetValueFilters(
 ): Array<{ or?: string[]; and?: string }> {
   if (facetValueIds.length === 0) return [];
 
+  // If facetGroups is empty or not loaded yet, fall back to simple OR logic
+  // This ensures filtering still works even before facets fully load
+  if (facetGroups.length === 0) {
+    // Simple approach: put all selected IDs in a single OR group
+    // This means "match products that have ANY of these facet values"
+    return [{ or: facetValueIds }];
+  }
+
   // Group selected values by facet
   const valuesByFacet = new Map<string, string[]>();
 
@@ -95,6 +103,11 @@ export function buildFacetValueFilters(
       valuesByFacet.set(facet.id, selectedInFacet);
     }
   });
+
+  // If no values were matched (IDs not found in facetGroups), fall back to OR logic
+  if (valuesByFacet.size === 0) {
+    return [{ or: facetValueIds }];
+  }
 
   // Build filters: OR within facet, AND between facets
   const filters: Array<{ or?: string[]; and?: string }> = [];

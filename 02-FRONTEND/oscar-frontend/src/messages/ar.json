@@ -6,5 +6,110 @@
   "Common": {
     "loading": "جاري التحميل...",
     "error": "حدث خطأ"
+  },
+  "auth": {
+    "fields": {
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "phone": "رقم الهاتف"
+    },
+    "placeholders": {
+      "email": "بريدك@example.com",
+      "password": "أدخل كلمة المرور",
+      "confirmPassword": "أكد كلمة المرور",
+      "firstName": "اسمك الأول",
+      "lastName": "اسم عائلتك",
+      "phone": "0555 00 00 00"
+    },
+    "login": {
+      "title": "تسجيل الدخول",
+      "noAccount": "ليس لديك حساب؟",
+      "signUp": "إنشاء حساب",
+      "rememberMe": "تذكرني",
+      "forgotPassword": "نسيت كلمة المرور؟",
+      "signIn": "دخول",
+      "signingIn": "جاري الدخول...",
+      "termsNotice": "بالمتابعة، أنت توافق على",
+      "termsLink": "شروط الاستخدام",
+      "resendVerification": "إعادة إرسال بريد التحقق"
+    },
+    "register": {
+      "title": "إنشاء حساب",
+      "hasAccount": "لديك حساب بالفعل؟",
+      "signIn": "تسجيل الدخول",
+      "createAccount": "إنشاء حساب",
+      "creating": "جاري الإنشاء...",
+      "termsNotice": "بإنشاء حساب، أنت توافق على",
+      "termsLink": "شروط الاستخدام",
+      "success": "تم إنشاء الحساب بنجاح!",
+      "checkEmail": "تحقق من بريدك الإلكتروني لتفعيل حسابك."
+    },
+    "forgotPassword": {
+      "title": "نسيت كلمة المرور",
+      "description": "أدخل بريدك الإلكتروني لاستلام رابط إعادة التعيين.",
+      "sendLink": "إرسال الرابط",
+      "sending": "جاري الإرسال...",
+      "backToLogin": "العودة لتسجيل الدخول",
+      "success": "تم الإرسال!",
+      "checkEmail": "تحقق من بريدك لإعادة تعيين كلمة المرور."
+    },
+    "resetPassword": {
+      "title": "كلمة مرور جديدة",
+      "description": "أدخل كلمة المرور الجديدة.",
+      "reset": "إعادة التعيين",
+      "resetting": "جاري إعادة التعيين...",
+      "success": "تم تغيير كلمة المرور!",
+      "redirecting": "جاري التوجيه..."
+    },
+    "verifyEmail": {
+      "title": "التحقق من البريد",
+      "verifying": "جاري التحقق...",
+      "success": "تم التحقق بنجاح!",
+      "redirecting": "جاري التوجيه..."
+    },
+    "verificationPending": {
+      "title": "تحقق من بريدك",
+      "description": "أرسلنا بريد تحقق إلى",
+      "resend": "إعادة الإرسال",
+      "resending": "جاري الإرسال...",
+      "resent": "تم الإرسال!",
+      "checkSpam": "تحقق أيضا من مجلد الرسائل غير المرغوبة."
+    },
+    "profile": {
+      "title": "ملفي الشخصي",
+      "personalInfo": "المعلومات الشخصية",
+      "security": "الأمان",
+      "addresses": "العناوين",
+      "updateProfile": "تحديث",
+      "updating": "جاري التحديث...",
+      "changePassword": "تغيير كلمة المرور",
+      "currentPassword": "كلمة المرور الحالية",
+      "newPassword": "كلمة المرور الجديدة",
+      "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
+      "passwordChanged": "تم تغيير كلمة المرور بنجاح!"
+    },
+    "errors": {
+      "loginFailed": "بيانات الدخول غير صحيحة",
+      "emailNotVerified": "يرجى التحقق من بريدك قبل تسجيل الدخول.",
+      "registrationFailed": "فشل التسجيل",
+      "passwordMismatch": "كلمات المرور غير متطابقة",
+      "invalidToken": "رابط غير صالح أو منتهي الصلاحية",
+      "invalidEmail": "بريد إلكتروني غير صالح",
+      "passwordTooShort": "يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل",
+      "required": "هذا الحقل مطلوب"
+    },
+    "validation": {
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "بريد إلكتروني غير صالح",
+      "passwordRequired": "كلمة المرور مطلوبة",
+      "passwordMin": "يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل",
+      "firstNameRequired": "الاسم الأول مطلوب",
+      "lastNameRequired": "اسم العائلة مطلوب",
+      "phoneInvalid": "رقم هاتف غير صالح",
+      "termsRequired": "يجب قبول الشروط"
+    }
   }
 }

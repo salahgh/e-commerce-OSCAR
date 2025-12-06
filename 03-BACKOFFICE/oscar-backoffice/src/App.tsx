@@ -6,34 +6,32 @@ import { store } from './store/store';
 import { MainLayout } from './components/layout/MainLayout';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { Login } from './pages/Login';
-import { Register } from './pages/auth/Register';
-import { PasswordReset } from './pages/auth/PasswordReset';
 import { Dashboard } from './pages/Dashboard';
 import { ProductList } from './pages/products/ProductList';
-import { ProductForm } from './pages/products/ProductForm';
-import { ProductDetail } from './pages/products/ProductDetail';
+import { ProductView } from './pages/products/ProductView';
+import { ProductEdit } from './pages/products/ProductEdit';
+import { ProductCreate } from './pages/products/ProductCreate';
 import { OrderList } from './pages/orders/OrderList';
 import { OrderDetail } from './pages/orders/OrderDetail';
-import { CreateOrder } from './pages/orders/CreateOrder';
+import { CustomerList } from './pages/customers/CustomerList';
+import { CustomerDetail } from './pages/customers/CustomerDetail';
 import { CategoryList } from './pages/categories/CategoryList';
-import { CategoryForm } from './pages/categories/CategoryForm';
-import { UserList } from './pages/users/UserList';
-import { UserDetail } from './pages/users/UserDetail';
-import { Cart } from './pages/cart/Cart';
-import { Profile } from './pages/profile/Profile';
-import { Reports } from './pages/reports/Reports';
+import { CategoryDetail } from './pages/categories/CategoryDetail';
+import { AdminProfile } from './pages/profile/AdminProfile';
 import { Settings } from './pages/settings/Settings';
+import { Reports } from './pages/reports/Reports';
+import { BulkOperations } from './pages/products/BulkOperations';
+import { UserList, UserDetail, UserForm, RoleList, RoleForm } from './pages/users';
 
 function App() {
   return (
-    <ReduxProvider store={store}>
-      <ApolloProvider client={apolloClient}>
-        <BrowserRouter>
+    <div className="dark">
+      <ReduxProvider store={store}>
+        <ApolloProvider client={apolloClient}>
+          <BrowserRouter>
           <Routes>
             {/* Public routes */}
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/reset-password" element={<PasswordReset />} />
 
             {/* Protected routes */}
             <Route
@@ -49,48 +47,59 @@ function App() {
               {/* Products */}
               <Route path="products">
                 <Route index element={<ProductList />} />
-                <Route path="new" element={<ProductForm />} />
-                <Route path="edit/:id" element={<ProductForm />} />
-                <Route path=":id" element={<ProductDetail />} />
-              </Route>
-
-              {/* Categories */}
-              <Route path="categories">
-                <Route index element={<CategoryList />} />
-                <Route path="new" element={<CategoryForm />} />
-                <Route path="edit/:id" element={<CategoryForm />} />
+                <Route path="new" element={<ProductCreate />} />
+                <Route path="bulk" element={<BulkOperations />} />
+                <Route path=":id" element={<ProductView />} />
+                <Route path=":id/edit" element={<ProductEdit />} />
               </Route>
 
               {/* Orders */}
               <Route path="orders">
                 <Route index element={<OrderList />} />
-                <Route path="new" element={<CreateOrder />} />
                 <Route path=":id" element={<OrderDetail />} />
               </Route>
 
-              {/* Users */}
-              <Route path="users">
-                <Route index element={<UserList />} />
-                <Route path=":id" element={<UserDetail />} />
+              {/* Customers */}
+              <Route path="customers">
+                <Route index element={<CustomerList />} />
+                <Route path=":id" element={<CustomerDetail />} />
               </Route>
 
-              {/* Cart */}
-              <Route path="cart" element={<Cart />} />
+              {/* Categories */}
+              <Route path="categories">
+                <Route index element={<CategoryList />} />
+                <Route path="new" element={<CategoryDetail />} />
+                <Route path=":id" element={<CategoryDetail />} />
+              </Route>
+
+              {/* Users (Administrators) */}
+              <Route path="users">
+                <Route index element={<UserList />} />
+                <Route path="new" element={<UserForm />} />
+                <Route path=":id" element={<UserDetail />} />
+                <Route path=":id/edit" element={<UserForm />} />
+                <Route path="roles" element={<RoleList />} />
+                <Route path="roles/new" element={<RoleForm />} />
+                <Route path="roles/:id/edit" element={<RoleForm />} />
+              </Route>
 
               {/* Profile */}
-              <Route path="profile" element={<Profile />} />
+              <Route path="profile" element={<AdminProfile />} />
 
-              {/* Reports & Settings */}
-              <Route path="reports" element={<Reports />} />
+              {/* Settings */}
               <Route path="settings" element={<Settings />} />
+
+              {/* Reports */}
+              <Route path="reports" element={<Reports />} />
             </Route>
 
             {/* Catch all */}
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </ApolloProvider>
-    </ReduxProvider>
+            </Routes>
+          </BrowserRouter>
+        </ApolloProvider>
+      </ReduxProvider>
+    </div>
   );
 }
 

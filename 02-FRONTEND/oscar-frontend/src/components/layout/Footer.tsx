@@ -38,7 +38,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-gray-50 border-t border-gray-200">
+    <footer className="bg-muted border-t border-border">
       {/* Newsletter */}
       <div className="bg-primary text-primary-foreground py-12">
         <div className="container-custom">
@@ -68,10 +68,10 @@ export default function Footer() {
               <span className="text-2xl font-bold text-primary">OSCAR</span>
               <span className="text-2xl font-light text-secondary ml-1">Fashion</span>
             </Link>
-            <p className="text-gray-600 mb-4">
+            <p className="text-muted-foreground mb-4">
               Découvrez l'élégance et le style avec OSCAR Fashion. Votre destination pour la mode en Algérie.
             </p>
-            <div className="space-y-2 text-sm text-gray-600">
+            <div className="space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
                 <span>Alger, Algérie</span>
@@ -89,11 +89,11 @@ export default function Footer() {
 
           {/* Shop */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-4">Boutique</h4>
+            <h4 className="font-semibold text-foreground mb-4">Boutique</h4>
             <ul className="space-y-2">
               {footerLinks.shop.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-gray-600 hover:text-primary transition-colors text-sm">
+                  <Link href={link.href} className="text-muted-foreground hover:text-primary transition-colors text-sm">
                     {link.name}
                   </Link>
                 </li>
@@ -103,11 +103,11 @@ export default function Footer() {
 
           {/* Help */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-4">Aide</h4>
+            <h4 className="font-semibold text-foreground mb-4">Aide</h4>
             <ul className="space-y-2">
               {footerLinks.help.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-gray-600 hover:text-primary transition-colors text-sm">
+                  <Link href={link.href} className="text-muted-foreground hover:text-primary transition-colors text-sm">
                     {link.name}
                   </Link>
                 </li>
@@ -117,11 +117,11 @@ export default function Footer() {
 
           {/* About */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-4">À propos</h4>
+            <h4 className="font-semibold text-foreground mb-4">À propos</h4>
             <ul className="space-y-2 mb-6">
               {footerLinks.about.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-gray-600 hover:text-primary transition-colors text-sm">
+                  <Link href={link.href} className="text-muted-foreground hover:text-primary transition-colors text-sm">
                     {link.name}
                   </Link>
                 </li>
@@ -134,7 +134,7 @@ export default function Footer() {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 bg-gray-200 rounded-full hover:bg-primary hover:text-white transition-colors"
+                className="p-2 bg-muted-foreground/20 rounded-full hover:bg-primary hover:text-white transition-colors"
                 aria-label="Facebook"
               >
                 <Facebook className="h-4 w-4" />
@@ -143,7 +143,7 @@ export default function Footer() {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 bg-gray-200 rounded-full hover:bg-primary hover:text-white transition-colors"
+                className="p-2 bg-muted-foreground/20 rounded-full hover:bg-primary hover:text-white transition-colors"
                 aria-label="Instagram"
               >
                 <Instagram className="h-4 w-4" />
@@ -152,7 +152,7 @@ export default function Footer() {
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 bg-gray-200 rounded-full hover:bg-primary hover:text-white transition-colors"
+                className="p-2 bg-muted-foreground/20 rounded-full hover:bg-primary hover:text-white transition-colors"
                 aria-label="Twitter"
               >
                 <Twitter className="h-4 w-4" />
@@ -163,9 +163,9 @@ export default function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-gray-200 py-6">
+      <div className="border-t border-border py-6">
         <div className="container-custom">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
             <p>© 2024 OSCAR Fashion. Tous droits réservés.</p>
             <div className="flex gap-6">
               {footerLinks.legal.map((link) => (

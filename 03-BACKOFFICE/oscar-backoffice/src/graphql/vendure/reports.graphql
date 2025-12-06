@@ -16,6 +16,7 @@ query SalesReportOrders($options: OrderListOptions) {
         id
         firstName
         lastName
+        emailAddress
       }
       lines {
         id

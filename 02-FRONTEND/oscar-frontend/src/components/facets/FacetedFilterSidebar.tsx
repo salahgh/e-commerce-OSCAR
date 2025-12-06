@@ -42,7 +42,7 @@ const FACET_ICONS: Record<string, React.ComponentType<{ className?: string }>> =
 const FACET_GRADIENTS: Record<string, string> = {
   'color-swatch': 'from-pink-500/10 via-purple-500/10 to-blue-500/10',
   'size-button': 'from-blue-500/10 via-cyan-500/10 to-teal-500/10',
-  checkbox: 'from-gray-100 to-gray-50',
+  checkbox: 'from-muted to-muted/50',
   'price-range': 'from-amber-500/10 via-orange-500/10 to-red-500/10',
 };
 
@@ -78,17 +78,17 @@ export function FacetedFilterSidebar({
   const totalActiveFilters = state.facetValueIds.length + (state.priceMin || state.priceMax ? 1 : 0);
 
   return (
-    <div className={cn('bg-white rounded-xl shadow-lg border border-gray-100', className)}>
+    <div className={cn('bg-card rounded-xl shadow-lg border border-border', className)}>
       {/* Header */}
-      <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary-50 rounded-lg">
-            <Filter className="h-5 w-5 text-primary-600" />
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Filter className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">Filtres</h3>
+            <h3 className="font-semibold text-foreground">Filtres</h3>
             {totalActiveFilters > 0 && (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 {totalActiveFilters} filtre{totalActiveFilters > 1 ? 's' : ''} actif
                 {totalActiveFilters > 1 ? 's' : ''}
               </p>
@@ -115,10 +115,10 @@ export function FacetedFilterSidebar({
         <div className="p-5 space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="space-y-3">
-              <div className="h-6 bg-gray-200 rounded animate-pulse w-32" />
+              <div className="h-6 bg-muted rounded animate-pulse w-32" />
               <div className="space-y-2">
                 {[1, 2, 3].map((j) => (
-                  <div key={j} className="h-10 bg-gray-100 rounded animate-pulse" />
+                  <div key={j} className="h-10 bg-muted rounded animate-pulse" />
                 ))}
               </div>
             </div>
@@ -128,7 +128,7 @@ export function FacetedFilterSidebar({
 
       {/* Facet Groups */}
       {!loading && (
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-border">
           {/* Price Range (always first) */}
           <FacetSection
             id="price"
@@ -226,13 +226,13 @@ function FacetSection({
         onClick={onToggle}
         className={cn(
           'w-full px-5 py-4 flex items-center justify-between',
-          'hover:bg-gray-50 transition-colors',
+          'hover:bg-muted transition-colors',
           `bg-gradient-to-r ${gradient}`
         )}
       >
         <div className="flex items-center gap-3">
-          <Icon className="h-4 w-4 text-gray-500" />
-          <span className="font-medium text-gray-900">{name}</span>
+          <Icon className="h-4 w-4 text-muted-foreground" />
+          <span className="font-medium text-foreground">{name}</span>
           {selectedCount > 0 && (
             <motion.span
               initial={{ scale: 0 }}
@@ -263,7 +263,7 @@ function FacetSection({
             animate={{ rotate: isExpanded ? 180 : 0 }}
             transition={{ duration: 0.2 }}
           >
-            <ChevronDown className="h-5 w-5 text-gray-400" />
+            <ChevronDown className="h-5 w-5 text-muted-foreground" />
           </motion.div>
         </div>
       </button>

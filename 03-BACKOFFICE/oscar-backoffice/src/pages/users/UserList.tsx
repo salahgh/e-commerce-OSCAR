@@ -1,155 +1,333 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/Table';
+import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import {
+  Users,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Pencil,
+  Trash2,
+  Plus,
+  Shield,
+  Mail,
+  CheckCircle,
+  XCircle,
+} from 'lucide-react';
+import {
+  AdminAdministratorsDocument,
+  DeleteAdministratorDocument,
+} from '../../graphql/generated/graphql';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
-import { Select } from '../../components/ui/Select';
-import { formatDate } from '../../lib/utils';
-import { UsersDocument, UsersByRoleDocument, ToggleUserStatusDocument } from '../../graphql/generated/graphql';
-import { useAppDispatch } from '../../hooks/useAppDispatch';
+import { Spinner } from '../../components/ui/Spinner';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { addToast } from '../../store/slices/uiSlice';
+import { formatDateTime } from '../../lib/utils';
 
 export const UserList: React.FC = () => {
-  const dispatch = useAppDispatch();
-  const [page, setPage] = useState(0);
-  const [size] = useState(20);
-  const [roleFilter, setRoleFilter] = useState('');
+  const dispatch = useDispatch();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const pageSize = 10;
 
-  // Use filtered or all users query
-  const { data: allData, loading: allLoading, error: allError } = useQuery(UsersDocument, {
-    variables: { page, size, sortBy: 'createdAt', sortDirection: 'DESC' },
-    skip: roleFilter !== '',
+  const { data, loading, error, refetch } = useQuery(AdminAdministratorsDocument, {
+    variables: {
+      options: {
+        skip: currentPage * pageSize,
+        take: pageSize,
+        sort: { createdAt: 'DESC' as any },
+        filter: searchTerm
+          ? {
+              _or: [
+                { firstName: { contains: searchTerm } },
+                { lastName: { contains: searchTerm } },
+                { emailAddress: { contains: searchTerm } },
+              ],
+            }
+          : undefined,
+      },
+    },
   });
 
-  const { data: filteredData, loading: filteredLoading, error: filteredError } = useQuery(UsersByRoleDocument, {
-    variables: { role: roleFilter, page, size },
-    skip: roleFilter === '',
-  });
-
-  const data = roleFilter ? filteredData?.usersByRole : allData?.users;
-  const loading = roleFilter ? filteredLoading : allLoading;
-  const error = roleFilter ? filteredError : allError;
-
-  const [toggleUserStatus, { loading: toggling }] = useMutation(ToggleUserStatusDocument, {
-    refetchQueries: [
-      { query: UsersDocument, variables: { page, size, sortBy: 'createdAt', sortDirection: 'DESC' } },
-      ...(roleFilter ? [{ query: UsersByRoleDocument, variables: { role: roleFilter, page, size } }] : []),
-    ],
-  });
-
-  const handleToggleStatus = async (userId: number, currentStatus: boolean) => {
-    try {
-      await toggleUserStatus({ variables: { userId } });
-      dispatch(
-        addToast({
-          message: `Utilisateur ${currentStatus ? 'désactivé' : 'activé'} avec succès`,
-          type: 'success',
-        })
-      );
-    } catch (error: any) {
-      console.error('Toggle user status error:', error);
-      dispatch(
-        addToast({
-          message: error.message || 'Erreur lors du changement de statut',
+  const [deleteAdmin, { loading: deleting }] = useMutation(DeleteAdministratorDocument, {
+    onCompleted: (result) => {
+      if (result.deleteAdministrator.result === 'DELETED') {
+        dispatch(addToast({ type: 'success', message: 'Administrateur supprimé avec succès' }));
+        refetch();
+      } else {
+        dispatch(addToast({
           type: 'error',
-        })
-      );
+          message: result.deleteAdministrator.message || 'Erreur lors de la suppression',
+        }));
+      }
+      setDeleteId(null);
+    },
+    onError: (err) => {
+      dispatch(addToast({ type: 'error', message: err.message }));
+      setDeleteId(null);
+    },
+  });
+
+  const administrators = data?.administrators?.items || [];
+  const totalItems = data?.administrators?.totalItems || 0;
+  const totalPages = Math.ceil(totalItems / pageSize);
+
+  const handleDelete = () => {
+    if (deleteId) {
+      deleteAdmin({ variables: { id: deleteId } });
     }
   };
+
+  const getRoleBadgeVariant = (code: string): 'default' | 'warning' | 'success' | 'danger' => {
+    if (code === '__super_admin_role__' || code.toLowerCase().includes('super')) {
+      return 'danger';
+    }
+    if (code.toLowerCase().includes('admin')) {
+      return 'warning';
+    }
+    return 'default';
+  };
+
+  const formatRoleCode = (code: string): string => {
+    if (code === '__super_admin_role__') return 'Super Admin';
+    return code
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (l) => l.toUpperCase());
+  };
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <p className="text-red-500 text-lg">Erreur: {error.message}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Utilisateurs</h1>
-        <p className="text-gray-600 mt-1">Gérez les utilisateurs et administrateurs</p>
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        title="Supprimer l'administrateur"
+        message="Êtes-vous sûr de vouloir supprimer cet administrateur ? Cette action est irréversible."
+        confirmText={deleting ? 'Suppression...' : 'Supprimer'}
+        loading={deleting}
+      />
+
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-100">Administrateurs</h1>
+          <p className="text-gray-400 mt-1">
+            {totalItems} administrateur{totalItems > 1 ? 's' : ''}
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <Link
+            to="/users/roles"
+            className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 flex items-center gap-2"
+          >
+            <Shield className="h-5 w-5" />
+            Gérer les rôles
+          </Link>
+          <Link
+            to="/users/new"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          >
+            <Plus className="h-5 w-5" />
+            Nouvel admin
+          </Link>
+        </div>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Select
-              value={roleFilter}
-              onChange={(e) => {
-                setRoleFilter(e.target.value);
-                setPage(0);
-              }}
-              options={[
-                { value: '', label: 'Tous les rôles' },
-                { value: 'CUSTOMER', label: 'Clients' },
-                { value: 'ADMIN', label: 'Administrateurs' },
-              ]}
-            />
-            <Button variant="outline" onClick={() => { setRoleFilter(''); setPage(0); }}>
-              Réinitialiser
-            </Button>
+      {/* Search */}
+      <div className="bg-gray-800 rounded-lg shadow p-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+          <input
+            type="text"
+            placeholder="Rechercher par nom ou email..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(0);
+            }}
+            className="w-full pl-10 pr-4 py-3 border border-gray-600 rounded-lg bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+          />
+        </div>
+      </div>
+
+      {/* Administrators Table */}
+      <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Spinner size="lg" />
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            {loading ? 'Chargement...' : error ? 'Erreur' : `${data?.totalElements || 0} utilisateurs`}
-            {roleFilter && ` (rôle: ${roleFilter === 'CUSTOMER' ? 'Clients' : 'Administrateurs'})`}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {loading && (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-gray-500">Chargement des utilisateurs...</div>
-            </div>
-          )}
-
-          {error && (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-red-500">Erreur: {error.message}</div>
-            </div>
-          )}
-
-          {!loading && !error && data?.content && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Rôle</TableHead>
-                  <TableHead>Inscription</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.content.map((user: any) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.firstName} {user.lastName}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="info">{user.role}</Badge>
-                    </TableCell>
-                    <TableCell>{formatDate(String(user.createdAt))}</TableCell>
-                    <TableCell>
-                      <Badge variant={user.isActive ? 'success' : 'default'}>
-                        {user.isActive ? 'Actif' : 'Inactif'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant={user.isActive ? 'ghost' : 'outline'}
-                        size="sm"
-                        onClick={() => handleToggleStatus(Number(user.id), user.isActive)}
-                        disabled={toggling}
-                      >
-                        {user.isActive ? 'Désactiver' : 'Activer'}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+        ) : administrators.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Users className="h-16 w-16 text-gray-500 mb-4" />
+            <p className="text-gray-400 text-lg">Aucun administrateur trouvé</p>
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="mt-4 text-blue-600 hover:text-blue-700"
+              >
+                Effacer la recherche
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            <table className="min-w-full divide-y divide-gray-700">
+              <thead className="bg-gray-800/50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Administrateur
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Rôles
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Statut
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Dernière connexion
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-gray-800 divide-y divide-gray-700">
+                {administrators.map((admin) => (
+                  <tr key={admin.id} className="hover:bg-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 rounded-full bg-blue-900/50 flex items-center justify-center">
+                          <span className="text-blue-400 font-semibold">
+                            {(admin.firstName?.[0] || '') + (admin.lastName?.[0] || '')}
+                          </span>
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-100">
+                            {admin.firstName} {admin.lastName}
+                          </div>
+                          <div className="text-sm text-gray-500">ID: {admin.id}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-100 flex items-center gap-1">
+                        <Mail className="h-4 w-4 text-gray-500" />
+                        {admin.emailAddress}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-wrap gap-1">
+                        {admin.user?.roles?.map((role) => (
+                          <Badge
+                            key={role.id}
+                            variant={getRoleBadgeVariant(role.code)}
+                            className="text-xs"
+                          >
+                            {formatRoleCode(role.code)}
+                          </Badge>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {admin.user?.verified ? (
+                        <Badge variant="success" className="flex items-center gap-1 w-fit">
+                          <CheckCircle className="h-3 w-3" />
+                          Actif
+                        </Badge>
+                      ) : (
+                        <Badge variant="warning" className="flex items-center gap-1 w-fit">
+                          <XCircle className="h-3 w-3" />
+                          En attente
+                        </Badge>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                      {admin.user?.lastLogin
+                        ? formatDateTime(admin.user.lastLogin)
+                        : 'Jamais connecté'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Link
+                          to={`/users/${admin.id}`}
+                          className="text-blue-400 hover:text-blue-300 p-2 rounded-lg hover:bg-blue-900/50"
+                          title="Voir les détails"
+                        >
+                          <Eye className="h-5 w-5" />
+                        </Link>
+                        <Link
+                          to={`/users/${admin.id}/edit`}
+                          className="text-yellow-400 hover:text-yellow-300 p-2 rounded-lg hover:bg-yellow-900/50"
+                          title="Modifier"
+                        >
+                          <Pencil className="h-5 w-5" />
+                        </Link>
+                        <button
+                          onClick={() => setDeleteId(admin.id)}
+                          className="text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-red-900/50"
+                          title="Supprimer"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+              </tbody>
+            </table>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="bg-gray-800/50 px-6 py-4 flex items-center justify-between border-t border-gray-700">
+                <div className="text-sm text-gray-400">
+                  Page {currentPage + 1} sur {totalPages} ({totalItems} administrateurs)
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+                    disabled={currentPage === 0}
+                    className="px-3 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Précédent
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
+                    disabled={currentPage >= totalPages - 1}
+                    className="px-3 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                  >
+                    Suivant
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

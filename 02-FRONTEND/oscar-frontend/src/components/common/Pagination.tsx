@@ -105,7 +105,7 @@ export default function Pagination({
         return (
           <Button
             key={pageNum}
-            variant={isActive ? 'primary' : 'outline'}
+            variant={isActive ? 'default' : 'outline'}
             size="sm"
             asChild={!onPageChange && !isActive}
             disabled={isActive}

@@ -1,19 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
-import { Formik, Form } from 'formik';
+import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import {
   ArrowLeft,
   Save,
   FolderTree,
-  Image,
+  Image as ImageIcon,
   Globe,
   Settings,
   Eye,
   EyeOff,
   ChevronRight,
   Package,
+  Upload,
+  X,
+  Trash2,
+  GripVertical,
+  Sparkles,
+  Info,
+  AlertCircle,
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { addToast } from '../../store/slices/uiSlice';
@@ -22,18 +29,22 @@ import {
   AdminCollectionsDocument,
   CreateCollectionDocument,
   UpdateCollectionDocument,
+  MoveCollectionDocument,
 } from '../../graphql/generated/graphql';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
-import { Textarea } from '../../components/ui/Textarea';
+import { TextArea } from '../../components/ui/TextArea';
 import { Select } from '../../components/ui/Select';
 import { Spinner } from '../../components/ui/Spinner';
 import { Tabs } from '../../components/ui/Tabs';
 import { Badge } from '../../components/ui/Badge';
+import { cn } from '../../lib/utils';
 
 const validationSchema = Yup.object({
-  name: Yup.string().required('Nom requis'),
-  slug: Yup.string().required('Slug requis'),
+  name: Yup.string().required('Nom requis').min(2, 'Minimum 2 caracteres'),
+  slug: Yup.string()
+    .required('Slug requis')
+    .matches(/^[a-z0-9-]+$/, 'Slug invalide (lettres minuscules, chiffres et tirets uniquement)'),
 });
 
 interface FormValues {
@@ -49,16 +60,35 @@ interface FormValues {
   displayOrder: number;
 }
 
+interface ImageFile {
+  file?: File;
+  preview: string;
+  isExisting?: boolean;
+  id?: string;
+}
+
 export const CategoryDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const isNew = id === 'new';
+  const isNew = !id || id === 'new';
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [featuredImage, setFeaturedImage] = useState<ImageFile | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Fetch current collection (if editing)
   const { data, loading, error } = useQuery(AdminCollectionDocument, {
-    variables: { id: id! },
+    variables: { id: isNew ? '0' : id! },
     skip: isNew,
+    onCompleted: (data) => {
+      if (data?.collection?.featuredAsset) {
+        setFeaturedImage({
+          preview: data.collection.featuredAsset.preview,
+          isExisting: true,
+          id: data.collection.featuredAsset.id,
+        });
+      }
+    },
   });
 
   // Fetch all collections for parent dropdown
@@ -68,9 +98,48 @@ export const CategoryDetail: React.FC = () => {
 
   const [createCollection, { loading: creating }] = useMutation(CreateCollectionDocument);
   const [updateCollection, { loading: updating }] = useMutation(UpdateCollectionDocument);
+  const [moveCollection] = useMutation(MoveCollectionDocument);
 
   const collection = data?.collection;
   const allCollections = collectionsData?.collections?.items || [];
+
+  // Handle image selection
+  const handleImageSelect = useCallback((file: File) => {
+    if (!file.type.startsWith('image/')) {
+      dispatch(addToast({ message: 'Veuillez selectionner une image valide', type: 'error' }));
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      dispatch(addToast({ message: 'Image trop volumineuse (max 5MB)', type: 'error' }));
+      return;
+    }
+
+    const preview = URL.createObjectURL(file);
+    setFeaturedImage({ file, preview, isExisting: false });
+  }, [dispatch]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleImageSelect(file);
+  }, [handleImageSelect]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  const removeImage = useCallback(() => {
+    if (featuredImage?.preview && !featuredImage.isExisting) {
+      URL.revokeObjectURL(featuredImage.preview);
+    }
+    setFeaturedImage(null);
+  }, [featuredImage]);
 
   // Build parent options (excluding current collection and its children)
   const getParentOptions = () => {
@@ -79,7 +148,6 @@ export const CategoryDetail: React.FC = () => {
     const excludeIds = new Set<string>();
     if (!isNew && id) {
       excludeIds.add(id);
-      // Also exclude children to prevent circular reference
       const addChildren = (parentId: string) => {
         allCollections.forEach((c) => {
           if (c.parentId === parentId) {
@@ -95,10 +163,11 @@ export const CategoryDetail: React.FC = () => {
       .filter((c) => !excludeIds.has(c.id))
       .forEach((c) => {
         const depth = c.breadcrumbs ? c.breadcrumbs.length - 1 : 0;
-        const prefix = '  '.repeat(depth);
+        const prefix = '\u00A0\u00A0'.repeat(depth);
+        const icon = depth > 0 ? '└ ' : '';
         options.push({
           value: c.id,
-          label: `${prefix}${c.name}`,
+          label: `${prefix}${icon}${c.name}`,
         });
       });
 
@@ -116,8 +185,10 @@ export const CategoryDetail: React.FC = () => {
 
   const handleSubmit = async (values: FormValues) => {
     try {
-      const input = {
-        ...(isNew ? {} : { id }),
+      // TODO: Handle image upload to Vendure asset system
+      // For now, we just save the form data
+
+      const baseInput = {
         translations: [
           {
             languageCode: 'en' as any,
@@ -127,7 +198,6 @@ export const CategoryDetail: React.FC = () => {
           },
         ],
         filters: [],
-        parentId: values.parentId || undefined,
         isPrivate: values.isPrivate,
         customFields: {
           nameFr: values.nameFr || null,
@@ -139,25 +209,50 @@ export const CategoryDetail: React.FC = () => {
       };
 
       if (isNew) {
-        await createCollection({ variables: { input } });
-        dispatch(addToast({
-          message: 'Catégorie créée avec succès',
-          type: 'success',
-        }));
+        const createInput = {
+          ...baseInput,
+          parentId: values.parentId || undefined,
+        };
+        await createCollection({ variables: { input: createInput } });
+        dispatch(
+          addToast({
+            message: 'Categorie creee avec succes',
+            type: 'success',
+          })
+        );
       } else {
-        await updateCollection({ variables: { input: { ...input, id: id! } } });
-        dispatch(addToast({
-          message: 'Catégorie mise à jour avec succès',
-          type: 'success',
-        }));
+        await updateCollection({ variables: { input: { ...baseInput, id: id! } } });
+
+        const currentParentId = collection?.parentId || '';
+        const newParentId = values.parentId || '';
+        if (currentParentId !== newParentId) {
+          await moveCollection({
+            variables: {
+              input: {
+                collectionId: id!,
+                parentId: newParentId || '1',
+                index: 0,
+              },
+            },
+          });
+        }
+
+        dispatch(
+          addToast({
+            message: 'Categorie mise a jour avec succes',
+            type: 'success',
+          })
+        );
       }
 
       navigate('/categories');
     } catch (err: any) {
-      dispatch(addToast({
-        message: err.message || 'Erreur lors de la sauvegarde',
-        type: 'error',
-      }));
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de la sauvegarde',
+          type: 'error',
+        })
+      );
     }
   };
 
@@ -173,11 +268,14 @@ export const CategoryDetail: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
-          <p className="text-red-500 text-lg">
-            {error ? `Erreur: ${error.message}` : 'Catégorie non trouvée'}
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="h-8 w-8 text-red-600" />
+          </div>
+          <p className="text-red-600 text-lg font-medium">
+            {error ? `Erreur: ${error.message}` : 'Categorie non trouvee'}
           </p>
           <Button variant="secondary" onClick={() => navigate('/categories')} className="mt-4">
-            Retour à la liste
+            Retour a la liste
           </Button>
         </div>
       </div>
@@ -197,206 +295,8 @@ export const CategoryDetail: React.FC = () => {
     displayOrder: collection?.customFields?.displayOrder || 0,
   };
 
-  const tabs = [
-    {
-      id: 'general',
-      label: 'Général',
-      icon: <Settings className="h-4 w-4" />,
-      content: (
-        <div className="space-y-6">
-          <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
-            enableReinitialize
-          >
-            {({ values, errors, touched, handleChange, handleBlur, setFieldValue }) => (
-              <Form className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Input
-                    label="Nom"
-                    name="name"
-                    value={values.name}
-                    onChange={(e) => {
-                      handleChange(e);
-                      if (isNew && !touched.slug) {
-                        setFieldValue('slug', generateSlug(e.target.value));
-                      }
-                    }}
-                    onBlur={handleBlur}
-                    error={touched.name && errors.name ? String(errors.name) : undefined}
-                    required
-                  />
-                  <Input
-                    label="Slug (URL)"
-                    name="slug"
-                    value={values.slug}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={touched.slug && errors.slug ? String(errors.slug) : undefined}
-                    required
-                  />
-                </div>
-
-                <Textarea
-                  label="Description"
-                  name="description"
-                  value={values.description}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  rows={3}
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Select
-                    label="Catégorie parente"
-                    name="parentId"
-                    value={values.parentId}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    options={getParentOptions()}
-                  />
-                  <Input
-                    label="Ordre d'affichage"
-                    name="displayOrder"
-                    type="number"
-                    value={String(values.displayOrder)}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                  />
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      name="isPrivate"
-                      checked={values.isPrivate}
-                      onChange={handleChange}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Catégorie privée (non visible sur le site)</span>
-                  </label>
-                </div>
-
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-                    <Globe className="h-5 w-5" />
-                    Traductions
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <h4 className="font-medium text-gray-700">Français</h4>
-                      <Input
-                        label="Nom (FR)"
-                        name="nameFr"
-                        value={values.nameFr}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                      />
-                      <Textarea
-                        label="Description (FR)"
-                        name="descriptionFr"
-                        value={values.descriptionFr}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        rows={3}
-                      />
-                    </div>
-                    <div className="space-y-4">
-                      <h4 className="font-medium text-gray-700">العربية</h4>
-                      <Input
-                        label="الاسم (AR)"
-                        name="nameAr"
-                        value={values.nameAr}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        dir="rtl"
-                      />
-                      <Textarea
-                        label="الوصف (AR)"
-                        name="descriptionAr"
-                        value={values.descriptionAr}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        rows={3}
-                        dir="rtl"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4 border-t">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => navigate('/categories')}
-                  >
-                    Annuler
-                  </Button>
-                  <Button
-                    type="submit"
-                    loading={creating || updating}
-                    icon={<Save className="h-4 w-4" />}
-                  >
-                    {isNew ? 'Créer' : 'Enregistrer'}
-                  </Button>
-                </div>
-              </Form>
-            )}
-          </Formik>
-        </div>
-      ),
-    },
-  ];
-
-  // Add children tab if editing and has children
-  if (!isNew && collection?.children && collection.children.length > 0) {
-    tabs.push({
-      id: 'children',
-      label: `Sous-catégories (${collection.children.length})`,
-      icon: <FolderTree className="h-4 w-4" />,
-      content: (
-        <div className="space-y-4">
-          {collection.children.map((child) => (
-            <div
-              key={child.id}
-              className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <ChevronRight className="h-4 w-4 text-gray-400" />
-                <div>
-                  <p className="font-medium text-gray-900">{child.name}</p>
-                  <p className="text-sm text-gray-500">
-                    {child.customFields?.nameFr && `FR: ${child.customFields.nameFr}`}
-                    {child.customFields?.nameFr && child.customFields?.nameAr && ' • '}
-                    {child.customFields?.nameAr && <span dir="rtl">AR: {child.customFields.nameAr}</span>}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1 text-sm text-gray-500">
-                  <Package className="h-4 w-4" />
-                  <span>{child.productVariants?.totalItems || 0}</span>
-                </div>
-                <Badge variant="default">Pos: {child.position}</Badge>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate(`/categories/${child.id}`)}
-                >
-                  Modifier
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      ),
-    });
-  }
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-8">
       {/* Header */}
       <div className="flex items-center gap-4">
         <button
@@ -407,20 +307,20 @@ export const CategoryDetail: React.FC = () => {
         </button>
         <div className="flex-1">
           <h1 className="text-3xl font-bold text-gray-900">
-            {isNew ? 'Nouvelle catégorie' : collection?.name}
+            {isNew ? 'Nouvelle categorie' : collection?.name}
           </h1>
           {!isNew && collection && (
             <div className="flex items-center gap-2 mt-1 text-gray-600">
               {collection.breadcrumbs?.map((crumb, index) => (
                 <React.Fragment key={crumb.id}>
                   {index > 0 && <ChevronRight className="h-4 w-4" />}
-                  <span>{crumb.name}</span>
+                  <span className="text-sm">{crumb.name}</span>
                 </React.Fragment>
               ))}
               {collection.isPrivate && (
                 <Badge variant="warning" className="ml-2">
                   <EyeOff className="h-3 w-3 mr-1" />
-                  Privé
+                  Prive
                 </Badge>
               )}
             </div>
@@ -428,49 +328,499 @@ export const CategoryDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* Info Card (only when editing) */}
-      {!isNew && collection && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-start gap-6">
-            <div className="h-20 w-20 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
-              {collection.featuredAsset?.preview ? (
-                <img
-                  src={collection.featuredAsset.preview}
-                  alt={collection.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <Image className="h-8 w-8 text-gray-400" />
-              )}
-            </div>
-            <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <p className="text-sm text-gray-500">Position</p>
-                <p className="font-medium">{collection.position}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Produits</p>
-                <p className="font-medium">{collection.productVariants?.totalItems || 0}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Sous-catégories</p>
-                <p className="font-medium">{collection.children?.length || 0}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Visibilité</p>
-                <Badge variant={collection.isPrivate ? 'warning' : 'success'}>
-                  {collection.isPrivate ? 'Privé' : 'Public'}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+        enableReinitialize
+      >
+        {({ values, errors, touched, handleChange, handleBlur, setFieldValue, isValid }) => (
+          <Form className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Main Info */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Basic Information Card */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+                    <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                      <Settings className="h-5 w-5 text-blue-600" />
+                      Informations generales
+                    </h2>
+                  </div>
+                  <div className="p-6 space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Nom <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={values.name}
+                          onChange={(e) => {
+                            handleChange(e);
+                            if (isNew && !touched.slug) {
+                              setFieldValue('slug', generateSlug(e.target.value));
+                            }
+                          }}
+                          onBlur={handleBlur}
+                          placeholder="Ex: Vetements Homme"
+                          className={cn(
+                            'w-full px-4 py-2.5 border rounded-lg transition-all duration-200',
+                            'focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none',
+                            touched.name && errors.name
+                              ? 'border-red-300 bg-red-50'
+                              : 'border-gray-300 hover:border-gray-400'
+                          )}
+                        />
+                        {touched.name && errors.name && (
+                          <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
+                            <AlertCircle className="h-3.5 w-3.5" />
+                            {errors.name}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Slug (URL) <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                            /categorie/
+                          </span>
+                          <input
+                            type="text"
+                            name="slug"
+                            value={values.slug}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            placeholder="vetements-homme"
+                            className={cn(
+                              'w-full pl-24 pr-4 py-2.5 border rounded-lg transition-all duration-200',
+                              'focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-mono text-sm',
+                              touched.slug && errors.slug
+                                ? 'border-red-300 bg-red-50'
+                                : 'border-gray-300 hover:border-gray-400'
+                            )}
+                          />
+                        </div>
+                        {touched.slug && errors.slug && (
+                          <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
+                            <AlertCircle className="h-3.5 w-3.5" />
+                            {errors.slug}
+                          </p>
+                        )}
+                      </div>
+                    </div>
 
-      {/* Tabs */}
-      <div className="bg-white rounded-lg shadow">
-        <Tabs tabs={tabs} defaultTab="general" />
-      </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Description
+                      </label>
+                      <textarea
+                        name="description"
+                        value={values.description}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        rows={3}
+                        placeholder="Description de la categorie..."
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all duration-200 hover:border-gray-400 resize-none"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Categorie parente
+                        </label>
+                        <select
+                          name="parentId"
+                          value={values.parentId}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all duration-200 hover:border-gray-400 bg-white"
+                        >
+                          {getParentOptions().map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Ordre d'affichage
+                        </label>
+                        <input
+                          type="number"
+                          name="displayOrder"
+                          value={values.displayOrder}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          min={0}
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all duration-200 hover:border-gray-400"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Visibility Toggle */}
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        {values.isPrivate ? (
+                          <div className="p-2 bg-amber-100 rounded-lg">
+                            <EyeOff className="h-5 w-5 text-amber-600" />
+                          </div>
+                        ) : (
+                          <div className="p-2 bg-green-100 rounded-lg">
+                            <Eye className="h-5 w-5 text-green-600" />
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {values.isPrivate ? 'Categorie privee' : 'Categorie publique'}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {values.isPrivate
+                              ? 'Non visible sur le site'
+                              : 'Visible sur le site'}
+                          </p>
+                        </div>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="isPrivate"
+                          checked={values.isPrivate}
+                          onChange={handleChange}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Translations Card */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-pink-50">
+                    <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                      <Globe className="h-5 w-5 text-purple-600" />
+                      Traductions
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* French */}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                          <span className="w-8 h-6 rounded bg-gradient-to-r from-blue-500 via-white to-red-500 flex-shrink-0"></span>
+                          <span className="font-medium text-gray-900">Francais</span>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            Nom (FR)
+                          </label>
+                          <input
+                            type="text"
+                            name="nameFr"
+                            value={values.nameFr}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            placeholder="Nom en francais"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all duration-200 hover:border-gray-400"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            Description (FR)
+                          </label>
+                          <textarea
+                            name="descriptionFr"
+                            value={values.descriptionFr}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            rows={3}
+                            placeholder="Description en francais..."
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all duration-200 hover:border-gray-400 resize-none"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Arabic */}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                          <span className="w-8 h-6 rounded bg-gradient-to-r from-green-600 via-white to-green-600 flex-shrink-0"></span>
+                          <span className="font-medium text-gray-900">Arabe</span>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            Nom (AR)
+                          </label>
+                          <input
+                            type="text"
+                            name="nameAr"
+                            value={values.nameAr}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            dir="rtl"
+                            placeholder="الاسم بالعربية"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all duration-200 hover:border-gray-400"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            Description (AR)
+                          </label>
+                          <textarea
+                            name="descriptionAr"
+                            value={values.descriptionAr}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            rows={3}
+                            dir="rtl"
+                            placeholder="الوصف بالعربية..."
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all duration-200 hover:border-gray-400 resize-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Children Card (only when editing and has children) */}
+                {!isNew && collection?.children && collection.children.length > 0 && (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-green-50 to-teal-50">
+                      <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <FolderTree className="h-5 w-5 text-green-600" />
+                        Sous-categories ({collection.children.length})
+                      </h2>
+                    </div>
+                    <div className="p-4 space-y-2">
+                      {collection.children.map((child, index) => (
+                        <div
+                          key={child.id}
+                          className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center justify-center w-8 h-8 bg-white rounded-lg shadow-sm text-gray-400 group-hover:text-gray-600">
+                              <GripVertical className="h-4 w-4" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900">{child.name}</p>
+                              <p className="text-sm text-gray-500">
+                                {child.customFields?.nameFr && (
+                                  <span className="mr-2">FR: {child.customFields.nameFr}</span>
+                                )}
+                                {child.customFields?.nameAr && (
+                                  <span dir="rtl">AR: {child.customFields.nameAr}</span>
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1.5 text-sm text-gray-500 bg-white px-2.5 py-1 rounded-full shadow-sm">
+                              <Package className="h-4 w-4" />
+                              <span>{child.productVariants?.totalItems || 0}</span>
+                            </div>
+                            <Badge variant="default">Pos: {child.position}</Badge>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigate(`/categories/${child.id}`)}
+                            >
+                              Modifier
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column - Image & Actions */}
+              <div className="space-y-6">
+                {/* Image Upload Card */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden sticky top-4">
+                  <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-orange-50">
+                    <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                      <ImageIcon className="h-5 w-5 text-amber-600" />
+                      Image de la categorie
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    {featuredImage ? (
+                      <div className="relative group">
+                        <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 border-2 border-gray-200">
+                          <img
+                            src={featuredImage.preview}
+                            alt="Apercu"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 rounded-xl flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="p-3 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors"
+                              title="Changer l'image"
+                            >
+                              <Upload className="h-5 w-5 text-gray-700" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={removeImage}
+                              className="p-3 bg-red-500 rounded-full shadow-lg hover:bg-red-600 transition-colors"
+                              title="Supprimer l'image"
+                            >
+                              <Trash2 className="h-5 w-5 text-white" />
+                            </button>
+                          </div>
+                        </div>
+                        {featuredImage.isExisting && (
+                          <div className="absolute top-3 left-3">
+                            <span className="px-2.5 py-1 bg-blue-600 text-white text-xs font-medium rounded-full shadow">
+                              Image actuelle
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onClick={() => fileInputRef.current?.click()}
+                        className={cn(
+                          'aspect-square rounded-xl border-2 border-dashed transition-all duration-300 cursor-pointer',
+                          'flex flex-col items-center justify-center gap-4',
+                          isDragging
+                            ? 'border-blue-500 bg-blue-50 scale-[1.02]'
+                            : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            'p-4 rounded-full transition-colors',
+                            isDragging ? 'bg-blue-100' : 'bg-gray-100'
+                          )}
+                        >
+                          <Upload
+                            className={cn(
+                              'h-8 w-8 transition-colors',
+                              isDragging ? 'text-blue-600' : 'text-gray-400'
+                            )}
+                          />
+                        </div>
+                        <div className="text-center px-4">
+                          <p className="font-medium text-gray-700">
+                            {isDragging ? 'Deposez l\'image ici' : 'Glissez une image ici'}
+                          </p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            ou cliquez pour parcourir
+                          </p>
+                          <p className="text-xs text-gray-400 mt-2">
+                            PNG, JPG jusqu'a 5MB
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleImageSelect(file);
+                        e.target.value = '';
+                      }}
+                      className="hidden"
+                    />
+
+                    {/* Image Tips */}
+                    <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                      <div className="flex gap-2">
+                        <Info className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <div className="text-xs text-blue-700">
+                          <p className="font-medium">Conseils pour l'image :</p>
+                          <ul className="mt-1 space-y-0.5 list-disc list-inside text-blue-600">
+                            <li>Format carre recommande (1:1)</li>
+                            <li>Resolution minimum 400x400px</li>
+                            <li>Fond neutre ou transparent</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Stats (only when editing) */}
+                {!isNew && collection && (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-100">
+                      <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <Sparkles className="h-5 w-5 text-indigo-600" />
+                        Statistiques
+                      </h2>
+                    </div>
+                    <div className="p-4 grid grid-cols-2 gap-4">
+                      <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg text-center">
+                        <p className="text-2xl font-bold text-blue-600">
+                          {collection.productVariants?.totalItems || 0}
+                        </p>
+                        <p className="text-sm text-gray-600">Produits</p>
+                      </div>
+                      <div className="p-4 bg-gradient-to-br from-green-50 to-teal-50 rounded-lg text-center">
+                        <p className="text-2xl font-bold text-green-600">
+                          {collection.children?.length || 0}
+                        </p>
+                        <p className="text-sm text-gray-600">Sous-categories</p>
+                      </div>
+                      <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg text-center">
+                        <p className="text-2xl font-bold text-purple-600">{collection.position}</p>
+                        <p className="text-sm text-gray-600">Position</p>
+                      </div>
+                      <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg text-center">
+                        <Badge
+                          variant={collection.isPrivate ? 'warning' : 'success'}
+                          className="text-sm"
+                        >
+                          {collection.isPrivate ? 'Prive' : 'Public'}
+                        </Badge>
+                        <p className="text-sm text-gray-600 mt-1">Visibilite</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 space-y-3">
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    loading={creating || updating}
+                    icon={<Save className="h-4 w-4" />}
+                    disabled={!isValid}
+                  >
+                    {isNew ? 'Creer la categorie' : 'Enregistrer les modifications'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => navigate('/categories')}
+                  >
+                    Annuler
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Form>
+        )}
+      </Formik>
     </div>
   );
 };

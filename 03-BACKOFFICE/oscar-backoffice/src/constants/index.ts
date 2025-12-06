@@ -72,7 +72,7 @@ export const WILAYAS = [
   'Constantine',
   'Médéa',
   'Mostaganem',
-  'M\'Sila',
+  "M'Sila",
   'Mascara',
   'Ouargla',
   'Oran',

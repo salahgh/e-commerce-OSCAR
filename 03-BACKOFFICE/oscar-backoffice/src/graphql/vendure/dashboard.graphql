@@ -51,3 +51,67 @@ query LowStockProducts($threshold: Int) {
     }
   }
 }
+
+# Get orders for sales analysis (with line items for category/product breakdown)
+query DashboardOrdersAnalysis($options: OrderListOptions) {
+  orders(options: $options) {
+    items {
+      id
+      code
+      state
+      totalWithTax
+      orderPlacedAt
+      lines {
+        id
+        quantity
+        linePriceWithTax
+        productVariant {
+          id
+          name
+          sku
+          product {
+            id
+            name
+            slug
+            featuredAsset {
+              preview
+            }
+            collections {
+              id
+              name
+              slug
+            }
+            customFields {
+              nameFr
+            }
+          }
+        }
+      }
+    }
+    totalItems
+  }
+}
+
+# Get top products for the dashboard
+query DashboardTopProducts($options: ProductListOptions) {
+  products(options: $options) {
+    items {
+      id
+      name
+      slug
+      featuredAsset {
+        preview
+      }
+      customFields {
+        nameFr
+        viewCount
+      }
+      variants {
+        id
+        stockOnHand
+        priceWithTax
+      }
+    }
+    totalItems
+  }
+}

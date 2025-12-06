@@ -58,7 +58,7 @@ export const baridimobPaymentHandler = new PaymentMethodHandler({
       if (!customerPhone && !args.testMode) {
         return {
           amount,
-          state: 'Error',
+          state: 'Declined',
           errorMessage: 'Customer phone number required for Baridimob payment',
           metadata: {},
         };
@@ -99,7 +99,7 @@ export const baridimobPaymentHandler = new PaymentMethodHandler({
     } catch (error: any) {
       return {
         amount,
-        state: 'Error',
+        state: 'Declined',
         errorMessage: error.message || 'Baridimob payment failed',
         metadata: {
           error: error.message,

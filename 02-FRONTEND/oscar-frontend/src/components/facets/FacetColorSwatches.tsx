@@ -90,9 +90,9 @@ export function FacetColorSwatches({
             disabled={isDisabled}
             className={cn(
               'group relative flex flex-col items-center gap-1 p-1.5 rounded-lg transition-all',
-              isSelected && 'bg-primary-50 ring-2 ring-primary-500',
+              isSelected && 'bg-primary/10 ring-2 ring-primary',
               isDisabled && 'opacity-40 cursor-not-allowed',
-              !isDisabled && !isSelected && 'hover:bg-gray-50'
+              !isDisabled && !isSelected && 'hover:bg-muted'
             )}
             whileHover={!isDisabled ? { scale: 1.05 } : undefined}
             whileTap={!isDisabled ? { scale: 0.95 } : undefined}
@@ -101,8 +101,8 @@ export function FacetColorSwatches({
             <div
               className={cn(
                 'w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all shadow-sm',
-                isSelected ? 'border-primary-500 ring-2 ring-primary-200' : 'border-gray-200',
-                colorHex === '#FFFFFF' && 'border-gray-300'
+                isSelected ? 'border-primary ring-2 ring-primary/30' : 'border-border',
+                colorHex === '#FFFFFF' && 'border-border'
               )}
               style={{ backgroundColor: colorHex }}
             >
@@ -127,7 +127,7 @@ export function FacetColorSwatches({
             <span
               className={cn(
                 'text-[10px] font-medium truncate max-w-[50px] transition-colors',
-                isSelected ? 'text-primary-700' : 'text-gray-600'
+                isSelected ? 'text-primary' : 'text-muted-foreground'
               )}
             >
               {value.name}
@@ -136,11 +136,10 @@ export function FacetColorSwatches({
             {/* Count Tooltip */}
             <div
               className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100
-                         bg-gray-900 text-white text-xs px-2 py-1 rounded pointer-events-none
-                         transition-opacity whitespace-nowrap z-10"
+                         bg-popover text-popover-foreground text-xs px-2 py-1 rounded pointer-events-none
+                         transition-opacity whitespace-nowrap z-10 border border-border shadow-md"
             >
               {value.count} produit{value.count !== 1 ? 's' : ''}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
             </div>
           </motion.button>
         );

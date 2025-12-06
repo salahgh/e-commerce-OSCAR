@@ -54,18 +54,18 @@ export function MobileFilterDrawer({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed inset-y-0 right-0 w-full max-w-md bg-white z-50 lg:hidden
+            className="fixed inset-y-0 right-0 w-full max-w-md bg-card z-50 lg:hidden
                        shadow-2xl flex flex-col"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary-50 rounded-lg">
                   <SlidersHorizontal className="h-5 w-5 text-primary-600" />
                 </div>
                 <div>
-                  <h2 className="font-semibold text-gray-900">Filtres</h2>
-                  <p className="text-xs text-gray-500">
+                  <h2 className="font-semibold text-foreground">Filtres</h2>
+                  <p className="text-xs text-muted-foreground">
                     {totalProducts} produit{totalProducts !== 1 ? 's' : ''} trouve
                     {totalProducts !== 1 ? 's' : ''}
                   </p>
@@ -73,9 +73,9 @@ export function MobileFilterDrawer({
               </div>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-muted rounded-lg transition-colors"
               >
-                <X className="h-5 w-5 text-gray-500" />
+                <X className="h-5 w-5 text-muted-foreground" />
               </button>
             </div>
 
@@ -94,11 +94,11 @@ export function MobileFilterDrawer({
             </div>
 
             {/* Footer */}
-            <div className="border-t border-gray-100 p-4 space-y-3 bg-gray-50">
+            <div className="border-t border-border p-4 space-y-3 bg-muted/50">
               {/* Active Filters Count */}
               {totalActiveFilters > 0 && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">
+                  <span className="text-muted-foreground">
                     {totalActiveFilters} filtre{totalActiveFilters > 1 ? 's' : ''} actif
                     {totalActiveFilters > 1 ? 's' : ''}
                   </span>
@@ -145,15 +145,15 @@ export function MobileFilterButton({
     <motion.button
       onClick={onClick}
       className={cn(
-        'lg:hidden flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200',
+        'lg:hidden flex items-center gap-2 px-4 py-2.5 bg-card border border-border',
         'rounded-xl shadow-sm hover:shadow-md transition-all',
         className
       )}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >
-      <SlidersHorizontal className="h-5 w-5 text-gray-600" />
-      <span className="font-medium text-gray-700">Filtres</span>
+      <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
+      <span className="font-medium text-foreground">Filtres</span>
       {activeFiltersCount > 0 && (
         <motion.span
           initial={{ scale: 0 }}

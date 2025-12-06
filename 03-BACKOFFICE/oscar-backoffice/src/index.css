@@ -3,9 +3,53 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --background: 17 24 39;
+    --foreground: 243 244 246;
+    --card: 31 41 55;
+    --card-foreground: 243 244 246;
+    --border: 55 65 81;
+    --input: 55 65 81;
+    --primary: 59 130 246;
+    --primary-foreground: 255 255 255;
+    --secondary: 75 85 99;
+    --muted: 31 41 55;
+    --muted-foreground: 156 163 175;
+    --accent: 55 65 81;
+    --destructive: 239 68 68;
+    --success: 34 197 94;
+    --warning: 234 179 8;
+  }
+
   body {
-    @apply bg-gray-50 text-gray-900;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    @apply bg-gray-900 text-gray-100;
+    font-family:
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      'Helvetica Neue',
+      Arial,
+      sans-serif;
+  }
+
+  /* Dark mode scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500;
   }
 }
 

@@ -10,14 +10,9 @@ export const MainLayout: React.FC = () => {
   const sidebarOpen = useAppSelector((state) => state.ui.sidebarOpen);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-900">
       <Sidebar />
-      <div
-        className={cn(
-          'transition-all duration-300',
-          sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'
-        )}
-      >
+      <div className={cn('transition-all duration-300', sidebarOpen ? 'lg:ml-64' : 'lg:ml-20')}>
         <TopBar />
         <main className="p-6">
           <Outlet />

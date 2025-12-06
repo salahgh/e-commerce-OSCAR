@@ -1,232 +1,199 @@
-import React from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Alert } from '../components/ui/Alert';
-import { Modal } from '../components/ui/Modal';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import { useAppDispatch } from '../hooks/useAppDispatch';
+import { loginSuccess, loginStart, loginFailure } from '../store/slices/authSlice';
 import { addToast } from '../store/slices/uiSlice';
-import { loginSuccess } from '../store/slices/authSlice';
-import { LoginDocument, ForgotPasswordDocument } from '../graphql/generated/graphql';
+import { AdminLoginDocument } from '../graphql/generated/graphql';
 
 const LoginSchema = Yup.object().shape({
-  email: Yup.string().email('Email invalide').required('Email requis'),
-  password: Yup.string().min(6, 'Minimum 6 caractères').required('Mot de passe requis'),
+  username: Yup.string().required("Nom d'utilisateur requis"),
+  password: Yup.string().min(4, 'Minimum 4 caractères').required('Mot de passe requis'),
 });
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const [error, setError] = React.useState('');
-  const [showForgotPassword, setShowForgotPassword] = React.useState(false);
-  const [forgotPasswordEmail, setForgotPasswordEmail] = React.useState('');
-  const [loginMutation, { loading }] = useMutation(LoginDocument);
-  const [forgotPasswordMutation, { loading: forgotPasswordLoading }] = useMutation(ForgotPasswordDocument, {
-    onCompleted: () => {
-      dispatch(addToast({
-        message: 'Un email de réinitialisation a été envoyé à votre adresse',
-        type: 'success'
-      }));
-      setShowForgotPassword(false);
-      setForgotPasswordEmail('');
-    },
-    onError: (error) => {
-      dispatch(addToast({
-        message: error.message || 'Erreur lors de l\'envoi de l\'email',
-        type: 'error'
-      }));
-    },
-  });
+  const [error, setError] = useState('');
+
+  const [loginMutation, { loading }] = useMutation(AdminLoginDocument);
 
   const formik = useFormik({
     initialValues: {
-      email: '',
+      username: '',
       password: '',
+      rememberMe: true,
     },
     validationSchema: LoginSchema,
-    onSubmit: async (values, { setSubmitting }) => {
+    onSubmit: async (values) => {
       try {
         setError('');
+        dispatch(loginStart());
 
         const { data } = await loginMutation({
           variables: {
-            input: {
-              email: values.email,
-              password: values.password,
-            },
+            username: values.username,
+            password: values.password,
+            rememberMe: values.rememberMe,
           },
         });
 
         if (data?.login) {
-          const loginResponse = data.login;
+          const result = data.login;
 
-          // Store token in localStorage
-          if (loginResponse.accessToken) {
-            localStorage.setItem('admin_token', loginResponse.accessToken);
+          // Check for CurrentUser (success)
+          if ('id' in result && 'identifier' in result) {
+            dispatch(
+              loginSuccess({
+                user: {
+                  id: result.id,
+                  identifier: result.identifier,
+                  channels: result.channels.map((ch) => ({
+                    id: ch.id,
+                    code: ch.code,
+                    token: ch.token,
+                    permissions: ch.permissions as string[],
+                  })),
+                },
+              })
+            );
+            dispatch(addToast({ message: 'Connexion réussie!', type: 'success' }));
+            navigate('/');
           }
-          if (loginResponse.refreshToken) {
-            localStorage.setItem('refresh_token', loginResponse.refreshToken);
+          // Check for InvalidCredentialsError
+          else if ('errorCode' in result) {
+            dispatch(loginFailure());
+            setError(result.message || 'Identifiants incorrects');
           }
-
-          // Prepare user object for Redux store
-          const user = {
-            id: String(loginResponse.userId || ''),
-            email: loginResponse.email || '',
-            firstName: loginResponse.firstName || '',
-            lastName: loginResponse.lastName || '',
-            role: loginResponse.role || 'CUSTOMER',
-            phoneNumber: '',
-            emailVerified: true,
-            isActive: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-
-          dispatch(loginSuccess({ user, token: loginResponse.accessToken || '' }));
-          navigate('/');
-        } else {
-          setError('Email ou mot de passe incorrect');
         }
       } catch (err: any) {
         console.error('Login error:', err);
+        dispatch(loginFailure());
         setError(err.message || 'Une erreur est survenue lors de la connexion');
-      } finally {
-        setSubmitting(false);
       }
     },
   });
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!forgotPasswordEmail || !/\S+@\S+\.\S+/.test(forgotPasswordEmail)) {
-      dispatch(addToast({ message: 'Veuillez entrer un email valide', type: 'error' }));
-      return;
-    }
-    await forgotPasswordMutation({ variables: { email: forgotPasswordEmail } });
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-700">
           {/* Logo */}
           <div className="flex justify-center mb-8">
-            <div className="h-16 w-16 bg-blue-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold">
+            <div className="h-16 w-16 bg-blue-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-blue-500/20">
               O
             </div>
           </div>
 
-          <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">
-            Back-Office OSCAR
-          </h1>
-          <p className="text-center text-gray-600 mb-8">
+          <h1 className="text-2xl font-bold text-center text-gray-100 mb-2">Back-Office OSCAR</h1>
+          <p className="text-center text-gray-400 mb-8">
             Connectez-vous pour accéder au panneau d'administration
           </p>
 
           {error && (
-            <Alert variant="error" className="mb-6">
-              {error}
-            </Alert>
+            <div className="mb-6 p-4 bg-red-900/30 border border-red-500/30 rounded-lg">
+              <p className="text-red-400 text-sm">{error}</p>
+            </div>
           )}
 
           <form onSubmit={formik.handleSubmit} className="space-y-6">
-            <Input
-              label="Email"
-              type="email"
-              {...formik.getFieldProps('email')}
-              error={formik.touched.email ? formik.errors.email : undefined}
-              placeholder="admin@oscarfashion.dz"
-            />
-
             <div>
-              <Input
-                label="Mot de passe"
-                type="password"
-                {...formik.getFieldProps('password')}
-                error={formik.touched.password ? formik.errors.password : undefined}
-                placeholder="••••••••"
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Nom d'utilisateur
+              </label>
+              <input
+                type="text"
+                {...formik.getFieldProps('username')}
+                className={`w-full px-4 py-3 border rounded-lg bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors ${
+                  formik.touched.username && formik.errors.username
+                    ? 'border-red-500'
+                    : 'border-gray-600'
+                }`}
+                placeholder="superadmin"
               />
-              <div className="text-right mt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowForgotPassword(true)}
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  Mot de passe oublié ?
-                </button>
-              </div>
+              {formik.touched.username && formik.errors.username && (
+                <p className="mt-1 text-sm text-red-400">{formik.errors.username}</p>
+              )}
             </div>
 
-            <Button
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Mot de passe</label>
+              <input
+                type="password"
+                {...formik.getFieldProps('password')}
+                className={`w-full px-4 py-3 border rounded-lg bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors ${
+                  formik.touched.password && formik.errors.password
+                    ? 'border-red-500'
+                    : 'border-gray-600'
+                }`}
+                placeholder="••••••••"
+              />
+              {formik.touched.password && formik.errors.password && (
+                <p className="mt-1 text-sm text-red-400">{formik.errors.password}</p>
+              )}
+            </div>
+
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="rememberMe"
+                {...formik.getFieldProps('rememberMe')}
+                checked={formik.values.rememberMe}
+                className="h-4 w-4 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500"
+              />
+              <label htmlFor="rememberMe" className="ml-2 text-sm text-gray-400">
+                Se souvenir de moi
+              </label>
+            </div>
+
+            <button
               type="submit"
-              variant="primary"
-              size="lg"
-              loading={loading || formik.isSubmitting}
-              className="w-full"
+              disabled={loading || formik.isSubmitting}
+              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              Se connecter
-            </Button>
+              {loading || formik.isSubmitting ? (
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Connexion...
+                </>
+              ) : (
+                'Se connecter'
+              )}
+            </button>
           </form>
 
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-800 font-medium mb-2">Compte de test:</p>
-            <p className="text-xs text-blue-600">Email: admin@oscarfashion.dz</p>
-            <p className="text-xs text-blue-600">Mot de passe: password123</p>
+          <div className="mt-6 p-4 bg-blue-900/30 rounded-lg border border-blue-500/30">
+            <p className="text-sm text-blue-300 font-medium mb-2">Compte superadmin:</p>
+            <p className="text-xs text-blue-400">Utilisateur: superadmin</p>
+            <p className="text-xs text-blue-400">Mot de passe: superadmin123</p>
           </div>
         </div>
 
-        <p className="text-center text-sm text-gray-600 mt-6">
+        <p className="text-center text-sm text-gray-500 mt-6">
           © 2025 OSCAR Fashion. Tous droits réservés.
         </p>
       </div>
-
-      {/* Forgot Password Modal */}
-      {showForgotPassword && (
-        <Modal
-          isOpen={showForgotPassword}
-          onClose={() => {
-            setShowForgotPassword(false);
-            setForgotPasswordEmail('');
-          }}
-          title="Mot de passe oublié"
-        >
-          <form onSubmit={handleForgotPassword} className="space-y-4">
-            <p className="text-sm text-gray-600">
-              Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.
-            </p>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email <span className="text-red-500">*</span>
-              </label>
-              <Input
-                type="email"
-                value={forgotPasswordEmail}
-                onChange={(e) => setForgotPasswordEmail(e.target.value)}
-                placeholder="email@exemple.com"
-                autoComplete="email"
-              />
-            </div>
-            <div className="flex gap-3 pt-4">
-              <Button type="submit" disabled={forgotPasswordLoading}>
-                {forgotPasswordLoading ? 'Envoi...' : 'Envoyer le lien'}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => {
-                  setShowForgotPassword(false);
-                  setForgotPasswordEmail('');
-                }}
-              >
-                Annuler
-              </Button>
-            </div>
-          </form>
-        </Modal>
-      )}
     </div>
   );
 };

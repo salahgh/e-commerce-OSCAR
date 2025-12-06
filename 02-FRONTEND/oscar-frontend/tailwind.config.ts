@@ -18,15 +18,16 @@ const config: Config = {
     },
     extend: {
       colors: {
+        // shadcn/ui semantic colors (CSS variables)
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         primary: {
-          DEFAULT: '#2C3E50',
-          light: '#3F5568',
-          dark: '#1F2D3D',
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+          // OSCAR brand navy shades
           50: '#f6f7f9',
           100: '#ebeef2',
           200: '#d3dae2',
@@ -40,9 +41,9 @@ const config: Config = {
           950: '#151e29',
         },
         secondary: {
-          DEFAULT: '#E8D5C4',
-          light: '#F0E4D7',
-          dark: '#D4C3B0',
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+          // OSCAR brand warm beige shades
           50: '#faf8f6',
           100: '#F0E4D7',
           200: '#E8D5C4',
@@ -56,9 +57,9 @@ const config: Config = {
           950: '#362720',
         },
         accent: {
-          DEFAULT: '#C9A992',
-          light: '#D9BCA9',
-          dark: '#B8957D',
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+          // OSCAR brand taupe shades
           50: '#f8f5f2',
           100: '#ede7e0',
           200: '#D9BCA9',
@@ -71,6 +72,23 @@ const config: Config = {
           900: '#563f38',
           950: '#2f201d',
         },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        // Status colors (semantic)
         success: {
           DEFAULT: '#10b981',
           light: '#34d399',
@@ -91,6 +109,30 @@ const config: Config = {
           light: '#60a5fa',
           dark: '#2563eb',
         },
+        // Chart colors for data visualization
+        chart: {
+          '1': 'hsl(var(--chart-1))',
+          '2': 'hsl(var(--chart-2))',
+          '3': 'hsl(var(--chart-3))',
+          '4': 'hsl(var(--chart-4))',
+          '5': 'hsl(var(--chart-5))',
+        },
+        // Sidebar colors
+        sidebar: {
+          DEFAULT: 'hsl(var(--sidebar-background))',
+          foreground: 'hsl(var(--sidebar-foreground))',
+          primary: 'hsl(var(--sidebar-primary))',
+          'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+          accent: 'hsl(var(--sidebar-accent))',
+          'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+          border: 'hsl(var(--sidebar-border))',
+          ring: 'hsl(var(--sidebar-ring))',
+        },
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
         sans: ['var(--font-inter)', ...fontFamily.sans],
@@ -149,6 +191,7 @@ const config: Config = {
     require('@tailwindcss/forms'),
     require('@tailwindcss/typography'),
     require('@tailwindcss/aspect-ratio'),
+    require('tailwindcss-animate'),
   ],
 };
 

@@ -1,41 +1,37 @@
 # Vendure Admin API - Collection (Category) Operations
 
-fragment CollectionFields on Collection {
-  id
-  createdAt
-  updatedAt
-  name
-  slug
-  description
-  isPrivate
-  position
-  parentId
-  breadcrumbs {
-    id
-    name
-    slug
-  }
-  featuredAsset {
-    id
-    preview
-    source
-  }
-  productVariants {
-    totalItems
-  }
-  customFields {
-    nameFr
-    nameAr
-    descriptionFr
-    descriptionAr
-    displayOrder
-  }
-}
-
 query AdminCollections($options: CollectionListOptions) {
   collections(options: $options) {
     items {
-      ...CollectionFields
+      id
+      createdAt
+      updatedAt
+      name
+      slug
+      description
+      isPrivate
+      position
+      parentId
+      breadcrumbs {
+        id
+        name
+        slug
+      }
+      featuredAsset {
+        id
+        preview
+        source
+      }
+      productVariants {
+        totalItems
+      }
+      customFields {
+        nameFr
+        nameAr
+        descriptionFr
+        descriptionAr
+        displayOrder
+      }
     }
     totalItems
   }
@@ -43,7 +39,35 @@ query AdminCollections($options: CollectionListOptions) {
 
 query AdminCollection($id: ID!) {
   collection(id: $id) {
-    ...CollectionFields
+    id
+    createdAt
+    updatedAt
+    name
+    slug
+    description
+    isPrivate
+    position
+    parentId
+    breadcrumbs {
+      id
+      name
+      slug
+    }
+    featuredAsset {
+      id
+      preview
+      source
+    }
+    productVariants {
+      totalItems
+    }
+    customFields {
+      nameFr
+      nameAr
+      descriptionFr
+      descriptionAr
+      displayOrder
+    }
     filters {
       code
       args {
@@ -69,13 +93,39 @@ query AdminCollection($id: ID!) {
 
 mutation CreateCollection($input: CreateCollectionInput!) {
   createCollection(input: $input) {
-    ...CollectionFields
+    id
+    name
+    slug
+    description
+    isPrivate
+    position
+    parentId
+    customFields {
+      nameFr
+      nameAr
+      descriptionFr
+      descriptionAr
+      displayOrder
+    }
   }
 }
 
 mutation UpdateCollection($input: UpdateCollectionInput!) {
   updateCollection(input: $input) {
-    ...CollectionFields
+    id
+    name
+    slug
+    description
+    isPrivate
+    position
+    parentId
+    customFields {
+      nameFr
+      nameAr
+      descriptionFr
+      descriptionAr
+      displayOrder
+    }
   }
 }
 
@@ -88,6 +138,45 @@ mutation DeleteCollection($id: ID!) {
 
 mutation MoveCollection($input: MoveCollectionInput!) {
   moveCollection(input: $input) {
-    ...CollectionFields
+    id
+    name
+    slug
+    position
+    parentId
+  }
+}
+
+# Update collection filters (for assigning products to collections)
+mutation UpdateCollectionFilters($id: ID!, $filters: [ConfigurableOperationInput!]!) {
+  updateCollection(input: { id: $id, filters: $filters }) {
+    id
+    name
+    filters {
+      code
+      args {
+        name
+        value
+      }
+    }
+  }
+}
+
+# Get all collections with their filters (for product-collection management)
+query AdminCollectionsWithFilters($options: CollectionListOptions) {
+  collections(options: $options) {
+    items {
+      id
+      name
+      slug
+      parentId
+      filters {
+        code
+        args {
+          name
+          value
+        }
+      }
+    }
+    totalItems
   }
 }

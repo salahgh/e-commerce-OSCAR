@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, FormEvent } from 'react';
 import Link from 'next/link';
-import { usePathname, useParams } from 'next/navigation';
+import { usePathname, useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Menu, Search, ShoppingCart, User, Heart, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/contexts/CartContext';
@@ -11,22 +12,34 @@ import { useCart } from '@/contexts/CartContext';
 export default function Header() {
   const pathname = usePathname();
   const params = useParams();
+  const router = useRouter();
   const locale = (params.locale as string) || 'fr';
   const { cart } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const cartItemCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      router.push(`/${locale}/products?q=${encodeURIComponent(searchTerm.trim())}`);
+      setSearchOpen(false);
+      setSearchTerm('');
+    }
+  };
+
   const navigation = [
     { name: 'Accueil', href: `/${locale}` },
+    { name: 'Catégories', href: `/${locale}/categories` },
     { name: 'Produits', href: `/${locale}/products` },
     { name: 'Promotions', href: `/${locale}/promotions` },
     { name: 'À propos', href: `/${locale}/about` },
   ];
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-background border-b border-border sticky top-0 z-50">
       {/* Top Bar */}
       <div className="bg-primary text-primary-foreground">
         <div className="container-custom py-2">
@@ -72,7 +85,7 @@ export default function Header() {
                   'text-sm font-medium transition-colors hover:text-primary',
                   pathname === item.href
                     ? 'text-primary border-b-2 border-primary pb-1'
-                    : 'text-gray-600'
+                    : 'text-muted-foreground'
                 )}
               >
                 {item.name}
@@ -101,7 +114,7 @@ export default function Header() {
               <Link href={`/${locale}/cart`} aria-label="Cart">
                 <ShoppingCart className="h-5 w-5" />
                 {cartItemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     {cartItemCount}
                   </span>
                 )}
@@ -113,28 +126,38 @@ export default function Header() {
                 <User className="h-5 w-5" />
               </Link>
             </Button>
+
+            <ThemeToggle />
           </div>
         </div>
 
         {/* Search Bar */}
         {searchOpen && (
-          <div className="py-4 border-t">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <div className="py-4 border-t border-border">
+            <form onSubmit={handleSearch} className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <input
                 type="search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Rechercher des produits..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full pl-10 pr-12 py-2 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 autoFocus
               />
-            </div>
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-primary text-primary-foreground rounded text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                Rechercher
+              </button>
+            </form>
           </div>
         )}
       </div>
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-200">
+        <div className="md:hidden border-t border-border">
           <nav className="container-custom py-4 space-y-2">
             {navigation.map((item) => (
               <Link
@@ -144,7 +167,7 @@ export default function Header() {
                   'block px-4 py-2 rounded-lg text-sm font-medium transition-colors',
                   pathname === item.href
                     ? 'bg-primary text-primary-foreground'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    : 'text-muted-foreground hover:bg-accent'
                 )}
                 onClick={() => setMobileMenuOpen(false)}
               >

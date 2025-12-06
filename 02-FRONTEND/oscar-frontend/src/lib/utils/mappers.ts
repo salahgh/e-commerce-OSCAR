@@ -1,15 +1,38 @@
 /**
  * Data mapping utilities to convert backend GraphQL responses to frontend types
+ * Note: These mappers are kept for legacy compatibility. With Vendure, you may use direct GraphQL fragments.
  */
 
-import type { ProductResponse } from '@/graphql/generated/graphql';
-
 export type Locale = 'ar' | 'fr' | 'en';
+
+// Legacy product response type - adjust as needed for your backend
+interface LegacyProductResponse {
+  id: string | number;
+  sku?: string;
+  nameAr?: string;
+  nameFr?: string;
+  nameEn?: string;
+  descriptionAr?: string;
+  descriptionFr?: string;
+  descriptionEn?: string;
+  basePrice?: number | string;
+  salePrice?: number | string;
+  stockQuantity?: number;
+  imageUrls?: string[];
+  categoryId?: string | number;
+  categoryName?: string;
+  availableSizes?: string[];
+  availableColors?: string[];
+  isFeatured?: boolean;
+  viewCount?: number | string;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 /**
  * Map backend product to frontend product format
  */
-export function mapProduct(product: ProductResponse, locale: Locale = 'fr') {
+export function mapProduct(product: LegacyProductResponse, locale: Locale = 'fr') {
   return {
     id: product.id.toString(),
     sku: product.sku || '',
@@ -56,7 +79,7 @@ export function mapProduct(product: ProductResponse, locale: Locale = 'fr') {
 /**
  * Map product variants from backend format
  */
-function mapProductVariants(product: ProductResponse) {
+function mapProductVariants(product: LegacyProductResponse) {
   const variants: any[] = [];
   const sizes = product.availableSizes || [];
   const colors = product.availableColors || [];

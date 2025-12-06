@@ -195,7 +195,7 @@ query GetCollectionById($id: ID!) {
   }
 }
 
-# Get facet values for filtering
+# Get facet values for filtering (enhanced with customFields)
 query GetFacets {
   facets {
     items {
@@ -209,6 +209,65 @@ query GetFacets {
       }
     }
     totalItems
+  }
+}
+
+# Get facets with full details for faceted search
+query GetFacetsWithDetails {
+  facets {
+    items {
+      id
+      name
+      code
+      values {
+        id
+        name
+        code
+      }
+    }
+    totalItems
+  }
+}
+
+# Search products with faceted filtering (full faceted search support)
+query SearchProductsWithFacets($input: SearchInput!) {
+  search(input: $input) {
+    items {
+      productId
+      productName
+      slug
+      description
+      productAsset {
+        id
+        preview
+      }
+      priceWithTax {
+        ... on SinglePrice {
+          value
+        }
+        ... on PriceRange {
+          min
+          max
+        }
+      }
+      currencyCode
+      collectionIds
+      inStock
+    }
+    totalItems
+    facetValues {
+      facetValue {
+        id
+        name
+        code
+        facet {
+          id
+          name
+          code
+        }
+      }
+      count
+    }
   }
 }
 
@@ -227,5 +286,113 @@ query GetProductsByCollection($collectionSlug: String!, $options: ProductVariant
       }
       totalItems
     }
+  }
+}
+
+# Get full collection tree (all nested categories)
+query GetCollectionTree {
+  collections(options: { take: 100 }) {
+    items {
+      id
+      name
+      slug
+      description
+      parentId
+      featuredAsset {
+        ...AssetFields
+      }
+      parent {
+        id
+        name
+        slug
+      }
+      children {
+        id
+        name
+        slug
+        featuredAsset {
+          ...AssetFields
+        }
+        children {
+          id
+          name
+          slug
+          featuredAsset {
+            ...AssetFields
+          }
+        }
+      }
+      breadcrumbs {
+        id
+        name
+        slug
+      }
+    }
+    totalItems
+  }
+}
+
+# Get collection with products (for category page)
+query GetCollectionWithProducts($slug: String!, $take: Int, $skip: Int) {
+  collection(slug: $slug) {
+    id
+    name
+    slug
+    description
+    featuredAsset {
+      ...AssetFields
+    }
+    parent {
+      id
+      name
+      slug
+    }
+    children {
+      id
+      name
+      slug
+      description
+      featuredAsset {
+        ...AssetFields
+      }
+    }
+    breadcrumbs {
+      id
+      name
+      slug
+    }
+    productVariants(options: { take: $take, skip: $skip }) {
+      items {
+        id
+        product {
+          ...ProductFields
+        }
+      }
+      totalItems
+    }
+  }
+}
+
+# Get root collections only (for main navigation)
+query GetRootCollections {
+  collections(options: { topLevelOnly: true, take: 50 }) {
+    items {
+      id
+      name
+      slug
+      description
+      featuredAsset {
+        ...AssetFields
+      }
+      children {
+        id
+        name
+        slug
+        featuredAsset {
+          ...AssetFields
+        }
+      }
+    }
+    totalItems
   }
 }

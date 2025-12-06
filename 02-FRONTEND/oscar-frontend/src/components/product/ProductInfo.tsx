@@ -64,7 +64,9 @@ export default function ProductInfo({ product, locale = 'fr' }: ProductInfoProps
     const selectedVariant = product.variants?.find(
       (v) => v.size === selectedSize && v.color === selectedColor
     );
-    addToCart(product.id, quantity, selectedVariant?.id);
+    // Use variant ID if available, otherwise product ID
+    const variantId = selectedVariant?.id || product.id;
+    addToCart(variantId, quantity);
   };
 
   const canAddToCart =
@@ -76,22 +78,22 @@ export default function ProductInfo({ product, locale = 'fr' }: ProductInfoProps
     <div className="space-y-6">
       {/* Category */}
       {product.category && (
-        <p className="text-sm text-gray-600">{product.category.name[locale]}</p>
+        <p className="text-sm text-muted-foreground">{product.category.name[locale]}</p>
       )}
 
       {/* Title */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name[locale]}</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-2">{product.name[locale]}</h1>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
             {Array.from({ length: 5 }).map((_, i) => (
               <Star
                 key={i}
-                className={cn('h-5 w-5', i < 4 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300')}
+                className={cn('h-5 w-5', i < 4 ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/50')}
               />
             ))}
           </div>
-          <span className="text-sm text-gray-600">(24 avis)</span>
+          <span className="text-sm text-muted-foreground">(24 avis)</span>
         </div>
       </div>
 
@@ -102,7 +104,7 @@ export default function ProductInfo({ product, locale = 'fr' }: ProductInfoProps
             <span className="text-3xl font-bold text-primary">
               {formatPrice(product.salePrice!)}
             </span>
-            <span className="text-xl text-gray-500 line-through">
+            <span className="text-xl text-muted-foreground line-through">
               {formatPrice(product.basePrice)}
             </span>
             <Badge variant="error">-{discountPercent}%</Badge>
@@ -131,13 +133,13 @@ export default function ProductInfo({ product, locale = 'fr' }: ProductInfoProps
 
       {/* Description */}
       <div className="prose prose-sm">
-        <p className="text-gray-700 leading-relaxed">{product.description[locale]}</p>
+        <p className="text-muted-foreground leading-relaxed">{product.description[locale]}</p>
       </div>
 
       {/* Size Selection */}
       {sizes.length > 0 && (
         <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">
+          <label className="block text-sm font-medium text-foreground mb-2">
             Taille {selectedSize && `(${selectedSize})`}
           </label>
           <div className="flex flex-wrap gap-2">
@@ -149,7 +151,7 @@ export default function ProductInfo({ product, locale = 'fr' }: ProductInfoProps
                   'px-4 py-2 rounded-md border transition-colors font-medium',
                   selectedSize === size
                     ? 'border-primary bg-primary text-white'
-                    : 'border-gray-300 hover:border-primary'
+                    : 'border-input hover:border-primary'
                 )}
               >
                 {size}
@@ -162,7 +164,7 @@ export default function ProductInfo({ product, locale = 'fr' }: ProductInfoProps
       {/* Color Selection */}
       {colors.length > 0 && (
         <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">
+          <label className="block text-sm font-medium text-foreground mb-2">
             Couleur {selectedColor && `(${selectedColor})`}
           </label>
           <div className="flex flex-wrap gap-2">
@@ -174,7 +176,7 @@ export default function ProductInfo({ product, locale = 'fr' }: ProductInfoProps
                   'px-4 py-2 rounded-md border transition-colors',
                   selectedColor === color
                     ? 'border-primary bg-primary text-white'
-                    : 'border-gray-300 hover:border-primary'
+                    : 'border-input hover:border-primary'
                 )}
               >
                 {color}
@@ -186,18 +188,18 @@ export default function ProductInfo({ product, locale = 'fr' }: ProductInfoProps
 
       {/* Quantity */}
       <div>
-        <label className="block text-sm font-medium text-gray-900 mb-2">Quantité</label>
+        <label className="block text-sm font-medium text-foreground mb-2">Quantité</label>
         <div className="flex items-center gap-3">
           <button
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            className="w-10 h-10 rounded-md border border-gray-300 hover:border-primary transition-colors"
+            className="w-10 h-10 rounded-md border border-input hover:border-primary transition-colors"
           >
             -
           </button>
           <span className="w-12 text-center font-medium">{quantity}</span>
           <button
             onClick={() => setQuantity(Math.min(product.stockQuantity, quantity + 1))}
-            className="w-10 h-10 rounded-md border border-gray-300 hover:border-primary transition-colors"
+            className="w-10 h-10 rounded-md border border-input hover:border-primary transition-colors"
           >
             +
           </button>
@@ -225,18 +227,18 @@ export default function ProductInfo({ product, locale = 'fr' }: ProductInfoProps
 
       {/* Features */}
       <div className="border-t pt-6 space-y-3">
-        <div className="flex items-center gap-3 text-sm text-gray-600">
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <Truck className="h-5 w-5" />
           <span>Livraison gratuite pour les commandes de plus de 5000 DA</span>
         </div>
-        <div className="flex items-center gap-3 text-sm text-gray-600">
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <ShieldCheck className="h-5 w-5" />
           <span>Garantie de remboursement sous 14 jours</span>
         </div>
       </div>
 
       {/* Product Details */}
-      <div className="border-t pt-6 text-sm text-gray-600">
+      <div className="border-t pt-6 text-sm text-muted-foreground">
         <p>SKU: {product.sku}</p>
       </div>
     </div>

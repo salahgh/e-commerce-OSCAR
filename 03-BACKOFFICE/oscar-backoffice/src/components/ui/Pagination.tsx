@@ -60,7 +60,7 @@ export const Pagination: React.FC<PaginationProps> = ({
 
       {getPageNumbers().map((page, index) =>
         page === '...' ? (
-          <span key={`ellipsis-${index}`} className="px-2 text-gray-500">
+          <span key={`ellipsis-${index}`} className="px-2 text-gray-400">
             ...
           </span>
         ) : (

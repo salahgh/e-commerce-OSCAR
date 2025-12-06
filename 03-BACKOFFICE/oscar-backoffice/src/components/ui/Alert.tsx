@@ -9,36 +9,31 @@ interface AlertProps {
   className?: string;
 }
 
-export const Alert: React.FC<AlertProps> = ({
-  variant = 'info',
-  title,
-  children,
-  className,
-}) => {
+export const Alert: React.FC<AlertProps> = ({ variant = 'info', title, children, className }) => {
   const variantConfig = {
     success: {
-      container: 'bg-green-50 border-green-200',
-      icon: <CheckCircle className="h-5 w-5 text-green-600" />,
-      title: 'text-green-800',
-      text: 'text-green-700',
+      container: 'bg-green-900/30 border-green-500/30',
+      icon: <CheckCircle className="h-5 w-5 text-green-400" />,
+      title: 'text-green-300',
+      text: 'text-green-400',
     },
     error: {
-      container: 'bg-red-50 border-red-200',
-      icon: <XCircle className="h-5 w-5 text-red-600" />,
-      title: 'text-red-800',
-      text: 'text-red-700',
+      container: 'bg-red-900/30 border-red-500/30',
+      icon: <XCircle className="h-5 w-5 text-red-400" />,
+      title: 'text-red-300',
+      text: 'text-red-400',
     },
     warning: {
-      container: 'bg-yellow-50 border-yellow-200',
-      icon: <AlertCircle className="h-5 w-5 text-yellow-600" />,
-      title: 'text-yellow-800',
-      text: 'text-yellow-700',
+      container: 'bg-yellow-900/30 border-yellow-500/30',
+      icon: <AlertCircle className="h-5 w-5 text-yellow-400" />,
+      title: 'text-yellow-300',
+      text: 'text-yellow-400',
     },
     info: {
-      container: 'bg-blue-50 border-blue-200',
-      icon: <Info className="h-5 w-5 text-blue-600" />,
-      title: 'text-blue-800',
-      text: 'text-blue-700',
+      container: 'bg-blue-900/30 border-blue-500/30',
+      icon: <Info className="h-5 w-5 text-blue-400" />,
+      title: 'text-blue-300',
+      text: 'text-blue-400',
     },
   };
 

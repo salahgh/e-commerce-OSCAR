@@ -30,18 +30,15 @@ interface OrderReviewProps {
   };
   cartItems: Array<{
     id: string;
-    product: {
-      id: string;
-      name: { fr: string };
-      images: Array<{ url: string; isPrimary: boolean }>;
-    };
-    variant?: {
-      size?: string;
-      color?: string;
-    };
+    productVariantId: string;
+    productName: string;
+    variantName: string;
+    sku: string;
     quantity: number;
-    price: number;
-    total: number;
+    unitPrice: number;
+    linePrice: number;
+    imageUrl?: string;
+    productSlug?: string;
   }>;
   subtotal: number;
   discount: number;
@@ -69,7 +66,7 @@ export default function OrderReview({
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-2">Vérification de la commande</h2>
-        <p className="text-gray-600">Vérifiez les détails de votre commande avant de confirmer</p>
+        <p className="text-muted-foreground">Vérifiez les détails de votre commande avant de confirmer</p>
       </div>
 
       {/* Shipping Address */}
@@ -77,7 +74,7 @@ export default function OrderReview({
         <Card.Header>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-gray-600" />
+              <MapPin className="h-5 w-5 text-muted-foreground" />
               <h3 className="font-semibold">Adresse de livraison</h3>
             </div>
             <Button variant="ghost" size="sm" onClick={() => onEdit(1)}>
@@ -91,14 +88,14 @@ export default function OrderReview({
             <p className="font-medium">
               {shippingAddress.firstName} {shippingAddress.lastName}
             </p>
-            <p className="text-gray-600">{shippingAddress.address}</p>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">{shippingAddress.address}</p>
+            <p className="text-muted-foreground">
               {shippingAddress.city}, {shippingAddress.wilaya} {shippingAddress.postalCode}
             </p>
-            <p className="text-gray-600">{shippingAddress.phone}</p>
-            <p className="text-gray-600">{shippingAddress.email}</p>
+            <p className="text-muted-foreground">{shippingAddress.phone}</p>
+            <p className="text-muted-foreground">{shippingAddress.email}</p>
             {shippingAddress.notes && (
-              <p className="text-gray-600 mt-2">
+              <p className="text-muted-foreground mt-2">
                 <span className="font-medium">Notes:</span> {shippingAddress.notes}
               </p>
             )}
@@ -111,7 +108,7 @@ export default function OrderReview({
         <Card.Header>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Truck className="h-5 w-5 text-gray-600" />
+              <Truck className="h-5 w-5 text-muted-foreground" />
               <h3 className="font-semibold">Méthode de livraison</h3>
             </div>
             <Button variant="ghost" size="sm" onClick={() => onEdit(2)}>
@@ -124,7 +121,7 @@ export default function OrderReview({
           <div className="flex justify-between items-center">
             <div>
               <p className="font-medium">{shippingMethod.name}</p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 Livraison estimée: {shippingMethod.estimatedDays}
               </p>
             </div>
@@ -140,7 +137,7 @@ export default function OrderReview({
         <Card.Header>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Banknote className="h-5 w-5 text-gray-600" />
+              <Banknote className="h-5 w-5 text-muted-foreground" />
               <h3 className="font-semibold">Mode de paiement</h3>
             </div>
             <Button variant="ghost" size="sm" onClick={() => onEdit(3)}>
@@ -161,38 +158,31 @@ export default function OrderReview({
         </Card.Header>
         <Card.Content>
           <div className="space-y-4">
-            {cartItems.map((item) => {
-              const primaryImage = item.product.images.find((img) => img.isPrimary);
-              return (
-                <div key={item.id} className="flex gap-4">
-                  <div className="relative w-20 h-20 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
-                    {primaryImage && (
-                      <Image
-                        src={primaryImage.url}
-                        alt={item.product.name.fr}
-                        fill
-                        className="object-cover"
-                        sizes="80px"
-                      />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm line-clamp-2">{item.product.name.fr}</p>
-                    {item.variant && (
-                      <p className="text-xs text-gray-600 mt-1">
-                        {item.variant.size && `Taille: ${item.variant.size}`}
-                        {item.variant.size && item.variant.color && ' • '}
-                        {item.variant.color && `Couleur: ${item.variant.color}`}
-                      </p>
-                    )}
-                    <p className="text-xs text-gray-600 mt-1">Quantité: {item.quantity}</p>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="font-semibold text-primary">{formatPrice(item.total)}</p>
-                  </div>
+            {cartItems.map((item) => (
+              <div key={item.id} className="flex gap-4">
+                <div className="relative w-20 h-20 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                  {item.imageUrl && (
+                    <Image
+                      src={item.imageUrl}
+                      alt={item.productName}
+                      fill
+                      className="object-cover"
+                      sizes="80px"
+                    />
+                  )}
                 </div>
-              );
-            })}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm line-clamp-2">{item.productName}</p>
+                  {item.variantName && (
+                    <p className="text-xs text-muted-foreground mt-1">{item.variantName}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">Quantité: {item.quantity}</p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="font-semibold text-primary">{formatPrice(item.linePrice)}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </Card.Content>
       </Card>
@@ -204,7 +194,7 @@ export default function OrderReview({
         </Card.Header>
         <Card.Content>
           <div className="space-y-2">
-            <div className="flex justify-between text-gray-700">
+            <div className="flex justify-between text-muted-foreground">
               <span>Sous-total</span>
               <span>{formatPrice(subtotal)}</span>
             </div>
@@ -214,7 +204,7 @@ export default function OrderReview({
                 <span>-{formatPrice(discount)}</span>
               </div>
             )}
-            <div className="flex justify-between text-gray-700">
+            <div className="flex justify-between text-muted-foreground">
               <span>Livraison</span>
               <span>{shippingCost === 0 ? 'Gratuite' : formatPrice(shippingCost)}</span>
             </div>
@@ -222,7 +212,7 @@ export default function OrderReview({
               <span className="text-lg font-bold">Total</span>
               <span className="text-2xl font-bold text-primary">{formatPrice(total)}</span>
             </div>
-            <p className="text-xs text-gray-500">TVA incluse</p>
+            <p className="text-xs text-muted-foreground">TVA incluse</p>
           </div>
         </Card.Content>
       </Card>
@@ -238,7 +228,7 @@ export default function OrderReview({
       </div>
 
       {/* Terms */}
-      <p className="text-xs text-gray-500 text-center">
+      <p className="text-xs text-muted-foreground text-center">
         En confirmant votre commande, vous acceptez nos{' '}
         <a href="/terms" className="text-primary hover:underline">
           conditions d'utilisation

@@ -1,197 +1,291 @@
-import React from 'react';
-import { useQuery } from '@apollo/client';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
+import React, { useState } from 'react';
+import { useQuery, useMutation } from '@apollo/client';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import {
+  ArrowLeft,
+  Pencil,
+  Trash2,
+  Mail,
+  Shield,
+  Calendar,
+  Clock,
+  CheckCircle,
+  XCircle,
+} from 'lucide-react';
+import {
+  AdminAdministratorDocument,
+  DeleteAdministratorDocument,
+} from '../../graphql/generated/graphql';
 import { Badge } from '../../components/ui/Badge';
+import { Card } from '../../components/ui/Card';
 import { Spinner } from '../../components/ui/Spinner';
-import { UserDocument } from '../../graphql/generated/graphql';
-import { formatDate } from '../../lib/utils';
-import { ArrowLeft, User, Mail, Phone, Calendar, Shield } from 'lucide-react';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { addToast } from '../../store/slices/uiSlice';
+import { formatDateTime } from '../../lib/utils';
 
 export const UserDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const { data, loading, error } = useQuery(UserDocument, {
-    variables: { id: id ? parseInt(id) : 0 },
+  const { data, loading, error } = useQuery(AdminAdministratorDocument, {
+    variables: { id: id! },
     skip: !id,
   });
 
+  const [deleteAdmin, { loading: deleting }] = useMutation(DeleteAdministratorDocument, {
+    onCompleted: (result) => {
+      if (result.deleteAdministrator.result === 'DELETED') {
+        dispatch(addToast({ type: 'success', message: 'Administrateur supprimé avec succès' }));
+        setTimeout(() => navigate('/users'), 1500);
+      } else {
+        dispatch(addToast({
+          type: 'error',
+          message: result.deleteAdministrator.message || 'Erreur lors de la suppression',
+        }));
+      }
+      setShowDeleteDialog(false);
+    },
+    onError: (err) => {
+      dispatch(addToast({ type: 'error', message: err.message }));
+      setShowDeleteDialog(false);
+    },
+  });
+
+  const admin = data?.administrator;
+
+  const handleDelete = () => {
+    if (id) {
+      deleteAdmin({ variables: { id } });
+    }
+  };
+
+  const getRoleBadgeVariant = (code: string): 'default' | 'warning' | 'success' | 'danger' => {
+    if (code === '__super_admin_role__' || code.toLowerCase().includes('super')) {
+      return 'danger';
+    }
+    if (code.toLowerCase().includes('admin')) {
+      return 'warning';
+    }
+    return 'default';
+  };
+
+  const formatRoleCode = (code: string): string => {
+    if (code === '__super_admin_role__') return 'Super Admin';
+    return code
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (l) => l.toUpperCase());
+  };
+
+  const formatPermission = (permission: string): string => {
+    return permission
+      .replace(/([A-Z])/g, ' $1')
+      .trim()
+      .replace(/\b\w/g, (l) => l.toUpperCase());
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-96">
         <Spinner size="lg" />
       </div>
     );
   }
 
-  if (error || !data?.user) {
+  if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-500">Erreur: {error?.message || 'Utilisateur non trouvé'}</div>
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <p className="text-red-500 text-lg">Erreur: {error.message}</p>
+          <button
+            onClick={() => navigate('/users')}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Retour à la liste
+          </button>
+        </div>
       </div>
     );
   }
 
-  const user = data.user;
+  if (!admin) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <p className="text-gray-400 text-lg">Administrateur non trouvé</p>
+          <button
+            onClick={() => navigate('/users')}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Retour à la liste
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDelete}
+        title="Supprimer l'administrateur"
+        message={`Êtes-vous sûr de vouloir supprimer ${admin.firstName} ${admin.lastName} ? Cette action est irréversible.`}
+        confirmText={deleting ? 'Suppression...' : 'Supprimer'}
+        loading={deleting}
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/users')}>
-            <ArrowLeft size={16} className="mr-2" />
-            Retour
-          </Button>
+          <button
+            onClick={() => navigate('/users')}
+            className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded-lg"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              {user.firstName} {user.lastName}
+            <h1 className="text-3xl font-bold text-gray-100">
+              {admin.firstName} {admin.lastName}
             </h1>
-            <p className="text-gray-600 mt-1">Détails de l'utilisateur</p>
+            <p className="text-gray-400 mt-1">ID: {admin.id}</p>
           </div>
         </div>
-        <Badge variant={user.isActive ? 'success' : 'default'}>
-          {user.isActive ? 'Actif' : 'Inactif'}
-        </Badge>
+        <div className="flex gap-3">
+          <Link
+            to={`/users/${id}/edit`}
+            className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 flex items-center gap-2"
+          >
+            <Pencil className="h-5 w-5" />
+            Modifier
+          </Link>
+          <button
+            onClick={() => setShowDeleteDialog(true)}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+          >
+            <Trash2 className="h-5 w-5" />
+            Supprimer
+          </button>
+        </div>
       </div>
 
-      {/* User Information */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Basic Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User size={20} />
-              Informations Personnelles
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-start gap-3">
-              <User size={20} className="text-gray-400 mt-1" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Admin Info */}
+        <Card className="lg:col-span-2 bg-gray-800 border-gray-700">
+          <div className="p-6">
+            <h2 className="text-lg font-semibold text-gray-100 mb-6">Informations</h2>
+
+            <div className="flex items-start gap-6 mb-6">
+              <div className="h-20 w-20 rounded-full bg-blue-900/50 flex items-center justify-center">
+                <span className="text-blue-400 font-bold text-2xl">
+                  {(admin.firstName?.[0] || '') + (admin.lastName?.[0] || '')}
+                </span>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-semibold text-gray-100">
+                  {admin.firstName} {admin.lastName}
+                </h3>
+                <div className="flex items-center gap-2 mt-2">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-300">{admin.emailAddress}</span>
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  {admin.user?.verified ? (
+                    <Badge variant="success" className="flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3" />
+                      Compte actif
+                    </Badge>
+                  ) : (
+                    <Badge variant="warning" className="flex items-center gap-1">
+                      <XCircle className="h-3 w-3" />
+                      En attente de vérification
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 pt-6 border-t border-gray-700">
               <div>
-                <p className="text-sm text-gray-600">Nom complet</p>
-                <p className="font-medium text-gray-900">
-                  {user.firstName} {user.lastName}
+                <div className="flex items-center gap-2 text-gray-400 text-sm">
+                  <Calendar className="h-4 w-4" />
+                  Créé le
+                </div>
+                <p className="text-gray-100 mt-1">{formatDateTime(admin.createdAt)}</p>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 text-gray-400 text-sm">
+                  <Clock className="h-4 w-4" />
+                  Dernière connexion
+                </div>
+                <p className="text-gray-100 mt-1">
+                  {admin.user?.lastLogin
+                    ? formatDateTime(admin.user.lastLogin)
+                    : 'Jamais connecté'}
                 </p>
               </div>
             </div>
-
-            <div className="flex items-start gap-3">
-              <Mail size={20} className="text-gray-400 mt-1" />
-              <div>
-                <p className="text-sm text-gray-600">Email</p>
-                <p className="font-medium text-gray-900">{user.email}</p>
-                <div className="mt-1">
-                  <Badge variant={user.emailVerified ? 'success' : 'warning'} size="sm">
-                    {user.emailVerified ? 'Email vérifié' : 'Email non vérifié'}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-
-            {user.phone && (
-              <div className="flex items-start gap-3">
-                <Phone size={20} className="text-gray-400 mt-1" />
-                <div>
-                  <p className="text-sm text-gray-600">Téléphone</p>
-                  <p className="font-medium text-gray-900">{user.phone}</p>
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-start gap-3">
-              <Shield size={20} className="text-gray-400 mt-1" />
-              <div>
-                <p className="text-sm text-gray-600">Rôle</p>
-                <Badge variant="info">{user.role}</Badge>
-              </div>
-            </div>
-          </CardContent>
+          </div>
         </Card>
 
-        {/* Account Status */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar size={20} />
-              Informations du Compte
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm text-gray-600">Statut du compte</p>
-              <Badge variant={user.isActive ? 'success' : 'default'} className="mt-1">
-                {user.isActive ? 'Compte actif' : 'Compte désactivé'}
-              </Badge>
-            </div>
+        {/* Roles */}
+        <Card className="bg-gray-800 border-gray-700">
+          <div className="p-6">
+            <h2 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
+              <Shield className="h-5 w-5 text-blue-400" />
+              Rôles assignés
+            </h2>
 
-            <div>
-              <p className="text-sm text-gray-600">Date d'inscription</p>
-              <p className="font-medium text-gray-900">{formatDate(String(user.createdAt))}</p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-600">Dernière modification</p>
-              <p className="font-medium text-gray-900">{formatDate(String(user.updatedAt))}</p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-600">ID Utilisateur</p>
-              <p className="font-medium text-gray-900">#{user.id}</p>
-            </div>
-          </CardContent>
+            {admin.user?.roles && admin.user.roles.length > 0 ? (
+              <div className="space-y-4">
+                {admin.user.roles.map((role) => (
+                  <div
+                    key={role.id}
+                    className="p-4 bg-gray-900 rounded-lg border border-gray-700"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant={getRoleBadgeVariant(role.code)}>
+                        {formatRoleCode(role.code)}
+                      </Badge>
+                    </div>
+                    {role.description && (
+                      <p className="text-sm text-gray-400 mb-3">{role.description}</p>
+                    )}
+                    {role.permissions && role.permissions.length > 0 && (
+                      <div>
+                        <p className="text-xs text-gray-500 mb-2">
+                          {role.permissions.length} permission{role.permissions.length > 1 ? 's' : ''}
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {role.permissions.slice(0, 5).map((perm) => (
+                            <span
+                              key={perm}
+                              className="text-xs px-2 py-1 bg-gray-800 text-gray-400 rounded"
+                            >
+                              {formatPermission(perm)}
+                            </span>
+                          ))}
+                          {role.permissions.length > 5 && (
+                            <span className="text-xs px-2 py-1 bg-gray-800 text-gray-400 rounded">
+                              +{role.permissions.length - 5} autres
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400 text-sm">Aucun rôle assigné</p>
+            )}
+          </div>
         </Card>
       </div>
-
-      {/* Additional Information Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Informations Complémentaires</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center p-6 bg-blue-50 rounded-lg">
-              <p className="text-3xl font-bold text-blue-600">-</p>
-              <p className="text-sm text-gray-600 mt-2">Commandes totales</p>
-              <p className="text-xs text-gray-500 mt-1">Bientôt disponible</p>
-            </div>
-
-            <div className="text-center p-6 bg-green-50 rounded-lg">
-              <p className="text-3xl font-bold text-green-600">-</p>
-              <p className="text-sm text-gray-600 mt-2">Montant dépensé</p>
-              <p className="text-xs text-gray-500 mt-1">Bientôt disponible</p>
-            </div>
-
-            <div className="text-center p-6 bg-purple-50 rounded-lg">
-              <p className="text-3xl font-bold text-purple-600">-</p>
-              <p className="text-sm text-gray-600 mt-2">Produits dans le panier</p>
-              <p className="text-xs text-gray-500 mt-1">Bientôt disponible</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => navigate(`/users`)}>
-              Retour à la liste
-            </Button>
-            <Button variant="outline" disabled>
-              Voir les commandes
-            </Button>
-            <Button variant="outline" disabled>
-              Envoyer un email
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
