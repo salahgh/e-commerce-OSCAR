@@ -14,59 +14,15 @@ import {
 import { CartSummary } from '@/components/cart';
 import { Skeleton } from '@/components/ui';
 import toast from 'react-hot-toast';
-import { useCreateOrderMutation } from '@/graphql/generated/graphql';
-
-// Mock data for shipping and payment methods
-const mockShippingMethods = [
-  {
-    id: 'standard',
-    name: 'Livraison Standard',
-    description: 'Livraison à domicile ou au bureau',
-    price: 0,
-    estimatedDays: '3-5 jours ouvrables',
-    icon: 'standard' as const,
-  },
-  {
-    id: 'express',
-    name: 'Livraison Express',
-    description: 'Livraison rapide à domicile',
-    price: 500,
-    estimatedDays: '1-2 jours ouvrables',
-    icon: 'express' as const,
-  },
-  {
-    id: 'economy',
-    name: 'Livraison Économique',
-    description: 'Point relais le plus proche',
-    price: 0,
-    estimatedDays: '5-7 jours ouvrables',
-    icon: 'economy' as const,
-  },
-];
-
-const mockPaymentMethods = [
-  {
-    id: 'cash_on_delivery',
-    name: 'Paiement à la livraison',
-    description: 'Payez en espèces lors de la réception de votre commande',
-    icon: 'cash' as const,
-    available: true,
-  },
-  {
-    id: 'card',
-    name: 'Carte bancaire',
-    description: 'Visa, Mastercard, CIB',
-    icon: 'card' as const,
-    available: false,
-  },
-  {
-    id: 'digital_wallet',
-    name: 'Portefeuille numérique',
-    description: 'BaridiMob, CCP',
-    icon: 'digital' as const,
-    available: false,
-  },
-];
+import {
+  useGetEligibleShippingMethodsQuery,
+  useGetEligiblePaymentMethodsQuery,
+  useSetOrderShippingAddressMutation,
+  useSetOrderShippingMethodMutation,
+  useTransitionOrderToStateMutation,
+  useAddPaymentToOrderMutation,
+  useSetCustomerForOrderMutation,
+} from '@/graphql/generated/graphql';
 
 const steps = [
   { number: 1, label: 'Livraison', description: 'Adresse' },
@@ -79,18 +35,50 @@ export default function CheckoutPage() {
   const router = useRouter();
   const params = useParams();
   const locale = (params.locale as string) || 'fr';
-  const { cart, loading: cartLoading, clearCart } = useCart();
-  const { user, isAuthenticated } = useAuth();
+  const { cart, loading: cartLoading, refetchCart } = useCart();
+  const { customer, isAuthenticated } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // GraphQL mutation
-  const [createOrderMutation] = useCreateOrderMutation();
-
   // Checkout data
   const [shippingAddress, setShippingAddress] = useState<any>(null);
-  const [selectedShippingMethod, setSelectedShippingMethod] = useState<string>('');
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
+  const [selectedShippingMethodId, setSelectedShippingMethodId] = useState<string>('');
+  const [selectedPaymentMethodCode, setSelectedPaymentMethodCode] = useState<string>('');
+
+  // GraphQL queries
+  const { data: shippingMethodsData, loading: shippingLoading } = useGetEligibleShippingMethodsQuery({
+    skip: currentStep < 2,
+  });
+
+  const { data: paymentMethodsData, loading: paymentLoading } = useGetEligiblePaymentMethodsQuery({
+    skip: currentStep < 3,
+  });
+
+  // GraphQL mutations
+  const [setShippingAddressMutation] = useSetOrderShippingAddressMutation();
+  const [setShippingMethodMutation] = useSetOrderShippingMethodMutation();
+  const [setCustomerMutation] = useSetCustomerForOrderMutation();
+  const [transitionOrderMutation] = useTransitionOrderToStateMutation();
+  const [addPaymentMutation] = useAddPaymentToOrderMutation();
+
+  // Map shipping methods for UI
+  const shippingMethods = (shippingMethodsData?.eligibleShippingMethods || []).map((method) => ({
+    id: method.id,
+    name: method.name,
+    description: method.description || '',
+    price: method.priceWithTax,
+    estimatedDays: method.metadata?.estimatedDays || '3-5 jours ouvrables',
+    icon: 'standard' as const,
+  }));
+
+  // Map payment methods for UI
+  const paymentMethods = (paymentMethodsData?.eligiblePaymentMethods || []).map((method) => ({
+    id: method.code,
+    name: method.name,
+    description: method.description || '',
+    icon: method.code === 'cash-on-delivery' ? ('cash' as const) : ('card' as const),
+    available: method.isEligible,
+  }));
 
   // Redirect if cart is empty
   useEffect(() => {
@@ -102,12 +90,12 @@ export default function CheckoutPage() {
 
   // Pre-fill shipping address if user is authenticated
   useEffect(() => {
-    if (isAuthenticated && user && !shippingAddress) {
+    if (isAuthenticated && customer && !shippingAddress) {
       setShippingAddress({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        email: user.email || '',
-        phone: user.phone || '',
+        firstName: customer.firstName || '',
+        lastName: customer.lastName || '',
+        email: customer.emailAddress || '',
+        phone: customer.phoneNumber || '',
         address: '',
         wilaya: '',
         city: '',
@@ -115,58 +103,145 @@ export default function CheckoutPage() {
         notes: '',
       });
     }
-  }, [isAuthenticated, user, shippingAddress]);
+  }, [isAuthenticated, customer, shippingAddress]);
 
-  const handleShippingAddressSubmit = (values: any) => {
-    setShippingAddress(values);
-    setCurrentStep(2);
+  const handleShippingAddressSubmit = async (values: any) => {
+    setIsSubmitting(true);
+    try {
+      // Set customer for guest checkout
+      if (!isAuthenticated) {
+        const customerResult = await setCustomerMutation({
+          variables: {
+            input: {
+              firstName: values.firstName,
+              lastName: values.lastName,
+              emailAddress: values.email,
+              phoneNumber: values.phone,
+            },
+          },
+        });
+
+        if (customerResult.data?.setCustomerForOrder) {
+          const response = customerResult.data.setCustomerForOrder;
+          if ('errorCode' in response) {
+            toast.error((response as any).message || 'Erreur lors de la définition du client');
+            setIsSubmitting(false);
+            return;
+          }
+        }
+      }
+
+      // Set shipping address
+      const result = await setShippingAddressMutation({
+        variables: {
+          input: {
+            fullName: `${values.firstName} ${values.lastName}`,
+            streetLine1: values.address,
+            streetLine2: values.notes || '',
+            city: values.city,
+            province: values.wilaya,
+            postalCode: values.postalCode || '',
+            countryCode: 'DZ', // Algeria
+            phoneNumber: values.phone,
+          },
+        },
+      });
+
+      if (result.data?.setOrderShippingAddress) {
+        const response = result.data.setOrderShippingAddress;
+        if ('errorCode' in response) {
+          toast.error((response as any).message || 'Erreur lors de la définition de l\'adresse');
+          setIsSubmitting(false);
+          return;
+        }
+
+        setShippingAddress(values);
+        await refetchCart();
+        setCurrentStep(2);
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Erreur lors de la définition de l\'adresse');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleShippingMethodSubmit = (methodId: string) => {
-    setSelectedShippingMethod(methodId);
-    setCurrentStep(3);
+  const handleShippingMethodSubmit = async (methodId: string) => {
+    setIsSubmitting(true);
+    try {
+      const result = await setShippingMethodMutation({
+        variables: {
+          shippingMethodId: [methodId],
+        },
+      });
+
+      if (result.data?.setOrderShippingMethod) {
+        const response = result.data.setOrderShippingMethod;
+        if ('errorCode' in response) {
+          toast.error((response as any).message || 'Erreur lors de la sélection de la méthode');
+          setIsSubmitting(false);
+          return;
+        }
+
+        setSelectedShippingMethodId(methodId);
+        await refetchCart();
+        setCurrentStep(3);
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Erreur lors de la sélection de la méthode de livraison');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handlePaymentMethodSubmit = (methodId: string) => {
-    setSelectedPaymentMethod(methodId);
+  const handlePaymentMethodSubmit = (methodCode: string) => {
+    setSelectedPaymentMethodCode(methodCode);
     setCurrentStep(4);
   };
 
   const handleOrderSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // Format shipping address for backend
-      const fullShippingAddress = [
-        shippingAddress.address,
-        shippingAddress.city,
-        shippingAddress.wilaya,
-        shippingAddress.postalCode,
-      ]
-        .filter(Boolean)
-        .join(', ');
+      // Transition order to ArrangingPayment state
+      const transitionResult = await transitionOrderMutation({
+        variables: {
+          state: 'ArrangingPayment',
+        },
+      });
 
-      const phoneNumber = shippingAddress.phone || user?.phone || '';
+      if (transitionResult.data?.transitionOrderToState) {
+        const response = transitionResult.data.transitionOrderToState;
+        if ('errorCode' in response) {
+          toast.error((response as any).message || 'Erreur lors de la transition de la commande');
+          setIsSubmitting(false);
+          return;
+        }
+      }
 
-      // Create order via GraphQL mutation
-      const { data } = await createOrderMutation({
+      // Add payment
+      const paymentResult = await addPaymentMutation({
         variables: {
           input: {
-            shippingAddress: fullShippingAddress,
-            phoneNumber,
-            paymentMethod: selectedPayment?.name || 'Paiement à la livraison',
-            notes: shippingAddress.notes || '',
+            method: selectedPaymentMethodCode,
+            metadata: {},
           },
         },
       });
 
-      if (data?.createOrder) {
-        // Clear cart after successful order
-        await clearCart();
+      if (paymentResult.data?.addPaymentToOrder) {
+        const response = paymentResult.data.addPaymentToOrder;
+        if ('errorCode' in response) {
+          toast.error((response as any).message || 'Erreur lors du paiement');
+          setIsSubmitting(false);
+          return;
+        }
 
-        toast.success('Commande confirmée avec succès!');
-
-        // Redirect to order detail page
-        router.push(`/${locale}/user/orders/${data.createOrder.id}`);
+        // Success - order is complete
+        if ('code' in response) {
+          toast.success('Commande confirmée avec succès!');
+          await refetchCart();
+          router.push(`/${locale}/order-confirmation?code=${response.code}`);
+        }
       }
     } catch (error: any) {
       console.error('Order creation error:', error);
@@ -183,7 +258,7 @@ export default function CheckoutPage() {
   // Loading state
   if (cartLoading) {
     return (
-      <div className="container-custom py-8">
+      <div className="container mx-auto px-4 py-8">
         <Skeleton className="h-12 w-full mb-8" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
@@ -197,21 +272,16 @@ export default function CheckoutPage() {
     );
   }
 
-  // Empty cart check (redundant with useEffect redirect, but good fallback)
+  // Empty cart check
   if (!cart || !cart.items || cart.items.length === 0) {
     return null;
   }
 
-  const selectedShipping = mockShippingMethods.find((m) => m.id === selectedShippingMethod);
-  const selectedPayment = mockPaymentMethods.find((m) => m.id === selectedPaymentMethod);
-
-  const subtotal = cart.subtotal || 0;
-  const discount = cart.discount || 0;
-  const shippingCost = selectedShipping?.price || 0;
-  const total = subtotal - discount + shippingCost;
+  const selectedShipping = shippingMethods.find((m) => m.id === selectedShippingMethodId);
+  const selectedPayment = paymentMethods.find((m) => m.id === selectedPaymentMethodCode);
 
   return (
-    <div className="container-custom py-8">
+    <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Finaliser ma commande</h1>
 
       {/* Progress Steps */}
@@ -230,8 +300,8 @@ export default function CheckoutPage() {
 
           {currentStep === 2 && (
             <ShippingMethodForm
-              shippingMethods={mockShippingMethods}
-              initialMethod={selectedShippingMethod}
+              shippingMethods={shippingMethods}
+              initialMethod={selectedShippingMethodId}
               onSubmit={handleShippingMethodSubmit}
               onBack={() => setCurrentStep(1)}
             />
@@ -239,8 +309,8 @@ export default function CheckoutPage() {
 
           {currentStep === 3 && (
             <PaymentMethodForm
-              paymentMethods={mockPaymentMethods}
-              initialMethod={selectedPaymentMethod}
+              paymentMethods={paymentMethods}
+              initialMethod={selectedPaymentMethodCode}
               onSubmit={handlePaymentMethodSubmit}
               onBack={() => setCurrentStep(2)}
             />
@@ -252,10 +322,10 @@ export default function CheckoutPage() {
               shippingMethod={selectedShipping}
               paymentMethod={selectedPayment}
               cartItems={cart.items}
-              subtotal={subtotal}
-              discount={discount}
-              shippingCost={shippingCost}
-              total={total}
+              subtotal={cart.subTotal}
+              discount={0}
+              shippingCost={cart.shipping}
+              total={cart.total}
               onEdit={handleEditStep}
               onSubmit={handleOrderSubmit}
               isSubmitting={isSubmitting}
@@ -263,11 +333,11 @@ export default function CheckoutPage() {
           )}
         </div>
 
-        {/* Sidebar - Order Summary (hidden on review step as it's included there) */}
+        {/* Sidebar - Order Summary */}
         {currentStep < 4 && (
           <div className="lg:block hidden">
             <div className="sticky top-4">
-              <CartSummary showCoupon={false} />
+              <CartSummary />
             </div>
           </div>
         )}

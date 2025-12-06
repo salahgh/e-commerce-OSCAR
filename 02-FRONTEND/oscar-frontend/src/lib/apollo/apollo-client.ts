@@ -3,7 +3,7 @@ import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 
 const httpLink = new HttpLink({
-  uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8080/graphql',
+  uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8085/shop-api',
   credentials: 'include',
 });
 

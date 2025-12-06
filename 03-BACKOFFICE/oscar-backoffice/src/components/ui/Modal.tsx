@@ -52,20 +52,20 @@ export const Modal: React.FC<ModalProps> = ({
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
+      <div className="fixed inset-0 bg-black bg-opacity-70" onClick={onClose} />
       <div
         className={cn(
-          'relative bg-white rounded-lg shadow-xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col',
+          'relative bg-gray-800 rounded-lg shadow-xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col border border-gray-700',
           sizeClasses[size]
         )}
       >
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-            {title && <h2 className="text-xl font-semibold text-gray-900">{title}</h2>}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700">
+            {title && <h2 className="text-xl font-semibold text-gray-100">{title}</h2>}
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-500 hover:text-gray-300 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -98,7 +98,10 @@ interface ModalFooterProps extends React.HTMLAttributes<HTMLDivElement> {
 export const ModalFooter: React.FC<ModalFooterProps> = ({ className, children, ...props }) => {
   return (
     <div
-      className={cn('flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50', className)}
+      className={cn(
+        'flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-700 bg-gray-800/50',
+        className
+      )}
       {...props}
     >
       {children}

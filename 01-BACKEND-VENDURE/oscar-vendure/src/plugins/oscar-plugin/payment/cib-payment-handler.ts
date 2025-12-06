@@ -89,7 +89,7 @@ export const cibPaymentHandler = new PaymentMethodHandler({
     } catch (error: any) {
       return {
         amount,
-        state: 'Error',
+        state: 'Declined',
         errorMessage: error.message || 'CIB payment failed',
         metadata: {
           error: error.message,

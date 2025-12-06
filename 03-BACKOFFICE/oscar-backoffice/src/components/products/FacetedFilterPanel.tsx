@@ -50,10 +50,10 @@ const FACET_ICONS: Record<string, React.ElementType> = {
 
 // Gradient styles for facet headers
 const FACET_GRADIENTS: Record<string, string> = {
-  'color-swatch': 'from-pink-500/10 via-purple-500/10 to-blue-500/10',
-  'size-button': 'from-blue-500/10 via-cyan-500/10 to-teal-500/10',
-  checkbox: 'from-gray-100 to-gray-50',
-  'price-range': 'from-amber-500/10 via-orange-500/10 to-red-500/10',
+  'color-swatch': 'from-pink-900/30 via-purple-900/30 to-blue-900/30',
+  'size-button': 'from-blue-900/30 via-cyan-900/30 to-teal-900/30',
+  checkbox: 'from-gray-800 to-gray-900',
+  'price-range': 'from-amber-900/30 via-orange-900/30 to-red-900/30',
 };
 
 export const FacetedFilterPanel: React.FC<FacetedFilterPanelProps> = ({
@@ -110,18 +110,18 @@ export const FacetedFilterPanel: React.FC<FacetedFilterPanelProps> = ({
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="fixed right-0 top-0 h-full w-[420px] bg-white shadow-2xl z-50 flex flex-col"
+        className="fixed right-0 top-0 h-full w-[420px] bg-gray-900 shadow-2xl z-50 flex flex-col"
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary-50 rounded-lg">
-              <Filter className="h-5 w-5 text-primary-600" />
+            <div className="p-2 bg-primary-900/50 rounded-lg">
+              <Filter className="h-5 w-5 text-primary-400" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">Filtres avances</h3>
+              <h3 className="font-semibold text-gray-100">Filtres avances</h3>
               {activeFilterCount > 0 && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-400">
                   {activeFilterCount} filtre{activeFilterCount > 1 ? 's' : ''} actif
                   {activeFilterCount > 1 ? 's' : ''}
                 </p>
@@ -131,9 +131,9 @@ export const FacetedFilterPanel: React.FC<FacetedFilterPanelProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
           >
-            <X className="h-5 w-5 text-gray-500" />
+            <X className="h-5 w-5 text-gray-400" />
           </button>
         </div>
 
@@ -142,10 +142,10 @@ export const FacetedFilterPanel: React.FC<FacetedFilterPanelProps> = ({
           <div className="flex-1 p-5 space-y-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="space-y-3">
-                <div className="h-6 bg-gray-200 rounded animate-pulse w-32" />
+                <div className="h-6 bg-gray-700 rounded animate-pulse w-32" />
                 <div className="space-y-2">
                   {[1, 2, 3].map((j) => (
-                    <div key={j} className="h-10 bg-gray-100 rounded animate-pulse" />
+                    <div key={j} className="h-10 bg-gray-800 rounded animate-pulse" />
                   ))}
                 </div>
               </div>
@@ -155,7 +155,7 @@ export const FacetedFilterPanel: React.FC<FacetedFilterPanelProps> = ({
 
         {/* Filter Sections */}
         {!loading && (
-          <div className="flex-1 overflow-y-auto divide-y divide-gray-100">
+          <div className="flex-1 overflow-y-auto divide-y divide-gray-700">
             {/* Status Filter */}
             <FilterSection
               id="status"
@@ -329,12 +329,12 @@ export const FacetedFilterPanel: React.FC<FacetedFilterPanelProps> = ({
         )}
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-100 bg-gray-50 flex gap-3">
+        <div className="p-4 border-t border-gray-700 bg-gray-800 flex gap-3">
           <button
             onClick={onClearAll}
             disabled={activeFilterCount === 0}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300
-                       text-gray-700 rounded-lg hover:bg-white transition-colors disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-600
+                       text-gray-300 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
           >
             <Trash2 className="h-4 w-4" />
             Reinitialiser
@@ -372,7 +372,7 @@ function FilterSection({
   selectedCount = 0,
   onToggle,
   onClear,
-  gradient = 'from-gray-100 to-gray-50',
+  gradient = 'from-gray-800 to-gray-900',
   children,
 }: FilterSectionProps) {
   return (
@@ -381,13 +381,13 @@ function FilterSection({
         onClick={onToggle}
         className={cn(
           'w-full px-5 py-3.5 flex items-center justify-between',
-          'hover:bg-gray-50 transition-colors',
+          'hover:bg-gray-700 transition-colors',
           `bg-gradient-to-r ${gradient}`
         )}
       >
         <div className="flex items-center gap-3">
-          <Icon className="h-4 w-4 text-gray-500" />
-          <span className="font-medium text-gray-900 text-sm">{name}</span>
+          <Icon className="h-4 w-4 text-gray-400" />
+          <span className="font-medium text-gray-100 text-sm">{name}</span>
           {selectedCount > 0 && (
             <motion.span
               initial={{ scale: 0 }}
@@ -406,8 +406,8 @@ function FilterSection({
                 e.stopPropagation();
                 onClear();
               }}
-              className="text-xs text-red-500 hover:text-red-600 font-medium px-2 py-1
-                         rounded hover:bg-red-50 transition-colors"
+              className="text-xs text-red-400 hover:text-red-300 font-medium px-2 py-1
+                         rounded hover:bg-red-900/50 transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -415,7 +415,7 @@ function FilterSection({
             </motion.button>
           )}
           <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
-            <ChevronDown className="h-4 w-4 text-gray-400" />
+            <ChevronDown className="h-4 w-4 text-gray-500" />
           </motion.div>
         </div>
       </button>
@@ -448,11 +448,11 @@ interface StatusButtonProps {
 
 function StatusButton({ label, icon, isActive, onClick, variant = 'default' }: StatusButtonProps) {
   const variantStyles = {
-    default: isActive ? 'bg-gray-200 border-gray-300 text-gray-900' : 'bg-white border-gray-200 text-gray-600',
-    success: isActive ? 'bg-green-100 border-green-300 text-green-700' : 'bg-white border-gray-200 text-gray-600',
-    warning: isActive ? 'bg-amber-100 border-amber-300 text-amber-700' : 'bg-white border-gray-200 text-gray-600',
-    danger: isActive ? 'bg-red-100 border-red-300 text-red-700' : 'bg-white border-gray-200 text-gray-600',
-    primary: isActive ? 'bg-primary-100 border-primary-300 text-primary-700' : 'bg-white border-gray-200 text-gray-600',
+    default: isActive ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-gray-800 border-gray-700 text-gray-400',
+    success: isActive ? 'bg-green-900/50 border-green-600 text-green-400' : 'bg-gray-800 border-gray-700 text-gray-400',
+    warning: isActive ? 'bg-amber-900/50 border-amber-600 text-amber-400' : 'bg-gray-800 border-gray-700 text-gray-400',
+    danger: isActive ? 'bg-red-900/50 border-red-600 text-red-400' : 'bg-gray-800 border-gray-700 text-gray-400',
+    primary: isActive ? 'bg-primary-900/50 border-primary-600 text-primary-400' : 'bg-gray-800 border-gray-700 text-gray-400',
   };
 
   return (
@@ -503,18 +503,18 @@ function PriceRangeFilter({ minPrice, maxPrice, onPriceChange }: PriceRangeFilte
             value={localMin}
             onChange={(e) => setLocalMin(e.target.value)}
             placeholder="Min"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm
+            className="w-full px-3 py-2 border border-gray-600 rounded-lg text-sm bg-gray-800 text-gray-100 placeholder-gray-500
                        focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
           />
         </div>
-        <span className="text-gray-400">—</span>
+        <span className="text-gray-500">—</span>
         <div className="flex-1">
           <input
             type="number"
             value={localMax}
             onChange={(e) => setLocalMax(e.target.value)}
             placeholder="Max"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm
+            className="w-full px-3 py-2 border border-gray-600 rounded-lg text-sm bg-gray-800 text-gray-100 placeholder-gray-500
                        focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
           />
         </div>
@@ -532,8 +532,8 @@ function PriceRangeFilter({ minPrice, maxPrice, onPriceChange }: PriceRangeFilte
           <button
             key={index}
             onClick={() => applyPreset(preset)}
-            className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600
-                       hover:bg-gray-200 transition-colors"
+            className="px-2 py-1 text-xs font-medium rounded-full bg-gray-700 text-gray-300
+                       hover:bg-gray-600 transition-colors"
           >
             {preset.label}
           </button>
@@ -563,13 +563,13 @@ function CategoryFilter({ collections, selectedIds, onToggle }: CategoryFilterPr
     <div className="space-y-2">
       {collections.length > 6 && (
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Rechercher..."
-            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg
+            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-600 rounded-lg bg-gray-800 text-gray-100 placeholder-gray-500
                        focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
           />
         </div>
@@ -585,14 +585,14 @@ function CategoryFilter({ collections, selectedIds, onToggle }: CategoryFilterPr
               className={cn(
                 'w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-all',
                 isSelected
-                  ? 'bg-primary-50 border border-primary-200 text-primary-700'
-                  : 'hover:bg-gray-50 border border-transparent'
+                  ? 'bg-primary-900/50 border border-primary-600 text-primary-400'
+                  : 'hover:bg-gray-700 border border-transparent text-gray-300'
               )}
             >
               <div
                 className={cn(
                   'w-4 h-4 rounded border-2 flex items-center justify-center transition-all',
-                  isSelected ? 'bg-primary-500 border-primary-500' : 'border-gray-300'
+                  isSelected ? 'bg-primary-500 border-primary-500' : 'border-gray-600'
                 )}
               >
                 {isSelected && <Check className="h-3 w-3 text-white" />}
@@ -630,7 +630,7 @@ function ColorSwatchFilter({ values, selectedIds, onToggle }: ColorSwatchFilterP
             whileTap={{ scale: 0.9 }}
             title={value.name}
           >
-            <ColorSwatch color={value.code} size="md" showCheck={isSelected} />
+            <ColorSwatch color={value.code} size="md" selected={isSelected} />
           </motion.button>
         );
       })}
@@ -665,7 +665,7 @@ function SizeButtonFilter({ values, selectedIds, onToggle }: SizeButtonFilterPro
               'px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all min-w-[44px]',
               isSelected
                 ? 'bg-primary-500 border-primary-500 text-white shadow-md'
-                : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
+                : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
             )}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -702,13 +702,13 @@ function CheckboxFilter({ values, selectedIds, onToggle }: CheckboxFilterProps) 
     <div className="space-y-2">
       {values.length > 8 && (
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Rechercher..."
-            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg
+            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-600 rounded-lg bg-gray-800 text-gray-100 placeholder-gray-500
                        focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
           />
         </div>
@@ -724,19 +724,19 @@ function CheckboxFilter({ values, selectedIds, onToggle }: CheckboxFilterProps) 
               className={cn(
                 'w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-all',
                 isSelected
-                  ? 'bg-primary-50 border border-primary-200'
-                  : 'hover:bg-gray-50 border border-transparent'
+                  ? 'bg-primary-900/50 border border-primary-600'
+                  : 'hover:bg-gray-700 border border-transparent text-gray-300'
               )}
             >
               <div
                 className={cn(
                   'w-4 h-4 rounded border-2 flex items-center justify-center transition-all',
-                  isSelected ? 'bg-primary-500 border-primary-500' : 'border-gray-300'
+                  isSelected ? 'bg-primary-500 border-primary-500' : 'border-gray-600'
                 )}
               >
                 {isSelected && <Check className="h-3 w-3 text-white" />}
               </div>
-              <span className={cn('flex-1', isSelected && 'text-primary-700 font-medium')}>
+              <span className={cn('flex-1', isSelected && 'text-primary-400 font-medium')}>
                 {value.name}
               </span>
             </button>

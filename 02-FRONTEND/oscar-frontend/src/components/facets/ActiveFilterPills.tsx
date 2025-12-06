@@ -86,7 +86,7 @@ export function ActiveFilterPills({
 
   return (
     <div className={cn('flex flex-wrap items-center gap-2', className)}>
-      <span className="text-sm text-gray-500 font-medium mr-1">Filtres actifs:</span>
+      <span className="text-sm text-muted-foreground font-medium mr-1">Filtres actifs:</span>
 
       <AnimatePresence initial={false}>
         {/* Search Term */}
@@ -166,9 +166,9 @@ interface FilterPillProps {
 
 function FilterPill({ label, subLabel, colorHex, variant = 'default', onRemove }: FilterPillProps) {
   const variantStyles = {
-    default: 'bg-primary-50 text-primary-700 border-primary-200',
-    secondary: 'bg-blue-50 text-blue-700 border-blue-200',
-    warning: 'bg-amber-50 text-amber-700 border-amber-200',
+    default: 'bg-primary/10 text-primary border-primary/30',
+    secondary: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30',
+    warning: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30',
   };
 
   return (
@@ -185,7 +185,7 @@ function FilterPill({ label, subLabel, colorHex, variant = 'default', onRemove }
       {/* Color Swatch */}
       {colorHex && (
         <div
-          className="w-4 h-4 rounded-full border border-gray-200 shadow-sm"
+          className="w-4 h-4 rounded-full border border-border shadow-sm"
           style={{ backgroundColor: colorHex }}
         />
       )}
@@ -200,7 +200,7 @@ function FilterPill({ label, subLabel, colorHex, variant = 'default', onRemove }
       {onRemove && (
         <button
           onClick={onRemove}
-          className="p-0.5 hover:bg-black/10 rounded-full transition-colors"
+          className="p-0.5 hover:bg-muted rounded-full transition-colors"
         >
           <X className="h-3.5 w-3.5" />
         </button>

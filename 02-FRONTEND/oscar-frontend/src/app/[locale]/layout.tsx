@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google';
 import { ApolloWrapper } from '@/lib/apollo/apollo-wrapper';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
+import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { Toaster } from 'react-hot-toast';
 import { locales } from '@/i18n/config';
 import '../globals.css';
@@ -39,25 +40,27 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
       <body className={inter.variable}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <ApolloWrapper>
-            <AuthProvider>
-              <CartProvider>
-                {children}
-                <Toaster
-                  position={locale === 'ar' ? 'top-left' : 'top-right'}
-                  toastOptions={{
-                    duration: 4000,
-                    style: {
-                      background: '#363636',
-                      color: '#fff',
-                    },
-                  }}
-                />
-              </CartProvider>
-            </AuthProvider>
-          </ApolloWrapper>
-        </NextIntlClientProvider>
+        <ThemeProvider>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <ApolloWrapper>
+              <AuthProvider>
+                <CartProvider>
+                  {children}
+                  <Toaster
+                    position={locale === 'ar' ? 'top-left' : 'top-right'}
+                    toastOptions={{
+                      duration: 4000,
+                      style: {
+                        background: 'var(--card)',
+                        color: 'var(--card-foreground)',
+                      },
+                    }}
+                  />
+                </CartProvider>
+              </AuthProvider>
+            </ApolloWrapper>
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

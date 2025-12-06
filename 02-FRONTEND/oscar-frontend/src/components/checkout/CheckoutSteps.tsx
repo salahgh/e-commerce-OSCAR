@@ -30,7 +30,7 @@ export default function CheckoutSteps({ currentStep, steps }: CheckoutStepsProps
                     ? 'bg-primary text-white'
                     : currentStep === step.number
                     ? 'bg-primary text-white ring-4 ring-primary/20'
-                    : 'bg-gray-200 text-gray-500'
+                    : 'bg-muted text-muted-foreground'
                 )}
               >
                 {currentStep > step.number ? (
@@ -43,12 +43,12 @@ export default function CheckoutSteps({ currentStep, steps }: CheckoutStepsProps
                 <p
                   className={cn(
                     'text-sm font-medium',
-                    currentStep >= step.number ? 'text-gray-900' : 'text-gray-500'
+                    currentStep >= step.number ? 'text-foreground' : 'text-muted-foreground'
                   )}
                 >
                   {step.label}
                 </p>
-                <p className="text-xs text-gray-500 hidden sm:block">{step.description}</p>
+                <p className="text-xs text-muted-foreground hidden sm:block">{step.description}</p>
               </div>
             </div>
 
@@ -57,7 +57,7 @@ export default function CheckoutSteps({ currentStep, steps }: CheckoutStepsProps
               <div
                 className={cn(
                   'h-0.5 flex-1 mx-2 transition-colors',
-                  currentStep > step.number ? 'bg-primary' : 'bg-gray-200'
+                  currentStep > step.number ? 'bg-primary' : 'bg-muted'
                 )}
               />
             )}

@@ -107,10 +107,12 @@ export const BulkOperations: React.FC = () => {
     setSelectedProducts(new Set());
     refetch();
 
-    dispatch(addToast({
-      message: `${successCount} produits traités${errorCount > 0 ? `, ${errorCount} erreurs` : ''}`,
-      type: errorCount > 0 ? 'warning' : 'success',
-    }));
+    dispatch(
+      addToast({
+        message: `${successCount} produits traités${errorCount > 0 ? `, ${errorCount} erreurs` : ''}`,
+        type: errorCount > 0 ? 'warning' : 'success',
+      })
+    );
   };
 
   // Handle CSV file selection
@@ -119,10 +121,12 @@ export const BulkOperations: React.FC = () => {
     if (!file) return;
 
     if (!file.name.endsWith('.csv')) {
-      dispatch(addToast({
-        message: 'Veuillez sélectionner un fichier CSV',
-        type: 'error',
-      }));
+      dispatch(
+        addToast({
+          message: 'Veuillez sélectionner un fichier CSV',
+          type: 'error',
+        })
+      );
       return;
     }
 
@@ -175,10 +179,12 @@ export const BulkOperations: React.FC = () => {
     a.click();
     window.URL.revokeObjectURL(url);
 
-    dispatch(addToast({
-      message: `${products.length} produits exportés`,
-      type: 'success',
-    }));
+    dispatch(
+      addToast({
+        message: `${products.length} produits exportés`,
+        type: 'success',
+      })
+    );
   };
 
   const tabs = [
@@ -191,17 +197,13 @@ export const BulkOperations: React.FC = () => {
           {/* Selection Controls */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleAll}
-              >
-                {selectedProducts.size === products.length ? 'Tout désélectionner' : 'Tout sélectionner'}
+              <Button variant="ghost" size="sm" onClick={toggleAll}>
+                {selectedProducts.size === products.length
+                  ? 'Tout désélectionner'
+                  : 'Tout sélectionner'}
               </Button>
               {selectedProducts.size > 0 && (
-                <Badge variant="info">
-                  {selectedProducts.size} produit(s) sélectionné(s)
-                </Badge>
+                <Badge variant="info">{selectedProducts.size} produit(s) sélectionné(s)</Badge>
               )}
             </div>
             <div className="flex items-center gap-2">
@@ -324,9 +326,7 @@ export const BulkOperations: React.FC = () => {
             <p className="text-gray-700 font-medium">
               {importFile ? importFile.name : 'Cliquez pour sélectionner un fichier CSV'}
             </p>
-            <p className="text-sm text-gray-500 mt-1">
-              ou glissez-déposez le fichier ici
-            </p>
+            <p className="text-sm text-gray-500 mt-1">ou glissez-déposez le fichier ici</p>
           </div>
 
           {/* Import Preview */}
@@ -370,10 +370,12 @@ export const BulkOperations: React.FC = () => {
                 <Button
                   icon={<Upload className="h-4 w-4" />}
                   onClick={() => {
-                    dispatch(addToast({
-                      message: 'Import via CSV disponible dans une prochaine version',
-                      type: 'info',
-                    }));
+                    dispatch(
+                      addToast({
+                        message: 'Import via CSV disponible dans une prochaine version',
+                        type: 'info',
+                      })
+                    );
                   }}
                 >
                   Importer
@@ -403,9 +405,7 @@ export const BulkOperations: React.FC = () => {
         <div className="space-y-6">
           <div>
             <h3 className="text-lg font-semibold text-gray-900">Exporter les produits</h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Téléchargez vos produits au format CSV
-            </p>
+            <p className="text-sm text-gray-500 mt-1">Téléchargez vos produits au format CSV</p>
           </div>
 
           <div className="bg-gray-50 rounded-lg p-6">
@@ -416,10 +416,7 @@ export const BulkOperations: React.FC = () => {
                   Exporte tous les produits avec leurs informations
                 </p>
               </div>
-              <Button
-                icon={<Download className="h-4 w-4" />}
-                onClick={exportProducts}
-              >
+              <Button icon={<Download className="h-4 w-4" />} onClick={exportProducts}>
                 Télécharger CSV
               </Button>
             </div>
@@ -466,8 +463,8 @@ export const BulkOperations: React.FC = () => {
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
             <p className="text-sm text-amber-800">
               <AlertTriangle className="h-4 w-4 inline mr-1" />
-              L'export inclut uniquement le premier variant de chaque produit.
-              Pour un export complet des variants, utilisez l'interface Vendure Admin.
+              L'export inclut uniquement le premier variant de chaque produit. Pour un export
+              complet des variants, utilisez l'interface Vendure Admin.
             </p>
           </div>
         </div>
@@ -483,11 +480,7 @@ export const BulkOperations: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Opérations en masse</h1>
           <p className="text-gray-600 mt-1">Gérez vos produits en lot</p>
         </div>
-        <Button
-          variant="ghost"
-          icon={<RefreshCw className="h-4 w-4" />}
-          onClick={() => refetch()}
-        >
+        <Button variant="ghost" icon={<RefreshCw className="h-4 w-4" />} onClick={() => refetch()}>
           Actualiser
         </Button>
       </div>
@@ -506,8 +499,8 @@ export const BulkOperations: React.FC = () => {
           bulkAction === 'delete'
             ? 'Supprimer les produits'
             : bulkAction === 'enable'
-            ? 'Activer les produits'
-            : 'Désactiver les produits'
+              ? 'Activer les produits'
+              : 'Désactiver les produits'
         }
         message={
           <div>
@@ -516,8 +509,8 @@ export const BulkOperations: React.FC = () => {
               {bulkAction === 'delete'
                 ? 'supprimer'
                 : bulkAction === 'enable'
-                ? 'activer'
-                : 'désactiver'}{' '}
+                  ? 'activer'
+                  : 'désactiver'}{' '}
               <strong>{selectedProducts.size}</strong> produit(s) ?
             </p>
             {bulkAction === 'delete' && (
@@ -528,7 +521,7 @@ export const BulkOperations: React.FC = () => {
         confirmText={
           bulkAction === 'delete' ? 'Supprimer' : bulkAction === 'enable' ? 'Activer' : 'Désactiver'
         }
-        variant={bulkAction === 'delete' ? 'danger' : 'primary'}
+        variant={bulkAction === 'delete' ? 'danger' : 'info'}
         loading={processing}
       />
     </div>

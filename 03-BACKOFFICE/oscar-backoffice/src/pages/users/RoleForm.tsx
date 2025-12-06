@@ -1,0 +1,409 @@
+import React from 'react';
+import { useQuery, useMutation } from '@apollo/client';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import { ArrowLeft, Save, Key, Shield } from 'lucide-react';
+import {
+  AdminRoleDocument,
+  CreateRoleDocument,
+  UpdateRoleDocument,
+  Permission,
+} from '../../graphql/generated/graphql';
+import { Card } from '../../components/ui/Card';
+import { Spinner } from '../../components/ui/Spinner';
+import { addToast } from '../../store/slices/uiSlice';
+
+interface FormValues {
+  code: string;
+  description: string;
+  permissions: Permission[];
+}
+
+const validationSchema = Yup.object().shape({
+  code: Yup.string()
+    .matches(/^[a-z_]+$/, 'Le code doit être en minuscules avec des underscores')
+    .required('Le code est requis'),
+  description: Yup.string().required('La description est requise'),
+  permissions: Yup.array()
+    .of(Yup.string())
+    .min(1, 'Au moins une permission est requise'),
+});
+
+// Permission categories for grouping
+const PERMISSION_CATEGORIES = {
+  'Catalogue': [
+    Permission.CreateCatalog,
+    Permission.ReadCatalog,
+    Permission.UpdateCatalog,
+    Permission.DeleteCatalog,
+    Permission.CreateProduct,
+    Permission.ReadProduct,
+    Permission.UpdateProduct,
+    Permission.DeleteProduct,
+    Permission.CreateFacet,
+    Permission.ReadFacet,
+    Permission.UpdateFacet,
+    Permission.DeleteFacet,
+    Permission.CreateCollection,
+    Permission.ReadCollection,
+    Permission.UpdateCollection,
+    Permission.DeleteCollection,
+  ],
+  'Commandes': [
+    Permission.CreateOrder,
+    Permission.ReadOrder,
+    Permission.UpdateOrder,
+    Permission.DeleteOrder,
+  ],
+  'Clients': [
+    Permission.CreateCustomer,
+    Permission.ReadCustomer,
+    Permission.UpdateCustomer,
+    Permission.DeleteCustomer,
+    Permission.CreateCustomerGroup,
+    Permission.ReadCustomerGroup,
+    Permission.UpdateCustomerGroup,
+    Permission.DeleteCustomerGroup,
+  ],
+  'Administrateurs': [
+    Permission.CreateAdministrator,
+    Permission.ReadAdministrator,
+    Permission.UpdateAdministrator,
+    Permission.DeleteAdministrator,
+  ],
+  'Paramètres': [
+    Permission.CreateSettings,
+    Permission.ReadSettings,
+    Permission.UpdateSettings,
+    Permission.DeleteSettings,
+    Permission.UpdateGlobalSettings,
+  ],
+  'Paiements': [
+    Permission.CreatePaymentMethod,
+    Permission.ReadPaymentMethod,
+    Permission.UpdatePaymentMethod,
+    Permission.DeletePaymentMethod,
+  ],
+  'Livraison': [
+    Permission.CreateShippingMethod,
+    Permission.ReadShippingMethod,
+    Permission.UpdateShippingMethod,
+    Permission.DeleteShippingMethod,
+  ],
+  'Promotions': [
+    Permission.CreatePromotion,
+    Permission.ReadPromotion,
+    Permission.UpdatePromotion,
+    Permission.DeletePromotion,
+  ],
+  'Assets': [
+    Permission.CreateAsset,
+    Permission.ReadAsset,
+    Permission.UpdateAsset,
+    Permission.DeleteAsset,
+  ],
+};
+
+export const RoleForm: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const isEdit = !!id;
+
+  const { data: roleData, loading: loadingRole } = useQuery(AdminRoleDocument, {
+    variables: { id: id! },
+    skip: !isEdit,
+  });
+
+  const [createRole, { loading: creating }] = useMutation(CreateRoleDocument, {
+    onCompleted: () => {
+      dispatch(addToast({ type: 'success', message: 'Rôle créé avec succès' }));
+      setTimeout(() => navigate('/users/roles'), 1500);
+    },
+    onError: (err) => {
+      dispatch(addToast({ type: 'error', message: err.message }));
+    },
+  });
+
+  const [updateRole, { loading: updating }] = useMutation(UpdateRoleDocument, {
+    onCompleted: () => {
+      dispatch(addToast({ type: 'success', message: 'Rôle mis à jour avec succès' }));
+      setTimeout(() => navigate('/users/roles'), 1500);
+    },
+    onError: (err) => {
+      dispatch(addToast({ type: 'error', message: err.message }));
+    },
+  });
+
+  const role = roleData?.role;
+  const loading = loadingRole;
+  const submitting = creating || updating;
+
+  const formatPermission = (permission: string): string => {
+    return permission
+      .replace(/([A-Z])/g, ' $1')
+      .trim();
+  };
+
+  const initialValues: FormValues = {
+    code: role?.code || '',
+    description: role?.description || '',
+    permissions: (role?.permissions as Permission[]) || [],
+  };
+
+  const handleSubmit = (values: FormValues) => {
+    if (isEdit) {
+      updateRole({
+        variables: {
+          input: {
+            id: id!,
+            code: values.code,
+            description: values.description,
+            permissions: values.permissions,
+          },
+        },
+      });
+    } else {
+      createRole({
+        variables: {
+          input: {
+            code: values.code,
+            description: values.description,
+            permissions: values.permissions,
+          },
+        },
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (isEdit && !role) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <p className="text-gray-400 text-lg">Rôle non trouvé</p>
+          <button
+            onClick={() => navigate('/users/roles')}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Retour à la liste
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => navigate('/users/roles')}
+          className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded-lg"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-100">
+            {isEdit ? 'Modifier le rôle' : 'Nouveau rôle'}
+          </h1>
+          <p className="text-gray-400 mt-1">
+            {isEdit
+              ? `Modification du rôle "${role?.code}"`
+              : 'Créer un nouveau rôle avec des permissions personnalisées'}
+          </p>
+        </div>
+      </div>
+
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+        enableReinitialize
+      >
+        {({ values, setFieldValue, errors, touched }) => (
+          <Form className="space-y-6">
+            {/* Basic Info */}
+            <Card className="bg-gray-800 border-gray-700">
+              <div className="p-6 space-y-6">
+                <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-blue-400" />
+                  Informations du rôle
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Code *
+                    </label>
+                    <Field
+                      type="text"
+                      name="code"
+                      disabled={isEdit}
+                      className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50"
+                      placeholder="manager_role"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Minuscules et underscores uniquement
+                    </p>
+                    <ErrorMessage
+                      name="code"
+                      component="p"
+                      className="mt-1 text-sm text-red-400"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Description *
+                    </label>
+                    <Field
+                      type="text"
+                      name="description"
+                      className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      placeholder="Gestionnaire des commandes"
+                    />
+                    <ErrorMessage
+                      name="description"
+                      component="p"
+                      className="mt-1 text-sm text-red-400"
+                    />
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Permissions */}
+            <Card className="bg-gray-800 border-gray-700">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2">
+                    <Key className="h-5 w-5 text-blue-400" />
+                    Permissions *
+                  </h2>
+                  <span className="text-sm text-gray-400">
+                    {values.permissions.length} sélectionnée{values.permissions.length > 1 ? 's' : ''}
+                  </span>
+                </div>
+
+                {errors.permissions && touched.permissions && (
+                  <p className="mb-4 text-sm text-red-400">{errors.permissions as string}</p>
+                )}
+
+                <div className="space-y-6">
+                  {Object.entries(PERMISSION_CATEGORIES).map(([category, permissions]) => {
+                    const selectedCount = permissions.filter((p) =>
+                      values.permissions.includes(p)
+                    ).length;
+                    const allSelected = selectedCount === permissions.length;
+
+                    return (
+                      <div
+                        key={category}
+                        className="border border-gray-700 rounded-lg overflow-hidden"
+                      >
+                        <div className="bg-gray-900 px-4 py-3 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="checkbox"
+                              checked={allSelected}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setFieldValue('permissions', [
+                                    ...new Set([...values.permissions, ...permissions]),
+                                  ]);
+                                } else {
+                                  setFieldValue(
+                                    'permissions',
+                                    values.permissions.filter((p) => !permissions.includes(p))
+                                  );
+                                }
+                              }}
+                              className="h-4 w-4 text-blue-600 rounded border-gray-600 bg-gray-800 focus:ring-blue-500"
+                            />
+                            <span className="font-medium text-gray-100">{category}</span>
+                          </div>
+                          <span className="text-sm text-gray-400">
+                            {selectedCount}/{permissions.length}
+                          </span>
+                        </div>
+
+                        <div className="p-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                          {permissions.map((permission) => (
+                            <label
+                              key={permission}
+                              className="flex items-center gap-2 cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={values.permissions.includes(permission)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setFieldValue('permissions', [
+                                      ...values.permissions,
+                                      permission,
+                                    ]);
+                                  } else {
+                                    setFieldValue(
+                                      'permissions',
+                                      values.permissions.filter((p) => p !== permission)
+                                    );
+                                  }
+                                }}
+                                className="h-4 w-4 text-blue-600 rounded border-gray-600 bg-gray-800 focus:ring-blue-500"
+                              />
+                              <span className="text-sm text-gray-300">
+                                {formatPermission(permission)}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </Card>
+
+            {/* Submit Button */}
+            <div className="flex justify-end gap-4">
+              <button
+                type="button"
+                onClick={() => navigate('/users/roles')}
+                className="px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {submitting ? (
+                  <>
+                    <Spinner size="sm" />
+                    {isEdit ? 'Mise à jour...' : 'Création...'}
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-5 w-5" />
+                    {isEdit ? 'Enregistrer' : 'Créer'}
+                  </>
+                )}
+              </button>
+            </div>
+          </Form>
+        )}
+      </Formik>
+    </div>
+  );
+};

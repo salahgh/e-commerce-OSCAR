@@ -39,9 +39,9 @@ export function FacetSizeButtons({
               'group relative px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200',
               'border-2 min-w-[48px]',
               isSelected
-                ? 'bg-primary-500 border-primary-500 text-white shadow-md shadow-primary-500/30'
-                : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50',
-              isDisabled && 'opacity-40 cursor-not-allowed bg-gray-100'
+                ? 'bg-primary border-primary text-primary-foreground shadow-md shadow-primary/30'
+                : 'bg-card border-border text-foreground hover:border-border hover:bg-muted',
+              isDisabled && 'opacity-40 cursor-not-allowed bg-muted'
             )}
             whileHover={!isDisabled ? { scale: 1.05, y: -2 } : undefined}
             whileTap={!isDisabled ? { scale: 0.95 } : undefined}
@@ -67,7 +67,7 @@ export function FacetSizeButtons({
             <div
               className={cn(
                 'absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity',
-                'bg-gray-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px]',
+                'bg-foreground text-background text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px]',
                 'flex items-center justify-center z-20'
               )}
             >

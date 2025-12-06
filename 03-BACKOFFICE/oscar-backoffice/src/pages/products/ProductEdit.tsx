@@ -51,11 +51,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Ca
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { TextArea } from '../../components/ui/TextArea';
-import { Tabs } from '../../components/ui/Tabs';
 import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { formatPrice, formatDateTime } from '../../lib/utils';
+
+// Wizard steps - matching ProductCreate
+const STEPS = [
+  { id: 'general', label: 'Informations', icon: Package },
+  { id: 'translations', label: 'Traductions', icon: Globe },
+  { id: 'images', label: 'Images', icon: ImageIcon },
+  { id: 'variants', label: 'Variantes', icon: Layers },
+  { id: 'categories', label: 'Catégories', icon: FolderTree },
+];
 
 // Validation schema for product form
 const ProductSchema = Yup.object().shape({
@@ -87,18 +95,30 @@ export const ProductEdit: React.FC = () => {
   const dispatch = useAppDispatch();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Step navigation state
+  const [currentStep, setCurrentStep] = useState(0);
+
   // Dialog states
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDeleteVariantDialog, setShowDeleteVariantDialog] = useState<string | null>(null);
 
   // Variant editing state
   const [editingVariant, setEditingVariant] = useState<string | null>(null);
-  const [variantEdits, setVariantEdits] = useState<Record<string, { sku: string; price: number; stock: number; enabled: boolean }>>({});
+  const [variantEdits, setVariantEdits] = useState<
+    Record<string, { sku: string; price: number; stock: number; enabled: boolean }>
+  >({});
 
   // Add variant state
   const [showAddVariant, setShowAddVariant] = useState(false);
-  const [newVariant, setNewVariant] = useState<NewVariant>({ sku: '', price: 0, stock: 0, options: {} });
-  const [selectedOptionGroupsForVariant, setSelectedOptionGroupsForVariant] = useState<string[]>([]);
+  const [newVariant, setNewVariant] = useState<NewVariant>({
+    sku: '',
+    price: 0,
+    stock: 0,
+    options: {},
+  });
+  const [selectedOptionGroupsForVariant, setSelectedOptionGroupsForVariant] = useState<string[]>(
+    []
+  );
 
   // Image upload state
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -133,7 +153,9 @@ export const ProductEdit: React.FC = () => {
 
   // Mutations
   const [updateProduct, { loading: updating }] = useMutation(UpdateProductDocument);
-  const [updateVariants, { loading: updatingVariants }] = useMutation(UpdateProductVariantsDocument);
+  const [updateVariants, { loading: updatingVariants }] = useMutation(
+    UpdateProductVariantsDocument
+  );
   const [deleteProduct, { loading: deleting }] = useMutation(DeleteProductDocument);
   const [setFeaturedAsset] = useMutation(SetProductFeaturedAssetDocument);
   const [updateCollectionFilters] = useMutation(UpdateCollectionFiltersDocument);
@@ -142,8 +164,12 @@ export const ProductEdit: React.FC = () => {
   const [createVariants, { loading: creatingVariant }] = useMutation(CreateProductVariantsDocument);
   const [deleteVariant, { loading: deletingVariant }] = useMutation(DeleteProductVariantDocument);
   const [addOptionGroupToProduct] = useMutation(AddOptionGroupToProductDocument);
-  const [removeOptionGroupFromProduct, { loading: removingOptionGroup }] = useMutation(RemoveOptionGroupFromProductDocument);
-  const [createOptionGroup, { loading: creatingOptionGroup }] = useMutation(CreateProductOptionGroupDocument);
+  const [removeOptionGroupFromProduct, { loading: removingOptionGroup }] = useMutation(
+    RemoveOptionGroupFromProductDocument
+  );
+  const [createOptionGroup, { loading: creatingOptionGroup }] = useMutation(
+    CreateProductOptionGroupDocument
+  );
   const [createOption, { loading: creatingOption }] = useMutation(CreateProductOptionDocument);
   const [deleteOption] = useMutation(DeleteProductOptionDocument);
 
@@ -222,10 +248,16 @@ export const ProductEdit: React.FC = () => {
                 isFeatured: values.isFeatured,
                 weightKg: values.weightKg || null,
                 availableSizes: values.availableSizes
-                  ? values.availableSizes.split(',').map((s) => s.trim()).filter(Boolean)
+                  ? values.availableSizes
+                      .split(',')
+                      .map((s) => s.trim())
+                      .filter(Boolean)
                   : [],
                 availableColors: values.availableColors
-                  ? values.availableColors.split(',').map((s) => s.trim()).filter(Boolean)
+                  ? values.availableColors
+                      .split(',')
+                      .map((s) => s.trim())
+                      .filter(Boolean)
                   : [],
               },
             },
@@ -234,7 +266,9 @@ export const ProductEdit: React.FC = () => {
         dispatch(addToast({ message: 'Produit mis à jour avec succès!', type: 'success' }));
         refetch();
       } catch (err: any) {
-        dispatch(addToast({ message: err.message || 'Erreur lors de la mise à jour', type: 'error' }));
+        dispatch(
+          addToast({ message: err.message || 'Erreur lors de la mise à jour', type: 'error' })
+        );
       }
     },
   });
@@ -245,17 +279,29 @@ export const ProductEdit: React.FC = () => {
     if (!edits) return;
 
     try {
-      await updateVariants({
+      const result = await updateVariants({
         variables: {
-          input: [{
-            id: variantId,
-            sku: edits.sku,
-            price: Math.round(edits.price * 100),
-            stockOnHand: edits.stock,
-            enabled: edits.enabled,
-          }],
+          input: [
+            {
+              id: variantId,
+              sku: edits.sku,
+              price: Math.round(edits.price * 100),
+              stockOnHand: edits.stock,
+              enabled: edits.enabled,
+            },
+          ],
         },
+        refetchQueries: [{ query: AdminProductDocument, variables: { id: id! } }],
+        awaitRefetchQueries: true,
       });
+
+      // Check if update was successful (Vendure returns null for failed updates)
+      const updatedVariants = result.data?.updateProductVariants?.filter(Boolean);
+      if (!updatedVariants || updatedVariants.length === 0) {
+        dispatch(addToast({ message: 'Erreur: la mise à jour a échoué', type: 'error' }));
+        return;
+      }
+
       dispatch(addToast({ message: 'Variante mise à jour!', type: 'success' }));
       setEditingVariant(null);
       setVariantEdits((prev) => {
@@ -263,9 +309,10 @@ export const ProductEdit: React.FC = () => {
         delete newEdits[variantId];
         return newEdits;
       });
-      refetch();
     } catch (err: any) {
-      dispatch(addToast({ message: err.message || 'Erreur lors de la mise à jour', type: 'error' }));
+      dispatch(
+        addToast({ message: err.message || 'Erreur lors de la mise à jour', type: 'error' })
+      );
     }
   };
 
@@ -316,27 +363,44 @@ export const ProductEdit: React.FC = () => {
         }
       }
 
-      await createVariants({
+      const result = await createVariants({
         variables: {
-          input: [{
-            productId: id!,
-            sku: newVariant.sku,
-            price: Math.round(newVariant.price * 100),
-            stockOnHand: newVariant.stock,
-            optionIds: Object.values(newVariant.options).filter(Boolean),
-            translations: [{
-              languageCode: LanguageCode.En,
-              name: newVariant.sku,
-            }],
-          }],
+          input: [
+            {
+              productId: id!,
+              sku: newVariant.sku,
+              price: Math.round(newVariant.price * 100),
+              stockOnHand: newVariant.stock,
+              optionIds: Object.values(newVariant.options).filter(Boolean),
+              translations: [
+                {
+                  languageCode: LanguageCode.En,
+                  name: newVariant.sku,
+                },
+              ],
+            },
+          ],
         },
+        refetchQueries: [{ query: AdminProductDocument, variables: { id: id! } }],
+        awaitRefetchQueries: true,
       });
+
+      // Check if variant was actually created (Vendure returns null for failed variants)
+      const createdVariants = result.data?.createProductVariants?.filter(Boolean);
+      if (!createdVariants || createdVariants.length === 0) {
+        dispatch(
+          addToast({
+            message: "Erreur: la variante n'a pas été créée. Vérifiez les options sélectionnées.",
+            type: 'error',
+          })
+        );
+        return;
+      }
 
       dispatch(addToast({ message: 'Variante ajoutée!', type: 'success' }));
       setShowAddVariant(false);
       setNewVariant({ sku: '', price: 0, stock: 0, options: {} });
       setSelectedOptionGroupsForVariant([]);
-      refetch();
     } catch (err: any) {
       dispatch(addToast({ message: err.message || "Erreur lors de l'ajout", type: 'error' }));
     }
@@ -347,15 +411,21 @@ export const ProductEdit: React.FC = () => {
     try {
       const result = await deleteVariant({
         variables: { id: variantId },
+        refetchQueries: [{ query: AdminProductDocument, variables: { id: id! } }],
+        awaitRefetchQueries: true,
       });
       if (result.data?.deleteProductVariant?.result === 'DELETED') {
         dispatch(addToast({ message: 'Variante supprimée!', type: 'success' }));
-        refetch();
       } else {
-        dispatch(addToast({ message: result.data?.deleteProductVariant?.message || 'Erreur lors de la suppression', type: 'error' }));
+        const errorMessage =
+          result.data?.deleteProductVariant?.message || 'Erreur lors de la suppression';
+        dispatch(addToast({ message: errorMessage, type: 'error' }));
       }
     } catch (err: any) {
-      dispatch(addToast({ message: err.message || 'Erreur lors de la suppression', type: 'error' }));
+      // Extract the actual error message from GraphQL errors
+      const graphqlError =
+        err.graphQLErrors?.[0]?.message || err.message || 'Erreur lors de la suppression';
+      dispatch(addToast({ message: graphqlError, type: 'error' }));
     }
     setShowDeleteVariantDialog(null);
   };
@@ -378,9 +448,7 @@ export const ProductEdit: React.FC = () => {
     if (!product?.assets) return;
 
     try {
-      const remainingAssetIds = product.assets
-        .filter((a) => a.id !== assetId)
-        .map((a) => a.id);
+      const remainingAssetIds = product.assets.filter((a) => a.id !== assetId).map((a) => a.id);
 
       await updateProduct({
         variables: {
@@ -399,14 +467,17 @@ export const ProductEdit: React.FC = () => {
   };
 
   // Handle file drop
-  const handleFileDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDraggingOver(false);
-    const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith('image/'));
-    if (files.length > 0) {
-      await uploadFiles(files);
-    }
-  }, [id, product]);
+  const handleFileDrop = useCallback(
+    async (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setIsDraggingOver(false);
+      const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith('image/'));
+      if (files.length > 0) {
+        await uploadFiles(files);
+      }
+    },
+    [id, product]
+  );
 
   // Handle file select
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -448,11 +519,15 @@ export const ProductEdit: React.FC = () => {
         },
       });
 
-      dispatch(addToast({ message: `${newAssetIds.length} image(s) ajoutée(s)!`, type: 'success' }));
+      dispatch(
+        addToast({ message: `${newAssetIds.length} image(s) ajoutée(s)!`, type: 'success' })
+      );
       refetch();
     } catch (err: any) {
       console.error('Upload error:', err);
-      dispatch(addToast({ message: err.message || 'Erreur lors du téléchargement', type: 'error' }));
+      dispatch(
+        addToast({ message: err.message || 'Erreur lors du téléchargement', type: 'error' })
+      );
     } finally {
       setUploadingImages(false);
     }
@@ -500,8 +575,12 @@ export const ProductEdit: React.FC = () => {
     setSavingCollections(true);
     try {
       const initialCollections = getInitialSelectedCollections();
-      const collectionsToAdd = selectedCollections.filter((cid) => !initialCollections.includes(cid));
-      const collectionsToRemove = initialCollections.filter((cid) => !selectedCollections.includes(cid));
+      const collectionsToAdd = selectedCollections.filter(
+        (cid) => !initialCollections.includes(cid)
+      );
+      const collectionsToRemove = initialCollections.filter(
+        (cid) => !selectedCollections.includes(cid)
+      );
 
       for (const collectionId of collectionsToAdd) {
         const collection = allCollections.find((c: any) => c.id === collectionId);
@@ -513,10 +592,12 @@ export const ProductEdit: React.FC = () => {
         await updateCollectionFilters({
           variables: {
             id: collectionId,
-            filters: [{
-              code: 'product-id-filter',
-              arguments: [{ name: 'productIds', value: JSON.stringify(newProductIds) }],
-            }],
+            filters: [
+              {
+                code: 'product-id-filter',
+                arguments: [{ name: 'productIds', value: JSON.stringify(newProductIds) }],
+              },
+            ],
           },
         });
       }
@@ -532,10 +613,12 @@ export const ProductEdit: React.FC = () => {
           await updateCollectionFilters({
             variables: {
               id: collectionId,
-              filters: [{
-                code: 'product-id-filter',
-                arguments: [{ name: 'productIds', value: JSON.stringify(newProductIds) }],
-              }],
+              filters: [
+                {
+                  code: 'product-id-filter',
+                  arguments: [{ name: 'productIds', value: JSON.stringify(newProductIds) }],
+                },
+              ],
             },
           });
         } else {
@@ -551,7 +634,12 @@ export const ProductEdit: React.FC = () => {
       dispatch(addToast({ message: 'Catégories mises à jour!', type: 'success' }));
       refetch();
     } catch (err: any) {
-      dispatch(addToast({ message: err.message || 'Erreur lors de la mise à jour des catégories', type: 'error' }));
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de la mise à jour des catégories',
+          type: 'error',
+        })
+      );
     } finally {
       setSavingCollections(false);
     }
@@ -565,10 +653,17 @@ export const ProductEdit: React.FC = () => {
         dispatch(addToast({ message: 'Produit supprimé avec succès!', type: 'success' }));
         navigate('/products');
       } else {
-        dispatch(addToast({ message: result.data?.deleteProduct?.message || 'Erreur lors de la suppression', type: 'error' }));
+        dispatch(
+          addToast({
+            message: result.data?.deleteProduct?.message || 'Erreur lors de la suppression',
+            type: 'error',
+          })
+        );
       }
     } catch (err: any) {
-      dispatch(addToast({ message: err.message || 'Erreur lors de la suppression', type: 'error' }));
+      dispatch(
+        addToast({ message: err.message || 'Erreur lors de la suppression', type: 'error' })
+      );
     }
     setShowDeleteDialog(false);
   };
@@ -595,17 +690,24 @@ export const ProductEdit: React.FC = () => {
       return;
     }
 
-    const code = newOptionGroupCode.trim() || newOptionGroupName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const code =
+      newOptionGroupCode.trim() ||
+      newOptionGroupName
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
 
     try {
       const result = await createOptionGroup({
         variables: {
           input: {
             code,
-            translations: [{
-              languageCode: LanguageCode.En,
-              name: newOptionGroupName.trim(),
-            }],
+            translations: [
+              {
+                languageCode: LanguageCode.En,
+                name: newOptionGroupName.trim(),
+              },
+            ],
             options: [],
           },
         },
@@ -620,7 +722,9 @@ export const ProductEdit: React.FC = () => {
             optionGroupId: result.data.createProductOptionGroup.id,
           },
         });
-        dispatch(addToast({ message: 'Groupe d\'options créé et ajouté au produit!', type: 'success' }));
+        dispatch(
+          addToast({ message: "Groupe d'options créé et ajouté au produit!", type: 'success' })
+        );
         setShowCreateOptionGroup(false);
         setNewOptionGroupName('');
         setNewOptionGroupCode('');
@@ -640,7 +744,7 @@ export const ProductEdit: React.FC = () => {
           optionGroupId,
         },
       });
-      dispatch(addToast({ message: 'Groupe d\'options ajouté!', type: 'success' }));
+      dispatch(addToast({ message: "Groupe d'options ajouté!", type: 'success' }));
       refetch();
     } catch (err: any) {
       dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
@@ -661,12 +765,14 @@ export const ProductEdit: React.FC = () => {
       // Check if there was an error (ProductOptionInUseError)
       if (result.data?.removeOptionGroupFromProduct?.__typename === 'ProductOptionInUseError') {
         const error = result.data.removeOptionGroupFromProduct as any;
-        dispatch(addToast({
-          message: `Ce groupe d'options est utilisé par ${error.productVariantCount} variante(s). Supprimez d'abord les variantes.`,
-          type: 'error'
-        }));
+        dispatch(
+          addToast({
+            message: `Ce groupe d'options est utilisé par ${error.productVariantCount} variante(s). Supprimez d'abord les variantes.`,
+            type: 'error',
+          })
+        );
       } else {
-        dispatch(addToast({ message: 'Groupe d\'options retiré!', type: 'success' }));
+        dispatch(addToast({ message: "Groupe d'options retiré!", type: 'success' }));
         refetch();
       }
     } catch (err: any) {
@@ -681,7 +787,12 @@ export const ProductEdit: React.FC = () => {
       return;
     }
 
-    const code = newOptionCode.trim() || newOptionName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const code =
+      newOptionCode.trim() ||
+      newOptionName
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
 
     try {
       await createOption({
@@ -689,10 +800,12 @@ export const ProductEdit: React.FC = () => {
           input: {
             productOptionGroupId: groupId,
             code,
-            translations: [{
-              languageCode: LanguageCode.En,
-              name: newOptionName.trim(),
-            }],
+            translations: [
+              {
+                languageCode: LanguageCode.En,
+                name: newOptionName.trim(),
+              },
+            ],
           },
         },
         refetchQueries: [
@@ -726,7 +839,12 @@ export const ProductEdit: React.FC = () => {
         dispatch(addToast({ message: 'Option supprimée!', type: 'success' }));
         refetch();
       } else {
-        dispatch(addToast({ message: result.data?.deleteProductOption?.message || 'Erreur lors de la suppression', type: 'error' }));
+        dispatch(
+          addToast({
+            message: result.data?.deleteProductOption?.message || 'Erreur lors de la suppression',
+            type: 'error',
+          })
+        );
       }
     } catch (err: any) {
       dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
@@ -834,24 +952,24 @@ export const ProductEdit: React.FC = () => {
         />
       </div>
       <div className="flex flex-wrap items-center gap-4">
-        <label className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+        <label className="flex items-center gap-2 p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600">
           <input
             type="checkbox"
             checked={formik.values.enabled}
             onChange={(e) => formik.setFieldValue('enabled', e.target.checked)}
-            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            className="h-4 w-4 text-blue-600 border-gray-500 rounded focus:ring-blue-500 bg-gray-600"
           />
-          <span className="text-sm font-medium text-gray-700">Produit actif</span>
+          <span className="text-sm font-medium text-gray-300">Produit actif</span>
         </label>
-        <label className="flex items-center gap-2 p-3 bg-yellow-50 rounded-lg cursor-pointer hover:bg-yellow-100">
+        <label className="flex items-center gap-2 p-3 bg-yellow-900/30 border border-yellow-700 rounded-lg cursor-pointer hover:bg-yellow-900/50">
           <input
             type="checkbox"
             checked={formik.values.isFeatured}
             onChange={(e) => formik.setFieldValue('isFeatured', e.target.checked)}
-            className="h-4 w-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+            className="h-4 w-4 text-yellow-600 border-gray-500 rounded focus:ring-yellow-500 bg-gray-600"
           />
           <Star className="h-4 w-4 text-yellow-500" />
-          <span className="text-sm font-medium text-gray-700">Produit vedette</span>
+          <span className="text-sm font-medium text-gray-100">Produit vedette</span>
         </label>
       </div>
     </div>
@@ -859,8 +977,8 @@ export const ProductEdit: React.FC = () => {
 
   const LocalizationTab = (
     <div className="space-y-6">
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <p className="text-sm text-blue-800">
+      <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mb-6">
+        <p className="text-sm text-blue-300">
           <Globe className="inline h-4 w-4 mr-2" />
           Configurez les traductions française et arabe pour ce produit.
         </p>
@@ -935,8 +1053,8 @@ export const ProductEdit: React.FC = () => {
         onClick={() => fileInputRef.current?.click()}
         className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
           isDraggingOver
-            ? 'border-blue-500 bg-blue-50'
-            : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+            ? 'border-blue-500 bg-blue-900/30'
+            : 'border-gray-600 hover:border-blue-400 hover:bg-gray-700/50'
         }`}
       >
         <input
@@ -950,14 +1068,16 @@ export const ProductEdit: React.FC = () => {
         {uploadingImages ? (
           <div className="flex flex-col items-center">
             <RefreshCw className="h-12 w-12 text-blue-500 animate-spin mb-4" />
-            <p className="text-lg font-medium text-gray-700">Téléchargement en cours...</p>
+            <p className="text-lg font-medium text-gray-300">Téléchargement en cours...</p>
           </div>
         ) : (
           <>
-            <Upload className={`h-12 w-12 mx-auto mb-4 ${isDraggingOver ? 'text-blue-500' : 'text-gray-400'}`} />
-            <p className="text-lg font-medium text-gray-700">Glissez-déposez vos images ici</p>
-            <p className="text-sm text-gray-500 mt-2">ou cliquez pour sélectionner des fichiers</p>
-            <p className="text-xs text-gray-400 mt-4">PNG, JPG, WEBP jusqu'à 10MB chacun</p>
+            <Upload
+              className={`h-12 w-12 mx-auto mb-4 ${isDraggingOver ? 'text-blue-500' : 'text-gray-400'}`}
+            />
+            <p className="text-lg font-medium text-gray-300">Glissez-déposez vos images ici</p>
+            <p className="text-sm text-gray-400 mt-2">ou cliquez pour sélectionner des fichiers</p>
+            <p className="text-xs text-gray-500 mt-4">PNG, JPG, WEBP jusqu'à 10MB chacun</p>
           </>
         )}
       </div>
@@ -965,12 +1085,12 @@ export const ProductEdit: React.FC = () => {
       {/* Featured Asset */}
       {product.featuredAsset && (
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Image principale</h3>
+          <h3 className="text-sm font-medium text-gray-300 mb-3">Image principale</h3>
           <div className="relative inline-block">
             <img
               src={product.featuredAsset.preview}
               alt={product.featuredAsset.name}
-              className="h-48 w-48 object-cover rounded-lg border-2 border-yellow-500 ring-2 ring-yellow-200"
+              className="h-48 w-48 object-cover rounded-lg border-2 border-yellow-500 ring-2 ring-yellow-500/30"
             />
             <Badge variant="warning" className="absolute top-2 left-2">
               <Star className="h-3 w-3 mr-1" />
@@ -983,9 +1103,12 @@ export const ProductEdit: React.FC = () => {
       {/* All Assets Gallery */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-medium text-gray-700">Galerie ({product.assets?.length || 0} images)</h3>
-          <p className="text-xs text-gray-500">
-            Glissez pour réorganiser - Cliquez sur <Star className="inline h-3 w-3" /> pour définir l'image principale
+          <h3 className="text-sm font-medium text-gray-300">
+            Galerie ({product.assets?.length || 0} images)
+          </h3>
+          <p className="text-xs text-gray-400">
+            Glissez pour réorganiser - Cliquez sur <Star className="inline h-3 w-3" /> pour définir
+            l'image principale
           </p>
         </div>
 
@@ -1001,12 +1124,14 @@ export const ProductEdit: React.FC = () => {
                   onDragOver={(e) => handleImageDragOver(e, index)}
                   onDragEnd={handleImageDragEnd}
                   className={`relative group rounded-lg overflow-hidden border-2 cursor-move transition-all ${
-                    isFeatured ? 'border-yellow-500 ring-2 ring-yellow-200' : 'border-gray-200 hover:border-gray-300'
+                    isFeatured
+                      ? 'border-yellow-500 ring-2 ring-yellow-500/30'
+                      : 'border-gray-600 hover:border-gray-500'
                   } ${draggedImageIndex === index ? 'opacity-50 scale-95' : ''}`}
                 >
                   <img src={asset.preview} alt={asset.name} className="h-32 w-full object-cover" />
-                  <div className="absolute top-1 left-1 p-1 bg-white/80 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                    <GripVertical className="h-4 w-4 text-gray-500" />
+                  <div className="absolute top-1 left-1 p-1 bg-gray-900/80 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                    <GripVertical className="h-4 w-4 text-gray-400" />
                   </div>
                   {isFeatured && (
                     <Badge variant="warning" className="absolute top-1 right-1 text-xs">
@@ -1054,10 +1179,10 @@ export const ProductEdit: React.FC = () => {
             })}
           </div>
         ) : (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-            <ImageIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">Aucune image disponible</p>
-            <p className="text-sm text-gray-400 mt-2">
+          <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-8 text-center">
+            <ImageIcon className="h-12 w-12 text-gray-500 mx-auto mb-3" />
+            <p className="text-gray-400">Aucune image disponible</p>
+            <p className="text-sm text-gray-500 mt-2">
               Glissez-déposez des images ci-dessus ou cliquez pour ajouter
             </p>
           </div>
@@ -1085,11 +1210,13 @@ export const ProductEdit: React.FC = () => {
                       e.target.value = '';
                     }
                   }}
-                  className="text-sm border rounded-lg px-3 py-1.5"
+                  className="text-sm bg-gray-700 border border-gray-600 text-gray-100 rounded-lg px-3 py-1.5"
                 >
                   <option value="">Ajouter un groupe existant...</option>
                   {getAvailableOptionGroups().map((group: any) => (
-                    <option key={group.id} value={group.id}>{group.name}</option>
+                    <option key={group.id} value={group.id}>
+                      {group.name}
+                    </option>
                   ))}
                 </select>
               )}
@@ -1107,22 +1234,24 @@ export const ProductEdit: React.FC = () => {
         <CardContent>
           {/* Create Option Group Form */}
           {showCreateOptionGroup && (
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
-              <h4 className="text-sm font-medium text-purple-800 mb-3">Créer un nouveau groupe d'options</h4>
+            <div className="bg-purple-900/30 border border-purple-700 rounded-lg p-4 mb-4">
+              <h4 className="text-sm font-medium text-purple-300 mb-3">
+                Créer un nouveau groupe d'options
+              </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                 <input
                   type="text"
                   value={newOptionGroupName}
                   onChange={(e) => setNewOptionGroupName(e.target.value)}
                   placeholder="Nom (ex: Taille, Couleur)"
-                  className="px-3 py-2 border rounded-lg text-sm"
+                  className="px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm"
                 />
                 <input
                   type="text"
                   value={newOptionGroupCode}
                   onChange={(e) => setNewOptionGroupCode(e.target.value)}
                   placeholder="Code (optionnel, ex: size)"
-                  className="px-3 py-2 border rounded-lg text-sm"
+                  className="px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm"
                 />
               </div>
               <div className="flex gap-2">
@@ -1154,11 +1283,11 @@ export const ProductEdit: React.FC = () => {
           {product.optionGroups && product.optionGroups.length > 0 ? (
             <div className="space-y-4">
               {product.optionGroups.map((group: any) => (
-                <div key={group.id} className="border rounded-lg p-4">
+                <div key={group.id} className="border border-gray-600 rounded-lg p-4 bg-gray-700/30">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <h4 className="font-medium text-gray-900">{group.name}</h4>
-                      <p className="text-xs text-gray-500">Code: {group.code}</p>
+                      <h4 className="font-medium text-gray-100">{group.name}</h4>
+                      <p className="text-xs text-gray-400">Code: {group.code}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
@@ -1183,21 +1312,21 @@ export const ProductEdit: React.FC = () => {
 
                   {/* Add Option Form */}
                   {showAddOption === group.id && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                    <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-3 mb-3">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
                         <input
                           type="text"
                           value={newOptionName}
                           onChange={(e) => setNewOptionName(e.target.value)}
                           placeholder="Nom de l'option (ex: S, M, L)"
-                          className="px-3 py-2 border rounded-lg text-sm"
+                          className="px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm"
                         />
                         <input
                           type="text"
                           value={newOptionCode}
                           onChange={(e) => setNewOptionCode(e.target.value)}
                           placeholder="Code (optionnel)"
-                          className="px-3 py-2 border rounded-lg text-sm"
+                          className="px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm"
                         />
                       </div>
                       <div className="flex gap-2">
@@ -1231,13 +1360,13 @@ export const ProductEdit: React.FC = () => {
                       group.options.map((option: any) => (
                         <div
                           key={option.id}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-100 rounded-lg"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 rounded-lg"
                         >
-                          <span className="text-sm">{option.name}</span>
+                          <span className="text-sm text-gray-200">{option.name}</span>
                           <button
                             type="button"
                             onClick={() => handleDeleteOption(option.id)}
-                            className="text-gray-400 hover:text-red-500 ml-1"
+                            className="text-gray-400 hover:text-red-400 ml-1"
                             title="Supprimer cette option"
                           >
                             <X className="h-3 w-3" />
@@ -1245,17 +1374,19 @@ export const ProductEdit: React.FC = () => {
                         </div>
                       ))
                     ) : (
-                      <span className="text-sm text-gray-400 italic">Aucune option - ajoutez-en</span>
+                      <span className="text-sm text-gray-500 italic">
+                        Aucune option - ajoutez-en
+                      </span>
                     )}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-6 text-gray-500">
-              <Settings className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+            <div className="text-center py-6 text-gray-400">
+              <Settings className="h-8 w-8 mx-auto mb-2 text-gray-500" />
               <p className="text-sm">Aucun groupe d'options sur ce produit</p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-gray-500 mt-1">
                 Ajoutez des groupes d'options (ex: Taille, Couleur) pour créer des variantes
               </p>
             </div>
@@ -1266,8 +1397,10 @@ export const ProductEdit: React.FC = () => {
       {/* Header with Add Variant Button */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium text-gray-900">Variantes du produit</h3>
-          <p className="text-sm text-gray-500">Gérez les variantes: SKU, prix, stock, options et statut.</p>
+          <h3 className="text-lg font-medium text-gray-100">Variantes du produit</h3>
+          <p className="text-sm text-gray-400">
+            Gérez les variantes: SKU, prix, stock, options et statut.
+          </p>
         </div>
         <Button
           type="button"
@@ -1280,23 +1413,25 @@ export const ProductEdit: React.FC = () => {
 
       {/* Add Variant Form */}
       {showAddVariant && (
-        <Card className="border-green-200 bg-green-50">
+        <Card className="border-green-700 bg-green-900/30">
           <CardHeader>
-            <CardTitle className="text-base text-green-800">Nouvelle variante</CardTitle>
+            <CardTitle className="text-base text-green-300">Nouvelle variante</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Use product's option groups for new variant */}
             {product.optionGroups && product.optionGroups.length > 0 && (
               <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">Options de la variante</p>
+                <p className="text-sm font-medium text-gray-300 mb-2">Options de la variante</p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {product.optionGroups.map((group: any) => (
                     <div key={group.id}>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">{group.name}</label>
+                      <label className="block text-xs font-medium text-gray-300 mb-1">
+                        {group.name}
+                      </label>
                       <select
                         value={newVariant.options[group.id] || ''}
                         onChange={(e) => updateNewVariantOption(group.id, e.target.value)}
-                        className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
                       >
                         <option value="">-- Sélectionner --</option>
                         {group.options?.map((option: any) => (
@@ -1314,34 +1449,38 @@ export const ProductEdit: React.FC = () => {
             {/* Variant Fields */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">SKU *</label>
+                <label className="block text-xs font-medium text-gray-300 mb-1">SKU *</label>
                 <input
                   type="text"
                   value={newVariant.sku}
                   onChange={(e) => setNewVariant({ ...newVariant, sku: e.target.value })}
                   placeholder="SKU-001"
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Prix (DZD)</label>
+                <label className="block text-xs font-medium text-gray-300 mb-1">Prix (DZD)</label>
                 <input
                   type="number"
                   value={newVariant.price || ''}
-                  onChange={(e) => setNewVariant({ ...newVariant, price: parseFloat(e.target.value) || 0 })}
+                  onChange={(e) =>
+                    setNewVariant({ ...newVariant, price: parseFloat(e.target.value) || 0 })
+                  }
                   placeholder="0"
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   min="0"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Stock</label>
+                <label className="block text-xs font-medium text-gray-300 mb-1">Stock</label>
                 <input
                   type="number"
                   value={newVariant.stock || ''}
-                  onChange={(e) => setNewVariant({ ...newVariant, stock: parseInt(e.target.value) || 0 })}
+                  onChange={(e) =>
+                    setNewVariant({ ...newVariant, stock: parseInt(e.target.value) || 0 })
+                  }
                   placeholder="0"
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   min="0"
                 />
               </div>
@@ -1372,21 +1511,36 @@ export const ProductEdit: React.FC = () => {
       )}
 
       {/* Variants Table */}
-      <div className="overflow-x-auto bg-white rounded-lg border">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="overflow-x-auto bg-gray-800 rounded-lg border border-gray-700">
+        <table className="min-w-full divide-y divide-gray-700">
+          <thead className="bg-gray-700/50">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Options</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix (DZD)</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                SKU
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                Options
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                Prix (DZD)
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                Stock
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                Statut
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">
+                Actions
+              </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-gray-800 divide-y divide-gray-700">
             {product.variants?.map((variant) => (
-              <tr key={variant.id} className={`hover:bg-gray-50 ${editingVariant === variant.id ? 'bg-blue-50' : ''}`}>
+              <tr
+                key={variant.id}
+                className={`hover:bg-gray-700/50 ${editingVariant === variant.id ? 'bg-blue-900/30' : ''}`}
+              >
                 <td className="px-4 py-3">
                   {editingVariant === variant.id ? (
                     <input
@@ -1401,18 +1555,18 @@ export const ProductEdit: React.FC = () => {
                           },
                         })
                       }
-                      className="w-32 px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-32 px-2 py-1 bg-gray-700 border border-gray-600 text-gray-100 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   ) : (
                     <div>
-                      <span className="text-sm font-medium text-gray-900">{variant.sku}</span>
+                      <span className="text-sm font-medium text-gray-100">{variant.sku}</span>
                       {variant.name !== variant.sku && (
-                        <p className="text-xs text-gray-500">{variant.name}</p>
+                        <p className="text-xs text-gray-400">{variant.name}</p>
                       )}
                     </div>
                   )}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-500">
+                <td className="px-4 py-3 text-sm text-gray-400">
                   {variant.options && variant.options.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
                       {variant.options.map((opt) => (
@@ -1422,7 +1576,7 @@ export const ProductEdit: React.FC = () => {
                       ))}
                     </div>
                   ) : (
-                    <span className="text-gray-400">-</span>
+                    <span className="text-gray-500">-</span>
                   )}
                 </td>
                 <td className="px-4 py-3">
@@ -1439,12 +1593,14 @@ export const ProductEdit: React.FC = () => {
                           },
                         })
                       }
-                      className="w-28 px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-28 px-2 py-1 bg-gray-700 border border-gray-600 text-gray-100 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       min="0"
                       step="0.01"
                     />
                   ) : (
-                    <span className="font-medium text-gray-900">{formatPrice(variant.price / 100)}</span>
+                    <span className="font-medium text-gray-100">
+                      {formatPrice(variant.price / 100)}
+                    </span>
                   )}
                 </td>
                 <td className="px-4 py-3">
@@ -1461,17 +1617,17 @@ export const ProductEdit: React.FC = () => {
                           },
                         })
                       }
-                      className="w-20 px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-20 px-2 py-1 bg-gray-700 border border-gray-600 text-gray-100 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       min="0"
                     />
                   ) : (
                     <span
                       className={`font-medium ${
                         variant.stockOnHand === 0
-                          ? 'text-red-600'
+                          ? 'text-red-400'
                           : variant.stockOnHand < (variant.customFields?.minStockAlert || 10)
-                            ? 'text-orange-600'
-                            : 'text-green-600'
+                            ? 'text-orange-400'
+                            : 'text-green-400'
                       }`}
                     >
                       {variant.stockOnHand}
@@ -1493,9 +1649,9 @@ export const ProductEdit: React.FC = () => {
                             },
                           })
                         }
-                        className="w-4 h-4 text-blue-600 border-gray-300 rounded"
+                        className="w-4 h-4 text-blue-600 border-gray-500 rounded bg-gray-600"
                       />
-                      <span className="text-sm">Actif</span>
+                      <span className="text-sm text-gray-300">Actif</span>
                     </label>
                   ) : (
                     <Badge variant={variant.enabled ? 'success' : 'default'}>
@@ -1528,14 +1684,13 @@ export const ProductEdit: React.FC = () => {
                       >
                         Modifier
                       </Button>
-                      {(product.variants?.length || 0) > 1 && (
-                        <Button
-                          size="sm"
-                          variant="danger"
-                          onClick={() => setShowDeleteVariantDialog(variant.id)}
-                          icon={<Trash2 className="h-3 w-3" />}
-                        />
-                      )}
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={() => setShowDeleteVariantDialog(variant.id)}
+                        icon={<Trash2 className="h-3 w-3" />}
+                        title="Supprimer cette variante"
+                      />
                     </div>
                   )}
                 </td>
@@ -1549,15 +1704,15 @@ export const ProductEdit: React.FC = () => {
 
   const CategoriesTab = (
     <div className="space-y-6">
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-800">
+      <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4">
+        <p className="text-sm text-blue-300">
           <FolderTree className="inline h-4 w-4 mr-2" />
           Sélectionnez les catégories où ce produit sera visible.
         </p>
       </div>
 
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium text-gray-900">Catégories</h3>
+        <h3 className="text-lg font-medium text-gray-100">Catégories</h3>
         <Button
           onClick={handleSaveCollections}
           loading={savingCollections}
@@ -1569,9 +1724,9 @@ export const ProductEdit: React.FC = () => {
       </div>
 
       {allCollections.length === 0 ? (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-          <FolderTree className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">Aucune catégorie disponible</p>
+        <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-8 text-center">
+          <FolderTree className="h-12 w-12 text-gray-500 mx-auto mb-3" />
+          <p className="text-gray-400">Aucune catégorie disponible</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1580,8 +1735,8 @@ export const ProductEdit: React.FC = () => {
               key={collection.id}
               className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
                 selectedCollections.includes(collection.id)
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  ? 'border-blue-500 bg-blue-900/30'
+                  : 'border-gray-600 hover:border-gray-500'
               }`}
             >
               <input
@@ -1591,14 +1746,16 @@ export const ProductEdit: React.FC = () => {
                   if (e.target.checked) {
                     setSelectedCollections([...selectedCollections, collection.id]);
                   } else {
-                    setSelectedCollections(selectedCollections.filter((cid) => cid !== collection.id));
+                    setSelectedCollections(
+                      selectedCollections.filter((cid) => cid !== collection.id)
+                    );
                   }
                 }}
-                className="h-5 w-5 text-blue-600 border-gray-300 rounded"
+                className="h-5 w-5 text-blue-600 border-gray-500 rounded bg-gray-600"
               />
               <div>
-                <p className="font-medium text-gray-900">{collection.name}</p>
-                {collection.slug && <p className="text-xs text-gray-500">/{collection.slug}</p>}
+                <p className="font-medium text-gray-100">{collection.name}</p>
+                {collection.slug && <p className="text-xs text-gray-400">/{collection.slug}</p>}
               </div>
             </label>
           ))}
@@ -1607,25 +1764,46 @@ export const ProductEdit: React.FC = () => {
     </div>
   );
 
-  const tabs = [
-    { id: 'general', label: 'Général', content: GeneralTab, icon: <Settings className="h-4 w-4" /> },
-    { id: 'localization', label: 'Traductions', content: LocalizationTab, icon: <Globe className="h-4 w-4" /> },
-    { id: 'images', label: 'Images', content: ImagesTab, icon: <ImageIcon className="h-4 w-4" /> },
-    { id: 'variants', label: 'Variantes', content: VariantsTab, icon: <Layers className="h-4 w-4" /> },
-    { id: 'categories', label: 'Catégories', content: CategoriesTab, icon: <FolderTree className="h-4 w-4" /> },
-  ];
+  // Step navigation
+  const goToStep = (step: number) => {
+    if (step >= 0 && step < STEPS.length) {
+      setCurrentStep(step);
+    }
+  };
+
+  // Render step content
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return GeneralTab;
+      case 1:
+        return LocalizationTab;
+      case 2:
+        return ImagesTab;
+      case 3:
+        return VariantsTab;
+      case 4:
+        return CategoriesTab;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate('/products')} icon={<ArrowLeft className="h-4 w-4" />}>
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/products')}
+            icon={<ArrowLeft className="h-4 w-4" />}
+          >
             Retour
           </Button>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900">{product.name}</h1>
+              <h1 className="text-2xl font-bold text-gray-100">{product.name}</h1>
               <Badge variant={product.enabled ? 'success' : 'default'}>
                 {product.enabled ? 'Actif' : 'Inactif'}
               </Badge>
@@ -1636,7 +1814,7 @@ export const ProductEdit: React.FC = () => {
                 </Badge>
               )}
             </div>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-400 mt-1">
               ID: {product.id} | Créé le {formatDateTime(product.createdAt)}
             </p>
           </div>
@@ -1672,25 +1850,25 @@ export const ProductEdit: React.FC = () => {
                   className="h-12 w-12 rounded-lg object-cover"
                 />
               ) : (
-                <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                <div className="h-12 w-12 bg-gray-700 rounded-lg flex items-center justify-center">
                   <Package className="h-6 w-6 text-gray-400" />
                 </div>
               )}
               <div>
-                <p className="text-sm text-gray-500">SKU Principal</p>
-                <p className="font-semibold text-gray-900">{mainVariant?.sku || '-'}</p>
+                <p className="text-sm text-gray-400">SKU Principal</p>
+                <p className="font-semibold text-gray-100">{mainVariant?.sku || '-'}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-gray-500">Prix</p>
-            <p className="text-xl font-bold text-gray-900">
+            <p className="text-sm text-gray-400">Prix</p>
+            <p className="text-xl font-bold text-gray-100">
               {mainVariant?.price ? formatPrice(mainVariant.price / 100) : '-'}
             </p>
             {product.customFields?.salePrice && (
-              <p className="text-sm text-green-600">
+              <p className="text-sm text-green-400">
                 Promo: {formatPrice(product.customFields.salePrice / 100)}
               </p>
             )}
@@ -1698,21 +1876,25 @@ export const ProductEdit: React.FC = () => {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-gray-500">Stock Total</p>
+            <p className="text-sm text-gray-400">Stock Total</p>
             <p
               className={`text-xl font-bold ${
-                totalStock === 0 ? 'text-red-600' : totalStock < 10 ? 'text-orange-600' : 'text-green-600'
+                totalStock === 0
+                  ? 'text-red-400'
+                  : totalStock < 10
+                    ? 'text-orange-400'
+                    : 'text-green-400'
               }`}
             >
               {totalStock} unités
             </p>
-            <p className="text-sm text-gray-400">{product.variants?.length || 0} variante(s)</p>
+            <p className="text-sm text-gray-500">{product.variants?.length || 0} variante(s)</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-gray-500">Vues</p>
-            <p className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <p className="text-sm text-gray-400">Vues</p>
+            <p className="text-xl font-bold text-gray-100 flex items-center gap-2">
               <Eye className="h-5 w-5 text-gray-400" />
               {product.customFields?.viewCount || 0}
             </p>
@@ -1720,12 +1902,82 @@ export const ProductEdit: React.FC = () => {
         </Card>
       </div>
 
-      {/* Tabs */}
+      {/* Progress steps */}
+      <div className="flex items-center justify-between bg-gray-800 rounded-xl p-4 shadow-sm overflow-x-auto border border-gray-700">
+        {STEPS.map((step, index) => {
+          const Icon = step.icon;
+          const isActive = index === currentStep;
+          const isCompleted = index < currentStep;
+
+          return (
+            <React.Fragment key={step.id}>
+              <button
+                onClick={() => goToStep(index)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${
+                  isActive
+                    ? 'bg-blue-900/50 text-blue-400'
+                    : isCompleted
+                      ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50'
+                      : 'text-gray-400 hover:bg-gray-700'
+                }`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    isActive
+                      ? 'bg-blue-600 text-white'
+                      : isCompleted
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gray-600 text-gray-400'
+                  }`}
+                >
+                  {isCompleted ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                </div>
+                <span className="hidden md:block font-medium text-sm">{step.label}</span>
+              </button>
+              {index < STEPS.length - 1 && (
+                <div
+                  className={`flex-1 h-0.5 mx-2 min-w-[20px] ${
+                    index < currentStep ? 'bg-green-500' : 'bg-gray-600'
+                  }`}
+                />
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
+
+      {/* Step content */}
       <Card>
-        <CardContent className="p-0">
-          <Tabs tabs={tabs} defaultTab="general" className="px-6" />
-        </CardContent>
+        <CardContent className="p-6">{renderStepContent()}</CardContent>
       </Card>
+
+      {/* Navigation buttons */}
+      <div className="flex items-center justify-between">
+        <Button
+          variant="secondary"
+          onClick={() => goToStep(currentStep - 1)}
+          disabled={currentStep === 0}
+          icon={<ArrowLeft className="h-4 w-4" />}
+        >
+          Précédent
+        </Button>
+
+        <div className="flex items-center gap-3">
+          {currentStep < STEPS.length - 1 ? (
+            <Button onClick={() => goToStep(currentStep + 1)}>
+              Suivant
+            </Button>
+          ) : (
+            <Button
+              onClick={() => formik.handleSubmit()}
+              loading={updating}
+              icon={<Save className="h-4 w-4" />}
+            >
+              Enregistrer
+            </Button>
+          )}
+        </div>
+      </div>
 
       {/* Delete Product Confirmation Dialog */}
       <ConfirmDialog

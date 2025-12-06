@@ -81,7 +81,7 @@ export default function ShippingAddressForm({
                       id="firstName"
                       type="text"
                       placeholder="Votre prénom"
-                      leftIcon={<User className="h-5 w-5 text-gray-400" />}
+                      leftIcon={<User className="h-5 w-5 text-muted-foreground" />}
                       error={touched.firstName && errors.firstName ? errors.firstName : ''}
                     />
                   )}
@@ -99,7 +99,7 @@ export default function ShippingAddressForm({
                       id="lastName"
                       type="text"
                       placeholder="Votre nom"
-                      leftIcon={<User className="h-5 w-5 text-gray-400" />}
+                      leftIcon={<User className="h-5 w-5 text-muted-foreground" />}
                       error={touched.lastName && errors.lastName ? errors.lastName : ''}
                     />
                   )}
@@ -120,7 +120,7 @@ export default function ShippingAddressForm({
                       id="email"
                       type="email"
                       placeholder="votre@email.com"
-                      leftIcon={<Mail className="h-5 w-5 text-gray-400" />}
+                      leftIcon={<Mail className="h-5 w-5 text-muted-foreground" />}
                       error={touched.email && errors.email ? errors.email : ''}
                     />
                   )}
@@ -138,7 +138,7 @@ export default function ShippingAddressForm({
                       id="phone"
                       type="tel"
                       placeholder="0X XX XX XX XX"
-                      leftIcon={<Phone className="h-5 w-5 text-gray-400" />}
+                      leftIcon={<Phone className="h-5 w-5 text-muted-foreground" />}
                       error={touched.phone && errors.phone ? errors.phone : ''}
                     />
                   )}
@@ -158,7 +158,7 @@ export default function ShippingAddressForm({
                     id="address"
                     type="text"
                     placeholder="Rue, numéro, bâtiment..."
-                    leftIcon={<MapPin className="h-5 w-5 text-gray-400" />}
+                    leftIcon={<MapPin className="h-5 w-5 text-muted-foreground" />}
                     error={touched.address && errors.address ? errors.address : ''}
                   />
                 )}
@@ -176,7 +176,7 @@ export default function ShippingAddressForm({
                     <select
                       {...field}
                       id="wilaya"
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="w-full px-4 py-2.5 border border-input bg-background rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
                       <option value="">Sélectionner</option>
                       <option value="16">Alger</option>

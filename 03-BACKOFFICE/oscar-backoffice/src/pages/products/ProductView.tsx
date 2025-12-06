@@ -17,7 +17,10 @@ import {
   Box,
   ExternalLink,
 } from 'lucide-react';
-import { AdminProductDocument, AdminCollectionsWithFiltersDocument } from '../../graphql/generated/graphql';
+import {
+  AdminProductDocument,
+  AdminCollectionsWithFiltersDocument,
+} from '../../graphql/generated/graphql';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
@@ -89,7 +92,11 @@ export const ProductView: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate('/products')} icon={<ArrowLeft className="h-4 w-4" />}>
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/products')}
+            icon={<ArrowLeft className="h-4 w-4" />}
+          >
             Retour
           </Button>
           <div>
@@ -169,7 +176,9 @@ export const ProductView: React.FC = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           className={`relative rounded-lg overflow-hidden border-2 hover:border-blue-400 transition-colors ${
-                            product.featuredAsset?.id === asset.id ? 'border-yellow-500' : 'border-gray-200'
+                            product.featuredAsset?.id === asset.id
+                              ? 'border-yellow-500'
+                              : 'border-gray-200'
                           }`}
                         >
                           <img
@@ -229,7 +238,9 @@ export const ProductView: React.FC = () => {
                           <span className="font-medium">Nom:</span> {product.customFields.nameFr}
                         </p>
                         {product.customFields?.descriptionFr && (
-                          <p className="text-sm text-gray-600">{product.customFields.descriptionFr}</p>
+                          <p className="text-sm text-gray-600">
+                            {product.customFields.descriptionFr}
+                          </p>
                         )}
                       </>
                     ) : (
@@ -248,7 +259,9 @@ export const ProductView: React.FC = () => {
                           <span className="font-medium">الاسم:</span> {product.customFields.nameAr}
                         </p>
                         {product.customFields?.descriptionAr && (
-                          <p className="text-sm text-gray-600">{product.customFields.descriptionAr}</p>
+                          <p className="text-sm text-gray-600">
+                            {product.customFields.descriptionAr}
+                          </p>
                         )}
                       </>
                     ) : (
@@ -274,20 +287,36 @@ export const ProductView: React.FC = () => {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Options</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix TTC</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          SKU
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Nom
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Options
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Prix
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Prix TTC
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Stock
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Statut
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {product.variants.map((variant) => (
                         <tr key={variant.id} className="hover:bg-gray-50">
                           <td className="px-4 py-3">
-                            <span className="text-sm font-mono font-medium text-gray-900">{variant.sku}</span>
+                            <span className="text-sm font-mono font-medium text-gray-900">
+                              {variant.sku}
+                            </span>
                           </td>
                           <td className="px-4 py-3">
                             <span className="text-sm text-gray-700">{variant.name}</span>
@@ -320,7 +349,8 @@ export const ProductView: React.FC = () => {
                               className={`text-sm font-medium ${
                                 variant.stockOnHand === 0
                                   ? 'text-red-600'
-                                  : variant.stockOnHand < (variant.customFields?.minStockAlert || 10)
+                                  : variant.stockOnHand <
+                                      (variant.customFields?.minStockAlert || 10)
                                     ? 'text-orange-600'
                                     : 'text-green-600'
                               }`}
@@ -379,7 +409,11 @@ export const ProductView: React.FC = () => {
                 <span className="text-sm text-gray-500">Stock total</span>
                 <span
                   className={`font-semibold ${
-                    totalStock === 0 ? 'text-red-600' : totalStock < 10 ? 'text-orange-600' : 'text-green-600'
+                    totalStock === 0
+                      ? 'text-red-600'
+                      : totalStock < 10
+                        ? 'text-orange-600'
+                        : 'text-green-600'
                   }`}
                 >
                   {totalStock} unités
@@ -399,14 +433,17 @@ export const ProductView: React.FC = () => {
               {product.customFields?.weightKg && (
                 <div className="flex items-center justify-between py-2 border-b">
                   <span className="text-sm text-gray-500">Poids</span>
-                  <span className="font-semibold text-gray-900">{product.customFields.weightKg} kg</span>
+                  <span className="font-semibold text-gray-900">
+                    {product.customFields.weightKg} kg
+                  </span>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Attributes */}
-          {(product.customFields?.availableSizes?.length > 0 || product.customFields?.availableColors?.length > 0) && (
+          {(product.customFields?.availableSizes?.length > 0 ||
+            product.customFields?.availableColors?.length > 0) && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -420,7 +457,9 @@ export const ProductView: React.FC = () => {
                     <p className="text-sm font-medium text-gray-700 mb-2">Tailles</p>
                     <div className="flex flex-wrap gap-2">
                       {product.customFields.availableSizes.map((size, i) => (
-                        <Badge key={i} variant="default">{size}</Badge>
+                        <Badge key={i} variant="default">
+                          {size}
+                        </Badge>
                       ))}
                     </div>
                   </div>
@@ -430,7 +469,9 @@ export const ProductView: React.FC = () => {
                     <p className="text-sm font-medium text-gray-700 mb-2">Couleurs</p>
                     <div className="flex flex-wrap gap-2">
                       {product.customFields.availableColors.map((color, i) => (
-                        <Badge key={i} variant="default">{color}</Badge>
+                        <Badge key={i} variant="default">
+                          {color}
+                        </Badge>
                       ))}
                     </div>
                   </div>
@@ -498,11 +539,15 @@ export const ProductView: React.FC = () => {
             <CardContent className="space-y-3">
               <div>
                 <p className="text-xs text-gray-500">Créé le</p>
-                <p className="text-sm font-medium text-gray-900">{formatDateTime(product.createdAt)}</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {formatDateTime(product.createdAt)}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-gray-500">Modifié le</p>
-                <p className="text-sm font-medium text-gray-900">{formatDateTime(product.updatedAt)}</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {formatDateTime(product.updatedAt)}
+                </p>
               </div>
             </CardContent>
           </Card>

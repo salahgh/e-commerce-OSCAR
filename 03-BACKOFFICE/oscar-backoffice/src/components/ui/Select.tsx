@@ -15,7 +15,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className="w-full">
         {label && (
-          <label htmlFor={selectId} className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor={selectId} className="block text-sm font-medium text-gray-300 mb-1">
             {label}
           </label>
         )}
@@ -23,20 +23,20 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           id={selectId}
           ref={ref}
           className={cn(
-            'w-full px-3 py-2 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed',
-            error ? 'border-red-500' : 'border-gray-300',
+            'w-full px-3 py-2 border rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:bg-gray-900 disabled:cursor-not-allowed',
+            error ? 'border-red-500' : 'border-gray-600',
             className
           )}
           {...props}
         >
           {options.map((option) => (
-            <option key={option.value} value={option.value}>
+            <option key={option.value} value={option.value} className="bg-gray-800">
               {option.label}
             </option>
           ))}
         </select>
-        {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-        {helperText && !error && <p className="mt-1 text-sm text-gray-500">{helperText}</p>}
+        {error && <p className="mt-1 text-sm text-red-400">{error}</p>}
+        {helperText && !error && <p className="mt-1 text-sm text-gray-400">{helperText}</p>}
       </div>
     );
   }

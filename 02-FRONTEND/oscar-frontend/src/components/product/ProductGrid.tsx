@@ -1,6 +1,6 @@
 import React from 'react';
 import ProductCard from './ProductCard';
-import { SkeletonCard } from '@/components/ui';
+import { Skeleton } from '@/components/ui';
 
 interface ProductGridProps {
   products: Array<{
@@ -47,7 +47,12 @@ export default function ProductGrid({
     return (
       <div className={`grid ${gridCols[columns]} gap-6`}>
         {Array.from({ length: 8 }).map((_, index) => (
-          <SkeletonCard key={index} />
+          <div key={index} className="border rounded-lg p-4 space-y-3">
+            <Skeleton className="aspect-square w-full rounded-md" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-8 w-full" />
+          </div>
         ))}
       </div>
     );

@@ -50,7 +50,7 @@ export default function ShippingMethodForm({
         <Form className="space-y-6">
           <div>
             <h2 className="text-2xl font-bold mb-2">Méthode de livraison</h2>
-            <p className="text-gray-600 mb-6">Choisissez votre mode de livraison préféré</p>
+            <p className="text-muted-foreground mb-6">Choisissez votre mode de livraison préféré</p>
 
             <div className="space-y-3">
               {shippingMethods.map((method) => {
@@ -75,16 +75,16 @@ export default function ShippingMethodForm({
                               'w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors',
                               isSelected
                                 ? 'border-primary bg-primary'
-                                : 'border-gray-300 bg-white'
+                                : 'border-input bg-background'
                             )}
                           >
-                            {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
+                            {isSelected && <div className="w-2 h-2 bg-primary-foreground rounded-full" />}
                           </div>
                         </div>
 
                         {/* Icon */}
                         <div className="flex-shrink-0">
-                          <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
                             <Icon className="h-6 w-6 text-primary" />
                           </div>
                         </div>
@@ -93,9 +93,9 @@ export default function ShippingMethodForm({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <div>
-                              <h3 className="font-semibold text-gray-900">{method.name}</h3>
-                              <p className="text-sm text-gray-600 mt-1">{method.description}</p>
-                              <p className="text-sm text-gray-500 mt-1">
+                              <h3 className="font-semibold text-foreground">{method.name}</h3>
+                              <p className="text-sm text-muted-foreground mt-1">{method.description}</p>
+                              <p className="text-sm text-muted-foreground mt-1">
                                 Livraison estimée: {method.estimatedDays}
                               </p>
                             </div>

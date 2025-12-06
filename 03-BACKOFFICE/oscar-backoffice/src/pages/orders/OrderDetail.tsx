@@ -1,350 +1,1140 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
-import { ArrowLeft, Package, User, MapPin, CreditCard, Truck, Download } from 'lucide-react';
+import {
+  ArrowLeft,
+  Package,
+  User,
+  MapPin,
+  CreditCard,
+  Truck,
+  Clock,
+  MessageSquare,
+  Edit2,
+  Save,
+  X,
+  CheckCircle,
+  XCircle,
+  FileText,
+  Phone,
+  Mail,
+  Calendar,
+  Hash,
+  DollarSign,
+  ShoppingBag,
+  AlertTriangle,
+  Copy,
+  ExternalLink,
+  Printer,
+  MoreVertical,
+  ChevronRight,
+  Circle,
+  Ban,
+} from 'lucide-react';
+import { useAppDispatch } from '../../hooks/useAppDispatch';
+import { addToast } from '../../store/slices/uiSlice';
+import {
+  AdminOrderDocument,
+  TransitionOrderToStateDocument,
+  UpdateOrderCustomFieldsDocument,
+  AddNoteToOrderDocument,
+  CancelOrderDocument,
+} from '../../graphql/generated/graphql';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
-import { Select } from '../../components/ui/Select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/Table';
-import { formatPrice, formatDateTime } from '../../lib/utils';
-import { PAYMENT_STATUS_LABELS } from '../../constants';
-import { useAppDispatch } from '../../hooks/useAppDispatch';
-import { addToast } from '../../store/slices/uiSlice';
-import type { OrderStatus } from '../../types';
-import { OrderDocument, UpdateOrderStatusDocument, AllOrdersDocument } from '../../graphql/generated/graphql';
 import { Spinner } from '../../components/ui/Spinner';
+import { Input } from '../../components/ui/Input';
+import { TextArea } from '../../components/ui/TextArea';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { formatPrice, formatDateTime, formatDate } from '../../lib/utils';
+import { printInvoice } from '../../lib/export-utils';
 
-const statusOptions = [
-  { value: 'PENDING', label: 'En attente' },
-  { value: 'CONFIRMED', label: 'Confirmée' },
-  { value: 'PROCESSING', label: 'En préparation' },
-  { value: 'SHIPPED', label: 'Expédiée' },
-  { value: 'DELIVERED', label: 'Livrée' },
-  { value: 'CANCELLED', label: 'Annulée' },
+// Order status configuration with allowed transitions and colors
+const ORDER_STATUS: Record<
+  string,
+  {
+    label: string;
+    variant: 'default' | 'success' | 'warning' | 'danger' | 'info';
+    icon: React.ReactNode;
+    color: string;
+    bgColor: string;
+    next?: string[];
+  }
+> = {
+  AddingItems: {
+    label: 'En cours',
+    variant: 'default',
+    icon: <ShoppingBag className="h-4 w-4" />,
+    color: 'text-gray-400',
+    bgColor: 'bg-gray-500/20',
+    next: ['ArrangingPayment', 'Cancelled'],
+  },
+  ArrangingPayment: {
+    label: 'Paiement en attente',
+    variant: 'info',
+    icon: <CreditCard className="h-4 w-4" />,
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-500/20',
+    next: ['PaymentAuthorized', 'PaymentSettled', 'Cancelled'],
+  },
+  PaymentAuthorized: {
+    label: 'Paiement autorisé',
+    variant: 'info',
+    icon: <CheckCircle className="h-4 w-4" />,
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-500/20',
+    next: ['PaymentSettled', 'Cancelled'],
+  },
+  PaymentSettled: {
+    label: 'Payé',
+    variant: 'success',
+    icon: <DollarSign className="h-4 w-4" />,
+    color: 'text-green-400',
+    bgColor: 'bg-green-500/20',
+    next: ['PartiallyShipped', 'Shipped', 'Cancelled'],
+  },
+  PartiallyShipped: {
+    label: 'Partiellement expédié',
+    variant: 'warning',
+    icon: <Truck className="h-4 w-4" />,
+    color: 'text-yellow-400',
+    bgColor: 'bg-yellow-500/20',
+    next: ['Shipped', 'PartiallyDelivered'],
+  },
+  Shipped: {
+    label: 'Expédié',
+    variant: 'info',
+    icon: <Truck className="h-4 w-4" />,
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-500/20',
+    next: ['PartiallyDelivered', 'Delivered'],
+  },
+  PartiallyDelivered: {
+    label: 'Partiellement livré',
+    variant: 'warning',
+    icon: <Package className="h-4 w-4" />,
+    color: 'text-yellow-400',
+    bgColor: 'bg-yellow-500/20',
+    next: ['Delivered'],
+  },
+  Delivered: {
+    label: 'Livré',
+    variant: 'success',
+    icon: <CheckCircle className="h-4 w-4" />,
+    color: 'text-green-400',
+    bgColor: 'bg-green-500/20',
+  },
+  Modifying: {
+    label: 'En modification',
+    variant: 'warning',
+    icon: <Edit2 className="h-4 w-4" />,
+    color: 'text-yellow-400',
+    bgColor: 'bg-yellow-500/20',
+  },
+  ArrangingAdditionalPayment: {
+    label: 'Paiement additionnel',
+    variant: 'info',
+    icon: <CreditCard className="h-4 w-4" />,
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-500/20',
+  },
+  Cancelled: {
+    label: 'Annulé',
+    variant: 'danger',
+    icon: <XCircle className="h-4 w-4" />,
+    color: 'text-red-400',
+    bgColor: 'bg-red-500/20',
+  },
+};
+
+// Order flow steps for progress visualization
+const ORDER_FLOW = [
+  'AddingItems',
+  'ArrangingPayment',
+  'PaymentSettled',
+  'Shipped',
+  'Delivered',
 ];
 
 export const OrderDetail: React.FC = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const [status, setStatus] = useState<string>('');
+
+  // Local state
+  const [editingTracking, setEditingTracking] = useState(false);
+  const [trackingNumber, setTrackingNumber] = useState('');
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [adminNotes, setAdminNotes] = useState('');
+  const [newNote, setNewNote] = useState('');
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState('');
+  const [activeTab, setActiveTab] = useState<'items' | 'history' | 'notes'>('items');
 
   // Fetch order data
-  const { data, loading, error } = useQuery(OrderDocument, {
-    variables: { id: id ? parseInt(id) : 0 },
+  const { data, loading, error, refetch } = useQuery(AdminOrderDocument, {
+    variables: { id: id! },
     skip: !id,
+    onCompleted: (data) => {
+      if (data?.order) {
+        setTrackingNumber(data.order.customFields?.trackingNumber || '');
+        setAdminNotes(data.order.customFields?.adminNotes || '');
+      }
+    },
   });
 
-  const [updateOrderStatus, { loading: updating }] = useMutation(UpdateOrderStatusDocument, {
-    refetchQueries: [
-      { query: AllOrdersDocument, variables: { page: 0, size: 20 } },
-      { query: OrderDocument, variables: { id: id ? parseInt(id) : 0 } },
-    ],
-  });
+  // Mutations
+  const [transitionOrder, { loading: transitioning }] = useMutation(TransitionOrderToStateDocument);
+  const [updateCustomFields, { loading: updatingFields }] = useMutation(
+    UpdateOrderCustomFieldsDocument
+  );
+  const [addNote, { loading: addingNote }] = useMutation(AddNoteToOrderDocument);
+  const [cancelOrder, { loading: cancelling }] = useMutation(CancelOrderDocument);
 
-  // Set initial status when data loads
-  useEffect(() => {
-    if (data?.order?.status) {
-      setStatus(data.order.status);
+  const order = data?.order;
+
+  // Calculate order progress
+  const orderProgress = useMemo(() => {
+    if (!order) return 0;
+    if (order.state === 'Cancelled') return -1;
+    const currentIndex = ORDER_FLOW.indexOf(order.state);
+    if (currentIndex === -1) {
+      // Handle intermediate states
+      if (['PaymentAuthorized'].includes(order.state)) return 2;
+      if (['PartiallyShipped'].includes(order.state)) return 3;
+      if (['PartiallyDelivered'].includes(order.state)) return 4;
+      return 0;
     }
-  }, [data]);
+    return currentIndex;
+  }, [order?.state]);
 
-  const handleStatusUpdate = async () => {
-    if (!id) return;
+  // Calculate order statistics
+  const orderStats = useMemo(() => {
+    if (!order) return null;
+    const totalItems = order.lines?.reduce((sum, line) => sum + line.quantity, 0) || 0;
+    const uniqueProducts = order.lines?.length || 0;
+    return { totalItems, uniqueProducts };
+  }, [order]);
 
+  // Handle state transition
+  const handleTransition = async (newState: string) => {
     try {
-      await updateOrderStatus({
+      const result = await transitionOrder({
+        variables: { id: id!, state: newState },
+      });
+
+      if (result.data?.transitionOrderToState) {
+        const response = result.data.transitionOrderToState;
+        if ('errorCode' in response) {
+          dispatch(
+            addToast({ message: response.message || 'Erreur lors de la transition', type: 'error' })
+          );
+        } else {
+          dispatch(
+            addToast({
+              message: `Commande passée à "${ORDER_STATUS[newState]?.label}"`,
+              type: 'success',
+            })
+          );
+          refetch();
+        }
+      }
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+  };
+
+  // Handle tracking update
+  const handleTrackingUpdate = async () => {
+    try {
+      await updateCustomFields({
         variables: {
-          id: parseInt(id),
           input: {
-            status,
+            id: id!,
+            customFields: { trackingNumber },
+          },
+        },
+      });
+      dispatch(addToast({ message: 'Numéro de suivi mis à jour', type: 'success' }));
+      setEditingTracking(false);
+      refetch();
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+  };
+
+  // Handle admin notes update
+  const handleNotesUpdate = async () => {
+    try {
+      await updateCustomFields({
+        variables: {
+          input: {
+            id: id!,
+            customFields: { adminNotes },
+          },
+        },
+      });
+      dispatch(addToast({ message: 'Notes mises à jour', type: 'success' }));
+      setEditingNotes(false);
+      refetch();
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+  };
+
+  // Handle adding note to history
+  const handleAddNote = async () => {
+    if (!newNote.trim()) return;
+    try {
+      await addNote({
+        variables: {
+          input: {
+            id: id!,
+            note: newNote,
+            isPublic: false,
+          },
+        },
+      });
+      dispatch(addToast({ message: 'Note ajoutée', type: 'success' }));
+      setNewNote('');
+      refetch();
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+  };
+
+  // Handle copy order code
+  const handleCopyCode = () => {
+    if (order) {
+      navigator.clipboard.writeText(order.code);
+      dispatch(addToast({ message: 'Code copié!', type: 'success' }));
+    }
+  };
+
+  // Handle generate invoice
+  const handleGenerateInvoice = () => {
+    if (!order) return;
+
+    printInvoice({
+      code: order.code,
+      orderPlacedAt: order.orderPlacedAt || order.createdAt,
+      customer: order.customer
+        ? {
+            firstName: order.customer.firstName,
+            lastName: order.customer.lastName,
+            emailAddress: order.customer.emailAddress,
+            phoneNumber: order.customer.phoneNumber || undefined,
+          }
+        : undefined,
+      shippingAddress: order.shippingAddress
+        ? {
+            fullName: order.shippingAddress.fullName || '',
+            streetLine1: order.shippingAddress.streetLine1 || '',
+            streetLine2: order.shippingAddress.streetLine2 || undefined,
+            city: order.shippingAddress.city || '',
+            province: order.shippingAddress.province || undefined,
+            postalCode: order.shippingAddress.postalCode || undefined,
+            country: order.shippingAddress.country
+              ? { name: order.shippingAddress.country }
+              : undefined,
+          }
+        : undefined,
+      lines: (order.lines || []).map((line) => ({
+        productVariant: {
+          name:
+            line.productVariant?.product?.customFields?.nameFr ||
+            line.productVariant?.product?.name ||
+            line.productVariant?.name ||
+            'Produit',
+          sku: line.productVariant?.sku || '',
+        },
+        quantity: line.quantity,
+        unitPriceWithTax: line.unitPriceWithTax,
+        linePriceWithTax: line.linePriceWithTax,
+      })),
+      subTotalWithTax: order.subTotalWithTax,
+      shippingWithTax: order.shippingWithTax,
+      totalWithTax: order.totalWithTax,
+      customFields: order.customFields
+        ? {
+            wilaya: order.customFields.wilaya || undefined,
+            city: order.customer?.customFields?.city || order.shippingAddress?.city || undefined,
+          }
+        : undefined,
+    });
+  };
+
+  // Handle cancel order
+  const handleCancelOrder = async () => {
+    try {
+      const result = await cancelOrder({
+        variables: {
+          input: {
+            orderId: id!,
+            reason: cancellationReason || undefined,
           },
         },
       });
 
-      dispatch(addToast({ message: 'Statut de la commande mis à jour', type: 'success' }));
-    } catch (error: any) {
-      console.error('Update order status error:', error);
-      dispatch(addToast({ message: error.message || 'Erreur lors de la mise à jour', type: 'error' }));
+      if (result.data?.cancelOrder) {
+        const response = result.data.cancelOrder;
+        if ('errorCode' in response) {
+          dispatch(
+            addToast({ message: response.message || "Erreur lors de l'annulation", type: 'error' })
+          );
+        } else {
+          dispatch(addToast({ message: 'Commande annulée', type: 'success' }));
+          refetch();
+        }
+      }
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
     }
+    setShowCancelDialog(false);
+    setCancellationReason('');
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-96">
         <Spinner size="lg" />
       </div>
     );
   }
 
-  if (error || !data?.order) {
+  if (error || !order) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <p className="text-red-500 text-lg mb-4">Erreur: {error?.message || 'Commande non trouvée'}</p>
-        <Button onClick={() => navigate('/orders')}>Retour aux commandes</Button>
+      <div className="flex flex-col items-center justify-center min-h-96 bg-gray-800 rounded-xl">
+        <Package className="h-20 w-20 text-gray-600 mb-4" />
+        <p className="text-gray-400 text-xl mb-2">Commande non trouvée</p>
+        <p className="text-gray-500 text-sm mb-6">Cette commande n'existe pas ou a été supprimée</p>
+        <Button variant="primary" onClick={() => navigate('/orders')}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Retour aux commandes
+        </Button>
       </div>
     );
   }
 
-  const order = data.order;
+  const statusConfig = ORDER_STATUS[order.state] || {
+    label: order.state,
+    variant: 'default' as const,
+    icon: <Circle className="h-4 w-4" />,
+    color: 'text-gray-400',
+    bgColor: 'bg-gray-500/20',
+    next: [] as string[],
+  };
+  const nextStates = statusConfig.next || [];
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate('/orders')} icon={<ArrowLeft className="h-5 w-5" />}>
-            Retour
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Commande {order.orderNumber}</h1>
-            <p className="text-gray-600 mt-1">Passée le {formatDateTime(String(order.createdAt))}</p>
+      {/* Header Card */}
+      <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          {/* Left Side - Order Info */}
+          <div className="flex items-start gap-4">
+            <button
+              onClick={() => navigate('/orders')}
+              className="p-2 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5 text-gray-300" />
+            </button>
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-2xl font-bold text-white">Commande #{order.code}</h1>
+                <button
+                  onClick={handleCopyCode}
+                  className="p-1 hover:bg-gray-700 rounded transition-colors"
+                  title="Copier le code"
+                >
+                  <Copy className="h-4 w-4 text-gray-400" />
+                </button>
+                <div
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${statusConfig.bgColor}`}
+                >
+                  <span className={statusConfig.color}>{statusConfig.icon}</span>
+                  <span className={`text-sm font-medium ${statusConfig.color}`}>
+                    {statusConfig.label}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4" />
+                  {order.orderPlacedAt
+                    ? `Passée le ${formatDate(order.orderPlacedAt)}`
+                    : `Créée le ${formatDate(order.createdAt)}`}
+                </span>
+                {orderStats && (
+                  <>
+                    <span className="text-gray-600">•</span>
+                    <span className="flex items-center gap-1.5">
+                      <Package className="h-4 w-4" />
+                      {orderStats.totalItems} article{orderStats.totalItems > 1 ? 's' : ''}
+                    </span>
+                  </>
+                )}
+                {order.customFields?.wilaya && (
+                  <>
+                    <span className="text-gray-600">•</span>
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="h-4 w-4" />
+                      {order.customFields.wilaya}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side - Actions */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateInvoice}
+              className="border-gray-600 hover:bg-gray-700"
+            >
+              <Printer className="h-4 w-4 mr-2" />
+              Facture
+            </Button>
+
+            {nextStates.length > 0 && (
+              <div className="flex items-center gap-2">
+                {nextStates
+                  .filter((s) => s !== 'Cancelled')
+                  .map((state) => (
+                    <Button
+                      key={state}
+                      variant="primary"
+                      size="sm"
+                      onClick={() => handleTransition(state)}
+                      loading={transitioning}
+                    >
+                      <ChevronRight className="h-4 w-4 mr-1" />
+                      {ORDER_STATUS[state]?.label || state}
+                    </Button>
+                  ))}
+                {nextStates.includes('Cancelled') && (
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => setShowCancelDialog(true)}
+                    className="ml-2"
+                  >
+                    <Ban className="h-4 w-4 mr-1" />
+                    Annuler
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </div>
-        <Button variant="outline" icon={<Download className="h-5 w-5" />}>
-          Télécharger facture
-        </Button>
+
+        {/* Order Progress */}
+        {order.state !== 'Cancelled' && (
+          <div className="mt-6 pt-6 border-t border-gray-700">
+            <div className="flex items-center justify-between">
+              {ORDER_FLOW.map((step, index) => {
+                const stepConfig = ORDER_STATUS[step];
+                const isCompleted = index < orderProgress;
+                const isCurrent = index === orderProgress;
+                const isPending = index > orderProgress;
+
+                return (
+                  <React.Fragment key={step}>
+                    <div className="flex flex-col items-center">
+                      <div
+                        className={`
+                          w-10 h-10 rounded-full flex items-center justify-center transition-all
+                          ${isCompleted ? 'bg-green-500 text-white' : ''}
+                          ${isCurrent ? 'bg-blue-500 text-white ring-4 ring-blue-500/30' : ''}
+                          ${isPending ? 'bg-gray-700 text-gray-500' : ''}
+                        `}
+                      >
+                        {isCompleted ? (
+                          <CheckCircle className="h-5 w-5" />
+                        ) : (
+                          stepConfig?.icon || <Circle className="h-5 w-5" />
+                        )}
+                      </div>
+                      <span
+                        className={`mt-2 text-xs font-medium ${
+                          isCompleted || isCurrent ? 'text-gray-300' : 'text-gray-500'
+                        }`}
+                      >
+                        {stepConfig?.label || step}
+                      </span>
+                    </div>
+                    {index < ORDER_FLOW.length - 1 && (
+                      <div
+                        className={`flex-1 h-0.5 mx-2 ${
+                          index < orderProgress ? 'bg-green-500' : 'bg-gray-700'
+                        }`}
+                      />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Cancelled Banner */}
+        {order.state === 'Cancelled' && (
+          <div className="mt-6 p-4 bg-red-900/30 border border-red-800 rounded-lg flex items-start gap-3">
+            <XCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-red-300 font-medium">Cette commande a été annulée</p>
+              {order.customFields?.cancellationReason && (
+                <p className="text-red-400 text-sm mt-1">
+                  Raison: {order.customFields.cancellationReason}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-500/20 rounded-lg">
+              <ShoppingBag className="h-5 w-5 text-blue-400" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-400">Articles</p>
+              <p className="text-xl font-bold text-gray-100">{orderStats?.totalItems || 0}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-green-500/20 rounded-lg">
+              <DollarSign className="h-5 w-5 text-green-400" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-400">Total</p>
+              <p className="text-xl font-bold text-gray-100">
+                {formatPrice(order.totalWithTax / 100)}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-500/20 rounded-lg">
+              <CreditCard className="h-5 w-5 text-purple-400" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-400">Paiement</p>
+              <p className="text-lg font-medium text-gray-100">
+                {order.payments && order.payments.length > 0
+                  ? order.payments[0].method
+                  : 'En attente'}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-orange-500/20 rounded-lg">
+              <Truck className="h-5 w-5 text-orange-400" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-400">Livraison</p>
+              <p className="text-lg font-medium text-gray-100">
+                {formatPrice(order.shippingWithTax / 100)}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content */}
+        {/* Left Column - Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Order Items */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-blue-600" />
-                <CardTitle>Articles ({order.items?.length || 0})</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Produit</TableHead>
-                    <TableHead>SKU</TableHead>
-                    <TableHead>Prix unitaire</TableHead>
-                    <TableHead>Quantité</TableHead>
-                    <TableHead>Total</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {order.items && order.items.length > 0 ? (
-                    order.items.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            {item.productImage && (
-                              <img
-                                src={item.productImage}
-                                alt={item.productName || ''}
-                                className="w-12 h-12 rounded object-cover"
-                              />
-                            )}
-                            <div>
-                              <p className="font-medium">{item.productName}</p>
-                              <p className="text-sm text-gray-500">
-                                {item.selectedSize && `${item.selectedSize} - `}{item.selectedColor}
-                              </p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-mono text-xs">{item.productId}</TableCell>
-                        <TableCell>{formatPrice(Number(item.price))}</TableCell>
-                        <TableCell>{item.quantity}</TableCell>
-                        <TableCell className="font-semibold">
-                          {formatPrice(Number(item.subtotal))}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center text-gray-500">
-                        Aucun article
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+          {/* Tabs */}
+          <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+            <div className="flex border-b border-gray-700">
+              {[
+                { id: 'items', label: 'Articles', icon: <Package className="h-4 w-4" /> },
+                { id: 'history', label: 'Historique', icon: <Clock className="h-4 w-4" /> },
+                { id: 'notes', label: 'Notes', icon: <MessageSquare className="h-4 w-4" /> },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-colors ${
+                    activeTab === tab.id
+                      ? 'text-blue-400 border-b-2 border-blue-400 bg-gray-700/30'
+                      : 'text-gray-400 hover:text-gray-300 hover:bg-gray-700/20'
+                  }`}
+                >
+                  {tab.icon}
+                  {tab.label}
+                </button>
+              ))}
+            </div>
 
-              {/* Order Summary */}
-              <div className="border-t border-gray-200 p-6">
-                <div className="space-y-2 max-w-sm ml-auto">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Sous-total</span>
-                    <span className="font-medium">{formatPrice(Number(order.subtotal))}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Livraison</span>
-                    <span className="font-medium">{formatPrice(Number(order.shippingCost))}</span>
-                  </div>
-                  <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                    <span>Total</span>
-                    <span>{formatPrice(Number(order.totalAmount))}</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            <div className="p-6">
+              {/* Items Tab */}
+              {activeTab === 'items' && (
+                <div className="space-y-4">
+                  {order.lines?.map((line) => (
+                    <div
+                      key={line.id}
+                      className="flex items-center gap-4 p-4 bg-gray-900/50 rounded-lg border border-gray-700"
+                    >
+                      {line.productVariant?.product?.featuredAsset?.preview ? (
+                        <img
+                          src={line.productVariant.product.featuredAsset.preview}
+                          alt=""
+                          className="h-16 w-16 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <div className="h-16 w-16 bg-gray-700 rounded-lg flex items-center justify-center">
+                          <Package className="h-8 w-8 text-gray-500" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-gray-100 font-medium truncate">
+                          {line.productVariant?.product?.customFields?.nameFr ||
+                            line.productVariant?.product?.name ||
+                            line.productVariant?.name}
+                        </p>
+                        <p className="text-sm text-gray-400">SKU: {line.productVariant?.sku}</p>
+                        <p className="text-sm text-gray-400">
+                          {formatPrice(line.unitPriceWithTax / 100)} × {line.quantity}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-gray-100">
+                          {formatPrice(line.linePriceWithTax / 100)}
+                        </p>
+                        <p className="text-sm text-gray-400">{line.quantity} unité(s)</p>
+                      </div>
+                    </div>
+                  ))}
 
-          {/* Customer Info */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-blue-600" />
-                <CardTitle>Informations client</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <p className="text-sm text-gray-600">Email</p>
-                <p className="font-medium">{order.userEmail || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Téléphone</p>
-                <p className="font-medium">{order.phoneNumber || 'N/A'}</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Shipping Info */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-blue-600" />
-                <CardTitle>Adresse de livraison</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <p className="text-sm text-gray-600">Téléphone</p>
-                <p className="font-medium">{order.phoneNumber || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-gray-900">{order.shippingAddress || 'Adresse non fournie'}</p>
-              </div>
-              {order.notes && (
-                <div className="pt-3 border-t">
-                  <p className="text-sm text-gray-600 mb-1">Notes</p>
-                  <p className="text-sm italic">{order.notes}</p>
+                  {/* Order Summary */}
+                  <div className="mt-6 pt-6 border-t border-gray-700 space-y-3">
+                    <div className="flex justify-between text-gray-400">
+                      <span>Sous-total</span>
+                      <span>{formatPrice(order.subTotalWithTax / 100)}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-400">
+                      <span>Livraison</span>
+                      <span>{formatPrice(order.shippingWithTax / 100)}</span>
+                    </div>
+                    {order.discounts && order.discounts.length > 0 && (
+                      <div className="flex justify-between text-green-400">
+                        <span>Réductions</span>
+                        <span>
+                          -
+                          {formatPrice(
+                            order.discounts.reduce((sum, d) => sum + d.amountWithTax, 0) / 100
+                          )}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-xl font-bold text-gray-100 pt-3 border-t border-gray-700">
+                      <span>Total</span>
+                      <span>{formatPrice(order.totalWithTax / 100)}</span>
+                    </div>
+                  </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+
+              {/* History Tab */}
+              {activeTab === 'history' && (
+                <div className="space-y-4">
+                  {order.history?.items && order.history.items.length > 0 ? (
+                    <div className="relative">
+                      <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-700" />
+                      {order.history.items.map((item, index) => (
+                        <div key={item.id} className="relative pl-10 pb-6 last:pb-0">
+                          <div
+                            className={`absolute left-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                              item.type === 'ORDER_STATE_TRANSITION'
+                                ? 'bg-blue-500/20 text-blue-400'
+                                : item.type === 'ORDER_NOTE'
+                                  ? 'bg-yellow-500/20 text-yellow-400'
+                                  : item.type === 'ORDER_PAYMENT_TRANSITION'
+                                    ? 'bg-green-500/20 text-green-400'
+                                    : 'bg-gray-700 text-gray-400'
+                            }`}
+                          >
+                            {item.type === 'ORDER_STATE_TRANSITION' ? (
+                              <CheckCircle className="h-4 w-4" />
+                            ) : item.type === 'ORDER_NOTE' ? (
+                              <MessageSquare className="h-4 w-4" />
+                            ) : item.type === 'ORDER_PAYMENT_TRANSITION' ? (
+                              <CreditCard className="h-4 w-4" />
+                            ) : (
+                              <Clock className="h-4 w-4" />
+                            )}
+                          </div>
+                          <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                {item.type === 'ORDER_STATE_TRANSITION' && item.data && (
+                                  <p className="text-gray-100">
+                                    Statut changé de{' '}
+                                    <Badge variant="default" className="mx-1">
+                                      {ORDER_STATUS[(item.data as any).from]?.label ||
+                                        (item.data as any).from}
+                                    </Badge>
+                                    à{' '}
+                                    <Badge variant="info" className="mx-1">
+                                      {ORDER_STATUS[(item.data as any).to]?.label ||
+                                        (item.data as any).to}
+                                    </Badge>
+                                  </p>
+                                )}
+                                {item.type === 'ORDER_NOTE' && item.data && (
+                                  <p className="text-gray-300 italic">
+                                    "{(item.data as any).note}"
+                                  </p>
+                                )}
+                                {item.type === 'ORDER_PAYMENT_TRANSITION' && item.data && (
+                                  <p className="text-gray-100">
+                                    Paiement: {(item.data as any).paymentState}
+                                  </p>
+                                )}
+                                {!['ORDER_STATE_TRANSITION', 'ORDER_NOTE', 'ORDER_PAYMENT_TRANSITION'].includes(
+                                  item.type
+                                ) && <p className="text-gray-400">{item.type}</p>}
+                              </div>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-2">
+                              {formatDateTime(item.createdAt)}
+                              {item.administrator &&
+                                ` • ${item.administrator.firstName} ${item.administrator.lastName}`}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-400">
+                      <Clock className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                      <p>Aucun historique disponible</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Notes Tab */}
+              {activeTab === 'notes' && (
+                <div className="space-y-6">
+                  {/* Add Note Form */}
+                  <div className="flex gap-3">
+                    <Input
+                      placeholder="Ajouter une note à l'historique..."
+                      value={newNote}
+                      onChange={(e) => setNewNote(e.target.value)}
+                      className="flex-1 bg-gray-900 border-gray-600"
+                    />
+                    <Button
+                      onClick={handleAddNote}
+                      loading={addingNote}
+                      disabled={!newNote.trim()}
+                    >
+                      Ajouter
+                    </Button>
+                  </div>
+
+                  {/* Admin Notes */}
+                  <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-gray-200 font-medium flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4" />
+                        Notes internes
+                      </h4>
+                      {!editingNotes && (
+                        <button
+                          onClick={() => setEditingNotes(true)}
+                          className="text-blue-400 hover:text-blue-300"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                    {editingNotes ? (
+                      <div className="space-y-3">
+                        <TextArea
+                          value={adminNotes}
+                          onChange={(e) => setAdminNotes(e.target.value)}
+                          rows={4}
+                          placeholder="Notes internes sur la commande..."
+                          className="bg-gray-800 border-gray-600"
+                        />
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={handleNotesUpdate} loading={updatingFields}>
+                            Enregistrer
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setEditingNotes(false);
+                              setAdminNotes(order.customFields?.adminNotes || '');
+                            }}
+                          >
+                            Annuler
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-400 whitespace-pre-wrap">
+                        {order.customFields?.adminNotes || 'Aucune note interne'}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Customer Notes */}
+                  {order.customFields?.customerNotes && (
+                    <div className="bg-yellow-900/20 rounded-lg p-4 border border-yellow-800/50">
+                      <h4 className="text-yellow-300 font-medium flex items-center gap-2 mb-2">
+                        <MessageSquare className="h-4 w-4" />
+                        Note du client
+                      </h4>
+                      <p className="text-yellow-200/80">{order.customFields.customerNotes}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Sidebar */}
+        {/* Right Column - Sidebar */}
         <div className="space-y-6">
-          {/* Status Management */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Statut de la commande</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Statut actuel</label>
-                <Select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as OrderStatus)}
-                  options={statusOptions}
-                />
-              </div>
-              {status !== order.status && (
-                <Button onClick={handleStatusUpdate} loading={updating} className="w-full">
-                  Mettre à jour le statut
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Payment Info */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-blue-600" />
-                <CardTitle>Paiement</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Méthode</span>
-                <span className="font-medium">
-                  {order.paymentMethod === 'CASH_ON_DELIVERY'
-                    ? 'Paiement à la livraison'
-                    : order.paymentMethod}
-                </span>
-              </div>
-              {order.paidAt && (
-                <div>
-                  <p className="text-sm text-gray-600">Payé le</p>
-                  <p className="text-sm font-medium">{formatDateTime(String(order.paidAt))}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Tracking */}
-          {order.trackingNumber && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Truck className="h-5 w-5 text-blue-600" />
-                  <CardTitle>Suivi</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <p className="text-sm text-gray-600">Numéro de suivi</p>
-                  <p className="font-mono font-medium">{order.trackingNumber}</p>
-                </div>
-                {order.deliveredAt && (
-                  <div>
-                    <p className="text-sm text-gray-600">Livré le</p>
-                    <p className="text-sm">{formatDateTime(String(order.deliveredAt))}</p>
+          {/* Customer Info */}
+          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+            <h3 className="text-gray-100 font-semibold mb-4 flex items-center gap-2">
+              <User className="h-5 w-5 text-blue-400" />
+              Client
+            </h3>
+            {order.customer ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-blue-500/20 flex items-center justify-center">
+                    <span className="text-blue-400 font-bold">
+                      {order.customer.firstName?.[0]}
+                      {order.customer.lastName?.[0]}
+                    </span>
                   </div>
+                  <div>
+                    <p className="text-gray-100 font-medium">
+                      {order.customer.firstName} {order.customer.lastName}
+                    </p>
+                    <Link
+                      to={`/customers/${order.customer.id}`}
+                      className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                    >
+                      Voir le profil
+                      <ExternalLink className="h-3 w-3" />
+                    </Link>
+                  </div>
+                </div>
+                <div className="pt-3 border-t border-gray-700 space-y-2">
+                  <a
+                    href={`mailto:${order.customer.emailAddress}`}
+                    className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-300"
+                  >
+                    <Mail className="h-4 w-4" />
+                    {order.customer.emailAddress}
+                  </a>
+                  {order.customer.phoneNumber && (
+                    <a
+                      href={`tel:${order.customer.phoneNumber}`}
+                      className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-300"
+                    >
+                      <Phone className="h-4 w-4" />
+                      {order.customer.phoneNumber}
+                    </a>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-500">Client anonyme</p>
+            )}
+          </div>
+
+          {/* Shipping Address */}
+          {order.shippingAddress && (
+            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+              <h3 className="text-gray-100 font-semibold mb-4 flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-green-400" />
+                Adresse de livraison
+              </h3>
+              <div className="space-y-1 text-gray-400">
+                {order.shippingAddress.fullName && (
+                  <p className="text-gray-100 font-medium">{order.shippingAddress.fullName}</p>
                 )}
-              </CardContent>
-            </Card>
+                {order.shippingAddress.streetLine1 && <p>{order.shippingAddress.streetLine1}</p>}
+                {order.shippingAddress.streetLine2 && <p>{order.shippingAddress.streetLine2}</p>}
+                <p>
+                  {[
+                    order.shippingAddress.city,
+                    order.shippingAddress.province,
+                    order.shippingAddress.postalCode,
+                  ]
+                    .filter(Boolean)
+                    .join(', ')}
+                </p>
+                {order.customFields?.wilaya && (
+                  <p className="mt-2 px-2 py-1 bg-gray-700 rounded text-gray-300 inline-block">
+                    Wilaya: {order.customFields.wilaya}
+                  </p>
+                )}
+                {order.shippingAddress.phoneNumber && (
+                  <p className="flex items-center gap-2 mt-2">
+                    <Phone className="h-4 w-4" />
+                    {order.shippingAddress.phoneNumber}
+                  </p>
+                )}
+              </div>
+            </div>
           )}
 
-          {/* Timeline */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Historique</CardTitle>
-            </CardHeader>
-            <CardContent>
+          {/* Payment Info */}
+          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+            <h3 className="text-gray-100 font-semibold mb-4 flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-purple-400" />
+              Paiement
+            </h3>
+            {order.payments && order.payments.length > 0 ? (
               <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-green-600 mt-2"></div>
-                  <div>
-                    <p className="text-sm font-medium">Commande créée</p>
-                    <p className="text-xs text-gray-500">{formatDateTime(String(order.createdAt))}</p>
-                  </div>
-                </div>
-                {order.updatedAt && order.updatedAt !== order.createdAt && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 rounded-full bg-blue-600 mt-2"></div>
+                {order.payments.map((payment) => (
+                  <div
+                    key={payment.id}
+                    className="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg"
+                  >
                     <div>
-                      <p className="text-sm font-medium">Mise à jour</p>
-                      <p className="text-xs text-gray-500">{formatDateTime(String(order.updatedAt))}</p>
+                      <p className="text-gray-100 font-medium">{payment.method}</p>
+                      <Badge
+                        variant={
+                          payment.state === 'Settled'
+                            ? 'success'
+                            : payment.state === 'Declined'
+                              ? 'danger'
+                              : 'default'
+                        }
+                        className="mt-1"
+                      >
+                        {payment.state}
+                      </Badge>
                     </div>
+                    <p className="text-gray-100 font-bold">{formatPrice(payment.amount / 100)}</p>
                   </div>
-                )}
-                {order.deliveredAt && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 rounded-full bg-green-600 mt-2"></div>
-                    <div>
-                      <p className="text-sm font-medium">Livrée</p>
-                      <p className="text-xs text-gray-500">{formatDateTime(String(order.deliveredAt))}</p>
-                    </div>
-                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                <CreditCard className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                <p>Aucun paiement enregistré</p>
+              </div>
+            )}
+          </div>
+
+          {/* Shipping / Tracking */}
+          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+            <h3 className="text-gray-100 font-semibold mb-4 flex items-center gap-2">
+              <Truck className="h-5 w-5 text-orange-400" />
+              Livraison
+            </h3>
+
+            {order.shippingLines && order.shippingLines.length > 0 && (
+              <div className="mb-4 p-3 bg-gray-900/50 rounded-lg">
+                <p className="text-gray-100 font-medium">
+                  {order.shippingLines[0].shippingMethod?.name}
+                </p>
+                <p className="text-gray-400 text-sm">
+                  {formatPrice((order.shippingLines[0].priceWithTax || 0) / 100)}
+                </p>
+              </div>
+            )}
+
+            {/* Tracking Number */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-gray-400">Numéro de suivi</p>
+                {!editingTracking && (
+                  <button
+                    onClick={() => setEditingTracking(true)}
+                    className="text-blue-400 hover:text-blue-300"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </button>
                 )}
               </div>
-            </CardContent>
-          </Card>
+              {editingTracking ? (
+                <div className="flex gap-2">
+                  <Input
+                    value={trackingNumber}
+                    onChange={(e) => setTrackingNumber(e.target.value)}
+                    placeholder="ABC123456"
+                    className="flex-1 bg-gray-900 border-gray-600"
+                  />
+                  <Button size="sm" onClick={handleTrackingUpdate} loading={updatingFields}>
+                    <Save className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setEditingTracking(false);
+                      setTrackingNumber(order.customFields?.trackingNumber || '');
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-gray-100 font-mono bg-gray-900/50 px-3 py-2 rounded">
+                  {order.customFields?.trackingNumber || (
+                    <span className="text-gray-500">Non défini</span>
+                  )}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Cancel Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showCancelDialog}
+        onClose={() => {
+          setShowCancelDialog(false);
+          setCancellationReason('');
+        }}
+        onConfirm={handleCancelOrder}
+        title="Annuler la commande"
+        message={
+          <div className="space-y-4">
+            <p className="text-gray-300">
+              Êtes-vous sûr de vouloir annuler cette commande? Cette action est irréversible.
+            </p>
+            <TextArea
+              label="Raison d'annulation"
+              value={cancellationReason}
+              onChange={(e) => setCancellationReason(e.target.value)}
+              rows={3}
+              placeholder="Raison de l'annulation..."
+              className="bg-gray-800 border-gray-600"
+            />
+          </div>
+        }
+        confirmText="Annuler la commande"
+        variant="danger"
+        loading={cancelling}
+      />
     </div>
   );
 };

@@ -1,7 +1,9 @@
+import 'dotenv/config';
 import {
   dummyPaymentHandler,
   DefaultJobQueuePlugin,
   DefaultSearchPlugin,
+  DefaultSchedulerPlugin,
   VendureConfig,
   LanguageCode,
 } from '@vendure/core';
@@ -22,6 +24,20 @@ export const config: VendureConfig = {
     port: 8085,
     adminApiPath: 'admin-api',
     shopApiPath: 'shop-api',
+    // CORS settings to allow frontend apps
+    cors: {
+      origin: IS_DEV ? [
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://localhost:5175',
+        'http://localhost:3000',
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:5174',
+        'http://127.0.0.1:5175',
+        'http://127.0.0.1:3000'
+      ] : false,
+      credentials: true,
+    },
     // The following options are useful in development mode,
     // but should be disabled in production for security reasons.
     ...(IS_DEV ? {
@@ -50,13 +66,13 @@ export const config: VendureConfig = {
     type: 'postgres',
     synchronize: true, // Set to false in production, use migrations instead
     migrations: [path.join(__dirname, './migrations/*.+(js|ts)')],
-    logging: IS_DEV,
-    database: process.env.DB_NAME || 'oscar_vendure',
+    logging: false,
+    database: process.env.DB_NAME!,
     schema: process.env.DB_SCHEMA || 'public',
-    host: process.env.DB_HOST || 'localhost',
-    port: +(process.env.DB_PORT || 5432),
-    username: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || 'majmajBS13..',
+    host: process.env.DB_HOST!,
+    port: +process.env.DB_PORT!,
+    username: process.env.DB_USERNAME!,
+    password: process.env.DB_PASSWORD!,
   },
   paymentOptions: {
     paymentMethodHandlers: [
@@ -102,6 +118,9 @@ export const config: VendureConfig = {
       { name: 'wilaya', type: 'string', label: [{ languageCode: LanguageCode.en, value: 'Wilaya' }] },
       { name: 'cancellationReason', type: 'text', label: [{ languageCode: LanguageCode.en, value: 'Cancellation Reason' }] },
     ],
+    FacetValue: [
+      { name: 'colorHex', type: 'string', nullable: true, label: [{ languageCode: LanguageCode.en, value: 'Color Hex Code' }] },
+    ],
   },
   plugins: [
     AssetServerPlugin.init({
@@ -109,6 +128,7 @@ export const config: VendureConfig = {
       assetUploadDir: path.join(__dirname, '../static/assets'),
     }),
     DefaultJobQueuePlugin.init({ useDatabaseForBuffer: true }),
+    DefaultSchedulerPlugin,
     DefaultSearchPlugin.init({ bufferUpdates: false, indexStockStatus: true }),
     EmailPlugin.init({
       devMode: true,
@@ -125,12 +145,7 @@ export const config: VendureConfig = {
     }),
     AdminUiPlugin.init({
       route: 'admin',
-      port: 3002,
-      adminUiConfig: {
-        brand: 'OSCAR Fashion',
-        hideVendureBranding: false,
-        hideVersion: false,
-      },
+      port: 8086,
     }),
     OscarPlugin,
   ],

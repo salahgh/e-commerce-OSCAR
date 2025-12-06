@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.config = void 0;
+require("dotenv/config");
 const core_1 = require("@vendure/core");
 const email_plugin_1 = require("@vendure/email-plugin");
 const asset_server_plugin_1 = require("@vendure/asset-server-plugin");
@@ -19,6 +20,20 @@ exports.config = {
         port: 8085,
         adminApiPath: 'admin-api',
         shopApiPath: 'shop-api',
+        // CORS settings to allow frontend apps
+        cors: {
+            origin: IS_DEV ? [
+                'http://localhost:5173',
+                'http://localhost:5174',
+                'http://localhost:5175',
+                'http://localhost:3000',
+                'http://127.0.0.1:5173',
+                'http://127.0.0.1:5174',
+                'http://127.0.0.1:5175',
+                'http://127.0.0.1:3000'
+            ] : false,
+            credentials: true,
+        },
         // The following options are useful in development mode,
         // but should be disabled in production for security reasons.
         ...(IS_DEV ? {
@@ -47,13 +62,13 @@ exports.config = {
         type: 'postgres',
         synchronize: true, // Set to false in production, use migrations instead
         migrations: [path_1.default.join(__dirname, './migrations/*.+(js|ts)')],
-        logging: IS_DEV,
-        database: process.env.DB_NAME || 'oscar_vendure',
+        logging: false,
+        database: process.env.DB_NAME,
         schema: process.env.DB_SCHEMA || 'public',
-        host: process.env.DB_HOST || 'localhost',
-        port: +(process.env.DB_PORT || 5432),
-        username: process.env.DB_USERNAME || 'postgres',
-        password: process.env.DB_PASSWORD || 'majmajBS13..',
+        host: process.env.DB_HOST,
+        port: +process.env.DB_PORT,
+        username: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
     },
     paymentOptions: {
         paymentMethodHandlers: [
@@ -99,6 +114,9 @@ exports.config = {
             { name: 'wilaya', type: 'string', label: [{ languageCode: core_1.LanguageCode.en, value: 'Wilaya' }] },
             { name: 'cancellationReason', type: 'text', label: [{ languageCode: core_1.LanguageCode.en, value: 'Cancellation Reason' }] },
         ],
+        FacetValue: [
+            { name: 'colorHex', type: 'string', nullable: true, label: [{ languageCode: core_1.LanguageCode.en, value: 'Color Hex Code' }] },
+        ],
     },
     plugins: [
         asset_server_plugin_1.AssetServerPlugin.init({
@@ -106,6 +124,7 @@ exports.config = {
             assetUploadDir: path_1.default.join(__dirname, '../static/assets'),
         }),
         core_1.DefaultJobQueuePlugin.init({ useDatabaseForBuffer: true }),
+        core_1.DefaultSchedulerPlugin,
         core_1.DefaultSearchPlugin.init({ bufferUpdates: false, indexStockStatus: true }),
         email_plugin_1.EmailPlugin.init({
             devMode: true,
@@ -122,12 +141,7 @@ exports.config = {
         }),
         admin_ui_plugin_1.AdminUiPlugin.init({
             route: 'admin',
-            port: 3002,
-            adminUiConfig: {
-                brand: 'OSCAR Fashion',
-                hideVendureBranding: false,
-                hideVersion: false,
-            },
+            port: 8086,
         }),
         oscar_plugin_1.OscarPlugin,
     ],

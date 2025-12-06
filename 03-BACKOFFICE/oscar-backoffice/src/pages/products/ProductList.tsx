@@ -1,394 +1,946 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
-import { Plus, Search, Eye, Trash2 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/Table';
-import { Badge } from '../../components/ui/Badge';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { formatPrice } from '../../lib/utils';
+import { useNavigate, Link } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import {
-  ProductsDocument,
-  DeleteProductDocument,
-  SearchProductsDocument,
-  CategoriesDocument,
-  ProductsByCategoryDocument,
-  ProductsByPriceRangeDocument,
-  ProductBySkuDocument,
-  FeaturedProductsDocument,
-  NewArrivalsDocument,
-} from '../../graphql/generated/graphql';
+  Package,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Plus,
+  Edit3,
+  Trash2,
+  Info,
+  Grid3X3,
+  List,
+  SlidersHorizontal,
+  Sparkles,
+} from 'lucide-react';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
-import { Select } from '../../components/ui/Select';
+import { AdminProductsDocument, DeleteProductDocument } from '../../graphql/generated/graphql';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { Tooltip, ProductTooltipContent } from '../../components/ui/Tooltip';
+import { formatDate } from '../../lib/utils';
+import { useProductFilters } from '../../hooks/useProductFilters';
+import { useFacetedFilters } from '../../hooks/useFacetedFilters';
+import { FilterPanel } from '../../components/products/FilterPanel';
+import { FacetedFilterPanel } from '../../components/products/FacetedFilterPanel';
+import { ActiveFilters } from '../../components/products/ActiveFilters';
+
+type ViewMode = 'table' | 'grid';
+type FilterMode = 'basic' | 'faceted';
 
 export const ProductList: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const [page, setPage] = useState(0);
-  const [size] = useState(20);
-  const [productToDelete, setProductToDelete] = useState<{ id: number; name: string } | null>(null);
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [searchType, setSearchType] = useState<'keyword' | 'sku'>('keyword');
-  const [productTypeFilter, setProductTypeFilter] = useState<'all' | 'featured' | 'new'>('all');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [filterMode, setFilterMode] = useState<FilterMode>('faceted'); // Default to new faceted mode
+  const [isFacetedPanelOpen, setIsFacetedPanelOpen] = useState(false);
+  const pageSize = viewMode === 'grid' ? 12 : 10;
 
-  // Fetch categories for filter dropdown
-  const { data: categoriesData } = useQuery(CategoriesDocument);
+  // Basic filter state (old mode)
+  const {
+    filters,
+    updateFilter,
+    resetFilters,
+    clearFilter,
+    activeFilterCount,
+    hasActiveFilters,
+    isFilterPanelOpen,
+    setIsFilterPanelOpen,
+  } = useProductFilters();
 
-  // Determine which query to use based on filters
-  const useSearchQuery = searchKeyword.trim() !== '' && searchType === 'keyword';
-  const useSkuQuery = searchKeyword.trim() !== '' && searchType === 'sku';
-  const useCategoryQuery = !useSearchQuery && !useSkuQuery && selectedCategory !== '';
-  const usePriceQuery = !useSearchQuery && !useSkuQuery && !useCategoryQuery && minPrice !== '' && maxPrice !== '';
-  const useFeaturedQuery = !useSearchQuery && !useSkuQuery && !useCategoryQuery && !usePriceQuery && productTypeFilter === 'featured';
-  const useNewArrivalsQuery = !useSearchQuery && !useSkuQuery && !useCategoryQuery && !usePriceQuery && productTypeFilter === 'new';
+  // Faceted filter state (new mode)
+  const facetedFilters = useFacetedFilters();
 
-  // Keyword search query
-  const { data: searchData, loading: searchLoading, error: searchError } = useQuery(SearchProductsDocument, {
-    variables: { keyword: searchKeyword, page, size },
-    skip: !useSearchQuery,
+  // Determine if we need client-side filtering (faceted mode with advanced filters)
+  const needsClientSideFiltering = useMemo(() => {
+    if (filterMode !== 'faceted') return false;
+    const { facetValueIds, collectionIds, stockStatus, priceMin, priceMax, isFeatured } = facetedFilters.state;
+    return (
+      facetValueIds.length > 0 ||
+      collectionIds.length > 0 ||
+      stockStatus !== undefined ||
+      priceMin !== undefined ||
+      priceMax !== undefined ||
+      isFeatured !== undefined
+    );
+  }, [filterMode, facetedFilters.state]);
+
+  // Build GraphQL filter from filter state (server-side filters)
+  const graphqlFilter = useMemo(() => {
+    const filter: Record<string, unknown> = {};
+
+    // Use faceted filters when in faceted mode
+    const searchTerm = filterMode === 'faceted' ? facetedFilters.state.searchTerm : filters.search;
+    const enabledFilter = filterMode === 'faceted' ? facetedFilters.state.enabled : filters.enabled;
+
+    if (searchTerm) {
+      filter.name = { contains: searchTerm };
+    }
+
+    if (enabledFilter !== undefined) {
+      filter.enabled = { eq: enabledFilter };
+    }
+
+    return Object.keys(filter).length > 0 ? filter : undefined;
+  }, [filterMode, filters.search, filters.enabled, facetedFilters.state.searchTerm, facetedFilters.state.enabled]);
+
+  // When client-side filtering is needed, fetch more products
+  const fetchSize = needsClientSideFiltering ? 200 : pageSize;
+
+  // Use server-side pagination (or fetch more for client-side filtering)
+  const { data, loading, error } = useQuery(AdminProductsDocument, {
+    variables: {
+      options: {
+        skip: needsClientSideFiltering ? 0 : currentPage * pageSize,
+        take: fetchSize,
+        filter: graphqlFilter,
+        sort: { createdAt: 'DESC' as any },
+      },
+    },
   });
 
-  // SKU search query
-  const { data: skuData, loading: skuLoading, error: skuError } = useQuery(ProductBySkuDocument, {
-    variables: { sku: searchKeyword },
-    skip: !useSkuQuery,
-  });
+  // Apply client-side filters when in faceted mode
+  const filteredProducts = useMemo(() => {
+    let result = data?.products?.items || [];
 
-  // Category query
-  const { data: categoryData, loading: categoryLoading, error: categoryError } = useQuery(ProductsByCategoryDocument, {
-    variables: { categoryId: parseInt(selectedCategory), page, size },
-    skip: !useCategoryQuery,
-  });
+    if (filterMode !== 'faceted' || !needsClientSideFiltering) {
+      return result;
+    }
 
-  // Price range query
-  const { data: priceData, loading: priceLoading, error: priceError } = useQuery(ProductsByPriceRangeDocument, {
-    variables: { minPrice: parseFloat(minPrice), maxPrice: parseFloat(maxPrice), page, size },
-    skip: !usePriceQuery,
-  });
+    const { facetValueIds, collectionIds, stockStatus, priceMin, priceMax, isFeatured } = facetedFilters.state;
 
-  // Featured products query
-  const { data: featuredData, loading: featuredLoading, error: featuredError } = useQuery(FeaturedProductsDocument, {
-    skip: !useFeaturedQuery,
-  });
+    // Filter by facet values (product or any of its variants must have at least one of the selected facet values)
+    if (facetValueIds.length > 0) {
+      result = result.filter((p: any) => {
+        // Check product-level facet values
+        const productHasFacet = p.facetValues?.some((fv: any) => facetValueIds.includes(fv.id));
+        if (productHasFacet) return true;
 
-  // New arrivals query
-  const { data: newArrivalsData, loading: newArrivalsLoading, error: newArrivalsError } = useQuery(NewArrivalsDocument, {
-    variables: { page, size },
-    skip: !useNewArrivalsQuery,
-  });
+        // Check variant-level facet values
+        const variantHasFacet = p.variants?.some((v: any) =>
+          v.facetValues?.some((fv: any) => facetValueIds.includes(fv.id))
+        );
+        return variantHasFacet;
+      });
+    }
 
-  // Default query
-  const { data: defaultData, loading: defaultLoading, error: defaultError } = useQuery(ProductsDocument, {
-    variables: { page, size, sortBy: 'createdAt', sortDirection: 'DESC' },
-    skip: useSearchQuery || useSkuQuery || useCategoryQuery || usePriceQuery || useFeaturedQuery || useNewArrivalsQuery,
-  });
+    // Filter by collections
+    if (collectionIds.length > 0) {
+      result = result.filter((p: any) =>
+        p.collections?.some((col: any) => collectionIds.includes(col.id))
+      );
+    }
 
-  // Select the appropriate data based on active query
-  let data: any;
-  let loading: boolean;
-  let error: any;
+    // Filter by featured
+    if (isFeatured !== undefined) {
+      result = result.filter((p: any) => p.customFields?.isFeatured === isFeatured);
+    }
 
-  if (useSearchQuery) {
-    data = searchData?.searchProducts;
-    loading = searchLoading;
-    error = searchError;
-  } else if (useSkuQuery) {
-    // SKU search returns single product, wrap in array
-    data = skuData?.productBySku ? { content: [skuData.productBySku], totalElements: 1, totalPages: 1 } : { content: [], totalElements: 0, totalPages: 0 };
-    loading = skuLoading;
-    error = skuError;
-  } else if (useCategoryQuery) {
-    data = categoryData?.productsByCategory;
-    loading = categoryLoading;
-    error = categoryError;
-  } else if (usePriceQuery) {
-    data = priceData?.productsByPriceRange;
-    loading = priceLoading;
-    error = priceError;
-  } else if (useFeaturedQuery) {
-    // Featured products returns array, wrap in paginated structure
-    data = featuredData?.featuredProducts ? { content: featuredData.featuredProducts, totalElements: featuredData.featuredProducts.length, totalPages: 1 } : { content: [], totalElements: 0, totalPages: 0 };
-    loading = featuredLoading;
-    error = featuredError;
-  } else if (useNewArrivalsQuery) {
-    data = newArrivalsData?.newArrivals;
-    loading = newArrivalsLoading;
-    error = newArrivalsError;
-  } else {
-    data = defaultData;
-    loading = defaultLoading;
-    error = defaultError;
-  }
+    // Filter by stock status
+    if (stockStatus) {
+      result = result.filter((p: any) => {
+        const totalStock = p.variants?.reduce((sum: number, v: any) => sum + (v.stockOnHand || 0), 0) || 0;
+        switch (stockStatus) {
+          case 'in_stock':
+            return totalStock > 10;
+          case 'low_stock':
+            return totalStock > 0 && totalStock <= 10;
+          case 'out_of_stock':
+            return totalStock === 0;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Filter by price range
+    if (priceMin !== undefined || priceMax !== undefined) {
+      result = result.filter((p: any) => {
+        const minVariantPrice = p.variants?.length
+          ? Math.min(...p.variants.map((v: any) => v.price || 0))
+          : 0;
+        const priceInCents = minVariantPrice;
+        if (priceMin !== undefined && priceInCents < priceMin * 100) return false;
+        if (priceMax !== undefined && priceInCents > priceMax * 100) return false;
+        return true;
+      });
+    }
+
+    return result;
+  }, [data, filterMode, needsClientSideFiltering, facetedFilters.state]);
+
+  // Calculate pagination based on filtered results
+  const totalItems = needsClientSideFiltering ? filteredProducts.length : (data?.products?.totalItems || 0);
+  const totalPages = Math.ceil(totalItems / pageSize);
+
+  // Paginate filtered results client-side when using client-side filtering
+  const paginatedProducts = useMemo(() => {
+    if (!needsClientSideFiltering) {
+      return filteredProducts;
+    }
+    const start = currentPage * pageSize;
+    return filteredProducts.slice(start, start + pageSize);
+  }, [filteredProducts, needsClientSideFiltering, currentPage, pageSize]);
+
+  // Get unique collections from products for filter dropdown
+  const collections = useMemo(() => {
+    const collectionsMap = new Map<string, { id: string; name: string; slug: string }>();
+    data?.products?.items?.forEach((product: any) => {
+      product.collections?.forEach((col: any) => {
+        if (!collectionsMap.has(col.id)) {
+          collectionsMap.set(col.id, { id: col.id, name: col.name, slug: col.slug });
+        }
+      });
+    });
+    return Array.from(collectionsMap.values());
+  }, [data]);
 
   const [deleteProduct, { loading: deleting }] = useMutation(DeleteProductDocument, {
-    refetchQueries: [
-      { query: ProductsDocument, variables: { page, size, sortBy: 'createdAt', sortDirection: 'DESC' } },
-      ...(useSearchQuery ? [{ query: SearchProductsDocument, variables: { keyword: searchKeyword, page, size } }] : []),
-      ...(useCategoryQuery ? [{ query: ProductsByCategoryDocument, variables: { categoryId: parseInt(selectedCategory), page, size } }] : []),
-    ],
+    refetchQueries: [{ query: AdminProductsDocument }],
   });
 
-  const handleClearFilters = () => {
-    setSearchKeyword('');
-    setSearchType('keyword');
-    setProductTypeFilter('all');
-    setSelectedCategory('');
-    setMinPrice('');
-    setMaxPrice('');
-    setPage(0);
-  };
+  // Products to display (either paginated from API or client-side filtered)
+  const products = paginatedProducts;
 
-  const handleDeleteClick = (id: number, name: string) => {
-    setProductToDelete({ id, name });
+  const handleDeleteClick = (product: { id: string; name: string }) => {
+    setProductToDelete(product);
+    setShowDeleteDialog(true);
   };
 
   const handleDeleteConfirm = async () => {
     if (!productToDelete) return;
-
     try {
-      await deleteProduct({
-        variables: { id: productToDelete.id },
-      });
-
+      const result = await deleteProduct({ variables: { id: productToDelete.id } });
+      if (result.data?.deleteProduct?.result === 'DELETED') {
+        dispatch(addToast({ message: 'Produit supprimé avec succès!', type: 'success' }));
+      } else {
+        dispatch(
+          addToast({
+            message: result.data?.deleteProduct?.message || 'Erreur lors de la suppression',
+            type: 'error',
+          })
+        );
+      }
+    } catch (err: any) {
       dispatch(
-        addToast({
-          message: 'Produit supprimé avec succès',
-          type: 'success',
-        })
-      );
-      setProductToDelete(null);
-    } catch (error: any) {
-      console.error('Delete product error:', error);
-      dispatch(
-        addToast({
-          message: error.message || 'Erreur lors de la suppression',
-          type: 'error',
-        })
+        addToast({ message: err.message || 'Erreur lors de la suppression', type: 'error' })
       );
     }
+    setShowDeleteDialog(false);
+    setProductToDelete(null);
   };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('fr-DZ', {
+      style: 'currency',
+      currency: 'DZD',
+      minimumFractionDigits: 0,
+    }).format(price / 100);
+  };
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <p className="text-red-500 text-lg">Erreur: {error.message}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Produits</h1>
-          <p className="text-gray-600 mt-1">Gérez votre catalogue de produits</p>
+          <h1 className="text-3xl font-bold text-gray-100">Produits</h1>
+          <p className="text-gray-500 mt-1">
+            {totalItems} produit{totalItems > 1 ? 's' : ''} au total
+          </p>
         </div>
-        <Button onClick={() => navigate('/products/new')} icon={<Plus className="h-5 w-5" />}>
-          Nouveau Produit
-        </Button>
-      </div>
-
-      {/* Product Type Filter Tabs */}
-      <div className="flex gap-2 border-b border-gray-200">
-        <button
-          onClick={() => { setProductTypeFilter('all'); setPage(0); }}
-          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-            productTypeFilter === 'all'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          Tous les produits
-        </button>
-        <button
-          onClick={() => { setProductTypeFilter('featured'); setPage(0); }}
-          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-            productTypeFilter === 'featured'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          Produits vedettes
-        </button>
-        <button
-          onClick={() => { setProductTypeFilter('new'); setPage(0); }}
-          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
-            productTypeFilter === 'new'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          Nouveautés
-        </button>
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-            <div className="md:col-span-2 flex gap-2">
-              <Select
-                value={searchType}
-                onChange={(e) => setSearchType(e.target.value as 'keyword' | 'sku')}
-                options={[
-                  { value: 'keyword', label: 'Par mot-clé' },
-                  { value: 'sku', label: 'Par SKU' },
-                ]}
-                className="w-32"
-              />
-              <Input
-                placeholder={searchType === 'sku' ? 'Rechercher par SKU...' : 'Rechercher un produit...'}
-                icon={<Search className="h-5 w-5" />}
-                value={searchKeyword}
-                onChange={(e) => {
-                  setSearchKeyword(e.target.value);
-                  setPage(0);
-                }}
-                className="flex-1"
-              />
-            </div>
-            <Select
-              value={selectedCategory}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value);
-                setPage(0);
-              }}
-              options={[
-                { value: '', label: 'Toutes les catégories' },
-                ...(categoriesData?.categories?.map((cat) => ({
-                  value: String(cat.id),
-                  label: cat.nameFr || '',
-                })) || []),
-              ]}
-            />
-            <Input
-              type="number"
-              placeholder="Prix min (DZD)"
-              value={minPrice}
-              onChange={(e) => {
-                setMinPrice(e.target.value);
-                setPage(0);
-              }}
-            />
-            <Input
-              type="number"
-              placeholder="Prix max (DZD)"
-              value={maxPrice}
-              onChange={(e) => {
-                setMaxPrice(e.target.value);
-                setPage(0);
-              }}
-            />
-            <Button variant="outline" onClick={handleClearFilters}>
-              Réinitialiser
-            </Button>
+        <div className="flex items-center gap-3">
+          {/* Filter Mode Toggle */}
+          <div className="flex items-center bg-gray-700 rounded-lg p-1" title="Mode de filtrage">
+            <button
+              onClick={() => setFilterMode('basic')}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                filterMode === 'basic'
+                  ? 'bg-gray-800 text-blue-400 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-200'
+              }`}
+            >
+              Basique
+            </button>
+            <button
+              onClick={() => setFilterMode('faceted')}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                filterMode === 'faceted'
+                  ? 'bg-gray-800 text-blue-400 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-200'
+              }`}
+            >
+              <Sparkles className="h-4 w-4" />
+              Avancé
+            </button>
           </div>
-        </CardContent>
-      </Card>
+          {/* View Mode Toggle */}
+          <div className="flex items-center bg-gray-700 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('table')}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === 'table'
+                  ? 'bg-gray-800 text-blue-400 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-200'
+              }`}
+              title="Vue tableau"
+            >
+              <List className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === 'grid'
+                  ? 'bg-gray-800 text-blue-400 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-200'
+              }`}
+              title="Vue grille"
+            >
+              <Grid3X3 className="h-5 w-5" />
+            </button>
+          </div>
+          <Link
+            to="/products/new"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="h-5 w-5" />
+            Nouveau produit
+          </Link>
+        </div>
+      </div>
 
-      {/* Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            {loading ? 'Chargement...' : error ? 'Erreur' : `${data?.totalElements || data?.products?.totalElements || 0} produits`}
-            {searchKeyword && ` (recherche: "${searchKeyword}")`}
-            {selectedCategory && ` (catégorie filtrée)`}
-            {minPrice && maxPrice && ` (prix: ${minPrice}-${maxPrice} DZD)`}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {loading && (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-gray-500">Chargement des produits...</div>
+      {/* Search and Filters */}
+      <div className="bg-gray-800 rounded-lg shadow p-4">
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+            <input
+              type="text"
+              placeholder="Rechercher un produit par nom, SKU..."
+              value={filterMode === 'faceted' ? facetedFilters.state.searchTerm : filters.search}
+              onChange={(e) => {
+                if (filterMode === 'faceted') {
+                  facetedFilters.setSearchTerm(e.target.value);
+                } else {
+                  updateFilter('search', e.target.value);
+                }
+                setCurrentPage(0);
+              }}
+              className="w-full pl-10 pr-4 py-3 border border-gray-600 rounded-lg bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            />
+          </div>
+          <button
+            onClick={() => {
+              if (filterMode === 'faceted') {
+                setIsFacetedPanelOpen(true);
+              } else {
+                setIsFilterPanelOpen(true);
+              }
+            }}
+            className={`flex items-center gap-2 px-4 py-3 border rounded-lg transition-colors relative ${
+              (filterMode === 'faceted' ? facetedFilters.activeFilterCount : activeFilterCount) > 0
+                ? 'border-blue-500 text-blue-400 bg-blue-900/30 hover:bg-blue-900/50'
+                : 'border-gray-600 text-gray-500 hover:bg-gray-700'
+            }`}
+          >
+            {filterMode === 'faceted' ? (
+              <Sparkles className="h-5 w-5" />
+            ) : (
+              <SlidersHorizontal className="h-5 w-5" />
+            )}
+            Filtres
+            {(filterMode === 'faceted' ? facetedFilters.activeFilterCount : activeFilterCount) > 0 && (
+              <span className="absolute -top-2 -right-2 w-5 h-5 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center">
+                {filterMode === 'faceted' ? facetedFilters.activeFilterCount : activeFilterCount}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Active Filters Display - Basic Mode */}
+        {filterMode === 'basic' && hasActiveFilters && (
+          <div className="mt-3 pt-3 border-t border-gray-700">
+            <ActiveFilters
+              filters={filters}
+              onClearFilter={clearFilter}
+              onClearAll={resetFilters}
+              collections={collections}
+            />
+          </div>
+        )}
+
+        {/* Active Filters Display - Faceted Mode */}
+        {filterMode === 'faceted' && facetedFilters.activeFilterCount > 0 && (
+          <div className="mt-3 pt-3 border-t border-gray-700">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm text-gray-500">Filtres actifs:</span>
+
+              {/* Search term */}
+              {facetedFilters.state.searchTerm && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-900/50 text-blue-300 rounded-full text-sm">
+                  Recherche: "{facetedFilters.state.searchTerm}"
+                  <button
+                    onClick={() => facetedFilters.setSearchTerm('')}
+                    className="hover:bg-blue-800 rounded-full p-0.5"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+
+              {/* Enabled status */}
+              {facetedFilters.state.enabled !== undefined && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-900/50 text-green-300 rounded-full text-sm">
+                  {facetedFilters.state.enabled ? 'Actifs' : 'Inactifs'}
+                  <button
+                    onClick={() => facetedFilters.setEnabled(undefined)}
+                    className="hover:bg-green-800 rounded-full p-0.5"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+
+              {/* Featured */}
+              {facetedFilters.state.isFeatured !== undefined && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-900/50 text-purple-300 rounded-full text-sm">
+                  {facetedFilters.state.isFeatured ? 'Vedettes' : 'Non vedettes'}
+                  <button
+                    onClick={() => facetedFilters.setFeatured(undefined)}
+                    className="hover:bg-purple-800 rounded-full p-0.5"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+
+              {/* Stock status */}
+              {facetedFilters.state.stockStatus && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-900/50 text-orange-300 rounded-full text-sm">
+                  {facetedFilters.state.stockStatus === 'in_stock' && 'En stock'}
+                  {facetedFilters.state.stockStatus === 'low_stock' && 'Stock bas'}
+                  {facetedFilters.state.stockStatus === 'out_of_stock' && 'Rupture'}
+                  <button
+                    onClick={() => facetedFilters.setStockStatus(undefined)}
+                    className="hover:bg-orange-800 rounded-full p-0.5"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+
+              {/* Facet values */}
+              {facetedFilters.state.facetValueIds.length > 0 && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-900/50 text-indigo-300 rounded-full text-sm">
+                  {facetedFilters.state.facetValueIds.length} attribut(s)
+                  <button
+                    onClick={() => facetedFilters.setFacetValues([])}
+                    className="hover:bg-indigo-800 rounded-full p-0.5"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+
+              {/* Clear all button */}
+              <button
+                onClick={() => facetedFilters.clearAllFilters()}
+                className="text-sm text-red-600 hover:text-red-700 hover:underline ml-2"
+              >
+                Tout effacer
+              </button>
             </div>
-          )}
+          </div>
+        )}
 
-          {error && (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-red-500">Erreur: {error.message}</div>
+        <div className="mt-3 flex items-center gap-2 text-sm text-gray-500">
+          <Info className="h-4 w-4" />
+          <span>Survolez un produit pour voir tous ses détails</span>
+        </div>
+      </div>
+
+      {/* Products View */}
+      <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex items-center gap-3">
+              <svg
+                className="animate-spin h-6 w-6 text-blue-600"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              <span className="text-gray-500">Chargement...</span>
             </div>
-          )}
+          </div>
+        ) : products.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Package className="h-16 w-16 text-gray-500 mb-4" />
+            <p className="text-gray-500 text-lg">Aucun produit trouvé</p>
+            {(filterMode === 'basic' ? hasActiveFilters : facetedFilters.activeFilterCount > 0) && (
+              <button
+                onClick={() => {
+                  if (filterMode === 'faceted') {
+                    facetedFilters.clearAllFilters();
+                  } else {
+                    resetFilters();
+                  }
+                  setCurrentPage(0);
+                }}
+                className="mt-4 text-blue-600 hover:text-blue-700"
+              >
+                Effacer tous les filtres
+              </button>
+            )}
+          </div>
+        ) : viewMode === 'grid' ? (
+          /* Grid View */
+          <div className="p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map((product) => {
+                const mainVariant = product.variants?.[0];
+                const totalStock =
+                  product.variants?.reduce((sum, v) => sum + (v.stockOnHand || 0), 0) || 0;
 
-          {!loading && !error && (data?.products?.content || data?.content) && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>SKU</TableHead>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Catégorie</TableHead>
-                  <TableHead>Prix</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {(data?.products?.content || data?.content || []).map((product: any) => (
-                  <TableRow key={product.id}>
-                    <TableCell className="font-mono text-xs">{product.sku}</TableCell>
-                    <TableCell className="font-medium">{product.nameFr}</TableCell>
-                    <TableCell className="text-sm text-gray-600">{product.categoryName || '-'}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        {product.salePrice ? (
-                          <>
-                            <span className="font-semibold">{formatPrice(Number(product.salePrice))}</span>
-                            <span className="text-xs text-gray-500 line-through">
-                              {formatPrice(Number(product.basePrice))}
-                            </span>
-                          </>
+                return (
+                  <Tooltip
+                    key={product.id}
+                    position="right"
+                    delay={300}
+                    maxWidth="780px"
+                    content={
+                      <ProductTooltipContent
+                        product={product as any}
+                        formatPrice={formatPrice}
+                        formatDate={formatDate}
+                      />
+                    }
+                  >
+                    <div className="bg-gray-700/50 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-200 border border-gray-600 hover:border-blue-500 group">
+                      {/* Image */}
+                      <div className="aspect-[4/3] relative bg-gray-700">
+                        {product.featuredAsset?.preview ? (
+                          <img
+                            src={product.featuredAsset.preview}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
-                          <span className="font-semibold">{formatPrice(Number(product.basePrice))}</span>
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package className="h-10 w-10 text-gray-500" />
+                          </div>
                         )}
+                        {/* Status Badges */}
+                        <div className="absolute top-2 left-2 flex flex-col gap-1">
+                          <span
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              product.enabled
+                                ? 'bg-green-900/50 text-green-300'
+                                : 'bg-gray-700 text-gray-300'
+                            }`}
+                          >
+                            {product.enabled ? 'Actif' : 'Inactif'}
+                          </span>
+                          {product.customFields?.isFeatured && (
+                            <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-900/50 text-blue-300">
+                              Vedette
+                            </span>
+                          )}
+                        </div>
+                        {/* Quick Actions */}
+                        <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => navigate(`/products/${product.id}`)}
+                            className="p-2 bg-white rounded-full shadow hover:bg-blue-50 text-blue-600"
+                            title="Voir"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => navigate(`/products/${product.id}/edit`)}
+                            className="p-2 bg-white rounded-full shadow hover:bg-green-50 text-green-600"
+                            title="Modifier"
+                          >
+                            <Edit3 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={(product.stockQuantity || 0) > 50 ? 'success' : 'warning'}>
-                        {product.stockQuantity} unités
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate(`/products/${product.id}`)}
-                          icon={<Eye className="h-4 w-4" />}
-                        >
-                          Voir
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate(`/products/edit/${product.id}`)}
-                        >
-                          Modifier
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteClick(Number(product.id), product.nameFr || '')}
-                          icon={<Trash2 className="h-4 w-4 text-red-600" />}
-                        />
+                      {/* Content */}
+                      <div className="p-4">
+                        <h3 className="font-medium text-gray-100 truncate mb-1">{product.name}</h3>
+                        <p className="text-sm text-gray-500 truncate mb-2">
+                          {mainVariant?.sku || product.slug}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-lg font-bold text-gray-100">
+                              {mainVariant?.price ? formatPrice(mainVariant.price) : '-'}
+                            </span>
+                            {product.customFields?.salePrice && (
+                              <span className="ml-2 text-sm text-green-600">
+                                {formatPrice(product.customFields.salePrice)}
+                              </span>
+                            )}
+                          </div>
+                          <span
+                            className={`text-sm font-medium px-2 py-1 rounded ${
+                              totalStock > 10
+                                ? 'bg-green-900/50 text-green-300'
+                                : totalStock > 0
+                                  ? 'bg-orange-900/50 text-orange-300'
+                                  : 'bg-red-900/50 text-red-300'
+                            }`}
+                          >
+                            {totalStock} en stock
+                          </span>
+                        </div>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                    </div>
+                  </Tooltip>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          /* Table View */
+          <div className="overflow-x-auto">
+            <table className="w-full divide-y divide-gray-700 table-fixed">
+              <thead className="bg-gray-800/50">
+                <tr>
+                  <th className="w-[22%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Produit
+                  </th>
+                  <th className="w-[16%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Traductions
+                  </th>
+                  <th className="w-[14%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    SKU / Variantes
+                  </th>
+                  <th className="w-[12%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Prix
+                  </th>
+                  <th className="w-[12%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Stock
+                  </th>
+                  <th className="w-[12%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Statut
+                  </th>
+                  <th className="w-[12%] px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-gray-800 divide-y divide-gray-700">
+                {products.map((product) => {
+                  const mainVariant = product.variants?.[0];
+                  const totalStock =
+                    product.variants?.reduce((sum, v) => sum + (v.stockOnHand || 0), 0) || 0;
+                  const variantCount = product.variants?.length || 0;
+
+                  return (
+                    <tr
+                      key={product.id}
+                      className="hover:bg-blue-900/30 cursor-pointer transition-colors group"
+                      onClick={() => navigate(`/products/${product.id}`)}
+                    >
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <Tooltip
+                          position="right"
+                          delay={400}
+                          maxWidth="780px"
+                          interactive
+                          display="block"
+                          content={
+                            <ProductTooltipContent
+                              product={product as any}
+                              formatPrice={formatPrice}
+                              formatDate={formatDate}
+                            />
+                          }
+                        >
+                          <div className="flex items-center w-full">
+                            {product.featuredAsset?.preview ? (
+                              <img
+                                src={product.featuredAsset.preview}
+                                alt={product.name}
+                                className="h-12 w-12 rounded-lg object-cover border border-gray-700"
+                              />
+                            ) : (
+                              <div className="h-12 w-12 rounded-lg bg-gray-700 flex items-center justify-center">
+                                <Package className="h-6 w-6 text-gray-500" />
+                              </div>
+                            )}
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-100 max-w-[200px] truncate">
+                                {product.name}
+                              </div>
+                              <div className="text-sm text-gray-500 truncate max-w-[200px]">
+                                {product.slug}
+                              </div>
+                            </div>
+                          </div>
+                        </Tooltip>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="space-y-1">
+                          {product.customFields?.nameFr ? (
+                            <div className="text-sm text-gray-100 truncate max-w-[150px]">
+                              <span className="text-gray-500 text-xs mr-1">FR</span>
+                              {product.customFields.nameFr}
+                            </div>
+                          ) : (
+                            <div className="text-sm text-gray-500">-</div>
+                          )}
+                          {product.customFields?.nameAr && (
+                            <div
+                              className="text-sm text-gray-500 truncate max-w-[150px]"
+                              dir="rtl"
+                            >
+                              <span className="text-gray-500 text-xs ml-1">AR</span>
+                              {product.customFields.nameAr}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="text-sm font-mono text-gray-100">
+                          {mainVariant?.sku || '-'}
+                        </div>
+                        {variantCount > 1 && (
+                          <div className="text-xs text-blue-600 mt-0.5">
+                            +{variantCount - 1} variantes
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="text-sm font-semibold text-gray-100">
+                          {mainVariant?.price ? formatPrice(mainVariant.price) : '-'}
+                        </div>
+                        {product.customFields?.salePrice && (
+                          <div className="text-xs text-green-600 font-medium">
+                            Promo: {formatPrice(product.customFields.salePrice)}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium ${
+                              totalStock > 10
+                                ? 'bg-green-900/50 text-green-300'
+                                : totalStock > 0
+                                  ? 'bg-orange-900/50 text-orange-300'
+                                  : 'bg-red-900/50 text-red-300'
+                            }`}
+                          >
+                            {totalStock}
+                          </span>
+                          {totalStock <= 5 && totalStock > 0 && (
+                            <span className="text-xs text-orange-600">Stock bas</span>
+                          )}
+                          {totalStock === 0 && (
+                            <span className="text-xs text-red-600">Rupture</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex flex-wrap gap-1">
+                          <span
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              product.enabled
+                                ? 'bg-green-900/50 text-green-300'
+                                : 'bg-gray-700 text-gray-300'
+                            }`}
+                          >
+                            {product.enabled ? 'Actif' : 'Inactif'}
+                          </span>
+                          {product.customFields?.isFeatured && (
+                            <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-900/50 text-blue-300">
+                              Vedette
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/products/${product.id}`);
+                            }}
+                            className="text-blue-400 hover:text-blue-300 p-2 rounded-lg hover:bg-blue-900/50"
+                            title="Voir les details"
+                          >
+                            <Eye className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/products/${product.id}/edit`);
+                            }}
+                            className="text-green-400 hover:text-green-300 p-2 rounded-lg hover:bg-green-900/50"
+                            title="Modifier"
+                          >
+                            <Edit3 className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteClick({ id: product.id, name: product.name });
+                            }}
+                            className="text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-red-900/50"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="bg-gray-800/50 px-6 py-4 flex items-center justify-between border-t border-gray-700">
+                <div className="text-sm text-gray-400">
+                  Page {currentPage + 1} sur {totalPages} ({totalItems} produits)
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+                    disabled={currentPage === 0}
+                    className="px-3 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Précédent
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
+                    disabled={currentPage >= totalPages - 1}
+                    className="px-3 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                  >
+                    Suivant
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Grid Pagination */}
+        {viewMode === 'grid' && totalPages > 1 && (
+          <div className="bg-gray-800/50 px-6 py-4 flex items-center justify-between border-t border-gray-700">
+            <div className="text-sm text-gray-400">
+              Page {currentPage + 1} sur {totalPages} ({totalItems} produits)
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+                disabled={currentPage === 0}
+                className="px-3 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Précédent
+              </button>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={currentPage >= totalPages - 1}
+                className="px-3 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              >
+                Suivant
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
-        isOpen={productToDelete !== null}
-        onClose={() => setProductToDelete(null)}
+        isOpen={showDeleteDialog}
+        onClose={() => {
+          setShowDeleteDialog(false);
+          setProductToDelete(null);
+        }}
         onConfirm={handleDeleteConfirm}
         title="Supprimer le produit"
-        message={`Êtes-vous sûr de vouloir supprimer "${productToDelete?.name}" ? Cette action est irréversible.`}
+        message={`Êtes-vous sûr de vouloir supprimer "${productToDelete?.name}"? Cette action est irréversible.`}
         confirmText="Supprimer"
-        cancelText="Annuler"
+        variant="danger"
         loading={deleting}
       />
+
+      {/* Basic Filter Panel */}
+      <FilterPanel
+        isOpen={isFilterPanelOpen}
+        onClose={() => setIsFilterPanelOpen(false)}
+        filters={filters}
+        onFilterChange={updateFilter}
+        onReset={resetFilters}
+        collections={collections}
+      />
+
+      {/* Faceted Filter Panel */}
+      <AnimatePresence>
+        {isFacetedPanelOpen && (
+          <FacetedFilterPanel
+            isOpen={isFacetedPanelOpen}
+            onClose={() => setIsFacetedPanelOpen(false)}
+            state={facetedFilters.state}
+            facetGroups={facetedFilters.facetGroups}
+            collections={facetedFilters.collections}
+            loading={facetedFilters.loading}
+            onToggleFacetValue={facetedFilters.toggleFacetValue}
+            onClearFacetGroup={facetedFilters.clearFacetGroup}
+            onSetCollectionIds={facetedFilters.setCollectionIds}
+            onSetEnabled={facetedFilters.setEnabled}
+            onSetFeatured={facetedFilters.setFeatured}
+            onSetStockStatus={facetedFilters.setStockStatus}
+            onPriceChange={facetedFilters.setPriceRange}
+            onClearAll={facetedFilters.clearAllFilters}
+            activeFilterCount={facetedFilters.activeFilterCount}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -16,7 +16,7 @@ interface NavItem {
 
 export default function UserSidebar() {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { customer, logout } = useAuth();
 
   const navItems: NavItem[] = [
     {
@@ -46,19 +46,19 @@ export default function UserSidebar() {
   };
 
   return (
-    <div className="bg-white rounded-lg border p-4">
+    <div className="bg-card rounded-lg border border-border p-4">
       {/* User Info */}
-      {user && (
+      {customer && (
         <div className="pb-4 mb-4 border-b">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
               <User className="h-6 w-6 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-gray-900 truncate">
-                {user.firstName} {user.lastName}
+              <p className="font-semibold text-foreground truncate">
+                {customer.firstName} {customer.lastName}
               </p>
-              <p className="text-sm text-gray-600 truncate">{user.email}</p>
+              <p className="text-sm text-muted-foreground truncate">{customer.emailAddress}</p>
             </div>
           </div>
         </div>
@@ -74,7 +74,7 @@ export default function UserSidebar() {
               'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
               isActive(item.href)
                 ? 'bg-primary text-white'
-                : 'text-gray-700 hover:bg-gray-100'
+                : 'text-foreground hover:bg-muted'
             )}
           >
             {item.icon}

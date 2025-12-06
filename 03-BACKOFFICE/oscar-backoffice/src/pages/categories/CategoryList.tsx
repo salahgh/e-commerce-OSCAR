@@ -1,238 +1,471 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
-import { Plus, Trash2, List, GitBranch, Search, Filter } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/Table';
-import { Badge } from '../../components/ui/Badge';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { Input } from '../../components/ui/Input';
-import { CategoriesDocument, DeleteCategoryDocument, ActiveCategoriesDocument, CategoryBySlugDocument } from '../../graphql/generated/graphql';
-import { useAppDispatch } from '../../hooks/useAppDispatch';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  FolderTree,
+  Plus,
+  Search,
+  ChevronRight,
+  ChevronDown,
+  Edit2,
+  Trash2,
+  Package,
+  Eye,
+  EyeOff,
+  Image,
+  X,
+  Filter,
+  LayoutGrid,
+  List,
+} from 'lucide-react';
+import { useDispatch } from 'react-redux';
 import { addToast } from '../../store/slices/uiSlice';
-import { CategoryTree } from '../../components/categories/CategoryTree';
+import {
+  AdminCollectionsDocument,
+  DeleteCollectionDocument,
+} from '../../graphql/generated/graphql';
+import { Button } from '../../components/ui/Button';
+import { Badge } from '../../components/ui/Badge';
+import { Spinner } from '../../components/ui/Spinner';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { cn } from '../../lib/utils';
 
 export const CategoryList: React.FC = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const [categoryToDelete, setCategoryToDelete] = useState<{ id: number; name: string } | null>(null);
-  const [viewMode, setViewMode] = useState<'list' | 'tree'>('list');
-  const [showActiveOnly, setShowActiveOnly] = useState(false);
-  const [slugSearch, setSlugSearch] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [showOnlyPublic, setShowOnlyPublic] = useState(false);
+  const [viewMode, setViewMode] = useState<'tree' | 'flat'>('tree');
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Query for slug search
-  const { data: searchData, loading: searchLoading, error: searchError } = useQuery(CategoryBySlugDocument, {
-    variables: { slug: slugSearch },
-    skip: !slugSearch,
+  const { data, loading, error, refetch } = useQuery(AdminCollectionsDocument, {
+    variables: {
+      options: {
+        take: 100,
+        sort: { position: 'ASC' as any },
+      },
+    },
   });
 
-  // Query for active categories only
-  const { data: activeData, loading: activeLoading, error: activeError } = useQuery(ActiveCategoriesDocument, {
-    skip: !showActiveOnly || !!slugSearch,
-  });
+  const [deleteCollection, { loading: deleting }] = useMutation(DeleteCollectionDocument);
 
-  const { data, loading, error } = useQuery(CategoriesDocument, {
-    skip: showActiveOnly || !!slugSearch,
-  });
+  const collections = data?.collections?.items || [];
+  const totalItems = data?.collections?.totalItems || 0;
 
-  // Determine which data to display
-  let displayData, displayLoading, displayError;
-  if (slugSearch) {
-    displayData = searchData?.categoryBySlug ? { categories: [searchData.categoryBySlug] } : { categories: [] };
-    displayLoading = searchLoading;
-    displayError = searchError;
-  } else if (showActiveOnly) {
-    displayData = { categories: activeData?.activeCategories || [] };
-    displayLoading = activeLoading;
-    displayError = activeError;
-  } else {
-    displayData = data;
-    displayLoading = loading;
-    displayError = error;
-  }
+  // Build tree structure
+  const buildTree = () => {
+    const rootCollections = collections.filter((c) => !c.parentId || c.parentId === '1');
+    const childMap = new Map<string, typeof collections>();
 
-  const [deleteCategory, { loading: deleting }] = useMutation(DeleteCategoryDocument, {
-    refetchQueries: [
-      { query: CategoriesDocument },
-      ...(showActiveOnly ? [{ query: ActiveCategoriesDocument }] : []),
-    ],
-  });
+    collections.forEach((c) => {
+      if (c.parentId && c.parentId !== '1') {
+        const children = childMap.get(c.parentId) || [];
+        children.push(c);
+        childMap.set(c.parentId, children);
+      }
+    });
 
-  const handleDeleteClick = (id: number, name: string) => {
-    setCategoryToDelete({ id, name });
+    return { rootCollections, childMap };
   };
 
-  const handleResetFilters = () => {
-    setShowActiveOnly(false);
-    setSlugSearch('');
+  const { rootCollections, childMap } = buildTree();
+
+  // Full-text search across all fields
+  const searchCollections = useMemo(() => {
+    if (!searchTerm.trim()) return null;
+
+    const term = searchTerm.toLowerCase().trim();
+    const matchedCollections = collections.filter((c) => {
+      // Search in name
+      if (c.name.toLowerCase().includes(term)) return true;
+      // Search in slug
+      if (c.slug.toLowerCase().includes(term)) return true;
+      // Search in description
+      if (c.description?.toLowerCase().includes(term)) return true;
+      // Search in French name
+      if (c.customFields?.nameFr?.toLowerCase().includes(term)) return true;
+      // Search in Arabic name
+      if (c.customFields?.nameAr?.toLowerCase().includes(term)) return true;
+      // Search in French description
+      if (c.customFields?.descriptionFr?.toLowerCase().includes(term)) return true;
+      // Search in Arabic description
+      if (c.customFields?.descriptionAr?.toLowerCase().includes(term)) return true;
+      return false;
+    });
+
+    return matchedCollections;
+  }, [collections, searchTerm]);
+
+  // Apply visibility filter
+  const applyVisibilityFilter = (items: typeof collections) => {
+    if (!showOnlyPublic) return items;
+    return items.filter((c) => !c.isPrivate);
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!categoryToDelete) return;
+  // Get filtered collections based on search and visibility
+  const getFilteredCollections = () => {
+    if (searchCollections !== null) {
+      return applyVisibilityFilter(searchCollections);
+    }
+    return applyVisibilityFilter(rootCollections);
+  };
+
+  const filteredRootCollections = getFilteredCollections();
+
+  // Auto-expand all when searching
+  useEffect(() => {
+    if (searchTerm.trim()) {
+      const allIds = new Set(collections.map((c) => c.id));
+      setExpandedIds(allIds);
+    }
+  }, [searchTerm, collections]);
+
+  // Keyboard shortcut for search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+      if (e.key === 'Escape' && isSearchFocused) {
+        setSearchTerm('');
+        searchInputRef.current?.blur();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isSearchFocused]);
+
+  const toggleExpand = (id: string) => {
+    const newExpanded = new Set(expandedIds);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedIds(newExpanded);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
 
     try {
-      await deleteCategory({
-        variables: { id: categoryToDelete.id },
-      });
-
+      await deleteCollection({ variables: { id: deleteTarget.id } });
       dispatch(
         addToast({
-          message: 'Catégorie supprimée avec succès',
+          message: `Catégorie "${deleteTarget.name}" supprimée`,
           type: 'success',
         })
       );
-      setCategoryToDelete(null);
-    } catch (error: any) {
-      console.error('Delete category error:', error);
+      refetch();
+    } catch (err) {
       dispatch(
         addToast({
-          message: error.message || 'Erreur lors de la suppression',
+          message: 'Erreur lors de la suppression',
           type: 'error',
         })
       );
     }
+    setDeleteTarget(null);
   };
+
+  const renderCollection = (collection: (typeof collections)[0], depth = 0) => {
+    const children = childMap.get(collection.id) || [];
+    const hasChildren = children.length > 0;
+    const isExpanded = expandedIds.has(collection.id);
+    const productCount = collection.productVariants?.totalItems || 0;
+
+    return (
+      <div key={collection.id}>
+        <div
+          className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-700 border-b border-gray-700 ${
+            depth > 0 ? 'bg-gray-800/50' : ''
+          }`}
+          style={{ paddingLeft: `${1 + depth * 1.5}rem` }}
+        >
+          {/* Expand/Collapse Toggle */}
+          <button
+            onClick={() => toggleExpand(collection.id)}
+            className={`p-1 rounded hover:bg-gray-600 ${hasChildren ? 'visible' : 'invisible'}`}
+          >
+            {isExpanded ? (
+              <ChevronDown className="h-4 w-4 text-gray-400" />
+            ) : (
+              <ChevronRight className="h-4 w-4 text-gray-400" />
+            )}
+          </button>
+
+          {/* Image */}
+          <div className="h-10 w-10 rounded-lg bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {collection.featuredAsset?.preview ? (
+              <img
+                src={collection.featuredAsset.preview}
+                alt={collection.name}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <Image className="h-5 w-5 text-gray-500" />
+            )}
+          </div>
+
+          {/* Name */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-gray-100 truncate">{collection.name}</span>
+              {collection.isPrivate && (
+                <span title="Privé">
+                  <EyeOff className="h-4 w-4 text-gray-500" />
+                </span>
+              )}
+            </div>
+            <div className="text-sm text-gray-500 truncate">
+              {collection.customFields?.nameFr && (
+                <span className="mr-3">FR: {collection.customFields.nameFr}</span>
+              )}
+              {collection.customFields?.nameAr && (
+                <span dir="rtl">AR: {collection.customFields.nameAr}</span>
+              )}
+            </div>
+          </div>
+
+          {/* Product Count */}
+          <div className="flex items-center gap-1 text-sm text-gray-400">
+            <Package className="h-4 w-4" />
+            <span>{productCount}</span>
+          </div>
+
+          {/* Position */}
+          <Badge variant="default" className="text-xs">
+            Pos: {collection.position}
+          </Badge>
+
+          {/* Actions */}
+          <div className="flex items-center gap-1">
+            <Link
+              to={`/categories/${collection.id}`}
+              className="p-2 text-blue-400 hover:bg-blue-900/50 rounded-lg transition-colors"
+              title="Modifier"
+            >
+              <Edit2 className="h-4 w-4" />
+            </Link>
+            <button
+              onClick={() => setDeleteTarget({ id: collection.id, name: collection.name })}
+              className="p-2 text-red-400 hover:bg-red-900/50 rounded-lg transition-colors"
+              title="Supprimer"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Children */}
+        {isExpanded && hasChildren && (
+          <div>{children.map((child) => renderCollection(child, depth + 1))}</div>
+        )}
+      </div>
+    );
+  };
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <p className="text-red-500 text-lg">Erreur: {error.message}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Catégories</h1>
-          <p className="text-gray-600 mt-1">Gérez les catégories de produits</p>
+          <h1 className="text-3xl font-bold text-gray-100">Catégories</h1>
+          <p className="text-gray-400 mt-1">
+            {totalItems} catégorie{totalItems > 1 ? 's' : ''}
+          </p>
         </div>
-        <Button onClick={() => navigate('/categories/new')} icon={<Plus className="h-5 w-5" />}>
-          Nouvelle Catégorie
-        </Button>
+        <Link to="/categories/new">
+          <Button icon={<Plus className="h-4 w-4" />}>Nouvelle catégorie</Button>
+        </Link>
       </div>
 
-      {/* Filters and View Mode */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Input
-                placeholder="Rechercher par slug..."
-                icon={<Search className="h-5 w-5" />}
-                value={slugSearch}
-                onChange={(e) => setSlugSearch(e.target.value)}
-              />
-              <Button
-                variant={showActiveOnly ? 'primary' : 'outline'}
-                onClick={() => setShowActiveOnly(!showActiveOnly)}
-                icon={<Filter className="h-5 w-5" />}
+      {/* Enhanced Search & Filters */}
+      <div className="bg-gray-800 rounded-xl shadow-sm border border-gray-700 p-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          {/* Search Input */}
+          <div className="flex-1 relative">
+            <Search
+              className={cn(
+                'absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 transition-colors',
+                isSearchFocused ? 'text-blue-500' : 'text-gray-500'
+              )}
+            />
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Rechercher par nom, slug, description (FR/AR)..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
+              className={cn(
+                'w-full pl-12 pr-20 py-3.5 border rounded-xl transition-all duration-200 outline-none text-gray-100 placeholder-gray-500',
+                isSearchFocused
+                  ? 'border-blue-500 ring-4 ring-blue-500/10 bg-gray-900'
+                  : 'border-gray-600 hover:border-gray-500 bg-gray-900'
+              )}
+            />
+            {searchTerm ? (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-700 rounded-full transition-colors"
               >
-                Actives uniquement
-              </Button>
-              <Button variant="outline" onClick={handleResetFilters}>
-                Réinitialiser
-              </Button>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant={viewMode === 'list' ? 'primary' : 'outline'}
-                onClick={() => setViewMode('list')}
-                icon={<List className="h-5 w-5" />}
-              >
-                Liste
-              </Button>
-              <Button
-                variant={viewMode === 'tree' ? 'primary' : 'outline'}
+                <X className="h-4 w-4 text-gray-400" />
+              </button>
+            ) : (
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 hidden md:flex items-center gap-1 text-xs text-gray-500 bg-gray-700 px-2 py-1 rounded">
+                <span>Ctrl</span>
+                <span>+</span>
+                <span>K</span>
+              </div>
+            )}
+          </div>
+
+          {/* Filter Buttons */}
+          <div className="flex items-center gap-2">
+            {/* Visibility Filter */}
+            <button
+              onClick={() => setShowOnlyPublic(!showOnlyPublic)}
+              className={cn(
+                'flex items-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200',
+                showOnlyPublic
+                  ? 'bg-green-900/50 border-green-600 text-green-400'
+                  : 'bg-gray-800 border-gray-600 text-gray-400 hover:bg-gray-700'
+              )}
+            >
+              {showOnlyPublic ? (
+                <Eye className="h-4 w-4" />
+              ) : (
+                <Filter className="h-4 w-4" />
+              )}
+              <span className="text-sm font-medium">
+                {showOnlyPublic ? 'Publiques' : 'Toutes'}
+              </span>
+            </button>
+
+            {/* View Mode Toggle */}
+            <div className="flex items-center bg-gray-700 rounded-xl p-1">
+              <button
                 onClick={() => setViewMode('tree')}
-                icon={<GitBranch className="h-5 w-5" />}
+                className={cn(
+                  'p-2.5 rounded-lg transition-all',
+                  viewMode === 'tree'
+                    ? 'bg-gray-800 text-blue-400 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-300'
+                )}
+                title="Vue arborescence"
               >
-                Arborescence
-              </Button>
+                <FolderTree className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('flat')}
+                className={cn(
+                  'p-2.5 rounded-lg transition-all',
+                  viewMode === 'flat'
+                    ? 'bg-gray-800 text-blue-400 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-300'
+                )}
+                title="Vue liste"
+              >
+                <List className="h-4 w-4" />
+              </button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Search Results Info */}
+        {searchTerm && (
+          <div className="mt-3 pt-3 border-t border-gray-700 flex items-center justify-between">
+            <p className="text-sm text-gray-400">
+              <span className="font-medium text-gray-100">{filteredRootCollections.length}</span>
+              {' '}resultat{filteredRootCollections.length !== 1 ? 's' : ''} pour{' '}
+              <span className="font-medium text-blue-400">"{searchTerm}"</span>
+            </p>
+            <button
+              onClick={() => setSearchTerm('')}
+              className="text-sm text-blue-400 hover:text-blue-300 font-medium"
+            >
+              Effacer
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Tree View */}
-      {viewMode === 'tree' && <CategoryTree />}
-
-      {/* List View */}
-      {viewMode === 'list' && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {displayLoading ? 'Chargement...' : displayError ? 'Erreur' : `${displayData?.categories?.length || 0} catégories`}
-              {slugSearch && ` (recherche: ${slugSearch})`}
-              {showActiveOnly && ' (Actives uniquement)'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {displayLoading && (
-              <div className="flex items-center justify-center py-12">
-                <div className="text-gray-500">Chargement des catégories...</div>
-              </div>
+      <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Spinner size="lg" />
+          </div>
+        ) : filteredRootCollections.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <FolderTree className="h-16 w-16 text-gray-500 mb-4" />
+            <p className="text-gray-400 text-lg">Aucune catégorie trouvée</p>
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="mt-4 text-blue-600 hover:text-blue-700"
+              >
+                Effacer la recherche
+              </button>
             )}
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-700">
+            {/* Header */}
+            <div className="flex items-center gap-3 px-4 py-3 bg-gray-800/50 font-medium text-sm text-gray-400">
+              <div className="w-6" /> {/* Toggle space */}
+              <div className="w-10" /> {/* Image space */}
+              <div className="flex-1">Nom</div>
+              <div className="w-16 text-center">Produits</div>
+              <div className="w-20 text-center">Position</div>
+              <div className="w-20 text-center">Actions</div>
+            </div>
 
-            {displayError && (
-              <div className="flex items-center justify-center py-12">
-                <div className="text-red-500">Erreur: {displayError.message}</div>
-              </div>
-            )}
+            {/* Tree */}
+            {filteredRootCollections.map((collection) => renderCollection(collection))}
+          </div>
+        )}
+      </div>
 
-            {!displayLoading && !displayError && displayData?.categories && (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Slug</TableHead>
-                    <TableHead>Produits</TableHead>
-                    <TableHead>Ordre</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {displayData.categories.map((category) => (
-                    <TableRow key={category.id}>
-                      <TableCell className="font-medium">{category.nameFr}</TableCell>
-                      <TableCell className="font-mono text-xs">{category.slug}</TableCell>
-                      <TableCell>{category.productCount} produits</TableCell>
-                      <TableCell>{category.displayOrder}</TableCell>
-                      <TableCell>
-                        <Badge variant={category.isActive ? 'success' : 'default'}>
-                          {category.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => navigate(`/categories/edit/${category.id}`)}
-                          >
-                            Modifier
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteClick(Number(category.id), category.nameFr || '')}
-                            icon={<Trash2 className="h-4 w-4 text-red-600" />}
-                          />
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Confirmation */}
       <ConfirmDialog
-        isOpen={categoryToDelete !== null}
-        onClose={() => setCategoryToDelete(null)}
-        onConfirm={handleDeleteConfirm}
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
         title="Supprimer la catégorie"
-        message={`Êtes-vous sûr de vouloir supprimer "${categoryToDelete?.name}" ? Cette action est irréversible.`}
+        message={
+          <div>
+            <p>
+              Êtes-vous sûr de vouloir supprimer la catégorie <strong>{deleteTarget?.name}</strong>{' '}
+              ?
+            </p>
+            <p className="mt-2 text-amber-600">Les sous-catégories seront également supprimées.</p>
+          </div>
+        }
         confirmText="Supprimer"
-        cancelText="Annuler"
+        variant="danger"
         loading={deleting}
       />
     </div>

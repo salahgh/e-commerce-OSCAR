@@ -1,76 +1,92 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
+import * as React from "react"
 
-export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'bordered' | 'elevated';
-  padding?: 'none' | 'sm' | 'md' | 'lg';
-}
+import { cn } from "@/lib/utils/index"
 
-const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant = 'default', padding = 'md', children, ...props }, ref) => {
-    const paddingClasses = {
-      none: '',
-      sm: 'p-4',
-      md: 'p-6',
-      lg: 'p-8',
-    };
+const Card = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "rounded-xl border bg-card text-card-foreground shadow",
+      className
+    )}
+    {...props}
+  />
+))
+Card.displayName = "Card"
 
-    const variantClasses = {
-      default: 'bg-card text-card-foreground shadow-sm',
-      bordered: 'border bg-card text-card-foreground',
-      elevated: 'bg-card text-card-foreground shadow-lg',
-    };
+const CardHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    {...props}
+  />
+))
+CardHeader.displayName = "CardHeader"
 
-    return (
-      <div
-        ref={ref}
-        className={cn('rounded-lg', paddingClasses[padding], variantClasses[variant], className)}
-        {...props}
-      >
-        {children}
-      </div>
-    );
-  }
-);
-
-Card.displayName = 'Card';
-
-const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('flex flex-col space-y-1.5 pb-6', className)} {...props} />
-  )
-);
-CardHeader.displayName = 'CardHeader';
-
-const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
-  ({ className, ...props }, ref) => (
-    <h3
-      ref={ref}
-      className={cn('text-2xl font-semibold leading-none tracking-tight', className)}
-      {...props}
-    />
-  )
-);
-CardTitle.displayName = 'CardTitle';
+const CardTitle = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("font-semibold leading-none tracking-tight", className)}
+    {...props}
+  />
+))
+CardTitle.displayName = "CardTitle"
 
 const CardDescription = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <p ref={ref} className={cn('text-sm text-muted-foreground', className)} {...props} />
-));
-CardDescription.displayName = 'CardDescription';
+  <div
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+CardDescription.displayName = "CardDescription"
 
-const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => <div ref={ref} className={cn('', className)} {...props} />
-);
-CardContent.displayName = 'CardContent';
+const CardContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+))
+CardContent.displayName = "CardContent"
 
-const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('flex items-center pt-6', className)} {...props} />
-  )
-);
-CardFooter.displayName = 'CardFooter';
+const CardFooter = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex items-center p-6 pt-0", className)}
+    {...props}
+  />
+))
+CardFooter.displayName = "CardFooter"
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };
+// Compound component pattern for Card.Header, Card.Content, etc.
+type CardComponent = typeof Card & {
+  Header: typeof CardHeader;
+  Content: typeof CardContent;
+  Footer: typeof CardFooter;
+  Title: typeof CardTitle;
+  Description: typeof CardDescription;
+};
+
+const CardWithSubcomponents = Card as CardComponent;
+CardWithSubcomponents.Header = CardHeader;
+CardWithSubcomponents.Content = CardContent;
+CardWithSubcomponents.Footer = CardFooter;
+CardWithSubcomponents.Title = CardTitle;
+CardWithSubcomponents.Description = CardDescription;
+
+export { CardWithSubcomponents as Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }

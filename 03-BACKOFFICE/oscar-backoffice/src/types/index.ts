@@ -16,7 +16,7 @@ export const UserRole = {
   ADMIN: 'ADMIN',
   CUSTOMER: 'CUSTOMER',
 } as const;
-export type UserRole = typeof UserRole[keyof typeof UserRole];
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
 export const OrderStatus = {
   PENDING: 'PENDING',
@@ -26,7 +26,7 @@ export const OrderStatus = {
   DELIVERED: 'DELIVERED',
   CANCELLED: 'CANCELLED',
 } as const;
-export type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
+export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
 
 export const PaymentStatus = {
   PENDING: 'PENDING',
@@ -35,14 +35,14 @@ export const PaymentStatus = {
   REFUNDED: 'REFUNDED',
   CANCELLED: 'CANCELLED',
 } as const;
-export type PaymentStatus = typeof PaymentStatus[keyof typeof PaymentStatus];
+export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus];
 
 export const PaymentMethod = {
   CASH_ON_DELIVERY: 'CASH_ON_DELIVERY',
   CIB: 'CIB',
   BARIDIMOB: 'BARIDIMOB',
 } as const;
-export type PaymentMethod = typeof PaymentMethod[keyof typeof PaymentMethod];
+export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod];
 
 export interface LocalizedString {
   fr: string;

@@ -8,7 +8,7 @@ interface ConfirmDialogProps {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  message: string;
+  message: React.ReactNode;
   confirmText?: string;
   cancelText?: string;
   variant?: 'danger' | 'warning' | 'info';
@@ -27,9 +27,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   loading = false,
 }) => {
   const iconColors = {
-    danger: 'text-red-600',
-    warning: 'text-yellow-600',
-    info: 'text-blue-600',
+    danger: 'text-red-400',
+    warning: 'text-yellow-400',
+    info: 'text-blue-400',
   };
 
   const buttonVariants = {
@@ -46,8 +46,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             <AlertTriangle className="h-6 w-6" />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-            <p className="text-sm text-gray-600">{message}</p>
+            <h3 className="text-lg font-semibold text-gray-100 mb-2">{title}</h3>
+            <div className="text-sm text-gray-400">{message}</div>
           </div>
         </div>
       </ModalContent>

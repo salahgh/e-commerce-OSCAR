@@ -7,6 +7,7 @@ import {
   GetFacetsWithDetailsDocument,
   SearchProductsWithFacetsDocument,
   type SearchInput,
+  SortOrder,
 } from '@/graphql/generated/graphql';
 import {
   type FacetGroup,
@@ -116,18 +117,23 @@ export function useFacetedSearch(): UseFacetedSearchReturn {
       input.collectionSlug = state.collectionSlug;
     }
 
+    // Build facet value filters - works even if facetGroups not fully loaded
     if (state.facetValueIds.length > 0) {
-      input.facetValueFilters = buildFacetValueFilters(state.facetValueIds, facetGroups);
+      const facetFilters = buildFacetValueFilters(state.facetValueIds, facetGroups);
+      if (facetFilters.length > 0) {
+        input.facetValueFilters = facetFilters;
+      }
     }
 
     // Note: Vendure search doesn't support price filtering directly
     // You might need custom logic or a plugin for this
 
-    // Sorting
+    // Sorting - convert string to SortOrder enum
+    const sortOrderEnum = state.sortOrder === 'ASC' ? SortOrder.Asc : SortOrder.Desc;
     if (state.sortBy === 'price') {
-      input.sort = { price: state.sortOrder };
+      input.sort = { price: sortOrderEnum };
     } else if (state.sortBy === 'name') {
-      input.sort = { name: state.sortOrder };
+      input.sort = { name: sortOrderEnum };
     }
 
     return input;

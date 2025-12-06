@@ -42,15 +42,15 @@ export function FacetCheckboxList({
       {/* Search Input */}
       {showSearch && values.length > 8 && (
         <div className="relative mb-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Rechercher..."
-            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg
-                       focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500
-                       bg-gray-50 hover:bg-white transition-colors"
+            className="w-full pl-9 pr-3 py-2 text-sm border border-input rounded-lg
+                       focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
+                       bg-muted hover:bg-background transition-colors"
           />
         </div>
       )}
@@ -76,8 +76,8 @@ export function FacetCheckboxList({
                   className={cn(
                     'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-150',
                     isSelected
-                      ? 'bg-primary-50 border border-primary-200'
-                      : 'hover:bg-gray-50 border border-transparent',
+                      ? 'bg-primary/10 border border-primary/30'
+                      : 'hover:bg-muted border border-transparent',
                     isDisabled && 'opacity-50 cursor-not-allowed'
                   )}
                 >
@@ -86,8 +86,8 @@ export function FacetCheckboxList({
                     className={cn(
                       'w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-150',
                       isSelected
-                        ? 'bg-primary-500 border-primary-500'
-                        : 'border-gray-300 bg-white'
+                        ? 'bg-primary border-primary'
+                        : 'border-input bg-background'
                     )}
                   >
                     <AnimatePresence>
@@ -108,7 +108,7 @@ export function FacetCheckboxList({
                   <span
                     className={cn(
                       'flex-1 text-sm font-medium transition-colors',
-                      isSelected ? 'text-primary-700' : 'text-gray-700'
+                      isSelected ? 'text-primary' : 'text-foreground'
                     )}
                   >
                     {value.name}
@@ -119,8 +119,8 @@ export function FacetCheckboxList({
                     className={cn(
                       'text-xs font-medium px-2 py-0.5 rounded-full transition-colors',
                       isSelected
-                        ? 'bg-primary-100 text-primary-600'
-                        : 'bg-gray-100 text-gray-500'
+                        ? 'bg-primary/20 text-primary'
+                        : 'bg-muted text-muted-foreground'
                     )}
                   >
                     {value.count}
@@ -157,7 +157,7 @@ export function FacetCheckboxList({
 
       {/* No Results */}
       {searchTerm && filteredValues.length === 0 && (
-        <p className="text-sm text-gray-500 text-center py-4">Aucun resultat pour "{searchTerm}"</p>
+        <p className="text-sm text-muted-foreground text-center py-4">Aucun resultat pour "{searchTerm}"</p>
       )}
     </div>
   );
