@@ -59,8 +59,10 @@ export const Dashboard: React.FC = () => {
     topProducts,
     recentOrders,
     lowStockProducts,
-    loading,
     chartsLoading,
+    kpisLoading,
+    recentOrdersLoading,
+    lowStockLoading,
   } = useDashboardData(dateRange);
 
   const handleRefresh = () => {
@@ -97,7 +99,7 @@ export const Dashboard: React.FC = () => {
           {/* Refresh Button */}
           <button
             onClick={handleRefresh}
-            disabled={isRefreshing || loading}
+            disabled={isRefreshing || kpisLoading}
             className="p-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-all disabled:opacity-50"
           >
             <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -116,7 +118,7 @@ export const Dashboard: React.FC = () => {
           trend={kpis.trends.revenue}
           subtitle={`Panier moyen: ${formatPrice(kpis.averageOrderValue / 100)}`}
           isCurrency
-          loading={loading}
+          loading={kpisLoading}
         />
         <KPICard
           title="Commandes"
@@ -126,7 +128,7 @@ export const Dashboard: React.FC = () => {
           iconColor="text-green-400"
           trend={kpis.trends.orders}
           subtitle={`${kpis.pendingOrders} en attente`}
-          loading={loading}
+          loading={kpisLoading}
         />
         <KPICard
           title="Clients"
@@ -136,7 +138,7 @@ export const Dashboard: React.FC = () => {
           iconColor="text-purple-400"
           trend={kpis.trends.customers}
           subtitle="Clients enregistrés"
-          loading={loading}
+          loading={kpisLoading}
         />
         <KPICard
           title="Taux de conversion"
@@ -146,7 +148,7 @@ export const Dashboard: React.FC = () => {
           iconColor="text-orange-400"
           trend={kpis.trends.aov}
           subtitle={`${kpis.lowStockCount} produits stock bas`}
-          loading={loading}
+          loading={kpisLoading}
         />
       </div>
 
@@ -176,7 +178,7 @@ export const Dashboard: React.FC = () => {
             </Link>
           </div>
           <div className="p-6">
-            {loading ? (
+            {recentOrdersLoading ? (
               <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
                   <div key={i} className="animate-pulse flex items-center gap-4 p-3 bg-gray-700/50 rounded-lg">
@@ -253,7 +255,7 @@ export const Dashboard: React.FC = () => {
             </Link>
           </div>
           <div className="p-6">
-            {loading ? (
+            {lowStockLoading ? (
               <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
                   <div key={i} className="animate-pulse p-3 bg-orange-900/20 rounded-lg">
