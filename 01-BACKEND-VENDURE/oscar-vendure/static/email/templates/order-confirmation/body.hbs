@@ -1,0 +1,39 @@
+<mjml>
+  <mj-body>
+    {{> header}}
+
+    <mj-section background-color="#ffffff">
+      <mj-column>
+        <mj-text font-size="20px" color="#1a1a2e" font-weight="bold">
+          Merci pour votre commande!
+        </mj-text>
+        <mj-text color="#333333">
+          Bonjour {{order.customer.firstName}},
+        </mj-text>
+        <mj-text color="#333333">
+          Votre commande <strong>#{{order.code}}</strong> a été confirmée.
+        </mj-text>
+        <mj-divider border-color="#e0e0e0"></mj-divider>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff">
+      <mj-column>
+        <mj-text font-size="16px" color="#1a1a2e" font-weight="bold">
+          Détails de la commande
+        </mj-text>
+        {{#each order.lines}}
+        <mj-text color="#333333">
+          {{productVariant.name}} x {{quantity}} - {{formatMoney linePriceWithTax}}
+        </mj-text>
+        {{/each}}
+        <mj-divider border-color="#e0e0e0"></mj-divider>
+        <mj-text color="#333333" font-weight="bold">
+          Total: {{formatMoney order.totalWithTax}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    {{> footer}}
+  </mj-body>
+</mjml>

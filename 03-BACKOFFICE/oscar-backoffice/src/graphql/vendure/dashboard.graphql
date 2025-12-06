@@ -1,0 +1,53 @@
+# Dashboard queries for OSCAR Backoffice
+
+query OscarDashboardStats {
+  oscarDashboardStats {
+    totalOrders
+    totalRevenue
+    totalCustomers
+    totalProducts
+    pendingOrders
+    lowStockProductsCount
+  }
+}
+
+query RecentOrders {
+  orders(options: { take: 5, sort: { orderPlacedAt: DESC } }) {
+    items {
+      id
+      code
+      state
+      totalWithTax
+      orderPlacedAt
+      customer {
+        id
+        firstName
+        lastName
+      }
+      customFields {
+        trackingNumber
+        wilaya
+      }
+    }
+    totalItems
+  }
+}
+
+query LowStockProducts($threshold: Int) {
+  lowStockProducts(threshold: $threshold) {
+    id
+    name
+    slug
+    variants {
+      id
+      sku
+      stockOnHand
+      customFields {
+        minStockAlert
+      }
+    }
+    customFields {
+      nameFr
+    }
+  }
+}

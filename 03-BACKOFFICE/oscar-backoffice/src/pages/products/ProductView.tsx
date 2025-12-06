@@ -1,0 +1,538 @@
+import React from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useQuery } from '@apollo/client';
+import {
+  ArrowLeft,
+  Edit3,
+  Package,
+  Globe,
+  DollarSign,
+  Layers,
+  Image as ImageIcon,
+  Star,
+  Eye,
+  FolderTree,
+  Calendar,
+  Tag,
+  Box,
+  ExternalLink,
+} from 'lucide-react';
+import { AdminProductDocument, AdminCollectionsWithFiltersDocument } from '../../graphql/generated/graphql';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Badge } from '../../components/ui/Badge';
+import { Spinner } from '../../components/ui/Spinner';
+import { formatPrice, formatDateTime } from '../../lib/utils';
+
+export const ProductView: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  // Fetch product data
+  const { data, loading, error } = useQuery(AdminProductDocument, {
+    variables: { id: id! },
+    skip: !id,
+  });
+
+  // Fetch collections to show which ones contain this product
+  const { data: collectionsData } = useQuery(AdminCollectionsWithFiltersDocument, {
+    variables: { options: { take: 100 } },
+  });
+
+  const product = data?.product;
+  const allCollections = collectionsData?.collections?.items || [];
+
+  // Get collections containing this product
+  const getProductCollections = () => {
+    if (!id || !allCollections.length) return [];
+    return allCollections.filter((col: any) => {
+      const productIdFilter = col.filters?.find((f: any) => f.code === 'product-id-filter');
+      if (!productIdFilter) return false;
+      const productIdsArg = productIdFilter.args?.find((a: any) => a.name === 'productIds');
+      if (!productIdsArg?.value) return false;
+      try {
+        const ids = JSON.parse(productIdsArg.value);
+        return ids.includes(id);
+      } catch {
+        return false;
+      }
+    });
+  };
+
+  const productCollections = getProductCollections();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-96">
+        <Package className="h-16 w-16 text-gray-300 mb-4" />
+        <p className="text-gray-500 text-lg mb-4">Produit non trouvé</p>
+        <Link to="/products" className="text-blue-600 hover:text-blue-700">
+          Retour à la liste
+        </Link>
+      </div>
+    );
+  }
+
+  const totalStock = product.variants?.reduce((sum, v) => sum + (v.stockOnHand || 0), 0) || 0;
+  const mainVariant = product.variants?.[0];
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" onClick={() => navigate('/products')} icon={<ArrowLeft className="h-4 w-4" />}>
+            Retour
+          </Button>
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-gray-900">{product.name}</h1>
+              <Badge variant={product.enabled ? 'success' : 'default'}>
+                {product.enabled ? 'Actif' : 'Inactif'}
+              </Badge>
+              {product.customFields?.isFeatured && (
+                <Badge variant="warning">
+                  <Star className="h-3 w-3 mr-1" />
+                  Vedette
+                </Badge>
+              )}
+            </div>
+            <p className="text-sm text-gray-500 mt-1">
+              ID: {product.id} | Slug: {product.slug}
+            </p>
+          </div>
+        </div>
+        <Button
+          variant="primary"
+          icon={<Edit3 className="h-4 w-4" />}
+          onClick={() => navigate(`/products/${id}/edit`)}
+        >
+          Modifier
+        </Button>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Images & Main Info */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Featured Image */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ImageIcon className="h-5 w-5" />
+                Images
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* Featured Image */}
+                {product.featuredAsset ? (
+                  <div className="relative">
+                    <img
+                      src={product.featuredAsset.preview}
+                      alt={product.name}
+                      className="w-full max-h-96 object-contain rounded-lg bg-gray-50"
+                    />
+                    <Badge variant="warning" className="absolute top-2 left-2">
+                      <Star className="h-3 w-3 mr-1" />
+                      Image principale
+                    </Badge>
+                  </div>
+                ) : (
+                  <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                      <ImageIcon className="h-16 w-16 text-gray-300 mx-auto mb-2" />
+                      <p className="text-gray-400">Aucune image</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Gallery */}
+                {product.assets && product.assets.length > 1 && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 mb-2">
+                      Galerie ({product.assets.length} images)
+                    </p>
+                    <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
+                      {product.assets.map((asset) => (
+                        <a
+                          key={asset.id}
+                          href={asset.source}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`relative rounded-lg overflow-hidden border-2 hover:border-blue-400 transition-colors ${
+                            product.featuredAsset?.id === asset.id ? 'border-yellow-500' : 'border-gray-200'
+                          }`}
+                        >
+                          <img
+                            src={asset.preview}
+                            alt={asset.name}
+                            className="h-20 w-full object-cover"
+                          />
+                          {product.featuredAsset?.id === asset.id && (
+                            <div className="absolute top-1 right-1">
+                              <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                            </div>
+                          )}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Description */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Description</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="prose prose-sm max-w-none">
+                {product.description ? (
+                  <p className="text-gray-700 whitespace-pre-wrap">{product.description}</p>
+                ) : (
+                  <p className="text-gray-400 italic">Aucune description</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Translations */}
+          {(product.customFields?.nameFr || product.customFields?.nameAr) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  Traductions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* French */}
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                      <span className="text-sm">FR</span> Français
+                    </h4>
+                    {product.customFields?.nameFr ? (
+                      <>
+                        <p className="text-sm text-gray-700">
+                          <span className="font-medium">Nom:</span> {product.customFields.nameFr}
+                        </p>
+                        {product.customFields?.descriptionFr && (
+                          <p className="text-sm text-gray-600">{product.customFields.descriptionFr}</p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-sm text-gray-400 italic">Non traduit</p>
+                    )}
+                  </div>
+
+                  {/* Arabic */}
+                  <div className="space-y-2" dir="rtl">
+                    <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                      <span className="text-sm">AR</span> العربية
+                    </h4>
+                    {product.customFields?.nameAr ? (
+                      <>
+                        <p className="text-sm text-gray-700">
+                          <span className="font-medium">الاسم:</span> {product.customFields.nameAr}
+                        </p>
+                        {product.customFields?.descriptionAr && (
+                          <p className="text-sm text-gray-600">{product.customFields.descriptionAr}</p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-sm text-gray-400 italic">غير مترجم</p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Variants */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Layers className="h-5 w-5" />
+                Variantes ({product.variants?.length || 0})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {product.variants && product.variants.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Options</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix TTC</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {product.variants.map((variant) => (
+                        <tr key={variant.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3">
+                            <span className="text-sm font-mono font-medium text-gray-900">{variant.sku}</span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="text-sm text-gray-700">{variant.name}</span>
+                          </td>
+                          <td className="px-4 py-3">
+                            {variant.options && variant.options.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {variant.options.map((opt) => (
+                                  <Badge key={opt.id} variant="default" className="text-xs">
+                                    {opt.group?.name}: {opt.name}
+                                  </Badge>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-gray-400 text-sm">-</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="text-sm font-medium text-gray-900">
+                              {formatPrice(variant.price / 100)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="text-sm text-gray-600">
+                              {formatPrice(variant.priceWithTax / 100)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span
+                              className={`text-sm font-medium ${
+                                variant.stockOnHand === 0
+                                  ? 'text-red-600'
+                                  : variant.stockOnHand < (variant.customFields?.minStockAlert || 10)
+                                    ? 'text-orange-600'
+                                    : 'text-green-600'
+                              }`}
+                            >
+                              {variant.stockOnHand}
+                              {variant.stockAllocated > 0 && (
+                                <span className="text-gray-400 text-xs ml-1">
+                                  ({variant.stockAllocated} réservé)
+                                </span>
+                              )}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <Badge variant={variant.enabled ? 'success' : 'default'}>
+                              {variant.enabled ? 'Actif' : 'Inactif'}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Box className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+                  <p className="text-gray-500">Aucune variante</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column - Sidebar */}
+        <div className="space-y-6">
+          {/* Summary Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Résumé</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between py-2 border-b">
+                <span className="text-sm text-gray-500">Prix principal</span>
+                <span className="font-semibold text-gray-900">
+                  {mainVariant?.price ? formatPrice(mainVariant.price / 100) : '-'}
+                </span>
+              </div>
+              {product.customFields?.salePrice && (
+                <div className="flex items-center justify-between py-2 border-b">
+                  <span className="text-sm text-gray-500">Prix promo</span>
+                  <span className="font-semibold text-green-600">
+                    {formatPrice(product.customFields.salePrice / 100)}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center justify-between py-2 border-b">
+                <span className="text-sm text-gray-500">Stock total</span>
+                <span
+                  className={`font-semibold ${
+                    totalStock === 0 ? 'text-red-600' : totalStock < 10 ? 'text-orange-600' : 'text-green-600'
+                  }`}
+                >
+                  {totalStock} unités
+                </span>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b">
+                <span className="text-sm text-gray-500">Variantes</span>
+                <span className="font-semibold text-gray-900">{product.variants?.length || 0}</span>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b">
+                <span className="text-sm text-gray-500">Vues</span>
+                <span className="font-semibold text-gray-900 flex items-center gap-1">
+                  <Eye className="h-4 w-4 text-gray-400" />
+                  {product.customFields?.viewCount || 0}
+                </span>
+              </div>
+              {product.customFields?.weightKg && (
+                <div className="flex items-center justify-between py-2 border-b">
+                  <span className="text-sm text-gray-500">Poids</span>
+                  <span className="font-semibold text-gray-900">{product.customFields.weightKg} kg</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Attributes */}
+          {(product.customFields?.availableSizes?.length > 0 || product.customFields?.availableColors?.length > 0) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Tag className="h-5 w-5" />
+                  Attributs
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {product.customFields?.availableSizes?.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 mb-2">Tailles</p>
+                    <div className="flex flex-wrap gap-2">
+                      {product.customFields.availableSizes.map((size, i) => (
+                        <Badge key={i} variant="default">{size}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {product.customFields?.availableColors?.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 mb-2">Couleurs</p>
+                    <div className="flex flex-wrap gap-2">
+                      {product.customFields.availableColors.map((color, i) => (
+                        <Badge key={i} variant="default">{color}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Categories */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FolderTree className="h-5 w-5" />
+                Catégories
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {productCollections.length > 0 ? (
+                <div className="space-y-2">
+                  {productCollections.map((col: any) => (
+                    <Link
+                      key={col.id}
+                      to={`/categories/${col.id}`}
+                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <FolderTree className="h-4 w-4 text-gray-400" />
+                      <span className="text-sm text-gray-700">{col.name}</span>
+                      <ExternalLink className="h-3 w-3 text-gray-400 ml-auto" />
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400 italic">Aucune catégorie</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Facets */}
+          {product.facetValues && product.facetValues.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Facettes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {product.facetValues.map((fv) => (
+                    <div key={fv.id} className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">{fv.facet.name}</span>
+                      <Badge variant="default">{fv.name}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Dates */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Dates
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <p className="text-xs text-gray-500">Créé le</p>
+                <p className="text-sm font-medium text-gray-900">{formatDateTime(product.createdAt)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Modifié le</p>
+                <p className="text-sm font-medium text-gray-900">{formatDateTime(product.updatedAt)}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Option Groups */}
+          {product.optionGroups && product.optionGroups.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Groupes d'options</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {product.optionGroups.map((group) => (
+                    <div key={group.id}>
+                      <p className="text-sm font-medium text-gray-900">{group.name}</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {group.options?.map((opt) => (
+                          <Badge key={opt.id} variant="default" className="text-xs">
+                            {opt.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -1,0 +1,137 @@
+# Vendure Admin API - Product Operations
+
+query AdminProducts($options: ProductListOptions) {
+  products(options: $options) {
+    items {
+      id
+      createdAt
+      updatedAt
+      name
+      slug
+      description
+      enabled
+      featuredAsset {
+        id
+        name
+        preview
+        source
+      }
+      assets {
+        id
+        name
+        preview
+        source
+      }
+      variants {
+        id
+        name
+        sku
+        price
+        priceWithTax
+        stockOnHand
+        stockAllocated
+        enabled
+        customFields {
+          minStockAlert
+        }
+      }
+      customFields {
+        nameFr
+        nameAr
+        descriptionFr
+        descriptionAr
+        salePrice
+        isFeatured
+        viewCount
+        weightKg
+        availableSizes
+        availableColors
+      }
+    }
+    totalItems
+  }
+}
+
+query AdminProduct($id: ID!) {
+  product(id: $id) {
+    id
+    createdAt
+    updatedAt
+    name
+    slug
+    description
+    enabled
+    featuredAsset {
+      id
+      name
+      preview
+      source
+    }
+    assets {
+      id
+      name
+      preview
+      source
+    }
+    optionGroups {
+      id
+      code
+      name
+      options {
+        id
+        code
+        name
+      }
+    }
+    variants {
+      id
+      name
+      sku
+      price
+      priceWithTax
+      stockOnHand
+      stockAllocated
+      enabled
+      options {
+        id
+        code
+        name
+        group {
+          id
+          code
+          name
+        }
+      }
+      customFields {
+        minStockAlert
+      }
+    }
+    customFields {
+      nameFr
+      nameAr
+      descriptionFr
+      descriptionAr
+      salePrice
+      isFeatured
+      viewCount
+      weightKg
+      availableSizes
+      availableColors
+    }
+    collections {
+      id
+      name
+      slug
+    }
+    facetValues {
+      id
+      name
+      code
+      facet {
+        id
+        name
+        code
+      }
+    }
+  }
+}

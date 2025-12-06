@@ -1,0 +1,116 @@
+# Vendure Admin API - Reports Operations
+
+# Get orders for date range with totals for sales reports
+query SalesReportOrders($options: OrderListOptions) {
+  orders(options: $options) {
+    items {
+      id
+      code
+      state
+      total
+      totalWithTax
+      currencyCode
+      orderPlacedAt
+      createdAt
+      customer {
+        id
+        firstName
+        lastName
+      }
+      lines {
+        id
+        productVariant {
+          id
+          sku
+          name
+          product {
+            id
+            name
+          }
+        }
+        quantity
+        linePrice
+        linePriceWithTax
+      }
+      customFields {
+        wilaya
+      }
+    }
+    totalItems
+  }
+}
+
+# Get top selling products
+query TopSellingProducts($options: ProductListOptions) {
+  products(options: $options) {
+    items {
+      id
+      name
+      slug
+      featuredAsset {
+        id
+        preview
+      }
+      variants {
+        id
+        sku
+        name
+        price
+        stockOnHand
+        stockAllocated
+      }
+      customFields {
+        nameFr
+        viewCount
+        isFeatured
+      }
+    }
+    totalItems
+  }
+}
+
+# Get products with low stock
+query LowStockVariants($options: ProductVariantListOptions) {
+  productVariants(options: $options) {
+    items {
+      id
+      sku
+      name
+      price
+      stockOnHand
+      stockAllocated
+      product {
+        id
+        name
+        featuredAsset {
+          id
+          preview
+        }
+      }
+      customFields {
+        minStockAlert
+      }
+    }
+    totalItems
+  }
+}
+
+# Get customers for growth analysis
+query CustomersReport($options: CustomerListOptions) {
+  customers(options: $options) {
+    items {
+      id
+      firstName
+      lastName
+      emailAddress
+      createdAt
+      orders {
+        totalItems
+      }
+      customFields {
+        wilaya
+      }
+    }
+    totalItems
+  }
+}

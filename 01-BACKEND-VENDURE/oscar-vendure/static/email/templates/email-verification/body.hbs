@@ -1,0 +1,24 @@
+<mjml>
+  <mj-body>
+    {{> header}}
+
+    <mj-section background-color="#ffffff">
+      <mj-column>
+        <mj-text font-size="20px" color="#1a1a2e" font-weight="bold">
+          Vérifiez votre adresse email
+        </mj-text>
+        <mj-text color="#333333">
+          Bonjour {{customer.firstName}},
+        </mj-text>
+        <mj-text color="#333333">
+          Merci de vous être inscrit chez OSCAR Fashion. Veuillez cliquer sur le bouton ci-dessous pour vérifier votre adresse email.
+        </mj-text>
+        <mj-button background-color="#1a1a2e" color="#ffffff" href="{{verificationUrl}}">
+          Vérifier mon email
+        </mj-button>
+      </mj-column>
+    </mj-section>
+
+    {{> footer}}
+  </mj-body>
+</mjml>

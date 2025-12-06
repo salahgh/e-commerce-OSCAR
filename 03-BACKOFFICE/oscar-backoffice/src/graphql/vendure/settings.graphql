@@ -1,0 +1,203 @@
+# Vendure Admin API - Settings Operations
+
+query GlobalSettings {
+  globalSettings {
+    id
+    availableLanguages
+    trackInventory
+    outOfStockThreshold
+    serverConfig {
+      permittedAssetTypes
+    }
+  }
+}
+
+query PaymentMethods {
+  paymentMethods {
+    items {
+      id
+      createdAt
+      updatedAt
+      name
+      code
+      description
+      enabled
+      checker {
+        code
+        args {
+          name
+          value
+        }
+      }
+      handler {
+        code
+        args {
+          name
+          value
+        }
+      }
+    }
+    totalItems
+  }
+}
+
+query PaymentMethod($id: ID!) {
+  paymentMethod(id: $id) {
+    id
+    createdAt
+    updatedAt
+    name
+    code
+    description
+    enabled
+    checker {
+      code
+      args {
+        name
+        value
+      }
+    }
+    handler {
+      code
+      args {
+        name
+        value
+      }
+    }
+  }
+}
+
+mutation UpdatePaymentMethod($input: UpdatePaymentMethodInput!) {
+  updatePaymentMethod(input: $input) {
+    id
+    name
+    code
+    description
+    enabled
+  }
+}
+
+query ShippingMethods {
+  shippingMethods {
+    items {
+      id
+      createdAt
+      updatedAt
+      name
+      code
+      description
+      fulfillmentHandlerCode
+      checker {
+        code
+        args {
+          name
+          value
+        }
+      }
+      calculator {
+        code
+        args {
+          name
+          value
+        }
+      }
+    }
+    totalItems
+  }
+}
+
+query ShippingMethod($id: ID!) {
+  shippingMethod(id: $id) {
+    id
+    createdAt
+    updatedAt
+    name
+    code
+    description
+    fulfillmentHandlerCode
+    checker {
+      code
+      args {
+        name
+        value
+      }
+    }
+    calculator {
+      code
+      args {
+        name
+        value
+      }
+    }
+  }
+}
+
+mutation UpdateShippingMethod($input: UpdateShippingMethodInput!) {
+  updateShippingMethod(input: $input) {
+    id
+    name
+    code
+    description
+  }
+}
+
+query TaxRates {
+  taxRates {
+    items {
+      id
+      name
+      value
+      enabled
+      category {
+        id
+        name
+      }
+      zone {
+        id
+        name
+      }
+    }
+    totalItems
+  }
+}
+
+query Channels {
+  channels {
+    items {
+      id
+      code
+      token
+      defaultLanguageCode
+      currencyCode
+      pricesIncludeTax
+      defaultShippingZone {
+        id
+        name
+      }
+      defaultTaxZone {
+        id
+        name
+      }
+    }
+    totalItems
+  }
+}
+
+query ActiveChannel {
+  activeChannel {
+    id
+    code
+    token
+    defaultLanguageCode
+    currencyCode
+    pricesIncludeTax
+    defaultShippingZone {
+      id
+      name
+    }
+    defaultTaxZone {
+      id
+      name
+    }
+  }
+}
