@@ -3,9 +3,11 @@ import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import { createUploadLink } from 'apollo-upload-client';
 
+const graphqlUrl = import.meta.env.VITE_GRAPHQL_URL || 'http://localhost:8085/admin-api';
+
 // Vendure Admin API endpoint with file upload support
 const uploadLink = createUploadLink({
-  uri: import.meta.env.VITE_GRAPHQL_URL || 'http://localhost:8085/admin-api',
+  uri: graphqlUrl,
   credentials: 'include', // Important for Vendure cookie-based auth
 });
 
@@ -21,18 +23,21 @@ const authLink = setContext((_, { headers }) => {
 });
 
 // Error handling for Vendure
-const errorLink = onError(({ graphQLErrors, networkError }) => {
+const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
   if (graphQLErrors) {
     graphQLErrors.forEach((error) => {
       const { message, locations, path } = error;
       console.error(`[GraphQL error]: Message: ${message}, Path: ${path}`, locations);
 
-      // Handle Vendure auth errors
+      // Handle Vendure auth errors - but DON'T redirect on dashboard page to avoid loops
       const errorCode = (error as any).extensions?.code;
+      const isDashboardQuery = ['OscarDashboardStats', 'RecentOrders', 'LowStockProducts', 'DashboardOrdersAnalysis'].includes(operation.operationName);
+
       if (
-        errorCode === 'FORBIDDEN' ||
+        (errorCode === 'FORBIDDEN' ||
         message.includes('You are not currently authorized') ||
-        message.includes('Not authenticated')
+        message.includes('Not authenticated')) &&
+        !isDashboardQuery
       ) {
         localStorage.removeItem('vendure_auth_token');
         window.location.href = '/login';

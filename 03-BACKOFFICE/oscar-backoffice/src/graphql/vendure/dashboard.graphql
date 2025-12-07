@@ -11,8 +11,8 @@ query OscarDashboardStats {
   }
 }
 
-query RecentOrders {
-  orders(options: { take: 5, sort: { orderPlacedAt: DESC } }) {
+query RecentOrders($options: OrderListOptions) {
+  orders(options: $options) {
     items {
       id
       code

@@ -2,7 +2,7 @@ import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { useMemo } from 'react';
 
-// GraphQL Queries
+// GraphQL Queries - Compatible with Vendure Admin API
 const OSCAR_DASHBOARD_STATS = gql`
   query OscarDashboardStats {
     oscarDashboardStats {
@@ -17,8 +17,8 @@ const OSCAR_DASHBOARD_STATS = gql`
 `;
 
 const RECENT_ORDERS = gql`
-  query RecentOrders {
-    orders(options: { take: 5, sort: { orderPlacedAt: DESC } }) {
+  query RecentOrders($options: OrderListOptions) {
+    orders(options: $options) {
       items {
         id
         code
@@ -199,59 +199,64 @@ function formatDateLabel(dateStr: string, range: DateRange): string {
 }
 
 export function useDashboardData(dateRange: DateRange = '30d') {
-  const dateFilter = getDateRangeFilter(dateRange);
+  // Memoize dateFilter to prevent new object on every render
+  const dateFilter = useMemo(() => getDateRangeFilter(dateRange), [dateRange]);
+
+  // Memoize variables objects to prevent useQuery from refetching
+  const recentOrdersVariables = useMemo(() => ({
+    options: {
+      take: 5,
+      sort: { orderPlacedAt: 'DESC' as const },
+    },
+  }), []);
+
+  const analysisVariables = useMemo(() => ({
+    options: {
+      take: 100,
+      filter: {
+        orderPlacedAt: {
+          after: dateFilter.after,
+          before: dateFilter.before,
+        },
+      },
+      sort: { orderPlacedAt: 'ASC' as const },
+    },
+  }), [dateFilter.after, dateFilter.before]);
 
   // Fetch basic stats
-  const { data: statsData, loading: statsLoading, error: statsError } = useQuery(OSCAR_DASHBOARD_STATS);
+  const { data: statsData, loading: statsLoading, error: statsError } = useQuery(OSCAR_DASHBOARD_STATS, {
+    errorPolicy: 'all',
+    fetchPolicy: 'cache-and-network',
+  });
 
-  // Fetch recent orders
-  const { data: recentOrdersData, loading: recentLoading, error: recentError } = useQuery(RECENT_ORDERS);
+  // Fetch recent orders with proper Vendure options
+  const { data: recentOrdersData, loading: recentLoading, error: recentError } = useQuery(RECENT_ORDERS, {
+    variables: recentOrdersVariables,
+    errorPolicy: 'all',
+    fetchPolicy: 'cache-and-network',
+  });
 
   // Fetch low stock products
   const { data: lowStockData, loading: lowStockLoading, error: lowStockError } = useQuery(LOW_STOCK_PRODUCTS, {
     variables: { threshold: 10 },
+    errorPolicy: 'all',
+    fetchPolicy: 'cache-and-network',
   });
 
   // Fetch orders for analysis (with date filter)
   const { data: ordersAnalysisData, loading: analysisLoading, error: analysisError } = useQuery(DASHBOARD_ORDERS_ANALYSIS, {
-    variables: {
-      options: {
-        take: 100, // Reduced to avoid timeout
-        filter: {
-          orderPlacedAt: {
-            after: dateFilter.after,
-            before: dateFilter.before,
-          },
-        },
-        sort: { orderPlacedAt: 'ASC' },
-      },
-    },
-    // Don't block loading if this query fails
-    errorPolicy: 'ignore',
+    variables: analysisVariables,
+    errorPolicy: 'all',
+    fetchPolicy: 'cache-and-network',
   });
-
-  // Log errors for debugging (only in development)
-  if (import.meta.env.DEV) {
-    if (statsError) console.error('Stats error:', statsError);
-    if (recentError) console.error('Recent orders error:', recentError);
-    if (lowStockError) console.error('Low stock error:', lowStockError);
-    if (analysisError) console.error('Analysis error:', analysisError);
-  }
-
-  // Check if queries have completed (either with data or error)
-  const statsComplete = !statsLoading;
-  const recentComplete = !recentLoading;
-  const lowStockComplete = !lowStockLoading;
-  const analysisComplete = !analysisLoading;
 
   // Process KPI data
   const kpis: KPIData = useMemo(() => {
     const stats = statsData?.oscarDashboardStats;
-    const orders = ordersAnalysisData?.orders?.items || [];
 
-    const totalRevenue = stats?.totalRevenue || 0;
-    const totalOrders = stats?.totalOrders || 0;
-    const totalCustomers = stats?.totalCustomers || 0;
+    const totalRevenue = stats?.totalRevenue ?? 0;
+    const totalOrders = stats?.totalOrders ?? 0;
+    const totalCustomers = stats?.totalCustomers ?? 0;
     const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
     // Calculate conversion rate (orders / customers as proxy)
@@ -259,8 +264,8 @@ export function useDashboardData(dateRange: DateRange = '30d') {
 
     // Calculate trends (mock for now - would need previous period data)
     // In a real scenario, we'd compare current period to previous period
-    const mockTrend = (base: number) => ({
-      value: Math.random() * 20 - 5, // Random between -5% and +15%
+    const mockTrend = () => ({
+      value: Math.round((Math.random() * 20 - 5) * 10) / 10, // Random between -5% and +15%
       isPositive: Math.random() > 0.3,
     });
 
@@ -268,19 +273,19 @@ export function useDashboardData(dateRange: DateRange = '30d') {
       totalRevenue,
       totalOrders,
       totalCustomers,
-      totalProducts: stats?.totalProducts || 0,
-      pendingOrders: stats?.pendingOrders || 0,
-      lowStockCount: stats?.lowStockProductsCount || 0,
+      totalProducts: stats?.totalProducts ?? 0,
+      pendingOrders: stats?.pendingOrders ?? 0,
+      lowStockCount: stats?.lowStockProductsCount ?? 0,
       conversionRate,
       averageOrderValue,
       trends: {
-        revenue: mockTrend(totalRevenue),
-        orders: mockTrend(totalOrders),
-        customers: mockTrend(totalCustomers),
-        aov: mockTrend(averageOrderValue),
+        revenue: mockTrend(),
+        orders: mockTrend(),
+        customers: mockTrend(),
+        aov: mockTrend(),
       },
     };
-  }, [statsData, ordersAnalysisData]);
+  }, [statsData]);
 
   // Process sales evolution data
   const salesData: SalesDataPoint[] = useMemo(() => {
@@ -428,6 +433,13 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     kpisLoading: statsLoading,
     recentOrdersLoading: recentLoading,
     lowStockLoading: lowStockLoading,
-    hasError: !!statsError || !!recentError,
+    hasError: !!statsError || !!recentError || !!lowStockError || !!analysisError,
+    // Expose error details for debugging
+    errors: {
+      stats: statsError,
+      recentOrders: recentError,
+      lowStock: lowStockError,
+      analysis: analysisError,
+    },
   };
 }
