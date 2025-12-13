@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "WebSearch",
+      "Bash(del \"D:\\e-commerce-OSCAR\\02-FRONTEND\\oscar-frontend\\src\\middleware.ts\")"
+    ]
+  }
+}

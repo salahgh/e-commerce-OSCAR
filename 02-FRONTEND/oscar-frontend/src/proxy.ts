@@ -10,7 +10,7 @@ const intlMiddleware = createMiddleware(routing);
 const protectedRoutes = ['/profile', '/orders', '/checkout', '/wishlist'];
 const authRoutes = ['/login', '/register'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Check if it's an API route or static file
