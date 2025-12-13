@@ -1,1 +1,20 @@
+# Build outputs
 /01-BACKEND/oscar-backend/target/
+
+# Temporary files
+*.tmp
+*.temp
+~$*
+cookies.txt
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

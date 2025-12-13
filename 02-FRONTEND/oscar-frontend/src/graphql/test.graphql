@@ -1,0 +1,16 @@
+query test{
+    search(input: {
+        term: "new product"
+    }){
+        items {
+            productId
+            productName
+        }
+    }
+    products{
+        items {
+            id
+            name
+        }
+    }
+}
