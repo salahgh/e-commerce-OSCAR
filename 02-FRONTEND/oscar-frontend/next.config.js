@@ -7,12 +7,21 @@ const nextConfig = {
     // Skip TypeScript errors during build
     ignoreBuildErrors: true,
   },
-  eslint: {
-    // Skip ESLint errors during build
-    ignoreDuringBuilds: true,
-  },
   images: {
-    domains: ['localhost', 'api.oscarfashion.dz', 'cdn.oscarfashion.dz'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.oscarfashion.dz',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.oscarfashion.dz',
+      },
+    ],
     formats: ['image/avif', 'image/webp'],
   },
   // Removed optimizeCss as it requires critters package
