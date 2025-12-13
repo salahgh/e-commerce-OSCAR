@@ -578,7 +578,7 @@ OSCAR Fashion souhaite développer une **solution e-commerce complète** compren
 
 ## Avant le Démarrage
 - Validation des spécifications fonctionnelles
-- Fourniture de la charte graphique et logo
+- Four[questions.md](questions.md)niture de la charte graphique et logo
 - Accès à l'API ERP/WMS (documentation + credentials test)
 
 ## Pendant le Projet
