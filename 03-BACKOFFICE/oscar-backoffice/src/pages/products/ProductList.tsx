@@ -28,6 +28,8 @@ import { useFacetedFilters } from '../../hooks/useFacetedFilters';
 import { FilterPanel } from '../../components/products/FilterPanel';
 import { FacetedFilterPanel } from '../../components/products/FacetedFilterPanel';
 import { ActiveFilters } from '../../components/products/ActiveFilters';
+import { PermissionGate } from '../../components/auth/PermissionGate';
+import { usePermissions } from '../../hooks/usePermissions';
 
 type ViewMode = 'table' | 'grid';
 type FilterMode = 'basic' | 'faceted';
@@ -61,7 +63,8 @@ export const ProductList: React.FC = () => {
   // Determine if we need client-side filtering (faceted mode with advanced filters)
   const needsClientSideFiltering = useMemo(() => {
     if (filterMode !== 'faceted') return false;
-    const { facetValueIds, collectionIds, stockStatus, priceMin, priceMax, isFeatured } = facetedFilters.state;
+    const { facetValueIds, collectionIds, stockStatus, priceMin, priceMax, isFeatured } =
+      facetedFilters.state;
     return (
       facetValueIds.length > 0 ||
       collectionIds.length > 0 ||
@@ -89,7 +92,13 @@ export const ProductList: React.FC = () => {
     }
 
     return Object.keys(filter).length > 0 ? filter : undefined;
-  }, [filterMode, filters.search, filters.enabled, facetedFilters.state.searchTerm, facetedFilters.state.enabled]);
+  }, [
+    filterMode,
+    filters.search,
+    filters.enabled,
+    facetedFilters.state.searchTerm,
+    facetedFilters.state.enabled,
+  ]);
 
   // When client-side filtering is needed, fetch more products
   const fetchSize = needsClientSideFiltering ? 200 : pageSize;
@@ -114,7 +123,8 @@ export const ProductList: React.FC = () => {
       return result;
     }
 
-    const { facetValueIds, collectionIds, stockStatus, priceMin, priceMax, isFeatured } = facetedFilters.state;
+    const { facetValueIds, collectionIds, stockStatus, priceMin, priceMax, isFeatured } =
+      facetedFilters.state;
 
     // Filter by facet values (product or any of its variants must have at least one of the selected facet values)
     if (facetValueIds.length > 0) {
@@ -146,7 +156,8 @@ export const ProductList: React.FC = () => {
     // Filter by stock status
     if (stockStatus) {
       result = result.filter((p: any) => {
-        const totalStock = p.variants?.reduce((sum: number, v: any) => sum + (v.stockOnHand || 0), 0) || 0;
+        const totalStock =
+          p.variants?.reduce((sum: number, v: any) => sum + (v.stockOnHand || 0), 0) || 0;
         switch (stockStatus) {
           case 'in_stock':
             return totalStock > 10;
@@ -177,7 +188,9 @@ export const ProductList: React.FC = () => {
   }, [data, filterMode, needsClientSideFiltering, facetedFilters.state]);
 
   // Calculate pagination based on filtered results
-  const totalItems = needsClientSideFiltering ? filteredProducts.length : (data?.products?.totalItems || 0);
+  const totalItems = needsClientSideFiltering
+    ? filteredProducts.length
+    : data?.products?.totalItems || 0;
   const totalPages = Math.ceil(totalItems / pageSize);
 
   // Paginate filtered results client-side when using client-side filtering
@@ -321,13 +334,15 @@ export const ProductList: React.FC = () => {
               <Grid3X3 className="h-5 w-5" />
             </button>
           </div>
-          <Link
-            to="/products/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            <Plus className="h-5 w-5" />
-            Nouveau produit
-          </Link>
+          <PermissionGate permission="CreateCatalog" disableMode>
+            <Link
+              to="/products/new"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              <Plus className="h-5 w-5" />
+              Nouveau produit
+            </Link>
+          </PermissionGate>
         </div>
       </div>
 
@@ -371,7 +386,8 @@ export const ProductList: React.FC = () => {
               <SlidersHorizontal className="h-5 w-5" />
             )}
             Filtres
-            {(filterMode === 'faceted' ? facetedFilters.activeFilterCount : activeFilterCount) > 0 && (
+            {(filterMode === 'faceted' ? facetedFilters.activeFilterCount : activeFilterCount) >
+              0 && (
               <span className="absolute -top-2 -right-2 w-5 h-5 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center">
                 {filterMode === 'faceted' ? facetedFilters.activeFilterCount : activeFilterCount}
               </span>
@@ -592,18 +608,22 @@ export const ProductList: React.FC = () => {
                           >
                             <Eye className="h-4 w-4" />
                           </button>
-                          <button
-                            onClick={() => navigate(`/products/${product.id}/edit`)}
-                            className="p-2 bg-white rounded-full shadow hover:bg-green-50 text-green-600"
-                            title="Modifier"
-                          >
-                            <Edit3 className="h-4 w-4" />
-                          </button>
+                          <PermissionGate permission="UpdateCatalog" disableMode>
+                            <button
+                              onClick={() => navigate(`/products/${product.id}/edit`)}
+                              className="p-2 bg-white rounded-full shadow hover:bg-green-50 text-green-600"
+                              title="Modifier"
+                            >
+                              <Edit3 className="h-4 w-4" />
+                            </button>
+                          </PermissionGate>
                         </div>
                       </div>
                       {/* Content */}
                       <div className="p-4">
-                        <h3 className="font-medium text-foreground truncate mb-1">{product.name}</h3>
+                        <h3 className="font-medium text-foreground truncate mb-1">
+                          {product.name}
+                        </h3>
                         <p className="text-sm text-muted-foreground truncate mb-2">
                           {mainVariant?.sku || product.slug}
                         </p>
@@ -809,26 +829,30 @@ export const ProductList: React.FC = () => {
                           >
                             <Eye className="h-5 w-5" />
                           </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/products/${product.id}/edit`);
-                            }}
-                            className="text-green-400 hover:text-green-300 p-2 rounded-lg hover:bg-green-900/50"
-                            title="Modifier"
-                          >
-                            <Edit3 className="h-5 w-5" />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteClick({ id: product.id, name: product.name });
-                            }}
-                            className="text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-red-900/50"
-                            title="Supprimer"
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </button>
+                          <PermissionGate permission="UpdateCatalog" disableMode>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/products/${product.id}/edit`);
+                              }}
+                              className="text-success hover:text-success/80 p-2 rounded-lg hover:bg-success/20"
+                              title="Modifier"
+                            >
+                              <Edit3 className="h-5 w-5" />
+                            </button>
+                          </PermissionGate>
+                          <PermissionGate permission="DeleteCatalog" disableMode>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteClick({ id: product.id, name: product.name });
+                              }}
+                              className="text-destructive hover:text-destructive/80 p-2 rounded-lg hover:bg-destructive/20"
+                              title="Supprimer"
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </button>
+                          </PermissionGate>
                         </div>
                       </td>
                     </tr>

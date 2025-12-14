@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import {
@@ -6,7 +6,6 @@ import {
   Edit3,
   Package,
   Globe,
-  DollarSign,
   Layers,
   Image as ImageIcon,
   Star,
@@ -16,6 +15,10 @@ import {
   Tag,
   Box,
   ExternalLink,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
 } from 'lucide-react';
 import {
   AdminProductDocument,
@@ -63,6 +66,21 @@ export const ProductView: React.FC = () => {
   };
 
   const productCollections = getProductCollections();
+
+  // Variant stats - must be before early returns to follow rules of hooks
+  const variantStats = useMemo(() => {
+    const variants = product?.variants || [];
+    return {
+      total: variants.length,
+      active: variants.filter(v => v.enabled).length,
+      inactive: variants.filter(v => !v.enabled).length,
+      outOfStock: variants.filter(v => (v.stockOnHand ?? 0) === 0).length,
+      lowStock: variants.filter(v =>
+        (v.stockOnHand ?? 0) > 0 &&
+        (v.stockOnHand ?? 0) < (v.customFields?.minStockAlert || 10)
+      ).length,
+    };
+  }, [product?.variants]);
 
   if (loading) {
     return (
@@ -276,12 +294,68 @@ export const ProductView: React.FC = () => {
           {/* Variants */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Layers className="h-5 w-5" />
-                Variantes ({product.variants?.length || 0})
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Layers className="h-5 w-5" />
+                  Variantes ({product.variants?.length || 0})
+                </span>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => navigate(`/products/${id}/edit?step=3`)}
+                  icon={<Edit3 className="h-3 w-3" />}
+                >
+                  Modifier
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Variant Stats */}
+              {variantStats.total > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                  <div className="flex items-center gap-2 p-3 bg-green-900/20 border border-green-700/50 rounded-lg">
+                    <CheckCircle className="h-4 w-4 text-green-400" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Actives</p>
+                      <p className="text-lg font-semibold text-green-400">{variantStats.active}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 p-3 bg-muted/30 border border-border rounded-lg">
+                    <XCircle className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Inactives</p>
+                      <p className="text-lg font-semibold text-foreground">{variantStats.inactive}</p>
+                    </div>
+                  </div>
+                  <div className={`flex items-center gap-2 p-3 rounded-lg ${
+                    variantStats.outOfStock > 0
+                      ? 'bg-red-900/20 border border-red-700/50'
+                      : 'bg-muted/30 border border-border'
+                  }`}>
+                    <AlertCircle className={`h-4 w-4 ${variantStats.outOfStock > 0 ? 'text-red-400' : 'text-muted-foreground'}`} />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Rupture</p>
+                      <p className={`text-lg font-semibold ${variantStats.outOfStock > 0 ? 'text-red-400' : 'text-foreground'}`}>
+                        {variantStats.outOfStock}
+                      </p>
+                    </div>
+                  </div>
+                  <div className={`flex items-center gap-2 p-3 rounded-lg ${
+                    variantStats.lowStock > 0
+                      ? 'bg-orange-900/20 border border-orange-700/50'
+                      : 'bg-muted/30 border border-border'
+                  }`}>
+                    <AlertTriangle className={`h-4 w-4 ${variantStats.lowStock > 0 ? 'text-orange-400' : 'text-muted-foreground'}`} />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Stock bas</p>
+                      <p className={`text-lg font-semibold ${variantStats.lowStock > 0 ? 'text-orange-400' : 'text-foreground'}`}>
+                        {variantStats.lowStock}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {product.variants && product.variants.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-border">
@@ -326,7 +400,7 @@ export const ProductView: React.FC = () => {
                               <div className="flex flex-wrap gap-1">
                                 {variant.options.map((opt) => (
                                   <Badge key={opt.id} variant="default" className="text-xs">
-                                    {opt.group?.name}: {opt.name}
+                                    {opt.group?.name ? `${opt.group.name}: ` : ''}{opt.name}
                                   </Badge>
                                 ))}
                               </div>
@@ -336,27 +410,27 @@ export const ProductView: React.FC = () => {
                           </td>
                           <td className="px-4 py-3">
                             <span className="text-sm font-medium text-foreground">
-                              {formatPrice(variant.price / 100)}
+                              {formatPrice(Number(variant.price ?? 0) / 100)}
                             </span>
                           </td>
                           <td className="px-4 py-3">
                             <span className="text-sm text-muted-foreground">
-                              {formatPrice(variant.priceWithTax / 100)}
+                              {formatPrice(Number(variant.priceWithTax ?? 0) / 100)}
                             </span>
                           </td>
                           <td className="px-4 py-3">
                             <span
                               className={`text-sm font-medium ${
-                                variant.stockOnHand === 0
+                                (variant.stockOnHand ?? 0) === 0
                                   ? 'text-red-500'
-                                  : variant.stockOnHand <
+                                  : (variant.stockOnHand ?? 0) <
                                       (variant.customFields?.minStockAlert || 10)
                                     ? 'text-orange-500'
                                     : 'text-green-500'
                               }`}
                             >
-                              {variant.stockOnHand}
-                              {variant.stockAllocated > 0 && (
+                              {variant.stockOnHand ?? 0}
+                              {(variant.stockAllocated ?? 0) > 0 && (
                                 <span className="text-muted-foreground text-xs ml-1">
                                   ({variant.stockAllocated} réservé)
                                 </span>
@@ -421,7 +495,9 @@ export const ProductView: React.FC = () => {
               </div>
               <div className="flex items-center justify-between py-2 border-b border-border">
                 <span className="text-sm text-muted-foreground">Variantes</span>
-                <span className="font-semibold text-foreground">{product.variants?.length || 0}</span>
+                <span className="font-semibold text-foreground">
+                  {product.variants?.length || 0}
+                </span>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-border">
                 <span className="text-sm text-muted-foreground">Vues</span>

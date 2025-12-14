@@ -41,10 +41,12 @@ export const UserDetail: React.FC = () => {
         dispatch(addToast({ type: 'success', message: 'Administrateur supprimé avec succès' }));
         setTimeout(() => navigate('/users'), 1500);
       } else {
-        dispatch(addToast({
-          type: 'error',
-          message: result.deleteAdministrator.message || 'Erreur lors de la suppression',
-        }));
+        dispatch(
+          addToast({
+            type: 'error',
+            message: result.deleteAdministrator.message || 'Erreur lors de la suppression',
+          })
+        );
       }
       setShowDeleteDialog(false);
     },
@@ -74,9 +76,7 @@ export const UserDetail: React.FC = () => {
 
   const formatRoleCode = (code: string): string => {
     if (code === '__super_admin_role__') return 'Super Admin';
-    return code
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, (l) => l.toUpperCase());
+    return code.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   const formatPermission = (permission: string): string => {
@@ -223,9 +223,7 @@ export const UserDetail: React.FC = () => {
                   Dernière connexion
                 </div>
                 <p className="text-foreground mt-1">
-                  {admin.user?.lastLogin
-                    ? formatDateTime(admin.user.lastLogin)
-                    : 'Jamais connecté'}
+                  {admin.user?.lastLogin ? formatDateTime(admin.user.lastLogin) : 'Jamais connecté'}
                 </p>
               </div>
             </div>
@@ -243,10 +241,7 @@ export const UserDetail: React.FC = () => {
             {admin.user?.roles && admin.user.roles.length > 0 ? (
               <div className="space-y-4">
                 {admin.user.roles.map((role) => (
-                  <div
-                    key={role.id}
-                    className="p-4 bg-background rounded-lg border border-border"
-                  >
+                  <div key={role.id} className="p-4 bg-background rounded-lg border border-border">
                     <div className="flex items-center justify-between mb-2">
                       <Badge variant={getRoleBadgeVariant(role.code)}>
                         {formatRoleCode(role.code)}
@@ -258,7 +253,8 @@ export const UserDetail: React.FC = () => {
                     {role.permissions && role.permissions.length > 0 && (
                       <div>
                         <p className="text-xs text-muted-foreground mb-2">
-                          {role.permissions.length} permission{role.permissions.length > 1 ? 's' : ''}
+                          {role.permissions.length} permission
+                          {role.permissions.length > 1 ? 's' : ''}
                         </p>
                         <div className="flex flex-wrap gap-1">
                           {role.permissions.slice(0, 5).map((perm) => (

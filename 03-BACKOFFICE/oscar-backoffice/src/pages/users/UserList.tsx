@@ -58,10 +58,12 @@ export const UserList: React.FC = () => {
         dispatch(addToast({ type: 'success', message: 'Administrateur supprimé avec succès' }));
         refetch();
       } else {
-        dispatch(addToast({
-          type: 'error',
-          message: result.deleteAdministrator.message || 'Erreur lors de la suppression',
-        }));
+        dispatch(
+          addToast({
+            type: 'error',
+            message: result.deleteAdministrator.message || 'Erreur lors de la suppression',
+          })
+        );
       }
       setDeleteId(null);
     },
@@ -93,9 +95,7 @@ export const UserList: React.FC = () => {
 
   const formatRoleCode = (code: string): string => {
     if (code === '__super_admin_role__') return 'Super Admin';
-    return code
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, (l) => l.toUpperCase());
+    return code.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   if (error) {

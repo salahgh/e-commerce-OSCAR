@@ -6,8 +6,10 @@ import { apolloClient } from './lib/apollo-client';
 import { store } from './store/store';
 import { MainLayout } from './components/layout/MainLayout';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
+import { AuthInitializer } from './components/auth/AuthInitializer';
 import { Login } from './pages/Login';
-import { Dashboard } from './pages/Dashboard';
+import { AccessDeniedPage } from './pages/AccessDeniedPage';
+import { Dashboard } from './pages/DashboardWithPermissions';
 import { ProductList } from './pages/products/ProductList';
 import { ProductView } from './pages/products/ProductView';
 import { ProductEdit } from './pages/products/ProductEdit';
@@ -39,75 +41,78 @@ function App() {
     <ReduxProvider store={store}>
       <ThemeInitializer>
         <ApolloProvider client={apolloClient}>
-          <BrowserRouter>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/login" element={<Login />} />
+          <AuthInitializer>
+            <BrowserRouter>
+              <Routes>
+                {/* Public routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/access-denied" element={<AccessDeniedPage />} />
 
-              {/* Protected routes */}
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<Dashboard />} />
+                {/* Protected routes */}
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <MainLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<Dashboard />} />
 
-                {/* Products */}
-                <Route path="products">
-                  <Route index element={<ProductList />} />
-                  <Route path="new" element={<ProductCreate />} />
-                  <Route path="bulk" element={<BulkOperations />} />
-                  <Route path=":id" element={<ProductView />} />
-                  <Route path=":id/edit" element={<ProductEdit />} />
+                  {/* Products */}
+                  <Route path="products">
+                    <Route index element={<ProductList />} />
+                    <Route path="new" element={<ProductCreate />} />
+                    <Route path="bulk" element={<BulkOperations />} />
+                    <Route path=":id" element={<ProductView />} />
+                    <Route path=":id/edit" element={<ProductEdit />} />
+                  </Route>
+
+                  {/* Orders */}
+                  <Route path="orders">
+                    <Route index element={<OrderList />} />
+                    <Route path=":id" element={<OrderDetail />} />
+                  </Route>
+
+                  {/* Customers */}
+                  <Route path="customers">
+                    <Route index element={<CustomerList />} />
+                    <Route path=":id" element={<CustomerDetail />} />
+                  </Route>
+
+                  {/* Categories */}
+                  <Route path="categories">
+                    <Route index element={<CategoryList />} />
+                    <Route path="new" element={<CategoryDetail />} />
+                    <Route path=":id" element={<CategoryDetail />} />
+                  </Route>
+
+                  {/* Users (Administrators) */}
+                  <Route path="users">
+                    <Route index element={<UserList />} />
+                    <Route path="new" element={<UserForm />} />
+                    <Route path=":id" element={<UserDetail />} />
+                    <Route path=":id/edit" element={<UserForm />} />
+                    <Route path="roles" element={<RoleList />} />
+                    <Route path="roles/new" element={<RoleForm />} />
+                    <Route path="roles/:id/edit" element={<RoleForm />} />
+                  </Route>
+
+                  {/* Profile */}
+                  <Route path="profile" element={<AdminProfile />} />
+
+                  {/* Settings */}
+                  <Route path="settings" element={<Settings />} />
+
+                  {/* Reports */}
+                  <Route path="reports" element={<Reports />} />
                 </Route>
 
-                {/* Orders */}
-                <Route path="orders">
-                  <Route index element={<OrderList />} />
-                  <Route path=":id" element={<OrderDetail />} />
-                </Route>
-
-                {/* Customers */}
-                <Route path="customers">
-                  <Route index element={<CustomerList />} />
-                  <Route path=":id" element={<CustomerDetail />} />
-                </Route>
-
-                {/* Categories */}
-                <Route path="categories">
-                  <Route index element={<CategoryList />} />
-                  <Route path="new" element={<CategoryDetail />} />
-                  <Route path=":id" element={<CategoryDetail />} />
-                </Route>
-
-                {/* Users (Administrators) */}
-                <Route path="users">
-                  <Route index element={<UserList />} />
-                  <Route path="new" element={<UserForm />} />
-                  <Route path=":id" element={<UserDetail />} />
-                  <Route path=":id/edit" element={<UserForm />} />
-                  <Route path="roles" element={<RoleList />} />
-                  <Route path="roles/new" element={<RoleForm />} />
-                  <Route path="roles/:id/edit" element={<RoleForm />} />
-                </Route>
-
-                {/* Profile */}
-                <Route path="profile" element={<AdminProfile />} />
-
-                {/* Settings */}
-                <Route path="settings" element={<Settings />} />
-
-                {/* Reports */}
-                <Route path="reports" element={<Reports />} />
-              </Route>
-
-              {/* Catch all */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </BrowserRouter>
+                {/* Catch all */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </BrowserRouter>
+          </AuthInitializer>
         </ApolloProvider>
       </ThemeInitializer>
     </ReduxProvider>

@@ -52,7 +52,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 
   return (
     <div className="w-full">
-      {label && <label className="block text-sm font-medium text-muted-foreground mb-2">{label}</label>}
+      {label && (
+        <label className="block text-sm font-medium text-muted-foreground mb-2">{label}</label>
+      )}
 
       {/* Image Grid */}
       {value.length > 0 && (

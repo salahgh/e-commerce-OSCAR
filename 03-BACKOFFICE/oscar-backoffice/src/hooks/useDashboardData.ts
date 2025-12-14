@@ -203,48 +203,70 @@ export function useDashboardData(dateRange: DateRange = '30d') {
   const dateFilter = useMemo(() => getDateRangeFilter(dateRange), [dateRange]);
 
   // Memoize variables objects to prevent useQuery from refetching
-  const recentOrdersVariables = useMemo(() => ({
-    options: {
-      take: 5,
-      sort: { orderPlacedAt: 'DESC' as const },
-    },
-  }), []);
-
-  const analysisVariables = useMemo(() => ({
-    options: {
-      take: 100,
-      filter: {
-        orderPlacedAt: {
-          after: dateFilter.after,
-          before: dateFilter.before,
-        },
+  const recentOrdersVariables = useMemo(
+    () => ({
+      options: {
+        take: 5,
+        sort: { orderPlacedAt: 'DESC' as const },
       },
-      sort: { orderPlacedAt: 'ASC' as const },
-    },
-  }), [dateFilter.after, dateFilter.before]);
+    }),
+    []
+  );
+
+  const analysisVariables = useMemo(
+    () => ({
+      options: {
+        take: 100,
+        filter: {
+          orderPlacedAt: {
+            after: dateFilter.after,
+            before: dateFilter.before,
+          },
+        },
+        sort: { orderPlacedAt: 'ASC' as const },
+      },
+    }),
+    [dateFilter.after, dateFilter.before]
+  );
 
   // Fetch basic stats
-  const { data: statsData, loading: statsLoading, error: statsError } = useQuery(OSCAR_DASHBOARD_STATS, {
+  const {
+    data: statsData,
+    loading: statsLoading,
+    error: statsError,
+  } = useQuery(OSCAR_DASHBOARD_STATS, {
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
   });
 
   // Fetch recent orders with proper Vendure options
-  const { data: recentOrdersData, loading: recentLoading, error: recentError } = useQuery(RECENT_ORDERS, {
+  const {
+    data: recentOrdersData,
+    loading: recentLoading,
+    error: recentError,
+  } = useQuery(RECENT_ORDERS, {
     variables: recentOrdersVariables,
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
   });
 
   // Fetch low stock products
-  const { data: lowStockData, loading: lowStockLoading, error: lowStockError } = useQuery(LOW_STOCK_PRODUCTS, {
+  const {
+    data: lowStockData,
+    loading: lowStockLoading,
+    error: lowStockError,
+  } = useQuery(LOW_STOCK_PRODUCTS, {
     variables: { threshold: 10 },
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
   });
 
   // Fetch orders for analysis (with date filter)
-  const { data: ordersAnalysisData, loading: analysisLoading, error: analysisError } = useQuery(DASHBOARD_ORDERS_ANALYSIS, {
+  const {
+    data: ordersAnalysisData,
+    loading: analysisLoading,
+    error: analysisError,
+  } = useQuery(DASHBOARD_ORDERS_ANALYSIS, {
     variables: analysisVariables,
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',

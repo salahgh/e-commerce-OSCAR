@@ -8,21 +8,15 @@ import {
   Save,
   Package,
   Globe,
-  DollarSign,
-  Settings,
   Layers,
   Image as ImageIcon,
   Trash2,
   Star,
   Eye,
-  X,
-  Edit3,
   FolderTree,
   Upload,
-  Plus,
   Check,
   GripVertical,
-  AlertCircle,
   RefreshCw,
 } from 'lucide-react';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
@@ -30,21 +24,13 @@ import { addToast } from '../../store/slices/uiSlice';
 import {
   AdminProductDocument,
   UpdateProductDocument,
-  UpdateProductVariantsDocument,
   DeleteProductDocument,
   SetProductFeaturedAssetDocument,
   AdminCollectionsWithFiltersDocument,
   UpdateCollectionFiltersDocument,
   CreateAssetsDocument,
   AddAssetsToProductDocument,
-  CreateProductVariantsDocument,
-  DeleteProductVariantDocument,
   AdminProductOptionGroupsDocument,
-  AddOptionGroupToProductDocument,
-  RemoveOptionGroupFromProductDocument,
-  CreateProductOptionGroupDocument,
-  CreateProductOptionDocument,
-  DeleteProductOptionDocument,
   LanguageCode,
 } from '../../graphql/generated/graphql';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -54,6 +40,7 @@ import { TextArea } from '../../components/ui/TextArea';
 import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { VariantManager } from '../../components/products/VariantManager';
 import { formatPrice, formatDateTime } from '../../lib/utils';
 
 // Wizard steps - matching ProductCreate
@@ -82,13 +69,6 @@ const ProductSchema = Yup.object().shape({
   availableColors: Yup.string(),
 });
 
-interface NewVariant {
-  sku: string;
-  price: number;
-  stock: number;
-  options: Record<string, string>;
-}
-
 export const ProductEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -100,25 +80,6 @@ export const ProductEdit: React.FC = () => {
 
   // Dialog states
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showDeleteVariantDialog, setShowDeleteVariantDialog] = useState<string | null>(null);
-
-  // Variant editing state
-  const [editingVariant, setEditingVariant] = useState<string | null>(null);
-  const [variantEdits, setVariantEdits] = useState<
-    Record<string, { sku: string; price: number; stock: number; enabled: boolean }>
-  >({});
-
-  // Add variant state
-  const [showAddVariant, setShowAddVariant] = useState(false);
-  const [newVariant, setNewVariant] = useState<NewVariant>({
-    sku: '',
-    price: 0,
-    stock: 0,
-    options: {},
-  });
-  const [selectedOptionGroupsForVariant, setSelectedOptionGroupsForVariant] = useState<string[]>(
-    []
-  );
 
   // Image upload state
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -128,14 +89,6 @@ export const ProductEdit: React.FC = () => {
   // Collections state
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [savingCollections, setSavingCollections] = useState(false);
-
-  // Option groups state
-  const [showCreateOptionGroup, setShowCreateOptionGroup] = useState(false);
-  const [newOptionGroupName, setNewOptionGroupName] = useState('');
-  const [newOptionGroupCode, setNewOptionGroupCode] = useState('');
-  const [showAddOption, setShowAddOption] = useState<string | null>(null);
-  const [newOptionName, setNewOptionName] = useState('');
-  const [newOptionCode, setNewOptionCode] = useState('');
 
   // Fetch product data
   const { data, loading, error, refetch } = useQuery(AdminProductDocument, {
@@ -153,25 +106,11 @@ export const ProductEdit: React.FC = () => {
 
   // Mutations
   const [updateProduct, { loading: updating }] = useMutation(UpdateProductDocument);
-  const [updateVariants, { loading: updatingVariants }] = useMutation(
-    UpdateProductVariantsDocument
-  );
   const [deleteProduct, { loading: deleting }] = useMutation(DeleteProductDocument);
   const [setFeaturedAsset] = useMutation(SetProductFeaturedAssetDocument);
   const [updateCollectionFilters] = useMutation(UpdateCollectionFiltersDocument);
   const [createAssets] = useMutation(CreateAssetsDocument);
   const [addAssetsToProduct] = useMutation(AddAssetsToProductDocument);
-  const [createVariants, { loading: creatingVariant }] = useMutation(CreateProductVariantsDocument);
-  const [deleteVariant, { loading: deletingVariant }] = useMutation(DeleteProductVariantDocument);
-  const [addOptionGroupToProduct] = useMutation(AddOptionGroupToProductDocument);
-  const [removeOptionGroupFromProduct, { loading: removingOptionGroup }] = useMutation(
-    RemoveOptionGroupFromProductDocument
-  );
-  const [createOptionGroup, { loading: creatingOptionGroup }] = useMutation(
-    CreateProductOptionGroupDocument
-  );
-  const [createOption, { loading: creatingOption }] = useMutation(CreateProductOptionDocument);
-  const [deleteOption] = useMutation(DeleteProductOptionDocument);
 
   const product = data?.product;
   const allCollections = collectionsData?.collections?.items || [];
@@ -272,163 +211,6 @@ export const ProductEdit: React.FC = () => {
       }
     },
   });
-
-  // Handle variant update (sku, stock, price, enabled)
-  const handleVariantUpdate = async (variantId: string) => {
-    const edits = variantEdits[variantId];
-    if (!edits) return;
-
-    try {
-      const result = await updateVariants({
-        variables: {
-          input: [
-            {
-              id: variantId,
-              sku: edits.sku,
-              price: Math.round(edits.price * 100),
-              stockOnHand: edits.stock,
-              enabled: edits.enabled,
-            },
-          ],
-        },
-        refetchQueries: [{ query: AdminProductDocument, variables: { id: id! } }],
-        awaitRefetchQueries: true,
-      });
-
-      // Check if update was successful (Vendure returns null for failed updates)
-      const updatedVariants = result.data?.updateProductVariants?.filter(Boolean);
-      if (!updatedVariants || updatedVariants.length === 0) {
-        dispatch(addToast({ message: 'Erreur: la mise à jour a échoué', type: 'error' }));
-        return;
-      }
-
-      dispatch(addToast({ message: 'Variante mise à jour!', type: 'success' }));
-      setEditingVariant(null);
-      setVariantEdits((prev) => {
-        const newEdits = { ...prev };
-        delete newEdits[variantId];
-        return newEdits;
-      });
-    } catch (err: any) {
-      dispatch(
-        addToast({ message: err.message || 'Erreur lors de la mise à jour', type: 'error' })
-      );
-    }
-  };
-
-  // Start editing a variant
-  const startEditingVariant = (variant: any) => {
-    setEditingVariant(variant.id);
-    setVariantEdits({
-      ...variantEdits,
-      [variant.id]: {
-        sku: variant.sku,
-        price: variant.price / 100,
-        stock: variant.stockOnHand,
-        enabled: variant.enabled,
-      },
-    });
-  };
-
-  // Cancel editing a variant
-  const cancelEditingVariant = () => {
-    if (editingVariant) {
-      setVariantEdits((prev) => {
-        const newEdits = { ...prev };
-        delete newEdits[editingVariant];
-        return newEdits;
-      });
-    }
-    setEditingVariant(null);
-  };
-
-  // Handle adding new variant
-  const handleAddVariant = async () => {
-    if (!newVariant.sku.trim()) {
-      dispatch(addToast({ message: 'Le SKU est requis', type: 'error' }));
-      return;
-    }
-
-    try {
-      // First, add option groups to product if needed
-      const existingOptionGroupIds = product?.optionGroups?.map((g: any) => g.id) || [];
-      for (const groupId of selectedOptionGroupsForVariant) {
-        if (!existingOptionGroupIds.includes(groupId)) {
-          await addOptionGroupToProduct({
-            variables: {
-              productId: id!,
-              optionGroupId: groupId,
-            },
-          });
-        }
-      }
-
-      const result = await createVariants({
-        variables: {
-          input: [
-            {
-              productId: id!,
-              sku: newVariant.sku,
-              price: Math.round(newVariant.price * 100),
-              stockOnHand: newVariant.stock,
-              optionIds: Object.values(newVariant.options).filter(Boolean),
-              translations: [
-                {
-                  languageCode: LanguageCode.En,
-                  name: newVariant.sku,
-                },
-              ],
-            },
-          ],
-        },
-        refetchQueries: [{ query: AdminProductDocument, variables: { id: id! } }],
-        awaitRefetchQueries: true,
-      });
-
-      // Check if variant was actually created (Vendure returns null for failed variants)
-      const createdVariants = result.data?.createProductVariants?.filter(Boolean);
-      if (!createdVariants || createdVariants.length === 0) {
-        dispatch(
-          addToast({
-            message: "Erreur: la variante n'a pas été créée. Vérifiez les options sélectionnées.",
-            type: 'error',
-          })
-        );
-        return;
-      }
-
-      dispatch(addToast({ message: 'Variante ajoutée!', type: 'success' }));
-      setShowAddVariant(false);
-      setNewVariant({ sku: '', price: 0, stock: 0, options: {} });
-      setSelectedOptionGroupsForVariant([]);
-    } catch (err: any) {
-      dispatch(addToast({ message: err.message || "Erreur lors de l'ajout", type: 'error' }));
-    }
-  };
-
-  // Handle deleting variant
-  const handleDeleteVariant = async (variantId: string) => {
-    try {
-      const result = await deleteVariant({
-        variables: { id: variantId },
-        refetchQueries: [{ query: AdminProductDocument, variables: { id: id! } }],
-        awaitRefetchQueries: true,
-      });
-      if (result.data?.deleteProductVariant?.result === 'DELETED') {
-        dispatch(addToast({ message: 'Variante supprimée!', type: 'success' }));
-      } else {
-        const errorMessage =
-          result.data?.deleteProductVariant?.message || 'Erreur lors de la suppression';
-        dispatch(addToast({ message: errorMessage, type: 'error' }));
-      }
-    } catch (err: any) {
-      // Extract the actual error message from GraphQL errors
-      const graphqlError =
-        err.graphQLErrors?.[0]?.message || err.message || 'Erreur lors de la suppression';
-      dispatch(addToast({ message: graphqlError, type: 'error' }));
-    }
-    setShowDeleteVariantDialog(null);
-  };
 
   // Handle setting featured asset
   const handleSetFeaturedAsset = async (assetId: string) => {
@@ -668,195 +450,6 @@ export const ProductEdit: React.FC = () => {
     setShowDeleteDialog(false);
   };
 
-  // Toggle option group for new variant
-  const toggleOptionGroupForVariant = (groupId: string) => {
-    setSelectedOptionGroupsForVariant((prev) =>
-      prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId]
-    );
-  };
-
-  // Update new variant option
-  const updateNewVariantOption = (groupId: string, optionId: string) => {
-    setNewVariant((prev) => ({
-      ...prev,
-      options: { ...prev.options, [groupId]: optionId },
-    }));
-  };
-
-  // Handle creating a new option group
-  const handleCreateOptionGroup = async () => {
-    if (!newOptionGroupName.trim()) {
-      dispatch(addToast({ message: 'Le nom est requis', type: 'error' }));
-      return;
-    }
-
-    const code =
-      newOptionGroupCode.trim() ||
-      newOptionGroupName
-        .toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '');
-
-    try {
-      const result = await createOptionGroup({
-        variables: {
-          input: {
-            code,
-            translations: [
-              {
-                languageCode: LanguageCode.En,
-                name: newOptionGroupName.trim(),
-              },
-            ],
-            options: [],
-          },
-        },
-        refetchQueries: [{ query: AdminProductOptionGroupsDocument }],
-      });
-
-      if (result.data?.createProductOptionGroup?.id) {
-        // Automatically add the new option group to the product
-        await addOptionGroupToProduct({
-          variables: {
-            productId: id!,
-            optionGroupId: result.data.createProductOptionGroup.id,
-          },
-        });
-        dispatch(
-          addToast({ message: "Groupe d'options créé et ajouté au produit!", type: 'success' })
-        );
-        setShowCreateOptionGroup(false);
-        setNewOptionGroupName('');
-        setNewOptionGroupCode('');
-        refetch();
-      }
-    } catch (err: any) {
-      dispatch(addToast({ message: err.message || 'Erreur lors de la création', type: 'error' }));
-    }
-  };
-
-  // Handle adding option group to product
-  const handleAddOptionGroupToProduct = async (optionGroupId: string) => {
-    try {
-      await addOptionGroupToProduct({
-        variables: {
-          productId: id!,
-          optionGroupId,
-        },
-      });
-      dispatch(addToast({ message: "Groupe d'options ajouté!", type: 'success' }));
-      refetch();
-    } catch (err: any) {
-      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
-    }
-  };
-
-  // Handle removing option group from product
-  const handleRemoveOptionGroupFromProduct = async (optionGroupId: string) => {
-    try {
-      const result = await removeOptionGroupFromProduct({
-        variables: {
-          productId: id!,
-          optionGroupId,
-          force: false,
-        },
-      });
-
-      // Check if there was an error (ProductOptionInUseError)
-      if (result.data?.removeOptionGroupFromProduct?.__typename === 'ProductOptionInUseError') {
-        const error = result.data.removeOptionGroupFromProduct as any;
-        dispatch(
-          addToast({
-            message: `Ce groupe d'options est utilisé par ${error.productVariantCount} variante(s). Supprimez d'abord les variantes.`,
-            type: 'error',
-          })
-        );
-      } else {
-        dispatch(addToast({ message: "Groupe d'options retiré!", type: 'success' }));
-        refetch();
-      }
-    } catch (err: any) {
-      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
-    }
-  };
-
-  // Handle creating a new option within a group
-  const handleCreateOption = async (groupId: string) => {
-    if (!newOptionName.trim()) {
-      dispatch(addToast({ message: 'Le nom est requis', type: 'error' }));
-      return;
-    }
-
-    const code =
-      newOptionCode.trim() ||
-      newOptionName
-        .toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '');
-
-    try {
-      await createOption({
-        variables: {
-          input: {
-            productOptionGroupId: groupId,
-            code,
-            translations: [
-              {
-                languageCode: LanguageCode.En,
-                name: newOptionName.trim(),
-              },
-            ],
-          },
-        },
-        refetchQueries: [
-          { query: AdminProductOptionGroupsDocument },
-          { query: AdminProductDocument, variables: { id: id! } },
-        ],
-      });
-
-      dispatch(addToast({ message: 'Option créée!', type: 'success' }));
-      setShowAddOption(null);
-      setNewOptionName('');
-      setNewOptionCode('');
-      refetch();
-    } catch (err: any) {
-      dispatch(addToast({ message: err.message || 'Erreur lors de la création', type: 'error' }));
-    }
-  };
-
-  // Handle deleting an option
-  const handleDeleteOption = async (optionId: string) => {
-    try {
-      const result = await deleteOption({
-        variables: { id: optionId },
-        refetchQueries: [
-          { query: AdminProductOptionGroupsDocument },
-          { query: AdminProductDocument, variables: { id: id! } },
-        ],
-      });
-
-      if (result.data?.deleteProductOption?.result === 'DELETED') {
-        dispatch(addToast({ message: 'Option supprimée!', type: 'success' }));
-        refetch();
-      } else {
-        dispatch(
-          addToast({
-            message: result.data?.deleteProductOption?.message || 'Erreur lors de la suppression',
-            type: 'error',
-          })
-        );
-      }
-    } catch (err: any) {
-      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
-    }
-  };
-
-  // Get option groups available to add (not already on product)
-  const getAvailableOptionGroups = () => {
-    const productOptionGroupIds = product?.optionGroups?.map((g: any) => g.id) || [];
-    return allOptionGroups.filter((g: any) => !productOptionGroupIds.includes(g.id));
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
@@ -1076,8 +669,12 @@ export const ProductEdit: React.FC = () => {
               className={`h-12 w-12 mx-auto mb-4 ${isDraggingOver ? 'text-primary' : 'text-muted-foreground'}`}
             />
             <p className="text-lg font-medium text-foreground">Glissez-déposez vos images ici</p>
-            <p className="text-sm text-muted-foreground mt-2">ou cliquez pour sélectionner des fichiers</p>
-            <p className="text-xs text-muted-foreground/70 mt-4">PNG, JPG, WEBP jusqu'à 10MB chacun</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              ou cliquez pour sélectionner des fichiers
+            </p>
+            <p className="text-xs text-muted-foreground/70 mt-4">
+              PNG, JPG, WEBP jusqu'à 10MB chacun
+            </p>
           </>
         )}
       </div>
@@ -1192,514 +789,14 @@ export const ProductEdit: React.FC = () => {
   );
 
   const VariantsTab = (
-    <div className="space-y-6">
-      {/* Option Groups Management Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              Groupes d'options du produit
-            </span>
-            <div className="flex gap-2">
-              {getAvailableOptionGroups().length > 0 && (
-                <select
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      handleAddOptionGroupToProduct(e.target.value);
-                      e.target.value = '';
-                    }
-                  }}
-                  className="text-sm bg-muted border border-border text-foreground rounded-lg px-3 py-1.5"
-                >
-                  <option value="">Ajouter un groupe existant...</option>
-                  {getAvailableOptionGroups().map((group: any) => (
-                    <option key={group.id} value={group.id}>
-                      {group.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => setShowCreateOptionGroup(true)}
-                icon={<Plus className="h-3 w-3" />}
-              >
-                Nouveau groupe
-              </Button>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {/* Create Option Group Form */}
-          {showCreateOptionGroup && (
-            <div className="bg-purple-900/30 border border-purple-700 rounded-lg p-4 mb-4">
-              <h4 className="text-sm font-medium text-purple-300 mb-3">
-                Créer un nouveau groupe d'options
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                <input
-                  type="text"
-                  value={newOptionGroupName}
-                  onChange={(e) => setNewOptionGroupName(e.target.value)}
-                  placeholder="Nom (ex: Taille, Couleur)"
-                  className="px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm"
-                />
-                <input
-                  type="text"
-                  value={newOptionGroupCode}
-                  onChange={(e) => setNewOptionGroupCode(e.target.value)}
-                  placeholder="Code (optionnel, ex: size)"
-                  className="px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={handleCreateOptionGroup}
-                  loading={creatingOptionGroup}
-                >
-                  Créer
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setShowCreateOptionGroup(false);
-                    setNewOptionGroupName('');
-                    setNewOptionGroupCode('');
-                  }}
-                >
-                  Annuler
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Product's Option Groups */}
-          {product.optionGroups && product.optionGroups.length > 0 ? (
-            <div className="space-y-4">
-              {product.optionGroups.map((group: any) => (
-                <div key={group.id} className="border border-border rounded-lg p-4 bg-muted/30">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <h4 className="font-medium text-foreground">{group.name}</h4>
-                      <p className="text-xs text-muted-foreground">Code: {group.code}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => setShowAddOption(group.id)}
-                        icon={<Plus className="h-3 w-3" />}
-                      >
-                        Ajouter option
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="danger"
-                        onClick={() => handleRemoveOptionGroupFromProduct(group.id)}
-                        loading={removingOptionGroup}
-                        icon={<Trash2 className="h-3 w-3" />}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Add Option Form */}
-                  {showAddOption === group.id && (
-                    <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-3 mb-3">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
-                        <input
-                          type="text"
-                          value={newOptionName}
-                          onChange={(e) => setNewOptionName(e.target.value)}
-                          placeholder="Nom de l'option (ex: S, M, L)"
-                          className="px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm"
-                        />
-                        <input
-                          type="text"
-                          value={newOptionCode}
-                          onChange={(e) => setNewOptionCode(e.target.value)}
-                          placeholder="Code (optionnel)"
-                          className="px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm"
-                        />
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => handleCreateOption(group.id)}
-                          loading={creatingOption}
-                        >
-                          Ajouter
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            setShowAddOption(null);
-                            setNewOptionName('');
-                            setNewOptionCode('');
-                          }}
-                        >
-                          Annuler
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Options List */}
-                  <div className="flex flex-wrap gap-2">
-                    {group.options && group.options.length > 0 ? (
-                      group.options.map((option: any) => (
-                        <div
-                          key={option.id}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-muted rounded-lg"
-                        >
-                          <span className="text-sm text-foreground">{option.name}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteOption(option.id)}
-                            className="text-muted-foreground hover:text-red-400 ml-1"
-                            title="Supprimer cette option"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))
-                    ) : (
-                      <span className="text-sm text-muted-foreground italic">
-                        Aucune option - ajoutez-en
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-6 text-muted-foreground">
-              <Settings className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
-              <p className="text-sm">Aucun groupe d'options sur ce produit</p>
-              <p className="text-xs text-muted-foreground/70 mt-1">
-                Ajoutez des groupes d'options (ex: Taille, Couleur) pour créer des variantes
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Header with Add Variant Button */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-medium text-foreground">Variantes du produit</h3>
-          <p className="text-sm text-muted-foreground">
-            Gérez les variantes: SKU, prix, stock, options et statut.
-          </p>
-        </div>
-        <Button
-          type="button"
-          onClick={() => setShowAddVariant(true)}
-          icon={<Plus className="h-4 w-4" />}
-        >
-          Ajouter une variante
-        </Button>
-      </div>
-
-      {/* Add Variant Form */}
-      {showAddVariant && (
-        <Card className="border-green-700 bg-green-900/30">
-          <CardHeader>
-            <CardTitle className="text-base text-green-300">Nouvelle variante</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Use product's option groups for new variant */}
-            {product.optionGroups && product.optionGroups.length > 0 && (
-              <div>
-                <p className="text-sm font-medium text-foreground mb-2">Options de la variante</p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {product.optionGroups.map((group: any) => (
-                    <div key={group.id}>
-                      <label className="block text-xs font-medium text-foreground mb-1">
-                        {group.name}
-                      </label>
-                      <select
-                        value={newVariant.options[group.id] || ''}
-                        onChange={(e) => updateNewVariantOption(group.id, e.target.value)}
-                        className="w-full px-3 py-2 bg-muted border border-border text-foreground rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      >
-                        <option value="">-- Sélectionner --</option>
-                        {group.options?.map((option: any) => (
-                          <option key={option.id} value={option.id}>
-                            {option.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Variant Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-foreground mb-1">SKU *</label>
-                <input
-                  type="text"
-                  value={newVariant.sku}
-                  onChange={(e) => setNewVariant({ ...newVariant, sku: e.target.value })}
-                  placeholder="SKU-001"
-                  className="w-full px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-foreground mb-1">Prix (DZD)</label>
-                <input
-                  type="number"
-                  value={newVariant.price || ''}
-                  onChange={(e) =>
-                    setNewVariant({ ...newVariant, price: parseFloat(e.target.value) || 0 })
-                  }
-                  placeholder="0"
-                  className="w-full px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  min="0"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-foreground mb-1">Stock</label>
-                <input
-                  type="number"
-                  value={newVariant.stock || ''}
-                  onChange={(e) =>
-                    setNewVariant({ ...newVariant, stock: parseInt(e.target.value) || 0 })
-                  }
-                  placeholder="0"
-                  className="w-full px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  min="0"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => {
-                  setShowAddVariant(false);
-                  setNewVariant({ sku: '', price: 0, stock: 0, options: {} });
-                }}
-              >
-                Annuler
-              </Button>
-              <Button
-                type="button"
-                onClick={handleAddVariant}
-                loading={creatingVariant}
-                icon={<Plus className="h-4 w-4" />}
-              >
-                Ajouter
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Variants Table */}
-      <div className="overflow-x-auto bg-card rounded-lg border border-border">
-        <table className="min-w-full divide-y divide-border">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                SKU
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                Options
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                Prix (DZD)
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                Stock
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                Statut
-              </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-card divide-y divide-border">
-            {product.variants?.map((variant) => (
-              <tr
-                key={variant.id}
-                className={`hover:bg-accent ${editingVariant === variant.id ? 'bg-primary/10' : ''}`}
-              >
-                <td className="px-4 py-3">
-                  {editingVariant === variant.id ? (
-                    <input
-                      type="text"
-                      value={variantEdits[variant.id]?.sku ?? variant.sku}
-                      onChange={(e) =>
-                        setVariantEdits({
-                          ...variantEdits,
-                          [variant.id]: {
-                            ...variantEdits[variant.id],
-                            sku: e.target.value,
-                          },
-                        })
-                      }
-                      className="w-32 px-2 py-1 bg-muted border border-border text-foreground rounded text-sm focus:ring-2 focus:ring-primary focus:border-primary"
-                    />
-                  ) : (
-                    <div>
-                      <span className="text-sm font-medium text-foreground">{variant.sku}</span>
-                      {variant.name !== variant.sku && (
-                        <p className="text-xs text-muted-foreground">{variant.name}</p>
-                      )}
-                    </div>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-sm text-muted-foreground">
-                  {variant.options && variant.options.length > 0 ? (
-                    <div className="flex flex-wrap gap-1">
-                      {variant.options.map((opt) => (
-                        <Badge key={opt.id} variant="default" className="text-xs">
-                          {opt.group?.name}: {opt.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  ) : (
-                    <span className="text-muted-foreground">-</span>
-                  )}
-                </td>
-                <td className="px-4 py-3">
-                  {editingVariant === variant.id ? (
-                    <input
-                      type="number"
-                      value={variantEdits[variant.id]?.price ?? variant.price / 100}
-                      onChange={(e) =>
-                        setVariantEdits({
-                          ...variantEdits,
-                          [variant.id]: {
-                            ...variantEdits[variant.id],
-                            price: parseFloat(e.target.value) || 0,
-                          },
-                        })
-                      }
-                      className="w-28 px-2 py-1 bg-muted border border-border text-foreground rounded text-sm focus:ring-2 focus:ring-primary focus:border-primary"
-                      min="0"
-                      step="0.01"
-                    />
-                  ) : (
-                    <span className="font-medium text-foreground">
-                      {formatPrice(variant.price / 100)}
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-3">
-                  {editingVariant === variant.id ? (
-                    <input
-                      type="number"
-                      value={variantEdits[variant.id]?.stock ?? variant.stockOnHand}
-                      onChange={(e) =>
-                        setVariantEdits({
-                          ...variantEdits,
-                          [variant.id]: {
-                            ...variantEdits[variant.id],
-                            stock: parseInt(e.target.value) || 0,
-                          },
-                        })
-                      }
-                      className="w-20 px-2 py-1 bg-muted border border-border text-foreground rounded text-sm focus:ring-2 focus:ring-primary focus:border-primary"
-                      min="0"
-                    />
-                  ) : (
-                    <span
-                      className={`font-medium ${
-                        variant.stockOnHand === 0
-                          ? 'text-red-400'
-                          : variant.stockOnHand < (variant.customFields?.minStockAlert || 10)
-                            ? 'text-orange-400'
-                            : 'text-green-400'
-                      }`}
-                    >
-                      {variant.stockOnHand}
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-3">
-                  {editingVariant === variant.id ? (
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={variantEdits[variant.id]?.enabled ?? variant.enabled}
-                        onChange={(e) =>
-                          setVariantEdits({
-                            ...variantEdits,
-                            [variant.id]: {
-                              ...variantEdits[variant.id],
-                              enabled: e.target.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-primary border-border rounded bg-card"
-                      />
-                      <span className="text-sm text-muted-foreground">Actif</span>
-                    </label>
-                  ) : (
-                    <Badge variant={variant.enabled ? 'success' : 'default'}>
-                      {variant.enabled ? 'Actif' : 'Inactif'}
-                    </Badge>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  {editingVariant === variant.id ? (
-                    <div className="flex items-center justify-end gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleVariantUpdate(variant.id)}
-                        loading={updatingVariants}
-                        icon={<Check className="h-3 w-3" />}
-                      >
-                        Sauver
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={cancelEditingVariant}>
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-end gap-2">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => startEditingVariant(variant)}
-                        icon={<Edit3 className="h-3 w-3" />}
-                      >
-                        Modifier
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        onClick={() => setShowDeleteVariantDialog(variant.id)}
-                        icon={<Trash2 className="h-3 w-3" />}
-                        title="Supprimer cette variante"
-                      />
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <VariantManager
+      productId={id!}
+      productName={product?.name || ''}
+      optionGroups={product?.optionGroups || []}
+      variants={product?.variants || []}
+      allOptionGroups={allOptionGroups}
+      onRefetch={refetch}
+    />
   );
 
   const CategoriesTab = (
@@ -1755,7 +852,9 @@ export const ProductEdit: React.FC = () => {
               />
               <div>
                 <p className="font-medium text-foreground">{collection.name}</p>
-                {collection.slug && <p className="text-xs text-muted-foreground">/{collection.slug}</p>}
+                {collection.slug && (
+                  <p className="text-xs text-muted-foreground">/{collection.slug}</p>
+                )}
               </div>
             </label>
           ))}
@@ -1888,7 +987,9 @@ export const ProductEdit: React.FC = () => {
             >
               {totalStock} unités
             </p>
-            <p className="text-sm text-muted-foreground">{product.variants?.length || 0} variante(s)</p>
+            <p className="text-sm text-muted-foreground">
+              {product.variants?.length || 0} variante(s)
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -1964,9 +1065,7 @@ export const ProductEdit: React.FC = () => {
 
         <div className="flex items-center gap-3">
           {currentStep < STEPS.length - 1 ? (
-            <Button onClick={() => goToStep(currentStep + 1)}>
-              Suivant
-            </Button>
+            <Button onClick={() => goToStep(currentStep + 1)}>Suivant</Button>
           ) : (
             <Button
               onClick={() => formik.handleSubmit()}
@@ -1989,18 +1088,6 @@ export const ProductEdit: React.FC = () => {
         confirmText="Supprimer"
         variant="danger"
         loading={deleting}
-      />
-
-      {/* Delete Variant Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={!!showDeleteVariantDialog}
-        onClose={() => setShowDeleteVariantDialog(null)}
-        onConfirm={() => showDeleteVariantDialog && handleDeleteVariant(showDeleteVariantDialog)}
-        title="Supprimer la variante"
-        message="Êtes-vous sûr de vouloir supprimer cette variante? Cette action est irréversible."
-        confirmText="Supprimer"
-        variant="danger"
-        loading={deletingVariant}
       />
     </div>
   );

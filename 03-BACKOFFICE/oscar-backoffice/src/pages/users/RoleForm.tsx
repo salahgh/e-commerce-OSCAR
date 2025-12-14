@@ -26,14 +26,12 @@ const validationSchema = Yup.object().shape({
     .matches(/^[a-z_]+$/, 'Le code doit être en minuscules avec des underscores')
     .required('Le code est requis'),
   description: Yup.string().required('La description est requise'),
-  permissions: Yup.array()
-    .of(Yup.string())
-    .min(1, 'Au moins une permission est requise'),
+  permissions: Yup.array().of(Yup.string()).min(1, 'Au moins une permission est requise'),
 });
 
 // Permission categories for grouping
 const PERMISSION_CATEGORIES = {
-  'Catalogue': [
+  Catalogue: [
     Permission.CreateCatalog,
     Permission.ReadCatalog,
     Permission.UpdateCatalog,
@@ -51,13 +49,13 @@ const PERMISSION_CATEGORIES = {
     Permission.UpdateCollection,
     Permission.DeleteCollection,
   ],
-  'Commandes': [
+  Commandes: [
     Permission.CreateOrder,
     Permission.ReadOrder,
     Permission.UpdateOrder,
     Permission.DeleteOrder,
   ],
-  'Clients': [
+  Clients: [
     Permission.CreateCustomer,
     Permission.ReadCustomer,
     Permission.UpdateCustomer,
@@ -67,38 +65,38 @@ const PERMISSION_CATEGORIES = {
     Permission.UpdateCustomerGroup,
     Permission.DeleteCustomerGroup,
   ],
-  'Administrateurs': [
+  Administrateurs: [
     Permission.CreateAdministrator,
     Permission.ReadAdministrator,
     Permission.UpdateAdministrator,
     Permission.DeleteAdministrator,
   ],
-  'Paramètres': [
+  Paramètres: [
     Permission.CreateSettings,
     Permission.ReadSettings,
     Permission.UpdateSettings,
     Permission.DeleteSettings,
     Permission.UpdateGlobalSettings,
   ],
-  'Paiements': [
+  Paiements: [
     Permission.CreatePaymentMethod,
     Permission.ReadPaymentMethod,
     Permission.UpdatePaymentMethod,
     Permission.DeletePaymentMethod,
   ],
-  'Livraison': [
+  Livraison: [
     Permission.CreateShippingMethod,
     Permission.ReadShippingMethod,
     Permission.UpdateShippingMethod,
     Permission.DeleteShippingMethod,
   ],
-  'Promotions': [
+  Promotions: [
     Permission.CreatePromotion,
     Permission.ReadPromotion,
     Permission.UpdatePromotion,
     Permission.DeletePromotion,
   ],
-  'Assets': [
+  Assets: [
     Permission.CreateAsset,
     Permission.ReadAsset,
     Permission.UpdateAsset,
@@ -142,9 +140,7 @@ export const RoleForm: React.FC = () => {
   const submitting = creating || updating;
 
   const formatPermission = (permission: string): string => {
-    return permission
-      .replace(/([A-Z])/g, ' $1')
-      .trim();
+    return permission.replace(/([A-Z])/g, ' $1').trim();
   };
 
   const initialValues: FormValues = {
@@ -242,9 +238,7 @@ export const RoleForm: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Code *
-                    </label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Code *</label>
                     <Field
                       type="text"
                       name="code"
@@ -255,11 +249,7 @@ export const RoleForm: React.FC = () => {
                     <p className="mt-1 text-xs text-muted-foreground">
                       Minuscules et underscores uniquement
                     </p>
-                    <ErrorMessage
-                      name="code"
-                      component="p"
-                      className="mt-1 text-sm text-red-400"
-                    />
+                    <ErrorMessage name="code" component="p" className="mt-1 text-sm text-red-400" />
                   </div>
 
                   <div>
@@ -291,7 +281,8 @@ export const RoleForm: React.FC = () => {
                     Permissions *
                   </h2>
                   <span className="text-sm text-muted-foreground">
-                    {values.permissions.length} sélectionnée{values.permissions.length > 1 ? 's' : ''}
+                    {values.permissions.length} sélectionnée
+                    {values.permissions.length > 1 ? 's' : ''}
                   </span>
                 </div>
 

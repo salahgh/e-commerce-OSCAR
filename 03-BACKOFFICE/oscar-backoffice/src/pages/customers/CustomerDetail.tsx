@@ -62,14 +62,64 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { formatDateTime, formatPrice } from '../../lib/utils';
 
 const WILAYAS = [
-  'Adrar', 'Chlef', 'Laghouat', 'Oum El Bouaghi', 'Batna', 'Béjaïa', 'Biskra', 'Béchar',
-  'Blida', 'Bouira', 'Tamanrasset', 'Tébessa', 'Tlemcen', 'Tiaret', 'Tizi Ouzou', 'Alger',
-  'Djelfa', 'Jijel', 'Sétif', 'Saïda', 'Skikda', 'Sidi Bel Abbès', 'Annaba', 'Guelma',
-  'Constantine', 'Médéa', 'Mostaganem', "M'Sila", 'Mascara', 'Ouargla', 'Oran', 'El Bayadh',
-  'Illizi', 'Bordj Bou Arréridj', 'Boumerdès', 'El Tarf', 'Tindouf', 'Tissemsilt', 'El Oued',
-  'Khenchela', 'Souk Ahras', 'Tipaza', 'Mila', 'Aïn Defla', 'Naâma', 'Aïn Témouchent',
-  'Ghardaïa', 'Relizane', 'Timimoun', 'Bordj Badji Mokhtar', 'Ouled Djellal', 'Béni Abbès',
-  'In Salah', 'In Guezzam', 'Touggourt', 'Djanet', "El M'Ghair", 'El Meniaa',
+  'Adrar',
+  'Chlef',
+  'Laghouat',
+  'Oum El Bouaghi',
+  'Batna',
+  'Béjaïa',
+  'Biskra',
+  'Béchar',
+  'Blida',
+  'Bouira',
+  'Tamanrasset',
+  'Tébessa',
+  'Tlemcen',
+  'Tiaret',
+  'Tizi Ouzou',
+  'Alger',
+  'Djelfa',
+  'Jijel',
+  'Sétif',
+  'Saïda',
+  'Skikda',
+  'Sidi Bel Abbès',
+  'Annaba',
+  'Guelma',
+  'Constantine',
+  'Médéa',
+  'Mostaganem',
+  "M'Sila",
+  'Mascara',
+  'Ouargla',
+  'Oran',
+  'El Bayadh',
+  'Illizi',
+  'Bordj Bou Arréridj',
+  'Boumerdès',
+  'El Tarf',
+  'Tindouf',
+  'Tissemsilt',
+  'El Oued',
+  'Khenchela',
+  'Souk Ahras',
+  'Tipaza',
+  'Mila',
+  'Aïn Defla',
+  'Naâma',
+  'Aïn Témouchent',
+  'Ghardaïa',
+  'Relizane',
+  'Timimoun',
+  'Bordj Badji Mokhtar',
+  'Ouled Djellal',
+  'Béni Abbès',
+  'In Salah',
+  'In Guezzam',
+  'Touggourt',
+  'Djanet',
+  "El M'Ghair",
+  'El Meniaa',
 ];
 
 const WILAYA_OPTIONS = [
@@ -77,34 +127,138 @@ const WILAYA_OPTIONS = [
   ...WILAYAS.map((w) => ({ value: w, label: w })),
 ];
 
-const ORDER_STATE_CONFIG: Record<string, {
-  label: string;
-  variant: 'default' | 'success' | 'warning' | 'danger' | 'info';
-  icon: React.ReactNode;
-  color: string;
-  bgColor: string;
-}> = {
-  Created: { label: 'Créée', variant: 'default', icon: <Package className="h-3 w-3" />, color: 'text-muted-foreground', bgColor: 'bg-muted' },
-  AddingItems: { label: 'En cours', variant: 'default', icon: <ShoppingCart className="h-3 w-3" />, color: 'text-muted-foreground', bgColor: 'bg-muted' },
-  ArrangingPayment: { label: 'Paiement', variant: 'warning', icon: <CreditCard className="h-3 w-3" />, color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' },
-  PaymentAuthorized: { label: 'Autorisée', variant: 'info', icon: <CheckCircle className="h-3 w-3" />, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
-  PaymentSettled: { label: 'Payée', variant: 'info', icon: <CheckCircle className="h-3 w-3" />, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
-  PartiallyShipped: { label: 'Part. expédiée', variant: 'warning', icon: <Truck className="h-3 w-3" />, color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' },
-  Shipped: { label: 'Expédiée', variant: 'info', icon: <Truck className="h-3 w-3" />, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
-  PartiallyDelivered: { label: 'Part. livrée', variant: 'warning', icon: <Package className="h-3 w-3" />, color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' },
-  Delivered: { label: 'Livrée', variant: 'success', icon: <CheckCircle className="h-3 w-3" />, color: 'text-green-400', bgColor: 'bg-green-500/20' },
-  Modifying: { label: 'Modification', variant: 'warning', icon: <Edit2 className="h-3 w-3" />, color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' },
-  ArrangingAdditionalPayment: { label: 'Paiement add.', variant: 'warning', icon: <CreditCard className="h-3 w-3" />, color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' },
-  Cancelled: { label: 'Annulée', variant: 'danger', icon: <X className="h-3 w-3" />, color: 'text-red-400', bgColor: 'bg-red-500/20' },
+const ORDER_STATE_CONFIG: Record<
+  string,
+  {
+    label: string;
+    variant: 'default' | 'success' | 'warning' | 'danger' | 'info';
+    icon: React.ReactNode;
+    color: string;
+    bgColor: string;
+  }
+> = {
+  Created: {
+    label: 'Créée',
+    variant: 'default',
+    icon: <Package className="h-3 w-3" />,
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted',
+  },
+  AddingItems: {
+    label: 'En cours',
+    variant: 'default',
+    icon: <ShoppingCart className="h-3 w-3" />,
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted',
+  },
+  ArrangingPayment: {
+    label: 'Paiement',
+    variant: 'warning',
+    icon: <CreditCard className="h-3 w-3" />,
+    color: 'text-yellow-400',
+    bgColor: 'bg-yellow-500/20',
+  },
+  PaymentAuthorized: {
+    label: 'Autorisée',
+    variant: 'info',
+    icon: <CheckCircle className="h-3 w-3" />,
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-500/20',
+  },
+  PaymentSettled: {
+    label: 'Payée',
+    variant: 'info',
+    icon: <CheckCircle className="h-3 w-3" />,
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-500/20',
+  },
+  PartiallyShipped: {
+    label: 'Part. expédiée',
+    variant: 'warning',
+    icon: <Truck className="h-3 w-3" />,
+    color: 'text-yellow-400',
+    bgColor: 'bg-yellow-500/20',
+  },
+  Shipped: {
+    label: 'Expédiée',
+    variant: 'info',
+    icon: <Truck className="h-3 w-3" />,
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-500/20',
+  },
+  PartiallyDelivered: {
+    label: 'Part. livrée',
+    variant: 'warning',
+    icon: <Package className="h-3 w-3" />,
+    color: 'text-yellow-400',
+    bgColor: 'bg-yellow-500/20',
+  },
+  Delivered: {
+    label: 'Livrée',
+    variant: 'success',
+    icon: <CheckCircle className="h-3 w-3" />,
+    color: 'text-green-400',
+    bgColor: 'bg-green-500/20',
+  },
+  Modifying: {
+    label: 'Modification',
+    variant: 'warning',
+    icon: <Edit2 className="h-3 w-3" />,
+    color: 'text-yellow-400',
+    bgColor: 'bg-yellow-500/20',
+  },
+  ArrangingAdditionalPayment: {
+    label: 'Paiement add.',
+    variant: 'warning',
+    icon: <CreditCard className="h-3 w-3" />,
+    color: 'text-yellow-400',
+    bgColor: 'bg-yellow-500/20',
+  },
+  Cancelled: {
+    label: 'Annulée',
+    variant: 'danger',
+    icon: <X className="h-3 w-3" />,
+    color: 'text-red-400',
+    bgColor: 'bg-red-500/20',
+  },
 };
 
 // Customer tier based on lifetime value
 const getCustomerTier = (lifetimeValue: number) => {
-  if (lifetimeValue >= 10000000) return { name: 'Diamant', color: 'from-cyan-400 to-blue-500', icon: <Sparkles className="h-5 w-5" />, textColor: 'text-cyan-400' };
-  if (lifetimeValue >= 5000000) return { name: 'Platine', color: 'from-purple-400 to-pink-500', icon: <Star className="h-5 w-5" />, textColor: 'text-purple-400' };
-  if (lifetimeValue >= 2000000) return { name: 'Or', color: 'from-yellow-400 to-orange-500', icon: <Award className="h-5 w-5" />, textColor: 'text-yellow-400' };
-  if (lifetimeValue >= 500000) return { name: 'Argent', color: 'from-gray-300 to-gray-500', icon: <Shield className="h-5 w-5" />, textColor: 'text-gray-300' };
-  return { name: 'Bronze', color: 'from-orange-300 to-orange-600', icon: <Heart className="h-5 w-5" />, textColor: 'text-orange-400' };
+  if (lifetimeValue >= 10000000)
+    return {
+      name: 'Diamant',
+      color: 'from-cyan-400 to-blue-500',
+      icon: <Sparkles className="h-5 w-5" />,
+      textColor: 'text-cyan-400',
+    };
+  if (lifetimeValue >= 5000000)
+    return {
+      name: 'Platine',
+      color: 'from-purple-400 to-pink-500',
+      icon: <Star className="h-5 w-5" />,
+      textColor: 'text-purple-400',
+    };
+  if (lifetimeValue >= 2000000)
+    return {
+      name: 'Or',
+      color: 'from-yellow-400 to-orange-500',
+      icon: <Award className="h-5 w-5" />,
+      textColor: 'text-yellow-400',
+    };
+  if (lifetimeValue >= 500000)
+    return {
+      name: 'Argent',
+      color: 'from-gray-300 to-gray-500',
+      icon: <Shield className="h-5 w-5" />,
+      textColor: 'text-gray-300',
+    };
+  return {
+    name: 'Bronze',
+    color: 'from-orange-300 to-orange-600',
+    icon: <Heart className="h-5 w-5" />,
+    textColor: 'text-orange-400',
+  };
 };
 
 const validationSchema = Yup.object({
@@ -148,12 +302,13 @@ export const CustomerDetail: React.FC = () => {
     const deliveredOrders = orders.filter((o) => o.state === 'Delivered');
 
     const lifetimeValue = completedOrders.reduce((sum, o) => sum + (o.totalWithTax || 0), 0);
-    const averageOrderValue = completedOrders.length > 0 ? lifetimeValue / completedOrders.length : 0;
+    const averageOrderValue =
+      completedOrders.length > 0 ? lifetimeValue / completedOrders.length : 0;
 
     // Calculate order frequency (days between orders)
     const orderDates = orders
-      .filter(o => o.orderPlacedAt)
-      .map(o => new Date(o.orderPlacedAt).getTime())
+      .filter((o) => o.orderPlacedAt)
+      .map((o) => new Date(o.orderPlacedAt).getTime())
       .sort((a, b) => a - b);
 
     let avgDaysBetweenOrders = 0;
@@ -163,12 +318,16 @@ export const CustomerDetail: React.FC = () => {
     }
 
     // Customer age (days since registration)
-    const customerAge = Math.floor((Date.now() - new Date(customer.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+    const customerAge = Math.floor(
+      (Date.now() - new Date(customer.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+    );
 
     // Last order date
     const lastOrder = orders[0];
     const daysSinceLastOrder = lastOrder?.orderPlacedAt
-      ? Math.floor((Date.now() - new Date(lastOrder.orderPlacedAt).getTime()) / (1000 * 60 * 60 * 24))
+      ? Math.floor(
+          (Date.now() - new Date(lastOrder.orderPlacedAt).getTime()) / (1000 * 60 * 60 * 24)
+        )
       : null;
 
     // Completion rate
@@ -176,7 +335,7 @@ export const CustomerDetail: React.FC = () => {
 
     // Order status distribution
     const statusDistribution: Record<string, number> = {};
-    orders.forEach(o => {
+    orders.forEach((o) => {
       statusDistribution[o.state] = (statusDistribution[o.state] || 0) + 1;
     });
 
@@ -292,9 +451,12 @@ export const CustomerDetail: React.FC = () => {
       <div className="relative overflow-hidden bg-gradient-to-br from-card via-background to-card rounded-2xl border border-border">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }} />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          />
         </div>
 
         {/* Gradient Orbs */}
@@ -339,7 +501,9 @@ export const CustomerDetail: React.FC = () => {
             <div className="flex flex-col items-center lg:items-start gap-4">
               {/* Large Avatar */}
               <div className="relative group">
-                <div className={`h-32 w-32 rounded-2xl bg-gradient-to-br ${customerStats?.tier.color || 'from-blue-500 to-purple-600'} p-1 shadow-2xl`}>
+                <div
+                  className={`h-32 w-32 rounded-2xl bg-gradient-to-br ${customerStats?.tier.color || 'from-blue-500 to-purple-600'} p-1 shadow-2xl`}
+                >
                   <div className="h-full w-full rounded-xl bg-background flex items-center justify-center">
                     <span className="text-4xl font-bold text-foreground">
                       {(customer.firstName?.[0] || '') + (customer.lastName?.[0] || '')}
@@ -347,11 +511,11 @@ export const CustomerDetail: React.FC = () => {
                   </div>
                 </div>
                 {/* Verification Badge */}
-                <div className={`absolute -bottom-2 -right-2 p-2 rounded-xl shadow-lg ${
-                  customer.user?.verified
-                    ? 'bg-green-500'
-                    : 'bg-yellow-500'
-                }`}>
+                <div
+                  className={`absolute -bottom-2 -right-2 p-2 rounded-xl shadow-lg ${
+                    customer.user?.verified ? 'bg-green-500' : 'bg-yellow-500'
+                  }`}
+                >
                   {customer.user?.verified ? (
                     <CheckCircle className="h-5 w-5 text-white" />
                   ) : (
@@ -362,7 +526,9 @@ export const CustomerDetail: React.FC = () => {
 
               {/* Customer Tier Badge */}
               {customerStats && (
-                <div className={`flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r ${customerStats.tier.color} bg-opacity-20`}>
+                <div
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r ${customerStats.tier.color} bg-opacity-20`}
+                >
                   {customerStats.tier.icon}
                   <span className={`font-bold ${customerStats.tier.textColor}`}>
                     Client {customerStats.tier.name}
@@ -417,7 +583,9 @@ export const CustomerDetail: React.FC = () => {
                     <Phone className="h-5 w-5 text-green-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Téléphone</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                      Téléphone
+                    </p>
                     <p className="text-foreground">{customer.phoneNumber || '-'}</p>
                   </div>
                 </div>
@@ -428,7 +596,9 @@ export const CustomerDetail: React.FC = () => {
                     <MapPin className="h-5 w-5 text-purple-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Localisation</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                      Localisation
+                    </p>
                     <p className="text-foreground">
                       {customer.customFields?.wilaya || '-'}
                       {customer.customFields?.city && `, ${customer.customFields.city}`}
@@ -442,16 +612,22 @@ export const CustomerDetail: React.FC = () => {
                     <Clock className="h-5 w-5 text-yellow-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Dernière connexion</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                      Dernière connexion
+                    </p>
                     <p className="text-foreground">
-                      {customer.user?.lastLogin ? formatDateTime(customer.user.lastLogin) : 'Jamais'}
+                      {customer.user?.lastLogin
+                        ? formatDateTime(customer.user.lastLogin)
+                        : 'Jamais'}
                     </p>
                   </div>
                 </div>
 
                 {/* Verification Status */}
                 <div className="flex items-center gap-3 p-4 bg-card/50 rounded-xl border border-border/50 hover:border-cyan-500/50 transition-all">
-                  <div className={`p-2 rounded-lg ${customer.user?.verified ? 'bg-green-500/20' : 'bg-yellow-500/20'}`}>
+                  <div
+                    className={`p-2 rounded-lg ${customer.user?.verified ? 'bg-green-500/20' : 'bg-yellow-500/20'}`}
+                  >
                     {customer.user?.verified ? (
                       <UserCheck className="h-5 w-5 text-green-400" />
                     ) : (
@@ -473,7 +649,9 @@ export const CustomerDetail: React.FC = () => {
                       <ShoppingCart className="h-5 w-5 text-pink-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider">Dernière commande</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                        Dernière commande
+                      </p>
                       <p className="text-foreground">
                         Il y a {customerStats.daysSinceLastOrder} jours
                       </p>
@@ -513,7 +691,9 @@ export const CustomerDetail: React.FC = () => {
                 <TrendingUp className="h-3 w-3" />
               </div>
             </div>
-            <p className="text-2xl font-bold text-foreground mb-1">{formatPrice(customerStats.lifetimeValue)}</p>
+            <p className="text-2xl font-bold text-foreground mb-1">
+              {formatPrice(customerStats.lifetimeValue)}
+            </p>
             <p className="text-sm text-muted-foreground">Valeur totale</p>
           </div>
 
@@ -527,7 +707,9 @@ export const CustomerDetail: React.FC = () => {
                 <BarChart3 className="h-3 w-3" />
               </div>
             </div>
-            <p className="text-2xl font-bold text-foreground mb-1">{formatPrice(customerStats.averageOrderValue)}</p>
+            <p className="text-2xl font-bold text-foreground mb-1">
+              {formatPrice(customerStats.averageOrderValue)}
+            </p>
             <p className="text-sm text-muted-foreground">Panier moyen</p>
           </div>
 
@@ -542,7 +724,9 @@ export const CustomerDetail: React.FC = () => {
                 {customerStats.completionRate.toFixed(0)}%
               </div>
             </div>
-            <p className="text-3xl font-bold text-foreground mb-1">{customerStats.deliveredOrders}</p>
+            <p className="text-3xl font-bold text-foreground mb-1">
+              {customerStats.deliveredOrders}
+            </p>
             <p className="text-sm text-muted-foreground">Livrées</p>
           </div>
 
@@ -556,7 +740,9 @@ export const CustomerDetail: React.FC = () => {
                 <ArrowDownRight className="h-3 w-3" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-foreground mb-1">{customerStats.cancelledOrders}</p>
+            <p className="text-3xl font-bold text-foreground mb-1">
+              {customerStats.cancelledOrders}
+            </p>
             <p className="text-sm text-muted-foreground">Annulées</p>
           </div>
 
@@ -582,17 +768,26 @@ export const CustomerDetail: React.FC = () => {
       <div className="flex items-center gap-2 border-b border-border">
         {[
           { id: 'overview' as const, label: 'Aperçu', icon: <PieChart className="h-4 w-4" /> },
-          { id: 'orders' as const, label: `Commandes (${customerStats?.totalOrders || 0})`, icon: <Package className="h-4 w-4" /> },
-          { id: 'addresses' as const, label: `Adresses (${addresses.length})`, icon: <Home className="h-4 w-4" /> },
+          {
+            id: 'orders' as const,
+            label: `Commandes (${customerStats?.totalOrders || 0})`,
+            icon: <Package className="h-4 w-4" />,
+          },
+          {
+            id: 'addresses' as const,
+            label: `Adresses (${addresses.length})`,
+            icon: <Home className="h-4 w-4" />,
+          },
         ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`
               flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-all
-              ${activeTab === tab.id
-                ? 'text-primary border-primary'
-                : 'text-muted-foreground border-transparent hover:text-foreground hover:border-muted-foreground'
+              ${
+                activeTab === tab.id
+                  ? 'text-primary border-primary'
+                  : 'text-muted-foreground border-transparent hover:text-foreground hover:border-muted-foreground'
               }
             `}
           >
@@ -646,7 +841,11 @@ export const CustomerDetail: React.FC = () => {
                             value={values.firstName}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            error={touched.firstName && errors.firstName ? String(errors.firstName) : undefined}
+                            error={
+                              touched.firstName && errors.firstName
+                                ? String(errors.firstName)
+                                : undefined
+                            }
                             required
                           />
                           <Input
@@ -655,7 +854,11 @@ export const CustomerDetail: React.FC = () => {
                             value={values.lastName}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            error={touched.lastName && errors.lastName ? String(errors.lastName) : undefined}
+                            error={
+                              touched.lastName && errors.lastName
+                                ? String(errors.lastName)
+                                : undefined
+                            }
                             required
                           />
                         </div>
@@ -666,7 +869,11 @@ export const CustomerDetail: React.FC = () => {
                           value={values.emailAddress}
                           onChange={handleChange}
                           onBlur={handleBlur}
-                          error={touched.emailAddress && errors.emailAddress ? String(errors.emailAddress) : undefined}
+                          error={
+                            touched.emailAddress && errors.emailAddress
+                              ? String(errors.emailAddress)
+                              : undefined
+                          }
                           required
                         />
                         <Input
@@ -694,10 +901,19 @@ export const CustomerDetail: React.FC = () => {
                           />
                         </div>
                         <div className="flex justify-end gap-3 pt-4">
-                          <Button type="button" variant="ghost" onClick={() => setIsEditing(false)} icon={<X className="h-4 w-4" />}>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setIsEditing(false)}
+                            icon={<X className="h-4 w-4" />}
+                          >
                             Annuler
                           </Button>
-                          <Button type="submit" loading={updating} icon={<Save className="h-4 w-4" />}>
+                          <Button
+                            type="submit"
+                            loading={updating}
+                            icon={<Save className="h-4 w-4" />}
+                          >
                             Enregistrer
                           </Button>
                         </div>
@@ -708,30 +924,46 @@ export const CustomerDetail: React.FC = () => {
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Prénom</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                          Prénom
+                        </p>
                         <p className="text-foreground font-medium">{customer.firstName}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Nom</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                          Nom
+                        </p>
                         <p className="text-foreground font-medium">{customer.lastName}</p>
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Email</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                        Email
+                      </p>
                       <p className="text-foreground font-medium">{customer.emailAddress}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Téléphone</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                        Téléphone
+                      </p>
                       <p className="text-foreground font-medium">{customer.phoneNumber || '-'}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Wilaya</p>
-                        <p className="text-foreground font-medium">{customer.customFields?.wilaya || '-'}</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                          Wilaya
+                        </p>
+                        <p className="text-foreground font-medium">
+                          {customer.customFields?.wilaya || '-'}
+                        </p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Ville</p>
-                        <p className="text-foreground font-medium">{customer.customFields?.city || '-'}</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                          Ville
+                        </p>
+                        <p className="text-foreground font-medium">
+                          {customer.customFields?.city || '-'}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -762,9 +994,7 @@ export const CustomerDetail: React.FC = () => {
                         <div key={status} className="space-y-1">
                           <div className="flex items-center justify-between text-sm">
                             <div className="flex items-center gap-2">
-                              <span className={`p-1 rounded ${config.bgColor}`}>
-                                {config.icon}
-                              </span>
+                              <span className={`p-1 rounded ${config.bgColor}`}>{config.icon}</span>
                               <span className={config.color}>{config.label}</span>
                             </div>
                             <span className="text-foreground font-medium">{count}</span>
@@ -794,7 +1024,9 @@ export const CustomerDetail: React.FC = () => {
                   <Package className="h-12 w-12 text-muted-foreground" />
                 </div>
                 <p className="text-foreground text-lg font-medium mb-2">Aucune commande</p>
-                <p className="text-muted-foreground text-sm">Ce client n'a pas encore passé de commande</p>
+                <p className="text-muted-foreground text-sm">
+                  Ce client n'a pas encore passé de commande
+                </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -849,7 +1081,9 @@ export const CustomerDetail: React.FC = () => {
                             </span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.bgColor} ${config.color}`}>
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.bgColor} ${config.color}`}
+                            >
                               {config.icon}
                               {config.label}
                             </span>
@@ -892,7 +1126,9 @@ export const CustomerDetail: React.FC = () => {
                   <MapPin className="h-12 w-12 text-muted-foreground" />
                 </div>
                 <p className="text-foreground text-lg font-medium mb-2">Aucune adresse</p>
-                <p className="text-muted-foreground text-sm">Ce client n'a pas encore enregistré d'adresse</p>
+                <p className="text-muted-foreground text-sm">
+                  Ce client n'a pas encore enregistré d'adresse
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">

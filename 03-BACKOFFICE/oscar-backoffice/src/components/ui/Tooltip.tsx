@@ -177,12 +177,16 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
   const totalStock = product.variants?.reduce((sum, v) => sum + (v.stockOnHand || 0), 0) || 0;
   const totalAllocated =
     product.variants?.reduce((sum, v) => sum + (v.stockAllocated || 0), 0) || 0;
-  const enabledVariants = product.variants?.filter(v => v.enabled).length || 0;
+  const enabledVariants = product.variants?.filter((v) => v.enabled).length || 0;
   const disabledVariants = (product.variants?.length || 0) - enabledVariants;
   const minPrice = product.variants?.length ? Math.min(...product.variants.map((v) => v.price)) : 0;
   const maxPrice = product.variants?.length ? Math.max(...product.variants.map((v) => v.price)) : 0;
-  const minPriceWithTax = product.variants?.length ? Math.min(...product.variants.map((v) => v.priceWithTax)) : 0;
-  const maxPriceWithTax = product.variants?.length ? Math.max(...product.variants.map((v) => v.priceWithTax)) : 0;
+  const minPriceWithTax = product.variants?.length
+    ? Math.min(...product.variants.map((v) => v.priceWithTax))
+    : 0;
+  const maxPriceWithTax = product.variants?.length
+    ? Math.max(...product.variants.map((v) => v.priceWithTax))
+    : 0;
 
   // Strip HTML from description
   const stripHtml = (html: string) => {
@@ -191,12 +195,16 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
   };
 
   // Group facet values by facet
-  const facetsByGroup = product.facetValues?.reduce((acc, fv) => {
-    const facetName = fv.facet.name;
-    if (!acc[facetName]) acc[facetName] = [];
-    acc[facetName].push(fv.name);
-    return acc;
-  }, {} as Record<string, string[]>) || {};
+  const facetsByGroup =
+    product.facetValues?.reduce(
+      (acc, fv) => {
+        const facetName = fv.facet.name;
+        if (!acc[facetName]) acc[facetName] = [];
+        acc[facetName].push(fv.name);
+        return acc;
+      },
+      {} as Record<string, string[]>
+    ) || {};
 
   return (
     <div className="p-5 w-[700px]">
@@ -270,10 +278,16 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
           <div className="grid grid-cols-3 gap-2">
             <div className="text-center p-1.5 bg-card/80 rounded-lg">
               <div className="text-[10px] text-muted-foreground uppercase">Stock</div>
-              <div className={cn(
-                'font-bold text-sm',
-                totalStock > 10 ? 'text-green-400' : totalStock > 0 ? 'text-orange-400' : 'text-red-400'
-              )}>
+              <div
+                className={cn(
+                  'font-bold text-sm',
+                  totalStock > 10
+                    ? 'text-green-400'
+                    : totalStock > 0
+                      ? 'text-orange-400'
+                      : 'text-red-400'
+                )}
+              >
                 {totalStock}
               </div>
             </div>
@@ -285,9 +299,7 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
             </div>
             <div className="text-center p-1.5 bg-card/80 rounded-lg">
               <div className="text-[10px] text-muted-foreground uppercase">Images</div>
-              <div className="font-bold text-sm text-indigo-400">
-                {product.assets?.length ?? 0}
-              </div>
+              <div className="font-bold text-sm text-indigo-400">{product.assets?.length ?? 0}</div>
             </div>
           </div>
         </div>
@@ -301,38 +313,59 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
           </div>
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="w-8 text-[10px] font-bold text-blue-400 bg-blue-500/20 px-1 py-0.5 rounded text-center">FR</span>
+              <span className="w-8 text-[10px] font-bold text-blue-400 bg-blue-500/20 px-1 py-0.5 rounded text-center">
+                FR
+              </span>
               <span className="text-foreground text-sm">{product.customFields?.nameFr || '—'}</span>
             </div>
             <div className="flex items-center gap-2" dir="rtl">
-              <span className="text-foreground text-sm flex-1">{product.customFields?.nameAr || '—'}</span>
-              <span className="w-8 text-[10px] font-bold text-green-400 bg-green-500/20 px-1 py-0.5 rounded text-center" dir="ltr">AR</span>
+              <span className="text-foreground text-sm flex-1">
+                {product.customFields?.nameAr || '—'}
+              </span>
+              <span
+                className="w-8 text-[10px] font-bold text-green-400 bg-green-500/20 px-1 py-0.5 rounded text-center"
+                dir="ltr"
+              >
+                AR
+              </span>
             </div>
           </div>
         </div>
       )}
 
       {/* Descriptions Section */}
-      {(product.description || product.customFields?.descriptionFr || product.customFields?.descriptionAr) && (
+      {(product.description ||
+        product.customFields?.descriptionFr ||
+        product.customFields?.descriptionAr) && (
         <div className="mb-3 p-3 bg-card/50 rounded-lg border border-border/50">
-          <div className="text-muted-foreground uppercase text-[10px] font-semibold mb-2">📝 Descriptions</div>
+          <div className="text-muted-foreground uppercase text-[10px] font-semibold mb-2">
+            📝 Descriptions
+          </div>
           <div className="space-y-2 max-h-24 overflow-y-auto">
             {product.description && (
               <div>
                 <span className="text-[10px] font-bold text-muted-foreground">EN:</span>
-                <p className="text-foreground text-xs mt-0.5 line-clamp-2">{stripHtml(product.description)}</p>
+                <p className="text-foreground text-xs mt-0.5 line-clamp-2">
+                  {stripHtml(product.description)}
+                </p>
               </div>
             )}
             {product.customFields?.descriptionFr && (
               <div>
                 <span className="text-[10px] font-bold text-blue-400">FR:</span>
-                <p className="text-foreground text-xs mt-0.5 line-clamp-2">{stripHtml(product.customFields.descriptionFr)}</p>
+                <p className="text-foreground text-xs mt-0.5 line-clamp-2">
+                  {stripHtml(product.customFields.descriptionFr)}
+                </p>
               </div>
             )}
             {product.customFields?.descriptionAr && (
               <div dir="rtl">
-                <span className="text-[10px] font-bold text-green-400" dir="ltr">AR:</span>
-                <p className="text-foreground text-xs mt-0.5 line-clamp-2">{stripHtml(product.customFields.descriptionAr)}</p>
+                <span className="text-[10px] font-bold text-green-400" dir="ltr">
+                  AR:
+                </span>
+                <p className="text-foreground text-xs mt-0.5 line-clamp-2">
+                  {stripHtml(product.customFields.descriptionAr)}
+                </p>
               </div>
             )}
           </div>
@@ -342,7 +375,9 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
       {/* Pricing Section */}
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div className="p-3 bg-gradient-to-br from-green-900/30 to-green-900/10 rounded-lg border border-green-800/30">
-          <div className="text-green-400/70 uppercase text-[10px] font-semibold mb-1">💰 Prix HT</div>
+          <div className="text-green-400/70 uppercase text-[10px] font-semibold mb-1">
+            💰 Prix HT
+          </div>
           {minPrice === maxPrice ? (
             <div className="text-green-400 font-bold text-lg">{formatPrice(minPrice / 100)}</div>
           ) : (
@@ -353,14 +388,20 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
           {product.customFields?.salePrice && (
             <div className="mt-1 flex items-center gap-1">
               <span className="text-orange-400 text-xs font-semibold">Promo:</span>
-              <span className="text-orange-400 font-bold">{formatPrice(product.customFields.salePrice / 100)}</span>
+              <span className="text-orange-400 font-bold">
+                {formatPrice(product.customFields.salePrice / 100)}
+              </span>
             </div>
           )}
         </div>
         <div className="p-3 bg-gradient-to-br from-blue-900/30 to-blue-900/10 rounded-lg border border-blue-800/30">
-          <div className="text-blue-400/70 uppercase text-[10px] font-semibold mb-1">💵 Prix TTC</div>
+          <div className="text-blue-400/70 uppercase text-[10px] font-semibold mb-1">
+            💵 Prix TTC
+          </div>
           {minPriceWithTax === maxPriceWithTax ? (
-            <div className="text-blue-400 font-bold text-lg">{formatPrice(minPriceWithTax / 100)}</div>
+            <div className="text-blue-400 font-bold text-lg">
+              {formatPrice(minPriceWithTax / 100)}
+            </div>
           ) : (
             <div className="text-blue-400 font-bold text-sm">
               {formatPrice(minPriceWithTax / 100)} — {formatPrice(maxPriceWithTax / 100)}
@@ -373,7 +414,16 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
       <div className="grid grid-cols-4 gap-2 mb-3">
         <div className="text-center p-2 bg-card rounded-lg">
           <div className="text-[9px] text-muted-foreground uppercase">Total</div>
-          <div className={cn('font-bold', totalStock > 10 ? 'text-green-400' : totalStock > 0 ? 'text-orange-400' : 'text-red-400')}>
+          <div
+            className={cn(
+              'font-bold',
+              totalStock > 10
+                ? 'text-green-400'
+                : totalStock > 0
+                  ? 'text-orange-400'
+                  : 'text-red-400'
+            )}
+          >
             {totalStock}
           </div>
         </div>
@@ -399,7 +449,9 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
               📦 Variantes ({product.variants.length})
             </div>
             {disabledVariants > 0 && (
-              <span className="text-[10px] text-orange-400">{disabledVariants} désactivée{disabledVariants > 1 ? 's' : ''}</span>
+              <span className="text-[10px] text-orange-400">
+                {disabledVariants} désactivée{disabledVariants > 1 ? 's' : ''}
+              </span>
             )}
           </div>
           <div className="bg-card/50 rounded-lg border border-border/50 overflow-hidden">
@@ -419,19 +471,28 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
                     !variant.enabled && 'opacity-50'
                   )}
                 >
-                  <div className="col-span-4 font-mono text-[10px] text-muted-foreground truncate" title={variant.sku}>
+                  <div
+                    className="col-span-4 font-mono text-[10px] text-muted-foreground truncate"
+                    title={variant.sku}
+                  >
                     {variant.sku}
                   </div>
                   <div className="col-span-3 text-[10px] text-foreground truncate">
-                    {variant.options?.map(o => o.name).join(' / ') || '—'}
+                    {variant.options?.map((o) => o.name).join(' / ') || '—'}
                   </div>
                   <div className="col-span-2 text-right text-green-400 text-[10px]">
                     {formatPrice(variant.price / 100)}
                   </div>
-                  <div className={cn(
-                    'col-span-2 text-right font-medium text-[10px]',
-                    variant.stockOnHand > 5 ? 'text-green-400' : variant.stockOnHand > 0 ? 'text-orange-400' : 'text-red-400'
-                  )}>
+                  <div
+                    className={cn(
+                      'col-span-2 text-right font-medium text-[10px]',
+                      variant.stockOnHand > 5
+                        ? 'text-green-400'
+                        : variant.stockOnHand > 0
+                          ? 'text-orange-400'
+                          : 'text-red-400'
+                    )}
+                  >
                     {variant.stockOnHand}
                   </div>
                   <div className="col-span-1 text-center">
@@ -456,14 +517,22 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
       {/* Option Groups */}
       {product.optionGroups && product.optionGroups.length > 0 && (
         <div className="mb-3">
-          <div className="text-muted-foreground uppercase text-[10px] font-semibold mb-2">🎛️ Groupes d'options</div>
+          <div className="text-muted-foreground uppercase text-[10px] font-semibold mb-2">
+            🎛️ Groupes d'options
+          </div>
           <div className="flex flex-wrap gap-2">
             {product.optionGroups.map((group) => (
-              <div key={group.name} className="bg-card rounded-lg px-2 py-1.5 border border-border/50">
+              <div
+                key={group.name}
+                className="bg-card rounded-lg px-2 py-1.5 border border-border/50"
+              >
                 <div className="text-[10px] text-purple-400 font-semibold mb-1">{group.name}</div>
                 <div className="flex flex-wrap gap-0.5">
                   {group.options.map((opt) => (
-                    <span key={opt.name} className="px-1.5 py-0.5 text-[10px] bg-purple-500/20 text-purple-300 rounded">
+                    <span
+                      key={opt.name}
+                      className="px-1.5 py-0.5 text-[10px] bg-purple-500/20 text-purple-300 rounded"
+                    >
                       {opt.name}
                     </span>
                   ))}
@@ -477,14 +546,22 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
       {/* Facet Values */}
       {Object.keys(facetsByGroup).length > 0 && (
         <div className="mb-3">
-          <div className="text-muted-foreground uppercase text-[10px] font-semibold mb-2">🏷️ Attributs (Facettes)</div>
+          <div className="text-muted-foreground uppercase text-[10px] font-semibold mb-2">
+            🏷️ Attributs (Facettes)
+          </div>
           <div className="flex flex-wrap gap-2">
             {Object.entries(facetsByGroup).map(([facetName, values]) => (
-              <div key={facetName} className="bg-card rounded-lg px-2 py-1.5 border border-border/50">
+              <div
+                key={facetName}
+                className="bg-card rounded-lg px-2 py-1.5 border border-border/50"
+              >
                 <div className="text-[10px] text-cyan-400 font-semibold mb-1">{facetName}</div>
                 <div className="flex flex-wrap gap-0.5">
                   {values.map((val) => (
-                    <span key={val} className="px-1.5 py-0.5 text-[10px] bg-cyan-500/20 text-cyan-300 rounded">
+                    <span
+                      key={val}
+                      className="px-1.5 py-0.5 text-[10px] bg-cyan-500/20 text-cyan-300 rounded"
+                    >
                       {val}
                     </span>
                   ))}
@@ -498,7 +575,9 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
       {/* Categories */}
       {product.collections && product.collections.length > 0 && (
         <div className="mb-3">
-          <div className="text-muted-foreground uppercase text-[10px] font-semibold mb-2">📁 Catégories ({product.collections.length})</div>
+          <div className="text-muted-foreground uppercase text-[10px] font-semibold mb-2">
+            📁 Catégories ({product.collections.length})
+          </div>
           <div className="flex flex-wrap gap-1.5">
             {product.collections.map((collection) => (
               <span
@@ -520,34 +599,40 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
 
       {/* Sizes & Colors */}
       {((product.customFields?.availableSizes && product.customFields.availableSizes.length > 0) ||
-        (product.customFields?.availableColors && product.customFields.availableColors.length > 0)) && (
+        (product.customFields?.availableColors &&
+          product.customFields.availableColors.length > 0)) && (
         <div className="grid grid-cols-2 gap-3 mb-3">
-          {product.customFields?.availableSizes && product.customFields.availableSizes.length > 0 && (
-            <div className="bg-card/50 rounded-lg p-2 border border-border/50">
-              <div className="text-muted-foreground uppercase text-[10px] font-semibold mb-1.5">
-                👕 Tailles ({product.customFields.availableSizes.length})
+          {product.customFields?.availableSizes &&
+            product.customFields.availableSizes.length > 0 && (
+              <div className="bg-card/50 rounded-lg p-2 border border-border/50">
+                <div className="text-muted-foreground uppercase text-[10px] font-semibold mb-1.5">
+                  👕 Tailles ({product.customFields.availableSizes.length})
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {product.customFields.availableSizes.map((size) => (
+                    <span
+                      key={size}
+                      className="px-2 py-0.5 text-xs bg-muted text-foreground rounded font-medium"
+                    >
+                      {size}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-1">
-                {product.customFields.availableSizes.map((size) => (
-                  <span key={size} className="px-2 py-0.5 text-xs bg-muted text-foreground rounded font-medium">
-                    {size}
-                  </span>
-                ))}
+            )}
+          {product.customFields?.availableColors &&
+            product.customFields.availableColors.length > 0 && (
+              <div className="bg-card/50 rounded-lg p-2 border border-border/50">
+                <div className="text-muted-foreground uppercase text-[10px] font-semibold mb-1.5">
+                  🎨 Couleurs ({product.customFields.availableColors.length})
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {product.customFields.availableColors.map((color) => (
+                    <ColorSwatch key={color} color={color} size="md" showLabel />
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-          {product.customFields?.availableColors && product.customFields.availableColors.length > 0 && (
-            <div className="bg-card/50 rounded-lg p-2 border border-border/50">
-              <div className="text-muted-foreground uppercase text-[10px] font-semibold mb-1.5">
-                🎨 Couleurs ({product.customFields.availableColors.length})
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {product.customFields.availableColors.map((color) => (
-                  <ColorSwatch key={color} color={color} size="md" showLabel />
-                ))}
-              </div>
-            </div>
-          )}
+            )}
         </div>
       )}
 
@@ -556,11 +641,15 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
         <div className="grid grid-cols-2 gap-4 text-[10px]">
           <div>
             <span className="text-muted-foreground">Créé le: </span>
-            <span className="text-foreground">{formatDate && product.createdAt ? formatDate(product.createdAt) : '—'}</span>
+            <span className="text-foreground">
+              {formatDate && product.createdAt ? formatDate(product.createdAt) : '—'}
+            </span>
           </div>
           <div className="text-right">
             <span className="text-muted-foreground">Modifié le: </span>
-            <span className="text-foreground">{formatDate && product.updatedAt ? formatDate(product.updatedAt) : '—'}</span>
+            <span className="text-foreground">
+              {formatDate && product.updatedAt ? formatDate(product.updatedAt) : '—'}
+            </span>
           </div>
         </div>
       </div>

@@ -284,7 +284,9 @@ export const BulkOperations: React.FC = () => {
                       <p className="text-sm text-muted-foreground">SKU: {variant?.sku || 'N/A'}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-foreground">{formatPrice(variant?.price || 0)}</p>
+                      <p className="font-medium text-foreground">
+                        {formatPrice(variant?.price || 0)}
+                      </p>
                       <Badge variant={product.enabled ? 'success' : 'default'} className="text-xs">
                         {product.enabled ? 'Actif' : 'Inactif'}
                       </Badge>
@@ -338,7 +340,10 @@ export const BulkOperations: React.FC = () => {
                   <thead>
                     <tr className="border-b border-border">
                       {Object.keys(importPreview[0]).map((header) => (
-                        <th key={header} className="px-3 py-2 text-left font-medium text-foreground">
+                        <th
+                          key={header}
+                          className="px-3 py-2 text-left font-medium text-foreground"
+                        >
                           {header}
                         </th>
                       ))}
@@ -405,7 +410,9 @@ export const BulkOperations: React.FC = () => {
         <div className="space-y-6">
           <div>
             <h3 className="text-lg font-semibold text-foreground">Exporter les produits</h3>
-            <p className="text-sm text-muted-foreground mt-1">Téléchargez vos produits au format CSV</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Téléchargez vos produits au format CSV
+            </p>
           </div>
 
           <div className="bg-muted rounded-lg p-6">

@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  Legend,
-} from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { formatPrice } from '../../lib/utils';
 import type { CategoryData } from '../../hooks/useDashboardData';
 
@@ -36,7 +29,8 @@ const CustomTooltip = ({ active, payload }: any) => {
         <p className="text-foreground font-medium mb-1">{data.name}</p>
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground">
-            Revenus: <span className="text-foreground font-semibold">{formatPrice(data.value)}</span>
+            Revenus:{' '}
+            <span className="text-foreground font-semibold">{formatPrice(data.value)}</span>
           </p>
           <p className="text-sm text-muted-foreground">
             Commandes: <span className="text-foreground font-semibold">{data.count}</span>
@@ -53,10 +47,7 @@ const CustomLegend = ({ payload }: any) => {
     <div className="flex flex-wrap justify-center gap-3 mt-4">
       {payload?.map((entry: any, index: number) => (
         <div key={index} className="flex items-center gap-2">
-          <span
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: entry.color }}
-          />
+          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
           <span className="text-sm text-muted-foreground">{entry.value}</span>
         </div>
       ))}

@@ -31,8 +31,8 @@ export const KPICard: React.FC<KPICardProps> = ({
   const formattedValue = isCurrency
     ? formatPrice(typeof value === 'number' ? value : parseFloat(value as string))
     : typeof value === 'number'
-    ? value.toLocaleString('fr-FR')
-    : value;
+      ? value.toLocaleString('fr-FR')
+      : value;
 
   if (loading) {
     return (
@@ -61,8 +61,8 @@ export const KPICard: React.FC<KPICardProps> = ({
               trend.isPositive
                 ? 'bg-success/20 text-success'
                 : trend.value === 0
-                ? 'bg-muted text-muted-foreground'
-                : 'bg-destructive/20 text-destructive'
+                  ? 'bg-muted text-muted-foreground'
+                  : 'bg-destructive/20 text-destructive'
             }`}
           >
             {trend.isPositive ? (

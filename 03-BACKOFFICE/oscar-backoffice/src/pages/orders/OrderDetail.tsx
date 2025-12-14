@@ -149,13 +149,7 @@ const ORDER_STATUS: Record<
 };
 
 // Order flow steps for progress visualization
-const ORDER_FLOW = [
-  'AddingItems',
-  'ArrangingPayment',
-  'PaymentSettled',
-  'Shipped',
-  'Delivered',
-];
+const ORDER_FLOW = ['AddingItems', 'ArrangingPayment', 'PaymentSettled', 'Shipped', 'Delivered'];
 
 export const OrderDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -408,7 +402,9 @@ export const OrderDetail: React.FC = () => {
       <div className="flex flex-col items-center justify-center min-h-96 bg-card rounded-xl">
         <Package className="h-20 w-20 text-muted-foreground mb-4" />
         <p className="text-muted-foreground text-xl mb-2">Commande non trouvée</p>
-        <p className="text-muted-foreground/70 text-sm mb-6">Cette commande n'existe pas ou a été supprimée</p>
+        <p className="text-muted-foreground/70 text-sm mb-6">
+          Cette commande n'existe pas ou a été supprimée
+        </p>
         <Button variant="primary" onClick={() => navigate('/orders')}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour aux commandes
@@ -705,7 +701,9 @@ export const OrderDetail: React.FC = () => {
                             line.productVariant?.product?.name ||
                             line.productVariant?.name}
                         </p>
-                        <p className="text-sm text-muted-foreground">SKU: {line.productVariant?.sku}</p>
+                        <p className="text-sm text-muted-foreground">
+                          SKU: {line.productVariant?.sku}
+                        </p>
                         <p className="text-sm text-muted-foreground">
                           {formatPrice(line.unitPriceWithTax / 100)} × {line.quantity}
                         </p>
@@ -804,9 +802,13 @@ export const OrderDetail: React.FC = () => {
                                     Paiement: {(item.data as any).paymentState}
                                   </p>
                                 )}
-                                {!['ORDER_STATE_TRANSITION', 'ORDER_NOTE', 'ORDER_PAYMENT_TRANSITION'].includes(
-                                  item.type
-                                ) && <p className="text-muted-foreground">{item.type}</p>}
+                                {![
+                                  'ORDER_STATE_TRANSITION',
+                                  'ORDER_NOTE',
+                                  'ORDER_PAYMENT_TRANSITION',
+                                ].includes(item.type) && (
+                                  <p className="text-muted-foreground">{item.type}</p>
+                                )}
                               </div>
                             </div>
                             <p className="text-xs text-muted-foreground mt-2">
@@ -838,11 +840,7 @@ export const OrderDetail: React.FC = () => {
                       onChange={(e) => setNewNote(e.target.value)}
                       className="flex-1 bg-background border-border"
                     />
-                    <Button
-                      onClick={handleAddNote}
-                      loading={addingNote}
-                      disabled={!newNote.trim()}
-                    >
+                    <Button onClick={handleAddNote} loading={addingNote} disabled={!newNote.trim()}>
                       Ajouter
                     </Button>
                   </div>

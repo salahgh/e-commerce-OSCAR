@@ -97,10 +97,10 @@ export function buildFacetValueFilters(
   // Group selected values by facet
   const valuesByFacet = new Map<string, string[]>();
 
-  facetGroups.forEach(facet => {
+  facetGroups.forEach((facet) => {
     const selectedInFacet = facet.values
-      .filter(v => facetValueIds.includes(v.id))
-      .map(v => v.id);
+      .filter((v) => facetValueIds.includes(v.id))
+      .map((v) => v.id);
 
     if (selectedInFacet.length > 0) {
       valuesByFacet.set(facet.id, selectedInFacet);
@@ -159,7 +159,12 @@ export function parseAdminFilterParams(searchParams: URLSearchParams): Partial<A
   if (featured === 'false') state.isFeatured = false;
 
   const stock = searchParams.get('stock');
-  if (stock === 'in_stock' || stock === 'low_stock' || stock === 'out_of_stock' || stock === 'all') {
+  if (
+    stock === 'in_stock' ||
+    stock === 'low_stock' ||
+    stock === 'out_of_stock' ||
+    stock === 'all'
+  ) {
     state.stockStatus = stock;
   }
 
@@ -202,10 +207,10 @@ export function serializeAdminFilterParams(
 
   // Group facet value IDs by facet code
   if (state.facetValueIds && state.facetValueIds.length > 0) {
-    facetGroups.forEach(facet => {
+    facetGroups.forEach((facet) => {
       const selectedInFacet = facet.values
-        .filter(v => state.facetValueIds?.includes(v.id))
-        .map(v => v.id);
+        .filter((v) => state.facetValueIds?.includes(v.id))
+        .map((v) => v.id);
 
       if (selectedInFacet.length > 0) {
         params.set(`f_${facet.code}`, selectedInFacet.join(','));

@@ -30,6 +30,8 @@ import {
   CreateCollectionDocument,
   UpdateCollectionDocument,
   MoveCollectionDocument,
+  CreateAssetsDocument,
+  LanguageCode,
 } from '../../graphql/generated/graphql';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -99,31 +101,38 @@ export const CategoryDetail: React.FC = () => {
   const [createCollection, { loading: creating }] = useMutation(CreateCollectionDocument);
   const [updateCollection, { loading: updating }] = useMutation(UpdateCollectionDocument);
   const [moveCollection] = useMutation(MoveCollectionDocument);
+  const [createAssets] = useMutation(CreateAssetsDocument);
 
   const collection = data?.collection;
   const allCollections = collectionsData?.collections?.items || [];
 
   // Handle image selection
-  const handleImageSelect = useCallback((file: File) => {
-    if (!file.type.startsWith('image/')) {
-      dispatch(addToast({ message: 'Veuillez selectionner une image valide', type: 'error' }));
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      dispatch(addToast({ message: 'Image trop volumineuse (max 5MB)', type: 'error' }));
-      return;
-    }
+  const handleImageSelect = useCallback(
+    (file: File) => {
+      if (!file.type.startsWith('image/')) {
+        dispatch(addToast({ message: 'Veuillez selectionner une image valide', type: 'error' }));
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        dispatch(addToast({ message: 'Image trop volumineuse (max 5MB)', type: 'error' }));
+        return;
+      }
 
-    const preview = URL.createObjectURL(file);
-    setFeaturedImage({ file, preview, isExisting: false });
-  }, [dispatch]);
+      const preview = URL.createObjectURL(file);
+      setFeaturedImage({ file, preview, isExisting: false });
+    },
+    [dispatch]
+  );
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleImageSelect(file);
-  }, [handleImageSelect]);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      const file = e.dataTransfer.files[0];
+      if (file) handleImageSelect(file);
+    },
+    [handleImageSelect]
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -185,20 +194,42 @@ export const CategoryDetail: React.FC = () => {
 
   const handleSubmit = async (values: FormValues) => {
     try {
-      // TODO: Handle image upload to Vendure asset system
-      // For now, we just save the form data
+      // Handle image upload if there's a new image
+      let featuredAssetId: string | undefined;
+
+      if (featuredImage?.file) {
+        // Upload new image
+        const assetResult = await createAssets({
+          variables: {
+            input: [{ file: featuredImage.file }],
+          },
+        });
+
+        const uploadedAssets = assetResult.data?.createAssets || [];
+        const uploadedAsset = uploadedAssets.find(
+          (a: any) => a.__typename === 'Asset'
+        ) as { id: string } | undefined;
+        if (uploadedAsset) {
+          featuredAssetId = uploadedAsset.id;
+        }
+      } else if (featuredImage?.isExisting && featuredImage.id) {
+        // Keep existing image
+        featuredAssetId = featuredImage.id;
+      }
+      // If featuredImage is null, no image (remove or none)
 
       const baseInput = {
         translations: [
           {
-            languageCode: 'en' as any,
+            languageCode: LanguageCode.En,
             name: values.name,
             slug: values.slug,
             description: values.description,
           },
         ],
-        filters: [],
+        filters: [] as any[],
         isPrivate: values.isPrivate,
+        featuredAssetId: featuredAssetId || null,
         customFields: {
           nameFr: values.nameFr || null,
           nameAr: values.nameAr || null,
@@ -216,7 +247,7 @@ export const CategoryDetail: React.FC = () => {
         await createCollection({ variables: { input: createInput } });
         dispatch(
           addToast({
-            message: 'Categorie creee avec succes',
+            message: 'Catégorie créée avec succès',
             type: 'success',
           })
         );
@@ -239,7 +270,7 @@ export const CategoryDetail: React.FC = () => {
 
         dispatch(
           addToast({
-            message: 'Categorie mise a jour avec succes',
+            message: 'Catégorie mise à jour avec succès',
             type: 'success',
           })
         );
@@ -480,9 +511,7 @@ export const CategoryDetail: React.FC = () => {
                             {values.isPrivate ? 'Categorie privee' : 'Categorie publique'}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {values.isPrivate
-                              ? 'Non visible sur le site'
-                              : 'Visible sur le site'}
+                            {values.isPrivate ? 'Non visible sur le site' : 'Visible sur le site'}
                           </p>
                         </div>
                       </div>
@@ -717,7 +746,7 @@ export const CategoryDetail: React.FC = () => {
                         </div>
                         <div className="text-center px-4">
                           <p className="font-medium text-foreground">
-                            {isDragging ? 'Deposez l\'image ici' : 'Glissez une image ici'}
+                            {isDragging ? "Deposez l'image ici" : 'Glissez une image ici'}
                           </p>
                           <p className="text-sm text-muted-foreground mt-1">
                             ou cliquez pour parcourir

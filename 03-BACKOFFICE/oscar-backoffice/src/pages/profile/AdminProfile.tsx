@@ -193,7 +193,9 @@ export const AdminProfile: React.FC = () => {
           </div>
           <div>
             <p className="text-muted-foreground">Identifiant</p>
-            <p className="font-medium text-foreground">{admin.user?.identifier || admin.emailAddress}</p>
+            <p className="font-medium text-foreground">
+              {admin.user?.identifier || admin.emailAddress}
+            </p>
           </div>
         </div>
       </div>

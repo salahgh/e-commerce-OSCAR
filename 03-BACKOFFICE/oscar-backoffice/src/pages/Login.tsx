@@ -119,7 +119,9 @@ export const Login: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-2">Mot de passe</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
+                Mot de passe
+              </label>
               <input
                 type="password"
                 {...formik.getFieldProps('password')}

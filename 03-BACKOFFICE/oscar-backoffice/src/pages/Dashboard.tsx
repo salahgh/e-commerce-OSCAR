@@ -77,7 +77,9 @@ export const Dashboard: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Tableau de bord</h1>
-          <p className="text-muted-foreground mt-1">Vue d'ensemble de la plateforme OSCAR Fashion</p>
+          <p className="text-muted-foreground mt-1">
+            Vue d'ensemble de la plateforme OSCAR Fashion
+          </p>
         </div>
         <div className="flex items-center gap-3">
           {/* Date Range Toggle */}
@@ -181,7 +183,10 @@ export const Dashboard: React.FC = () => {
             {recentOrdersLoading ? (
               <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} className="animate-pulse flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
+                  <div
+                    key={i}
+                    className="animate-pulse flex items-center gap-4 p-3 bg-muted/50 rounded-lg"
+                  >
                     <div className="h-10 w-24 bg-muted rounded" />
                     <div className="flex-1 space-y-2">
                       <div className="h-4 w-32 bg-muted rounded" />
@@ -212,7 +217,9 @@ export const Dashboard: React.FC = () => {
                     >
                       <div className="flex items-center gap-4">
                         <div className="bg-muted rounded-lg px-3 py-2">
-                          <span className="font-mono text-sm text-muted-foreground">#{order.code}</span>
+                          <span className="font-mono text-sm text-muted-foreground">
+                            #{order.code}
+                          </span>
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
@@ -315,11 +322,7 @@ export const Dashboard: React.FC = () => {
                       <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all ${
-                            isCritical
-                              ? 'bg-red-500'
-                              : isLow
-                                ? 'bg-orange-500'
-                                : 'bg-yellow-500'
+                            isCritical ? 'bg-red-500' : isLow ? 'bg-orange-500' : 'bg-yellow-500'
                           }`}
                           style={{
                             width: `${Math.min((stockLevel / product.minStock) * 100, 100)}%`,
