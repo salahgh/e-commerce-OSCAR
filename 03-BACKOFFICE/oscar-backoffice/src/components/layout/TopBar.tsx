@@ -7,6 +7,7 @@ import { toggleSidebar } from '../../store/slices/uiSlice';
 import { logout } from '../../store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { AdminLogoutDocument } from '../../graphql/generated/graphql';
+import { ThemeSwitcher } from '../ui/ThemeSwitcher';
 
 export const TopBar: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -42,22 +43,25 @@ export const TopBar: React.FC = () => {
   };
 
   return (
-    <header className="h-16 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-6">
+    <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6">
       {/* Left side */}
       <div className="flex items-center gap-4">
         <button
           onClick={() => dispatch(toggleSidebar())}
-          className="text-gray-400 hover:text-gray-200 lg:hidden"
+          className="text-muted-foreground hover:text-foreground lg:hidden"
         >
           <Menu className="h-6 w-6" />
         </button>
-        <h1 className="text-xl font-semibold text-gray-100">Back-Office OSCAR</h1>
+        <h1 className="text-xl font-semibold text-foreground">Back-Office OSCAR</h1>
       </div>
 
       {/* Right side */}
       <div className="flex items-center gap-4">
+        {/* Theme Switcher */}
+        <ThemeSwitcher variant="dropdown" />
+
         {/* Notifications */}
-        <button className="relative p-2 text-gray-400 hover:text-gray-200 rounded-lg hover:bg-gray-700">
+        <button className="relative p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-accent">
           <Bell className="h-5 w-5" />
         </button>
 
@@ -65,14 +69,14 @@ export const TopBar: React.FC = () => {
         <div className="relative">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-700"
+            className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent"
           >
-            <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+            <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-sm font-medium">
               {getInitials(displayName)}
             </div>
             <div className="hidden md:block text-left">
-              <p className="text-sm font-medium text-gray-100">{displayName}</p>
-              <p className="text-xs text-gray-400">Administrateur</p>
+              <p className="text-sm font-medium text-foreground">{displayName}</p>
+              <p className="text-xs text-muted-foreground">Administrateur</p>
             </div>
           </button>
 
@@ -80,24 +84,24 @@ export const TopBar: React.FC = () => {
           {showUserMenu && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowUserMenu(false)} />
-              <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 py-1 z-20">
+              <div className="absolute right-0 mt-2 w-48 bg-popover rounded-lg shadow-lg border border-border py-1 z-20">
                 <button
                   onClick={() => {
                     setShowUserMenu(false);
                     navigate('/profile');
                   }}
-                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
                 >
                   <User className="h-4 w-4" />
                   Mon profil
                 </button>
-                <hr className="my-1 border-gray-700" />
+                <hr className="my-1 border-border" />
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-400 hover:bg-red-900/30"
+                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-destructive hover:bg-destructive/10"
                 >
                   <LogOut className="h-4 w-4" />
-                  Déconnexion
+                  Deconnexion
                 </button>
               </div>
             </>

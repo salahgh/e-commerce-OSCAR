@@ -32,14 +32,14 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 shadow-xl">
-        <p className="text-white font-medium mb-1">{data.name}</p>
+      <div className="bg-popover border border-border rounded-lg p-3 shadow-xl">
+        <p className="text-foreground font-medium mb-1">{data.name}</p>
         <div className="space-y-1">
-          <p className="text-sm text-gray-400">
-            Revenus: <span className="text-white font-semibold">{formatPrice(data.value)}</span>
+          <p className="text-sm text-muted-foreground">
+            Revenus: <span className="text-foreground font-semibold">{formatPrice(data.value)}</span>
           </p>
-          <p className="text-sm text-gray-400">
-            Commandes: <span className="text-white font-semibold">{data.count}</span>
+          <p className="text-sm text-muted-foreground">
+            Commandes: <span className="text-foreground font-semibold">{data.count}</span>
           </p>
         </div>
       </div>
@@ -57,7 +57,7 @@ const CustomLegend = ({ payload }: any) => {
             className="w-3 h-3 rounded-full"
             style={{ backgroundColor: entry.color }}
           />
-          <span className="text-sm text-gray-400">{entry.value}</span>
+          <span className="text-sm text-muted-foreground">{entry.value}</span>
         </div>
       ))}
     </div>
@@ -67,10 +67,10 @@ const CustomLegend = ({ payload }: any) => {
 export const CategoryPieChart: React.FC<CategoryPieChartProps> = ({ data, loading = false }) => {
   if (loading) {
     return (
-      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 animate-pulse">
-        <div className="h-6 w-48 bg-gray-700 rounded mb-4" />
+      <div className="bg-card rounded-xl p-6 border border-border animate-pulse">
+        <div className="h-6 w-48 bg-muted rounded mb-4" />
         <div className="h-64 flex items-center justify-center">
-          <div className="w-48 h-48 bg-gray-700/50 rounded-full" />
+          <div className="w-48 h-48 bg-muted/50 rounded-full" />
         </div>
       </div>
     );
@@ -78,9 +78,9 @@ export const CategoryPieChart: React.FC<CategoryPieChartProps> = ({ data, loadin
 
   if (!data || data.length === 0) {
     return (
-      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-        <h3 className="text-lg font-semibold text-white mb-4">Ventes par catégorie</h3>
-        <div className="h-64 flex items-center justify-center text-gray-500">
+      <div className="bg-card rounded-xl p-6 border border-border">
+        <h3 className="text-lg font-semibold text-foreground mb-4">Ventes par catégorie</h3>
+        <div className="h-64 flex items-center justify-center text-muted-foreground">
           Aucune donnée disponible
         </div>
       </div>
@@ -90,8 +90,8 @@ export const CategoryPieChart: React.FC<CategoryPieChartProps> = ({ data, loadin
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-      <h3 className="text-lg font-semibold text-white mb-4">Ventes par catégorie</h3>
+    <div className="bg-card rounded-xl p-6 border border-border">
+      <h3 className="text-lg font-semibold text-foreground mb-4">Ventes par catégorie</h3>
       <div className="h-72 relative">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -119,8 +119,8 @@ export const CategoryPieChart: React.FC<CategoryPieChartProps> = ({ data, loadin
         </ResponsiveContainer>
         {/* Center label */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -mt-4 text-center pointer-events-none">
-          <p className="text-2xl font-bold text-white">{formatPrice(total)}</p>
-          <p className="text-xs text-gray-400">Total</p>
+          <p className="text-2xl font-bold text-foreground">{formatPrice(total)}</p>
+          <p className="text-xs text-muted-foreground">Total</p>
         </div>
       </div>
     </div>

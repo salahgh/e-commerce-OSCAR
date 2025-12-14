@@ -868,9 +868,9 @@ export const ProductEdit: React.FC = () => {
   if (error || !product) {
     return (
       <div className="flex flex-col items-center justify-center min-h-96">
-        <Package className="h-16 w-16 text-gray-300 mb-4" />
-        <p className="text-gray-500 text-lg mb-4">Produit non trouvé</p>
-        <Link to="/products" className="text-blue-600 hover:text-blue-700">
+        <Package className="h-16 w-16 text-muted-foreground mb-4" />
+        <p className="text-muted-foreground text-lg mb-4">Produit non trouvé</p>
+        <Link to="/products" className="text-primary hover:text-primary/80">
           Retour à la liste
         </Link>
       </div>
@@ -952,24 +952,24 @@ export const ProductEdit: React.FC = () => {
         />
       </div>
       <div className="flex flex-wrap items-center gap-4">
-        <label className="flex items-center gap-2 p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600">
+        <label className="flex items-center gap-2 p-3 bg-muted rounded-lg cursor-pointer hover:bg-accent">
           <input
             type="checkbox"
             checked={formik.values.enabled}
             onChange={(e) => formik.setFieldValue('enabled', e.target.checked)}
-            className="h-4 w-4 text-blue-600 border-gray-500 rounded focus:ring-blue-500 bg-gray-600"
+            className="h-4 w-4 text-primary border-border rounded focus:ring-primary bg-card"
           />
-          <span className="text-sm font-medium text-gray-300">Produit actif</span>
+          <span className="text-sm font-medium text-muted-foreground">Produit actif</span>
         </label>
         <label className="flex items-center gap-2 p-3 bg-yellow-900/30 border border-yellow-700 rounded-lg cursor-pointer hover:bg-yellow-900/50">
           <input
             type="checkbox"
             checked={formik.values.isFeatured}
             onChange={(e) => formik.setFieldValue('isFeatured', e.target.checked)}
-            className="h-4 w-4 text-yellow-600 border-gray-500 rounded focus:ring-yellow-500 bg-gray-600"
+            className="h-4 w-4 text-yellow-600 border-border rounded focus:ring-yellow-500 bg-card"
           />
           <Star className="h-4 w-4 text-yellow-500" />
-          <span className="text-sm font-medium text-gray-100">Produit vedette</span>
+          <span className="text-sm font-medium text-foreground">Produit vedette</span>
         </label>
       </div>
     </div>
@@ -1053,8 +1053,8 @@ export const ProductEdit: React.FC = () => {
         onClick={() => fileInputRef.current?.click()}
         className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
           isDraggingOver
-            ? 'border-blue-500 bg-blue-900/30'
-            : 'border-gray-600 hover:border-blue-400 hover:bg-gray-700/50'
+            ? 'border-primary bg-primary/10'
+            : 'border-border hover:border-primary hover:bg-muted/50'
         }`}
       >
         <input
@@ -1067,17 +1067,17 @@ export const ProductEdit: React.FC = () => {
         />
         {uploadingImages ? (
           <div className="flex flex-col items-center">
-            <RefreshCw className="h-12 w-12 text-blue-500 animate-spin mb-4" />
-            <p className="text-lg font-medium text-gray-300">Téléchargement en cours...</p>
+            <RefreshCw className="h-12 w-12 text-primary animate-spin mb-4" />
+            <p className="text-lg font-medium text-foreground">Téléchargement en cours...</p>
           </div>
         ) : (
           <>
             <Upload
-              className={`h-12 w-12 mx-auto mb-4 ${isDraggingOver ? 'text-blue-500' : 'text-gray-400'}`}
+              className={`h-12 w-12 mx-auto mb-4 ${isDraggingOver ? 'text-primary' : 'text-muted-foreground'}`}
             />
-            <p className="text-lg font-medium text-gray-300">Glissez-déposez vos images ici</p>
-            <p className="text-sm text-gray-400 mt-2">ou cliquez pour sélectionner des fichiers</p>
-            <p className="text-xs text-gray-500 mt-4">PNG, JPG, WEBP jusqu'à 10MB chacun</p>
+            <p className="text-lg font-medium text-foreground">Glissez-déposez vos images ici</p>
+            <p className="text-sm text-muted-foreground mt-2">ou cliquez pour sélectionner des fichiers</p>
+            <p className="text-xs text-muted-foreground/70 mt-4">PNG, JPG, WEBP jusqu'à 10MB chacun</p>
           </>
         )}
       </div>
@@ -1085,7 +1085,7 @@ export const ProductEdit: React.FC = () => {
       {/* Featured Asset */}
       {product.featuredAsset && (
         <div>
-          <h3 className="text-sm font-medium text-gray-300 mb-3">Image principale</h3>
+          <h3 className="text-sm font-medium text-foreground mb-3">Image principale</h3>
           <div className="relative inline-block">
             <img
               src={product.featuredAsset.preview}
@@ -1103,10 +1103,10 @@ export const ProductEdit: React.FC = () => {
       {/* All Assets Gallery */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-medium text-gray-300">
+          <h3 className="text-sm font-medium text-foreground">
             Galerie ({product.assets?.length || 0} images)
           </h3>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-muted-foreground">
             Glissez pour réorganiser - Cliquez sur <Star className="inline h-3 w-3" /> pour définir
             l'image principale
           </p>
@@ -1126,12 +1126,12 @@ export const ProductEdit: React.FC = () => {
                   className={`relative group rounded-lg overflow-hidden border-2 cursor-move transition-all ${
                     isFeatured
                       ? 'border-yellow-500 ring-2 ring-yellow-500/30'
-                      : 'border-gray-600 hover:border-gray-500'
+                      : 'border-border hover:border-muted-foreground'
                   } ${draggedImageIndex === index ? 'opacity-50 scale-95' : ''}`}
                 >
                   <img src={asset.preview} alt={asset.name} className="h-32 w-full object-cover" />
-                  <div className="absolute top-1 left-1 p-1 bg-gray-900/80 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                    <GripVertical className="h-4 w-4 text-gray-400" />
+                  <div className="absolute top-1 left-1 p-1 bg-background/80 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                    <GripVertical className="h-4 w-4 text-muted-foreground" />
                   </div>
                   {isFeatured && (
                     <Badge variant="warning" className="absolute top-1 right-1 text-xs">
@@ -1179,10 +1179,10 @@ export const ProductEdit: React.FC = () => {
             })}
           </div>
         ) : (
-          <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-8 text-center">
-            <ImageIcon className="h-12 w-12 text-gray-500 mx-auto mb-3" />
-            <p className="text-gray-400">Aucune image disponible</p>
-            <p className="text-sm text-gray-500 mt-2">
+          <div className="bg-muted/50 border border-border rounded-lg p-8 text-center">
+            <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground">Aucune image disponible</p>
+            <p className="text-sm text-muted-foreground/70 mt-2">
               Glissez-déposez des images ci-dessus ou cliquez pour ajouter
             </p>
           </div>
@@ -1210,7 +1210,7 @@ export const ProductEdit: React.FC = () => {
                       e.target.value = '';
                     }
                   }}
-                  className="text-sm bg-gray-700 border border-gray-600 text-gray-100 rounded-lg px-3 py-1.5"
+                  className="text-sm bg-muted border border-border text-foreground rounded-lg px-3 py-1.5"
                 >
                   <option value="">Ajouter un groupe existant...</option>
                   {getAvailableOptionGroups().map((group: any) => (
@@ -1244,14 +1244,14 @@ export const ProductEdit: React.FC = () => {
                   value={newOptionGroupName}
                   onChange={(e) => setNewOptionGroupName(e.target.value)}
                   placeholder="Nom (ex: Taille, Couleur)"
-                  className="px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm"
+                  className="px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm"
                 />
                 <input
                   type="text"
                   value={newOptionGroupCode}
                   onChange={(e) => setNewOptionGroupCode(e.target.value)}
                   placeholder="Code (optionnel, ex: size)"
-                  className="px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm"
+                  className="px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm"
                 />
               </div>
               <div className="flex gap-2">
@@ -1283,11 +1283,11 @@ export const ProductEdit: React.FC = () => {
           {product.optionGroups && product.optionGroups.length > 0 ? (
             <div className="space-y-4">
               {product.optionGroups.map((group: any) => (
-                <div key={group.id} className="border border-gray-600 rounded-lg p-4 bg-gray-700/30">
+                <div key={group.id} className="border border-border rounded-lg p-4 bg-muted/30">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <h4 className="font-medium text-gray-100">{group.name}</h4>
-                      <p className="text-xs text-gray-400">Code: {group.code}</p>
+                      <h4 className="font-medium text-foreground">{group.name}</h4>
+                      <p className="text-xs text-muted-foreground">Code: {group.code}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
@@ -1319,14 +1319,14 @@ export const ProductEdit: React.FC = () => {
                           value={newOptionName}
                           onChange={(e) => setNewOptionName(e.target.value)}
                           placeholder="Nom de l'option (ex: S, M, L)"
-                          className="px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm"
+                          className="px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm"
                         />
                         <input
                           type="text"
                           value={newOptionCode}
                           onChange={(e) => setNewOptionCode(e.target.value)}
                           placeholder="Code (optionnel)"
-                          className="px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm"
+                          className="px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm"
                         />
                       </div>
                       <div className="flex gap-2">
@@ -1360,13 +1360,13 @@ export const ProductEdit: React.FC = () => {
                       group.options.map((option: any) => (
                         <div
                           key={option.id}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-600 rounded-lg"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-muted rounded-lg"
                         >
-                          <span className="text-sm text-gray-200">{option.name}</span>
+                          <span className="text-sm text-foreground">{option.name}</span>
                           <button
                             type="button"
                             onClick={() => handleDeleteOption(option.id)}
-                            className="text-gray-400 hover:text-red-400 ml-1"
+                            className="text-muted-foreground hover:text-red-400 ml-1"
                             title="Supprimer cette option"
                           >
                             <X className="h-3 w-3" />
@@ -1374,7 +1374,7 @@ export const ProductEdit: React.FC = () => {
                         </div>
                       ))
                     ) : (
-                      <span className="text-sm text-gray-500 italic">
+                      <span className="text-sm text-muted-foreground italic">
                         Aucune option - ajoutez-en
                       </span>
                     )}
@@ -1383,10 +1383,10 @@ export const ProductEdit: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-6 text-gray-400">
-              <Settings className="h-8 w-8 mx-auto mb-2 text-gray-500" />
+            <div className="text-center py-6 text-muted-foreground">
+              <Settings className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
               <p className="text-sm">Aucun groupe d'options sur ce produit</p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-muted-foreground/70 mt-1">
                 Ajoutez des groupes d'options (ex: Taille, Couleur) pour créer des variantes
               </p>
             </div>
@@ -1397,8 +1397,8 @@ export const ProductEdit: React.FC = () => {
       {/* Header with Add Variant Button */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium text-gray-100">Variantes du produit</h3>
-          <p className="text-sm text-gray-400">
+          <h3 className="text-lg font-medium text-foreground">Variantes du produit</h3>
+          <p className="text-sm text-muted-foreground">
             Gérez les variantes: SKU, prix, stock, options et statut.
           </p>
         </div>
@@ -1421,17 +1421,17 @@ export const ProductEdit: React.FC = () => {
             {/* Use product's option groups for new variant */}
             {product.optionGroups && product.optionGroups.length > 0 && (
               <div>
-                <p className="text-sm font-medium text-gray-300 mb-2">Options de la variante</p>
+                <p className="text-sm font-medium text-foreground mb-2">Options de la variante</p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {product.optionGroups.map((group: any) => (
                     <div key={group.id}>
-                      <label className="block text-xs font-medium text-gray-300 mb-1">
+                      <label className="block text-xs font-medium text-foreground mb-1">
                         {group.name}
                       </label>
                       <select
                         value={newVariant.options[group.id] || ''}
                         onChange={(e) => updateNewVariantOption(group.id, e.target.value)}
-                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        className="w-full px-3 py-2 bg-muted border border-border text-foreground rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
                       >
                         <option value="">-- Sélectionner --</option>
                         {group.options?.map((option: any) => (
@@ -1449,17 +1449,17 @@ export const ProductEdit: React.FC = () => {
             {/* Variant Fields */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1">SKU *</label>
+                <label className="block text-xs font-medium text-foreground mb-1">SKU *</label>
                 <input
                   type="text"
                   value={newVariant.sku}
                   onChange={(e) => setNewVariant({ ...newVariant, sku: e.target.value })}
                   placeholder="SKU-001"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1">Prix (DZD)</label>
+                <label className="block text-xs font-medium text-foreground mb-1">Prix (DZD)</label>
                 <input
                   type="number"
                   value={newVariant.price || ''}
@@ -1467,12 +1467,12 @@ export const ProductEdit: React.FC = () => {
                     setNewVariant({ ...newVariant, price: parseFloat(e.target.value) || 0 })
                   }
                   placeholder="0"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   min="0"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1">Stock</label>
+                <label className="block text-xs font-medium text-foreground mb-1">Stock</label>
                 <input
                   type="number"
                   value={newVariant.stock || ''}
@@ -1480,7 +1480,7 @@ export const ProductEdit: React.FC = () => {
                     setNewVariant({ ...newVariant, stock: parseInt(e.target.value) || 0 })
                   }
                   placeholder="0"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   min="0"
                 />
               </div>
@@ -1511,35 +1511,35 @@ export const ProductEdit: React.FC = () => {
       )}
 
       {/* Variants Table */}
-      <div className="overflow-x-auto bg-gray-800 rounded-lg border border-gray-700">
-        <table className="min-w-full divide-y divide-gray-700">
-          <thead className="bg-gray-700/50">
+      <div className="overflow-x-auto bg-card rounded-lg border border-border">
+        <table className="min-w-full divide-y divide-border">
+          <thead className="bg-muted/50">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                 SKU
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                 Options
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                 Prix (DZD)
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                 Stock
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                 Statut
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">
+              <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-gray-800 divide-y divide-gray-700">
+          <tbody className="bg-card divide-y divide-border">
             {product.variants?.map((variant) => (
               <tr
                 key={variant.id}
-                className={`hover:bg-gray-700/50 ${editingVariant === variant.id ? 'bg-blue-900/30' : ''}`}
+                className={`hover:bg-accent ${editingVariant === variant.id ? 'bg-primary/10' : ''}`}
               >
                 <td className="px-4 py-3">
                   {editingVariant === variant.id ? (
@@ -1555,18 +1555,18 @@ export const ProductEdit: React.FC = () => {
                           },
                         })
                       }
-                      className="w-32 px-2 py-1 bg-gray-700 border border-gray-600 text-gray-100 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-32 px-2 py-1 bg-muted border border-border text-foreground rounded text-sm focus:ring-2 focus:ring-primary focus:border-primary"
                     />
                   ) : (
                     <div>
-                      <span className="text-sm font-medium text-gray-100">{variant.sku}</span>
+                      <span className="text-sm font-medium text-foreground">{variant.sku}</span>
                       {variant.name !== variant.sku && (
-                        <p className="text-xs text-gray-400">{variant.name}</p>
+                        <p className="text-xs text-muted-foreground">{variant.name}</p>
                       )}
                     </div>
                   )}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-400">
+                <td className="px-4 py-3 text-sm text-muted-foreground">
                   {variant.options && variant.options.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
                       {variant.options.map((opt) => (
@@ -1576,7 +1576,7 @@ export const ProductEdit: React.FC = () => {
                       ))}
                     </div>
                   ) : (
-                    <span className="text-gray-500">-</span>
+                    <span className="text-muted-foreground">-</span>
                   )}
                 </td>
                 <td className="px-4 py-3">
@@ -1593,12 +1593,12 @@ export const ProductEdit: React.FC = () => {
                           },
                         })
                       }
-                      className="w-28 px-2 py-1 bg-gray-700 border border-gray-600 text-gray-100 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-28 px-2 py-1 bg-muted border border-border text-foreground rounded text-sm focus:ring-2 focus:ring-primary focus:border-primary"
                       min="0"
                       step="0.01"
                     />
                   ) : (
-                    <span className="font-medium text-gray-100">
+                    <span className="font-medium text-foreground">
                       {formatPrice(variant.price / 100)}
                     </span>
                   )}
@@ -1617,7 +1617,7 @@ export const ProductEdit: React.FC = () => {
                           },
                         })
                       }
-                      className="w-20 px-2 py-1 bg-gray-700 border border-gray-600 text-gray-100 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-20 px-2 py-1 bg-muted border border-border text-foreground rounded text-sm focus:ring-2 focus:ring-primary focus:border-primary"
                       min="0"
                     />
                   ) : (
@@ -1649,9 +1649,9 @@ export const ProductEdit: React.FC = () => {
                             },
                           })
                         }
-                        className="w-4 h-4 text-blue-600 border-gray-500 rounded bg-gray-600"
+                        className="w-4 h-4 text-primary border-border rounded bg-card"
                       />
-                      <span className="text-sm text-gray-300">Actif</span>
+                      <span className="text-sm text-muted-foreground">Actif</span>
                     </label>
                   ) : (
                     <Badge variant={variant.enabled ? 'success' : 'default'}>
@@ -1712,7 +1712,7 @@ export const ProductEdit: React.FC = () => {
       </div>
 
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium text-gray-100">Catégories</h3>
+        <h3 className="text-lg font-medium text-foreground">Catégories</h3>
         <Button
           onClick={handleSaveCollections}
           loading={savingCollections}
@@ -1724,9 +1724,9 @@ export const ProductEdit: React.FC = () => {
       </div>
 
       {allCollections.length === 0 ? (
-        <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-8 text-center">
-          <FolderTree className="h-12 w-12 text-gray-500 mx-auto mb-3" />
-          <p className="text-gray-400">Aucune catégorie disponible</p>
+        <div className="bg-muted/50 border border-border rounded-lg p-8 text-center">
+          <FolderTree className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground">Aucune catégorie disponible</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1735,8 +1735,8 @@ export const ProductEdit: React.FC = () => {
               key={collection.id}
               className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
                 selectedCollections.includes(collection.id)
-                  ? 'border-blue-500 bg-blue-900/30'
-                  : 'border-gray-600 hover:border-gray-500'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border hover:border-muted-foreground'
               }`}
             >
               <input
@@ -1751,11 +1751,11 @@ export const ProductEdit: React.FC = () => {
                     );
                   }
                 }}
-                className="h-5 w-5 text-blue-600 border-gray-500 rounded bg-gray-600"
+                className="h-5 w-5 text-primary border-border rounded bg-card"
               />
               <div>
-                <p className="font-medium text-gray-100">{collection.name}</p>
-                {collection.slug && <p className="text-xs text-gray-400">/{collection.slug}</p>}
+                <p className="font-medium text-foreground">{collection.name}</p>
+                {collection.slug && <p className="text-xs text-muted-foreground">/{collection.slug}</p>}
               </div>
             </label>
           ))}
@@ -1803,7 +1803,7 @@ export const ProductEdit: React.FC = () => {
           </Button>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-100">{product.name}</h1>
+              <h1 className="text-2xl font-bold text-foreground">{product.name}</h1>
               <Badge variant={product.enabled ? 'success' : 'default'}>
                 {product.enabled ? 'Actif' : 'Inactif'}
               </Badge>
@@ -1814,7 +1814,7 @@ export const ProductEdit: React.FC = () => {
                 </Badge>
               )}
             </div>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               ID: {product.id} | Créé le {formatDateTime(product.createdAt)}
             </p>
           </div>
@@ -1850,21 +1850,21 @@ export const ProductEdit: React.FC = () => {
                   className="h-12 w-12 rounded-lg object-cover"
                 />
               ) : (
-                <div className="h-12 w-12 bg-gray-700 rounded-lg flex items-center justify-center">
-                  <Package className="h-6 w-6 text-gray-400" />
+                <div className="h-12 w-12 bg-muted rounded-lg flex items-center justify-center">
+                  <Package className="h-6 w-6 text-muted-foreground" />
                 </div>
               )}
               <div>
-                <p className="text-sm text-gray-400">SKU Principal</p>
-                <p className="font-semibold text-gray-100">{mainVariant?.sku || '-'}</p>
+                <p className="text-sm text-muted-foreground">SKU Principal</p>
+                <p className="font-semibold text-foreground">{mainVariant?.sku || '-'}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-gray-400">Prix</p>
-            <p className="text-xl font-bold text-gray-100">
+            <p className="text-sm text-muted-foreground">Prix</p>
+            <p className="text-xl font-bold text-foreground">
               {mainVariant?.price ? formatPrice(mainVariant.price / 100) : '-'}
             </p>
             {product.customFields?.salePrice && (
@@ -1876,7 +1876,7 @@ export const ProductEdit: React.FC = () => {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-gray-400">Stock Total</p>
+            <p className="text-sm text-muted-foreground">Stock Total</p>
             <p
               className={`text-xl font-bold ${
                 totalStock === 0
@@ -1888,14 +1888,14 @@ export const ProductEdit: React.FC = () => {
             >
               {totalStock} unités
             </p>
-            <p className="text-sm text-gray-500">{product.variants?.length || 0} variante(s)</p>
+            <p className="text-sm text-muted-foreground">{product.variants?.length || 0} variante(s)</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-gray-400">Vues</p>
-            <p className="text-xl font-bold text-gray-100 flex items-center gap-2">
-              <Eye className="h-5 w-5 text-gray-400" />
+            <p className="text-sm text-muted-foreground">Vues</p>
+            <p className="text-xl font-bold text-foreground flex items-center gap-2">
+              <Eye className="h-5 w-5 text-muted-foreground" />
               {product.customFields?.viewCount || 0}
             </p>
           </CardContent>
@@ -1903,7 +1903,7 @@ export const ProductEdit: React.FC = () => {
       </div>
 
       {/* Progress steps */}
-      <div className="flex items-center justify-between bg-gray-800 rounded-xl p-4 shadow-sm overflow-x-auto border border-gray-700">
+      <div className="flex items-center justify-between bg-card rounded-xl p-4 shadow-sm overflow-x-auto border border-border">
         {STEPS.map((step, index) => {
           const Icon = step.icon;
           const isActive = index === currentStep;
@@ -1915,19 +1915,19 @@ export const ProductEdit: React.FC = () => {
                 onClick={() => goToStep(index)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${
                   isActive
-                    ? 'bg-blue-900/50 text-blue-400'
+                    ? 'bg-primary/20 text-primary'
                     : isCompleted
                       ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50'
-                      : 'text-gray-400 hover:bg-gray-700'
+                      : 'text-muted-foreground hover:bg-accent'
                 }`}
               >
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center ${
                     isActive
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-primary text-primary-foreground'
                       : isCompleted
                         ? 'bg-green-500 text-white'
-                        : 'bg-gray-600 text-gray-400'
+                        : 'bg-muted text-muted-foreground'
                   }`}
                 >
                   {isCompleted ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
@@ -1937,7 +1937,7 @@ export const ProductEdit: React.FC = () => {
               {index < STEPS.length - 1 && (
                 <div
                   className={`flex-1 h-0.5 mx-2 min-w-[20px] ${
-                    index < currentStep ? 'bg-green-500' : 'bg-gray-600'
+                    index < currentStep ? 'bg-green-500' : 'bg-muted'
                   }`}
                 />
               )}

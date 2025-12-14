@@ -8,7 +8,7 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 export const Card: React.FC<CardProps> = ({ className, children, ...props }) => {
   return (
     <div
-      className={cn('bg-gray-800 rounded-lg shadow-lg border border-gray-700', className)}
+      className={cn('bg-card rounded-lg shadow-lg border border-border', className)}
       {...props}
     >
       {children}
@@ -22,7 +22,7 @@ interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const CardHeader: React.FC<CardHeaderProps> = ({ className, children, ...props }) => {
   return (
-    <div className={cn('px-6 py-4 border-b border-gray-700', className)} {...props}>
+    <div className={cn('px-6 py-4 border-b border-border', className)} {...props}>
       {children}
     </div>
   );
@@ -34,7 +34,7 @@ interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
 
 export const CardTitle: React.FC<CardTitleProps> = ({ className, children, ...props }) => {
   return (
-    <h3 className={cn('text-lg font-semibold text-gray-100', className)} {...props}>
+    <h3 className={cn('text-lg font-semibold text-foreground', className)} {...props}>
       {children}
     </h3>
   );
@@ -58,7 +58,7 @@ interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const CardFooter: React.FC<CardFooterProps> = ({ className, children, ...props }) => {
   return (
-    <div className={cn('px-6 py-4 border-t border-gray-700 bg-gray-800/50', className)} {...props}>
+    <div className={cn('px-6 py-4 border-t border-border bg-card/50', className)} {...props}>
       {children}
     </div>
   );

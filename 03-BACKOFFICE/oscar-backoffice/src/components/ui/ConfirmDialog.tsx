@@ -27,9 +27,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   loading = false,
 }) => {
   const iconColors = {
-    danger: 'text-red-400',
-    warning: 'text-yellow-400',
-    info: 'text-blue-400',
+    danger: 'text-destructive',
+    warning: 'text-warning',
+    info: 'text-primary',
   };
 
   const buttonVariants = {
@@ -46,8 +46,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             <AlertTriangle className="h-6 w-6" />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-100 mb-2">{title}</h3>
-            <div className="text-sm text-gray-400">{message}</div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
+            <div className="text-sm text-muted-foreground">{message}</div>
           </div>
         </div>
       </ModalContent>

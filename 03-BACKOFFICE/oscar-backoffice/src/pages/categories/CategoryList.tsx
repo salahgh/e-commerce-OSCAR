@@ -181,25 +181,25 @@ export const CategoryList: React.FC = () => {
     return (
       <div key={collection.id}>
         <div
-          className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-700 border-b border-gray-700 ${
-            depth > 0 ? 'bg-gray-800/50' : ''
+          className={`flex items-center gap-3 px-4 py-3 hover:bg-accent border-b border-border ${
+            depth > 0 ? 'bg-card/50' : ''
           }`}
           style={{ paddingLeft: `${1 + depth * 1.5}rem` }}
         >
           {/* Expand/Collapse Toggle */}
           <button
             onClick={() => toggleExpand(collection.id)}
-            className={`p-1 rounded hover:bg-gray-600 ${hasChildren ? 'visible' : 'invisible'}`}
+            className={`p-1 rounded hover:bg-muted ${hasChildren ? 'visible' : 'invisible'}`}
           >
             {isExpanded ? (
-              <ChevronDown className="h-4 w-4 text-gray-400" />
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
             ) : (
-              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             )}
           </button>
 
           {/* Image */}
-          <div className="h-10 w-10 rounded-lg bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
             {collection.featuredAsset?.preview ? (
               <img
                 src={collection.featuredAsset.preview}
@@ -207,21 +207,21 @@ export const CategoryList: React.FC = () => {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <Image className="h-5 w-5 text-gray-500" />
+              <Image className="h-5 w-5 text-muted-foreground" />
             )}
           </div>
 
           {/* Name */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-medium text-gray-100 truncate">{collection.name}</span>
+              <span className="font-medium text-foreground truncate">{collection.name}</span>
               {collection.isPrivate && (
                 <span title="Privé">
-                  <EyeOff className="h-4 w-4 text-gray-500" />
+                  <EyeOff className="h-4 w-4 text-muted-foreground" />
                 </span>
               )}
             </div>
-            <div className="text-sm text-gray-500 truncate">
+            <div className="text-sm text-muted-foreground truncate">
               {collection.customFields?.nameFr && (
                 <span className="mr-3">FR: {collection.customFields.nameFr}</span>
               )}
@@ -232,7 +232,7 @@ export const CategoryList: React.FC = () => {
           </div>
 
           {/* Product Count */}
-          <div className="flex items-center gap-1 text-sm text-gray-400">
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Package className="h-4 w-4" />
             <span>{productCount}</span>
           </div>
@@ -246,14 +246,14 @@ export const CategoryList: React.FC = () => {
           <div className="flex items-center gap-1">
             <Link
               to={`/categories/${collection.id}`}
-              className="p-2 text-blue-400 hover:bg-blue-900/50 rounded-lg transition-colors"
+              className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
               title="Modifier"
             >
               <Edit2 className="h-4 w-4" />
             </Link>
             <button
               onClick={() => setDeleteTarget({ id: collection.id, name: collection.name })}
-              className="p-2 text-red-400 hover:bg-red-900/50 rounded-lg transition-colors"
+              className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
               title="Supprimer"
             >
               <Trash2 className="h-4 w-4" />
@@ -273,10 +273,10 @@ export const CategoryList: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
-          <p className="text-red-500 text-lg">Erreur: {error.message}</p>
+          <p className="text-destructive text-lg">Erreur: {error.message}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
           >
             Réessayer
           </button>
@@ -290,8 +290,8 @@ export const CategoryList: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-100">Catégories</h1>
-          <p className="text-gray-400 mt-1">
+          <h1 className="text-3xl font-bold text-foreground">Catégories</h1>
+          <p className="text-muted-foreground mt-1">
             {totalItems} catégorie{totalItems > 1 ? 's' : ''}
           </p>
         </div>
@@ -301,14 +301,14 @@ export const CategoryList: React.FC = () => {
       </div>
 
       {/* Enhanced Search & Filters */}
-      <div className="bg-gray-800 rounded-xl shadow-sm border border-gray-700 p-4">
+      <div className="bg-card rounded-xl shadow-sm border border-border p-4">
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search Input */}
           <div className="flex-1 relative">
             <Search
               className={cn(
                 'absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 transition-colors',
-                isSearchFocused ? 'text-blue-500' : 'text-gray-500'
+                isSearchFocused ? 'text-primary' : 'text-muted-foreground'
               )}
             />
             <input
@@ -320,21 +320,21 @@ export const CategoryList: React.FC = () => {
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
               className={cn(
-                'w-full pl-12 pr-20 py-3.5 border rounded-xl transition-all duration-200 outline-none text-gray-100 placeholder-gray-500',
+                'w-full pl-12 pr-20 py-3.5 border rounded-xl transition-all duration-200 outline-none text-foreground placeholder-muted-foreground',
                 isSearchFocused
-                  ? 'border-blue-500 ring-4 ring-blue-500/10 bg-gray-900'
-                  : 'border-gray-600 hover:border-gray-500 bg-gray-900'
+                  ? 'border-primary ring-4 ring-primary/10 bg-background'
+                  : 'border-border hover:border-muted-foreground bg-background'
               )}
             />
             {searchTerm ? (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-700 rounded-full transition-colors"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1 hover:bg-accent rounded-full transition-colors"
               >
-                <X className="h-4 w-4 text-gray-400" />
+                <X className="h-4 w-4 text-muted-foreground" />
               </button>
             ) : (
-              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 hidden md:flex items-center gap-1 text-xs text-gray-500 bg-gray-700 px-2 py-1 rounded">
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 hidden md:flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
                 <span>Ctrl</span>
                 <span>+</span>
                 <span>K</span>
@@ -351,7 +351,7 @@ export const CategoryList: React.FC = () => {
                 'flex items-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200',
                 showOnlyPublic
                   ? 'bg-green-900/50 border-green-600 text-green-400'
-                  : 'bg-gray-800 border-gray-600 text-gray-400 hover:bg-gray-700'
+                  : 'bg-card border-border text-muted-foreground hover:bg-accent'
               )}
             >
               {showOnlyPublic ? (
@@ -365,14 +365,14 @@ export const CategoryList: React.FC = () => {
             </button>
 
             {/* View Mode Toggle */}
-            <div className="flex items-center bg-gray-700 rounded-xl p-1">
+            <div className="flex items-center bg-muted rounded-xl p-1">
               <button
                 onClick={() => setViewMode('tree')}
                 className={cn(
                   'p-2.5 rounded-lg transition-all',
                   viewMode === 'tree'
-                    ? 'bg-gray-800 text-blue-400 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-300'
+                    ? 'bg-card text-primary shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 )}
                 title="Vue arborescence"
               >
@@ -383,8 +383,8 @@ export const CategoryList: React.FC = () => {
                 className={cn(
                   'p-2.5 rounded-lg transition-all',
                   viewMode === 'flat'
-                    ? 'bg-gray-800 text-blue-400 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-300'
+                    ? 'bg-card text-primary shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 )}
                 title="Vue liste"
               >
@@ -396,15 +396,15 @@ export const CategoryList: React.FC = () => {
 
         {/* Search Results Info */}
         {searchTerm && (
-          <div className="mt-3 pt-3 border-t border-gray-700 flex items-center justify-between">
-            <p className="text-sm text-gray-400">
-              <span className="font-medium text-gray-100">{filteredRootCollections.length}</span>
+          <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">{filteredRootCollections.length}</span>
               {' '}resultat{filteredRootCollections.length !== 1 ? 's' : ''} pour{' '}
-              <span className="font-medium text-blue-400">"{searchTerm}"</span>
+              <span className="font-medium text-primary">"{searchTerm}"</span>
             </p>
             <button
               onClick={() => setSearchTerm('')}
-              className="text-sm text-blue-400 hover:text-blue-300 font-medium"
+              className="text-sm text-primary hover:text-primary/80 font-medium"
             >
               Effacer
             </button>
@@ -413,28 +413,28 @@ export const CategoryList: React.FC = () => {
       </div>
 
       {/* Tree View */}
-      <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div className="bg-card rounded-lg shadow overflow-hidden border border-border">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Spinner size="lg" />
           </div>
         ) : filteredRootCollections.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12">
-            <FolderTree className="h-16 w-16 text-gray-500 mb-4" />
-            <p className="text-gray-400 text-lg">Aucune catégorie trouvée</p>
+            <FolderTree className="h-16 w-16 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground text-lg">Aucune catégorie trouvée</p>
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="mt-4 text-blue-600 hover:text-blue-700"
+                className="mt-4 text-primary hover:text-primary/80"
               >
                 Effacer la recherche
               </button>
             )}
           </div>
         ) : (
-          <div className="divide-y divide-gray-700">
+          <div className="divide-y divide-border">
             {/* Header */}
-            <div className="flex items-center gap-3 px-4 py-3 bg-gray-800/50 font-medium text-sm text-gray-400">
+            <div className="flex items-center gap-3 px-4 py-3 bg-muted/50 font-medium text-sm text-muted-foreground">
               <div className="w-6" /> {/* Toggle space */}
               <div className="w-10" /> {/* Image space */}
               <div className="flex-1">Nom</div>

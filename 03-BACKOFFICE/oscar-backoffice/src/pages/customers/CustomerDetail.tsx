@@ -84,8 +84,8 @@ const ORDER_STATE_CONFIG: Record<string, {
   color: string;
   bgColor: string;
 }> = {
-  Created: { label: 'Créée', variant: 'default', icon: <Package className="h-3 w-3" />, color: 'text-gray-400', bgColor: 'bg-gray-500/20' },
-  AddingItems: { label: 'En cours', variant: 'default', icon: <ShoppingCart className="h-3 w-3" />, color: 'text-gray-400', bgColor: 'bg-gray-500/20' },
+  Created: { label: 'Créée', variant: 'default', icon: <Package className="h-3 w-3" />, color: 'text-muted-foreground', bgColor: 'bg-muted' },
+  AddingItems: { label: 'En cours', variant: 'default', icon: <ShoppingCart className="h-3 w-3" />, color: 'text-muted-foreground', bgColor: 'bg-muted' },
   ArrangingPayment: { label: 'Paiement', variant: 'warning', icon: <CreditCard className="h-3 w-3" />, color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' },
   PaymentAuthorized: { label: 'Autorisée', variant: 'info', icon: <CheckCircle className="h-3 w-3" />, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
   PaymentSettled: { label: 'Payée', variant: 'info', icon: <CheckCircle className="h-3 w-3" />, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
@@ -257,7 +257,7 @@ export const CustomerDetail: React.FC = () => {
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
           <Spinner size="lg" />
-          <p className="text-gray-400 mt-4">Chargement du profil client...</p>
+          <p className="text-muted-foreground mt-4">Chargement du profil client...</p>
         </div>
       </div>
     );
@@ -265,14 +265,14 @@ export const CustomerDetail: React.FC = () => {
 
   if (error || !customer) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-96 bg-gray-800 rounded-xl border border-gray-700">
+      <div className="flex flex-col items-center justify-center min-h-96 bg-card rounded-xl border border-border">
         <div className="p-4 bg-red-500/20 rounded-full mb-4">
           <AlertTriangle className="h-12 w-12 text-red-400" />
         </div>
-        <p className="text-gray-300 text-lg font-medium mb-2">
+        <p className="text-foreground text-lg font-medium mb-2">
           {error ? 'Erreur de chargement' : 'Client non trouvé'}
         </p>
-        <p className="text-gray-500 text-sm mb-6">
+        <p className="text-muted-foreground text-sm mb-6">
           {error?.message || "Ce client n'existe pas ou a été supprimé"}
         </p>
         <Button variant="primary" onClick={() => navigate('/customers')}>
@@ -289,7 +289,7 @@ export const CustomerDetail: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Hero Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 rounded-2xl border border-gray-700">
+      <div className="relative overflow-hidden bg-gradient-to-br from-card via-background to-card rounded-2xl border border-border">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0" style={{
@@ -306,7 +306,7 @@ export const CustomerDetail: React.FC = () => {
           <div className="flex items-center justify-between mb-8">
             <button
               onClick={() => navigate('/customers')}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-700/50 hover:bg-gray-700 rounded-xl text-gray-300 hover:text-white transition-all group"
+              className="flex items-center gap-2 px-4 py-2 bg-muted/50 hover:bg-muted rounded-xl text-muted-foreground hover:text-foreground transition-all group"
             >
               <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
               Retour
@@ -340,8 +340,8 @@ export const CustomerDetail: React.FC = () => {
               {/* Large Avatar */}
               <div className="relative group">
                 <div className={`h-32 w-32 rounded-2xl bg-gradient-to-br ${customerStats?.tier.color || 'from-blue-500 to-purple-600'} p-1 shadow-2xl`}>
-                  <div className="h-full w-full rounded-xl bg-gray-900 flex items-center justify-center">
-                    <span className="text-4xl font-bold text-white">
+                  <div className="h-full w-full rounded-xl bg-background flex items-center justify-center">
+                    <span className="text-4xl font-bold text-foreground">
                       {(customer.firstName?.[0] || '') + (customer.lastName?.[0] || '')}
                     </span>
                   </div>
@@ -375,16 +375,16 @@ export const CustomerDetail: React.FC = () => {
             <div className="flex-1">
               <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
                 <div>
-                  <h1 className="text-3xl font-bold text-white mb-2">
+                  <h1 className="text-3xl font-bold text-foreground mb-2">
                     {customer.firstName} {customer.lastName}
                   </h1>
-                  <div className="flex flex-wrap items-center gap-3 text-gray-400">
+                  <div className="flex flex-wrap items-center gap-3 text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
                       Client depuis {customerStats?.customerAge || 0} jours
                     </span>
-                    <span className="text-gray-600">•</span>
-                    <span className="text-sm bg-gray-700/50 px-2 py-1 rounded-lg">
+                    <span className="text-muted-foreground/50">•</span>
+                    <span className="text-sm bg-muted/50 px-2 py-1 rounded-lg">
                       ID: {customer.id}
                     </span>
                   </div>
@@ -394,42 +394,42 @@ export const CustomerDetail: React.FC = () => {
               {/* Contact Info Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Email */}
-                <div className="flex items-center gap-3 p-4 bg-gray-800/50 rounded-xl border border-gray-700/50 group hover:border-blue-500/50 transition-all">
+                <div className="flex items-center gap-3 p-4 bg-card/50 rounded-xl border border-border/50 group hover:border-blue-500/50 transition-all">
                   <div className="p-2 bg-blue-500/20 rounded-lg">
                     <Mail className="h-5 w-5 text-blue-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-500 uppercase tracking-wider">Email</p>
-                    <p className="text-white truncate">{customer.emailAddress}</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Email</p>
+                    <p className="text-foreground truncate">{customer.emailAddress}</p>
                   </div>
                   <button
                     onClick={handleCopyEmail}
-                    className="p-2 opacity-0 group-hover:opacity-100 hover:bg-gray-700 rounded-lg transition-all"
+                    className="p-2 opacity-0 group-hover:opacity-100 hover:bg-muted rounded-lg transition-all"
                     title="Copier"
                   >
-                    <Copy className="h-4 w-4 text-gray-400" />
+                    <Copy className="h-4 w-4 text-muted-foreground" />
                   </button>
                 </div>
 
                 {/* Phone */}
-                <div className="flex items-center gap-3 p-4 bg-gray-800/50 rounded-xl border border-gray-700/50 hover:border-green-500/50 transition-all">
+                <div className="flex items-center gap-3 p-4 bg-card/50 rounded-xl border border-border/50 hover:border-green-500/50 transition-all">
                   <div className="p-2 bg-green-500/20 rounded-lg">
                     <Phone className="h-5 w-5 text-green-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-500 uppercase tracking-wider">Téléphone</p>
-                    <p className="text-white">{customer.phoneNumber || '-'}</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Téléphone</p>
+                    <p className="text-foreground">{customer.phoneNumber || '-'}</p>
                   </div>
                 </div>
 
                 {/* Location */}
-                <div className="flex items-center gap-3 p-4 bg-gray-800/50 rounded-xl border border-gray-700/50 hover:border-purple-500/50 transition-all">
+                <div className="flex items-center gap-3 p-4 bg-card/50 rounded-xl border border-border/50 hover:border-purple-500/50 transition-all">
                   <div className="p-2 bg-purple-500/20 rounded-lg">
                     <MapPin className="h-5 w-5 text-purple-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-500 uppercase tracking-wider">Localisation</p>
-                    <p className="text-white">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Localisation</p>
+                    <p className="text-foreground">
                       {customer.customFields?.wilaya || '-'}
                       {customer.customFields?.city && `, ${customer.customFields.city}`}
                     </p>
@@ -437,20 +437,20 @@ export const CustomerDetail: React.FC = () => {
                 </div>
 
                 {/* Last Activity */}
-                <div className="flex items-center gap-3 p-4 bg-gray-800/50 rounded-xl border border-gray-700/50 hover:border-yellow-500/50 transition-all">
+                <div className="flex items-center gap-3 p-4 bg-card/50 rounded-xl border border-border/50 hover:border-yellow-500/50 transition-all">
                   <div className="p-2 bg-yellow-500/20 rounded-lg">
                     <Clock className="h-5 w-5 text-yellow-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-500 uppercase tracking-wider">Dernière connexion</p>
-                    <p className="text-white">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Dernière connexion</p>
+                    <p className="text-foreground">
                       {customer.user?.lastLogin ? formatDateTime(customer.user.lastLogin) : 'Jamais'}
                     </p>
                   </div>
                 </div>
 
                 {/* Verification Status */}
-                <div className="flex items-center gap-3 p-4 bg-gray-800/50 rounded-xl border border-gray-700/50 hover:border-cyan-500/50 transition-all">
+                <div className="flex items-center gap-3 p-4 bg-card/50 rounded-xl border border-border/50 hover:border-cyan-500/50 transition-all">
                   <div className={`p-2 rounded-lg ${customer.user?.verified ? 'bg-green-500/20' : 'bg-yellow-500/20'}`}>
                     {customer.user?.verified ? (
                       <UserCheck className="h-5 w-5 text-green-400" />
@@ -459,7 +459,7 @@ export const CustomerDetail: React.FC = () => {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-500 uppercase tracking-wider">Statut</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Statut</p>
                     <Badge variant={customer.user?.verified ? 'success' : 'warning'}>
                       {customer.user?.verified ? 'Vérifié' : 'Non vérifié'}
                     </Badge>
@@ -468,13 +468,13 @@ export const CustomerDetail: React.FC = () => {
 
                 {/* Last Order */}
                 {customerStats?.daysSinceLastOrder !== null && (
-                  <div className="flex items-center gap-3 p-4 bg-gray-800/50 rounded-xl border border-gray-700/50 hover:border-pink-500/50 transition-all">
+                  <div className="flex items-center gap-3 p-4 bg-card/50 rounded-xl border border-border/50 hover:border-pink-500/50 transition-all">
                     <div className="p-2 bg-pink-500/20 rounded-lg">
                       <ShoppingCart className="h-5 w-5 text-pink-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-gray-500 uppercase tracking-wider">Dernière commande</p>
-                      <p className="text-white">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider">Dernière commande</p>
+                      <p className="text-foreground">
                         Il y a {customerStats.daysSinceLastOrder} jours
                       </p>
                     </div>
@@ -499,8 +499,8 @@ export const CustomerDetail: React.FC = () => {
                 <Activity className="h-3 w-3" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-white mb-1">{customerStats.totalOrders}</p>
-            <p className="text-sm text-gray-400">Commandes totales</p>
+            <p className="text-3xl font-bold text-foreground mb-1">{customerStats.totalOrders}</p>
+            <p className="text-sm text-muted-foreground">Commandes totales</p>
           </div>
 
           {/* Lifetime Value */}
@@ -513,8 +513,8 @@ export const CustomerDetail: React.FC = () => {
                 <TrendingUp className="h-3 w-3" />
               </div>
             </div>
-            <p className="text-2xl font-bold text-white mb-1">{formatPrice(customerStats.lifetimeValue)}</p>
-            <p className="text-sm text-gray-400">Valeur totale</p>
+            <p className="text-2xl font-bold text-foreground mb-1">{formatPrice(customerStats.lifetimeValue)}</p>
+            <p className="text-sm text-muted-foreground">Valeur totale</p>
           </div>
 
           {/* Average Order */}
@@ -527,8 +527,8 @@ export const CustomerDetail: React.FC = () => {
                 <BarChart3 className="h-3 w-3" />
               </div>
             </div>
-            <p className="text-2xl font-bold text-white mb-1">{formatPrice(customerStats.averageOrderValue)}</p>
-            <p className="text-sm text-gray-400">Panier moyen</p>
+            <p className="text-2xl font-bold text-foreground mb-1">{formatPrice(customerStats.averageOrderValue)}</p>
+            <p className="text-sm text-muted-foreground">Panier moyen</p>
           </div>
 
           {/* Delivered Orders */}
@@ -542,8 +542,8 @@ export const CustomerDetail: React.FC = () => {
                 {customerStats.completionRate.toFixed(0)}%
               </div>
             </div>
-            <p className="text-3xl font-bold text-white mb-1">{customerStats.deliveredOrders}</p>
-            <p className="text-sm text-gray-400">Livrées</p>
+            <p className="text-3xl font-bold text-foreground mb-1">{customerStats.deliveredOrders}</p>
+            <p className="text-sm text-muted-foreground">Livrées</p>
           </div>
 
           {/* Cancelled Orders */}
@@ -556,8 +556,8 @@ export const CustomerDetail: React.FC = () => {
                 <ArrowDownRight className="h-3 w-3" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-white mb-1">{customerStats.cancelledOrders}</p>
-            <p className="text-sm text-gray-400">Annulées</p>
+            <p className="text-3xl font-bold text-foreground mb-1">{customerStats.cancelledOrders}</p>
+            <p className="text-sm text-muted-foreground">Annulées</p>
           </div>
 
           {/* Order Frequency */}
@@ -570,16 +570,16 @@ export const CustomerDetail: React.FC = () => {
                 <Clock className="h-3 w-3" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-white mb-1">
+            <p className="text-3xl font-bold text-foreground mb-1">
               {customerStats.avgDaysBetweenOrders || '∞'}
             </p>
-            <p className="text-sm text-gray-400">Jours entre cmd</p>
+            <p className="text-sm text-muted-foreground">Jours entre cmd</p>
           </div>
         </div>
       )}
 
       {/* Tabs Navigation */}
-      <div className="flex items-center gap-2 border-b border-gray-700">
+      <div className="flex items-center gap-2 border-b border-border">
         {[
           { id: 'overview' as const, label: 'Aperçu', icon: <PieChart className="h-4 w-4" /> },
           { id: 'orders' as const, label: `Commandes (${customerStats?.totalOrders || 0})`, icon: <Package className="h-4 w-4" /> },
@@ -591,8 +591,8 @@ export const CustomerDetail: React.FC = () => {
             className={`
               flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-all
               ${activeTab === tab.id
-                ? 'text-blue-400 border-blue-400'
-                : 'text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-600'
+                ? 'text-primary border-primary'
+                : 'text-muted-foreground border-transparent hover:text-foreground hover:border-muted-foreground'
               }
             `}
           >
@@ -608,16 +608,16 @@ export const CustomerDetail: React.FC = () => {
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Edit Form or Info Display */}
-            <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
-              <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                  <User className="h-5 w-5 text-gray-400" />
+            <div className="bg-card rounded-xl border border-border overflow-hidden">
+              <div className="p-4 border-b border-border flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <User className="h-5 w-5 text-muted-foreground" />
                   Informations personnelles
                 </h3>
                 {!isEditing && (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="p-2 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-white transition-all"
+                    className="p-2 hover:bg-accent rounded-lg text-muted-foreground hover:text-foreground transition-all"
                   >
                     <Edit2 className="h-4 w-4" />
                   </button>
@@ -708,30 +708,30 @@ export const CustomerDetail: React.FC = () => {
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Prénom</p>
-                        <p className="text-white font-medium">{customer.firstName}</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Prénom</p>
+                        <p className="text-foreground font-medium">{customer.firstName}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Nom</p>
-                        <p className="text-white font-medium">{customer.lastName}</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Nom</p>
+                        <p className="text-foreground font-medium">{customer.lastName}</p>
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Email</p>
-                      <p className="text-white font-medium">{customer.emailAddress}</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Email</p>
+                      <p className="text-foreground font-medium">{customer.emailAddress}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Téléphone</p>
-                      <p className="text-white font-medium">{customer.phoneNumber || '-'}</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Téléphone</p>
+                      <p className="text-foreground font-medium">{customer.phoneNumber || '-'}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Wilaya</p>
-                        <p className="text-white font-medium">{customer.customFields?.wilaya || '-'}</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Wilaya</p>
+                        <p className="text-foreground font-medium">{customer.customFields?.wilaya || '-'}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Ville</p>
-                        <p className="text-white font-medium">{customer.customFields?.city || '-'}</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Ville</p>
+                        <p className="text-foreground font-medium">{customer.customFields?.city || '-'}</p>
                       </div>
                     </div>
                   </div>
@@ -741,10 +741,10 @@ export const CustomerDetail: React.FC = () => {
 
             {/* Order Status Distribution */}
             {customerStats && customerStats.totalOrders > 0 && (
-              <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
-                <div className="p-4 border-b border-gray-700">
-                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                    <PieChart className="h-5 w-5 text-gray-400" />
+              <div className="bg-card rounded-xl border border-border overflow-hidden">
+                <div className="p-4 border-b border-border">
+                  <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                    <PieChart className="h-5 w-5 text-muted-foreground" />
                     Distribution des commandes
                   </h3>
                 </div>
@@ -753,8 +753,8 @@ export const CustomerDetail: React.FC = () => {
                     {Object.entries(customerStats.statusDistribution).map(([status, count]) => {
                       const config = ORDER_STATE_CONFIG[status] || {
                         label: status,
-                        color: 'text-gray-400',
-                        bgColor: 'bg-gray-500/20',
+                        color: 'text-muted-foreground',
+                        bgColor: 'bg-muted',
                         icon: <Package className="h-3 w-3" />,
                       };
                       const percentage = (count / customerStats.totalOrders) * 100;
@@ -767,9 +767,9 @@ export const CustomerDetail: React.FC = () => {
                               </span>
                               <span className={config.color}>{config.label}</span>
                             </div>
-                            <span className="text-white font-medium">{count}</span>
+                            <span className="text-foreground font-medium">{count}</span>
                           </div>
-                          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
                             <div
                               className={`h-full rounded-full transition-all ${config.bgColor.replace('/20', '')}`}
                               style={{ width: `${percentage}%` }}
@@ -787,47 +787,47 @@ export const CustomerDetail: React.FC = () => {
 
         {/* Orders Tab */}
         {activeTab === 'orders' && (
-          <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
             {orders.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20">
-                <div className="p-4 bg-gray-700/30 rounded-full mb-4">
-                  <Package className="h-12 w-12 text-gray-500" />
+                <div className="p-4 bg-muted/30 rounded-full mb-4">
+                  <Package className="h-12 w-12 text-muted-foreground" />
                 </div>
-                <p className="text-gray-300 text-lg font-medium mb-2">Aucune commande</p>
-                <p className="text-gray-500 text-sm">Ce client n'a pas encore passé de commande</p>
+                <p className="text-foreground text-lg font-medium mb-2">Aucune commande</p>
+                <p className="text-muted-foreground text-sm">Ce client n'a pas encore passé de commande</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full">
                   <thead>
-                    <tr className="bg-gray-900/50">
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    <tr className="bg-background/50">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                         Commande
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                         Date
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                         Statut
                       </th>
-                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                         Total
                       </th>
-                      <th className="px-6 py-4 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-700/50">
+                  <tbody className="divide-y divide-border/50">
                     {orders.map((order) => {
                       const config = ORDER_STATE_CONFIG[order.state] || {
                         label: order.state,
-                        color: 'text-gray-400',
-                        bgColor: 'bg-gray-500/20',
+                        color: 'text-muted-foreground',
+                        bgColor: 'bg-muted',
                         icon: <Package className="h-3 w-3" />,
                       };
                       return (
-                        <tr key={order.id} className="hover:bg-gray-700/30 transition-colors group">
+                        <tr key={order.id} className="hover:bg-accent/30 transition-colors group">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className={`p-2 rounded-lg ${config.bgColor}`}>
@@ -836,7 +836,7 @@ export const CustomerDetail: React.FC = () => {
                               <div>
                                 <Link
                                   to={`/orders/${order.id}`}
-                                  className="text-white font-medium hover:text-blue-400 transition-colors"
+                                  className="text-foreground font-medium hover:text-primary transition-colors"
                                 >
                                   #{order.code}
                                 </Link>
@@ -844,7 +844,7 @@ export const CustomerDetail: React.FC = () => {
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-gray-300">
+                            <span className="text-muted-foreground">
                               {order.orderPlacedAt ? formatDateTime(order.orderPlacedAt) : '-'}
                             </span>
                           </td>
@@ -855,14 +855,14 @@ export const CustomerDetail: React.FC = () => {
                             </span>
                           </td>
                           <td className="px-6 py-4 text-right">
-                            <span className="text-white font-semibold">
+                            <span className="text-foreground font-semibold">
                               {formatPrice(order.totalWithTax)}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-right">
                             <Link
                               to={`/orders/${order.id}`}
-                              className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                              className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-primary hover:text-primary/80 hover:bg-primary/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                             >
                               <Eye className="h-4 w-4" />
                               Voir
@@ -874,7 +874,7 @@ export const CustomerDetail: React.FC = () => {
                   </tbody>
                 </table>
                 {(customerStats?.totalOrders || 0) > 10 && (
-                  <div className="px-6 py-4 bg-gray-900/30 border-t border-gray-700 text-center text-sm text-gray-400">
+                  <div className="px-6 py-4 bg-background/30 border-t border-border text-center text-sm text-muted-foreground">
                     Affichage des 10 dernières commandes sur {customerStats?.totalOrders}
                   </div>
                 )}
@@ -885,21 +885,21 @@ export const CustomerDetail: React.FC = () => {
 
         {/* Addresses Tab */}
         {activeTab === 'addresses' && (
-          <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
             {addresses.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20">
-                <div className="p-4 bg-gray-700/30 rounded-full mb-4">
-                  <MapPin className="h-12 w-12 text-gray-500" />
+                <div className="p-4 bg-muted/30 rounded-full mb-4">
+                  <MapPin className="h-12 w-12 text-muted-foreground" />
                 </div>
-                <p className="text-gray-300 text-lg font-medium mb-2">Aucune adresse</p>
-                <p className="text-gray-500 text-sm">Ce client n'a pas encore enregistré d'adresse</p>
+                <p className="text-foreground text-lg font-medium mb-2">Aucune adresse</p>
+                <p className="text-muted-foreground text-sm">Ce client n'a pas encore enregistré d'adresse</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
                 {addresses.map((address) => (
                   <div
                     key={address.id}
-                    className="p-5 bg-gray-900/50 rounded-xl border border-gray-700 hover:border-gray-600 transition-all"
+                    className="p-5 bg-background/50 rounded-xl border border-border hover:border-muted-foreground/50 transition-all"
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -911,9 +911,9 @@ export const CustomerDetail: React.FC = () => {
                           )}
                         </div>
                         <div>
-                          <p className="font-medium text-white">{address.fullName}</p>
+                          <p className="font-medium text-foreground">{address.fullName}</p>
                           {address.company && (
-                            <p className="text-sm text-gray-400">{address.company}</p>
+                            <p className="text-sm text-muted-foreground">{address.company}</p>
                           )}
                         </div>
                       </div>
@@ -932,16 +932,16 @@ export const CustomerDetail: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    <div className="text-sm text-gray-300 space-y-1 ml-12">
+                    <div className="text-sm text-foreground/80 space-y-1 ml-12">
                       <p>{address.streetLine1}</p>
                       {address.streetLine2 && <p>{address.streetLine2}</p>}
                       <p>
                         {address.postalCode} {address.city}
                         {address.province && `, ${address.province}`}
                       </p>
-                      <p className="text-gray-400">{address.country?.name}</p>
+                      <p className="text-muted-foreground">{address.country?.name}</p>
                       {address.phoneNumber && (
-                        <p className="flex items-center gap-1 mt-2 text-gray-400">
+                        <p className="flex items-center gap-1 mt-2 text-muted-foreground">
                           <Phone className="h-3 w-3" />
                           {address.phoneNumber}
                         </p>
@@ -965,7 +965,7 @@ export const CustomerDetail: React.FC = () => {
           <div>
             <p>
               Êtes-vous sûr de vouloir supprimer le client{' '}
-              <strong className="text-white">
+              <strong className="text-foreground">
                 {customer.firstName} {customer.lastName}
               </strong>{' '}
               ?

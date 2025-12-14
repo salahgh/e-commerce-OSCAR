@@ -155,10 +155,10 @@ export const UserForm: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
-          <p className="text-gray-400 text-lg">Administrateur non trouvé</p>
+          <p className="text-muted-foreground text-lg">Administrateur non trouvé</p>
           <button
             onClick={() => navigate('/users')}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
           >
             Retour à la liste
           </button>
@@ -173,15 +173,15 @@ export const UserForm: React.FC = () => {
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate('/users')}
-          className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded-lg"
+          className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-100">
+          <h1 className="text-3xl font-bold text-foreground">
             {isEdit ? 'Modifier l\'administrateur' : 'Nouvel administrateur'}
           </h1>
-          <p className="text-gray-400 mt-1">
+          <p className="text-muted-foreground mt-1">
             {isEdit
               ? `Modification de ${admin?.firstName} ${admin?.lastName}`
               : 'Créer un nouveau compte administrateur'}
@@ -199,19 +199,19 @@ export const UserForm: React.FC = () => {
           <Form className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Main Form */}
-              <Card className="lg:col-span-2 bg-gray-800 border-gray-700">
+              <Card className="lg:col-span-2 bg-card border-border">
                 <div className="p-6 space-y-6">
-                  <h2 className="text-lg font-semibold text-gray-100">Informations personnelles</h2>
+                  <h2 className="text-lg font-semibold text-foreground">Informations personnelles</h2>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Prénom *
                       </label>
                       <Field
                         type="text"
                         name="firstName"
-                        className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                         placeholder="Jean"
                       />
                       <ErrorMessage
@@ -222,13 +222,13 @@ export const UserForm: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Nom *
                       </label>
                       <Field
                         type="text"
                         name="lastName"
-                        className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                         placeholder="Dupont"
                       />
                       <ErrorMessage
@@ -240,13 +240,13 @@ export const UserForm: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Email *
                     </label>
                     <Field
                       type="email"
                       name="emailAddress"
-                      className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                       placeholder="jean.dupont@example.com"
                     />
                     <ErrorMessage
@@ -256,27 +256,27 @@ export const UserForm: React.FC = () => {
                     />
                   </div>
 
-                  <div className="pt-6 border-t border-gray-700">
-                    <h3 className="text-lg font-semibold text-gray-100 mb-4">
+                  <div className="pt-6 border-t border-border">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">
                       {isEdit ? 'Changer le mot de passe (optionnel)' : 'Mot de passe'}
                     </h3>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-foreground mb-2">
                           Mot de passe {!isEdit && '*'}
                         </label>
                         <div className="relative">
                           <Field
                             type={showPassword ? 'text' : 'password'}
                             name="password"
-                            className="w-full px-4 py-3 pr-12 border border-gray-600 rounded-lg bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            className="w-full px-4 py-3 pr-12 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                             placeholder="••••••••"
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                           >
                             {showPassword ? (
                               <EyeOff className="h-5 w-5" />
@@ -293,20 +293,20 @@ export const UserForm: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-foreground mb-2">
                           Confirmer {!isEdit && '*'}
                         </label>
                         <div className="relative">
                           <Field
                             type={showConfirmPassword ? 'text' : 'password'}
                             name="confirmPassword"
-                            className="w-full px-4 py-3 pr-12 border border-gray-600 rounded-lg bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            className="w-full px-4 py-3 pr-12 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                             placeholder="••••••••"
                           />
                           <button
                             type="button"
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                           >
                             {showConfirmPassword ? (
                               <EyeOff className="h-5 w-5" />
@@ -327,9 +327,9 @@ export const UserForm: React.FC = () => {
               </Card>
 
               {/* Roles Panel */}
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="bg-card border-border">
                 <div className="p-6">
-                  <h2 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                     <Shield className="h-5 w-5 text-blue-400" />
                     Rôles *
                   </h2>
@@ -344,8 +344,8 @@ export const UserForm: React.FC = () => {
                         key={role.id}
                         className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
                           values.roleIds.includes(role.id)
-                            ? 'border-blue-500 bg-blue-900/30'
-                            : 'border-gray-700 bg-gray-900 hover:border-gray-600'
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border bg-background hover:border-muted-foreground'
                         }`}
                       >
                         <input
@@ -361,17 +361,17 @@ export const UserForm: React.FC = () => {
                               );
                             }
                           }}
-                          className="mt-1 h-4 w-4 text-blue-600 rounded border-gray-600 bg-gray-800 focus:ring-blue-500"
+                          className="mt-1 h-4 w-4 text-primary rounded border-border bg-card focus:ring-primary"
                         />
                         <div>
-                          <p className="font-medium text-gray-100">
+                          <p className="font-medium text-foreground">
                             {formatRoleCode(role.code)}
                           </p>
                           {role.description && (
-                            <p className="text-sm text-gray-400 mt-1">{role.description}</p>
+                            <p className="text-sm text-muted-foreground mt-1">{role.description}</p>
                           )}
                           {role.permissions && (
-                            <p className="text-xs text-gray-500 mt-2">
+                            <p className="text-xs text-muted-foreground mt-2">
                               {role.permissions.length} permission{role.permissions.length > 1 ? 's' : ''}
                             </p>
                           )}
@@ -388,14 +388,14 @@ export const UserForm: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/users')}
-                className="px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700"
+                className="px-6 py-3 border border-border text-foreground rounded-lg hover:bg-accent"
               >
                 Annuler
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {submitting ? (
                   <>

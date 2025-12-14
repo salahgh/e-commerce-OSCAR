@@ -109,42 +109,42 @@ export const Settings: React.FC = () => {
           ) : channel ? (
             <>
               {/* Channel Info */}
-              <div className="bg-gray-700/50 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
+              <div className="bg-muted/50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                   <Globe className="h-5 w-5 text-blue-500" />
                   Configuration de la Boutique
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div>
-                    <p className="text-sm text-gray-400">Code du Canal</p>
-                    <p className="font-medium text-gray-100">{channel.code}</p>
+                    <p className="text-sm text-muted-foreground">Code du Canal</p>
+                    <p className="font-medium text-foreground">{channel.code}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400">Langue par défaut</p>
-                    <p className="font-medium text-gray-100">{channel.defaultLanguageCode}</p>
+                    <p className="text-sm text-muted-foreground">Langue par défaut</p>
+                    <p className="font-medium text-foreground">{channel.defaultLanguageCode}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400">Devise</p>
-                    <p className="font-medium text-gray-100 flex items-center gap-1">
+                    <p className="text-sm text-muted-foreground">Devise</p>
+                    <p className="font-medium text-foreground flex items-center gap-1">
                       <DollarSign className="h-4 w-4" />
                       {channel.currencyCode}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400">Prix TTC</p>
+                    <p className="text-sm text-muted-foreground">Prix TTC</p>
                     <Badge variant={channel.pricesIncludeTax ? 'success' : 'warning'}>
                       {channel.pricesIncludeTax ? 'Oui' : 'Non'}
                     </Badge>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400">Zone d'expédition</p>
-                    <p className="font-medium text-gray-100">
+                    <p className="text-sm text-muted-foreground">Zone d'expédition</p>
+                    <p className="font-medium text-foreground">
                       {channel.defaultShippingZone?.name || 'Non définie'}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400">Zone fiscale</p>
-                    <p className="font-medium text-gray-100">
+                    <p className="text-sm text-muted-foreground">Zone fiscale</p>
+                    <p className="font-medium text-foreground">
                       {channel.defaultTaxZone?.name || 'Non définie'}
                     </p>
                   </div>
@@ -152,27 +152,27 @@ export const Settings: React.FC = () => {
               </div>
 
               {/* Shop Info */}
-              <div className="bg-gray-700/50 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
+              <div className="bg-muted/50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                   <SettingsIcon className="h-5 w-5 text-blue-500" />
                   Informations OSCAR Fashion
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <p className="text-sm text-gray-400">Nom de la boutique</p>
-                    <p className="font-medium text-gray-100">OSCAR Fashion</p>
+                    <p className="text-sm text-muted-foreground">Nom de la boutique</p>
+                    <p className="font-medium text-foreground">OSCAR Fashion</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400">Pays</p>
-                    <p className="font-medium text-gray-100">Algérie</p>
+                    <p className="text-sm text-muted-foreground">Pays</p>
+                    <p className="font-medium text-foreground">Algérie</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400">Email de support</p>
-                    <p className="font-medium text-gray-100">support@oscarfashion.dz</p>
+                    <p className="text-sm text-muted-foreground">Email de support</p>
+                    <p className="font-medium text-foreground">support@oscarfashion.dz</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400">Téléphone</p>
-                    <p className="font-medium text-gray-100">+213 XX XX XX XX</p>
+                    <p className="text-sm text-muted-foreground">Téléphone</p>
+                    <p className="font-medium text-foreground">+213 XX XX XX XX</p>
                   </div>
                 </div>
               </div>
@@ -193,7 +193,7 @@ export const Settings: React.FC = () => {
               </div>
             </>
           ) : (
-            <p className="text-gray-500">Impossible de charger les paramètres</p>
+            <p className="text-muted-foreground">Impossible de charger les paramètres</p>
           )}
         </div>
       ),
@@ -206,8 +206,8 @@ export const Settings: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-100">Méthodes de Paiement</h3>
-              <p className="text-sm text-gray-400">
+              <h3 className="text-lg font-semibold text-foreground">Méthodes de Paiement</h3>
+              <p className="text-sm text-muted-foreground">
                 Configurez les méthodes de paiement disponibles pour vos clients
               </p>
             </div>
@@ -218,32 +218,32 @@ export const Settings: React.FC = () => {
               <Spinner size="lg" />
             </div>
           ) : paymentMethods.length === 0 ? (
-            <div className="text-center py-8 bg-gray-700/50 rounded-lg">
-              <CreditCard className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-              <p className="text-gray-400">Aucune méthode de paiement configurée</p>
+            <div className="text-center py-8 bg-muted/50 rounded-lg">
+              <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">Aucune méthode de paiement configurée</p>
             </div>
           ) : (
             <div className="space-y-3">
               {paymentMethods.map((method) => (
                 <div
                   key={method.id}
-                  className="flex items-center justify-between p-4 bg-gray-800 border border-gray-600 rounded-lg hover:border-gray-500 transition-colors"
+                  className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-muted-foreground transition-colors"
                 >
                   <div className="flex items-center gap-4">
                     <div
-                      className={`p-3 rounded-lg ${method.enabled ? 'bg-green-900/50' : 'bg-gray-700'}`}
+                      className={`p-3 rounded-lg ${method.enabled ? 'bg-green-900/50' : 'bg-muted'}`}
                     >
                       <CreditCard
-                        className={`h-6 w-6 ${method.enabled ? 'text-green-400' : 'text-gray-500'}`}
+                        className={`h-6 w-6 ${method.enabled ? 'text-green-400' : 'text-muted-foreground'}`}
                       />
                     </div>
                     <div>
-                      <p className="font-medium text-gray-100">{method.name}</p>
-                      <p className="text-sm text-gray-400">
+                      <p className="font-medium text-foreground">{method.name}</p>
+                      <p className="text-sm text-muted-foreground">
                         {getPaymentMethodLabel(method.handler?.code || method.code)}
                       </p>
                       {method.description && (
-                        <p className="text-xs text-gray-500 mt-1">{method.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{method.description}</p>
                       )}
                     </div>
                   </div>
@@ -289,8 +289,8 @@ export const Settings: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-100">Méthodes de Livraison</h3>
-              <p className="text-sm text-gray-400">
+              <h3 className="text-lg font-semibold text-foreground">Méthodes de Livraison</h3>
+              <p className="text-sm text-muted-foreground">
                 Gérez les options de livraison disponibles en Algérie
               </p>
             </div>
@@ -301,9 +301,9 @@ export const Settings: React.FC = () => {
               <Spinner size="lg" />
             </div>
           ) : shippingMethods.length === 0 ? (
-            <div className="text-center py-8 bg-gray-700/50 rounded-lg">
-              <Truck className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-              <p className="text-gray-400">Aucune méthode de livraison configurée</p>
+            <div className="text-center py-8 bg-muted/50 rounded-lg">
+              <Truck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">Aucune méthode de livraison configurée</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -315,25 +315,25 @@ export const Settings: React.FC = () => {
                 return (
                   <div
                     key={method.id}
-                    className="flex items-center justify-between p-4 bg-gray-800 border border-gray-600 rounded-lg hover:border-gray-500 transition-colors"
+                    className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-muted-foreground transition-colors"
                   >
                     <div className="flex items-center gap-4">
                       <div className="p-3 rounded-lg bg-blue-900/50">
                         <Truck className="h-6 w-6 text-blue-400" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-100">{method.name}</p>
-                        <p className="text-sm text-gray-400">
+                        <p className="font-medium text-foreground">{method.name}</p>
+                        <p className="text-sm text-muted-foreground">
                           {getShippingMethodLabel(method.code)}
                         </p>
                         {method.description && (
-                          <p className="text-xs text-gray-500 mt-1">{method.description}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{method.description}</p>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
                       {price !== null && (
-                        <span className="text-lg font-semibold text-gray-100">
+                        <span className="text-lg font-semibold text-foreground">
                           {formatPrice(price)}
                         </span>
                       )}
@@ -346,22 +346,22 @@ export const Settings: React.FC = () => {
           )}
 
           {/* Delivery Zones Info */}
-          <div className="bg-gray-700/50 rounded-lg p-6 mt-6">
-            <h4 className="font-medium text-gray-100 mb-4">Zones de Livraison - Algérie</h4>
+          <div className="bg-muted/50 rounded-lg p-6 mt-6">
+            <h4 className="font-medium text-foreground mb-4">Zones de Livraison - Algérie</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div className="p-3 bg-gray-800 rounded border border-gray-600">
-                <p className="font-medium text-gray-100">Zone 1 - Centre</p>
-                <p className="text-gray-400">Alger, Blida, Tipaza, Boumerdès</p>
+              <div className="p-3 bg-card rounded border border-border">
+                <p className="font-medium text-foreground">Zone 1 - Centre</p>
+                <p className="text-muted-foreground">Alger, Blida, Tipaza, Boumerdès</p>
                 <p className="text-green-400 font-medium mt-1">Livraison: 300-500 DZD</p>
               </div>
-              <div className="p-3 bg-gray-800 rounded border border-gray-600">
-                <p className="font-medium text-gray-100">Zone 2 - Côte</p>
-                <p className="text-gray-400">Oran, Annaba, Jijel, Béjaïa</p>
+              <div className="p-3 bg-card rounded border border-border">
+                <p className="font-medium text-foreground">Zone 2 - Côte</p>
+                <p className="text-muted-foreground">Oran, Annaba, Jijel, Béjaïa</p>
                 <p className="text-green-400 font-medium mt-1">Livraison: 400-600 DZD</p>
               </div>
-              <div className="p-3 bg-gray-800 rounded border border-gray-600">
-                <p className="font-medium text-gray-100">Zone 3 - Sud</p>
-                <p className="text-gray-400">Ghardaïa, Ouargla, Tamanrasset</p>
+              <div className="p-3 bg-card rounded border border-border">
+                <p className="font-medium text-foreground">Zone 3 - Sud</p>
+                <p className="text-muted-foreground">Ghardaïa, Ouargla, Tamanrasset</p>
                 <p className="text-green-400 font-medium mt-1">Livraison: 600-1000 DZD</p>
               </div>
             </div>
@@ -384,35 +384,35 @@ export const Settings: React.FC = () => {
         <div className="space-y-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-100">Configuration Email</h3>
-              <p className="text-sm text-gray-400">
+              <h3 className="text-lg font-semibold text-foreground">Configuration Email</h3>
+              <p className="text-sm text-muted-foreground">
                 Paramètres SMTP et modèles d'emails transactionnels
               </p>
             </div>
           </div>
 
           {/* SMTP Configuration */}
-          <div className="bg-gray-700/50 rounded-lg p-6">
-            <h4 className="font-medium text-gray-100 mb-4 flex items-center gap-2">
+          <div className="bg-muted/50 rounded-lg p-6">
+            <h4 className="font-medium text-foreground mb-4 flex items-center gap-2">
               <Server className="h-5 w-5 text-blue-500" />
               Configuration SMTP
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <p className="text-sm text-gray-400">Serveur SMTP</p>
-                <p className="font-medium text-gray-100">smtp.oscarfashion.dz</p>
+                <p className="text-sm text-muted-foreground">Serveur SMTP</p>
+                <p className="font-medium text-foreground">smtp.oscarfashion.dz</p>
               </div>
               <div>
-                <p className="text-sm text-gray-400">Port</p>
-                <p className="font-medium text-gray-100">587 (TLS)</p>
+                <p className="text-sm text-muted-foreground">Port</p>
+                <p className="font-medium text-foreground">587 (TLS)</p>
               </div>
               <div>
-                <p className="text-sm text-gray-400">Email d'envoi</p>
-                <p className="font-medium text-gray-100">noreply@oscarfashion.dz</p>
+                <p className="text-sm text-muted-foreground">Email d'envoi</p>
+                <p className="font-medium text-foreground">noreply@oscarfashion.dz</p>
               </div>
               <div>
-                <p className="text-sm text-gray-400">Nom d'expéditeur</p>
-                <p className="font-medium text-gray-100">OSCAR Fashion</p>
+                <p className="text-sm text-muted-foreground">Nom d'expéditeur</p>
+                <p className="font-medium text-foreground">OSCAR Fashion</p>
               </div>
             </div>
             <div className="mt-4 flex items-center gap-2">
@@ -420,13 +420,13 @@ export const Settings: React.FC = () => {
                 <Check className="h-3 w-3 mr-1" />
                 Connecté
               </Badge>
-              <span className="text-sm text-gray-400">Dernière vérification: Aujourd'hui</span>
+              <span className="text-sm text-muted-foreground">Dernière vérification: Aujourd'hui</span>
             </div>
           </div>
 
           {/* Email Templates */}
-          <div className="bg-gray-700/50 rounded-lg p-6">
-            <h4 className="font-medium text-gray-100 mb-4 flex items-center gap-2">
+          <div className="bg-muted/50 rounded-lg p-6">
+            <h4 className="font-medium text-foreground mb-4 flex items-center gap-2">
               <FileText className="h-5 w-5 text-purple-500" />
               Modèles d'Email
             </h4>
@@ -465,15 +465,15 @@ export const Settings: React.FC = () => {
               ].map((template) => (
                 <div
                   key={template.trigger}
-                  className="flex items-center justify-between p-4 bg-gray-800 border border-gray-600 rounded-lg"
+                  className="flex items-center justify-between p-4 bg-card border border-border rounded-lg"
                 >
                   <div className="flex items-center gap-4">
                     <div className="p-2 rounded-lg bg-purple-900/50">
                       <Mail className="h-5 w-5 text-purple-400" />
                     </div>
                     <div>
-                      <p className="font-medium text-gray-100">{template.name}</p>
-                      <p className="text-sm text-gray-400">{template.description}</p>
+                      <p className="font-medium text-foreground">{template.name}</p>
+                      <p className="text-sm text-muted-foreground">{template.description}</p>
                     </div>
                   </div>
                   <Badge variant="info">{template.trigger}</Badge>
@@ -498,20 +498,20 @@ export const Settings: React.FC = () => {
           </div>
 
           {/* Test Email Section */}
-          <div className="bg-gray-700/50 rounded-lg p-6">
-            <h4 className="font-medium text-gray-100 mb-4">Tester la Configuration</h4>
+          <div className="bg-muted/50 rounded-lg p-6">
+            <h4 className="font-medium text-foreground mb-4">Tester la Configuration</h4>
             <div className="flex items-center gap-4">
               <input
                 type="email"
                 placeholder="Adresse email de test"
-                className="flex-1 px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="flex-1 px-4 py-2 bg-card border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
               />
               <Button variant="primary" size="sm">
                 <Mail className="h-4 w-4 mr-2" />
                 Envoyer un test
               </Button>
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               Envoie un email de test pour vérifier la configuration SMTP
             </p>
           </div>
@@ -524,12 +524,12 @@ export const Settings: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-100">Paramètres</h1>
-        <p className="text-gray-400 mt-1">Configuration de la boutique OSCAR Fashion</p>
+        <h1 className="text-3xl font-bold text-foreground">Paramètres</h1>
+        <p className="text-muted-foreground mt-1">Configuration de la boutique OSCAR Fashion</p>
       </div>
 
       {/* Tabs */}
-      <div className="bg-gray-800 rounded-lg shadow">
+      <div className="bg-card rounded-lg shadow">
         <Tabs tabs={tabs} defaultTab="general" />
       </div>
     </div>

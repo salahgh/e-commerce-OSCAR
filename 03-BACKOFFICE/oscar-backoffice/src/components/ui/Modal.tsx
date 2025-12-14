@@ -55,17 +55,17 @@ export const Modal: React.FC<ModalProps> = ({
       <div className="fixed inset-0 bg-black bg-opacity-70" onClick={onClose} />
       <div
         className={cn(
-          'relative bg-gray-800 rounded-lg shadow-xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col border border-gray-700',
+          'relative bg-popover rounded-lg shadow-xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col border border-border',
           sizeClasses[size]
         )}
       >
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700">
-            {title && <h2 className="text-xl font-semibold text-gray-100">{title}</h2>}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+            {title && <h2 className="text-xl font-semibold text-foreground">{title}</h2>}
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="text-gray-500 hover:text-gray-300 transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -99,7 +99,7 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({ className, children, .
   return (
     <div
       className={cn(
-        'flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-700 bg-gray-800/50',
+        'flex items-center justify-end gap-3 px-6 py-4 border-t border-border bg-card/50',
         className
       )}
       {...props}

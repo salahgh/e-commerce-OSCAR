@@ -76,20 +76,20 @@ export const Dashboard: React.FC = () => {
       {/* Header with Date Range Selector */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">Tableau de bord</h1>
-          <p className="text-gray-400 mt-1">Vue d'ensemble de la plateforme OSCAR Fashion</p>
+          <h1 className="text-3xl font-bold text-foreground">Tableau de bord</h1>
+          <p className="text-muted-foreground mt-1">Vue d'ensemble de la plateforme OSCAR Fashion</p>
         </div>
         <div className="flex items-center gap-3">
           {/* Date Range Toggle */}
-          <div className="flex items-center bg-gray-800 rounded-lg p-1 border border-gray-700">
+          <div className="flex items-center bg-card rounded-lg p-1 border border-border">
             {DATE_RANGE_OPTIONS.map((option) => (
               <button
                 key={option.value}
                 onClick={() => setDateRange(option.value)}
                 className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
                   dateRange === option.value
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                    ? 'bg-primary text-primary-foreground shadow-lg'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                 }`}
               >
                 {option.label}
@@ -100,7 +100,7 @@ export const Dashboard: React.FC = () => {
           <button
             onClick={handleRefresh}
             disabled={isRefreshing || kpisLoading}
-            className="p-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-all disabled:opacity-50"
+            className="p-2 bg-card border border-border rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all disabled:opacity-50"
           >
             <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
@@ -164,15 +164,15 @@ export const Dashboard: React.FC = () => {
       {/* Recent Orders & Low Stock */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Orders - Takes 2 columns */}
-        <div className="lg:col-span-2 bg-gray-800 rounded-xl border border-gray-700">
-          <div className="flex items-center justify-between p-6 border-b border-gray-700">
-            <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+        <div className="lg:col-span-2 bg-card rounded-xl border border-border">
+          <div className="flex items-center justify-between p-6 border-b border-border">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
               <Clock className="h-5 w-5 text-blue-400" />
               Commandes Récentes
             </h3>
             <Link
               to="/orders"
-              className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
+              className="text-sm text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
             >
               Voir tout <ChevronRight className="h-4 w-4" />
             </Link>
@@ -181,18 +181,18 @@ export const Dashboard: React.FC = () => {
             {recentOrdersLoading ? (
               <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} className="animate-pulse flex items-center gap-4 p-3 bg-gray-700/50 rounded-lg">
-                    <div className="h-10 w-24 bg-gray-600 rounded" />
+                  <div key={i} className="animate-pulse flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
+                    <div className="h-10 w-24 bg-muted rounded" />
                     <div className="flex-1 space-y-2">
-                      <div className="h-4 w-32 bg-gray-600 rounded" />
-                      <div className="h-3 w-48 bg-gray-600 rounded" />
+                      <div className="h-4 w-32 bg-muted rounded" />
+                      <div className="h-3 w-48 bg-muted rounded" />
                     </div>
-                    <div className="h-6 w-20 bg-gray-600 rounded" />
+                    <div className="h-6 w-20 bg-muted rounded" />
                   </div>
                 ))}
               </div>
             ) : recentOrders.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                 <ShoppingCart className="h-12 w-12 mb-3 opacity-50" />
                 <p className="font-medium">Aucune commande</p>
                 <p className="text-sm">Les nouvelles commandes apparaîtront ici</p>
@@ -208,27 +208,27 @@ export const Dashboard: React.FC = () => {
                     <Link
                       key={order.id}
                       to={`/orders/${order.id}`}
-                      className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-all group border border-transparent hover:border-gray-600"
+                      className="flex items-center justify-between p-4 bg-accent/30 rounded-lg hover:bg-accent/50 transition-all group border border-transparent hover:border-muted-foreground/30"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="bg-gray-700 rounded-lg px-3 py-2">
-                          <span className="font-mono text-sm text-gray-300">#{order.code}</span>
+                        <div className="bg-muted rounded-lg px-3 py-2">
+                          <span className="font-mono text-sm text-muted-foreground">#{order.code}</span>
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-white group-hover:text-blue-400 transition-colors">
+                            <span className="font-medium text-foreground group-hover:text-primary transition-colors">
                               {order.customerName}
                             </span>
                             <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
                           </div>
-                          <p className="text-sm text-gray-400 mt-0.5">
+                          <p className="text-sm text-muted-foreground mt-0.5">
                             {order.wilaya && <span>{order.wilaya} • </span>}
                             {order.orderPlacedAt && formatDateTime(order.orderPlacedAt)}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-semibold text-white">
+                        <p className="text-lg font-semibold text-foreground">
                           {formatPrice(order.totalWithTax)}
                         </p>
                       </div>
@@ -241,15 +241,15 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Low Stock Alerts */}
-        <div className="bg-gray-800 rounded-xl border border-gray-700">
-          <div className="flex items-center justify-between p-6 border-b border-gray-700">
-            <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+        <div className="bg-card rounded-xl border border-border">
+          <div className="flex items-center justify-between p-6 border-b border-border">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-orange-400" />
               Alertes Stock
             </h3>
             <Link
               to="/products"
-              className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
+              className="text-sm text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
             >
               Voir tout <ChevronRight className="h-4 w-4" />
             </Link>
@@ -265,9 +265,9 @@ export const Dashboard: React.FC = () => {
                 ))}
               </div>
             ) : lowStockProducts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                 <Package className="h-12 w-12 mb-3 opacity-50" />
-                <p className="font-medium text-green-400">Stock OK</p>
+                <p className="font-medium text-success">Stock OK</p>
                 <p className="text-sm">Tous les produits ont un stock suffisant</p>
               </div>
             ) : (
@@ -291,8 +291,8 @@ export const Dashboard: React.FC = () => {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-white truncate">{product.name}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">{product.sku}</p>
+                          <p className="font-medium text-foreground truncate">{product.name}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{product.sku}</p>
                         </div>
                         <div className="flex items-center gap-2 ml-4">
                           <span
@@ -306,13 +306,13 @@ export const Dashboard: React.FC = () => {
                           >
                             {stockLevel}
                           </span>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-muted-foreground">
                             / {product.minStock}
                           </span>
                         </div>
                       </div>
                       {/* Stock bar */}
-                      <div className="mt-2 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                      <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all ${
                             isCritical
@@ -330,7 +330,7 @@ export const Dashboard: React.FC = () => {
                   );
                 })}
                 {lowStockProducts.length > 10 && (
-                  <p className="text-sm text-gray-400 text-center pt-2">
+                  <p className="text-sm text-muted-foreground text-center pt-2">
                     Et {lowStockProducts.length - 10} autres produits...
                   </p>
                 )}
@@ -341,36 +341,36 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-gray-800 rounded-xl border border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Actions Rapides</h3>
+      <div className="bg-card rounded-xl border border-border p-6">
+        <h3 className="text-lg font-semibold text-foreground mb-4">Actions Rapides</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Link
             to="/products"
             className="flex flex-col items-center p-4 bg-blue-500/10 rounded-xl hover:bg-blue-500/20 transition-all border border-blue-500/20 hover:border-blue-500/40 group"
           >
             <Package className="h-8 w-8 text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
-            <span className="text-sm font-medium text-white">Gérer Produits</span>
+            <span className="text-sm font-medium text-foreground">Gérer Produits</span>
           </Link>
           <Link
             to="/orders"
             className="flex flex-col items-center p-4 bg-green-500/10 rounded-xl hover:bg-green-500/20 transition-all border border-green-500/20 hover:border-green-500/40 group"
           >
             <ShoppingCart className="h-8 w-8 text-green-400 mb-2 group-hover:scale-110 transition-transform" />
-            <span className="text-sm font-medium text-white">Commandes</span>
+            <span className="text-sm font-medium text-foreground">Commandes</span>
           </Link>
           <Link
             to="/customers"
             className="flex flex-col items-center p-4 bg-purple-500/10 rounded-xl hover:bg-purple-500/20 transition-all border border-purple-500/20 hover:border-purple-500/40 group"
           >
             <Users className="h-8 w-8 text-purple-400 mb-2 group-hover:scale-110 transition-transform" />
-            <span className="text-sm font-medium text-white">Clients</span>
+            <span className="text-sm font-medium text-foreground">Clients</span>
           </Link>
           <Link
             to="/categories"
             className="flex flex-col items-center p-4 bg-orange-500/10 rounded-xl hover:bg-orange-500/20 transition-all border border-orange-500/20 hover:border-orange-500/40 group"
           >
             <TrendingUp className="h-8 w-8 text-orange-400 mb-2 group-hover:scale-110 transition-transform" />
-            <span className="text-sm font-medium text-white">Catégories</span>
+            <span className="text-sm font-medium text-foreground">Catégories</span>
           </Link>
         </div>
       </div>

@@ -66,8 +66,8 @@ const ORDER_STATUS: Record<
     label: 'En cours',
     variant: 'default',
     icon: <ShoppingBag className="h-4 w-4" />,
-    color: 'text-gray-400',
-    bgColor: 'bg-gray-500/20',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted',
     next: ['ArrangingPayment', 'Cancelled'],
   },
   ArrangingPayment: {
@@ -405,10 +405,10 @@ export const OrderDetail: React.FC = () => {
 
   if (error || !order) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-96 bg-gray-800 rounded-xl">
-        <Package className="h-20 w-20 text-gray-600 mb-4" />
-        <p className="text-gray-400 text-xl mb-2">Commande non trouvée</p>
-        <p className="text-gray-500 text-sm mb-6">Cette commande n'existe pas ou a été supprimée</p>
+      <div className="flex flex-col items-center justify-center min-h-96 bg-card rounded-xl">
+        <Package className="h-20 w-20 text-muted-foreground mb-4" />
+        <p className="text-muted-foreground text-xl mb-2">Commande non trouvée</p>
+        <p className="text-muted-foreground/70 text-sm mb-6">Cette commande n'existe pas ou a été supprimée</p>
         <Button variant="primary" onClick={() => navigate('/orders')}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour aux commandes
@@ -421,8 +421,8 @@ export const OrderDetail: React.FC = () => {
     label: order.state,
     variant: 'default' as const,
     icon: <Circle className="h-4 w-4" />,
-    color: 'text-gray-400',
-    bgColor: 'bg-gray-500/20',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted',
     next: [] as string[],
   };
   const nextStates = statusConfig.next || [];
@@ -430,25 +430,25 @@ export const OrderDetail: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Card */}
-      <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700">
+      <div className="bg-gradient-to-r from-card to-background rounded-xl p-6 border border-border">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           {/* Left Side - Order Info */}
           <div className="flex items-start gap-4">
             <button
               onClick={() => navigate('/orders')}
-              className="p-2 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-2 bg-accent/50 hover:bg-accent rounded-lg transition-colors"
             >
-              <ArrowLeft className="h-5 w-5 text-gray-300" />
+              <ArrowLeft className="h-5 w-5 text-foreground" />
             </button>
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl font-bold text-white">Commande #{order.code}</h1>
+                <h1 className="text-2xl font-bold text-foreground">Commande #{order.code}</h1>
                 <button
                   onClick={handleCopyCode}
-                  className="p-1 hover:bg-gray-700 rounded transition-colors"
+                  className="p-1 hover:bg-accent rounded transition-colors"
                   title="Copier le code"
                 >
-                  <Copy className="h-4 w-4 text-gray-400" />
+                  <Copy className="h-4 w-4 text-muted-foreground" />
                 </button>
                 <div
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${statusConfig.bgColor}`}
@@ -459,7 +459,7 @@ export const OrderDetail: React.FC = () => {
                   </span>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
+              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <Calendar className="h-4 w-4" />
                   {order.orderPlacedAt
@@ -468,7 +468,7 @@ export const OrderDetail: React.FC = () => {
                 </span>
                 {orderStats && (
                   <>
-                    <span className="text-gray-600">•</span>
+                    <span className="text-muted-foreground/50">•</span>
                     <span className="flex items-center gap-1.5">
                       <Package className="h-4 w-4" />
                       {orderStats.totalItems} article{orderStats.totalItems > 1 ? 's' : ''}
@@ -477,7 +477,7 @@ export const OrderDetail: React.FC = () => {
                 )}
                 {order.customFields?.wilaya && (
                   <>
-                    <span className="text-gray-600">•</span>
+                    <span className="text-muted-foreground/50">•</span>
                     <span className="flex items-center gap-1.5">
                       <MapPin className="h-4 w-4" />
                       {order.customFields.wilaya}
@@ -494,7 +494,7 @@ export const OrderDetail: React.FC = () => {
               variant="outline"
               size="sm"
               onClick={handleGenerateInvoice}
-              className="border-gray-600 hover:bg-gray-700"
+              className="border-border hover:bg-accent"
             >
               <Printer className="h-4 w-4 mr-2" />
               Facture
@@ -534,7 +534,7 @@ export const OrderDetail: React.FC = () => {
 
         {/* Order Progress */}
         {order.state !== 'Cancelled' && (
-          <div className="mt-6 pt-6 border-t border-gray-700">
+          <div className="mt-6 pt-6 border-t border-border">
             <div className="flex items-center justify-between">
               {ORDER_FLOW.map((step, index) => {
                 const stepConfig = ORDER_STATUS[step];
@@ -550,7 +550,7 @@ export const OrderDetail: React.FC = () => {
                           w-10 h-10 rounded-full flex items-center justify-center transition-all
                           ${isCompleted ? 'bg-green-500 text-white' : ''}
                           ${isCurrent ? 'bg-blue-500 text-white ring-4 ring-blue-500/30' : ''}
-                          ${isPending ? 'bg-gray-700 text-gray-500' : ''}
+                          ${isPending ? 'bg-muted text-muted-foreground' : ''}
                         `}
                       >
                         {isCompleted ? (
@@ -561,7 +561,7 @@ export const OrderDetail: React.FC = () => {
                       </div>
                       <span
                         className={`mt-2 text-xs font-medium ${
-                          isCompleted || isCurrent ? 'text-gray-300' : 'text-gray-500'
+                          isCompleted || isCurrent ? 'text-foreground' : 'text-muted-foreground'
                         }`}
                       >
                         {stepConfig?.label || step}
@@ -570,7 +570,7 @@ export const OrderDetail: React.FC = () => {
                     {index < ORDER_FLOW.length - 1 && (
                       <div
                         className={`flex-1 h-0.5 mx-2 ${
-                          index < orderProgress ? 'bg-green-500' : 'bg-gray-700'
+                          index < orderProgress ? 'bg-green-500' : 'bg-muted'
                         }`}
                       />
                     )}
@@ -599,38 +599,38 @@ export const OrderDetail: React.FC = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+        <div className="bg-card rounded-xl p-4 border border-border">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-500/20 rounded-lg">
               <ShoppingBag className="h-5 w-5 text-blue-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-400">Articles</p>
-              <p className="text-xl font-bold text-gray-100">{orderStats?.totalItems || 0}</p>
+              <p className="text-sm text-muted-foreground">Articles</p>
+              <p className="text-xl font-bold text-foreground">{orderStats?.totalItems || 0}</p>
             </div>
           </div>
         </div>
-        <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+        <div className="bg-card rounded-xl p-4 border border-border">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-green-500/20 rounded-lg">
               <DollarSign className="h-5 w-5 text-green-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-400">Total</p>
-              <p className="text-xl font-bold text-gray-100">
+              <p className="text-sm text-muted-foreground">Total</p>
+              <p className="text-xl font-bold text-foreground">
                 {formatPrice(order.totalWithTax / 100)}
               </p>
             </div>
           </div>
         </div>
-        <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+        <div className="bg-card rounded-xl p-4 border border-border">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-purple-500/20 rounded-lg">
               <CreditCard className="h-5 w-5 text-purple-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-400">Paiement</p>
-              <p className="text-lg font-medium text-gray-100">
+              <p className="text-sm text-muted-foreground">Paiement</p>
+              <p className="text-lg font-medium text-foreground">
                 {order.payments && order.payments.length > 0
                   ? order.payments[0].method
                   : 'En attente'}
@@ -638,14 +638,14 @@ export const OrderDetail: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+        <div className="bg-card rounded-xl p-4 border border-border">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-orange-500/20 rounded-lg">
               <Truck className="h-5 w-5 text-orange-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-400">Livraison</p>
-              <p className="text-lg font-medium text-gray-100">
+              <p className="text-sm text-muted-foreground">Livraison</p>
+              <p className="text-lg font-medium text-foreground">
                 {formatPrice(order.shippingWithTax / 100)}
               </p>
             </div>
@@ -657,8 +657,8 @@ export const OrderDetail: React.FC = () => {
         {/* Left Column - Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Tabs */}
-          <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
-            <div className="flex border-b border-gray-700">
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
+            <div className="flex border-b border-border">
               {[
                 { id: 'items', label: 'Articles', icon: <Package className="h-4 w-4" /> },
                 { id: 'history', label: 'Historique', icon: <Clock className="h-4 w-4" /> },
@@ -669,8 +669,8 @@ export const OrderDetail: React.FC = () => {
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-colors ${
                     activeTab === tab.id
-                      ? 'text-blue-400 border-b-2 border-blue-400 bg-gray-700/30'
-                      : 'text-gray-400 hover:text-gray-300 hover:bg-gray-700/20'
+                      ? 'text-primary border-b-2 border-primary bg-accent/30'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/20'
                   }`}
                 >
                   {tab.icon}
@@ -686,7 +686,7 @@ export const OrderDetail: React.FC = () => {
                   {order.lines?.map((line) => (
                     <div
                       key={line.id}
-                      className="flex items-center gap-4 p-4 bg-gray-900/50 rounded-lg border border-gray-700"
+                      className="flex items-center gap-4 p-4 bg-background/50 rounded-lg border border-border"
                     >
                       {line.productVariant?.product?.featuredAsset?.preview ? (
                         <img
@@ -695,37 +695,37 @@ export const OrderDetail: React.FC = () => {
                           className="h-16 w-16 rounded-lg object-cover"
                         />
                       ) : (
-                        <div className="h-16 w-16 bg-gray-700 rounded-lg flex items-center justify-center">
-                          <Package className="h-8 w-8 text-gray-500" />
+                        <div className="h-16 w-16 bg-muted rounded-lg flex items-center justify-center">
+                          <Package className="h-8 w-8 text-muted-foreground" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-gray-100 font-medium truncate">
+                        <p className="text-foreground font-medium truncate">
                           {line.productVariant?.product?.customFields?.nameFr ||
                             line.productVariant?.product?.name ||
                             line.productVariant?.name}
                         </p>
-                        <p className="text-sm text-gray-400">SKU: {line.productVariant?.sku}</p>
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-muted-foreground">SKU: {line.productVariant?.sku}</p>
+                        <p className="text-sm text-muted-foreground">
                           {formatPrice(line.unitPriceWithTax / 100)} × {line.quantity}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-gray-100">
+                        <p className="text-lg font-bold text-foreground">
                           {formatPrice(line.linePriceWithTax / 100)}
                         </p>
-                        <p className="text-sm text-gray-400">{line.quantity} unité(s)</p>
+                        <p className="text-sm text-muted-foreground">{line.quantity} unité(s)</p>
                       </div>
                     </div>
                   ))}
 
                   {/* Order Summary */}
-                  <div className="mt-6 pt-6 border-t border-gray-700 space-y-3">
-                    <div className="flex justify-between text-gray-400">
+                  <div className="mt-6 pt-6 border-t border-border space-y-3">
+                    <div className="flex justify-between text-muted-foreground">
                       <span>Sous-total</span>
                       <span>{formatPrice(order.subTotalWithTax / 100)}</span>
                     </div>
-                    <div className="flex justify-between text-gray-400">
+                    <div className="flex justify-between text-muted-foreground">
                       <span>Livraison</span>
                       <span>{formatPrice(order.shippingWithTax / 100)}</span>
                     </div>
@@ -740,7 +740,7 @@ export const OrderDetail: React.FC = () => {
                         </span>
                       </div>
                     )}
-                    <div className="flex justify-between text-xl font-bold text-gray-100 pt-3 border-t border-gray-700">
+                    <div className="flex justify-between text-xl font-bold text-foreground pt-3 border-t border-border">
                       <span>Total</span>
                       <span>{formatPrice(order.totalWithTax / 100)}</span>
                     </div>
@@ -753,7 +753,7 @@ export const OrderDetail: React.FC = () => {
                 <div className="space-y-4">
                   {order.history?.items && order.history.items.length > 0 ? (
                     <div className="relative">
-                      <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-700" />
+                      <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
                       {order.history.items.map((item, index) => (
                         <div key={item.id} className="relative pl-10 pb-6 last:pb-0">
                           <div
@@ -764,7 +764,7 @@ export const OrderDetail: React.FC = () => {
                                   ? 'bg-yellow-500/20 text-yellow-400'
                                   : item.type === 'ORDER_PAYMENT_TRANSITION'
                                     ? 'bg-green-500/20 text-green-400'
-                                    : 'bg-gray-700 text-gray-400'
+                                    : 'bg-muted text-muted-foreground'
                             }`}
                           >
                             {item.type === 'ORDER_STATE_TRANSITION' ? (
@@ -777,11 +777,11 @@ export const OrderDetail: React.FC = () => {
                               <Clock className="h-4 w-4" />
                             )}
                           </div>
-                          <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
+                          <div className="bg-background/50 rounded-lg p-4 border border-border">
                             <div className="flex items-start justify-between">
                               <div>
                                 {item.type === 'ORDER_STATE_TRANSITION' && item.data && (
-                                  <p className="text-gray-100">
+                                  <p className="text-foreground">
                                     Statut changé de{' '}
                                     <Badge variant="default" className="mx-1">
                                       {ORDER_STATUS[(item.data as any).from]?.label ||
@@ -795,21 +795,21 @@ export const OrderDetail: React.FC = () => {
                                   </p>
                                 )}
                                 {item.type === 'ORDER_NOTE' && item.data && (
-                                  <p className="text-gray-300 italic">
+                                  <p className="text-foreground italic">
                                     "{(item.data as any).note}"
                                   </p>
                                 )}
                                 {item.type === 'ORDER_PAYMENT_TRANSITION' && item.data && (
-                                  <p className="text-gray-100">
+                                  <p className="text-foreground">
                                     Paiement: {(item.data as any).paymentState}
                                   </p>
                                 )}
                                 {!['ORDER_STATE_TRANSITION', 'ORDER_NOTE', 'ORDER_PAYMENT_TRANSITION'].includes(
                                   item.type
-                                ) && <p className="text-gray-400">{item.type}</p>}
+                                ) && <p className="text-muted-foreground">{item.type}</p>}
                               </div>
                             </div>
-                            <p className="text-xs text-gray-500 mt-2">
+                            <p className="text-xs text-muted-foreground mt-2">
                               {formatDateTime(item.createdAt)}
                               {item.administrator &&
                                 ` • ${item.administrator.firstName} ${item.administrator.lastName}`}
@@ -819,7 +819,7 @@ export const OrderDetail: React.FC = () => {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8 text-gray-400">
+                    <div className="text-center py-8 text-muted-foreground">
                       <Clock className="h-12 w-12 mx-auto mb-3 opacity-50" />
                       <p>Aucun historique disponible</p>
                     </div>
@@ -836,7 +836,7 @@ export const OrderDetail: React.FC = () => {
                       placeholder="Ajouter une note à l'historique..."
                       value={newNote}
                       onChange={(e) => setNewNote(e.target.value)}
-                      className="flex-1 bg-gray-900 border-gray-600"
+                      className="flex-1 bg-background border-border"
                     />
                     <Button
                       onClick={handleAddNote}
@@ -848,16 +848,16 @@ export const OrderDetail: React.FC = () => {
                   </div>
 
                   {/* Admin Notes */}
-                  <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
+                  <div className="bg-background/50 rounded-lg p-4 border border-border">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-gray-200 font-medium flex items-center gap-2">
+                      <h4 className="text-foreground font-medium flex items-center gap-2">
                         <MessageSquare className="h-4 w-4" />
                         Notes internes
                       </h4>
                       {!editingNotes && (
                         <button
                           onClick={() => setEditingNotes(true)}
-                          className="text-blue-400 hover:text-blue-300"
+                          className="text-primary hover:text-primary/80"
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
@@ -870,7 +870,7 @@ export const OrderDetail: React.FC = () => {
                           onChange={(e) => setAdminNotes(e.target.value)}
                           rows={4}
                           placeholder="Notes internes sur la commande..."
-                          className="bg-gray-800 border-gray-600"
+                          className="bg-card border-border"
                         />
                         <div className="flex gap-2">
                           <Button size="sm" onClick={handleNotesUpdate} loading={updatingFields}>
@@ -889,7 +889,7 @@ export const OrderDetail: React.FC = () => {
                         </div>
                       </div>
                     ) : (
-                      <p className="text-gray-400 whitespace-pre-wrap">
+                      <p className="text-muted-foreground whitespace-pre-wrap">
                         {order.customFields?.adminNotes || 'Aucune note interne'}
                       </p>
                     )}
@@ -914,8 +914,8 @@ export const OrderDetail: React.FC = () => {
         {/* Right Column - Sidebar */}
         <div className="space-y-6">
           {/* Customer Info */}
-          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-            <h3 className="text-gray-100 font-semibold mb-4 flex items-center gap-2">
+          <div className="bg-card rounded-xl p-6 border border-border">
+            <h3 className="text-foreground font-semibold mb-4 flex items-center gap-2">
               <User className="h-5 w-5 text-blue-400" />
               Client
             </h3>
@@ -929,22 +929,22 @@ export const OrderDetail: React.FC = () => {
                     </span>
                   </div>
                   <div>
-                    <p className="text-gray-100 font-medium">
+                    <p className="text-foreground font-medium">
                       {order.customer.firstName} {order.customer.lastName}
                     </p>
                     <Link
                       to={`/customers/${order.customer.id}`}
-                      className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                      className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
                     >
                       Voir le profil
                       <ExternalLink className="h-3 w-3" />
                     </Link>
                   </div>
                 </div>
-                <div className="pt-3 border-t border-gray-700 space-y-2">
+                <div className="pt-3 border-t border-border space-y-2">
                   <a
                     href={`mailto:${order.customer.emailAddress}`}
-                    className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-300"
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                   >
                     <Mail className="h-4 w-4" />
                     {order.customer.emailAddress}
@@ -952,7 +952,7 @@ export const OrderDetail: React.FC = () => {
                   {order.customer.phoneNumber && (
                     <a
                       href={`tel:${order.customer.phoneNumber}`}
-                      className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-300"
+                      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                     >
                       <Phone className="h-4 w-4" />
                       {order.customer.phoneNumber}
@@ -961,20 +961,20 @@ export const OrderDetail: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <p className="text-gray-500">Client anonyme</p>
+              <p className="text-muted-foreground">Client anonyme</p>
             )}
           </div>
 
           {/* Shipping Address */}
           {order.shippingAddress && (
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-              <h3 className="text-gray-100 font-semibold mb-4 flex items-center gap-2">
+            <div className="bg-card rounded-xl p-6 border border-border">
+              <h3 className="text-foreground font-semibold mb-4 flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-green-400" />
                 Adresse de livraison
               </h3>
-              <div className="space-y-1 text-gray-400">
+              <div className="space-y-1 text-muted-foreground">
                 {order.shippingAddress.fullName && (
-                  <p className="text-gray-100 font-medium">{order.shippingAddress.fullName}</p>
+                  <p className="text-foreground font-medium">{order.shippingAddress.fullName}</p>
                 )}
                 {order.shippingAddress.streetLine1 && <p>{order.shippingAddress.streetLine1}</p>}
                 {order.shippingAddress.streetLine2 && <p>{order.shippingAddress.streetLine2}</p>}
@@ -988,7 +988,7 @@ export const OrderDetail: React.FC = () => {
                     .join(', ')}
                 </p>
                 {order.customFields?.wilaya && (
-                  <p className="mt-2 px-2 py-1 bg-gray-700 rounded text-gray-300 inline-block">
+                  <p className="mt-2 px-2 py-1 bg-muted rounded text-foreground inline-block">
                     Wilaya: {order.customFields.wilaya}
                   </p>
                 )}
@@ -1003,8 +1003,8 @@ export const OrderDetail: React.FC = () => {
           )}
 
           {/* Payment Info */}
-          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-            <h3 className="text-gray-100 font-semibold mb-4 flex items-center gap-2">
+          <div className="bg-card rounded-xl p-6 border border-border">
+            <h3 className="text-foreground font-semibold mb-4 flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-purple-400" />
               Paiement
             </h3>
@@ -1013,10 +1013,10 @@ export const OrderDetail: React.FC = () => {
                 {order.payments.map((payment) => (
                   <div
                     key={payment.id}
-                    className="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg"
+                    className="flex items-center justify-between p-3 bg-background/50 rounded-lg"
                   >
                     <div>
-                      <p className="text-gray-100 font-medium">{payment.method}</p>
+                      <p className="text-foreground font-medium">{payment.method}</p>
                       <Badge
                         variant={
                           payment.state === 'Settled'
@@ -1030,12 +1030,12 @@ export const OrderDetail: React.FC = () => {
                         {payment.state}
                       </Badge>
                     </div>
-                    <p className="text-gray-100 font-bold">{formatPrice(payment.amount / 100)}</p>
+                    <p className="text-foreground font-bold">{formatPrice(payment.amount / 100)}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-4 text-gray-500">
+              <div className="text-center py-4 text-muted-foreground">
                 <CreditCard className="h-10 w-10 mx-auto mb-2 opacity-50" />
                 <p>Aucun paiement enregistré</p>
               </div>
@@ -1043,18 +1043,18 @@ export const OrderDetail: React.FC = () => {
           </div>
 
           {/* Shipping / Tracking */}
-          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-            <h3 className="text-gray-100 font-semibold mb-4 flex items-center gap-2">
+          <div className="bg-card rounded-xl p-6 border border-border">
+            <h3 className="text-foreground font-semibold mb-4 flex items-center gap-2">
               <Truck className="h-5 w-5 text-orange-400" />
               Livraison
             </h3>
 
             {order.shippingLines && order.shippingLines.length > 0 && (
-              <div className="mb-4 p-3 bg-gray-900/50 rounded-lg">
-                <p className="text-gray-100 font-medium">
+              <div className="mb-4 p-3 bg-background/50 rounded-lg">
+                <p className="text-foreground font-medium">
                   {order.shippingLines[0].shippingMethod?.name}
                 </p>
-                <p className="text-gray-400 text-sm">
+                <p className="text-muted-foreground text-sm">
                   {formatPrice((order.shippingLines[0].priceWithTax || 0) / 100)}
                 </p>
               </div>
@@ -1063,11 +1063,11 @@ export const OrderDetail: React.FC = () => {
             {/* Tracking Number */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-gray-400">Numéro de suivi</p>
+                <p className="text-sm font-medium text-muted-foreground">Numéro de suivi</p>
                 {!editingTracking && (
                   <button
                     onClick={() => setEditingTracking(true)}
-                    className="text-blue-400 hover:text-blue-300"
+                    className="text-primary hover:text-primary/80"
                   >
                     <Edit2 className="h-4 w-4" />
                   </button>
@@ -1079,7 +1079,7 @@ export const OrderDetail: React.FC = () => {
                     value={trackingNumber}
                     onChange={(e) => setTrackingNumber(e.target.value)}
                     placeholder="ABC123456"
-                    className="flex-1 bg-gray-900 border-gray-600"
+                    className="flex-1 bg-background border-border"
                   />
                   <Button size="sm" onClick={handleTrackingUpdate} loading={updatingFields}>
                     <Save className="h-4 w-4" />
@@ -1096,9 +1096,9 @@ export const OrderDetail: React.FC = () => {
                   </Button>
                 </div>
               ) : (
-                <p className="text-gray-100 font-mono bg-gray-900/50 px-3 py-2 rounded">
+                <p className="text-foreground font-mono bg-background/50 px-3 py-2 rounded">
                   {order.customFields?.trackingNumber || (
-                    <span className="text-gray-500">Non défini</span>
+                    <span className="text-muted-foreground">Non défini</span>
                   )}
                 </p>
               )}
@@ -1118,7 +1118,7 @@ export const OrderDetail: React.FC = () => {
         title="Annuler la commande"
         message={
           <div className="space-y-4">
-            <p className="text-gray-300">
+            <p className="text-foreground">
               Êtes-vous sûr de vouloir annuler cette commande? Cette action est irréversible.
             </p>
             <TextArea
@@ -1127,7 +1127,7 @@ export const OrderDetail: React.FC = () => {
               onChange={(e) => setCancellationReason(e.target.value)}
               rows={3}
               placeholder="Raison de l'annulation..."
-              className="bg-gray-800 border-gray-600"
+              className="bg-card border-border"
             />
           </div>
         }

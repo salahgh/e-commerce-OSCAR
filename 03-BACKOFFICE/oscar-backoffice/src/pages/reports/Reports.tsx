@@ -219,12 +219,12 @@ export const Reports: React.FC = () => {
         <div className="space-y-6">
           {/* Date Range Selector */}
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <h3 className="text-lg font-semibold text-gray-100">Rapport des Ventes</h3>
+            <h3 className="text-lg font-semibold text-foreground">Rapport des Ventes</h3>
             <div className="flex items-center gap-3">
               <select
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value)}
-                className="px-3 py-2 border border-gray-600 rounded-lg text-sm bg-gray-900 text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
               >
                 {DATE_RANGES.map((range) => (
                   <option key={range.value} value={range.value}>
@@ -298,23 +298,23 @@ export const Reports: React.FC = () => {
               </div>
 
               {/* Orders by State */}
-              <div className="bg-gray-700/50 rounded-lg p-6">
-                <h4 className="font-medium text-gray-100 mb-4">Statut des commandes</h4>
+              <div className="bg-muted/50 rounded-lg p-6">
+                <h4 className="font-medium text-foreground mb-4">Statut des commandes</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {Object.entries(salesMetrics.ordersByState).map(([state, count]) => (
-                    <div key={state} className="bg-gray-800 p-4 rounded-lg border border-gray-600">
-                      <p className="text-sm text-gray-400">{state}</p>
-                      <p className="text-xl font-bold text-gray-100">{count}</p>
+                    <div key={state} className="bg-card p-4 rounded-lg border border-border">
+                      <p className="text-sm text-muted-foreground">{state}</p>
+                      <p className="text-xl font-bold text-foreground">{count}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Top Wilayas */}
-              <div className="bg-gray-700/50 rounded-lg p-6">
+              <div className="bg-muted/50 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-medium text-gray-100 flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-gray-400" />
+                  <h4 className="font-medium text-foreground flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-muted-foreground" />
                     Top Wilayas
                   </h4>
                   <Button
@@ -331,17 +331,17 @@ export const Reports: React.FC = () => {
                   {salesMetrics.topWilayas.map(([wilaya, data], index) => (
                     <div
                       key={wilaya}
-                      className="flex items-center justify-between bg-gray-800 p-3 rounded-lg border border-gray-600"
+                      className="flex items-center justify-between bg-card p-3 rounded-lg border border-border"
                     >
                       <div className="flex items-center gap-3">
                         <span className="w-8 h-8 rounded-full bg-blue-900/50 text-blue-400 flex items-center justify-center font-bold text-sm">
                           {index + 1}
                         </span>
-                        <span className="font-medium text-gray-100">{wilaya}</span>
+                        <span className="font-medium text-foreground">{wilaya}</span>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-gray-100">{formatPrice(data.revenue)}</p>
-                        <p className="text-sm text-gray-400">{data.count} commandes</p>
+                        <p className="font-semibold text-foreground">{formatPrice(data.revenue)}</p>
+                        <p className="text-sm text-muted-foreground">{data.count} commandes</p>
                       </div>
                     </div>
                   ))}
@@ -359,7 +359,7 @@ export const Reports: React.FC = () => {
       content: (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-100">Performance des Produits</h3>
+            <h3 className="text-lg font-semibold text-foreground">Performance des Produits</h3>
             <Button
               variant="outline"
               size="sm"
@@ -378,30 +378,30 @@ export const Reports: React.FC = () => {
           ) : (
             <>
               {/* Top Selling Products */}
-              <div className="bg-gray-700/50 rounded-lg p-6">
-                <h4 className="font-medium text-gray-100 mb-4 flex items-center gap-2">
+              <div className="bg-muted/50 rounded-lg p-6">
+                <h4 className="font-medium text-foreground mb-4 flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-green-500" />
                   Meilleures ventes
                 </h4>
                 {productPerformance.length === 0 ? (
-                  <p className="text-gray-400 text-center py-4">Aucune vente dans cette période</p>
+                  <p className="text-muted-foreground text-center py-4">Aucune vente dans cette période</p>
                 ) : (
                   <div className="space-y-3">
                     {productPerformance.map(([productId, data], index) => (
                       <div
                         key={productId}
-                        className="flex items-center justify-between bg-gray-800 p-4 rounded-lg border border-gray-600"
+                        className="flex items-center justify-between bg-card p-4 rounded-lg border border-border"
                       >
                         <div className="flex items-center gap-3">
                           <span className="w-8 h-8 rounded-full bg-green-900/50 text-green-400 flex items-center justify-center font-bold text-sm">
                             {index + 1}
                           </span>
                           <div>
-                            <p className="font-medium text-gray-100">{data.name}</p>
-                            <p className="text-sm text-gray-400">{data.quantity} unités vendues</p>
+                            <p className="font-medium text-foreground">{data.name}</p>
+                            <p className="text-sm text-muted-foreground">{data.quantity} unités vendues</p>
                           </div>
                         </div>
-                        <p className="font-semibold text-gray-100">{formatPrice(data.revenue)}</p>
+                        <p className="font-semibold text-foreground">{formatPrice(data.revenue)}</p>
                       </div>
                     ))}
                   </div>
@@ -409,8 +409,8 @@ export const Reports: React.FC = () => {
               </div>
 
               {/* Most Viewed Products */}
-              <div className="bg-gray-700/50 rounded-lg p-6">
-                <h4 className="font-medium text-gray-100 mb-4 flex items-center gap-2">
+              <div className="bg-muted/50 rounded-lg p-6">
+                <h4 className="font-medium text-foreground mb-4 flex items-center gap-2">
                   <Eye className="h-5 w-5 text-blue-500" />
                   Produits les plus consultés
                 </h4>
@@ -424,7 +424,7 @@ export const Reports: React.FC = () => {
                     .map((product, index) => (
                       <div
                         key={product.id}
-                        className="flex items-center justify-between bg-gray-800 p-4 rounded-lg border border-gray-600"
+                        className="flex items-center justify-between bg-card p-4 rounded-lg border border-border"
                       >
                         <div className="flex items-center gap-3">
                           {product.featuredAsset?.preview ? (
@@ -434,13 +434,13 @@ export const Reports: React.FC = () => {
                               className="w-10 h-10 rounded object-cover"
                             />
                           ) : (
-                            <div className="w-10 h-10 rounded bg-gray-700 flex items-center justify-center">
-                              <Package className="h-5 w-5 text-gray-500" />
+                            <div className="w-10 h-10 rounded bg-muted flex items-center justify-center">
+                              <Package className="h-5 w-5 text-muted-foreground" />
                             </div>
                           )}
                           <div>
-                            <p className="font-medium text-gray-100">{product.name}</p>
-                            <p className="text-sm text-gray-400">
+                            <p className="font-medium text-foreground">{product.name}</p>
+                            <p className="text-sm text-muted-foreground">
                               {product.customFields?.nameFr || product.slug}
                             </p>
                           </div>
@@ -452,7 +452,7 @@ export const Reports: React.FC = () => {
                       </div>
                     ))}
                   {products.filter((p) => p.customFields?.viewCount).length === 0 && (
-                    <p className="text-gray-400 text-center py-4">
+                    <p className="text-muted-foreground text-center py-4">
                       Aucune donnée de vue disponible
                     </p>
                   )}
@@ -470,7 +470,7 @@ export const Reports: React.FC = () => {
       content: (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-100">Alertes Stock</h3>
+            <h3 className="text-lg font-semibold text-foreground">Alertes Stock</h3>
             <Button
               variant="outline"
               size="sm"
@@ -509,7 +509,7 @@ export const Reports: React.FC = () => {
                         ? 'bg-red-900/30 border-red-700'
                         : isCritical
                           ? 'bg-amber-900/30 border-amber-700'
-                          : 'bg-gray-800 border-gray-600'
+                          : 'bg-card border-border'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -520,21 +520,21 @@ export const Reports: React.FC = () => {
                           className="w-12 h-12 rounded object-cover"
                         />
                       ) : (
-                        <div className="w-12 h-12 rounded bg-gray-700 flex items-center justify-center">
-                          <Package className="h-6 w-6 text-gray-500" />
+                        <div className="w-12 h-12 rounded bg-muted flex items-center justify-center">
+                          <Package className="h-6 w-6 text-muted-foreground" />
                         </div>
                       )}
                       <div>
-                        <p className="font-medium text-gray-100">{variant.product?.name}</p>
-                        <p className="text-sm text-gray-400">SKU: {variant.sku}</p>
-                        <p className="text-xs text-gray-500">{variant.name}</p>
+                        <p className="font-medium text-foreground">{variant.product?.name}</p>
+                        <p className="text-sm text-muted-foreground">SKU: {variant.sku}</p>
+                        <p className="text-xs text-muted-foreground">{variant.name}</p>
                       </div>
                     </div>
                     <div className="text-right">
                       <Badge variant={isOutOfStock ? 'danger' : isCritical ? 'warning' : 'default'}>
                         {isOutOfStock ? 'Rupture' : `${variant.stockOnHand} en stock`}
                       </Badge>
-                      <p className="text-sm text-gray-400 mt-1">
+                      <p className="text-sm text-muted-foreground mt-1">
                         Alerte: {variant.customFields?.minStockAlert || 5}
                       </p>
                     </div>
@@ -552,12 +552,12 @@ export const Reports: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-100">Rapports</h1>
-        <p className="text-gray-400 mt-1">Analysez les performances de votre boutique</p>
+        <h1 className="text-3xl font-bold text-foreground">Rapports</h1>
+        <p className="text-muted-foreground mt-1">Analysez les performances de votre boutique</p>
       </div>
 
       {/* Tabs */}
-      <div className="bg-gray-800 rounded-lg shadow">
+      <div className="bg-card rounded-lg shadow">
         <Tabs tabs={tabs} defaultTab="sales" />
       </div>
     </div>

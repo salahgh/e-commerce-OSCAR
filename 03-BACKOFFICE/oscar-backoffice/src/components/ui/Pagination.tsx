@@ -55,12 +55,12 @@ export const Pagination: React.FC<PaginationProps> = ({
         disabled={currentPage === 1}
         icon={<ChevronLeft className="h-4 w-4" />}
       >
-        Précédent
+        Precedent
       </Button>
 
       {getPageNumbers().map((page, index) =>
         page === '...' ? (
-          <span key={`ellipsis-${index}`} className="px-2 text-gray-400">
+          <span key={`ellipsis-${index}`} className="px-2 text-muted-foreground">
             ...
           </span>
         ) : (
