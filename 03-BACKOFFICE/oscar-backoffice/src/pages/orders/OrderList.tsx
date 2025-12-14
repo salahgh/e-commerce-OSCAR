@@ -122,48 +122,118 @@ const ORDER_STATUS: Record<
 };
 
 const WILAYAS = [
-  'Adrar', 'Chlef', 'Laghouat', 'Oum El Bouaghi', 'Batna', 'Béjaïa', 'Biskra', 'Béchar',
-  'Blida', 'Bouira', 'Tamanrasset', 'Tébessa', 'Tlemcen', 'Tiaret', 'Tizi Ouzou', 'Alger',
-  'Djelfa', 'Jijel', 'Sétif', 'Saïda', 'Skikda', 'Sidi Bel Abbès', 'Annaba', 'Guelma',
-  'Constantine', 'Médéa', 'Mostaganem', "M'Sila", 'Mascara', 'Ouargla', 'Oran', 'El Bayadh',
-  'Illizi', 'Bordj Bou Arréridj', 'Boumerdès', 'El Tarf', 'Tindouf', 'Tissemsilt', 'El Oued',
-  'Khenchela', 'Souk Ahras', 'Tipaza', 'Mila', 'Aïn Defla', 'Naâma', 'Aïn Témouchent',
-  'Ghardaïa', 'Relizane', 'Timimoun', 'Bordj Badji Mokhtar', 'Ouled Djellal', 'Béni Abbès',
-  'In Salah', 'In Guezzam', 'Touggourt', 'Djanet', "El M'Ghair", 'El Meniaa',
+  'Adrar',
+  'Chlef',
+  'Laghouat',
+  'Oum El Bouaghi',
+  'Batna',
+  'Béjaïa',
+  'Biskra',
+  'Béchar',
+  'Blida',
+  'Bouira',
+  'Tamanrasset',
+  'Tébessa',
+  'Tlemcen',
+  'Tiaret',
+  'Tizi Ouzou',
+  'Alger',
+  'Djelfa',
+  'Jijel',
+  'Sétif',
+  'Saïda',
+  'Skikda',
+  'Sidi Bel Abbès',
+  'Annaba',
+  'Guelma',
+  'Constantine',
+  'Médéa',
+  'Mostaganem',
+  "M'Sila",
+  'Mascara',
+  'Ouargla',
+  'Oran',
+  'El Bayadh',
+  'Illizi',
+  'Bordj Bou Arréridj',
+  'Boumerdès',
+  'El Tarf',
+  'Tindouf',
+  'Tissemsilt',
+  'El Oued',
+  'Khenchela',
+  'Souk Ahras',
+  'Tipaza',
+  'Mila',
+  'Aïn Defla',
+  'Naâma',
+  'Aïn Témouchent',
+  'Ghardaïa',
+  'Relizane',
+  'Timimoun',
+  'Bordj Badji Mokhtar',
+  'Ouled Djellal',
+  'Béni Abbès',
+  'In Salah',
+  'In Guezzam',
+  'Touggourt',
+  'Djanet',
+  "El M'Ghair",
+  'El Meniaa',
 ];
 
 // Date presets
 const DATE_PRESETS = [
-  { label: "Aujourd'hui", getValue: () => {
-    const today = new Date().toISOString().split('T')[0];
-    return { from: today, to: today };
-  }},
-  { label: 'Hier', getValue: () => {
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-    return { from: yesterday, to: yesterday };
-  }},
-  { label: '7 derniers jours', getValue: () => {
-    const today = new Date().toISOString().split('T')[0];
-    const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
-    return { from: weekAgo, to: today };
-  }},
-  { label: '30 derniers jours', getValue: () => {
-    const today = new Date().toISOString().split('T')[0];
-    const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
-    return { from: monthAgo, to: today };
-  }},
-  { label: 'Ce mois', getValue: () => {
-    const now = new Date();
-    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-    const today = now.toISOString().split('T')[0];
-    return { from: firstDay, to: today };
-  }},
-  { label: 'Mois dernier', getValue: () => {
-    const now = new Date();
-    const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0];
-    const lastDay = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().split('T')[0];
-    return { from: firstDay, to: lastDay };
-  }},
+  {
+    label: "Aujourd'hui",
+    getValue: () => {
+      const today = new Date().toISOString().split('T')[0];
+      return { from: today, to: today };
+    },
+  },
+  {
+    label: 'Hier',
+    getValue: () => {
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      return { from: yesterday, to: yesterday };
+    },
+  },
+  {
+    label: '7 derniers jours',
+    getValue: () => {
+      const today = new Date().toISOString().split('T')[0];
+      const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
+      return { from: weekAgo, to: today };
+    },
+  },
+  {
+    label: '30 derniers jours',
+    getValue: () => {
+      const today = new Date().toISOString().split('T')[0];
+      const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
+      return { from: monthAgo, to: today };
+    },
+  },
+  {
+    label: 'Ce mois',
+    getValue: () => {
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      const today = now.toISOString().split('T')[0];
+      return { from: firstDay, to: today };
+    },
+  },
+  {
+    label: 'Mois dernier',
+    getValue: () => {
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+        .toISOString()
+        .split('T')[0];
+      const lastDay = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().split('T')[0];
+      return { from: firstDay, to: lastDay };
+    },
+  },
 ];
 
 // Amount presets
@@ -228,7 +298,7 @@ export const OrderList: React.FC = () => {
 
   const dateFilter = buildDateFilter();
   const amountFilter = buildAmountFilter();
-  const currentSort = SORT_OPTIONS.find(s => s.value === sortOption) || SORT_OPTIONS[0];
+  const currentSort = SORT_OPTIONS.find((s) => s.value === sortOption) || SORT_OPTIONS[0];
 
   const { data, loading, error } = useQuery(AdminOrdersDocument, {
     variables: {
@@ -273,7 +343,7 @@ export const OrderList: React.FC = () => {
     const totalValue = filteredOrders.reduce((sum, o) => sum + (o.totalWithTax || 0), 0);
     const avgValue = filteredOrders.length > 0 ? totalValue / filteredOrders.length : 0;
     const byStatus: Record<string, number> = {};
-    filteredOrders.forEach(o => {
+    filteredOrders.forEach((o) => {
       byStatus[o.state] = (byStatus[o.state] || 0) + 1;
     });
     return { totalValue, avgValue, byStatus };
@@ -293,15 +363,13 @@ export const OrderList: React.FC = () => {
   };
 
   const toggleStatusFilter = (status: string) => {
-    setStatusFilter(prev =>
-      prev.includes(status)
-        ? prev.filter(s => s !== status)
-        : [...prev, status]
+    setStatusFilter((prev) =>
+      prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]
     );
     setCurrentPage(0);
   };
 
-  const applyDatePreset = (preset: typeof DATE_PRESETS[0]) => {
+  const applyDatePreset = (preset: (typeof DATE_PRESETS)[0]) => {
     const { from, to } = preset.getValue();
     setDateFrom(from);
     setDateTo(to);
@@ -309,7 +377,7 @@ export const OrderList: React.FC = () => {
     setCurrentPage(0);
   };
 
-  const applyAmountPreset = (preset: typeof AMOUNT_PRESETS[0]) => {
+  const applyAmountPreset = (preset: (typeof AMOUNT_PRESETS)[0]) => {
     setMinAmount(preset.min);
     setMaxAmount(preset.max);
     setShowAmountPresets(false);
@@ -353,9 +421,7 @@ export const OrderList: React.FC = () => {
               </div>
               Commandes
             </h1>
-            <p className="text-muted-foreground mt-2">
-              Gérez et suivez toutes vos commandes
-            </p>
+            <p className="text-muted-foreground mt-2">Gérez et suivez toutes vos commandes</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-right">
@@ -373,8 +439,12 @@ export const OrderList: React.FC = () => {
                 <TrendingUp className="h-5 w-5 text-green-400" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Valeur totale</p>
-                <p className="text-lg font-bold text-foreground">{formatPrice(stats.totalValue / 100)}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                  Valeur totale
+                </p>
+                <p className="text-lg font-bold text-foreground">
+                  {formatPrice(stats.totalValue / 100)}
+                </p>
               </div>
             </div>
           </div>
@@ -384,8 +454,12 @@ export const OrderList: React.FC = () => {
                 <DollarSign className="h-5 w-5 text-blue-400" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Panier moyen</p>
-                <p className="text-lg font-bold text-foreground">{formatPrice(stats.avgValue / 100)}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                  Panier moyen
+                </p>
+                <p className="text-lg font-bold text-foreground">
+                  {formatPrice(stats.avgValue / 100)}
+                </p>
               </div>
             </div>
           </div>
@@ -397,7 +471,8 @@ export const OrderList: React.FC = () => {
               <div>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">En attente</p>
                 <p className="text-lg font-bold text-foreground">
-                  {(stats.byStatus['PaymentSettled'] || 0) + (stats.byStatus['ArrangingPayment'] || 0)}
+                  {(stats.byStatus['PaymentSettled'] || 0) +
+                    (stats.byStatus['ArrangingPayment'] || 0)}
                 </p>
               </div>
             </div>
@@ -456,8 +531,10 @@ export const OrderList: React.FC = () => {
                 }}
                 className="w-full px-4 py-3 pr-10 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none appearance-none cursor-pointer"
               >
-                {SORT_OPTIONS.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                {SORT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                 ))}
               </select>
               <ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -498,9 +575,10 @@ export const OrderList: React.FC = () => {
                       onClick={() => toggleStatusFilter(key)}
                       className={`
                         inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all
-                        ${isSelected
-                          ? `${config.bgColor} ${config.color} ring-2 ring-offset-2 ring-offset-background ring-current`
-                          : 'bg-muted text-muted-foreground hover:bg-accent hover:text-foreground'
+                        ${
+                          isSelected
+                            ? `${config.bgColor} ${config.color} ring-2 ring-offset-2 ring-offset-background ring-current`
+                            : 'bg-muted text-muted-foreground hover:bg-accent hover:text-foreground'
                         }
                       `}
                     >
@@ -529,7 +607,9 @@ export const OrderList: React.FC = () => {
                       className="w-full flex items-center justify-between px-4 py-2.5 bg-background border border-border rounded-lg text-foreground hover:border-muted-foreground transition-colors"
                     >
                       <span>Période prédéfinie</span>
-                      <ChevronDown className={`h-4 w-4 transition-transform ${showDatePresets ? 'rotate-180' : ''}`} />
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform ${showDatePresets ? 'rotate-180' : ''}`}
+                      />
                     </button>
                     {showDatePresets && (
                       <div className="absolute z-10 mt-1 w-full bg-background border border-border rounded-lg shadow-xl overflow-hidden">
@@ -572,7 +652,10 @@ export const OrderList: React.FC = () => {
                     </div>
                     {(dateFrom || dateTo) && (
                       <button
-                        onClick={() => { setDateFrom(''); setDateTo(''); }}
+                        onClick={() => {
+                          setDateFrom('');
+                          setDateTo('');
+                        }}
                         className="p-2 hover:bg-accent rounded-lg transition-colors"
                       >
                         <X className="h-4 w-4 text-muted-foreground" />
@@ -596,7 +679,9 @@ export const OrderList: React.FC = () => {
                       className="w-full flex items-center justify-between px-4 py-2.5 bg-background border border-border rounded-lg text-foreground hover:border-muted-foreground transition-colors"
                     >
                       <span>Fourchette prédéfinie</span>
-                      <ChevronDown className={`h-4 w-4 transition-transform ${showAmountPresets ? 'rotate-180' : ''}`} />
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform ${showAmountPresets ? 'rotate-180' : ''}`}
+                      />
                     </button>
                     {showAmountPresets && (
                       <div className="absolute z-10 mt-1 w-full bg-background border border-border rounded-lg shadow-xl overflow-hidden">
@@ -637,7 +722,10 @@ export const OrderList: React.FC = () => {
                     />
                     {(minAmount || maxAmount) && (
                       <button
-                        onClick={() => { setMinAmount(''); setMaxAmount(''); }}
+                        onClick={() => {
+                          setMinAmount('');
+                          setMaxAmount('');
+                        }}
                         className="p-2 hover:bg-accent rounded-lg transition-colors"
                       >
                         <X className="h-4 w-4 text-muted-foreground" />
@@ -666,7 +754,9 @@ export const OrderList: React.FC = () => {
                 >
                   <option value="">Toutes les wilayas</option>
                   {WILAYAS.map((w) => (
-                    <option key={w} value={w}>{w}</option>
+                    <option key={w} value={w}>
+                      {w}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -711,7 +801,7 @@ export const OrderList: React.FC = () => {
         {activeFiltersCount > 0 && !showFilters && (
           <div className="px-4 py-3 bg-background/50 border-b border-border flex flex-wrap items-center gap-2">
             <span className="text-sm text-muted-foreground">Filtres actifs:</span>
-            {statusFilter.map(status => (
+            {statusFilter.map((status) => (
               <span
                 key={status}
                 className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-sm"
@@ -725,7 +815,13 @@ export const OrderList: React.FC = () => {
             {(dateFrom || dateTo) && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-500/20 text-purple-400 rounded-lg text-sm">
                 {dateFrom && dateTo ? `${dateFrom} → ${dateTo}` : dateFrom || dateTo}
-                <button onClick={() => { setDateFrom(''); setDateTo(''); }} className="hover:text-purple-300">
+                <button
+                  onClick={() => {
+                    setDateFrom('');
+                    setDateTo('');
+                  }}
+                  className="hover:text-purple-300"
+                >
                   <X className="h-3 w-3" />
                 </button>
               </span>
@@ -733,7 +829,13 @@ export const OrderList: React.FC = () => {
             {(minAmount || maxAmount) && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-500/20 text-green-400 rounded-lg text-sm">
                 {minAmount ? `${minAmount} DZD` : '0'} → {maxAmount ? `${maxAmount} DZD` : '∞'}
-                <button onClick={() => { setMinAmount(''); setMaxAmount(''); }} className="hover:text-green-300">
+                <button
+                  onClick={() => {
+                    setMinAmount('');
+                    setMaxAmount('');
+                  }}
+                  className="hover:text-green-300"
+                >
                   <X className="h-3 w-3" />
                 </button>
               </span>
@@ -818,10 +920,7 @@ export const OrderList: React.FC = () => {
                       bgColor: 'bg-muted',
                     };
                     return (
-                      <tr
-                        key={order.id}
-                        className="hover:bg-accent/30 transition-colors group"
-                      >
+                      <tr key={order.id} className="hover:bg-accent/30 transition-colors group">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className={`p-2 rounded-lg ${statusConfig.bgColor}`}>
@@ -839,13 +938,11 @@ export const OrderList: React.FC = () => {
                         </td>
                         <td className="px-6 py-4">
                           {order.customer ? (
-                            <Link
-                              to={`/customers/${order.customer.id}`}
-                              className="group/customer"
-                            >
+                            <Link to={`/customers/${order.customer.id}`} className="group/customer">
                               <div className="flex items-center gap-2">
                                 <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white">
-                                  {(order.customer.firstName?.[0] || '') + (order.customer.lastName?.[0] || '')}
+                                  {(order.customer.firstName?.[0] || '') +
+                                    (order.customer.lastName?.[0] || '')}
                                 </div>
                                 <div>
                                   <div className="text-sm font-medium text-foreground group-hover/customer:text-primary transition-colors">
@@ -870,7 +967,9 @@ export const OrderList: React.FC = () => {
                           {order.customFields?.wilaya ? (
                             <div className="flex items-center gap-2">
                               <MapPin className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm text-foreground">{order.customFields.wilaya}</span>
+                              <span className="text-sm text-foreground">
+                                {order.customFields.wilaya}
+                              </span>
                             </div>
                           ) : (
                             <span className="text-sm text-muted-foreground">-</span>
@@ -882,7 +981,9 @@ export const OrderList: React.FC = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusConfig.bgColor} ${statusConfig.color}`}>
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusConfig.bgColor} ${statusConfig.color}`}
+                          >
                             {statusConfig.icon}
                             {statusConfig.label}
                           </span>
@@ -914,7 +1015,9 @@ export const OrderList: React.FC = () => {
             {totalPages > 1 && (
               <div className="px-6 py-4 bg-background/30 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="text-sm text-muted-foreground">
-                  Affichage de <span className="font-medium text-foreground">{currentPage * pageSize + 1}</span> à{' '}
+                  Affichage de{' '}
+                  <span className="font-medium text-foreground">{currentPage * pageSize + 1}</span>{' '}
+                  à{' '}
                   <span className="font-medium text-foreground">
                     {Math.min((currentPage + 1) * pageSize, totalItems)}
                   </span>{' '}

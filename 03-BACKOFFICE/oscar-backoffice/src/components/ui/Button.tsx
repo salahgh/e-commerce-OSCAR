@@ -25,9 +25,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const variantClasses = {
       primary: 'bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary',
-      secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:ring-secondary',
-      danger: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-destructive',
-      ghost: 'bg-transparent hover:bg-accent text-muted-foreground hover:text-foreground focus:ring-accent',
+      secondary:
+        'bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:ring-secondary',
+      danger:
+        'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-destructive',
+      ghost:
+        'bg-transparent hover:bg-accent text-muted-foreground hover:text-foreground focus:ring-accent',
       outline:
         'bg-transparent border-2 border-border text-muted-foreground hover:bg-accent hover:text-foreground focus:ring-accent',
     };

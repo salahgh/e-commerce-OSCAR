@@ -8,26 +8,27 @@ interface ThemeSwitcherProps {
   variant?: 'dropdown' | 'buttons' | 'toggle';
 }
 
-const themeOptions: { value: Theme; label: string; icon: React.ReactNode; description: string }[] = [
-  {
-    value: 'light',
-    label: 'Clair',
-    icon: <Sun className="h-4 w-4" />,
-    description: 'Theme clair avec fond blanc',
-  },
-  {
-    value: 'dark',
-    label: 'Sombre',
-    icon: <Moon className="h-4 w-4" />,
-    description: 'Theme sombre standard',
-  },
-  {
-    value: 'actuelle',
-    label: 'Actuelle',
-    icon: <Palette className="h-4 w-4" />,
-    description: 'Theme sombre bleu (original)',
-  },
-];
+const themeOptions: { value: Theme; label: string; icon: React.ReactNode; description: string }[] =
+  [
+    {
+      value: 'light',
+      label: 'Clair',
+      icon: <Sun className="h-4 w-4" />,
+      description: 'Theme clair avec fond blanc',
+    },
+    {
+      value: 'dark',
+      label: 'Sombre',
+      icon: <Moon className="h-4 w-4" />,
+      description: 'Theme sombre standard',
+    },
+    {
+      value: 'actuelle',
+      label: 'Actuelle',
+      icon: <Palette className="h-4 w-4" />,
+      description: 'Theme sombre bleu (original)',
+    },
+  ];
 
 export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ variant = 'dropdown' }) => {
   const { theme, setTheme } = useTheme();

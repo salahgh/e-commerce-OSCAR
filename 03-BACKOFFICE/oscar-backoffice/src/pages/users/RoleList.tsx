@@ -13,19 +13,20 @@ import {
   ArrowLeft,
   Key,
 } from 'lucide-react';
-import {
-  AdminRolesDocument,
-  DeleteRoleDocument,
-} from '../../graphql/generated/graphql';
+import { AdminRolesDocument, DeleteRoleDocument } from '../../graphql/generated/graphql';
 import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
 import { Spinner } from '../../components/ui/Spinner';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 import { addToast } from '../../store/slices/uiSlice';
 import { formatDateTime } from '../../lib/utils';
+import { usePermissions } from '../../hooks/usePermissions';
 
 export const RoleList: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { canCreate, canUpdate, canDelete } = usePermissions();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -39,10 +40,7 @@ export const RoleList: React.FC = () => {
         sort: { createdAt: 'DESC' as any },
         filter: searchTerm
           ? {
-              _or: [
-                { code: { contains: searchTerm } },
-                { description: { contains: searchTerm } },
-              ],
+              _or: [{ code: { contains: searchTerm } }, { description: { contains: searchTerm } }],
             }
           : undefined,
       },
@@ -55,10 +53,12 @@ export const RoleList: React.FC = () => {
         dispatch(addToast({ type: 'success', message: 'Rôle supprimé avec succès' }));
         refetch();
       } else {
-        dispatch(addToast({
-          type: 'error',
-          message: result.deleteRole.message || 'Erreur lors de la suppression',
-        }));
+        dispatch(
+          addToast({
+            type: 'error',
+            message: result.deleteRole.message || 'Erreur lors de la suppression',
+          })
+        );
       }
       setDeleteId(null);
     },
@@ -80,9 +80,7 @@ export const RoleList: React.FC = () => {
 
   const formatRoleCode = (code: string): string => {
     if (code === '__super_admin_role__') return 'Super Admin';
-    return code
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, (l) => l.toUpperCase());
+    return code.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   const getRoleBadgeVariant = (code: string): 'default' | 'warning' | 'success' | 'danger' => {
@@ -144,13 +142,11 @@ export const RoleList: React.FC = () => {
             </p>
           </div>
         </div>
-        <Link
-          to="/users/roles/new"
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 flex items-center gap-2"
-        >
-          <Plus className="h-5 w-5" />
-          Nouveau rôle
-        </Link>
+        <PermissionGate permission="CreateAdministrator" disableMode>
+          <Button onClick={() => navigate('/users/roles/new')} icon={<Plus className="h-5 w-5" />}>
+            Nouveau rôle
+          </Button>
+        </PermissionGate>
       </div>
 
       {/* Search */}
@@ -238,7 +234,8 @@ export const RoleList: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <Key className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm text-foreground">
-                          {role.permissions?.length || 0} permission{(role.permissions?.length || 0) > 1 ? 's' : ''}
+                          {role.permissions?.length || 0} permission
+                          {(role.permissions?.length || 0) > 1 ? 's' : ''}
                         </span>
                       </div>
                     </td>
@@ -249,20 +246,24 @@ export const RoleList: React.FC = () => {
                       <div className="flex items-center justify-end gap-1">
                         {!isSystemRole(role.code) && (
                           <>
-                            <Link
-                              to={`/users/roles/${role.id}/edit`}
-                              className="text-yellow-400 hover:text-yellow-300 p-2 rounded-lg hover:bg-yellow-900/50"
-                              title="Modifier"
-                            >
-                              <Pencil className="h-5 w-5" />
-                            </Link>
-                            <button
-                              onClick={() => setDeleteId(role.id)}
-                              className="text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-red-900/50"
-                              title="Supprimer"
-                            >
-                              <Trash2 className="h-5 w-5" />
-                            </button>
+                            <PermissionGate permission="UpdateAdministrator" disableMode>
+                              <Link
+                                to={`/users/roles/${role.id}/edit`}
+                                className="text-warning hover:text-warning/80 p-2 rounded-lg hover:bg-warning/20"
+                                title="Modifier"
+                              >
+                                <Pencil className="h-5 w-5" />
+                              </Link>
+                            </PermissionGate>
+                            <PermissionGate permission="DeleteAdministrator" disableMode>
+                              <button
+                                onClick={() => setDeleteId(role.id)}
+                                className="text-destructive hover:text-destructive/80 p-2 rounded-lg hover:bg-destructive/20"
+                                title="Supprimer"
+                              >
+                                <Trash2 className="h-5 w-5" />
+                              </button>
+                            </PermissionGate>
                           </>
                         )}
                       </div>

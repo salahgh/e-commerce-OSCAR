@@ -11,13 +11,10 @@ import {
   Layers,
   FolderTree,
   Upload,
-  X,
-  Plus,
   Trash2,
   Star,
   Check,
   GripVertical,
-  AlertCircle,
 } from 'lucide-react';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
@@ -29,6 +26,8 @@ import {
   UpdateCollectionFiltersDocument,
   AdminProductOptionGroupsDocument,
   AddOptionGroupToProductDocument,
+  CreateProductOptionGroupDocument,
+  CreateProductOptionDocument,
   LanguageCode,
 } from '../../graphql/generated/graphql';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -36,6 +35,8 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { TextArea } from '../../components/ui/TextArea';
 import { Badge } from '../../components/ui/Badge';
+import { VariantManagerCreate } from '../../components/products/VariantManagerCreate';
+import type { LocalOptionGroup, LocalVariant } from '../../components/products/VariantManagerCreate';
 
 // Wizard steps
 const STEPS = [
@@ -52,13 +53,6 @@ interface UploadedImage {
   preview: string;
   name: string;
   uploading?: boolean;
-}
-
-interface VariantConfig {
-  sku: string;
-  price: number;
-  stock: number;
-  options: Record<string, string>;
 }
 
 export const ProductCreate: React.FC = () => {
@@ -92,11 +86,9 @@ export const ProductCreate: React.FC = () => {
   const [draggedImageIndex, setDraggedImageIndex] = useState<number | null>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
-  // Variants
-  const [selectedOptionGroups, setSelectedOptionGroups] = useState<string[]>([]);
-  const [variants, setVariants] = useState<VariantConfig[]>([
-    { sku: '', price: 0, stock: 0, options: {} },
-  ]);
+  // Variants - using local state types from VariantManagerCreate
+  const [selectedOptionGroups, setSelectedOptionGroups] = useState<LocalOptionGroup[]>([]);
+  const [pendingVariants, setPendingVariants] = useState<LocalVariant[]>([]);
 
   // Categories
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
@@ -116,6 +108,8 @@ export const ProductCreate: React.FC = () => {
   const [createAssets] = useMutation(CreateAssetsDocument);
   const [updateCollectionFilters] = useMutation(UpdateCollectionFiltersDocument);
   const [addOptionGroupToProduct] = useMutation(AddOptionGroupToProductDocument);
+  const [createProductOptionGroup] = useMutation(CreateProductOptionGroupDocument);
+  const [createProductOption] = useMutation(CreateProductOptionDocument);
 
   const collections = collectionsData?.collections?.items || [];
   const optionGroups = optionGroupsData?.productOptionGroups || [];
@@ -218,35 +212,6 @@ export const ProductCreate: React.FC = () => {
     setDraggedImageIndex(null);
   };
 
-  // Variant handling
-  const addVariant = () => {
-    setVariants((prev) => [...prev, { sku: '', price: 0, stock: 0, options: {} }]);
-  };
-
-  const removeVariant = (index: number) => {
-    if (variants.length > 1) {
-      setVariants((prev) => prev.filter((_, i) => i !== index));
-    }
-  };
-
-  const updateVariant = (index: number, field: keyof VariantConfig, value: any) => {
-    setVariants((prev) => prev.map((v, i) => (i === index ? { ...v, [field]: value } : v)));
-  };
-
-  const updateVariantOption = (variantIndex: number, optionGroupId: string, optionId: string) => {
-    setVariants((prev) =>
-      prev.map((v, i) =>
-        i === variantIndex ? { ...v, options: { ...v.options, [optionGroupId]: optionId } } : v
-      )
-    );
-  };
-
-  // Toggle option group selection
-  const toggleOptionGroup = (groupId: string) => {
-    setSelectedOptionGroups((prev) =>
-      prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId]
-    );
-  };
 
   // Helper to get product IDs from collection filters
   const getProductIdsFromCollection = (collection: any): string[] => {
@@ -268,7 +233,14 @@ export const ProductCreate: React.FC = () => {
       return;
     }
 
-    if (variants.every((v) => !v.sku)) {
+    // If there are option groups, we need at least one variant
+    if (selectedOptionGroups.length > 0 && pendingVariants.length === 0) {
+      dispatch(addToast({ message: 'Au moins une variante est requise', type: 'error' }));
+      return;
+    }
+
+    // If no option groups, we still need at least one variant with SKU
+    if (selectedOptionGroups.length === 0 && pendingVariants.every((v) => !v.sku.trim())) {
       dispatch(addToast({ message: 'Au moins une variante avec SKU est requise', type: 'error' }));
       return;
     }
@@ -347,36 +319,99 @@ export const ProductCreate: React.FC = () => {
         throw new Error('Echec de la creation du produit');
       }
 
-      // Step 3: Add option groups to product
-      for (const groupId of selectedOptionGroups) {
+      // Step 3: Process option groups and build ID mappings
+      // Map temp IDs to real IDs for both groups and options
+      const optionIdMap = new Map<string, string>(); // tempId -> realId
+
+      for (const group of selectedOptionGroups) {
+        let realGroupId = group.id;
+
+        if (group.isNew) {
+          // Create new option group
+          const groupResult = await createProductOptionGroup({
+            variables: {
+              input: {
+                code: group.code,
+                translations: [
+                  {
+                    languageCode: LanguageCode.En,
+                    name: group.name,
+                  },
+                ],
+                options: [], // We'll create options separately
+              },
+            },
+          });
+          realGroupId = groupResult.data?.createProductOptionGroup?.id || '';
+          if (!realGroupId) {
+            throw new Error(`Echec de la creation du groupe d'options: ${group.name}`);
+          }
+        }
+
+        // Add option group to product
         await addOptionGroupToProduct({
           variables: {
             productId,
-            optionGroupId: groupId,
+            optionGroupId: realGroupId,
           },
         });
+
+        // Process options for this group
+        for (const option of group.options) {
+          if (option.isNew) {
+            // Create new option
+            const optionResult = await createProductOption({
+              variables: {
+                input: {
+                  productOptionGroupId: realGroupId,
+                  code: option.code,
+                  translations: [
+                    {
+                      languageCode: LanguageCode.En,
+                      name: option.name,
+                    },
+                  ],
+                },
+              },
+            });
+            const realOptionId = optionResult.data?.createProductOption?.id || '';
+            if (realOptionId) {
+              optionIdMap.set(option.id, realOptionId);
+            }
+          } else {
+            // Existing option - ID stays the same
+            optionIdMap.set(option.id, option.id);
+          }
+        }
       }
 
-      // Step 4: Create variants
-      const validVariants = variants.filter((v) => v.sku.trim());
-      if (validVariants.length > 0) {
-        await createVariants({
-          variables: {
-            input: validVariants.map((v) => ({
-              productId,
-              sku: v.sku,
-              price: Math.round(v.price * 100),
-              stockOnHand: v.stock,
-              optionIds: Object.values(v.options).filter(Boolean),
-              translations: [
-                {
-                  languageCode: LanguageCode.En,
-                  name: v.sku,
-                },
-              ],
-            })),
-          },
-        });
+      // Step 4: Create variants with resolved option IDs
+      if (pendingVariants.length > 0) {
+        const variantInputs = pendingVariants
+          .filter((v) => v.sku.trim())
+          .map((v) => ({
+            productId,
+            sku: v.sku,
+            price: Math.round(v.price * 100), // Convert to cents
+            stockOnHand: v.stock,
+            optionIds: v.optionIds
+              .map((tempId) => optionIdMap.get(tempId) || tempId)
+              .filter(Boolean),
+            translations: [
+              {
+                languageCode: LanguageCode.En,
+                name: v.optionLabels || v.sku,
+              },
+            ],
+          }));
+
+        if (variantInputs.length > 0) {
+          await createVariants({
+            variables: {
+              input: variantInputs,
+            },
+          });
+        }
       }
 
       // Step 5: Add product to selected collections
@@ -426,7 +461,10 @@ export const ProductCreate: React.FC = () => {
       case 4:
         return true;
       case 3:
-        return variants.some((v) => v.sku.trim());
+        // If no option groups, allow to proceed (variants optional for simple products)
+        // If option groups exist, need at least one variant
+        if (selectedOptionGroups.length === 0) return true;
+        return pendingVariants.length > 0;
       default:
         return true;
     }
@@ -634,7 +672,9 @@ export const ProductCreate: React.FC = () => {
               <p className="text-sm text-muted-foreground mt-2">
                 ou cliquez pour selectionner des fichiers
               </p>
-              <p className="text-xs text-muted-foreground/70 mt-4">PNG, JPG, WEBP jusqu a 10MB chacun</p>
+              <p className="text-xs text-muted-foreground/70 mt-4">
+                PNG, JPG, WEBP jusqu a 10MB chacun
+              </p>
             </div>
 
             {/* Image gallery */}
@@ -710,7 +750,9 @@ export const ProductCreate: React.FC = () => {
               <div className="text-center py-8 text-muted-foreground">
                 <ImageIcon className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
                 <p>Aucune image ajoutee</p>
-                <p className="text-sm text-muted-foreground/70">Les images sont optionnelles mais recommandees</p>
+                <p className="text-sm text-muted-foreground/70">
+                  Les images sont optionnelles mais recommandees
+                </p>
               </div>
             )}
           </div>
@@ -718,164 +760,23 @@ export const ProductCreate: React.FC = () => {
 
       case 3:
         return (
-          <div className="space-y-6">
-            {/* Option groups selection */}
-            {optionGroups.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Groupes d options (optionnel)</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Selectionnez les groupes d options pour creer des variantes (ex: Taille,
-                    Couleur)
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {optionGroups.map((group: any) => (
-                      <button
-                        key={group.id}
-                        type="button"
-                        onClick={() => toggleOptionGroup(group.id)}
-                        className={`px-4 py-2 rounded-lg border-2 transition-colors ${
-                          selectedOptionGroups.includes(group.id)
-                            ? 'border-primary bg-primary/10 text-primary'
-                            : 'border-border hover:border-muted-foreground text-muted-foreground'
-                        }`}
-                      >
-                        {selectedOptionGroups.includes(group.id) && (
-                          <Check className="inline h-4 w-4 mr-1" />
-                        )}
-                        {group.name}
-                      </button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Variants table */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-base">Variantes du produit</CardTitle>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={addVariant}
-                  icon={<Plus className="h-4 w-4" />}
-                >
-                  Ajouter une variante
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-yellow-900/30 border border-yellow-700 rounded-lg p-3 mb-4">
-                  <p className="text-sm text-yellow-300 flex items-center gap-2">
-                    <AlertCircle className="h-4 w-4" />
-                    Chaque produit doit avoir au moins une variante avec un SKU unique.
-                  </p>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-border">
-                    <thead className="bg-muted/50">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                          SKU *
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                          Prix (DZD)
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                          Stock
-                        </th>
-                        {selectedOptionGroups.map((groupId) => {
-                          const group = optionGroups.find((g: any) => g.id === groupId);
-                          return (
-                            <th
-                              key={groupId}
-                              className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase"
-                            >
-                              {group?.name || 'Option'}
-                            </th>
-                          );
-                        })}
-                        <th className="px-4 py-3 w-16"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-card divide-y divide-border">
-                      {variants.map((variant, index) => (
-                        <tr key={index} className="hover:bg-accent">
-                          <td className="px-4 py-3">
-                            <input
-                              type="text"
-                              value={variant.sku}
-                              onChange={(e) => updateVariant(index, 'sku', e.target.value)}
-                              placeholder="SKU-001"
-                              className="w-full px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary"
-                            />
-                          </td>
-                          <td className="px-4 py-3">
-                            <input
-                              type="number"
-                              value={variant.price || ''}
-                              onChange={(e) =>
-                                updateVariant(index, 'price', parseFloat(e.target.value) || 0)
-                              }
-                              placeholder="0"
-                              min="0"
-                              className="w-28 px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary"
-                            />
-                          </td>
-                          <td className="px-4 py-3">
-                            <input
-                              type="number"
-                              value={variant.stock || ''}
-                              onChange={(e) =>
-                                updateVariant(index, 'stock', parseInt(e.target.value) || 0)
-                              }
-                              placeholder="0"
-                              min="0"
-                              className="w-20 px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary"
-                            />
-                          </td>
-                          {selectedOptionGroups.map((groupId) => {
-                            const group = optionGroups.find((g: any) => g.id === groupId);
-                            return (
-                              <td key={groupId} className="px-4 py-3">
-                                <select
-                                  value={variant.options[groupId] || ''}
-                                  onChange={(e) =>
-                                    updateVariantOption(index, groupId, e.target.value)
-                                  }
-                                  className="w-full px-3 py-2 bg-muted border border-border text-foreground rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary"
-                                >
-                                  <option value="">--</option>
-                                  {group?.options?.map((option: any) => (
-                                    <option key={option.id} value={option.id}>
-                                      {option.name}
-                                    </option>
-                                  ))}
-                                </select>
-                              </td>
-                            );
-                          })}
-                          <td className="px-4 py-3">
-                            {variants.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => removeVariant(index)}
-                                className="p-2 text-red-400 hover:bg-red-900/30 rounded-lg"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <VariantManagerCreate
+            productName={formData.name}
+            allOptionGroups={optionGroups.map((g: any) => ({
+              id: g.id,
+              code: g.code,
+              name: g.name,
+              options: g.options?.map((o: any) => ({
+                id: o.id,
+                code: o.code,
+                name: o.name,
+              })) || [],
+            }))}
+            selectedOptionGroups={selectedOptionGroups}
+            pendingVariants={pendingVariants}
+            onOptionGroupsChange={setSelectedOptionGroups}
+            onVariantsChange={setPendingVariants}
+          />
         );
 
       case 4:
@@ -951,7 +852,7 @@ export const ProductCreate: React.FC = () => {
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <p className="text-sm text-muted-foreground">Variantes</p>
                     <p className="font-semibold text-foreground">
-                      {variants.filter((v) => v.sku).length}
+                      {pendingVariants.filter((v) => v.sku).length}
                     </p>
                   </div>
                   <div className="p-4 bg-muted/50 rounded-lg">

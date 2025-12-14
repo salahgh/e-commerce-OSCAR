@@ -420,7 +420,9 @@ export const Settings: React.FC = () => {
                 <Check className="h-3 w-3 mr-1" />
                 Connecté
               </Badge>
-              <span className="text-sm text-muted-foreground">Dernière vérification: Aujourd'hui</span>
+              <span className="text-sm text-muted-foreground">
+                Dernière vérification: Aujourd'hui
+              </span>
             </div>
           </div>
 
@@ -435,7 +437,7 @@ export const Settings: React.FC = () => {
                 {
                   name: 'Confirmation de commande',
                   trigger: 'order-confirmation',
-                  description: 'Envoyé après la création d\'une commande',
+                  description: "Envoyé après la création d'une commande",
                 },
                 {
                   name: 'Commande expédiée',
@@ -448,9 +450,9 @@ export const Settings: React.FC = () => {
                   description: 'Envoyé à la livraison de la commande',
                 },
                 {
-                  name: 'Vérification d\'email',
+                  name: "Vérification d'email",
                   trigger: 'email-verification',
-                  description: 'Envoyé pour vérifier l\'adresse email du client',
+                  description: "Envoyé pour vérifier l'adresse email du client",
                 },
                 {
                   name: 'Réinitialisation du mot de passe',
@@ -458,9 +460,9 @@ export const Settings: React.FC = () => {
                   description: 'Envoyé pour réinitialiser le mot de passe',
                 },
                 {
-                  name: 'Changement d\'adresse email',
+                  name: "Changement d'adresse email",
                   trigger: 'email-address-change',
-                  description: 'Envoyé lors d\'un changement d\'adresse email',
+                  description: "Envoyé lors d'un changement d'adresse email",
                 },
               ].map((template) => (
                 <div
@@ -486,13 +488,12 @@ export const Settings: React.FC = () => {
           <div className="bg-amber-900/30 border border-amber-700 rounded-lg p-4 flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm text-amber-300 font-medium">
-                Configuration avancée des emails
-              </p>
+              <p className="text-sm text-amber-300 font-medium">Configuration avancée des emails</p>
               <p className="text-sm text-amber-400 mt-1">
-                Les modèles d'email sont configurés via le plugin EmailPlugin de Vendure.
-                Pour modifier le contenu HTML des templates, éditez les fichiers dans le
-                dossier <code className="bg-amber-800/50 px-1 rounded">static/email/templates/</code> du backend.
+                Les modèles d'email sont configurés via le plugin EmailPlugin de Vendure. Pour
+                modifier le contenu HTML des templates, éditez les fichiers dans le dossier{' '}
+                <code className="bg-amber-800/50 px-1 rounded">static/email/templates/</code> du
+                backend.
               </p>
             </div>
           </div>

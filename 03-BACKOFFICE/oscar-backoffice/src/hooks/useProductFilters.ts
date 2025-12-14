@@ -28,19 +28,19 @@ export function useProductFilters() {
   const [filters, setFilters] = useState<ProductFilters>(defaultFilters);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
-  const updateFilter = useCallback(<K extends keyof ProductFilters>(
-    key: K,
-    value: ProductFilters[K]
-  ) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-  }, []);
+  const updateFilter = useCallback(
+    <K extends keyof ProductFilters>(key: K, value: ProductFilters[K]) => {
+      setFilters((prev) => ({ ...prev, [key]: value }));
+    },
+    []
+  );
 
   const resetFilters = useCallback(() => {
     setFilters(defaultFilters);
   }, []);
 
   const clearFilter = useCallback(<K extends keyof ProductFilters>(key: K) => {
-    setFilters(prev => ({ ...prev, [key]: defaultFilters[key] }));
+    setFilters((prev) => ({ ...prev, [key]: defaultFilters[key] }));
   }, []);
 
   // Count active filters (excluding search)

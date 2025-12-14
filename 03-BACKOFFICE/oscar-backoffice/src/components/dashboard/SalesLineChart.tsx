@@ -26,11 +26,15 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <div className="space-y-1">
           <p className="text-blue-400 text-sm flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-blue-400" />
-            Revenus: <span className="font-semibold text-foreground">{formatPrice(payload[0]?.value || 0)}</span>
+            Revenus:{' '}
+            <span className="font-semibold text-foreground">
+              {formatPrice(payload[0]?.value || 0)}
+            </span>
           </p>
           <p className="text-green-400 text-sm flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-400" />
-            Commandes: <span className="font-semibold text-foreground">{payload[1]?.value || 0}</span>
+            Commandes:{' '}
+            <span className="font-semibold text-foreground">{payload[1]?.value || 0}</span>
           </p>
         </div>
       </div>

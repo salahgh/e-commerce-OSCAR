@@ -27,34 +27,26 @@ interface FormValues {
 const createValidationSchema = Yup.object().shape({
   firstName: Yup.string().required('Le prénom est requis'),
   lastName: Yup.string().required('Le nom est requis'),
-  emailAddress: Yup.string()
-    .email('Email invalide')
-    .required("L'email est requis"),
+  emailAddress: Yup.string().email('Email invalide').required("L'email est requis"),
   password: Yup.string()
     .min(8, 'Le mot de passe doit contenir au moins 8 caractères')
     .required('Le mot de passe est requis'),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref('password')], 'Les mots de passe ne correspondent pas')
     .required('La confirmation est requise'),
-  roleIds: Yup.array()
-    .of(Yup.string())
-    .min(1, 'Au moins un rôle est requis'),
+  roleIds: Yup.array().of(Yup.string()).min(1, 'Au moins un rôle est requis'),
 });
 
 const updateValidationSchema = Yup.object().shape({
   firstName: Yup.string().required('Le prénom est requis'),
   lastName: Yup.string().required('Le nom est requis'),
-  emailAddress: Yup.string()
-    .email('Email invalide')
-    .required("L'email est requis"),
+  emailAddress: Yup.string().email('Email invalide').required("L'email est requis"),
   password: Yup.string().min(8, 'Le mot de passe doit contenir au moins 8 caractères'),
   confirmPassword: Yup.string().oneOf(
     [Yup.ref('password')],
     'Les mots de passe ne correspondent pas'
   ),
-  roleIds: Yup.array()
-    .of(Yup.string())
-    .min(1, 'Au moins un rôle est requis'),
+  roleIds: Yup.array().of(Yup.string()).min(1, 'Au moins un rôle est requis'),
 });
 
 export const UserForm: React.FC = () => {
@@ -101,9 +93,7 @@ export const UserForm: React.FC = () => {
 
   const formatRoleCode = (code: string): string => {
     if (code === '__super_admin_role__') return 'Super Admin';
-    return code
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, (l) => l.toUpperCase());
+    return code.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   const initialValues: FormValues = {
@@ -179,7 +169,7 @@ export const UserForm: React.FC = () => {
         </button>
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            {isEdit ? 'Modifier l\'administrateur' : 'Nouvel administrateur'}
+            {isEdit ? "Modifier l'administrateur" : 'Nouvel administrateur'}
           </h1>
           <p className="text-muted-foreground mt-1">
             {isEdit
@@ -201,7 +191,9 @@ export const UserForm: React.FC = () => {
               {/* Main Form */}
               <Card className="lg:col-span-2 bg-card border-border">
                 <div className="p-6 space-y-6">
-                  <h2 className="text-lg font-semibold text-foreground">Informations personnelles</h2>
+                  <h2 className="text-lg font-semibold text-foreground">
+                    Informations personnelles
+                  </h2>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -364,15 +356,14 @@ export const UserForm: React.FC = () => {
                           className="mt-1 h-4 w-4 text-primary rounded border-border bg-card focus:ring-primary"
                         />
                         <div>
-                          <p className="font-medium text-foreground">
-                            {formatRoleCode(role.code)}
-                          </p>
+                          <p className="font-medium text-foreground">{formatRoleCode(role.code)}</p>
                           {role.description && (
                             <p className="text-sm text-muted-foreground mt-1">{role.description}</p>
                           )}
                           {role.permissions && (
                             <p className="text-xs text-muted-foreground mt-2">
-                              {role.permissions.length} permission{role.permissions.length > 1 ? 's' : ''}
+                              {role.permissions.length} permission
+                              {role.permissions.length > 1 ? 's' : ''}
                             </p>
                           )}
                         </div>

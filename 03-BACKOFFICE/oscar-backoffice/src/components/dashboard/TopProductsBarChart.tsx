@@ -46,7 +46,9 @@ export const TopProductsBarChart: React.FC<TopProductsBarChartProps> = ({
     .sort((a, b) => (metric === 'revenue' ? b.revenue - a.revenue : b.quantity - a.quantity))
     .slice(0, 10);
 
-  const maxValue = Math.max(...sortedData.map((d) => (metric === 'revenue' ? d.revenue : d.quantity)));
+  const maxValue = Math.max(
+    ...sortedData.map((d) => (metric === 'revenue' ? d.revenue : d.quantity))
+  );
 
   return (
     <div className="bg-card rounded-xl p-6 border border-border">
@@ -71,9 +73,7 @@ export const TopProductsBarChart: React.FC<TopProductsBarChartProps> = ({
             <div key={product.id} className="group">
               <div className="flex items-center gap-3 mb-1">
                 {/* Rank */}
-                <span className="text-sm font-medium text-muted-foreground w-5">
-                  {index + 1}.
-                </span>
+                <span className="text-sm font-medium text-muted-foreground w-5">{index + 1}.</span>
 
                 {/* Product image or placeholder */}
                 <div className="w-8 h-8 rounded bg-muted flex-shrink-0 overflow-hidden">

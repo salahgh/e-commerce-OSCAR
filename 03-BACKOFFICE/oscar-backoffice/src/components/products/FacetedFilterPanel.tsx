@@ -18,7 +18,12 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { type FacetGroup, type AdminFilterState, sortSizes, PRICE_PRESETS } from '../../lib/facet-utils';
+import {
+  type FacetGroup,
+  type AdminFilterState,
+  sortSizes,
+  PRICE_PRESETS,
+} from '../../lib/facet-utils';
 import { ColorSwatch } from '../ui/ColorSwatch';
 import { cn } from '../../lib/utils';
 
@@ -129,10 +134,7 @@ export const FacetedFilterPanel: React.FC<FacetedFilterPanelProps> = ({
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
             <X className="h-5 w-5 text-gray-400" />
           </button>
         </div>
@@ -448,11 +450,21 @@ interface StatusButtonProps {
 
 function StatusButton({ label, icon, isActive, onClick, variant = 'default' }: StatusButtonProps) {
   const variantStyles = {
-    default: isActive ? 'bg-gray-700 border-gray-600 text-gray-100' : 'bg-gray-800 border-gray-700 text-gray-400',
-    success: isActive ? 'bg-green-900/50 border-green-600 text-green-400' : 'bg-gray-800 border-gray-700 text-gray-400',
-    warning: isActive ? 'bg-amber-900/50 border-amber-600 text-amber-400' : 'bg-gray-800 border-gray-700 text-gray-400',
-    danger: isActive ? 'bg-red-900/50 border-red-600 text-red-400' : 'bg-gray-800 border-gray-700 text-gray-400',
-    primary: isActive ? 'bg-primary-900/50 border-primary-600 text-primary-400' : 'bg-gray-800 border-gray-700 text-gray-400',
+    default: isActive
+      ? 'bg-gray-700 border-gray-600 text-gray-100'
+      : 'bg-gray-800 border-gray-700 text-gray-400',
+    success: isActive
+      ? 'bg-green-900/50 border-green-600 text-green-400'
+      : 'bg-gray-800 border-gray-700 text-gray-400',
+    warning: isActive
+      ? 'bg-amber-900/50 border-amber-600 text-amber-400'
+      : 'bg-gray-800 border-gray-700 text-gray-400',
+    danger: isActive
+      ? 'bg-red-900/50 border-red-600 text-red-400'
+      : 'bg-gray-800 border-gray-700 text-gray-400',
+    primary: isActive
+      ? 'bg-primary-900/50 border-primary-600 text-primary-400'
+      : 'bg-gray-800 border-gray-700 text-gray-400',
   };
 
   return (

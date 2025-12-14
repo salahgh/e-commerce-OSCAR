@@ -5,34 +5,45 @@ export type InputMaybe<T> = T | null | undefined;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
-export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = {
+  [_ in K]?: never;
+};
+export type Incremental<T> =
+  | T
+  | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string; output: string; }
-  String: { input: string; output: string; }
-  Boolean: { input: boolean; output: boolean; }
-  Int: { input: number; output: number; }
-  Float: { input: number; output: number; }
+  ID: { input: string; output: string };
+  String: { input: string; output: string };
+  Boolean: { input: boolean; output: boolean };
+  Int: { input: number; output: number };
+  Float: { input: number; output: number };
   /**
    * A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the
    * `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO
    * 8601 standard for representation of dates and times using the Gregorian calendar.
    */
-  DateTime: { input: any; output: any; }
+  DateTime: { input: any; output: any };
   /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
-  JSON: { input: any; output: any; }
+  JSON: { input: any; output: any };
   /**
    * The `Money` scalar type represents monetary values and supports signed
    * double-precision fractional values as specified by [IEEE
    * 754](https://en.wikipedia.org/wiki/IEEE_floating_point).
    */
-  Money: { input: any; output: any; }
+  Money: { input: any; output: any };
   /** The `Upload` scalar type represents a file upload. */
-  Upload: { input: any; output: any; }
+  Upload: { input: any; output: any };
 };
 
-export type AddFulfillmentToOrderResult = CreateFulfillmentError | EmptyOrderLineSelectionError | Fulfillment | FulfillmentStateTransitionError | InsufficientStockOnHandError | InvalidFulfillmentHandlerError | ItemsAlreadyFulfilledError;
+export type AddFulfillmentToOrderResult =
+  | CreateFulfillmentError
+  | EmptyOrderLineSelectionError
+  | Fulfillment
+  | FulfillmentStateTransitionError
+  | InsufficientStockOnHandError
+  | InvalidFulfillmentHandlerError
+  | ItemsAlreadyFulfilledError;
 
 export type AddItemInput = {
   productVariantId: Scalars['ID']['input'];
@@ -94,7 +105,7 @@ export type Adjustment = {
 export enum AdjustmentType {
   DistributedOrderPromotion = 'DISTRIBUTED_ORDER_PROMOTION',
   Other = 'OTHER',
-  Promotion = 'PROMOTION'
+  Promotion = 'PROMOTION',
 }
 
 export type Administrator = Node & {
@@ -167,17 +178,18 @@ export type AdministratorSortParameter = {
   updatedAt?: InputMaybe<SortOrder>;
 };
 
-export type Allocation = Node & StockMovement & {
-  __typename?: 'Allocation';
-  createdAt: Scalars['DateTime']['output'];
-  customFields?: Maybe<Scalars['JSON']['output']>;
-  id: Scalars['ID']['output'];
-  orderLine: OrderLine;
-  productVariant: ProductVariant;
-  quantity: Scalars['Int']['output'];
-  type: StockMovementType;
-  updatedAt: Scalars['DateTime']['output'];
-};
+export type Allocation = Node &
+  StockMovement & {
+    __typename?: 'Allocation';
+    createdAt: Scalars['DateTime']['output'];
+    customFields?: Maybe<Scalars['JSON']['output']>;
+    id: Scalars['ID']['output'];
+    orderLine: OrderLine;
+    productVariant: ProductVariant;
+    quantity: Scalars['Int']['output'];
+    type: StockMovementType;
+    updatedAt: Scalars['DateTime']['output'];
+  };
 
 /** Returned if an attempting to refund an OrderItem which has already been refunded */
 export type AlreadyRefundedError = ErrorResult & {
@@ -187,7 +199,11 @@ export type AlreadyRefundedError = ErrorResult & {
   refundId: Scalars['ID']['output'];
 };
 
-export type ApplyCouponCodeResult = CouponCodeExpiredError | CouponCodeInvalidError | CouponCodeLimitError | Order;
+export type ApplyCouponCodeResult =
+  | CouponCodeExpiredError
+  | CouponCodeInvalidError
+  | CouponCodeLimitError
+  | Order;
 
 export type Asset = Node & {
   __typename?: 'Asset';
@@ -263,7 +279,7 @@ export type AssetSortParameter = {
 export enum AssetType {
   Binary = 'BINARY',
   Image = 'IMAGE',
-  Video = 'VIDEO'
+  Video = 'VIDEO',
 }
 
 export type AssignAssetsToChannelInput = {
@@ -382,7 +398,13 @@ export type CancelOrderInput = {
   reason?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type CancelOrderResult = CancelActiveOrderError | EmptyOrderLineSelectionError | MultipleOrderError | Order | OrderStateTransitionError | QuantityTooGreatError;
+export type CancelOrderResult =
+  | CancelActiveOrderError
+  | EmptyOrderLineSelectionError
+  | MultipleOrderError
+  | Order
+  | OrderStateTransitionError
+  | QuantityTooGreatError;
 
 /** Returned if the Payment cancellation fails */
 export type CancelPaymentError = ErrorResult & {
@@ -394,17 +416,18 @@ export type CancelPaymentError = ErrorResult & {
 
 export type CancelPaymentResult = CancelPaymentError | Payment | PaymentStateTransitionError;
 
-export type Cancellation = Node & StockMovement & {
-  __typename?: 'Cancellation';
-  createdAt: Scalars['DateTime']['output'];
-  customFields?: Maybe<Scalars['JSON']['output']>;
-  id: Scalars['ID']['output'];
-  orderLine: OrderLine;
-  productVariant: ProductVariant;
-  quantity: Scalars['Int']['output'];
-  type: StockMovementType;
-  updatedAt: Scalars['DateTime']['output'];
-};
+export type Cancellation = Node &
+  StockMovement & {
+    __typename?: 'Cancellation';
+    createdAt: Scalars['DateTime']['output'];
+    customFields?: Maybe<Scalars['JSON']['output']>;
+    id: Scalars['ID']['output'];
+    orderLine: OrderLine;
+    productVariant: ProductVariant;
+    quantity: Scalars['Int']['output'];
+    type: StockMovementType;
+    updatedAt: Scalars['DateTime']['output'];
+  };
 
 export type Channel = Node & {
   __typename?: 'Channel';
@@ -512,7 +535,6 @@ export type Collection = Node & {
   translations: Array<CollectionTranslation>;
   updatedAt: Scalars['DateTime']['output'];
 };
-
 
 export type CollectionProductVariantsArgs = {
   options?: InputMaybe<ProductVariantListOptions>;
@@ -675,21 +697,22 @@ export type CoordinateInput = {
  * etc. This code is used in certain inputs such as
  * `UpdateAddressInput` and `CreateAddressInput` to specify the country.
  */
-export type Country = Node & Region & {
-  __typename?: 'Country';
-  code: Scalars['String']['output'];
-  createdAt: Scalars['DateTime']['output'];
-  customFields?: Maybe<Scalars['JSON']['output']>;
-  enabled: Scalars['Boolean']['output'];
-  id: Scalars['ID']['output'];
-  languageCode: LanguageCode;
-  name: Scalars['String']['output'];
-  parent?: Maybe<Region>;
-  parentId?: Maybe<Scalars['ID']['output']>;
-  translations: Array<RegionTranslation>;
-  type: Scalars['String']['output'];
-  updatedAt: Scalars['DateTime']['output'];
-};
+export type Country = Node &
+  Region & {
+    __typename?: 'Country';
+    code: Scalars['String']['output'];
+    createdAt: Scalars['DateTime']['output'];
+    customFields?: Maybe<Scalars['JSON']['output']>;
+    enabled: Scalars['Boolean']['output'];
+    id: Scalars['ID']['output'];
+    languageCode: LanguageCode;
+    name: Scalars['String']['output'];
+    parent?: Maybe<Region>;
+    parentId?: Maybe<Scalars['ID']['output']>;
+    translations: Array<RegionTranslation>;
+    type: Scalars['String']['output'];
+    updatedAt: Scalars['DateTime']['output'];
+  };
 
 export type CountryFilterParameter = {
   _and?: InputMaybe<Array<CountryFilterParameter>>;
@@ -1391,7 +1414,7 @@ export enum CurrencyCode {
   /** Zambian kwacha */
   Zmw = 'ZMW',
   /** Zimbabwean dollar */
-  Zwl = 'ZWL'
+  Zwl = 'ZWL',
 }
 
 export type CurrentUser = {
@@ -1424,7 +1447,17 @@ export type CustomField = {
   ui?: Maybe<Scalars['JSON']['output']>;
 };
 
-export type CustomFieldConfig = BooleanCustomFieldConfig | DateTimeCustomFieldConfig | FloatCustomFieldConfig | IntCustomFieldConfig | LocaleStringCustomFieldConfig | LocaleTextCustomFieldConfig | RelationCustomFieldConfig | StringCustomFieldConfig | StructCustomFieldConfig | TextCustomFieldConfig;
+export type CustomFieldConfig =
+  | BooleanCustomFieldConfig
+  | DateTimeCustomFieldConfig
+  | FloatCustomFieldConfig
+  | IntCustomFieldConfig
+  | LocaleStringCustomFieldConfig
+  | LocaleTextCustomFieldConfig
+  | RelationCustomFieldConfig
+  | StringCustomFieldConfig
+  | StructCustomFieldConfig
+  | TextCustomFieldConfig;
 
 /**
  * This type is deprecated in v2.2 in favor of the EntityCustomFields type,
@@ -1487,11 +1520,9 @@ export type Customer = Node & {
   user?: Maybe<User>;
 };
 
-
 export type CustomerHistoryArgs = {
   options?: InputMaybe<HistoryEntryListOptions>;
 };
-
 
 export type CustomerOrdersArgs = {
   options?: InputMaybe<OrderListOptions>;
@@ -1528,7 +1559,6 @@ export type CustomerGroup = Node & {
   name: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
 };
-
 
 export type CustomerGroupCustomersArgs = {
   options?: InputMaybe<CustomerListOptions>;
@@ -1703,7 +1733,7 @@ export enum DeletionResult {
   /** The entity was successfully deleted */
   Deleted = 'DELETED',
   /** Deletion did not take place, reason given in message */
-  NotDeleted = 'NOT_DELETED'
+  NotDeleted = 'NOT_DELETED',
 }
 
 export type Discount = {
@@ -1810,7 +1840,7 @@ export enum ErrorCode {
   RefundPaymentIdMissingError = 'REFUND_PAYMENT_ID_MISSING_ERROR',
   RefundStateTransitionError = 'REFUND_STATE_TRANSITION_ERROR',
   SettlePaymentError = 'SETTLE_PAYMENT_ERROR',
-  UnknownError = 'UNKNOWN_ERROR'
+  UnknownError = 'UNKNOWN_ERROR',
 }
 
 export type ErrorResult = {
@@ -1833,7 +1863,6 @@ export type Facet = Node & {
   valueList: FacetValueList;
   values: Array<FacetValue>;
 };
-
 
 export type FacetValueListArgs = {
   options?: InputMaybe<FacetValueListOptions>;
@@ -2076,7 +2105,7 @@ export type FulfillmentStateTransitionError = ErrorResult & {
 export enum GlobalFlag {
   False = 'FALSE',
   Inherit = 'INHERIT',
-  True = 'TRUE'
+  True = 'TRUE',
 }
 
 export type GlobalSettings = {
@@ -2177,7 +2206,7 @@ export enum HistoryEntryType {
   OrderNote = 'ORDER_NOTE',
   OrderPaymentTransition = 'ORDER_PAYMENT_TRANSITION',
   OrderRefundTransition = 'ORDER_REFUND_TRANSITION',
-  OrderStateTransition = 'ORDER_STATE_TRANSITION'
+  OrderStateTransition = 'ORDER_STATE_TRANSITION',
 }
 
 /** Operators for filtering on a list of ID fields */
@@ -2376,7 +2405,7 @@ export enum JobState {
   Failed = 'FAILED',
   Pending = 'PENDING',
   Retrying = 'RETRYING',
-  Running = 'RUNNING'
+  Running = 'RUNNING',
 }
 
 /**
@@ -2702,7 +2731,7 @@ export enum LanguageCode {
   /** Traditional Chinese */
   ZhHant = 'zh_Hant',
   /** Zulu */
-  Zu = 'zu'
+  Zu = 'zu',
 }
 
 /** Returned if attempting to set a Channel's defaultLanguageCode to a language which is not enabled in GlobalSettings */
@@ -2755,7 +2784,7 @@ export type LocalizedString = {
 
 export enum LogicalOperator {
   And = 'AND',
-  Or = 'OR'
+  Or = 'OR',
 }
 
 export type LowStockProduct = {
@@ -2783,7 +2812,7 @@ export type ManualPaymentStateError = ErrorResult & {
 };
 
 export enum MetricInterval {
-  Daily = 'Daily'
+  Daily = 'Daily',
 }
 
 export type MetricSummary = {
@@ -2809,7 +2838,7 @@ export type MetricSummaryInput = {
 export enum MetricType {
   AverageOrderValue = 'AverageOrderValue',
   OrderCount = 'OrderCount',
-  OrderTotal = 'OrderTotal'
+  OrderTotal = 'OrderTotal',
 }
 
 export type MimeTypeError = ErrorResult & {
@@ -2854,7 +2883,19 @@ export type ModifyOrderOptions = {
   recalculateShipping?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
-export type ModifyOrderResult = CouponCodeExpiredError | CouponCodeInvalidError | CouponCodeLimitError | IneligibleShippingMethodError | InsufficientStockError | NegativeQuantityError | NoChangesSpecifiedError | Order | OrderLimitError | OrderModificationStateError | PaymentMethodMissingError | RefundPaymentIdMissingError;
+export type ModifyOrderResult =
+  | CouponCodeExpiredError
+  | CouponCodeInvalidError
+  | CouponCodeLimitError
+  | IneligibleShippingMethodError
+  | InsufficientStockError
+  | NegativeQuantityError
+  | NoChangesSpecifiedError
+  | Order
+  | OrderLimitError
+  | OrderModificationStateError
+  | PaymentMethodMissingError
+  | RefundPaymentIdMissingError;
 
 export type MoveCollectionInput = {
   collectionId: Scalars['ID']['input'];
@@ -3217,522 +3258,421 @@ export type Mutation = {
   updateZone: Zone;
 };
 
-
 export type MutationAddCustomersToGroupArgs = {
   customerGroupId: Scalars['ID']['input'];
   customerIds: Array<Scalars['ID']['input']>;
 };
 
-
 export type MutationAddFulfillmentToOrderArgs = {
   input: FulfillOrderInput;
 };
-
 
 export type MutationAddItemToDraftOrderArgs = {
   input: AddItemToDraftOrderInput;
   orderId: Scalars['ID']['input'];
 };
 
-
 export type MutationAddManualPaymentToOrderArgs = {
   input: ManualPaymentInput;
 };
-
 
 export type MutationAddMembersToZoneArgs = {
   memberIds: Array<Scalars['ID']['input']>;
   zoneId: Scalars['ID']['input'];
 };
 
-
 export type MutationAddNoteToCustomerArgs = {
   input: AddNoteToCustomerInput;
 };
 
-
 export type MutationAddNoteToOrderArgs = {
   input: AddNoteToOrderInput;
 };
-
 
 export type MutationAddOptionGroupToProductArgs = {
   optionGroupId: Scalars['ID']['input'];
   productId: Scalars['ID']['input'];
 };
 
-
 export type MutationAddOrderAdminNotesArgs = {
   notes: Scalars['String']['input'];
   orderId: Scalars['ID']['input'];
 };
-
 
 export type MutationAdjustDraftOrderLineArgs = {
   input: AdjustDraftOrderLineInput;
   orderId: Scalars['ID']['input'];
 };
 
-
 export type MutationApplyCouponCodeToDraftOrderArgs = {
   couponCode: Scalars['String']['input'];
   orderId: Scalars['ID']['input'];
 };
 
-
 export type MutationAssignAssetsToChannelArgs = {
   input: AssignAssetsToChannelInput;
 };
-
 
 export type MutationAssignCollectionsToChannelArgs = {
   input: AssignCollectionsToChannelInput;
 };
 
-
 export type MutationAssignFacetsToChannelArgs = {
   input: AssignFacetsToChannelInput;
 };
-
 
 export type MutationAssignPaymentMethodsToChannelArgs = {
   input: AssignPaymentMethodsToChannelInput;
 };
 
-
 export type MutationAssignProductVariantsToChannelArgs = {
   input: AssignProductVariantsToChannelInput;
 };
-
 
 export type MutationAssignProductsToChannelArgs = {
   input: AssignProductsToChannelInput;
 };
 
-
 export type MutationAssignPromotionsToChannelArgs = {
   input: AssignPromotionsToChannelInput;
 };
-
 
 export type MutationAssignRoleToAdministratorArgs = {
   administratorId: Scalars['ID']['input'];
   roleId: Scalars['ID']['input'];
 };
 
-
 export type MutationAssignShippingMethodsToChannelArgs = {
   input: AssignShippingMethodsToChannelInput;
 };
 
-
 export type MutationAssignStockLocationsToChannelArgs = {
   input: AssignStockLocationsToChannelInput;
 };
-
 
 export type MutationAuthenticateArgs = {
   input: AuthenticationInput;
   rememberMe?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
-
 export type MutationCancelJobArgs = {
   jobId: Scalars['ID']['input'];
 };
-
 
 export type MutationCancelOrderArgs = {
   input: CancelOrderInput;
 };
 
-
 export type MutationCancelPaymentArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type MutationCreateAdministratorArgs = {
   input: CreateAdministratorInput;
 };
 
-
 export type MutationCreateAssetsArgs = {
   input: Array<CreateAssetInput>;
 };
-
 
 export type MutationCreateChannelArgs = {
   input: CreateChannelInput;
 };
 
-
 export type MutationCreateCollectionArgs = {
   input: CreateCollectionInput;
 };
 
-
 export type MutationCreateCountryArgs = {
   input: CreateCountryInput;
 };
-
 
 export type MutationCreateCustomerArgs = {
   input: CreateCustomerInput;
   password?: InputMaybe<Scalars['String']['input']>;
 };
 
-
 export type MutationCreateCustomerAddressArgs = {
   customerId: Scalars['ID']['input'];
   input: CreateAddressInput;
 };
 
-
 export type MutationCreateCustomerGroupArgs = {
   input: CreateCustomerGroupInput;
 };
-
 
 export type MutationCreateFacetArgs = {
   input: CreateFacetInput;
 };
 
-
 export type MutationCreateFacetValueArgs = {
   input: CreateFacetValueInput;
 };
-
 
 export type MutationCreateFacetValuesArgs = {
   input: Array<CreateFacetValueInput>;
 };
 
-
 export type MutationCreatePaymentMethodArgs = {
   input: CreatePaymentMethodInput;
 };
-
 
 export type MutationCreateProductArgs = {
   input: CreateProductInput;
 };
 
-
 export type MutationCreateProductOptionArgs = {
   input: CreateProductOptionInput;
 };
-
 
 export type MutationCreateProductOptionGroupArgs = {
   input: CreateProductOptionGroupInput;
 };
 
-
 export type MutationCreateProductVariantsArgs = {
   input: Array<CreateProductVariantInput>;
 };
-
 
 export type MutationCreatePromotionArgs = {
   input: CreatePromotionInput;
 };
 
-
 export type MutationCreateProvinceArgs = {
   input: CreateProvinceInput;
 };
-
 
 export type MutationCreateRoleArgs = {
   input: CreateRoleInput;
 };
 
-
 export type MutationCreateSellerArgs = {
   input: CreateSellerInput;
 };
-
 
 export type MutationCreateShippingMethodArgs = {
   input: CreateShippingMethodInput;
 };
 
-
 export type MutationCreateStockLocationArgs = {
   input: CreateStockLocationInput;
 };
-
 
 export type MutationCreateTagArgs = {
   input: CreateTagInput;
 };
 
-
 export type MutationCreateTaxCategoryArgs = {
   input: CreateTaxCategoryInput;
 };
-
 
 export type MutationCreateTaxRateArgs = {
   input: CreateTaxRateInput;
 };
 
-
 export type MutationCreateZoneArgs = {
   input: CreateZoneInput;
 };
-
 
 export type MutationDeleteAdministratorArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type MutationDeleteAdministratorsArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
-
 
 export type MutationDeleteAssetArgs = {
   input: DeleteAssetInput;
 };
 
-
 export type MutationDeleteAssetsArgs = {
   input: DeleteAssetsInput;
 };
-
 
 export type MutationDeleteChannelArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type MutationDeleteChannelsArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
-
 
 export type MutationDeleteCollectionArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type MutationDeleteCollectionsArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
-
 
 export type MutationDeleteCountriesArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
 
-
 export type MutationDeleteCountryArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type MutationDeleteCustomerArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type MutationDeleteCustomerAddressArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type MutationDeleteCustomerGroupArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type MutationDeleteCustomerGroupsArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
-
 
 export type MutationDeleteCustomerNoteArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type MutationDeleteCustomersArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
 
-
 export type MutationDeleteDraftOrderArgs = {
   orderId: Scalars['ID']['input'];
 };
-
 
 export type MutationDeleteFacetArgs = {
   force?: InputMaybe<Scalars['Boolean']['input']>;
   id: Scalars['ID']['input'];
 };
 
-
 export type MutationDeleteFacetValuesArgs = {
   force?: InputMaybe<Scalars['Boolean']['input']>;
   ids: Array<Scalars['ID']['input']>;
 };
-
 
 export type MutationDeleteFacetsArgs = {
   force?: InputMaybe<Scalars['Boolean']['input']>;
   ids: Array<Scalars['ID']['input']>;
 };
 
-
 export type MutationDeleteOrderNoteArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type MutationDeletePaymentMethodArgs = {
   force?: InputMaybe<Scalars['Boolean']['input']>;
   id: Scalars['ID']['input'];
 };
 
-
 export type MutationDeletePaymentMethodsArgs = {
   force?: InputMaybe<Scalars['Boolean']['input']>;
   ids: Array<Scalars['ID']['input']>;
 };
 
-
 export type MutationDeleteProductArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type MutationDeleteProductOptionArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type MutationDeleteProductVariantArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type MutationDeleteProductVariantsArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
 
-
 export type MutationDeleteProductsArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
-
 
 export type MutationDeletePromotionArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type MutationDeletePromotionsArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
-
 
 export type MutationDeleteProvinceArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type MutationDeleteRoleArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type MutationDeleteRolesArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
 
-
 export type MutationDeleteSellerArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type MutationDeleteSellersArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
 
-
 export type MutationDeleteShippingMethodArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type MutationDeleteShippingMethodsArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
 
-
 export type MutationDeleteStockLocationArgs = {
   input: DeleteStockLocationInput;
 };
-
 
 export type MutationDeleteStockLocationsArgs = {
   input: Array<DeleteStockLocationInput>;
 };
 
-
 export type MutationDeleteTagArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type MutationDeleteTaxCategoriesArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
 
-
 export type MutationDeleteTaxCategoryArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type MutationDeleteTaxRateArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type MutationDeleteTaxRatesArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
-
 
 export type MutationDeleteZoneArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type MutationDeleteZonesArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
-
 
 export type MutationDuplicateEntityArgs = {
   input: DuplicateEntityInput;
 };
 
-
 export type MutationFlushBufferedJobsArgs = {
   bufferIds?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
-
 export type MutationImportProductsArgs = {
   csvFile: Scalars['Upload']['input'];
 };
-
 
 export type MutationLoginArgs = {
   password: Scalars['String']['input'];
@@ -3740,55 +3680,45 @@ export type MutationLoginArgs = {
   username: Scalars['String']['input'];
 };
 
-
 export type MutationModifyOrderArgs = {
   input: ModifyOrderInput;
 };
-
 
 export type MutationMoveCollectionArgs = {
   input: MoveCollectionInput;
 };
 
-
 export type MutationRefundOrderArgs = {
   input: RefundOrderInput;
 };
 
-
 export type MutationRemoveCollectionsFromChannelArgs = {
   input: RemoveCollectionsFromChannelInput;
 };
-
 
 export type MutationRemoveCouponCodeFromDraftOrderArgs = {
   couponCode: Scalars['String']['input'];
   orderId: Scalars['ID']['input'];
 };
 
-
 export type MutationRemoveCustomersFromGroupArgs = {
   customerGroupId: Scalars['ID']['input'];
   customerIds: Array<Scalars['ID']['input']>;
 };
-
 
 export type MutationRemoveDraftOrderLineArgs = {
   orderId: Scalars['ID']['input'];
   orderLineId: Scalars['ID']['input'];
 };
 
-
 export type MutationRemoveFacetsFromChannelArgs = {
   input: RemoveFacetsFromChannelInput;
 };
-
 
 export type MutationRemoveMembersFromZoneArgs = {
   memberIds: Array<Scalars['ID']['input']>;
   zoneId: Scalars['ID']['input'];
 };
-
 
 export type MutationRemoveOptionGroupFromProductArgs = {
   force?: InputMaybe<Scalars['Boolean']['input']>;
@@ -3796,47 +3726,38 @@ export type MutationRemoveOptionGroupFromProductArgs = {
   productId: Scalars['ID']['input'];
 };
 
-
 export type MutationRemovePaymentMethodsFromChannelArgs = {
   input: RemovePaymentMethodsFromChannelInput;
 };
-
 
 export type MutationRemoveProductVariantsFromChannelArgs = {
   input: RemoveProductVariantsFromChannelInput;
 };
 
-
 export type MutationRemoveProductsFromChannelArgs = {
   input: RemoveProductsFromChannelInput;
 };
 
-
 export type MutationRemovePromotionsFromChannelArgs = {
   input: RemovePromotionsFromChannelInput;
 };
-
 
 export type MutationRemoveSettledJobsArgs = {
   olderThan?: InputMaybe<Scalars['DateTime']['input']>;
   queueNames?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
-
 export type MutationRemoveShippingMethodsFromChannelArgs = {
   input: RemoveShippingMethodsFromChannelInput;
 };
-
 
 export type MutationRemoveStockLocationsFromChannelArgs = {
   input: RemoveStockLocationsFromChannelInput;
 };
 
-
 export type MutationRunScheduledTaskArgs = {
   id: Scalars['String']['input'];
 };
-
 
 export type MutationSetCustomerForDraftOrderArgs = {
   customerId?: InputMaybe<Scalars['ID']['input']>;
@@ -3844,259 +3765,209 @@ export type MutationSetCustomerForDraftOrderArgs = {
   orderId: Scalars['ID']['input'];
 };
 
-
 export type MutationSetDraftOrderBillingAddressArgs = {
   input: CreateAddressInput;
   orderId: Scalars['ID']['input'];
 };
-
 
 export type MutationSetDraftOrderCustomFieldsArgs = {
   input: UpdateOrderInput;
   orderId: Scalars['ID']['input'];
 };
 
-
 export type MutationSetDraftOrderShippingAddressArgs = {
   input: CreateAddressInput;
   orderId: Scalars['ID']['input'];
 };
-
 
 export type MutationSetDraftOrderShippingMethodArgs = {
   orderId: Scalars['ID']['input'];
   shippingMethodId: Scalars['ID']['input'];
 };
 
-
 export type MutationSetOrderCustomFieldsArgs = {
   input: UpdateOrderInput;
 };
-
 
 export type MutationSetOrderCustomerArgs = {
   input: SetOrderCustomerInput;
 };
 
-
 export type MutationSetSettingsStoreValueArgs = {
   input: SettingsStoreInput;
 };
-
 
 export type MutationSetSettingsStoreValuesArgs = {
   inputs: Array<SettingsStoreInput>;
 };
 
-
 export type MutationSettlePaymentArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type MutationSettleRefundArgs = {
   input: SettleRefundInput;
 };
 
-
 export type MutationToggleProductFeaturedArgs = {
   productId: Scalars['ID']['input'];
 };
-
 
 export type MutationTransitionFulfillmentToStateArgs = {
   id: Scalars['ID']['input'];
   state: Scalars['String']['input'];
 };
 
-
 export type MutationTransitionOrderToStateArgs = {
   id: Scalars['ID']['input'];
   state: Scalars['String']['input'];
 };
-
 
 export type MutationTransitionPaymentToStateArgs = {
   id: Scalars['ID']['input'];
   state: Scalars['String']['input'];
 };
 
-
 export type MutationUnsetDraftOrderBillingAddressArgs = {
   orderId: Scalars['ID']['input'];
 };
-
 
 export type MutationUnsetDraftOrderShippingAddressArgs = {
   orderId: Scalars['ID']['input'];
 };
 
-
 export type MutationUpdateActiveAdministratorArgs = {
   input: UpdateActiveAdministratorInput;
 };
-
 
 export type MutationUpdateAdministratorArgs = {
   input: UpdateAdministratorInput;
 };
 
-
 export type MutationUpdateAssetArgs = {
   input: UpdateAssetInput;
 };
-
 
 export type MutationUpdateChannelArgs = {
   input: UpdateChannelInput;
 };
 
-
 export type MutationUpdateCollectionArgs = {
   input: UpdateCollectionInput;
 };
-
 
 export type MutationUpdateCountryArgs = {
   input: UpdateCountryInput;
 };
 
-
 export type MutationUpdateCustomerArgs = {
   input: UpdateCustomerInput;
 };
-
 
 export type MutationUpdateCustomerAddressArgs = {
   input: UpdateAddressInput;
 };
 
-
 export type MutationUpdateCustomerGroupArgs = {
   input: UpdateCustomerGroupInput;
 };
-
 
 export type MutationUpdateCustomerNoteArgs = {
   input: UpdateCustomerNoteInput;
 };
 
-
 export type MutationUpdateFacetArgs = {
   input: UpdateFacetInput;
 };
-
 
 export type MutationUpdateFacetValueArgs = {
   input: UpdateFacetValueInput;
 };
 
-
 export type MutationUpdateFacetValuesArgs = {
   input: Array<UpdateFacetValueInput>;
 };
-
 
 export type MutationUpdateGlobalSettingsArgs = {
   input: UpdateGlobalSettingsInput;
 };
 
-
 export type MutationUpdateOrderNoteArgs = {
   input: UpdateOrderNoteInput;
 };
-
 
 export type MutationUpdateOrderTrackingArgs = {
   orderId: Scalars['ID']['input'];
   trackingNumber: Scalars['String']['input'];
 };
 
-
 export type MutationUpdatePaymentMethodArgs = {
   input: UpdatePaymentMethodInput;
 };
-
 
 export type MutationUpdateProductArgs = {
   input: UpdateProductInput;
 };
 
-
 export type MutationUpdateProductOptionArgs = {
   input: UpdateProductOptionInput;
 };
-
 
 export type MutationUpdateProductOptionGroupArgs = {
   input: UpdateProductOptionGroupInput;
 };
 
-
 export type MutationUpdateProductVariantArgs = {
   input: UpdateProductVariantInput;
 };
-
 
 export type MutationUpdateProductVariantsArgs = {
   input: Array<UpdateProductVariantInput>;
 };
 
-
 export type MutationUpdateProductsArgs = {
   input: Array<UpdateProductInput>;
 };
-
 
 export type MutationUpdatePromotionArgs = {
   input: UpdatePromotionInput;
 };
 
-
 export type MutationUpdateProvinceArgs = {
   input: UpdateProvinceInput;
 };
-
 
 export type MutationUpdateRoleArgs = {
   input: UpdateRoleInput;
 };
 
-
 export type MutationUpdateScheduledTaskArgs = {
   input: UpdateScheduledTaskInput;
 };
-
 
 export type MutationUpdateSellerArgs = {
   input: UpdateSellerInput;
 };
 
-
 export type MutationUpdateShippingMethodArgs = {
   input: UpdateShippingMethodInput;
 };
-
 
 export type MutationUpdateStockLocationArgs = {
   input: UpdateStockLocationInput;
 };
 
-
 export type MutationUpdateTagArgs = {
   input: UpdateTagInput;
 };
-
 
 export type MutationUpdateTaxCategoryArgs = {
   input: UpdateTaxCategoryInput;
 };
 
-
 export type MutationUpdateTaxRateArgs = {
   input: UpdateTaxRateInput;
 };
-
 
 export type MutationUpdateZoneArgs = {
   input: UpdateZoneInput;
@@ -4114,7 +3985,10 @@ export type NativeAuthStrategyError = ErrorResult & {
   message: Scalars['String']['output'];
 };
 
-export type NativeAuthenticationResult = CurrentUser | InvalidCredentialsError | NativeAuthStrategyError;
+export type NativeAuthenticationResult =
+  | CurrentUser
+  | InvalidCredentialsError
+  | NativeAuthStrategyError;
 
 /** Returned when attempting to set a negative OrderLine quantity. */
 export type NegativeQuantityError = ErrorResult & {
@@ -4235,7 +4109,6 @@ export type Order = Node & {
   type: OrderType;
   updatedAt: Scalars['DateTime']['output'];
 };
-
 
 export type OrderHistoryArgs = {
   options?: InputMaybe<HistoryEntryListOptions>;
@@ -4497,7 +4370,7 @@ export type OrderTaxSummary = {
 export enum OrderType {
   Aggregate = 'Aggregate',
   Regular = 'Regular',
-  Seller = 'Seller'
+  Seller = 'Seller',
 }
 
 export type PaginatedList = {
@@ -4869,7 +4742,7 @@ export enum Permission {
   /** Grants permission to update TaxRate */
   UpdateTaxRate = 'UpdateTaxRate',
   /** Grants permission to update Zone */
-  UpdateZone = 'UpdateZone'
+  UpdateZone = 'UpdateZone',
 }
 
 export type PermissionDefinition = {
@@ -4915,7 +4788,6 @@ export type Product = Node & {
   /** Returns all ProductVariants */
   variants: Array<ProductVariant>;
 };
-
 
 export type ProductVariantListArgs = {
   options?: InputMaybe<ProductVariantListOptions>;
@@ -5165,7 +5037,6 @@ export type ProductVariant = Node & {
   useGlobalOutOfStockThreshold: Scalars['Boolean']['output'];
 };
 
-
 export type ProductVariantStockMovementsArgs = {
   options?: InputMaybe<StockMovementListOptions>;
 };
@@ -5348,21 +5219,22 @@ export type PromotionTranslationInput = {
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type Province = Node & Region & {
-  __typename?: 'Province';
-  code: Scalars['String']['output'];
-  createdAt: Scalars['DateTime']['output'];
-  customFields?: Maybe<Scalars['JSON']['output']>;
-  enabled: Scalars['Boolean']['output'];
-  id: Scalars['ID']['output'];
-  languageCode: LanguageCode;
-  name: Scalars['String']['output'];
-  parent?: Maybe<Region>;
-  parentId?: Maybe<Scalars['ID']['output']>;
-  translations: Array<RegionTranslation>;
-  type: Scalars['String']['output'];
-  updatedAt: Scalars['DateTime']['output'];
-};
+export type Province = Node &
+  Region & {
+    __typename?: 'Province';
+    code: Scalars['String']['output'];
+    createdAt: Scalars['DateTime']['output'];
+    customFields?: Maybe<Scalars['JSON']['output']>;
+    enabled: Scalars['Boolean']['output'];
+    id: Scalars['ID']['output'];
+    languageCode: LanguageCode;
+    name: Scalars['String']['output'];
+    parent?: Maybe<Region>;
+    parentId?: Maybe<Scalars['ID']['output']>;
+    translations: Array<RegionTranslation>;
+    type: Scalars['String']['output'];
+    updatedAt: Scalars['DateTime']['output'];
+  };
 
 export type ProvinceFilterParameter = {
   _and?: InputMaybe<Array<ProvinceFilterParameter>>;
@@ -5525,326 +5397,262 @@ export type Query = {
   zones: ZoneList;
 };
 
-
 export type QueryAdministratorArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryAdministratorsArgs = {
   options?: InputMaybe<AdministratorListOptions>;
 };
 
-
 export type QueryAssetArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryAssetsArgs = {
   options?: InputMaybe<AssetListOptions>;
 };
 
-
 export type QueryChannelArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryChannelsArgs = {
   options?: InputMaybe<ChannelListOptions>;
 };
-
 
 export type QueryCollectionArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
 };
 
-
 export type QueryCollectionsArgs = {
   options?: InputMaybe<CollectionListOptions>;
 };
-
 
 export type QueryCountriesArgs = {
   options?: InputMaybe<CountryListOptions>;
 };
 
-
 export type QueryCountryArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryCustomerArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryCustomerGroupArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryCustomerGroupsArgs = {
   options?: InputMaybe<CustomerGroupListOptions>;
 };
 
-
 export type QueryCustomersArgs = {
   options?: InputMaybe<CustomerListOptions>;
 };
-
 
 export type QueryEligibleShippingMethodsForDraftOrderArgs = {
   orderId: Scalars['ID']['input'];
 };
 
-
 export type QueryFacetArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryFacetValueArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryFacetValuesArgs = {
   options?: InputMaybe<FacetValueListOptions>;
 };
-
 
 export type QueryFacetsArgs = {
   options?: InputMaybe<FacetListOptions>;
 };
 
-
 export type QueryGetSettingsStoreValueArgs = {
   key: Scalars['String']['input'];
 };
-
 
 export type QueryGetSettingsStoreValuesArgs = {
   keys: Array<Scalars['String']['input']>;
 };
 
-
 export type QueryJobArgs = {
   jobId: Scalars['ID']['input'];
 };
-
 
 export type QueryJobBufferSizeArgs = {
   bufferIds?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
-
 export type QueryJobsArgs = {
   options?: InputMaybe<JobListOptions>;
 };
-
 
 export type QueryJobsByIdArgs = {
   jobIds: Array<Scalars['ID']['input']>;
 };
 
-
 export type QueryLowStockProductsArgs = {
   threshold?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type QueryMetricSummaryArgs = {
   input?: InputMaybe<MetricSummaryInput>;
 };
 
-
 export type QueryOrderArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryOrdersArgs = {
   options?: InputMaybe<OrderListOptions>;
 };
 
-
 export type QueryPaymentMethodArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryPaymentMethodsArgs = {
   options?: InputMaybe<PaymentMethodListOptions>;
 };
-
 
 export type QueryPreviewCollectionVariantsArgs = {
   input: PreviewCollectionVariantsInput;
   options?: InputMaybe<ProductVariantListOptions>;
 };
 
-
 export type QueryProductArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
 };
 
-
 export type QueryProductOptionArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryProductOptionGroupArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryProductOptionGroupsArgs = {
   filterTerm?: InputMaybe<Scalars['String']['input']>;
 };
-
 
 export type QueryProductOptionsArgs = {
   groupId?: InputMaybe<Scalars['ID']['input']>;
   options?: InputMaybe<ProductOptionListOptions>;
 };
 
-
 export type QueryProductVariantArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryProductVariantsArgs = {
   options?: InputMaybe<ProductVariantListOptions>;
   productId?: InputMaybe<Scalars['ID']['input']>;
 };
 
-
 export type QueryProductsArgs = {
   options?: InputMaybe<ProductListOptions>;
 };
-
 
 export type QueryPromotionArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryPromotionsArgs = {
   options?: InputMaybe<PromotionListOptions>;
 };
-
 
 export type QueryProvinceArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryProvincesArgs = {
   options?: InputMaybe<ProvinceListOptions>;
 };
-
 
 export type QueryRoleArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryRolesArgs = {
   options?: InputMaybe<RoleListOptions>;
 };
-
 
 export type QuerySearchArgs = {
   input: SearchInput;
 };
 
-
 export type QuerySellerArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QuerySellersArgs = {
   options?: InputMaybe<SellerListOptions>;
 };
 
-
 export type QueryShippingMethodArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryShippingMethodsArgs = {
   options?: InputMaybe<ShippingMethodListOptions>;
 };
 
-
 export type QuerySlugForEntityArgs = {
   input: SlugForEntityInput;
 };
-
 
 export type QueryStockLocationArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryStockLocationsArgs = {
   options?: InputMaybe<StockLocationListOptions>;
 };
-
 
 export type QueryTagArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryTagsArgs = {
   options?: InputMaybe<TagListOptions>;
 };
-
 
 export type QueryTaxCategoriesArgs = {
   options?: InputMaybe<TaxCategoryListOptions>;
 };
 
-
 export type QueryTaxCategoryArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryTaxRateArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryTaxRatesArgs = {
   options?: InputMaybe<TaxRateListOptions>;
 };
-
 
 export type QueryTestEligibleShippingMethodsArgs = {
   input: TestEligibleShippingMethodsInput;
 };
 
-
 export type QueryTestShippingMethodArgs = {
   input: TestShippingMethodInput;
 };
 
-
 export type QueryZoneArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryZonesArgs = {
   options?: InputMaybe<ZoneListOptions>;
@@ -5897,7 +5705,17 @@ export type RefundOrderInput = {
   reason?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type RefundOrderResult = AlreadyRefundedError | MultipleOrderError | NothingToRefundError | OrderStateTransitionError | PaymentOrderMismatchError | QuantityTooGreatError | Refund | RefundAmountError | RefundOrderStateError | RefundStateTransitionError;
+export type RefundOrderResult =
+  | AlreadyRefundedError
+  | MultipleOrderError
+  | NothingToRefundError
+  | OrderStateTransitionError
+  | PaymentOrderMismatchError
+  | QuantityTooGreatError
+  | Refund
+  | RefundAmountError
+  | RefundOrderStateError
+  | RefundStateTransitionError;
 
 /** Returned if an attempting to refund an Order which is not in the expected state */
 export type RefundOrderStateError = ErrorResult & {
@@ -5968,16 +5786,17 @@ export type RelationCustomFieldConfig = CustomField & {
   ui?: Maybe<Scalars['JSON']['output']>;
 };
 
-export type Release = Node & StockMovement & {
-  __typename?: 'Release';
-  createdAt: Scalars['DateTime']['output'];
-  customFields?: Maybe<Scalars['JSON']['output']>;
-  id: Scalars['ID']['output'];
-  productVariant: ProductVariant;
-  quantity: Scalars['Int']['output'];
-  type: StockMovementType;
-  updatedAt: Scalars['DateTime']['output'];
-};
+export type Release = Node &
+  StockMovement & {
+    __typename?: 'Release';
+    createdAt: Scalars['DateTime']['output'];
+    customFields?: Maybe<Scalars['JSON']['output']>;
+    id: Scalars['ID']['output'];
+    productVariant: ProductVariant;
+    quantity: Scalars['Int']['output'];
+    type: StockMovementType;
+    updatedAt: Scalars['DateTime']['output'];
+  };
 
 export type RemoveCollectionsFromChannelInput = {
   channelId: Scalars['ID']['input'];
@@ -6026,16 +5845,17 @@ export type RemoveStockLocationsFromChannelInput = {
   stockLocationIds: Array<Scalars['ID']['input']>;
 };
 
-export type Return = Node & StockMovement & {
-  __typename?: 'Return';
-  createdAt: Scalars['DateTime']['output'];
-  customFields?: Maybe<Scalars['JSON']['output']>;
-  id: Scalars['ID']['output'];
-  productVariant: ProductVariant;
-  quantity: Scalars['Int']['output'];
-  type: StockMovementType;
-  updatedAt: Scalars['DateTime']['output'];
-};
+export type Return = Node &
+  StockMovement & {
+    __typename?: 'Return';
+    createdAt: Scalars['DateTime']['output'];
+    customFields?: Maybe<Scalars['JSON']['output']>;
+    id: Scalars['ID']['output'];
+    productVariant: ProductVariant;
+    quantity: Scalars['Int']['output'];
+    type: StockMovementType;
+    updatedAt: Scalars['DateTime']['output'];
+  };
 
 export type Role = Node & {
   __typename?: 'Role';
@@ -6088,16 +5908,17 @@ export type RoleSortParameter = {
   updatedAt?: InputMaybe<SortOrder>;
 };
 
-export type Sale = Node & StockMovement & {
-  __typename?: 'Sale';
-  createdAt: Scalars['DateTime']['output'];
-  customFields?: Maybe<Scalars['JSON']['output']>;
-  id: Scalars['ID']['output'];
-  productVariant: ProductVariant;
-  quantity: Scalars['Int']['output'];
-  type: StockMovementType;
-  updatedAt: Scalars['DateTime']['output'];
-};
+export type Sale = Node &
+  StockMovement & {
+    __typename?: 'Sale';
+    createdAt: Scalars['DateTime']['output'];
+    customFields?: Maybe<Scalars['JSON']['output']>;
+    id: Scalars['ID']['output'];
+    productVariant: ProductVariant;
+    quantity: Scalars['Int']['output'];
+    type: StockMovementType;
+    updatedAt: Scalars['DateTime']['output'];
+  };
 
 export type ScheduledTask = {
   __typename?: 'ScheduledTask';
@@ -6247,7 +6068,11 @@ export type SetOrderCustomerInput = {
   orderId: Scalars['ID']['input'];
 };
 
-export type SetOrderShippingMethodResult = IneligibleShippingMethodError | NoActiveOrderError | Order | OrderModificationError;
+export type SetOrderShippingMethodResult =
+  | IneligibleShippingMethodError
+  | NoActiveOrderError
+  | Order
+  | OrderModificationError;
 
 export type SetSettingsStoreValueResult = {
   __typename?: 'SetSettingsStoreValueResult';
@@ -6269,7 +6094,11 @@ export type SettlePaymentError = ErrorResult & {
   paymentErrorMessage: Scalars['String']['output'];
 };
 
-export type SettlePaymentResult = OrderStateTransitionError | Payment | PaymentStateTransitionError | SettlePaymentError;
+export type SettlePaymentResult =
+  | OrderStateTransitionError
+  | Payment
+  | PaymentStateTransitionError
+  | SettlePaymentError;
 
 export type SettleRefundInput = {
   id: Scalars['ID']['input'];
@@ -6397,19 +6226,20 @@ export type SlugForEntityInput = {
 
 export enum SortOrder {
   Asc = 'ASC',
-  Desc = 'DESC'
+  Desc = 'DESC',
 }
 
-export type StockAdjustment = Node & StockMovement & {
-  __typename?: 'StockAdjustment';
-  createdAt: Scalars['DateTime']['output'];
-  customFields?: Maybe<Scalars['JSON']['output']>;
-  id: Scalars['ID']['output'];
-  productVariant: ProductVariant;
-  quantity: Scalars['Int']['output'];
-  type: StockMovementType;
-  updatedAt: Scalars['DateTime']['output'];
-};
+export type StockAdjustment = Node &
+  StockMovement & {
+    __typename?: 'StockAdjustment';
+    createdAt: Scalars['DateTime']['output'];
+    customFields?: Maybe<Scalars['JSON']['output']>;
+    id: Scalars['ID']['output'];
+    productVariant: ProductVariant;
+    quantity: Scalars['Int']['output'];
+    type: StockMovementType;
+    updatedAt: Scalars['DateTime']['output'];
+  };
 
 export type StockLevel = Node & {
   __typename?: 'StockLevel';
@@ -6487,7 +6317,13 @@ export type StockMovement = {
   updatedAt: Scalars['DateTime']['output'];
 };
 
-export type StockMovementItem = Allocation | Cancellation | Release | Return | Sale | StockAdjustment;
+export type StockMovementItem =
+  | Allocation
+  | Cancellation
+  | Release
+  | Return
+  | Sale
+  | StockAdjustment;
 
 export type StockMovementList = {
   __typename?: 'StockMovementList';
@@ -6507,7 +6343,7 @@ export enum StockMovementType {
   Cancellation = 'CANCELLATION',
   Release = 'RELEASE',
   Return = 'RETURN',
-  Sale = 'SALE'
+  Sale = 'SALE',
 }
 
 export type StringCustomFieldConfig = CustomField & {
@@ -6591,7 +6427,13 @@ export type StructField = {
   ui?: Maybe<Scalars['JSON']['output']>;
 };
 
-export type StructFieldConfig = BooleanStructFieldConfig | DateTimeStructFieldConfig | FloatStructFieldConfig | IntStructFieldConfig | StringStructFieldConfig | TextStructFieldConfig;
+export type StructFieldConfig =
+  | BooleanStructFieldConfig
+  | DateTimeStructFieldConfig
+  | FloatStructFieldConfig
+  | IntStructFieldConfig
+  | StringStructFieldConfig
+  | TextStructFieldConfig;
 
 /** Indicates that an operation succeeded, where we do not want to return any more specific information. */
 export type Success = {
@@ -7024,9 +6866,20 @@ export type UpdateOrderInput = {
 };
 
 /** Union type of all possible errors that can occur when adding or removing items from an Order. */
-export type UpdateOrderItemErrorResult = InsufficientStockError | NegativeQuantityError | OrderInterceptorError | OrderLimitError | OrderModificationError;
+export type UpdateOrderItemErrorResult =
+  | InsufficientStockError
+  | NegativeQuantityError
+  | OrderInterceptorError
+  | OrderLimitError
+  | OrderModificationError;
 
-export type UpdateOrderItemsResult = InsufficientStockError | NegativeQuantityError | Order | OrderInterceptorError | OrderLimitError | OrderModificationError;
+export type UpdateOrderItemsResult =
+  | InsufficientStockError
+  | NegativeQuantityError
+  | Order
+  | OrderInterceptorError
+  | OrderLimitError
+  | OrderModificationError;
 
 export type UpdateOrderNoteInput = {
   isPublic?: InputMaybe<Scalars['Boolean']['input']>;
@@ -7272,78 +7125,221 @@ export type UpdateActiveAdministratorMutationVariables = Exact<{
   input: UpdateActiveAdministratorInput;
 }>;
 
-
-export type UpdateActiveAdministratorMutation = { __typename?: 'Mutation', updateActiveAdministrator: { __typename?: 'Administrator', id: string, firstName: string, lastName: string, emailAddress: string, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, verified: boolean, lastLogin?: any | null, roles: Array<{ __typename?: 'Role', id: string, code: string, description: string }> } } };
+export type UpdateActiveAdministratorMutation = {
+  __typename?: 'Mutation';
+  updateActiveAdministrator: {
+    __typename?: 'Administrator';
+    id: string;
+    firstName: string;
+    lastName: string;
+    emailAddress: string;
+    createdAt: any;
+    updatedAt: any;
+    user: {
+      __typename?: 'User';
+      id: string;
+      verified: boolean;
+      lastLogin?: any | null;
+      roles: Array<{ __typename?: 'Role'; id: string; code: string; description: string }>;
+    };
+  };
+};
 
 export type AdminAdministratorsQueryVariables = Exact<{
   options?: InputMaybe<AdministratorListOptions>;
 }>;
 
-
-export type AdminAdministratorsQuery = { __typename?: 'Query', administrators: { __typename?: 'AdministratorList', totalItems: number, items: Array<{ __typename?: 'Administrator', id: string, createdAt: any, updatedAt: any, firstName: string, lastName: string, emailAddress: string, user: { __typename?: 'User', id: string, verified: boolean, lastLogin?: any | null, roles: Array<{ __typename?: 'Role', id: string, code: string, description: string, permissions: Array<Permission> }> } }> } };
+export type AdminAdministratorsQuery = {
+  __typename?: 'Query';
+  administrators: {
+    __typename?: 'AdministratorList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'Administrator';
+      id: string;
+      createdAt: any;
+      updatedAt: any;
+      firstName: string;
+      lastName: string;
+      emailAddress: string;
+      user: {
+        __typename?: 'User';
+        id: string;
+        verified: boolean;
+        lastLogin?: any | null;
+        roles: Array<{
+          __typename?: 'Role';
+          id: string;
+          code: string;
+          description: string;
+          permissions: Array<Permission>;
+        }>;
+      };
+    }>;
+  };
+};
 
 export type AdminAdministratorQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
-export type AdminAdministratorQuery = { __typename?: 'Query', administrator?: { __typename?: 'Administrator', id: string, createdAt: any, updatedAt: any, firstName: string, lastName: string, emailAddress: string, user: { __typename?: 'User', id: string, verified: boolean, lastLogin?: any | null, roles: Array<{ __typename?: 'Role', id: string, code: string, description: string, permissions: Array<Permission> }> } } | null };
+export type AdminAdministratorQuery = {
+  __typename?: 'Query';
+  administrator?: {
+    __typename?: 'Administrator';
+    id: string;
+    createdAt: any;
+    updatedAt: any;
+    firstName: string;
+    lastName: string;
+    emailAddress: string;
+    user: {
+      __typename?: 'User';
+      id: string;
+      verified: boolean;
+      lastLogin?: any | null;
+      roles: Array<{
+        __typename?: 'Role';
+        id: string;
+        code: string;
+        description: string;
+        permissions: Array<Permission>;
+      }>;
+    };
+  } | null;
+};
 
 export type AdminRolesQueryVariables = Exact<{
   options?: InputMaybe<RoleListOptions>;
 }>;
 
-
-export type AdminRolesQuery = { __typename?: 'Query', roles: { __typename?: 'RoleList', totalItems: number, items: Array<{ __typename?: 'Role', id: string, createdAt: any, updatedAt: any, code: string, description: string, permissions: Array<Permission>, channels: Array<{ __typename?: 'Channel', id: string, code: string }> }> } };
+export type AdminRolesQuery = {
+  __typename?: 'Query';
+  roles: {
+    __typename?: 'RoleList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'Role';
+      id: string;
+      createdAt: any;
+      updatedAt: any;
+      code: string;
+      description: string;
+      permissions: Array<Permission>;
+      channels: Array<{ __typename?: 'Channel'; id: string; code: string }>;
+    }>;
+  };
+};
 
 export type AdminRoleQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
-export type AdminRoleQuery = { __typename?: 'Query', role?: { __typename?: 'Role', id: string, createdAt: any, updatedAt: any, code: string, description: string, permissions: Array<Permission>, channels: Array<{ __typename?: 'Channel', id: string, code: string }> } | null };
+export type AdminRoleQuery = {
+  __typename?: 'Query';
+  role?: {
+    __typename?: 'Role';
+    id: string;
+    createdAt: any;
+    updatedAt: any;
+    code: string;
+    description: string;
+    permissions: Array<Permission>;
+    channels: Array<{ __typename?: 'Channel'; id: string; code: string }>;
+  } | null;
+};
 
 export type CreateAdministratorMutationVariables = Exact<{
   input: CreateAdministratorInput;
 }>;
 
-
-export type CreateAdministratorMutation = { __typename?: 'Mutation', createAdministrator: { __typename?: 'Administrator', id: string, firstName: string, lastName: string, emailAddress: string, user: { __typename?: 'User', id: string, roles: Array<{ __typename?: 'Role', id: string, code: string }> } } };
+export type CreateAdministratorMutation = {
+  __typename?: 'Mutation';
+  createAdministrator: {
+    __typename?: 'Administrator';
+    id: string;
+    firstName: string;
+    lastName: string;
+    emailAddress: string;
+    user: {
+      __typename?: 'User';
+      id: string;
+      roles: Array<{ __typename?: 'Role'; id: string; code: string }>;
+    };
+  };
+};
 
 export type UpdateAdministratorMutationVariables = Exact<{
   input: UpdateAdministratorInput;
 }>;
 
-
-export type UpdateAdministratorMutation = { __typename?: 'Mutation', updateAdministrator: { __typename?: 'Administrator', id: string, firstName: string, lastName: string, emailAddress: string, user: { __typename?: 'User', id: string, roles: Array<{ __typename?: 'Role', id: string, code: string }> } } };
+export type UpdateAdministratorMutation = {
+  __typename?: 'Mutation';
+  updateAdministrator: {
+    __typename?: 'Administrator';
+    id: string;
+    firstName: string;
+    lastName: string;
+    emailAddress: string;
+    user: {
+      __typename?: 'User';
+      id: string;
+      roles: Array<{ __typename?: 'Role'; id: string; code: string }>;
+    };
+  };
+};
 
 export type DeleteAdministratorMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
-export type DeleteAdministratorMutation = { __typename?: 'Mutation', deleteAdministrator: { __typename?: 'DeletionResponse', result: DeletionResult, message?: string | null } };
+export type DeleteAdministratorMutation = {
+  __typename?: 'Mutation';
+  deleteAdministrator: {
+    __typename?: 'DeletionResponse';
+    result: DeletionResult;
+    message?: string | null;
+  };
+};
 
 export type CreateRoleMutationVariables = Exact<{
   input: CreateRoleInput;
 }>;
 
-
-export type CreateRoleMutation = { __typename?: 'Mutation', createRole: { __typename?: 'Role', id: string, code: string, description: string, permissions: Array<Permission> } };
+export type CreateRoleMutation = {
+  __typename?: 'Mutation';
+  createRole: {
+    __typename?: 'Role';
+    id: string;
+    code: string;
+    description: string;
+    permissions: Array<Permission>;
+  };
+};
 
 export type UpdateRoleMutationVariables = Exact<{
   input: UpdateRoleInput;
 }>;
 
-
-export type UpdateRoleMutation = { __typename?: 'Mutation', updateRole: { __typename?: 'Role', id: string, code: string, description: string, permissions: Array<Permission> } };
+export type UpdateRoleMutation = {
+  __typename?: 'Mutation';
+  updateRole: {
+    __typename?: 'Role';
+    id: string;
+    code: string;
+    description: string;
+    permissions: Array<Permission>;
+  };
+};
 
 export type DeleteRoleMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
-export type DeleteRoleMutation = { __typename?: 'Mutation', deleteRole: { __typename?: 'DeletionResponse', result: DeletionResult, message?: string | null } };
+export type DeleteRoleMutation = {
+  __typename?: 'Mutation';
+  deleteRole: { __typename?: 'DeletionResponse'; result: DeletionResult; message?: string | null };
+};
 
 export type AdminLoginMutationVariables = Exact<{
   username: Scalars['String']['input'];
@@ -7351,368 +7347,1402 @@ export type AdminLoginMutationVariables = Exact<{
   rememberMe?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
+export type AdminLoginMutation = {
+  __typename?: 'Mutation';
+  login:
+    | {
+        __typename?: 'CurrentUser';
+        id: string;
+        identifier: string;
+        channels: Array<{
+          __typename?: 'CurrentUserChannel';
+          id: string;
+          code: string;
+          token: string;
+          permissions: Array<Permission>;
+        }>;
+      }
+    | { __typename?: 'InvalidCredentialsError'; errorCode: ErrorCode; message: string }
+    | { __typename?: 'NativeAuthStrategyError'; errorCode: ErrorCode; message: string };
+};
 
-export type AdminLoginMutation = { __typename?: 'Mutation', login:
-    | { __typename?: 'CurrentUser', id: string, identifier: string, channels: Array<{ __typename?: 'CurrentUserChannel', id: string, code: string, token: string, permissions: Array<Permission> }> }
-    | { __typename?: 'InvalidCredentialsError', errorCode: ErrorCode, message: string }
-    | { __typename?: 'NativeAuthStrategyError', errorCode: ErrorCode, message: string }
-   };
+export type AdminLogoutMutationVariables = Exact<{ [key: string]: never }>;
 
-export type AdminLogoutMutationVariables = Exact<{ [key: string]: never; }>;
+export type AdminLogoutMutation = {
+  __typename?: 'Mutation';
+  logout: { __typename?: 'Success'; success: boolean };
+};
 
+export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
-export type AdminLogoutMutation = { __typename?: 'Mutation', logout: { __typename?: 'Success', success: boolean } };
+export type MeQuery = {
+  __typename?: 'Query';
+  me?: {
+    __typename?: 'CurrentUser';
+    id: string;
+    identifier: string;
+    channels: Array<{
+      __typename?: 'CurrentUserChannel';
+      id: string;
+      code: string;
+      token: string;
+      permissions: Array<Permission>;
+    }>;
+  } | null;
+};
 
-export type MeQueryVariables = Exact<{ [key: string]: never; }>;
+export type ActiveAdministratorQueryVariables = Exact<{ [key: string]: never }>;
 
-
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'CurrentUser', id: string, identifier: string, channels: Array<{ __typename?: 'CurrentUserChannel', id: string, code: string, token: string, permissions: Array<Permission> }> } | null };
-
-export type ActiveAdministratorQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type ActiveAdministratorQuery = { __typename?: 'Query', activeAdministrator?: { __typename?: 'Administrator', id: string, firstName: string, lastName: string, emailAddress: string, user: { __typename?: 'User', id: string, identifier: string, roles: Array<{ __typename?: 'Role', id: string, code: string, description: string, permissions: Array<Permission> }> } } | null };
+export type ActiveAdministratorQuery = {
+  __typename?: 'Query';
+  activeAdministrator?: {
+    __typename?: 'Administrator';
+    id: string;
+    firstName: string;
+    lastName: string;
+    emailAddress: string;
+    user: {
+      __typename?: 'User';
+      id: string;
+      identifier: string;
+      roles: Array<{
+        __typename?: 'Role';
+        id: string;
+        code: string;
+        description: string;
+        permissions: Array<Permission>;
+      }>;
+    };
+  } | null;
+};
 
 export type AdminCollectionsQueryVariables = Exact<{
   options?: InputMaybe<CollectionListOptions>;
 }>;
 
-
-export type AdminCollectionsQuery = { __typename?: 'Query', collections: { __typename?: 'CollectionList', totalItems: number, items: Array<{ __typename?: 'Collection', id: string, createdAt: any, updatedAt: any, name: string, slug: string, description: string, isPrivate: boolean, position: number, parentId: string, breadcrumbs: Array<{ __typename?: 'CollectionBreadcrumb', id: string, name: string, slug: string }>, featuredAsset?: { __typename?: 'Asset', id: string, preview: string, source: string } | null, productVariants: { __typename?: 'ProductVariantList', totalItems: number }, customFields?: { __typename?: 'CollectionCustomFields', nameFr?: string | null, nameAr?: string | null, descriptionFr?: string | null, descriptionAr?: string | null, displayOrder?: number | null } | null }> } };
+export type AdminCollectionsQuery = {
+  __typename?: 'Query';
+  collections: {
+    __typename?: 'CollectionList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'Collection';
+      id: string;
+      createdAt: any;
+      updatedAt: any;
+      name: string;
+      slug: string;
+      description: string;
+      isPrivate: boolean;
+      position: number;
+      parentId: string;
+      breadcrumbs: Array<{
+        __typename?: 'CollectionBreadcrumb';
+        id: string;
+        name: string;
+        slug: string;
+      }>;
+      featuredAsset?: { __typename?: 'Asset'; id: string; preview: string; source: string } | null;
+      productVariants: { __typename?: 'ProductVariantList'; totalItems: number };
+      customFields?: {
+        __typename?: 'CollectionCustomFields';
+        nameFr?: string | null;
+        nameAr?: string | null;
+        descriptionFr?: string | null;
+        descriptionAr?: string | null;
+        displayOrder?: number | null;
+      } | null;
+    }>;
+  };
+};
 
 export type AdminCollectionQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
-export type AdminCollectionQuery = { __typename?: 'Query', collection?: { __typename?: 'Collection', id: string, createdAt: any, updatedAt: any, name: string, slug: string, description: string, isPrivate: boolean, position: number, parentId: string, breadcrumbs: Array<{ __typename?: 'CollectionBreadcrumb', id: string, name: string, slug: string }>, featuredAsset?: { __typename?: 'Asset', id: string, preview: string, source: string } | null, productVariants: { __typename?: 'ProductVariantList', totalItems: number }, customFields?: { __typename?: 'CollectionCustomFields', nameFr?: string | null, nameAr?: string | null, descriptionFr?: string | null, descriptionAr?: string | null, displayOrder?: number | null } | null, filters: Array<{ __typename?: 'ConfigurableOperation', code: string, args: Array<{ __typename?: 'ConfigArg', name: string, value: string }> }>, children?: Array<{ __typename?: 'Collection', id: string, name: string, slug: string, position: number, productVariants: { __typename?: 'ProductVariantList', totalItems: number }, customFields?: { __typename?: 'CollectionCustomFields', nameFr?: string | null, nameAr?: string | null } | null }> | null } | null };
+export type AdminCollectionQuery = {
+  __typename?: 'Query';
+  collection?: {
+    __typename?: 'Collection';
+    id: string;
+    createdAt: any;
+    updatedAt: any;
+    name: string;
+    slug: string;
+    description: string;
+    isPrivate: boolean;
+    position: number;
+    parentId: string;
+    breadcrumbs: Array<{
+      __typename?: 'CollectionBreadcrumb';
+      id: string;
+      name: string;
+      slug: string;
+    }>;
+    featuredAsset?: { __typename?: 'Asset'; id: string; preview: string; source: string } | null;
+    productVariants: { __typename?: 'ProductVariantList'; totalItems: number };
+    customFields?: {
+      __typename?: 'CollectionCustomFields';
+      nameFr?: string | null;
+      nameAr?: string | null;
+      descriptionFr?: string | null;
+      descriptionAr?: string | null;
+      displayOrder?: number | null;
+    } | null;
+    filters: Array<{
+      __typename?: 'ConfigurableOperation';
+      code: string;
+      args: Array<{ __typename?: 'ConfigArg'; name: string; value: string }>;
+    }>;
+    children?: Array<{
+      __typename?: 'Collection';
+      id: string;
+      name: string;
+      slug: string;
+      position: number;
+      productVariants: { __typename?: 'ProductVariantList'; totalItems: number };
+      customFields?: {
+        __typename?: 'CollectionCustomFields';
+        nameFr?: string | null;
+        nameAr?: string | null;
+      } | null;
+    }> | null;
+  } | null;
+};
 
 export type CreateCollectionMutationVariables = Exact<{
   input: CreateCollectionInput;
 }>;
 
-
-export type CreateCollectionMutation = { __typename?: 'Mutation', createCollection: { __typename?: 'Collection', id: string, name: string, slug: string, description: string, isPrivate: boolean, position: number, parentId: string, customFields?: { __typename?: 'CollectionCustomFields', nameFr?: string | null, nameAr?: string | null, descriptionFr?: string | null, descriptionAr?: string | null, displayOrder?: number | null } | null } };
+export type CreateCollectionMutation = {
+  __typename?: 'Mutation';
+  createCollection: {
+    __typename?: 'Collection';
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
+    isPrivate: boolean;
+    position: number;
+    parentId: string;
+    customFields?: {
+      __typename?: 'CollectionCustomFields';
+      nameFr?: string | null;
+      nameAr?: string | null;
+      descriptionFr?: string | null;
+      descriptionAr?: string | null;
+      displayOrder?: number | null;
+    } | null;
+  };
+};
 
 export type UpdateCollectionMutationVariables = Exact<{
   input: UpdateCollectionInput;
 }>;
 
-
-export type UpdateCollectionMutation = { __typename?: 'Mutation', updateCollection: { __typename?: 'Collection', id: string, name: string, slug: string, description: string, isPrivate: boolean, position: number, parentId: string, customFields?: { __typename?: 'CollectionCustomFields', nameFr?: string | null, nameAr?: string | null, descriptionFr?: string | null, descriptionAr?: string | null, displayOrder?: number | null } | null } };
+export type UpdateCollectionMutation = {
+  __typename?: 'Mutation';
+  updateCollection: {
+    __typename?: 'Collection';
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
+    isPrivate: boolean;
+    position: number;
+    parentId: string;
+    customFields?: {
+      __typename?: 'CollectionCustomFields';
+      nameFr?: string | null;
+      nameAr?: string | null;
+      descriptionFr?: string | null;
+      descriptionAr?: string | null;
+      displayOrder?: number | null;
+    } | null;
+  };
+};
 
 export type DeleteCollectionMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
-export type DeleteCollectionMutation = { __typename?: 'Mutation', deleteCollection: { __typename?: 'DeletionResponse', result: DeletionResult, message?: string | null } };
+export type DeleteCollectionMutation = {
+  __typename?: 'Mutation';
+  deleteCollection: {
+    __typename?: 'DeletionResponse';
+    result: DeletionResult;
+    message?: string | null;
+  };
+};
 
 export type MoveCollectionMutationVariables = Exact<{
   input: MoveCollectionInput;
 }>;
 
-
-export type MoveCollectionMutation = { __typename?: 'Mutation', moveCollection: { __typename?: 'Collection', id: string, name: string, slug: string, position: number, parentId: string } };
+export type MoveCollectionMutation = {
+  __typename?: 'Mutation';
+  moveCollection: {
+    __typename?: 'Collection';
+    id: string;
+    name: string;
+    slug: string;
+    position: number;
+    parentId: string;
+  };
+};
 
 export type UpdateCollectionFiltersMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   filters: Array<ConfigurableOperationInput> | ConfigurableOperationInput;
 }>;
 
-
-export type UpdateCollectionFiltersMutation = { __typename?: 'Mutation', updateCollection: { __typename?: 'Collection', id: string, name: string, filters: Array<{ __typename?: 'ConfigurableOperation', code: string, args: Array<{ __typename?: 'ConfigArg', name: string, value: string }> }> } };
+export type UpdateCollectionFiltersMutation = {
+  __typename?: 'Mutation';
+  updateCollection: {
+    __typename?: 'Collection';
+    id: string;
+    name: string;
+    filters: Array<{
+      __typename?: 'ConfigurableOperation';
+      code: string;
+      args: Array<{ __typename?: 'ConfigArg'; name: string; value: string }>;
+    }>;
+  };
+};
 
 export type AdminCollectionsWithFiltersQueryVariables = Exact<{
   options?: InputMaybe<CollectionListOptions>;
 }>;
 
-
-export type AdminCollectionsWithFiltersQuery = { __typename?: 'Query', collections: { __typename?: 'CollectionList', totalItems: number, items: Array<{ __typename?: 'Collection', id: string, name: string, slug: string, parentId: string, filters: Array<{ __typename?: 'ConfigurableOperation', code: string, args: Array<{ __typename?: 'ConfigArg', name: string, value: string }> }> }> } };
+export type AdminCollectionsWithFiltersQuery = {
+  __typename?: 'Query';
+  collections: {
+    __typename?: 'CollectionList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'Collection';
+      id: string;
+      name: string;
+      slug: string;
+      parentId: string;
+      filters: Array<{
+        __typename?: 'ConfigurableOperation';
+        code: string;
+        args: Array<{ __typename?: 'ConfigArg'; name: string; value: string }>;
+      }>;
+    }>;
+  };
+};
 
 export type AdminCustomersQueryVariables = Exact<{
   options?: InputMaybe<CustomerListOptions>;
 }>;
 
-
-export type AdminCustomersQuery = { __typename?: 'Query', customers: { __typename?: 'CustomerList', totalItems: number, items: Array<{ __typename?: 'Customer', id: string, createdAt: any, updatedAt: any, firstName: string, lastName: string, emailAddress: string, phoneNumber?: string | null, user?: { __typename?: 'User', id: string, verified: boolean, lastLogin?: any | null } | null, customFields?: { __typename?: 'CustomerCustomFields', wilaya?: string | null, city?: string | null } | null }> } };
+export type AdminCustomersQuery = {
+  __typename?: 'Query';
+  customers: {
+    __typename?: 'CustomerList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'Customer';
+      id: string;
+      createdAt: any;
+      updatedAt: any;
+      firstName: string;
+      lastName: string;
+      emailAddress: string;
+      phoneNumber?: string | null;
+      user?: { __typename?: 'User'; id: string; verified: boolean; lastLogin?: any | null } | null;
+      customFields?: {
+        __typename?: 'CustomerCustomFields';
+        wilaya?: string | null;
+        city?: string | null;
+      } | null;
+    }>;
+  };
+};
 
 export type AdminCustomerQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
-export type AdminCustomerQuery = { __typename?: 'Query', customer?: { __typename?: 'Customer', id: string, createdAt: any, updatedAt: any, firstName: string, lastName: string, emailAddress: string, phoneNumber?: string | null, user?: { __typename?: 'User', id: string, verified: boolean, lastLogin?: any | null } | null, addresses?: Array<{ __typename?: 'Address', id: string, fullName?: string | null, company?: string | null, streetLine1: string, streetLine2?: string | null, city?: string | null, province?: string | null, postalCode?: string | null, phoneNumber?: string | null, defaultShippingAddress?: boolean | null, defaultBillingAddress?: boolean | null, country: { __typename?: 'Country', code: string, name: string } }> | null, orders: { __typename?: 'OrderList', totalItems: number, items: Array<{ __typename?: 'Order', id: string, code: string, state: string, totalWithTax: any, orderPlacedAt?: any | null }> }, customFields?: { __typename?: 'CustomerCustomFields', wilaya?: string | null, city?: string | null } | null } | null };
+export type AdminCustomerQuery = {
+  __typename?: 'Query';
+  customer?: {
+    __typename?: 'Customer';
+    id: string;
+    createdAt: any;
+    updatedAt: any;
+    firstName: string;
+    lastName: string;
+    emailAddress: string;
+    phoneNumber?: string | null;
+    user?: { __typename?: 'User'; id: string; verified: boolean; lastLogin?: any | null } | null;
+    addresses?: Array<{
+      __typename?: 'Address';
+      id: string;
+      fullName?: string | null;
+      company?: string | null;
+      streetLine1: string;
+      streetLine2?: string | null;
+      city?: string | null;
+      province?: string | null;
+      postalCode?: string | null;
+      phoneNumber?: string | null;
+      defaultShippingAddress?: boolean | null;
+      defaultBillingAddress?: boolean | null;
+      country: { __typename?: 'Country'; code: string; name: string };
+    }> | null;
+    orders: {
+      __typename?: 'OrderList';
+      totalItems: number;
+      items: Array<{
+        __typename?: 'Order';
+        id: string;
+        code: string;
+        state: string;
+        totalWithTax: any;
+        orderPlacedAt?: any | null;
+      }>;
+    };
+    customFields?: {
+      __typename?: 'CustomerCustomFields';
+      wilaya?: string | null;
+      city?: string | null;
+    } | null;
+  } | null;
+};
 
 export type UpdateCustomerMutationVariables = Exact<{
   input: UpdateCustomerInput;
 }>;
 
-
-export type UpdateCustomerMutation = { __typename?: 'Mutation', updateCustomer:
-    | { __typename?: 'Customer', id: string, firstName: string, lastName: string, emailAddress: string, phoneNumber?: string | null, customFields?: { __typename?: 'CustomerCustomFields', wilaya?: string | null, city?: string | null } | null }
-    | { __typename?: 'EmailAddressConflictError', errorCode: ErrorCode, message: string }
-   };
+export type UpdateCustomerMutation = {
+  __typename?: 'Mutation';
+  updateCustomer:
+    | {
+        __typename?: 'Customer';
+        id: string;
+        firstName: string;
+        lastName: string;
+        emailAddress: string;
+        phoneNumber?: string | null;
+        customFields?: {
+          __typename?: 'CustomerCustomFields';
+          wilaya?: string | null;
+          city?: string | null;
+        } | null;
+      }
+    | { __typename?: 'EmailAddressConflictError'; errorCode: ErrorCode; message: string };
+};
 
 export type DeleteCustomerMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
+export type DeleteCustomerMutation = {
+  __typename?: 'Mutation';
+  deleteCustomer: {
+    __typename?: 'DeletionResponse';
+    result: DeletionResult;
+    message?: string | null;
+  };
+};
 
-export type DeleteCustomerMutation = { __typename?: 'Mutation', deleteCustomer: { __typename?: 'DeletionResponse', result: DeletionResult, message?: string | null } };
+export type OscarDashboardStatsQueryVariables = Exact<{ [key: string]: never }>;
 
-export type OscarDashboardStatsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type OscarDashboardStatsQuery = { __typename?: 'Query', oscarDashboardStats: { __typename?: 'DashboardStats', totalOrders: number, totalRevenue: number, totalCustomers: number, totalProducts: number, pendingOrders: number, lowStockProductsCount: number } };
+export type OscarDashboardStatsQuery = {
+  __typename?: 'Query';
+  oscarDashboardStats: {
+    __typename?: 'DashboardStats';
+    totalOrders: number;
+    totalRevenue: number;
+    totalCustomers: number;
+    totalProducts: number;
+    pendingOrders: number;
+    lowStockProductsCount: number;
+  };
+};
 
 export type RecentOrdersQueryVariables = Exact<{
   options?: InputMaybe<OrderListOptions>;
 }>;
 
-
-export type RecentOrdersQuery = { __typename?: 'Query', orders: { __typename?: 'OrderList', totalItems: number, items: Array<{ __typename?: 'Order', id: string, code: string, state: string, totalWithTax: any, orderPlacedAt?: any | null, customer?: { __typename?: 'Customer', id: string, firstName: string, lastName: string } | null, customFields?: { __typename?: 'OrderCustomFields', trackingNumber?: string | null, wilaya?: string | null } | null }> } };
+export type RecentOrdersQuery = {
+  __typename?: 'Query';
+  orders: {
+    __typename?: 'OrderList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'Order';
+      id: string;
+      code: string;
+      state: string;
+      totalWithTax: any;
+      orderPlacedAt?: any | null;
+      customer?: {
+        __typename?: 'Customer';
+        id: string;
+        firstName: string;
+        lastName: string;
+      } | null;
+      customFields?: {
+        __typename?: 'OrderCustomFields';
+        trackingNumber?: string | null;
+        wilaya?: string | null;
+      } | null;
+    }>;
+  };
+};
 
 export type LowStockProductsQueryVariables = Exact<{
   threshold?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
-
-export type LowStockProductsQuery = { __typename?: 'Query', lowStockProducts: Array<{ __typename?: 'Product', id: string, name: string, slug: string, variants: Array<{ __typename?: 'ProductVariant', id: string, sku: string, stockOnHand: number, customFields?: { __typename?: 'ProductVariantCustomFields', minStockAlert?: number | null } | null }>, customFields?: { __typename?: 'ProductCustomFields', nameFr?: string | null } | null }> };
+export type LowStockProductsQuery = {
+  __typename?: 'Query';
+  lowStockProducts: Array<{
+    __typename?: 'Product';
+    id: string;
+    name: string;
+    slug: string;
+    variants: Array<{
+      __typename?: 'ProductVariant';
+      id: string;
+      sku: string;
+      stockOnHand: number;
+      customFields?: {
+        __typename?: 'ProductVariantCustomFields';
+        minStockAlert?: number | null;
+      } | null;
+    }>;
+    customFields?: { __typename?: 'ProductCustomFields'; nameFr?: string | null } | null;
+  }>;
+};
 
 export type DashboardOrdersAnalysisQueryVariables = Exact<{
   options?: InputMaybe<OrderListOptions>;
 }>;
 
-
-export type DashboardOrdersAnalysisQuery = { __typename?: 'Query', orders: { __typename?: 'OrderList', totalItems: number, items: Array<{ __typename?: 'Order', id: string, code: string, state: string, totalWithTax: any, orderPlacedAt?: any | null, lines: Array<{ __typename?: 'OrderLine', id: string, quantity: number, linePriceWithTax: any, productVariant: { __typename?: 'ProductVariant', id: string, name: string, sku: string, product: { __typename?: 'Product', id: string, name: string, slug: string, featuredAsset?: { __typename?: 'Asset', preview: string } | null, collections: Array<{ __typename?: 'Collection', id: string, name: string, slug: string }>, customFields?: { __typename?: 'ProductCustomFields', nameFr?: string | null } | null } } }> }> } };
+export type DashboardOrdersAnalysisQuery = {
+  __typename?: 'Query';
+  orders: {
+    __typename?: 'OrderList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'Order';
+      id: string;
+      code: string;
+      state: string;
+      totalWithTax: any;
+      orderPlacedAt?: any | null;
+      lines: Array<{
+        __typename?: 'OrderLine';
+        id: string;
+        quantity: number;
+        linePriceWithTax: any;
+        productVariant: {
+          __typename?: 'ProductVariant';
+          id: string;
+          name: string;
+          sku: string;
+          product: {
+            __typename?: 'Product';
+            id: string;
+            name: string;
+            slug: string;
+            featuredAsset?: { __typename?: 'Asset'; preview: string } | null;
+            collections: Array<{
+              __typename?: 'Collection';
+              id: string;
+              name: string;
+              slug: string;
+            }>;
+            customFields?: { __typename?: 'ProductCustomFields'; nameFr?: string | null } | null;
+          };
+        };
+      }>;
+    }>;
+  };
+};
 
 export type DashboardTopProductsQueryVariables = Exact<{
   options?: InputMaybe<ProductListOptions>;
 }>;
 
-
-export type DashboardTopProductsQuery = { __typename?: 'Query', products: { __typename?: 'ProductList', totalItems: number, items: Array<{ __typename?: 'Product', id: string, name: string, slug: string, featuredAsset?: { __typename?: 'Asset', preview: string } | null, customFields?: { __typename?: 'ProductCustomFields', nameFr?: string | null, viewCount?: number | null } | null, variants: Array<{ __typename?: 'ProductVariant', id: string, stockOnHand: number, priceWithTax: any }> }> } };
+export type DashboardTopProductsQuery = {
+  __typename?: 'Query';
+  products: {
+    __typename?: 'ProductList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'Product';
+      id: string;
+      name: string;
+      slug: string;
+      featuredAsset?: { __typename?: 'Asset'; preview: string } | null;
+      customFields?: {
+        __typename?: 'ProductCustomFields';
+        nameFr?: string | null;
+        viewCount?: number | null;
+      } | null;
+      variants: Array<{
+        __typename?: 'ProductVariant';
+        id: string;
+        stockOnHand: number;
+        priceWithTax: any;
+      }>;
+    }>;
+  };
+};
 
 export type AdminOrdersQueryVariables = Exact<{
   options?: InputMaybe<OrderListOptions>;
 }>;
 
-
-export type AdminOrdersQuery = { __typename?: 'Query', orders: { __typename?: 'OrderList', totalItems: number, items: Array<{ __typename?: 'Order', id: string, code: string, state: string, orderPlacedAt?: any | null, createdAt: any, updatedAt: any, totalWithTax: any, total: any, currencyCode: CurrencyCode, customer?: { __typename?: 'Customer', id: string, firstName: string, lastName: string, emailAddress: string, phoneNumber?: string | null } | null, shippingLines: Array<{ __typename?: 'ShippingLine', priceWithTax: any, shippingMethod: { __typename?: 'ShippingMethod', id: string, name: string } }>, payments?: Array<{ __typename?: 'Payment', id: string, method: string, state: string, amount: any }> | null, customFields?: { __typename?: 'OrderCustomFields', customerNotes?: string | null, adminNotes?: string | null, trackingNumber?: string | null, wilaya?: string | null, cancellationReason?: string | null } | null }> } };
+export type AdminOrdersQuery = {
+  __typename?: 'Query';
+  orders: {
+    __typename?: 'OrderList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'Order';
+      id: string;
+      code: string;
+      state: string;
+      orderPlacedAt?: any | null;
+      createdAt: any;
+      updatedAt: any;
+      totalWithTax: any;
+      total: any;
+      currencyCode: CurrencyCode;
+      customer?: {
+        __typename?: 'Customer';
+        id: string;
+        firstName: string;
+        lastName: string;
+        emailAddress: string;
+        phoneNumber?: string | null;
+      } | null;
+      shippingLines: Array<{
+        __typename?: 'ShippingLine';
+        priceWithTax: any;
+        shippingMethod: { __typename?: 'ShippingMethod'; id: string; name: string };
+      }>;
+      payments?: Array<{
+        __typename?: 'Payment';
+        id: string;
+        method: string;
+        state: string;
+        amount: any;
+      }> | null;
+      customFields?: {
+        __typename?: 'OrderCustomFields';
+        customerNotes?: string | null;
+        adminNotes?: string | null;
+        trackingNumber?: string | null;
+        wilaya?: string | null;
+        cancellationReason?: string | null;
+      } | null;
+    }>;
+  };
+};
 
 export type AdminOrderQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
-export type AdminOrderQuery = { __typename?: 'Query', order?: { __typename?: 'Order', id: string, code: string, state: string, active: boolean, orderPlacedAt?: any | null, createdAt: any, updatedAt: any, totalWithTax: any, total: any, subTotal: any, subTotalWithTax: any, currencyCode: CurrencyCode, shipping: any, shippingWithTax: any, couponCodes: Array<string>, discounts: Array<{ __typename?: 'Discount', type: AdjustmentType, description: string, amountWithTax: any }>, customer?: { __typename?: 'Customer', id: string, firstName: string, lastName: string, emailAddress: string, phoneNumber?: string | null, customFields?: { __typename?: 'CustomerCustomFields', wilaya?: string | null, city?: string | null } | null } | null, shippingAddress?: { __typename?: 'OrderAddress', fullName?: string | null, company?: string | null, streetLine1?: string | null, streetLine2?: string | null, city?: string | null, province?: string | null, postalCode?: string | null, country?: string | null, phoneNumber?: string | null } | null, billingAddress?: { __typename?: 'OrderAddress', fullName?: string | null, company?: string | null, streetLine1?: string | null, streetLine2?: string | null, city?: string | null, province?: string | null, postalCode?: string | null, country?: string | null, phoneNumber?: string | null } | null, lines: Array<{ __typename?: 'OrderLine', id: string, quantity: number, unitPrice: any, unitPriceWithTax: any, linePrice: any, linePriceWithTax: any, productVariant: { __typename?: 'ProductVariant', id: string, sku: string, name: string, product: { __typename?: 'Product', id: string, name: string, featuredAsset?: { __typename?: 'Asset', preview: string } | null, customFields?: { __typename?: 'ProductCustomFields', nameFr?: string | null } | null } } }>, shippingLines: Array<{ __typename?: 'ShippingLine', price: any, priceWithTax: any, shippingMethod: { __typename?: 'ShippingMethod', id: string, name: string, code: string } }>, payments?: Array<{ __typename?: 'Payment', id: string, method: string, state: string, amount: any, transactionId?: string | null, createdAt: any, metadata?: any | null }> | null, fulfillments?: Array<{ __typename?: 'Fulfillment', id: string, state: string, method: string, trackingCode?: string | null, createdAt: any, lines: Array<{ __typename?: 'FulfillmentLine', orderLineId: string, quantity: number }> }> | null, history: { __typename?: 'HistoryEntryList', items: Array<{ __typename?: 'HistoryEntry', id: string, type: HistoryEntryType, createdAt: any, data: any, administrator?: { __typename?: 'Administrator', id: string, firstName: string, lastName: string } | null }> }, customFields?: { __typename?: 'OrderCustomFields', customerNotes?: string | null, adminNotes?: string | null, trackingNumber?: string | null, wilaya?: string | null, cancellationReason?: string | null } | null } | null };
+export type AdminOrderQuery = {
+  __typename?: 'Query';
+  order?: {
+    __typename?: 'Order';
+    id: string;
+    code: string;
+    state: string;
+    active: boolean;
+    orderPlacedAt?: any | null;
+    createdAt: any;
+    updatedAt: any;
+    totalWithTax: any;
+    total: any;
+    subTotal: any;
+    subTotalWithTax: any;
+    currencyCode: CurrencyCode;
+    shipping: any;
+    shippingWithTax: any;
+    couponCodes: Array<string>;
+    discounts: Array<{
+      __typename?: 'Discount';
+      type: AdjustmentType;
+      description: string;
+      amountWithTax: any;
+    }>;
+    customer?: {
+      __typename?: 'Customer';
+      id: string;
+      firstName: string;
+      lastName: string;
+      emailAddress: string;
+      phoneNumber?: string | null;
+      customFields?: {
+        __typename?: 'CustomerCustomFields';
+        wilaya?: string | null;
+        city?: string | null;
+      } | null;
+    } | null;
+    shippingAddress?: {
+      __typename?: 'OrderAddress';
+      fullName?: string | null;
+      company?: string | null;
+      streetLine1?: string | null;
+      streetLine2?: string | null;
+      city?: string | null;
+      province?: string | null;
+      postalCode?: string | null;
+      country?: string | null;
+      phoneNumber?: string | null;
+    } | null;
+    billingAddress?: {
+      __typename?: 'OrderAddress';
+      fullName?: string | null;
+      company?: string | null;
+      streetLine1?: string | null;
+      streetLine2?: string | null;
+      city?: string | null;
+      province?: string | null;
+      postalCode?: string | null;
+      country?: string | null;
+      phoneNumber?: string | null;
+    } | null;
+    lines: Array<{
+      __typename?: 'OrderLine';
+      id: string;
+      quantity: number;
+      unitPrice: any;
+      unitPriceWithTax: any;
+      linePrice: any;
+      linePriceWithTax: any;
+      productVariant: {
+        __typename?: 'ProductVariant';
+        id: string;
+        sku: string;
+        name: string;
+        product: {
+          __typename?: 'Product';
+          id: string;
+          name: string;
+          featuredAsset?: { __typename?: 'Asset'; preview: string } | null;
+          customFields?: { __typename?: 'ProductCustomFields'; nameFr?: string | null } | null;
+        };
+      };
+    }>;
+    shippingLines: Array<{
+      __typename?: 'ShippingLine';
+      price: any;
+      priceWithTax: any;
+      shippingMethod: { __typename?: 'ShippingMethod'; id: string; name: string; code: string };
+    }>;
+    payments?: Array<{
+      __typename?: 'Payment';
+      id: string;
+      method: string;
+      state: string;
+      amount: any;
+      transactionId?: string | null;
+      createdAt: any;
+      metadata?: any | null;
+    }> | null;
+    fulfillments?: Array<{
+      __typename?: 'Fulfillment';
+      id: string;
+      state: string;
+      method: string;
+      trackingCode?: string | null;
+      createdAt: any;
+      lines: Array<{ __typename?: 'FulfillmentLine'; orderLineId: string; quantity: number }>;
+    }> | null;
+    history: {
+      __typename?: 'HistoryEntryList';
+      items: Array<{
+        __typename?: 'HistoryEntry';
+        id: string;
+        type: HistoryEntryType;
+        createdAt: any;
+        data: any;
+        administrator?: {
+          __typename?: 'Administrator';
+          id: string;
+          firstName: string;
+          lastName: string;
+        } | null;
+      }>;
+    };
+    customFields?: {
+      __typename?: 'OrderCustomFields';
+      customerNotes?: string | null;
+      adminNotes?: string | null;
+      trackingNumber?: string | null;
+      wilaya?: string | null;
+      cancellationReason?: string | null;
+    } | null;
+  } | null;
+};
 
 export type TransitionOrderToStateMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   state: Scalars['String']['input'];
 }>;
 
-
-export type TransitionOrderToStateMutation = { __typename?: 'Mutation', transitionOrderToState?:
-    | { __typename?: 'Order', id: string, state: string }
-    | { __typename?: 'OrderStateTransitionError', errorCode: ErrorCode, message: string, transitionError: string, fromState: string, toState: string }
-   | null };
+export type TransitionOrderToStateMutation = {
+  __typename?: 'Mutation';
+  transitionOrderToState?:
+    | { __typename?: 'Order'; id: string; state: string }
+    | {
+        __typename?: 'OrderStateTransitionError';
+        errorCode: ErrorCode;
+        message: string;
+        transitionError: string;
+        fromState: string;
+        toState: string;
+      }
+    | null;
+};
 
 export type AddNoteToOrderMutationVariables = Exact<{
   input: AddNoteToOrderInput;
 }>;
 
-
-export type AddNoteToOrderMutation = { __typename?: 'Mutation', addNoteToOrder: { __typename?: 'Order', id: string } };
+export type AddNoteToOrderMutation = {
+  __typename?: 'Mutation';
+  addNoteToOrder: { __typename?: 'Order'; id: string };
+};
 
 export type UpdateOrderCustomFieldsMutationVariables = Exact<{
   input: UpdateOrderInput;
 }>;
 
-
-export type UpdateOrderCustomFieldsMutation = { __typename?: 'Mutation', setOrderCustomFields?: { __typename?: 'Order', id: string, customFields?: { __typename?: 'OrderCustomFields', trackingNumber?: string | null, adminNotes?: string | null, wilaya?: string | null } | null } | null };
+export type UpdateOrderCustomFieldsMutation = {
+  __typename?: 'Mutation';
+  setOrderCustomFields?: {
+    __typename?: 'Order';
+    id: string;
+    customFields?: {
+      __typename?: 'OrderCustomFields';
+      trackingNumber?: string | null;
+      adminNotes?: string | null;
+      wilaya?: string | null;
+    } | null;
+  } | null;
+};
 
 export type CancelOrderMutationVariables = Exact<{
   input: CancelOrderInput;
 }>;
 
-
-export type CancelOrderMutation = { __typename?: 'Mutation', cancelOrder:
-    | { __typename?: 'CancelActiveOrderError', errorCode: ErrorCode, message: string, orderState: string }
-    | { __typename?: 'EmptyOrderLineSelectionError', errorCode: ErrorCode, message: string }
-    | { __typename?: 'MultipleOrderError', errorCode: ErrorCode, message: string }
-    | { __typename?: 'Order', id: string, state: string }
-    | { __typename?: 'OrderStateTransitionError', errorCode: ErrorCode, message: string, transitionError: string }
-    | { __typename?: 'QuantityTooGreatError', errorCode: ErrorCode, message: string }
-   };
+export type CancelOrderMutation = {
+  __typename?: 'Mutation';
+  cancelOrder:
+    | {
+        __typename?: 'CancelActiveOrderError';
+        errorCode: ErrorCode;
+        message: string;
+        orderState: string;
+      }
+    | { __typename?: 'EmptyOrderLineSelectionError'; errorCode: ErrorCode; message: string }
+    | { __typename?: 'MultipleOrderError'; errorCode: ErrorCode; message: string }
+    | { __typename?: 'Order'; id: string; state: string }
+    | {
+        __typename?: 'OrderStateTransitionError';
+        errorCode: ErrorCode;
+        message: string;
+        transitionError: string;
+      }
+    | { __typename?: 'QuantityTooGreatError'; errorCode: ErrorCode; message: string };
+};
 
 export type CreateFulfillmentMutationVariables = Exact<{
   input: FulfillOrderInput;
 }>;
 
-
-export type CreateFulfillmentMutation = { __typename?: 'Mutation', addFulfillmentToOrder:
-    | { __typename?: 'CreateFulfillmentError', errorCode: ErrorCode, message: string }
-    | { __typename?: 'EmptyOrderLineSelectionError', errorCode: ErrorCode, message: string }
-    | { __typename?: 'Fulfillment', id: string, state: string, trackingCode?: string | null, method: string }
-    | { __typename?: 'FulfillmentStateTransitionError', errorCode: ErrorCode, message: string }
-    | { __typename?: 'InsufficientStockOnHandError', errorCode: ErrorCode, message: string }
+export type CreateFulfillmentMutation = {
+  __typename?: 'Mutation';
+  addFulfillmentToOrder:
+    | { __typename?: 'CreateFulfillmentError'; errorCode: ErrorCode; message: string }
+    | { __typename?: 'EmptyOrderLineSelectionError'; errorCode: ErrorCode; message: string }
+    | {
+        __typename?: 'Fulfillment';
+        id: string;
+        state: string;
+        trackingCode?: string | null;
+        method: string;
+      }
+    | { __typename?: 'FulfillmentStateTransitionError'; errorCode: ErrorCode; message: string }
+    | { __typename?: 'InsufficientStockOnHandError'; errorCode: ErrorCode; message: string }
     | { __typename?: 'InvalidFulfillmentHandlerError' }
-    | { __typename?: 'ItemsAlreadyFulfilledError', errorCode: ErrorCode, message: string }
-   };
+    | { __typename?: 'ItemsAlreadyFulfilledError'; errorCode: ErrorCode; message: string };
+};
 
 export type AdminProductsQueryVariables = Exact<{
   options?: InputMaybe<ProductListOptions>;
 }>;
 
-
-export type AdminProductsQuery = { __typename?: 'Query', products: { __typename?: 'ProductList', totalItems: number, items: Array<{ __typename?: 'Product', id: string, createdAt: any, updatedAt: any, name: string, slug: string, description: string, enabled: boolean, featuredAsset?: { __typename?: 'Asset', id: string, name: string, preview: string, source: string } | null, assets: Array<{ __typename?: 'Asset', id: string, name: string, preview: string, source: string }>, variants: Array<{ __typename?: 'ProductVariant', id: string, name: string, sku: string, price: any, priceWithTax: any, stockOnHand: number, stockAllocated: number, enabled: boolean, options: Array<{ __typename?: 'ProductOption', id: string, code: string, name: string }>, facetValues: Array<{ __typename?: 'FacetValue', id: string, name: string, code: string, facet: { __typename?: 'Facet', id: string, name: string, code: string } }>, customFields?: { __typename?: 'ProductVariantCustomFields', minStockAlert?: number | null } | null }>, optionGroups: Array<{ __typename?: 'ProductOptionGroup', id: string, code: string, name: string, options: Array<{ __typename?: 'ProductOption', id: string, code: string, name: string }> }>, facetValues: Array<{ __typename?: 'FacetValue', id: string, name: string, code: string, facet: { __typename?: 'Facet', id: string, name: string, code: string } }>, collections: Array<{ __typename?: 'Collection', id: string, name: string, slug: string, parent?: { __typename?: 'Collection', id: string, name: string } | null }>, customFields?: { __typename?: 'ProductCustomFields', nameFr?: string | null, nameAr?: string | null, descriptionFr?: string | null, descriptionAr?: string | null, salePrice?: number | null, isFeatured?: boolean | null, viewCount?: number | null, weightKg?: number | null, availableSizes?: Array<string> | null, availableColors?: Array<string> | null } | null }> } };
+export type AdminProductsQuery = {
+  __typename?: 'Query';
+  products: {
+    __typename?: 'ProductList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'Product';
+      id: string;
+      createdAt: any;
+      updatedAt: any;
+      name: string;
+      slug: string;
+      description: string;
+      enabled: boolean;
+      featuredAsset?: {
+        __typename?: 'Asset';
+        id: string;
+        name: string;
+        preview: string;
+        source: string;
+      } | null;
+      assets: Array<{
+        __typename?: 'Asset';
+        id: string;
+        name: string;
+        preview: string;
+        source: string;
+      }>;
+      variants: Array<{
+        __typename?: 'ProductVariant';
+        id: string;
+        name: string;
+        sku: string;
+        price: any;
+        priceWithTax: any;
+        stockOnHand: number;
+        stockAllocated: number;
+        enabled: boolean;
+        options: Array<{ __typename?: 'ProductOption'; id: string; code: string; name: string }>;
+        facetValues: Array<{
+          __typename?: 'FacetValue';
+          id: string;
+          name: string;
+          code: string;
+          facet: { __typename?: 'Facet'; id: string; name: string; code: string };
+        }>;
+        customFields?: {
+          __typename?: 'ProductVariantCustomFields';
+          minStockAlert?: number | null;
+        } | null;
+      }>;
+      optionGroups: Array<{
+        __typename?: 'ProductOptionGroup';
+        id: string;
+        code: string;
+        name: string;
+        options: Array<{ __typename?: 'ProductOption'; id: string; code: string; name: string }>;
+      }>;
+      facetValues: Array<{
+        __typename?: 'FacetValue';
+        id: string;
+        name: string;
+        code: string;
+        facet: { __typename?: 'Facet'; id: string; name: string; code: string };
+      }>;
+      collections: Array<{
+        __typename?: 'Collection';
+        id: string;
+        name: string;
+        slug: string;
+        parent?: { __typename?: 'Collection'; id: string; name: string } | null;
+      }>;
+      customFields?: {
+        __typename?: 'ProductCustomFields';
+        nameFr?: string | null;
+        nameAr?: string | null;
+        descriptionFr?: string | null;
+        descriptionAr?: string | null;
+        salePrice?: number | null;
+        isFeatured?: boolean | null;
+        viewCount?: number | null;
+        weightKg?: number | null;
+        availableSizes?: Array<string> | null;
+        availableColors?: Array<string> | null;
+      } | null;
+    }>;
+  };
+};
 
 export type AdminProductQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
-export type AdminProductQuery = { __typename?: 'Query', product?: { __typename?: 'Product', id: string, createdAt: any, updatedAt: any, name: string, slug: string, description: string, enabled: boolean, featuredAsset?: { __typename?: 'Asset', id: string, name: string, preview: string, source: string, width: number, height: number, fileSize: number, mimeType: string } | null, assets: Array<{ __typename?: 'Asset', id: string, name: string, preview: string, source: string, width: number, height: number, fileSize: number, mimeType: string }>, optionGroups: Array<{ __typename?: 'ProductOptionGroup', id: string, code: string, name: string, options: Array<{ __typename?: 'ProductOption', id: string, code: string, name: string }> }>, variants: Array<{ __typename?: 'ProductVariant', id: string, createdAt: any, updatedAt: any, name: string, sku: string, price: any, priceWithTax: any, stockOnHand: number, stockAllocated: number, enabled: boolean, trackInventory: GlobalFlag, featuredAsset?: { __typename?: 'Asset', id: string, preview: string, source: string } | null, assets: Array<{ __typename?: 'Asset', id: string, preview: string, source: string }>, options: Array<{ __typename?: 'ProductOption', id: string, code: string, name: string, group: { __typename?: 'ProductOptionGroup', id: string, code: string, name: string } }>, customFields?: { __typename?: 'ProductVariantCustomFields', minStockAlert?: number | null } | null }>, customFields?: { __typename?: 'ProductCustomFields', nameFr?: string | null, nameAr?: string | null, descriptionFr?: string | null, descriptionAr?: string | null, salePrice?: number | null, isFeatured?: boolean | null, viewCount?: number | null, weightKg?: number | null, availableSizes?: Array<string> | null, availableColors?: Array<string> | null } | null, collections: Array<{ __typename?: 'Collection', id: string, name: string, slug: string }>, facetValues: Array<{ __typename?: 'FacetValue', id: string, name: string, code: string, facet: { __typename?: 'Facet', id: string, name: string, code: string } }> } | null };
+export type AdminProductQuery = {
+  __typename?: 'Query';
+  product?: {
+    __typename?: 'Product';
+    id: string;
+    createdAt: any;
+    updatedAt: any;
+    name: string;
+    slug: string;
+    description: string;
+    enabled: boolean;
+    featuredAsset?: {
+      __typename?: 'Asset';
+      id: string;
+      name: string;
+      preview: string;
+      source: string;
+      width: number;
+      height: number;
+      fileSize: number;
+      mimeType: string;
+    } | null;
+    assets: Array<{
+      __typename?: 'Asset';
+      id: string;
+      name: string;
+      preview: string;
+      source: string;
+      width: number;
+      height: number;
+      fileSize: number;
+      mimeType: string;
+    }>;
+    optionGroups: Array<{
+      __typename?: 'ProductOptionGroup';
+      id: string;
+      code: string;
+      name: string;
+      options: Array<{ __typename?: 'ProductOption'; id: string; code: string; name: string }>;
+    }>;
+    variants: Array<{
+      __typename?: 'ProductVariant';
+      id: string;
+      createdAt: any;
+      updatedAt: any;
+      name: string;
+      sku: string;
+      price: any;
+      priceWithTax: any;
+      stockOnHand: number;
+      stockAllocated: number;
+      enabled: boolean;
+      trackInventory: GlobalFlag;
+      featuredAsset?: { __typename?: 'Asset'; id: string; preview: string; source: string } | null;
+      assets: Array<{ __typename?: 'Asset'; id: string; preview: string; source: string }>;
+      options: Array<{
+        __typename?: 'ProductOption';
+        id: string;
+        code: string;
+        name: string;
+        group: { __typename?: 'ProductOptionGroup'; id: string; code: string; name: string };
+      }>;
+      customFields?: {
+        __typename?: 'ProductVariantCustomFields';
+        minStockAlert?: number | null;
+      } | null;
+    }>;
+    customFields?: {
+      __typename?: 'ProductCustomFields';
+      nameFr?: string | null;
+      nameAr?: string | null;
+      descriptionFr?: string | null;
+      descriptionAr?: string | null;
+      salePrice?: number | null;
+      isFeatured?: boolean | null;
+      viewCount?: number | null;
+      weightKg?: number | null;
+      availableSizes?: Array<string> | null;
+      availableColors?: Array<string> | null;
+    } | null;
+    collections: Array<{ __typename?: 'Collection'; id: string; name: string; slug: string }>;
+    facetValues: Array<{
+      __typename?: 'FacetValue';
+      id: string;
+      name: string;
+      code: string;
+      facet: { __typename?: 'Facet'; id: string; name: string; code: string };
+    }>;
+  } | null;
+};
 
 export type AdminProductOptionGroupsQueryVariables = Exact<{
   filterTerm?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
-export type AdminProductOptionGroupsQuery = { __typename?: 'Query', productOptionGroups: Array<{ __typename?: 'ProductOptionGroup', id: string, createdAt: any, name: string, code: string, options: Array<{ __typename?: 'ProductOption', id: string, code: string, name: string }> }> };
+export type AdminProductOptionGroupsQuery = {
+  __typename?: 'Query';
+  productOptionGroups: Array<{
+    __typename?: 'ProductOptionGroup';
+    id: string;
+    createdAt: any;
+    name: string;
+    code: string;
+    options: Array<{ __typename?: 'ProductOption'; id: string; code: string; name: string }>;
+  }>;
+};
 
 export type AdminFacetsQueryVariables = Exact<{
   options?: InputMaybe<FacetListOptions>;
 }>;
 
-
-export type AdminFacetsQuery = { __typename?: 'Query', facets: { __typename?: 'FacetList', totalItems: number, items: Array<{ __typename?: 'Facet', id: string, name: string, code: string, values: Array<{ __typename?: 'FacetValue', id: string, name: string, code: string }> }> } };
+export type AdminFacetsQuery = {
+  __typename?: 'Query';
+  facets: {
+    __typename?: 'FacetList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'Facet';
+      id: string;
+      name: string;
+      code: string;
+      values: Array<{ __typename?: 'FacetValue'; id: string; name: string; code: string }>;
+    }>;
+  };
+};
 
 export type AdminFacetsWithValuesQueryVariables = Exact<{
   options?: InputMaybe<FacetListOptions>;
 }>;
 
-
-export type AdminFacetsWithValuesQuery = { __typename?: 'Query', facets: { __typename?: 'FacetList', totalItems: number, items: Array<{ __typename?: 'Facet', id: string, name: string, code: string, isPrivate: boolean, values: Array<{ __typename?: 'FacetValue', id: string, name: string, code: string }> }> } };
+export type AdminFacetsWithValuesQuery = {
+  __typename?: 'Query';
+  facets: {
+    __typename?: 'FacetList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'Facet';
+      id: string;
+      name: string;
+      code: string;
+      isPrivate: boolean;
+      values: Array<{ __typename?: 'FacetValue'; id: string; name: string; code: string }>;
+    }>;
+  };
+};
 
 export type AdminSearchProductsQueryVariables = Exact<{
   input: SearchInput;
 }>;
 
+export type AdminSearchProductsQuery = {
+  __typename?: 'Query';
+  search: {
+    __typename?: 'SearchResponse';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'SearchResult';
+      productId: string;
+      productName: string;
+      slug: string;
+      description: string;
+      enabled: boolean;
+      currencyCode: CurrencyCode;
+      collectionIds: Array<string>;
+      inStock: boolean;
+      productAsset?: { __typename?: 'SearchResultAsset'; id: string; preview: string } | null;
+      price:
+        | { __typename?: 'PriceRange'; min: any; max: any }
+        | { __typename?: 'SinglePrice'; value: any };
+      priceWithTax:
+        | { __typename?: 'PriceRange'; min: any; max: any }
+        | { __typename?: 'SinglePrice'; value: any };
+    }>;
+    facetValues: Array<{
+      __typename?: 'FacetValueResult';
+      count: number;
+      facetValue: {
+        __typename?: 'FacetValue';
+        id: string;
+        name: string;
+        code: string;
+        facet: { __typename?: 'Facet'; id: string; name: string; code: string };
+      };
+    }>;
+  };
+};
 
-export type AdminSearchProductsQuery = { __typename?: 'Query', search: { __typename?: 'SearchResponse', totalItems: number, items: Array<{ __typename?: 'SearchResult', productId: string, productName: string, slug: string, description: string, enabled: boolean, currencyCode: CurrencyCode, collectionIds: Array<string>, inStock: boolean, productAsset?: { __typename?: 'SearchResultAsset', id: string, preview: string } | null, price:
-        | { __typename?: 'PriceRange', min: any, max: any }
-        | { __typename?: 'SinglePrice', value: any }
-      , priceWithTax:
-        | { __typename?: 'PriceRange', min: any, max: any }
-        | { __typename?: 'SinglePrice', value: any }
-       }>, facetValues: Array<{ __typename?: 'FacetValueResult', count: number, facetValue: { __typename?: 'FacetValue', id: string, name: string, code: string, facet: { __typename?: 'Facet', id: string, name: string, code: string } } }> } };
+export type AdminTaxCategoriesQueryVariables = Exact<{ [key: string]: never }>;
 
-export type AdminTaxCategoriesQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type AdminTaxCategoriesQuery = { __typename?: 'Query', taxCategories: { __typename?: 'TaxCategoryList', totalItems: number, items: Array<{ __typename?: 'TaxCategory', id: string, name: string, isDefault: boolean }> } };
+export type AdminTaxCategoriesQuery = {
+  __typename?: 'Query';
+  taxCategories: {
+    __typename?: 'TaxCategoryList';
+    totalItems: number;
+    items: Array<{ __typename?: 'TaxCategory'; id: string; name: string; isDefault: boolean }>;
+  };
+};
 
 export type CreateProductMutationVariables = Exact<{
   input: CreateProductInput;
 }>;
 
-
-export type CreateProductMutation = { __typename?: 'Mutation', createProduct: { __typename?: 'Product', id: string, name: string, slug: string, description: string, enabled: boolean, featuredAsset?: { __typename?: 'Asset', id: string, preview: string } | null, assets: Array<{ __typename?: 'Asset', id: string, preview: string }>, optionGroups: Array<{ __typename?: 'ProductOptionGroup', id: string, code: string, name: string, options: Array<{ __typename?: 'ProductOption', id: string, code: string, name: string }> }>, customFields?: { __typename?: 'ProductCustomFields', nameFr?: string | null, nameAr?: string | null, descriptionFr?: string | null, descriptionAr?: string | null, salePrice?: number | null, isFeatured?: boolean | null, weightKg?: number | null, availableSizes?: Array<string> | null, availableColors?: Array<string> | null } | null } };
+export type CreateProductMutation = {
+  __typename?: 'Mutation';
+  createProduct: {
+    __typename?: 'Product';
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
+    enabled: boolean;
+    featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+    assets: Array<{ __typename?: 'Asset'; id: string; preview: string }>;
+    optionGroups: Array<{
+      __typename?: 'ProductOptionGroup';
+      id: string;
+      code: string;
+      name: string;
+      options: Array<{ __typename?: 'ProductOption'; id: string; code: string; name: string }>;
+    }>;
+    customFields?: {
+      __typename?: 'ProductCustomFields';
+      nameFr?: string | null;
+      nameAr?: string | null;
+      descriptionFr?: string | null;
+      descriptionAr?: string | null;
+      salePrice?: number | null;
+      isFeatured?: boolean | null;
+      weightKg?: number | null;
+      availableSizes?: Array<string> | null;
+      availableColors?: Array<string> | null;
+    } | null;
+  };
+};
 
 export type UpdateProductMutationVariables = Exact<{
   input: UpdateProductInput;
 }>;
 
-
-export type UpdateProductMutation = { __typename?: 'Mutation', updateProduct: { __typename?: 'Product', id: string, name: string, slug: string, description: string, enabled: boolean, featuredAsset?: { __typename?: 'Asset', id: string, preview: string } | null, assets: Array<{ __typename?: 'Asset', id: string, preview: string }>, optionGroups: Array<{ __typename?: 'ProductOptionGroup', id: string, code: string, name: string, options: Array<{ __typename?: 'ProductOption', id: string, code: string, name: string }> }>, customFields?: { __typename?: 'ProductCustomFields', nameFr?: string | null, nameAr?: string | null, descriptionFr?: string | null, descriptionAr?: string | null, salePrice?: number | null, isFeatured?: boolean | null, viewCount?: number | null, weightKg?: number | null, availableSizes?: Array<string> | null, availableColors?: Array<string> | null } | null } };
+export type UpdateProductMutation = {
+  __typename?: 'Mutation';
+  updateProduct: {
+    __typename?: 'Product';
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
+    enabled: boolean;
+    featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+    assets: Array<{ __typename?: 'Asset'; id: string; preview: string }>;
+    optionGroups: Array<{
+      __typename?: 'ProductOptionGroup';
+      id: string;
+      code: string;
+      name: string;
+      options: Array<{ __typename?: 'ProductOption'; id: string; code: string; name: string }>;
+    }>;
+    customFields?: {
+      __typename?: 'ProductCustomFields';
+      nameFr?: string | null;
+      nameAr?: string | null;
+      descriptionFr?: string | null;
+      descriptionAr?: string | null;
+      salePrice?: number | null;
+      isFeatured?: boolean | null;
+      viewCount?: number | null;
+      weightKg?: number | null;
+      availableSizes?: Array<string> | null;
+      availableColors?: Array<string> | null;
+    } | null;
+  };
+};
 
 export type DeleteProductMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
-export type DeleteProductMutation = { __typename?: 'Mutation', deleteProduct: { __typename?: 'DeletionResponse', result: DeletionResult, message?: string | null } };
+export type DeleteProductMutation = {
+  __typename?: 'Mutation';
+  deleteProduct: {
+    __typename?: 'DeletionResponse';
+    result: DeletionResult;
+    message?: string | null;
+  };
+};
 
 export type DeleteProductsMutationVariables = Exact<{
   ids: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
 }>;
 
-
-export type DeleteProductsMutation = { __typename?: 'Mutation', deleteProducts: Array<{ __typename?: 'DeletionResponse', result: DeletionResult, message?: string | null }> };
+export type DeleteProductsMutation = {
+  __typename?: 'Mutation';
+  deleteProducts: Array<{
+    __typename?: 'DeletionResponse';
+    result: DeletionResult;
+    message?: string | null;
+  }>;
+};
 
 export type CreateProductVariantsMutationVariables = Exact<{
   input: Array<CreateProductVariantInput> | CreateProductVariantInput;
 }>;
 
-
-export type CreateProductVariantsMutation = { __typename?: 'Mutation', createProductVariants: Array<{ __typename?: 'ProductVariant', id: string, name: string, sku: string, price: any, priceWithTax: any, stockOnHand: number, enabled: boolean, trackInventory: GlobalFlag, featuredAsset?: { __typename?: 'Asset', id: string, preview: string } | null, options: Array<{ __typename?: 'ProductOption', id: string, code: string, name: string }> } | null> };
+export type CreateProductVariantsMutation = {
+  __typename?: 'Mutation';
+  createProductVariants: Array<{
+    __typename?: 'ProductVariant';
+    id: string;
+    name: string;
+    sku: string;
+    price: any;
+    priceWithTax: any;
+    stockOnHand: number;
+    enabled: boolean;
+    trackInventory: GlobalFlag;
+    featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+    options: Array<{ __typename?: 'ProductOption'; id: string; code: string; name: string }>;
+  } | null>;
+};
 
 export type UpdateProductVariantsMutationVariables = Exact<{
   input: Array<UpdateProductVariantInput> | UpdateProductVariantInput;
 }>;
 
-
-export type UpdateProductVariantsMutation = { __typename?: 'Mutation', updateProductVariants: Array<{ __typename?: 'ProductVariant', id: string, name: string, sku: string, price: any, priceWithTax: any, stockOnHand: number, stockAllocated: number, enabled: boolean, trackInventory: GlobalFlag, featuredAsset?: { __typename?: 'Asset', id: string, preview: string } | null, options: Array<{ __typename?: 'ProductOption', id: string, code: string, name: string }>, customFields?: { __typename?: 'ProductVariantCustomFields', minStockAlert?: number | null } | null } | null> };
+export type UpdateProductVariantsMutation = {
+  __typename?: 'Mutation';
+  updateProductVariants: Array<{
+    __typename?: 'ProductVariant';
+    id: string;
+    name: string;
+    sku: string;
+    price: any;
+    priceWithTax: any;
+    stockOnHand: number;
+    stockAllocated: number;
+    enabled: boolean;
+    trackInventory: GlobalFlag;
+    featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+    options: Array<{ __typename?: 'ProductOption'; id: string; code: string; name: string }>;
+    customFields?: {
+      __typename?: 'ProductVariantCustomFields';
+      minStockAlert?: number | null;
+    } | null;
+  } | null>;
+};
 
 export type DeleteProductVariantMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
-export type DeleteProductVariantMutation = { __typename?: 'Mutation', deleteProductVariant: { __typename?: 'DeletionResponse', result: DeletionResult, message?: string | null } };
+export type DeleteProductVariantMutation = {
+  __typename?: 'Mutation';
+  deleteProductVariant: {
+    __typename?: 'DeletionResponse';
+    result: DeletionResult;
+    message?: string | null;
+  };
+};
 
 export type DeleteProductVariantsMutationVariables = Exact<{
   ids: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
 }>;
 
-
-export type DeleteProductVariantsMutation = { __typename?: 'Mutation', deleteProductVariants: Array<{ __typename?: 'DeletionResponse', result: DeletionResult, message?: string | null }> };
+export type DeleteProductVariantsMutation = {
+  __typename?: 'Mutation';
+  deleteProductVariants: Array<{
+    __typename?: 'DeletionResponse';
+    result: DeletionResult;
+    message?: string | null;
+  }>;
+};
 
 export type CreateProductOptionGroupMutationVariables = Exact<{
   input: CreateProductOptionGroupInput;
 }>;
 
-
-export type CreateProductOptionGroupMutation = { __typename?: 'Mutation', createProductOptionGroup: { __typename?: 'ProductOptionGroup', id: string, code: string, name: string, options: Array<{ __typename?: 'ProductOption', id: string, code: string, name: string }> } };
+export type CreateProductOptionGroupMutation = {
+  __typename?: 'Mutation';
+  createProductOptionGroup: {
+    __typename?: 'ProductOptionGroup';
+    id: string;
+    code: string;
+    name: string;
+    options: Array<{ __typename?: 'ProductOption'; id: string; code: string; name: string }>;
+  };
+};
 
 export type UpdateProductOptionGroupMutationVariables = Exact<{
   input: UpdateProductOptionGroupInput;
 }>;
 
-
-export type UpdateProductOptionGroupMutation = { __typename?: 'Mutation', updateProductOptionGroup: { __typename?: 'ProductOptionGroup', id: string, code: string, name: string, options: Array<{ __typename?: 'ProductOption', id: string, code: string, name: string }> } };
+export type UpdateProductOptionGroupMutation = {
+  __typename?: 'Mutation';
+  updateProductOptionGroup: {
+    __typename?: 'ProductOptionGroup';
+    id: string;
+    code: string;
+    name: string;
+    options: Array<{ __typename?: 'ProductOption'; id: string; code: string; name: string }>;
+  };
+};
 
 export type CreateProductOptionMutationVariables = Exact<{
   input: CreateProductOptionInput;
 }>;
 
-
-export type CreateProductOptionMutation = { __typename?: 'Mutation', createProductOption: { __typename?: 'ProductOption', id: string, code: string, name: string, group: { __typename?: 'ProductOptionGroup', id: string, code: string, name: string } } };
+export type CreateProductOptionMutation = {
+  __typename?: 'Mutation';
+  createProductOption: {
+    __typename?: 'ProductOption';
+    id: string;
+    code: string;
+    name: string;
+    group: { __typename?: 'ProductOptionGroup'; id: string; code: string; name: string };
+  };
+};
 
 export type UpdateProductOptionMutationVariables = Exact<{
   input: UpdateProductOptionInput;
 }>;
 
-
-export type UpdateProductOptionMutation = { __typename?: 'Mutation', updateProductOption: { __typename?: 'ProductOption', id: string, code: string, name: string, group: { __typename?: 'ProductOptionGroup', id: string, code: string, name: string } } };
+export type UpdateProductOptionMutation = {
+  __typename?: 'Mutation';
+  updateProductOption: {
+    __typename?: 'ProductOption';
+    id: string;
+    code: string;
+    name: string;
+    group: { __typename?: 'ProductOptionGroup'; id: string; code: string; name: string };
+  };
+};
 
 export type DeleteProductOptionMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
-export type DeleteProductOptionMutation = { __typename?: 'Mutation', deleteProductOption: { __typename?: 'DeletionResponse', result: DeletionResult, message?: string | null } };
+export type DeleteProductOptionMutation = {
+  __typename?: 'Mutation';
+  deleteProductOption: {
+    __typename?: 'DeletionResponse';
+    result: DeletionResult;
+    message?: string | null;
+  };
+};
 
 export type AddOptionGroupToProductMutationVariables = Exact<{
   productId: Scalars['ID']['input'];
   optionGroupId: Scalars['ID']['input'];
 }>;
 
-
-export type AddOptionGroupToProductMutation = { __typename?: 'Mutation', addOptionGroupToProduct: { __typename?: 'Product', id: string, optionGroups: Array<{ __typename?: 'ProductOptionGroup', id: string, code: string, name: string, options: Array<{ __typename?: 'ProductOption', id: string, code: string, name: string }> }> } };
+export type AddOptionGroupToProductMutation = {
+  __typename?: 'Mutation';
+  addOptionGroupToProduct: {
+    __typename?: 'Product';
+    id: string;
+    optionGroups: Array<{
+      __typename?: 'ProductOptionGroup';
+      id: string;
+      code: string;
+      name: string;
+      options: Array<{ __typename?: 'ProductOption'; id: string; code: string; name: string }>;
+    }>;
+  };
+};
 
 export type RemoveOptionGroupFromProductMutationVariables = Exact<{
   productId: Scalars['ID']['input'];
@@ -7720,292 +8750,7600 @@ export type RemoveOptionGroupFromProductMutationVariables = Exact<{
   force?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
-
-export type RemoveOptionGroupFromProductMutation = { __typename?: 'Mutation', removeOptionGroupFromProduct:
-    | { __typename?: 'Product', id: string, optionGroups: Array<{ __typename?: 'ProductOptionGroup', id: string, code: string, name: string }> }
-    | { __typename?: 'ProductOptionInUseError', errorCode: ErrorCode, message: string, optionGroupCode: string, productVariantCount: number }
-   };
+export type RemoveOptionGroupFromProductMutation = {
+  __typename?: 'Mutation';
+  removeOptionGroupFromProduct:
+    | {
+        __typename?: 'Product';
+        id: string;
+        optionGroups: Array<{
+          __typename?: 'ProductOptionGroup';
+          id: string;
+          code: string;
+          name: string;
+        }>;
+      }
+    | {
+        __typename?: 'ProductOptionInUseError';
+        errorCode: ErrorCode;
+        message: string;
+        optionGroupCode: string;
+        productVariantCount: number;
+      };
+};
 
 export type CreateAssetsMutationVariables = Exact<{
   input: Array<CreateAssetInput> | CreateAssetInput;
 }>;
 
-
-export type CreateAssetsMutation = { __typename?: 'Mutation', createAssets: Array<
-    | { __typename?: 'Asset', id: string, name: string, preview: string, source: string, width: number, height: number, fileSize: number, mimeType: string }
-    | { __typename?: 'MimeTypeError', errorCode: ErrorCode, message: string, fileName: string, mimeType: string }
-  > };
+export type CreateAssetsMutation = {
+  __typename?: 'Mutation';
+  createAssets: Array<
+    | {
+        __typename?: 'Asset';
+        id: string;
+        name: string;
+        preview: string;
+        source: string;
+        width: number;
+        height: number;
+        fileSize: number;
+        mimeType: string;
+      }
+    | {
+        __typename?: 'MimeTypeError';
+        errorCode: ErrorCode;
+        message: string;
+        fileName: string;
+        mimeType: string;
+      }
+  >;
+};
 
 export type UpdateAssetMutationVariables = Exact<{
   input: UpdateAssetInput;
 }>;
 
-
-export type UpdateAssetMutation = { __typename?: 'Mutation', updateAsset: { __typename?: 'Asset', id: string, name: string, preview: string, source: string, focalPoint?: { __typename?: 'Coordinate', x: number, y: number } | null, tags: Array<{ __typename?: 'Tag', id: string, value: string }> } };
+export type UpdateAssetMutation = {
+  __typename?: 'Mutation';
+  updateAsset: {
+    __typename?: 'Asset';
+    id: string;
+    name: string;
+    preview: string;
+    source: string;
+    focalPoint?: { __typename?: 'Coordinate'; x: number; y: number } | null;
+    tags: Array<{ __typename?: 'Tag'; id: string; value: string }>;
+  };
+};
 
 export type DeleteAssetMutationVariables = Exact<{
   input: DeleteAssetInput;
 }>;
 
-
-export type DeleteAssetMutation = { __typename?: 'Mutation', deleteAsset: { __typename?: 'DeletionResponse', result: DeletionResult, message?: string | null } };
+export type DeleteAssetMutation = {
+  __typename?: 'Mutation';
+  deleteAsset: { __typename?: 'DeletionResponse'; result: DeletionResult; message?: string | null };
+};
 
 export type DeleteAssetsMutationVariables = Exact<{
   input: DeleteAssetsInput;
 }>;
 
-
-export type DeleteAssetsMutation = { __typename?: 'Mutation', deleteAssets: { __typename?: 'DeletionResponse', result: DeletionResult, message?: string | null } };
+export type DeleteAssetsMutation = {
+  __typename?: 'Mutation';
+  deleteAssets: {
+    __typename?: 'DeletionResponse';
+    result: DeletionResult;
+    message?: string | null;
+  };
+};
 
 export type AddAssetsToProductMutationVariables = Exact<{
   productId: Scalars['ID']['input'];
   assetIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
 }>;
 
-
-export type AddAssetsToProductMutation = { __typename?: 'Mutation', updateProduct: { __typename?: 'Product', id: string, assets: Array<{ __typename?: 'Asset', id: string, name: string, preview: string, source: string }> } };
+export type AddAssetsToProductMutation = {
+  __typename?: 'Mutation';
+  updateProduct: {
+    __typename?: 'Product';
+    id: string;
+    assets: Array<{
+      __typename?: 'Asset';
+      id: string;
+      name: string;
+      preview: string;
+      source: string;
+    }>;
+  };
+};
 
 export type SetProductFeaturedAssetMutationVariables = Exact<{
   productId: Scalars['ID']['input'];
   assetId: Scalars['ID']['input'];
 }>;
 
-
-export type SetProductFeaturedAssetMutation = { __typename?: 'Mutation', updateProduct: { __typename?: 'Product', id: string, featuredAsset?: { __typename?: 'Asset', id: string, name: string, preview: string, source: string } | null } };
+export type SetProductFeaturedAssetMutation = {
+  __typename?: 'Mutation';
+  updateProduct: {
+    __typename?: 'Product';
+    id: string;
+    featuredAsset?: {
+      __typename?: 'Asset';
+      id: string;
+      name: string;
+      preview: string;
+      source: string;
+    } | null;
+  };
+};
 
 export type SetVariantFeaturedAssetMutationVariables = Exact<{
   variantId: Scalars['ID']['input'];
   assetId: Scalars['ID']['input'];
 }>;
 
-
-export type SetVariantFeaturedAssetMutation = { __typename?: 'Mutation', updateProductVariants: Array<{ __typename?: 'ProductVariant', id: string, featuredAsset?: { __typename?: 'Asset', id: string, preview: string } | null } | null> };
+export type SetVariantFeaturedAssetMutation = {
+  __typename?: 'Mutation';
+  updateProductVariants: Array<{
+    __typename?: 'ProductVariant';
+    id: string;
+    featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+  } | null>;
+};
 
 export type AddAssetsToVariantMutationVariables = Exact<{
   variantId: Scalars['ID']['input'];
   assetIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
 }>;
 
-
-export type AddAssetsToVariantMutation = { __typename?: 'Mutation', updateProductVariants: Array<{ __typename?: 'ProductVariant', id: string, assets: Array<{ __typename?: 'Asset', id: string, preview: string, source: string }> } | null> };
+export type AddAssetsToVariantMutation = {
+  __typename?: 'Mutation';
+  updateProductVariants: Array<{
+    __typename?: 'ProductVariant';
+    id: string;
+    assets: Array<{ __typename?: 'Asset'; id: string; preview: string; source: string }>;
+  } | null>;
+};
 
 export type AssignProductsToChannelMutationVariables = Exact<{
   input: AssignProductsToChannelInput;
 }>;
 
-
-export type AssignProductsToChannelMutation = { __typename?: 'Mutation', assignProductsToChannel: Array<{ __typename?: 'Product', id: string }> };
+export type AssignProductsToChannelMutation = {
+  __typename?: 'Mutation';
+  assignProductsToChannel: Array<{ __typename?: 'Product'; id: string }>;
+};
 
 export type RemoveProductsFromChannelMutationVariables = Exact<{
   input: RemoveProductsFromChannelInput;
 }>;
 
-
-export type RemoveProductsFromChannelMutation = { __typename?: 'Mutation', removeProductsFromChannel: Array<{ __typename?: 'Product', id: string }> };
+export type RemoveProductsFromChannelMutation = {
+  __typename?: 'Mutation';
+  removeProductsFromChannel: Array<{ __typename?: 'Product'; id: string }>;
+};
 
 export type UpdateProductFacetsMutationVariables = Exact<{
   productId: Scalars['ID']['input'];
   facetValueIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
 }>;
 
-
-export type UpdateProductFacetsMutation = { __typename?: 'Mutation', updateProduct: { __typename?: 'Product', id: string, facetValues: Array<{ __typename?: 'FacetValue', id: string, name: string, facet: { __typename?: 'Facet', id: string, name: string } }> } };
+export type UpdateProductFacetsMutation = {
+  __typename?: 'Mutation';
+  updateProduct: {
+    __typename?: 'Product';
+    id: string;
+    facetValues: Array<{
+      __typename?: 'FacetValue';
+      id: string;
+      name: string;
+      facet: { __typename?: 'Facet'; id: string; name: string };
+    }>;
+  };
+};
 
 export type UpdateVariantStockMutationVariables = Exact<{
   variantId: Scalars['ID']['input'];
   stockOnHand: Scalars['Int']['input'];
 }>;
 
-
-export type UpdateVariantStockMutation = { __typename?: 'Mutation', updateProductVariants: Array<{ __typename?: 'ProductVariant', id: string, stockOnHand: number, stockAllocated: number } | null> };
+export type UpdateVariantStockMutation = {
+  __typename?: 'Mutation';
+  updateProductVariants: Array<{
+    __typename?: 'ProductVariant';
+    id: string;
+    stockOnHand: number;
+    stockAllocated: number;
+  } | null>;
+};
 
 export type UpdateVariantsStockMutationVariables = Exact<{
   input: Array<UpdateProductVariantInput> | UpdateProductVariantInput;
 }>;
 
-
-export type UpdateVariantsStockMutation = { __typename?: 'Mutation', updateProductVariants: Array<{ __typename?: 'ProductVariant', id: string, sku: string, stockOnHand: number, stockAllocated: number } | null> };
+export type UpdateVariantsStockMutation = {
+  __typename?: 'Mutation';
+  updateProductVariants: Array<{
+    __typename?: 'ProductVariant';
+    id: string;
+    sku: string;
+    stockOnHand: number;
+    stockAllocated: number;
+  } | null>;
+};
 
 export type ToggleProductFeaturedMutationVariables = Exact<{
   productId: Scalars['ID']['input'];
 }>;
 
-
-export type ToggleProductFeaturedMutation = { __typename?: 'Mutation', toggleProductFeatured: { __typename?: 'Product', id: string, customFields?: { __typename?: 'ProductCustomFields', isFeatured?: boolean | null } | null } };
+export type ToggleProductFeaturedMutation = {
+  __typename?: 'Mutation';
+  toggleProductFeatured: {
+    __typename?: 'Product';
+    id: string;
+    customFields?: { __typename?: 'ProductCustomFields'; isFeatured?: boolean | null } | null;
+  };
+};
 
 export type SalesReportOrdersQueryVariables = Exact<{
   options?: InputMaybe<OrderListOptions>;
 }>;
 
-
-export type SalesReportOrdersQuery = { __typename?: 'Query', orders: { __typename?: 'OrderList', totalItems: number, items: Array<{ __typename?: 'Order', id: string, code: string, state: string, total: any, totalWithTax: any, currencyCode: CurrencyCode, orderPlacedAt?: any | null, createdAt: any, customer?: { __typename?: 'Customer', id: string, firstName: string, lastName: string, emailAddress: string } | null, lines: Array<{ __typename?: 'OrderLine', id: string, quantity: number, linePrice: any, linePriceWithTax: any, productVariant: { __typename?: 'ProductVariant', id: string, sku: string, name: string, product: { __typename?: 'Product', id: string, name: string } } }>, customFields?: { __typename?: 'OrderCustomFields', wilaya?: string | null } | null }> } };
+export type SalesReportOrdersQuery = {
+  __typename?: 'Query';
+  orders: {
+    __typename?: 'OrderList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'Order';
+      id: string;
+      code: string;
+      state: string;
+      total: any;
+      totalWithTax: any;
+      currencyCode: CurrencyCode;
+      orderPlacedAt?: any | null;
+      createdAt: any;
+      customer?: {
+        __typename?: 'Customer';
+        id: string;
+        firstName: string;
+        lastName: string;
+        emailAddress: string;
+      } | null;
+      lines: Array<{
+        __typename?: 'OrderLine';
+        id: string;
+        quantity: number;
+        linePrice: any;
+        linePriceWithTax: any;
+        productVariant: {
+          __typename?: 'ProductVariant';
+          id: string;
+          sku: string;
+          name: string;
+          product: { __typename?: 'Product'; id: string; name: string };
+        };
+      }>;
+      customFields?: { __typename?: 'OrderCustomFields'; wilaya?: string | null } | null;
+    }>;
+  };
+};
 
 export type TopSellingProductsQueryVariables = Exact<{
   options?: InputMaybe<ProductListOptions>;
 }>;
 
-
-export type TopSellingProductsQuery = { __typename?: 'Query', products: { __typename?: 'ProductList', totalItems: number, items: Array<{ __typename?: 'Product', id: string, name: string, slug: string, featuredAsset?: { __typename?: 'Asset', id: string, preview: string } | null, variants: Array<{ __typename?: 'ProductVariant', id: string, sku: string, name: string, price: any, stockOnHand: number, stockAllocated: number }>, customFields?: { __typename?: 'ProductCustomFields', nameFr?: string | null, viewCount?: number | null, isFeatured?: boolean | null } | null }> } };
+export type TopSellingProductsQuery = {
+  __typename?: 'Query';
+  products: {
+    __typename?: 'ProductList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'Product';
+      id: string;
+      name: string;
+      slug: string;
+      featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+      variants: Array<{
+        __typename?: 'ProductVariant';
+        id: string;
+        sku: string;
+        name: string;
+        price: any;
+        stockOnHand: number;
+        stockAllocated: number;
+      }>;
+      customFields?: {
+        __typename?: 'ProductCustomFields';
+        nameFr?: string | null;
+        viewCount?: number | null;
+        isFeatured?: boolean | null;
+      } | null;
+    }>;
+  };
+};
 
 export type LowStockVariantsQueryVariables = Exact<{
   options?: InputMaybe<ProductVariantListOptions>;
 }>;
 
-
-export type LowStockVariantsQuery = { __typename?: 'Query', productVariants: { __typename?: 'ProductVariantList', totalItems: number, items: Array<{ __typename?: 'ProductVariant', id: string, sku: string, name: string, price: any, stockOnHand: number, stockAllocated: number, product: { __typename?: 'Product', id: string, name: string, featuredAsset?: { __typename?: 'Asset', id: string, preview: string } | null }, customFields?: { __typename?: 'ProductVariantCustomFields', minStockAlert?: number | null } | null }> } };
+export type LowStockVariantsQuery = {
+  __typename?: 'Query';
+  productVariants: {
+    __typename?: 'ProductVariantList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'ProductVariant';
+      id: string;
+      sku: string;
+      name: string;
+      price: any;
+      stockOnHand: number;
+      stockAllocated: number;
+      product: {
+        __typename?: 'Product';
+        id: string;
+        name: string;
+        featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+      };
+      customFields?: {
+        __typename?: 'ProductVariantCustomFields';
+        minStockAlert?: number | null;
+      } | null;
+    }>;
+  };
+};
 
 export type CustomersReportQueryVariables = Exact<{
   options?: InputMaybe<CustomerListOptions>;
 }>;
 
+export type CustomersReportQuery = {
+  __typename?: 'Query';
+  customers: {
+    __typename?: 'CustomerList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'Customer';
+      id: string;
+      firstName: string;
+      lastName: string;
+      emailAddress: string;
+      createdAt: any;
+      orders: { __typename?: 'OrderList'; totalItems: number };
+      customFields?: { __typename?: 'CustomerCustomFields'; wilaya?: string | null } | null;
+    }>;
+  };
+};
 
-export type CustomersReportQuery = { __typename?: 'Query', customers: { __typename?: 'CustomerList', totalItems: number, items: Array<{ __typename?: 'Customer', id: string, firstName: string, lastName: string, emailAddress: string, createdAt: any, orders: { __typename?: 'OrderList', totalItems: number }, customFields?: { __typename?: 'CustomerCustomFields', wilaya?: string | null } | null }> } };
+export type GlobalSettingsQueryVariables = Exact<{ [key: string]: never }>;
 
-export type GlobalSettingsQueryVariables = Exact<{ [key: string]: never; }>;
+export type GlobalSettingsQuery = {
+  __typename?: 'Query';
+  globalSettings: {
+    __typename?: 'GlobalSettings';
+    id: string;
+    availableLanguages: Array<LanguageCode>;
+    trackInventory: boolean;
+    outOfStockThreshold: number;
+    serverConfig: { __typename?: 'ServerConfig'; permittedAssetTypes: Array<string> };
+  };
+};
 
+export type PaymentMethodsQueryVariables = Exact<{ [key: string]: never }>;
 
-export type GlobalSettingsQuery = { __typename?: 'Query', globalSettings: { __typename?: 'GlobalSettings', id: string, availableLanguages: Array<LanguageCode>, trackInventory: boolean, outOfStockThreshold: number, serverConfig: { __typename?: 'ServerConfig', permittedAssetTypes: Array<string> } } };
-
-export type PaymentMethodsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type PaymentMethodsQuery = { __typename?: 'Query', paymentMethods: { __typename?: 'PaymentMethodList', totalItems: number, items: Array<{ __typename?: 'PaymentMethod', id: string, createdAt: any, updatedAt: any, name: string, code: string, description: string, enabled: boolean, checker?: { __typename?: 'ConfigurableOperation', code: string, args: Array<{ __typename?: 'ConfigArg', name: string, value: string }> } | null, handler: { __typename?: 'ConfigurableOperation', code: string, args: Array<{ __typename?: 'ConfigArg', name: string, value: string }> } }> } };
+export type PaymentMethodsQuery = {
+  __typename?: 'Query';
+  paymentMethods: {
+    __typename?: 'PaymentMethodList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'PaymentMethod';
+      id: string;
+      createdAt: any;
+      updatedAt: any;
+      name: string;
+      code: string;
+      description: string;
+      enabled: boolean;
+      checker?: {
+        __typename?: 'ConfigurableOperation';
+        code: string;
+        args: Array<{ __typename?: 'ConfigArg'; name: string; value: string }>;
+      } | null;
+      handler: {
+        __typename?: 'ConfigurableOperation';
+        code: string;
+        args: Array<{ __typename?: 'ConfigArg'; name: string; value: string }>;
+      };
+    }>;
+  };
+};
 
 export type PaymentMethodQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
-export type PaymentMethodQuery = { __typename?: 'Query', paymentMethod?: { __typename?: 'PaymentMethod', id: string, createdAt: any, updatedAt: any, name: string, code: string, description: string, enabled: boolean, checker?: { __typename?: 'ConfigurableOperation', code: string, args: Array<{ __typename?: 'ConfigArg', name: string, value: string }> } | null, handler: { __typename?: 'ConfigurableOperation', code: string, args: Array<{ __typename?: 'ConfigArg', name: string, value: string }> } } | null };
+export type PaymentMethodQuery = {
+  __typename?: 'Query';
+  paymentMethod?: {
+    __typename?: 'PaymentMethod';
+    id: string;
+    createdAt: any;
+    updatedAt: any;
+    name: string;
+    code: string;
+    description: string;
+    enabled: boolean;
+    checker?: {
+      __typename?: 'ConfigurableOperation';
+      code: string;
+      args: Array<{ __typename?: 'ConfigArg'; name: string; value: string }>;
+    } | null;
+    handler: {
+      __typename?: 'ConfigurableOperation';
+      code: string;
+      args: Array<{ __typename?: 'ConfigArg'; name: string; value: string }>;
+    };
+  } | null;
+};
 
 export type UpdatePaymentMethodMutationVariables = Exact<{
   input: UpdatePaymentMethodInput;
 }>;
 
+export type UpdatePaymentMethodMutation = {
+  __typename?: 'Mutation';
+  updatePaymentMethod: {
+    __typename?: 'PaymentMethod';
+    id: string;
+    name: string;
+    code: string;
+    description: string;
+    enabled: boolean;
+  };
+};
 
-export type UpdatePaymentMethodMutation = { __typename?: 'Mutation', updatePaymentMethod: { __typename?: 'PaymentMethod', id: string, name: string, code: string, description: string, enabled: boolean } };
+export type ShippingMethodsQueryVariables = Exact<{ [key: string]: never }>;
 
-export type ShippingMethodsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type ShippingMethodsQuery = { __typename?: 'Query', shippingMethods: { __typename?: 'ShippingMethodList', totalItems: number, items: Array<{ __typename?: 'ShippingMethod', id: string, createdAt: any, updatedAt: any, name: string, code: string, description: string, fulfillmentHandlerCode: string, checker: { __typename?: 'ConfigurableOperation', code: string, args: Array<{ __typename?: 'ConfigArg', name: string, value: string }> }, calculator: { __typename?: 'ConfigurableOperation', code: string, args: Array<{ __typename?: 'ConfigArg', name: string, value: string }> } }> } };
+export type ShippingMethodsQuery = {
+  __typename?: 'Query';
+  shippingMethods: {
+    __typename?: 'ShippingMethodList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'ShippingMethod';
+      id: string;
+      createdAt: any;
+      updatedAt: any;
+      name: string;
+      code: string;
+      description: string;
+      fulfillmentHandlerCode: string;
+      checker: {
+        __typename?: 'ConfigurableOperation';
+        code: string;
+        args: Array<{ __typename?: 'ConfigArg'; name: string; value: string }>;
+      };
+      calculator: {
+        __typename?: 'ConfigurableOperation';
+        code: string;
+        args: Array<{ __typename?: 'ConfigArg'; name: string; value: string }>;
+      };
+    }>;
+  };
+};
 
 export type ShippingMethodQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
-export type ShippingMethodQuery = { __typename?: 'Query', shippingMethod?: { __typename?: 'ShippingMethod', id: string, createdAt: any, updatedAt: any, name: string, code: string, description: string, fulfillmentHandlerCode: string, checker: { __typename?: 'ConfigurableOperation', code: string, args: Array<{ __typename?: 'ConfigArg', name: string, value: string }> }, calculator: { __typename?: 'ConfigurableOperation', code: string, args: Array<{ __typename?: 'ConfigArg', name: string, value: string }> } } | null };
+export type ShippingMethodQuery = {
+  __typename?: 'Query';
+  shippingMethod?: {
+    __typename?: 'ShippingMethod';
+    id: string;
+    createdAt: any;
+    updatedAt: any;
+    name: string;
+    code: string;
+    description: string;
+    fulfillmentHandlerCode: string;
+    checker: {
+      __typename?: 'ConfigurableOperation';
+      code: string;
+      args: Array<{ __typename?: 'ConfigArg'; name: string; value: string }>;
+    };
+    calculator: {
+      __typename?: 'ConfigurableOperation';
+      code: string;
+      args: Array<{ __typename?: 'ConfigArg'; name: string; value: string }>;
+    };
+  } | null;
+};
 
 export type UpdateShippingMethodMutationVariables = Exact<{
   input: UpdateShippingMethodInput;
 }>;
 
+export type UpdateShippingMethodMutation = {
+  __typename?: 'Mutation';
+  updateShippingMethod: {
+    __typename?: 'ShippingMethod';
+    id: string;
+    name: string;
+    code: string;
+    description: string;
+  };
+};
 
-export type UpdateShippingMethodMutation = { __typename?: 'Mutation', updateShippingMethod: { __typename?: 'ShippingMethod', id: string, name: string, code: string, description: string } };
+export type TaxRatesQueryVariables = Exact<{ [key: string]: never }>;
 
-export type TaxRatesQueryVariables = Exact<{ [key: string]: never; }>;
+export type TaxRatesQuery = {
+  __typename?: 'Query';
+  taxRates: {
+    __typename?: 'TaxRateList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'TaxRate';
+      id: string;
+      name: string;
+      value: number;
+      enabled: boolean;
+      category: { __typename?: 'TaxCategory'; id: string; name: string };
+      zone: { __typename?: 'Zone'; id: string; name: string };
+    }>;
+  };
+};
 
+export type ChannelsQueryVariables = Exact<{ [key: string]: never }>;
 
-export type TaxRatesQuery = { __typename?: 'Query', taxRates: { __typename?: 'TaxRateList', totalItems: number, items: Array<{ __typename?: 'TaxRate', id: string, name: string, value: number, enabled: boolean, category: { __typename?: 'TaxCategory', id: string, name: string }, zone: { __typename?: 'Zone', id: string, name: string } }> } };
+export type ChannelsQuery = {
+  __typename?: 'Query';
+  channels: {
+    __typename?: 'ChannelList';
+    totalItems: number;
+    items: Array<{
+      __typename?: 'Channel';
+      id: string;
+      code: string;
+      token: string;
+      defaultLanguageCode: LanguageCode;
+      currencyCode: CurrencyCode;
+      pricesIncludeTax: boolean;
+      defaultShippingZone?: { __typename?: 'Zone'; id: string; name: string } | null;
+      defaultTaxZone?: { __typename?: 'Zone'; id: string; name: string } | null;
+    }>;
+  };
+};
 
-export type ChannelsQueryVariables = Exact<{ [key: string]: never; }>;
+export type ActiveChannelQueryVariables = Exact<{ [key: string]: never }>;
 
+export type ActiveChannelQuery = {
+  __typename?: 'Query';
+  activeChannel: {
+    __typename?: 'Channel';
+    id: string;
+    code: string;
+    token: string;
+    defaultLanguageCode: LanguageCode;
+    currencyCode: CurrencyCode;
+    pricesIncludeTax: boolean;
+    defaultShippingZone?: { __typename?: 'Zone'; id: string; name: string } | null;
+    defaultTaxZone?: { __typename?: 'Zone'; id: string; name: string } | null;
+  };
+};
 
-export type ChannelsQuery = { __typename?: 'Query', channels: { __typename?: 'ChannelList', totalItems: number, items: Array<{ __typename?: 'Channel', id: string, code: string, token: string, defaultLanguageCode: LanguageCode, currencyCode: CurrencyCode, pricesIncludeTax: boolean, defaultShippingZone?: { __typename?: 'Zone', id: string, name: string } | null, defaultTaxZone?: { __typename?: 'Zone', id: string, name: string } | null }> } };
-
-export type ActiveChannelQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type ActiveChannelQuery = { __typename?: 'Query', activeChannel: { __typename?: 'Channel', id: string, code: string, token: string, defaultLanguageCode: LanguageCode, currencyCode: CurrencyCode, pricesIncludeTax: boolean, defaultShippingZone?: { __typename?: 'Zone', id: string, name: string } | null, defaultTaxZone?: { __typename?: 'Zone', id: string, name: string } | null } };
-
-
-export const UpdateActiveAdministratorDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateActiveAdministrator"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateActiveAdministratorInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateActiveAdministrator"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"emailAddress"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"verified"}},{"kind":"Field","name":{"kind":"Name","value":"lastLogin"}},{"kind":"Field","name":{"kind":"Name","value":"roles"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<UpdateActiveAdministratorMutation, UpdateActiveAdministratorMutationVariables>;
-export const AdminAdministratorsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminAdministrators"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"AdministratorListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"administrators"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"emailAddress"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"verified"}},{"kind":"Field","name":{"kind":"Name","value":"lastLogin"}},{"kind":"Field","name":{"kind":"Name","value":"roles"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<AdminAdministratorsQuery, AdminAdministratorsQueryVariables>;
-export const AdminAdministratorDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminAdministrator"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"administrator"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"emailAddress"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"verified"}},{"kind":"Field","name":{"kind":"Name","value":"lastLogin"}},{"kind":"Field","name":{"kind":"Name","value":"roles"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}}]}}]}}]}}]}}]} as unknown as DocumentNode<AdminAdministratorQuery, AdminAdministratorQueryVariables>;
-export const AdminRolesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminRoles"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"RoleListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"roles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}},{"kind":"Field","name":{"kind":"Name","value":"channels"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<AdminRolesQuery, AdminRolesQueryVariables>;
-export const AdminRoleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminRole"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"role"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}},{"kind":"Field","name":{"kind":"Name","value":"channels"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}}]}}]}}]} as unknown as DocumentNode<AdminRoleQuery, AdminRoleQueryVariables>;
-export const CreateAdministratorDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateAdministrator"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateAdministratorInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createAdministrator"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"emailAddress"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"roles"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}}]}}]}}]}}]} as unknown as DocumentNode<CreateAdministratorMutation, CreateAdministratorMutationVariables>;
-export const UpdateAdministratorDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateAdministrator"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateAdministratorInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateAdministrator"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"emailAddress"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"roles"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}}]}}]}}]}}]} as unknown as DocumentNode<UpdateAdministratorMutation, UpdateAdministratorMutationVariables>;
-export const DeleteAdministratorDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteAdministrator"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteAdministrator"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"result"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<DeleteAdministratorMutation, DeleteAdministratorMutationVariables>;
-export const CreateRoleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateRole"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateRoleInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createRole"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}}]}}]}}]} as unknown as DocumentNode<CreateRoleMutation, CreateRoleMutationVariables>;
-export const UpdateRoleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateRole"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateRoleInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateRole"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}}]}}]}}]} as unknown as DocumentNode<UpdateRoleMutation, UpdateRoleMutationVariables>;
-export const DeleteRoleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteRole"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteRole"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"result"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<DeleteRoleMutation, DeleteRoleMutationVariables>;
-export const AdminLoginDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminLogin"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"username"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"rememberMe"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"login"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"username"},"value":{"kind":"Variable","name":{"kind":"Name","value":"username"}}},{"kind":"Argument","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}},{"kind":"Argument","name":{"kind":"Name","value":"rememberMe"},"value":{"kind":"Variable","name":{"kind":"Name","value":"rememberMe"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"CurrentUser"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"identifier"}},{"kind":"Field","name":{"kind":"Name","value":"channels"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"InvalidCredentialsError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"NativeAuthStrategyError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]}}]} as unknown as DocumentNode<AdminLoginMutation, AdminLoginMutationVariables>;
-export const AdminLogoutDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminLogout"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"logout"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}}]}}]}}]} as unknown as DocumentNode<AdminLogoutMutation, AdminLogoutMutationVariables>;
-export const MeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"identifier"}},{"kind":"Field","name":{"kind":"Name","value":"channels"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}}]}}]}}]}}]} as unknown as DocumentNode<MeQuery, MeQueryVariables>;
-export const ActiveAdministratorDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ActiveAdministrator"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"activeAdministrator"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"emailAddress"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"identifier"}},{"kind":"Field","name":{"kind":"Name","value":"roles"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}}]}}]}}]}}]}}]} as unknown as DocumentNode<ActiveAdministratorQuery, ActiveAdministratorQueryVariables>;
-export const AdminCollectionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminCollections"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"CollectionListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"collections"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPrivate"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"parentId"}},{"kind":"Field","name":{"kind":"Name","value":"breadcrumbs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}},{"kind":"Field","name":{"kind":"Name","value":"featuredAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}},{"kind":"Field","name":{"kind":"Name","value":"source"}}]}},{"kind":"Field","name":{"kind":"Name","value":"productVariants"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nameFr"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"descriptionFr"}},{"kind":"Field","name":{"kind":"Name","value":"descriptionAr"}},{"kind":"Field","name":{"kind":"Name","value":"displayOrder"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<AdminCollectionsQuery, AdminCollectionsQueryVariables>;
-export const AdminCollectionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminCollection"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"collection"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPrivate"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"parentId"}},{"kind":"Field","name":{"kind":"Name","value":"breadcrumbs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}},{"kind":"Field","name":{"kind":"Name","value":"featuredAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}},{"kind":"Field","name":{"kind":"Name","value":"source"}}]}},{"kind":"Field","name":{"kind":"Name","value":"productVariants"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nameFr"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"descriptionFr"}},{"kind":"Field","name":{"kind":"Name","value":"descriptionAr"}},{"kind":"Field","name":{"kind":"Name","value":"displayOrder"}}]}},{"kind":"Field","name":{"kind":"Name","value":"filters"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"args"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"children"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"productVariants"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nameFr"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}}]}}]}}]}}]}}]} as unknown as DocumentNode<AdminCollectionQuery, AdminCollectionQueryVariables>;
-export const CreateCollectionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateCollection"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateCollectionInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createCollection"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPrivate"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"parentId"}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nameFr"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"descriptionFr"}},{"kind":"Field","name":{"kind":"Name","value":"descriptionAr"}},{"kind":"Field","name":{"kind":"Name","value":"displayOrder"}}]}}]}}]}}]} as unknown as DocumentNode<CreateCollectionMutation, CreateCollectionMutationVariables>;
-export const UpdateCollectionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateCollection"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateCollectionInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateCollection"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPrivate"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"parentId"}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nameFr"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"descriptionFr"}},{"kind":"Field","name":{"kind":"Name","value":"descriptionAr"}},{"kind":"Field","name":{"kind":"Name","value":"displayOrder"}}]}}]}}]}}]} as unknown as DocumentNode<UpdateCollectionMutation, UpdateCollectionMutationVariables>;
-export const DeleteCollectionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteCollection"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteCollection"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"result"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<DeleteCollectionMutation, DeleteCollectionMutationVariables>;
-export const MoveCollectionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"MoveCollection"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MoveCollectionInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"moveCollection"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"parentId"}}]}}]}}]} as unknown as DocumentNode<MoveCollectionMutation, MoveCollectionMutationVariables>;
-export const UpdateCollectionFiltersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateCollectionFilters"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ConfigurableOperationInput"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateCollection"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"filters"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"args"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}}]} as unknown as DocumentNode<UpdateCollectionFiltersMutation, UpdateCollectionFiltersMutationVariables>;
-export const AdminCollectionsWithFiltersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminCollectionsWithFilters"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"CollectionListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"collections"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"parentId"}},{"kind":"Field","name":{"kind":"Name","value":"filters"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"args"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<AdminCollectionsWithFiltersQuery, AdminCollectionsWithFiltersQueryVariables>;
-export const AdminCustomersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminCustomers"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"CustomerListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"customers"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"emailAddress"}},{"kind":"Field","name":{"kind":"Name","value":"phoneNumber"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"verified"}},{"kind":"Field","name":{"kind":"Name","value":"lastLogin"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"wilaya"}},{"kind":"Field","name":{"kind":"Name","value":"city"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<AdminCustomersQuery, AdminCustomersQueryVariables>;
-export const AdminCustomerDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminCustomer"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"customer"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"emailAddress"}},{"kind":"Field","name":{"kind":"Name","value":"phoneNumber"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"verified"}},{"kind":"Field","name":{"kind":"Name","value":"lastLogin"}}]}},{"kind":"Field","name":{"kind":"Name","value":"addresses"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"company"}},{"kind":"Field","name":{"kind":"Name","value":"streetLine1"}},{"kind":"Field","name":{"kind":"Name","value":"streetLine2"}},{"kind":"Field","name":{"kind":"Name","value":"city"}},{"kind":"Field","name":{"kind":"Name","value":"province"}},{"kind":"Field","name":{"kind":"Name","value":"postalCode"}},{"kind":"Field","name":{"kind":"Name","value":"country"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"phoneNumber"}},{"kind":"Field","name":{"kind":"Name","value":"defaultShippingAddress"}},{"kind":"Field","name":{"kind":"Name","value":"defaultBillingAddress"}}]}},{"kind":"Field","name":{"kind":"Name","value":"orders"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"take"},"value":{"kind":"IntValue","value":"10"}},{"kind":"ObjectField","name":{"kind":"Name","value":"sort"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"orderPlacedAt"},"value":{"kind":"EnumValue","value":"DESC"}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"totalWithTax"}},{"kind":"Field","name":{"kind":"Name","value":"orderPlacedAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"wilaya"}},{"kind":"Field","name":{"kind":"Name","value":"city"}}]}}]}}]}}]} as unknown as DocumentNode<AdminCustomerQuery, AdminCustomerQueryVariables>;
-export const UpdateCustomerDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateCustomer"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateCustomerInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateCustomer"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Customer"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"emailAddress"}},{"kind":"Field","name":{"kind":"Name","value":"phoneNumber"}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"wilaya"}},{"kind":"Field","name":{"kind":"Name","value":"city"}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"EmailAddressConflictError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]}}]} as unknown as DocumentNode<UpdateCustomerMutation, UpdateCustomerMutationVariables>;
-export const DeleteCustomerDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteCustomer"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteCustomer"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"result"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<DeleteCustomerMutation, DeleteCustomerMutationVariables>;
-export const OscarDashboardStatsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"OscarDashboardStats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"oscarDashboardStats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalOrders"}},{"kind":"Field","name":{"kind":"Name","value":"totalRevenue"}},{"kind":"Field","name":{"kind":"Name","value":"totalCustomers"}},{"kind":"Field","name":{"kind":"Name","value":"totalProducts"}},{"kind":"Field","name":{"kind":"Name","value":"pendingOrders"}},{"kind":"Field","name":{"kind":"Name","value":"lowStockProductsCount"}}]}}]}}]} as unknown as DocumentNode<OscarDashboardStatsQuery, OscarDashboardStatsQueryVariables>;
-export const RecentOrdersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"RecentOrders"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"OrderListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"orders"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"totalWithTax"}},{"kind":"Field","name":{"kind":"Name","value":"orderPlacedAt"}},{"kind":"Field","name":{"kind":"Name","value":"customer"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"trackingNumber"}},{"kind":"Field","name":{"kind":"Name","value":"wilaya"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<RecentOrdersQuery, RecentOrdersQueryVariables>;
-export const LowStockProductsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"LowStockProducts"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"threshold"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"lowStockProducts"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"threshold"},"value":{"kind":"Variable","name":{"kind":"Name","value":"threshold"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"variants"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"stockOnHand"}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"minStockAlert"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nameFr"}}]}}]}}]}}]} as unknown as DocumentNode<LowStockProductsQuery, LowStockProductsQueryVariables>;
-export const DashboardOrdersAnalysisDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DashboardOrdersAnalysis"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"OrderListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"orders"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"totalWithTax"}},{"kind":"Field","name":{"kind":"Name","value":"orderPlacedAt"}},{"kind":"Field","name":{"kind":"Name","value":"lines"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"quantity"}},{"kind":"Field","name":{"kind":"Name","value":"linePriceWithTax"}},{"kind":"Field","name":{"kind":"Name","value":"productVariant"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"product"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"featuredAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"preview"}}]}},{"kind":"Field","name":{"kind":"Name","value":"collections"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nameFr"}}]}}]}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<DashboardOrdersAnalysisQuery, DashboardOrdersAnalysisQueryVariables>;
-export const DashboardTopProductsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DashboardTopProducts"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ProductListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"products"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"featuredAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"preview"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nameFr"}},{"kind":"Field","name":{"kind":"Name","value":"viewCount"}}]}},{"kind":"Field","name":{"kind":"Name","value":"variants"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"stockOnHand"}},{"kind":"Field","name":{"kind":"Name","value":"priceWithTax"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<DashboardTopProductsQuery, DashboardTopProductsQueryVariables>;
-export const AdminOrdersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminOrders"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"OrderListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"orders"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"orderPlacedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"totalWithTax"}},{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"currencyCode"}},{"kind":"Field","name":{"kind":"Name","value":"customer"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"emailAddress"}},{"kind":"Field","name":{"kind":"Name","value":"phoneNumber"}}]}},{"kind":"Field","name":{"kind":"Name","value":"shippingLines"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"shippingMethod"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"priceWithTax"}}]}},{"kind":"Field","name":{"kind":"Name","value":"payments"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"method"}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"amount"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"customerNotes"}},{"kind":"Field","name":{"kind":"Name","value":"adminNotes"}},{"kind":"Field","name":{"kind":"Name","value":"trackingNumber"}},{"kind":"Field","name":{"kind":"Name","value":"wilaya"}},{"kind":"Field","name":{"kind":"Name","value":"cancellationReason"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<AdminOrdersQuery, AdminOrdersQueryVariables>;
-export const AdminOrderDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminOrder"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"order"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"orderPlacedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"totalWithTax"}},{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"subTotal"}},{"kind":"Field","name":{"kind":"Name","value":"subTotalWithTax"}},{"kind":"Field","name":{"kind":"Name","value":"currencyCode"}},{"kind":"Field","name":{"kind":"Name","value":"shipping"}},{"kind":"Field","name":{"kind":"Name","value":"shippingWithTax"}},{"kind":"Field","name":{"kind":"Name","value":"couponCodes"}},{"kind":"Field","name":{"kind":"Name","value":"discounts"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"amountWithTax"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customer"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"emailAddress"}},{"kind":"Field","name":{"kind":"Name","value":"phoneNumber"}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"wilaya"}},{"kind":"Field","name":{"kind":"Name","value":"city"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"shippingAddress"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"company"}},{"kind":"Field","name":{"kind":"Name","value":"streetLine1"}},{"kind":"Field","name":{"kind":"Name","value":"streetLine2"}},{"kind":"Field","name":{"kind":"Name","value":"city"}},{"kind":"Field","name":{"kind":"Name","value":"province"}},{"kind":"Field","name":{"kind":"Name","value":"postalCode"}},{"kind":"Field","name":{"kind":"Name","value":"country"}},{"kind":"Field","name":{"kind":"Name","value":"phoneNumber"}}]}},{"kind":"Field","name":{"kind":"Name","value":"billingAddress"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"company"}},{"kind":"Field","name":{"kind":"Name","value":"streetLine1"}},{"kind":"Field","name":{"kind":"Name","value":"streetLine2"}},{"kind":"Field","name":{"kind":"Name","value":"city"}},{"kind":"Field","name":{"kind":"Name","value":"province"}},{"kind":"Field","name":{"kind":"Name","value":"postalCode"}},{"kind":"Field","name":{"kind":"Name","value":"country"}},{"kind":"Field","name":{"kind":"Name","value":"phoneNumber"}}]}},{"kind":"Field","name":{"kind":"Name","value":"lines"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"quantity"}},{"kind":"Field","name":{"kind":"Name","value":"unitPrice"}},{"kind":"Field","name":{"kind":"Name","value":"unitPriceWithTax"}},{"kind":"Field","name":{"kind":"Name","value":"linePrice"}},{"kind":"Field","name":{"kind":"Name","value":"linePriceWithTax"}},{"kind":"Field","name":{"kind":"Name","value":"productVariant"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"product"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"featuredAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"preview"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nameFr"}}]}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"shippingLines"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"shippingMethod"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}},{"kind":"Field","name":{"kind":"Name","value":"price"}},{"kind":"Field","name":{"kind":"Name","value":"priceWithTax"}}]}},{"kind":"Field","name":{"kind":"Name","value":"payments"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"method"}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"amount"}},{"kind":"Field","name":{"kind":"Name","value":"transactionId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"}}]}},{"kind":"Field","name":{"kind":"Name","value":"fulfillments"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"method"}},{"kind":"Field","name":{"kind":"Name","value":"trackingCode"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"lines"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"orderLineId"}},{"kind":"Field","name":{"kind":"Name","value":"quantity"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"history"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"take"},"value":{"kind":"IntValue","value":"50"}},{"kind":"ObjectField","name":{"kind":"Name","value":"sort"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"createdAt"},"value":{"kind":"EnumValue","value":"DESC"}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"data"}},{"kind":"Field","name":{"kind":"Name","value":"administrator"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"customerNotes"}},{"kind":"Field","name":{"kind":"Name","value":"adminNotes"}},{"kind":"Field","name":{"kind":"Name","value":"trackingNumber"}},{"kind":"Field","name":{"kind":"Name","value":"wilaya"}},{"kind":"Field","name":{"kind":"Name","value":"cancellationReason"}}]}}]}}]}}]} as unknown as DocumentNode<AdminOrderQuery, AdminOrderQueryVariables>;
-export const TransitionOrderToStateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"TransitionOrderToState"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"state"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"transitionOrderToState"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"state"},"value":{"kind":"Variable","name":{"kind":"Name","value":"state"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Order"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"state"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OrderStateTransitionError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"transitionError"}},{"kind":"Field","name":{"kind":"Name","value":"fromState"}},{"kind":"Field","name":{"kind":"Name","value":"toState"}}]}}]}}]}}]} as unknown as DocumentNode<TransitionOrderToStateMutation, TransitionOrderToStateMutationVariables>;
-export const AddNoteToOrderDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AddNoteToOrder"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AddNoteToOrderInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"addNoteToOrder"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<AddNoteToOrderMutation, AddNoteToOrderMutationVariables>;
-export const UpdateOrderCustomFieldsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateOrderCustomFields"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateOrderInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"setOrderCustomFields"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"trackingNumber"}},{"kind":"Field","name":{"kind":"Name","value":"adminNotes"}},{"kind":"Field","name":{"kind":"Name","value":"wilaya"}}]}}]}}]}}]} as unknown as DocumentNode<UpdateOrderCustomFieldsMutation, UpdateOrderCustomFieldsMutationVariables>;
-export const CancelOrderDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CancelOrder"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CancelOrderInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cancelOrder"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Order"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"state"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"EmptyOrderLineSelectionError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"QuantityTooGreatError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MultipleOrderError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"CancelActiveOrderError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"orderState"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OrderStateTransitionError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"transitionError"}}]}}]}}]}}]} as unknown as DocumentNode<CancelOrderMutation, CancelOrderMutationVariables>;
-export const CreateFulfillmentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateFulfillment"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"FulfillOrderInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"addFulfillmentToOrder"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Fulfillment"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"trackingCode"}},{"kind":"Field","name":{"kind":"Name","value":"method"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"EmptyOrderLineSelectionError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ItemsAlreadyFulfilledError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"InsufficientStockOnHandError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"CreateFulfillmentError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"FulfillmentStateTransitionError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]}}]} as unknown as DocumentNode<CreateFulfillmentMutation, CreateFulfillmentMutationVariables>;
-export const AdminProductsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminProducts"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ProductListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"products"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"featuredAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}},{"kind":"Field","name":{"kind":"Name","value":"source"}}]}},{"kind":"Field","name":{"kind":"Name","value":"assets"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}},{"kind":"Field","name":{"kind":"Name","value":"source"}}]}},{"kind":"Field","name":{"kind":"Name","value":"variants"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"price"}},{"kind":"Field","name":{"kind":"Name","value":"priceWithTax"}},{"kind":"Field","name":{"kind":"Name","value":"stockOnHand"}},{"kind":"Field","name":{"kind":"Name","value":"stockAllocated"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"options"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"facetValues"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"facet"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"minStockAlert"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"optionGroups"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"options"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"facetValues"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"facet"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"collections"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"parent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nameFr"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"descriptionFr"}},{"kind":"Field","name":{"kind":"Name","value":"descriptionAr"}},{"kind":"Field","name":{"kind":"Name","value":"salePrice"}},{"kind":"Field","name":{"kind":"Name","value":"isFeatured"}},{"kind":"Field","name":{"kind":"Name","value":"viewCount"}},{"kind":"Field","name":{"kind":"Name","value":"weightKg"}},{"kind":"Field","name":{"kind":"Name","value":"availableSizes"}},{"kind":"Field","name":{"kind":"Name","value":"availableColors"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<AdminProductsQuery, AdminProductsQueryVariables>;
-export const AdminProductDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminProduct"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"product"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"featuredAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}},{"kind":"Field","name":{"kind":"Name","value":"source"}},{"kind":"Field","name":{"kind":"Name","value":"width"}},{"kind":"Field","name":{"kind":"Name","value":"height"}},{"kind":"Field","name":{"kind":"Name","value":"fileSize"}},{"kind":"Field","name":{"kind":"Name","value":"mimeType"}}]}},{"kind":"Field","name":{"kind":"Name","value":"assets"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}},{"kind":"Field","name":{"kind":"Name","value":"source"}},{"kind":"Field","name":{"kind":"Name","value":"width"}},{"kind":"Field","name":{"kind":"Name","value":"height"}},{"kind":"Field","name":{"kind":"Name","value":"fileSize"}},{"kind":"Field","name":{"kind":"Name","value":"mimeType"}}]}},{"kind":"Field","name":{"kind":"Name","value":"optionGroups"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"options"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"variants"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"price"}},{"kind":"Field","name":{"kind":"Name","value":"priceWithTax"}},{"kind":"Field","name":{"kind":"Name","value":"stockOnHand"}},{"kind":"Field","name":{"kind":"Name","value":"stockAllocated"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"trackInventory"}},{"kind":"Field","name":{"kind":"Name","value":"featuredAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}},{"kind":"Field","name":{"kind":"Name","value":"source"}}]}},{"kind":"Field","name":{"kind":"Name","value":"assets"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}},{"kind":"Field","name":{"kind":"Name","value":"source"}}]}},{"kind":"Field","name":{"kind":"Name","value":"options"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"group"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"minStockAlert"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nameFr"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"descriptionFr"}},{"kind":"Field","name":{"kind":"Name","value":"descriptionAr"}},{"kind":"Field","name":{"kind":"Name","value":"salePrice"}},{"kind":"Field","name":{"kind":"Name","value":"isFeatured"}},{"kind":"Field","name":{"kind":"Name","value":"viewCount"}},{"kind":"Field","name":{"kind":"Name","value":"weightKg"}},{"kind":"Field","name":{"kind":"Name","value":"availableSizes"}},{"kind":"Field","name":{"kind":"Name","value":"availableColors"}}]}},{"kind":"Field","name":{"kind":"Name","value":"collections"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}},{"kind":"Field","name":{"kind":"Name","value":"facetValues"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"facet"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}}]}}]}}]}}]} as unknown as DocumentNode<AdminProductQuery, AdminProductQueryVariables>;
-export const AdminProductOptionGroupsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminProductOptionGroups"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filterTerm"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"productOptionGroups"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filterTerm"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filterTerm"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"options"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<AdminProductOptionGroupsQuery, AdminProductOptionGroupsQueryVariables>;
-export const AdminFacetsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminFacets"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"FacetListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"facets"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"values"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<AdminFacetsQuery, AdminFacetsQueryVariables>;
-export const AdminFacetsWithValuesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminFacetsWithValues"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"FacetListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"facets"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"isPrivate"}},{"kind":"Field","name":{"kind":"Name","value":"values"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<AdminFacetsWithValuesQuery, AdminFacetsWithValuesQueryVariables>;
-export const AdminSearchProductsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminSearchProducts"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"SearchInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"search"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"productId"}},{"kind":"Field","name":{"kind":"Name","value":"productName"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"productAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}}]}},{"kind":"Field","name":{"kind":"Name","value":"price"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SinglePrice"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"value"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PriceRange"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"min"}},{"kind":"Field","name":{"kind":"Name","value":"max"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"priceWithTax"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SinglePrice"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"value"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PriceRange"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"min"}},{"kind":"Field","name":{"kind":"Name","value":"max"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"currencyCode"}},{"kind":"Field","name":{"kind":"Name","value":"collectionIds"}},{"kind":"Field","name":{"kind":"Name","value":"inStock"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}},{"kind":"Field","name":{"kind":"Name","value":"facetValues"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"facetValue"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"facet"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}}]}}]}}]} as unknown as DocumentNode<AdminSearchProductsQuery, AdminSearchProductsQueryVariables>;
-export const AdminTaxCategoriesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminTaxCategories"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"taxCategories"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"isDefault"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<AdminTaxCategoriesQuery, AdminTaxCategoriesQueryVariables>;
-export const CreateProductDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateProduct"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateProductInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createProduct"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"featuredAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}}]}},{"kind":"Field","name":{"kind":"Name","value":"assets"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}}]}},{"kind":"Field","name":{"kind":"Name","value":"optionGroups"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"options"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nameFr"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"descriptionFr"}},{"kind":"Field","name":{"kind":"Name","value":"descriptionAr"}},{"kind":"Field","name":{"kind":"Name","value":"salePrice"}},{"kind":"Field","name":{"kind":"Name","value":"isFeatured"}},{"kind":"Field","name":{"kind":"Name","value":"weightKg"}},{"kind":"Field","name":{"kind":"Name","value":"availableSizes"}},{"kind":"Field","name":{"kind":"Name","value":"availableColors"}}]}}]}}]}}]} as unknown as DocumentNode<CreateProductMutation, CreateProductMutationVariables>;
-export const UpdateProductDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateProduct"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateProductInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProduct"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"featuredAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}}]}},{"kind":"Field","name":{"kind":"Name","value":"assets"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}}]}},{"kind":"Field","name":{"kind":"Name","value":"optionGroups"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"options"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nameFr"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"descriptionFr"}},{"kind":"Field","name":{"kind":"Name","value":"descriptionAr"}},{"kind":"Field","name":{"kind":"Name","value":"salePrice"}},{"kind":"Field","name":{"kind":"Name","value":"isFeatured"}},{"kind":"Field","name":{"kind":"Name","value":"viewCount"}},{"kind":"Field","name":{"kind":"Name","value":"weightKg"}},{"kind":"Field","name":{"kind":"Name","value":"availableSizes"}},{"kind":"Field","name":{"kind":"Name","value":"availableColors"}}]}}]}}]}}]} as unknown as DocumentNode<UpdateProductMutation, UpdateProductMutationVariables>;
-export const DeleteProductDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteProduct"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteProduct"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"result"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<DeleteProductMutation, DeleteProductMutationVariables>;
-export const DeleteProductsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteProducts"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ids"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteProducts"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ids"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ids"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"result"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<DeleteProductsMutation, DeleteProductsMutationVariables>;
-export const CreateProductVariantsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateProductVariants"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateProductVariantInput"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createProductVariants"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"price"}},{"kind":"Field","name":{"kind":"Name","value":"priceWithTax"}},{"kind":"Field","name":{"kind":"Name","value":"stockOnHand"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"trackInventory"}},{"kind":"Field","name":{"kind":"Name","value":"featuredAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}}]}},{"kind":"Field","name":{"kind":"Name","value":"options"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<CreateProductVariantsMutation, CreateProductVariantsMutationVariables>;
-export const UpdateProductVariantsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateProductVariants"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateProductVariantInput"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProductVariants"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"price"}},{"kind":"Field","name":{"kind":"Name","value":"priceWithTax"}},{"kind":"Field","name":{"kind":"Name","value":"stockOnHand"}},{"kind":"Field","name":{"kind":"Name","value":"stockAllocated"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"trackInventory"}},{"kind":"Field","name":{"kind":"Name","value":"featuredAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}}]}},{"kind":"Field","name":{"kind":"Name","value":"options"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"minStockAlert"}}]}}]}}]}}]} as unknown as DocumentNode<UpdateProductVariantsMutation, UpdateProductVariantsMutationVariables>;
-export const DeleteProductVariantDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteProductVariant"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteProductVariant"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"result"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<DeleteProductVariantMutation, DeleteProductVariantMutationVariables>;
-export const DeleteProductVariantsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteProductVariants"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ids"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteProductVariants"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ids"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ids"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"result"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<DeleteProductVariantsMutation, DeleteProductVariantsMutationVariables>;
-export const CreateProductOptionGroupDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateProductOptionGroup"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateProductOptionGroupInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createProductOptionGroup"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"options"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<CreateProductOptionGroupMutation, CreateProductOptionGroupMutationVariables>;
-export const UpdateProductOptionGroupDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateProductOptionGroup"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateProductOptionGroupInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProductOptionGroup"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"options"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<UpdateProductOptionGroupMutation, UpdateProductOptionGroupMutationVariables>;
-export const CreateProductOptionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateProductOption"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateProductOptionInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createProductOption"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"group"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<CreateProductOptionMutation, CreateProductOptionMutationVariables>;
-export const UpdateProductOptionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateProductOption"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateProductOptionInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProductOption"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"group"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<UpdateProductOptionMutation, UpdateProductOptionMutationVariables>;
-export const DeleteProductOptionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteProductOption"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteProductOption"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"result"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<DeleteProductOptionMutation, DeleteProductOptionMutationVariables>;
-export const AddOptionGroupToProductDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AddOptionGroupToProduct"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"productId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"optionGroupId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"addOptionGroupToProduct"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"productId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"productId"}}},{"kind":"Argument","name":{"kind":"Name","value":"optionGroupId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"optionGroupId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"optionGroups"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"options"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]}}]} as unknown as DocumentNode<AddOptionGroupToProductMutation, AddOptionGroupToProductMutationVariables>;
-export const RemoveOptionGroupFromProductDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RemoveOptionGroupFromProduct"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"productId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"optionGroupId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"force"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"removeOptionGroupFromProduct"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"productId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"productId"}}},{"kind":"Argument","name":{"kind":"Name","value":"optionGroupId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"optionGroupId"}}},{"kind":"Argument","name":{"kind":"Name","value":"force"},"value":{"kind":"Variable","name":{"kind":"Name","value":"force"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Product"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"optionGroups"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ProductOptionInUseError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"optionGroupCode"}},{"kind":"Field","name":{"kind":"Name","value":"productVariantCount"}}]}}]}}]}}]} as unknown as DocumentNode<RemoveOptionGroupFromProductMutation, RemoveOptionGroupFromProductMutationVariables>;
-export const CreateAssetsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateAssets"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateAssetInput"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createAssets"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Asset"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}},{"kind":"Field","name":{"kind":"Name","value":"source"}},{"kind":"Field","name":{"kind":"Name","value":"width"}},{"kind":"Field","name":{"kind":"Name","value":"height"}},{"kind":"Field","name":{"kind":"Name","value":"fileSize"}},{"kind":"Field","name":{"kind":"Name","value":"mimeType"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MimeTypeError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"fileName"}},{"kind":"Field","name":{"kind":"Name","value":"mimeType"}}]}}]}}]}}]} as unknown as DocumentNode<CreateAssetsMutation, CreateAssetsMutationVariables>;
-export const UpdateAssetDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateAsset"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateAssetInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateAsset"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}},{"kind":"Field","name":{"kind":"Name","value":"source"}},{"kind":"Field","name":{"kind":"Name","value":"focalPoint"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"x"}},{"kind":"Field","name":{"kind":"Name","value":"y"}}]}},{"kind":"Field","name":{"kind":"Name","value":"tags"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]} as unknown as DocumentNode<UpdateAssetMutation, UpdateAssetMutationVariables>;
-export const DeleteAssetDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteAsset"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"DeleteAssetInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteAsset"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"result"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<DeleteAssetMutation, DeleteAssetMutationVariables>;
-export const DeleteAssetsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteAssets"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"DeleteAssetsInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteAssets"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"result"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<DeleteAssetsMutation, DeleteAssetsMutationVariables>;
-export const AddAssetsToProductDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AddAssetsToProduct"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"productId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"assetIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProduct"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"productId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"assetIds"},"value":{"kind":"Variable","name":{"kind":"Name","value":"assetIds"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"assets"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}},{"kind":"Field","name":{"kind":"Name","value":"source"}}]}}]}}]}}]} as unknown as DocumentNode<AddAssetsToProductMutation, AddAssetsToProductMutationVariables>;
-export const SetProductFeaturedAssetDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SetProductFeaturedAsset"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"productId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"assetId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProduct"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"productId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"featuredAssetId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"assetId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"featuredAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}},{"kind":"Field","name":{"kind":"Name","value":"source"}}]}}]}}]}}]} as unknown as DocumentNode<SetProductFeaturedAssetMutation, SetProductFeaturedAssetMutationVariables>;
-export const SetVariantFeaturedAssetDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SetVariantFeaturedAsset"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"variantId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"assetId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProductVariants"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ListValue","values":[{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"variantId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"featuredAssetId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"assetId"}}}]}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"featuredAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}}]}}]}}]}}]} as unknown as DocumentNode<SetVariantFeaturedAssetMutation, SetVariantFeaturedAssetMutationVariables>;
-export const AddAssetsToVariantDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AddAssetsToVariant"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"variantId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"assetIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProductVariants"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ListValue","values":[{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"variantId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"assetIds"},"value":{"kind":"Variable","name":{"kind":"Name","value":"assetIds"}}}]}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"assets"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}},{"kind":"Field","name":{"kind":"Name","value":"source"}}]}}]}}]}}]} as unknown as DocumentNode<AddAssetsToVariantMutation, AddAssetsToVariantMutationVariables>;
-export const AssignProductsToChannelDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AssignProductsToChannel"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AssignProductsToChannelInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"assignProductsToChannel"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<AssignProductsToChannelMutation, AssignProductsToChannelMutationVariables>;
-export const RemoveProductsFromChannelDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RemoveProductsFromChannel"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RemoveProductsFromChannelInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"removeProductsFromChannel"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<RemoveProductsFromChannelMutation, RemoveProductsFromChannelMutationVariables>;
-export const UpdateProductFacetsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateProductFacets"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"productId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"facetValueIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProduct"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"productId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"facetValueIds"},"value":{"kind":"Variable","name":{"kind":"Name","value":"facetValueIds"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"facetValues"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"facet"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]}}]} as unknown as DocumentNode<UpdateProductFacetsMutation, UpdateProductFacetsMutationVariables>;
-export const UpdateVariantStockDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateVariantStock"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"variantId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"stockOnHand"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProductVariants"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ListValue","values":[{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"variantId"}}},{"kind":"ObjectField","name":{"kind":"Name","value":"stockOnHand"},"value":{"kind":"Variable","name":{"kind":"Name","value":"stockOnHand"}}}]}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"stockOnHand"}},{"kind":"Field","name":{"kind":"Name","value":"stockAllocated"}}]}}]}}]} as unknown as DocumentNode<UpdateVariantStockMutation, UpdateVariantStockMutationVariables>;
-export const UpdateVariantsStockDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateVariantsStock"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateProductVariantInput"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProductVariants"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"stockOnHand"}},{"kind":"Field","name":{"kind":"Name","value":"stockAllocated"}}]}}]}}]} as unknown as DocumentNode<UpdateVariantsStockMutation, UpdateVariantsStockMutationVariables>;
-export const ToggleProductFeaturedDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ToggleProductFeatured"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"productId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"toggleProductFeatured"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"productId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"productId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"isFeatured"}}]}}]}}]}}]} as unknown as DocumentNode<ToggleProductFeaturedMutation, ToggleProductFeaturedMutationVariables>;
-export const SalesReportOrdersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"SalesReportOrders"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"OrderListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"orders"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"totalWithTax"}},{"kind":"Field","name":{"kind":"Name","value":"currencyCode"}},{"kind":"Field","name":{"kind":"Name","value":"orderPlacedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"customer"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"emailAddress"}}]}},{"kind":"Field","name":{"kind":"Name","value":"lines"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"productVariant"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"product"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"quantity"}},{"kind":"Field","name":{"kind":"Name","value":"linePrice"}},{"kind":"Field","name":{"kind":"Name","value":"linePriceWithTax"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"wilaya"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<SalesReportOrdersQuery, SalesReportOrdersQueryVariables>;
-export const TopSellingProductsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TopSellingProducts"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ProductListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"products"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"featuredAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}}]}},{"kind":"Field","name":{"kind":"Name","value":"variants"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"price"}},{"kind":"Field","name":{"kind":"Name","value":"stockOnHand"}},{"kind":"Field","name":{"kind":"Name","value":"stockAllocated"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nameFr"}},{"kind":"Field","name":{"kind":"Name","value":"viewCount"}},{"kind":"Field","name":{"kind":"Name","value":"isFeatured"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<TopSellingProductsQuery, TopSellingProductsQueryVariables>;
-export const LowStockVariantsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"LowStockVariants"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ProductVariantListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"productVariants"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"price"}},{"kind":"Field","name":{"kind":"Name","value":"stockOnHand"}},{"kind":"Field","name":{"kind":"Name","value":"stockAllocated"}},{"kind":"Field","name":{"kind":"Name","value":"product"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"featuredAsset"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"minStockAlert"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<LowStockVariantsQuery, LowStockVariantsQueryVariables>;
-export const CustomersReportDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CustomersReport"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"CustomerListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"customers"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"emailAddress"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"orders"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"wilaya"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<CustomersReportQuery, CustomersReportQueryVariables>;
-export const GlobalSettingsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GlobalSettings"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"globalSettings"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"availableLanguages"}},{"kind":"Field","name":{"kind":"Name","value":"trackInventory"}},{"kind":"Field","name":{"kind":"Name","value":"outOfStockThreshold"}},{"kind":"Field","name":{"kind":"Name","value":"serverConfig"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"permittedAssetTypes"}}]}}]}}]}}]} as unknown as DocumentNode<GlobalSettingsQuery, GlobalSettingsQueryVariables>;
-export const PaymentMethodsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PaymentMethods"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"paymentMethods"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"checker"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"args"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"handler"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"args"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<PaymentMethodsQuery, PaymentMethodsQueryVariables>;
-export const PaymentMethodDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PaymentMethod"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"paymentMethod"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"checker"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"args"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"handler"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"args"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}}]} as unknown as DocumentNode<PaymentMethodQuery, PaymentMethodQueryVariables>;
-export const UpdatePaymentMethodDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdatePaymentMethod"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdatePaymentMethodInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updatePaymentMethod"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}}]}}]}}]} as unknown as DocumentNode<UpdatePaymentMethodMutation, UpdatePaymentMethodMutationVariables>;
-export const ShippingMethodsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ShippingMethods"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"shippingMethods"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"fulfillmentHandlerCode"}},{"kind":"Field","name":{"kind":"Name","value":"checker"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"args"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"calculator"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"args"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<ShippingMethodsQuery, ShippingMethodsQueryVariables>;
-export const ShippingMethodDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ShippingMethod"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"shippingMethod"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"fulfillmentHandlerCode"}},{"kind":"Field","name":{"kind":"Name","value":"checker"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"args"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"calculator"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"args"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}}]} as unknown as DocumentNode<ShippingMethodQuery, ShippingMethodQueryVariables>;
-export const UpdateShippingMethodDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateShippingMethod"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateShippingMethodInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateShippingMethod"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}}]} as unknown as DocumentNode<UpdateShippingMethodMutation, UpdateShippingMethodMutationVariables>;
-export const TaxRatesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TaxRates"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"taxRates"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"category"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"zone"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<TaxRatesQuery, TaxRatesQueryVariables>;
-export const ChannelsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Channels"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"channels"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"defaultLanguageCode"}},{"kind":"Field","name":{"kind":"Name","value":"currencyCode"}},{"kind":"Field","name":{"kind":"Name","value":"pricesIncludeTax"}},{"kind":"Field","name":{"kind":"Name","value":"defaultShippingZone"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"defaultTaxZone"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<ChannelsQuery, ChannelsQueryVariables>;
-export const ActiveChannelDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ActiveChannel"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"activeChannel"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"defaultLanguageCode"}},{"kind":"Field","name":{"kind":"Name","value":"currencyCode"}},{"kind":"Field","name":{"kind":"Name","value":"pricesIncludeTax"}},{"kind":"Field","name":{"kind":"Name","value":"defaultShippingZone"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"defaultTaxZone"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<ActiveChannelQuery, ActiveChannelQueryVariables>;
+export const UpdateActiveAdministratorDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateActiveAdministrator' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'UpdateActiveAdministratorInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateActiveAdministrator' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'emailAddress' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'user' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'verified' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'lastLogin' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'roles' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  UpdateActiveAdministratorMutation,
+  UpdateActiveAdministratorMutationVariables
+>;
+export const AdminAdministratorsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminAdministrators' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'AdministratorListOptions' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'administrators' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'options' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'emailAddress' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'user' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'verified' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'lastLogin' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'roles' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'permissions' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminAdministratorsQuery, AdminAdministratorsQueryVariables>;
+export const AdminAdministratorDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminAdministrator' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'administrator' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'emailAddress' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'user' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'verified' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'lastLogin' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'roles' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'permissions' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminAdministratorQuery, AdminAdministratorQueryVariables>;
+export const AdminRolesDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminRoles' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'RoleListOptions' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'roles' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'options' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'permissions' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'channels' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminRolesQuery, AdminRolesQueryVariables>;
+export const AdminRoleDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminRole' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'role' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'permissions' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'channels' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminRoleQuery, AdminRoleQueryVariables>;
+export const CreateAdministratorDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateAdministrator' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'CreateAdministratorInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createAdministrator' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'emailAddress' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'user' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'roles' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CreateAdministratorMutation, CreateAdministratorMutationVariables>;
+export const UpdateAdministratorDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateAdministrator' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateAdministratorInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateAdministrator' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'emailAddress' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'user' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'roles' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdateAdministratorMutation, UpdateAdministratorMutationVariables>;
+export const DeleteAdministratorDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteAdministrator' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteAdministrator' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'result' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteAdministratorMutation, DeleteAdministratorMutationVariables>;
+export const CreateRoleDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateRole' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'CreateRoleInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createRole' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'permissions' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CreateRoleMutation, CreateRoleMutationVariables>;
+export const UpdateRoleDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateRole' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateRoleInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateRole' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'permissions' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdateRoleMutation, UpdateRoleMutationVariables>;
+export const DeleteRoleDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteRole' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteRole' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'result' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteRoleMutation, DeleteRoleMutationVariables>;
+export const AdminLoginDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'AdminLogin' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'username' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'password' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'rememberMe' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Boolean' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'login' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'username' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'username' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'password' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'password' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'rememberMe' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'rememberMe' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'CurrentUser' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'identifier' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'channels' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'permissions' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'InvalidCredentialsError' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'errorCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'NativeAuthStrategyError' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'errorCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminLoginMutation, AdminLoginMutationVariables>;
+export const AdminLogoutDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'AdminLogout' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'logout' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'Field', name: { kind: 'Name', value: 'success' } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminLogoutMutation, AdminLogoutMutationVariables>;
+export const MeDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'Me' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'me' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'identifier' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'channels' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'permissions' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<MeQuery, MeQueryVariables>;
+export const ActiveAdministratorDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'ActiveAdministrator' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'activeAdministrator' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'emailAddress' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'user' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'identifier' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'roles' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'permissions' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ActiveAdministratorQuery, ActiveAdministratorQueryVariables>;
+export const AdminCollectionsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminCollections' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'CollectionListOptions' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'collections' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'options' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'isPrivate' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'position' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'parentId' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'breadcrumbs' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'featuredAsset' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'source' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'productVariants' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customFields' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'nameFr' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'nameAr' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'descriptionFr' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'descriptionAr' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'displayOrder' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminCollectionsQuery, AdminCollectionsQueryVariables>;
+export const AdminCollectionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminCollection' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'collection' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'isPrivate' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'position' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'parentId' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'breadcrumbs' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'featuredAsset' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'source' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'productVariants' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'totalItems' } }],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'customFields' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'nameFr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'nameAr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'descriptionFr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'descriptionAr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'displayOrder' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'filters' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'args' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'children' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'position' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'productVariants' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customFields' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'nameFr' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'nameAr' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminCollectionQuery, AdminCollectionQueryVariables>;
+export const CreateCollectionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateCollection' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'CreateCollectionInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createCollection' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'isPrivate' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'position' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'parentId' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'customFields' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'nameFr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'nameAr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'descriptionFr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'descriptionAr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'displayOrder' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CreateCollectionMutation, CreateCollectionMutationVariables>;
+export const UpdateCollectionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateCollection' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateCollectionInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateCollection' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'isPrivate' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'position' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'parentId' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'customFields' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'nameFr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'nameAr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'descriptionFr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'descriptionAr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'displayOrder' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdateCollectionMutation, UpdateCollectionMutationVariables>;
+export const DeleteCollectionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteCollection' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteCollection' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'result' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteCollectionMutation, DeleteCollectionMutationVariables>;
+export const MoveCollectionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'MoveCollection' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'MoveCollectionInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'moveCollection' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'position' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'parentId' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<MoveCollectionMutation, MoveCollectionMutationVariables>;
+export const UpdateCollectionFiltersDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateCollectionFilters' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'filters' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: {
+                  kind: 'NamedType',
+                  name: { kind: 'Name', value: 'ConfigurableOperationInput' },
+                },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateCollection' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'id' },
+                      value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    },
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'filters' },
+                      value: { kind: 'Variable', name: { kind: 'Name', value: 'filters' } },
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'filters' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'args' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  UpdateCollectionFiltersMutation,
+  UpdateCollectionFiltersMutationVariables
+>;
+export const AdminCollectionsWithFiltersDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminCollectionsWithFilters' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'CollectionListOptions' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'collections' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'options' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'parentId' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'filters' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'args' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  AdminCollectionsWithFiltersQuery,
+  AdminCollectionsWithFiltersQueryVariables
+>;
+export const AdminCustomersDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminCustomers' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'CustomerListOptions' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'customers' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'options' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'emailAddress' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'phoneNumber' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'user' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'verified' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'lastLogin' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customFields' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'wilaya' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'city' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminCustomersQuery, AdminCustomersQueryVariables>;
+export const AdminCustomerDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminCustomer' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'customer' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'emailAddress' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'phoneNumber' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'user' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'verified' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'lastLogin' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'addresses' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'fullName' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'company' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'streetLine1' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'streetLine2' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'city' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'province' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'postalCode' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'country' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                          ],
+                        },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'phoneNumber' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'defaultShippingAddress' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'defaultBillingAddress' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'orders' },
+                  arguments: [
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'options' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'take' },
+                            value: { kind: 'IntValue', value: '10' },
+                          },
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'sort' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: 'orderPlacedAt' },
+                                  value: { kind: 'EnumValue', value: 'DESC' },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'items' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'totalWithTax' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'orderPlacedAt' } },
+                          ],
+                        },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'customFields' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'wilaya' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'city' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminCustomerQuery, AdminCustomerQueryVariables>;
+export const UpdateCustomerDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateCustomer' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateCustomerInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateCustomer' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Customer' } },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'emailAddress' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'phoneNumber' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customFields' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'wilaya' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'city' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'EmailAddressConflictError' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'errorCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdateCustomerMutation, UpdateCustomerMutationVariables>;
+export const DeleteCustomerDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteCustomer' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteCustomer' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'result' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteCustomerMutation, DeleteCustomerMutationVariables>;
+export const OscarDashboardStatsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'OscarDashboardStats' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'oscarDashboardStats' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'totalOrders' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalRevenue' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalCustomers' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalProducts' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'pendingOrders' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'lowStockProductsCount' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<OscarDashboardStatsQuery, OscarDashboardStatsQueryVariables>;
+export const RecentOrdersDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'RecentOrders' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'OrderListOptions' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'orders' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'options' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'totalWithTax' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'orderPlacedAt' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customer' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customFields' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'trackingNumber' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'wilaya' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<RecentOrdersQuery, RecentOrdersQueryVariables>;
+export const LowStockProductsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'LowStockProducts' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'threshold' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'lowStockProducts' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'threshold' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'threshold' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'variants' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'stockOnHand' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customFields' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'minStockAlert' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'customFields' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'nameFr' } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<LowStockProductsQuery, LowStockProductsQueryVariables>;
+export const DashboardOrdersAnalysisDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'DashboardOrdersAnalysis' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'OrderListOptions' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'orders' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'options' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'totalWithTax' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'orderPlacedAt' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'lines' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'quantity' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'linePriceWithTax' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'productVariant' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'product' },
+                                    selectionSet: {
+                                      kind: 'SelectionSet',
+                                      selections: [
+                                        { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                        { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                        { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                                        {
+                                          kind: 'Field',
+                                          name: { kind: 'Name', value: 'featuredAsset' },
+                                          selectionSet: {
+                                            kind: 'SelectionSet',
+                                            selections: [
+                                              {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'preview' },
+                                              },
+                                            ],
+                                          },
+                                        },
+                                        {
+                                          kind: 'Field',
+                                          name: { kind: 'Name', value: 'collections' },
+                                          selectionSet: {
+                                            kind: 'SelectionSet',
+                                            selections: [
+                                              {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                              },
+                                              {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                              },
+                                              {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'slug' },
+                                              },
+                                            ],
+                                          },
+                                        },
+                                        {
+                                          kind: 'Field',
+                                          name: { kind: 'Name', value: 'customFields' },
+                                          selectionSet: {
+                                            kind: 'SelectionSet',
+                                            selections: [
+                                              {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'nameFr' },
+                                              },
+                                            ],
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DashboardOrdersAnalysisQuery, DashboardOrdersAnalysisQueryVariables>;
+export const DashboardTopProductsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'DashboardTopProducts' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'ProductListOptions' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'products' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'options' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'featuredAsset' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [{ kind: 'Field', name: { kind: 'Name', value: 'preview' } }],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customFields' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'nameFr' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'viewCount' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'variants' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'stockOnHand' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'priceWithTax' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DashboardTopProductsQuery, DashboardTopProductsQueryVariables>;
+export const AdminOrdersDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminOrders' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'OrderListOptions' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'orders' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'options' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'orderPlacedAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'totalWithTax' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'total' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'currencyCode' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customer' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'emailAddress' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'phoneNumber' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'shippingLines' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'shippingMethod' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                ],
+                              },
+                            },
+                            { kind: 'Field', name: { kind: 'Name', value: 'priceWithTax' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'payments' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'method' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customFields' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'customerNotes' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'adminNotes' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'trackingNumber' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'wilaya' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'cancellationReason' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminOrdersQuery, AdminOrdersQueryVariables>;
+export const AdminOrderDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminOrder' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'order' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'active' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'orderPlacedAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalWithTax' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'total' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'subTotal' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'subTotalWithTax' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'currencyCode' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'shipping' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'shippingWithTax' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'couponCodes' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'discounts' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'amountWithTax' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'customer' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'emailAddress' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'phoneNumber' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customFields' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'wilaya' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'city' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'shippingAddress' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'fullName' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'company' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'streetLine1' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'streetLine2' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'city' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'province' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'postalCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'country' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'phoneNumber' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'billingAddress' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'fullName' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'company' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'streetLine1' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'streetLine2' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'city' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'province' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'postalCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'country' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'phoneNumber' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'lines' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'quantity' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'unitPrice' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'unitPriceWithTax' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'linePrice' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'linePriceWithTax' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'productVariant' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'product' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'featuredAsset' },
+                                    selectionSet: {
+                                      kind: 'SelectionSet',
+                                      selections: [
+                                        { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                                      ],
+                                    },
+                                  },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'customFields' },
+                                    selectionSet: {
+                                      kind: 'SelectionSet',
+                                      selections: [
+                                        { kind: 'Field', name: { kind: 'Name', value: 'nameFr' } },
+                                      ],
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'shippingLines' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'shippingMethod' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                          ],
+                        },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'priceWithTax' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'payments' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'method' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'amount' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'transactionId' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'metadata' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'fulfillments' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'method' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'trackingCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'lines' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'orderLineId' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'quantity' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'history' },
+                  arguments: [
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'options' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'take' },
+                            value: { kind: 'IntValue', value: '50' },
+                          },
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'sort' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: 'createdAt' },
+                                  value: { kind: 'EnumValue', value: 'DESC' },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'items' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'data' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'administrator' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'customFields' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'customerNotes' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'adminNotes' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'trackingNumber' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'wilaya' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'cancellationReason' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminOrderQuery, AdminOrderQueryVariables>;
+export const TransitionOrderToStateDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'TransitionOrderToState' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'state' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'transitionOrderToState' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'state' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'state' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Order' } },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'OrderStateTransitionError' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'errorCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'transitionError' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'fromState' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'toState' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  TransitionOrderToStateMutation,
+  TransitionOrderToStateMutationVariables
+>;
+export const AddNoteToOrderDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'AddNoteToOrder' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'AddNoteToOrderInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'addNoteToOrder' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'Field', name: { kind: 'Name', value: 'id' } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AddNoteToOrderMutation, AddNoteToOrderMutationVariables>;
+export const UpdateOrderCustomFieldsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateOrderCustomFields' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateOrderInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'setOrderCustomFields' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'customFields' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'trackingNumber' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'adminNotes' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'wilaya' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  UpdateOrderCustomFieldsMutation,
+  UpdateOrderCustomFieldsMutationVariables
+>;
+export const CancelOrderDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CancelOrder' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'CancelOrderInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'cancelOrder' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Order' } },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'EmptyOrderLineSelectionError' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'errorCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'QuantityTooGreatError' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'errorCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'MultipleOrderError' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'errorCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'CancelActiveOrderError' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'errorCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'orderState' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'OrderStateTransitionError' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'errorCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'transitionError' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CancelOrderMutation, CancelOrderMutationVariables>;
+export const CreateFulfillmentDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateFulfillment' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'FulfillOrderInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'addFulfillmentToOrder' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'Fulfillment' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'trackingCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'method' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'EmptyOrderLineSelectionError' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'errorCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'ItemsAlreadyFulfilledError' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'errorCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'InsufficientStockOnHandError' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'errorCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'CreateFulfillmentError' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'errorCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'FulfillmentStateTransitionError' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'errorCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CreateFulfillmentMutation, CreateFulfillmentMutationVariables>;
+export const AdminProductsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminProducts' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'ProductListOptions' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'products' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'options' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'enabled' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'featuredAsset' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'source' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'assets' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'source' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'variants' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'priceWithTax' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'stockOnHand' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'stockAllocated' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'enabled' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'options' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                ],
+                              },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'facetValues' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'facet' },
+                                    selectionSet: {
+                                      kind: 'SelectionSet',
+                                      selections: [
+                                        { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                        { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                        { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                                      ],
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'customFields' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'minStockAlert' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'optionGroups' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'options' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'facetValues' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'facet' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'collections' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'parent' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customFields' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'nameFr' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'nameAr' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'descriptionFr' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'descriptionAr' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'salePrice' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'isFeatured' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'viewCount' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'weightKg' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'availableSizes' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'availableColors' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminProductsQuery, AdminProductsQueryVariables>;
+export const AdminProductDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminProduct' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'product' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'enabled' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'featuredAsset' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'source' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'width' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'height' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'fileSize' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'mimeType' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'assets' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'source' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'width' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'height' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'fileSize' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'mimeType' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'optionGroups' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'options' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'variants' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'priceWithTax' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'stockOnHand' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'stockAllocated' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'enabled' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'trackInventory' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'featuredAsset' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'source' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'assets' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'source' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'options' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'group' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customFields' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'minStockAlert' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'customFields' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'nameFr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'nameAr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'descriptionFr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'descriptionAr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'salePrice' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'isFeatured' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'viewCount' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'weightKg' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'availableSizes' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'availableColors' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'collections' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'facetValues' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'facet' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminProductQuery, AdminProductQueryVariables>;
+export const AdminProductOptionGroupsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminProductOptionGroups' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'filterTerm' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'productOptionGroups' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'filterTerm' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'filterTerm' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'options' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminProductOptionGroupsQuery, AdminProductOptionGroupsQueryVariables>;
+export const AdminFacetsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminFacets' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'FacetListOptions' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'facets' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'options' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'values' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminFacetsQuery, AdminFacetsQueryVariables>;
+export const AdminFacetsWithValuesDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminFacetsWithValues' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'FacetListOptions' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'facets' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'options' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'isPrivate' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'values' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminFacetsWithValuesQuery, AdminFacetsWithValuesQueryVariables>;
+export const AdminSearchProductsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminSearchProducts' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'SearchInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'search' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'productId' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'productName' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'enabled' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'productAsset' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'price' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'InlineFragment',
+                              typeCondition: {
+                                kind: 'NamedType',
+                                name: { kind: 'Name', value: 'SinglePrice' },
+                              },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                                ],
+                              },
+                            },
+                            {
+                              kind: 'InlineFragment',
+                              typeCondition: {
+                                kind: 'NamedType',
+                                name: { kind: 'Name', value: 'PriceRange' },
+                              },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'min' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'max' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'priceWithTax' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'InlineFragment',
+                              typeCondition: {
+                                kind: 'NamedType',
+                                name: { kind: 'Name', value: 'SinglePrice' },
+                              },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                                ],
+                              },
+                            },
+                            {
+                              kind: 'InlineFragment',
+                              typeCondition: {
+                                kind: 'NamedType',
+                                name: { kind: 'Name', value: 'PriceRange' },
+                              },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'min' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'max' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'currencyCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'collectionIds' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'inStock' } },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'facetValues' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'facetValue' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'facet' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'count' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminSearchProductsQuery, AdminSearchProductsQueryVariables>;
+export const AdminTaxCategoriesDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'AdminTaxCategories' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'taxCategories' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'isDefault' } },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AdminTaxCategoriesQuery, AdminTaxCategoriesQueryVariables>;
+export const CreateProductDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateProduct' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'CreateProductInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createProduct' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'enabled' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'featuredAsset' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'assets' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'optionGroups' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'options' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'customFields' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'nameFr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'nameAr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'descriptionFr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'descriptionAr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'salePrice' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'isFeatured' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'weightKg' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'availableSizes' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'availableColors' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CreateProductMutation, CreateProductMutationVariables>;
+export const UpdateProductDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateProduct' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateProductInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateProduct' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'enabled' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'featuredAsset' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'assets' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'optionGroups' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'options' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'customFields' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'nameFr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'nameAr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'descriptionFr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'descriptionAr' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'salePrice' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'isFeatured' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'viewCount' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'weightKg' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'availableSizes' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'availableColors' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdateProductMutation, UpdateProductMutationVariables>;
+export const DeleteProductDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteProduct' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteProduct' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'result' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteProductMutation, DeleteProductMutationVariables>;
+export const DeleteProductsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteProducts' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'ids' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteProducts' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'ids' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'ids' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'result' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteProductsMutation, DeleteProductsMutationVariables>;
+export const CreateProductVariantsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateProductVariants' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: {
+                  kind: 'NamedType',
+                  name: { kind: 'Name', value: 'CreateProductVariantInput' },
+                },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createProductVariants' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'priceWithTax' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'stockOnHand' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'enabled' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'trackInventory' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'featuredAsset' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'options' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CreateProductVariantsMutation, CreateProductVariantsMutationVariables>;
+export const UpdateProductVariantsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateProductVariants' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: {
+                  kind: 'NamedType',
+                  name: { kind: 'Name', value: 'UpdateProductVariantInput' },
+                },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateProductVariants' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'priceWithTax' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'stockOnHand' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'stockAllocated' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'enabled' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'trackInventory' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'featuredAsset' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'options' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'customFields' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'minStockAlert' } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdateProductVariantsMutation, UpdateProductVariantsMutationVariables>;
+export const DeleteProductVariantDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteProductVariant' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteProductVariant' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'result' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteProductVariantMutation, DeleteProductVariantMutationVariables>;
+export const DeleteProductVariantsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteProductVariants' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'ids' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteProductVariants' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'ids' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'ids' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'result' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteProductVariantsMutation, DeleteProductVariantsMutationVariables>;
+export const CreateProductOptionGroupDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateProductOptionGroup' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'CreateProductOptionGroupInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createProductOptionGroup' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'options' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  CreateProductOptionGroupMutation,
+  CreateProductOptionGroupMutationVariables
+>;
+export const UpdateProductOptionGroupDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateProductOptionGroup' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'UpdateProductOptionGroupInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateProductOptionGroup' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'options' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  UpdateProductOptionGroupMutation,
+  UpdateProductOptionGroupMutationVariables
+>;
+export const CreateProductOptionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateProductOption' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'CreateProductOptionInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createProductOption' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'group' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CreateProductOptionMutation, CreateProductOptionMutationVariables>;
+export const UpdateProductOptionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateProductOption' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateProductOptionInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateProductOption' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'group' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdateProductOptionMutation, UpdateProductOptionMutationVariables>;
+export const DeleteProductOptionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteProductOption' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteProductOption' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'result' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteProductOptionMutation, DeleteProductOptionMutationVariables>;
+export const AddOptionGroupToProductDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'AddOptionGroupToProduct' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'productId' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'optionGroupId' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'addOptionGroupToProduct' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'productId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'productId' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'optionGroupId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'optionGroupId' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'optionGroups' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'options' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  AddOptionGroupToProductMutation,
+  AddOptionGroupToProductMutationVariables
+>;
+export const RemoveOptionGroupFromProductDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'RemoveOptionGroupFromProduct' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'productId' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'optionGroupId' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'force' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Boolean' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'removeOptionGroupFromProduct' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'productId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'productId' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'optionGroupId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'optionGroupId' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'force' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'force' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Product' } },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'optionGroups' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'ProductOptionInUseError' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'errorCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'optionGroupCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'productVariantCount' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  RemoveOptionGroupFromProductMutation,
+  RemoveOptionGroupFromProductMutationVariables
+>;
+export const CreateAssetsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CreateAssets' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: { kind: 'NamedType', name: { kind: 'Name', value: 'CreateAssetInput' } },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'createAssets' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Asset' } },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'source' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'width' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'height' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'fileSize' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'mimeType' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'InlineFragment',
+                  typeCondition: {
+                    kind: 'NamedType',
+                    name: { kind: 'Name', value: 'MimeTypeError' },
+                  },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'errorCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'fileName' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'mimeType' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CreateAssetsMutation, CreateAssetsMutationVariables>;
+export const UpdateAssetDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateAsset' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateAssetInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateAsset' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'source' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'focalPoint' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'x' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'y' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'tags' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdateAssetMutation, UpdateAssetMutationVariables>;
+export const DeleteAssetDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteAsset' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'DeleteAssetInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteAsset' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'result' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteAssetMutation, DeleteAssetMutationVariables>;
+export const DeleteAssetsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'DeleteAssets' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'DeleteAssetsInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteAssets' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'result' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'message' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteAssetsMutation, DeleteAssetsMutationVariables>;
+export const AddAssetsToProductDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'AddAssetsToProduct' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'productId' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'assetIds' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateProduct' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'id' },
+                      value: { kind: 'Variable', name: { kind: 'Name', value: 'productId' } },
+                    },
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'assetIds' },
+                      value: { kind: 'Variable', name: { kind: 'Name', value: 'assetIds' } },
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'assets' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'source' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AddAssetsToProductMutation, AddAssetsToProductMutationVariables>;
+export const SetProductFeaturedAssetDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'SetProductFeaturedAsset' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'productId' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'assetId' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateProduct' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'id' },
+                      value: { kind: 'Variable', name: { kind: 'Name', value: 'productId' } },
+                    },
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'featuredAssetId' },
+                      value: { kind: 'Variable', name: { kind: 'Name', value: 'assetId' } },
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'featuredAsset' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'source' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  SetProductFeaturedAssetMutation,
+  SetProductFeaturedAssetMutationVariables
+>;
+export const SetVariantFeaturedAssetDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'SetVariantFeaturedAsset' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'variantId' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'assetId' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateProductVariants' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'ListValue',
+                  values: [
+                    {
+                      kind: 'ObjectValue',
+                      fields: [
+                        {
+                          kind: 'ObjectField',
+                          name: { kind: 'Name', value: 'id' },
+                          value: { kind: 'Variable', name: { kind: 'Name', value: 'variantId' } },
+                        },
+                        {
+                          kind: 'ObjectField',
+                          name: { kind: 'Name', value: 'featuredAssetId' },
+                          value: { kind: 'Variable', name: { kind: 'Name', value: 'assetId' } },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'featuredAsset' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  SetVariantFeaturedAssetMutation,
+  SetVariantFeaturedAssetMutationVariables
+>;
+export const AddAssetsToVariantDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'AddAssetsToVariant' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'variantId' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'assetIds' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateProductVariants' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'ListValue',
+                  values: [
+                    {
+                      kind: 'ObjectValue',
+                      fields: [
+                        {
+                          kind: 'ObjectField',
+                          name: { kind: 'Name', value: 'id' },
+                          value: { kind: 'Variable', name: { kind: 'Name', value: 'variantId' } },
+                        },
+                        {
+                          kind: 'ObjectField',
+                          name: { kind: 'Name', value: 'assetIds' },
+                          value: { kind: 'Variable', name: { kind: 'Name', value: 'assetIds' } },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'assets' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'source' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AddAssetsToVariantMutation, AddAssetsToVariantMutationVariables>;
+export const AssignProductsToChannelDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'AssignProductsToChannel' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'AssignProductsToChannelInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'assignProductsToChannel' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'Field', name: { kind: 'Name', value: 'id' } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  AssignProductsToChannelMutation,
+  AssignProductsToChannelMutationVariables
+>;
+export const RemoveProductsFromChannelDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'RemoveProductsFromChannel' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'RemoveProductsFromChannelInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'removeProductsFromChannel' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [{ kind: 'Field', name: { kind: 'Name', value: 'id' } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  RemoveProductsFromChannelMutation,
+  RemoveProductsFromChannelMutationVariables
+>;
+export const UpdateProductFacetsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateProductFacets' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'productId' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'facetValueIds' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateProduct' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'id' },
+                      value: { kind: 'Variable', name: { kind: 'Name', value: 'productId' } },
+                    },
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'facetValueIds' },
+                      value: { kind: 'Variable', name: { kind: 'Name', value: 'facetValueIds' } },
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'facetValues' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'facet' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdateProductFacetsMutation, UpdateProductFacetsMutationVariables>;
+export const UpdateVariantStockDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateVariantStock' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'variantId' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'stockOnHand' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateProductVariants' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'ListValue',
+                  values: [
+                    {
+                      kind: 'ObjectValue',
+                      fields: [
+                        {
+                          kind: 'ObjectField',
+                          name: { kind: 'Name', value: 'id' },
+                          value: { kind: 'Variable', name: { kind: 'Name', value: 'variantId' } },
+                        },
+                        {
+                          kind: 'ObjectField',
+                          name: { kind: 'Name', value: 'stockOnHand' },
+                          value: { kind: 'Variable', name: { kind: 'Name', value: 'stockOnHand' } },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'stockOnHand' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'stockAllocated' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdateVariantStockMutation, UpdateVariantStockMutationVariables>;
+export const UpdateVariantsStockDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateVariantsStock' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: {
+                kind: 'NonNullType',
+                type: {
+                  kind: 'NamedType',
+                  name: { kind: 'Name', value: 'UpdateProductVariantInput' },
+                },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateProductVariants' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'stockOnHand' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'stockAllocated' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdateVariantsStockMutation, UpdateVariantsStockMutationVariables>;
+export const ToggleProductFeaturedDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'ToggleProductFeatured' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'productId' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'toggleProductFeatured' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'productId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'productId' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'customFields' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'isFeatured' } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ToggleProductFeaturedMutation, ToggleProductFeaturedMutationVariables>;
+export const SalesReportOrdersDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'SalesReportOrders' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'OrderListOptions' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'orders' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'options' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'total' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'totalWithTax' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'currencyCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'orderPlacedAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customer' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'emailAddress' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'lines' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'productVariant' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                  {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'product' },
+                                    selectionSet: {
+                                      kind: 'SelectionSet',
+                                      selections: [
+                                        { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                        { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                      ],
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                            { kind: 'Field', name: { kind: 'Name', value: 'quantity' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'linePrice' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'linePriceWithTax' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customFields' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [{ kind: 'Field', name: { kind: 'Name', value: 'wilaya' } }],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<SalesReportOrdersQuery, SalesReportOrdersQueryVariables>;
+export const TopSellingProductsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'TopSellingProducts' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'ProductListOptions' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'products' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'options' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'slug' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'featuredAsset' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'variants' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'stockOnHand' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'stockAllocated' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customFields' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'nameFr' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'viewCount' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'isFeatured' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<TopSellingProductsQuery, TopSellingProductsQueryVariables>;
+export const LowStockVariantsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'LowStockVariants' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'ProductVariantListOptions' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'productVariants' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'options' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'stockOnHand' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'stockAllocated' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'product' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'featuredAsset' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'preview' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customFields' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'minStockAlert' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<LowStockVariantsQuery, LowStockVariantsQueryVariables>;
+export const CustomersReportDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'CustomersReport' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'CustomerListOptions' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'customers' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'options' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'options' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'emailAddress' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'orders' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'customFields' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [{ kind: 'Field', name: { kind: 'Name', value: 'wilaya' } }],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CustomersReportQuery, CustomersReportQueryVariables>;
+export const GlobalSettingsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GlobalSettings' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'globalSettings' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'availableLanguages' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'trackInventory' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'outOfStockThreshold' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'serverConfig' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'permittedAssetTypes' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GlobalSettingsQuery, GlobalSettingsQueryVariables>;
+export const PaymentMethodsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'PaymentMethods' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'paymentMethods' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'enabled' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'checker' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'args' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'handler' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'args' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<PaymentMethodsQuery, PaymentMethodsQueryVariables>;
+export const PaymentMethodDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'PaymentMethod' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'paymentMethod' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'enabled' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'checker' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'args' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'handler' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'args' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<PaymentMethodQuery, PaymentMethodQueryVariables>;
+export const UpdatePaymentMethodDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdatePaymentMethod' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdatePaymentMethodInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updatePaymentMethod' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'enabled' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdatePaymentMethodMutation, UpdatePaymentMethodMutationVariables>;
+export const ShippingMethodsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'ShippingMethods' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'shippingMethods' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'fulfillmentHandlerCode' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'checker' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'args' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'calculator' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'args' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                  { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ShippingMethodsQuery, ShippingMethodsQueryVariables>;
+export const ShippingMethodDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'ShippingMethod' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'shippingMethod' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'fulfillmentHandlerCode' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'checker' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'args' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'calculator' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'args' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ShippingMethodQuery, ShippingMethodQueryVariables>;
+export const UpdateShippingMethodDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateShippingMethod' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'UpdateShippingMethodInput' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateShippingMethod' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdateShippingMethodMutation, UpdateShippingMethodMutationVariables>;
+export const TaxRatesDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'TaxRates' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'taxRates' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'value' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'enabled' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'category' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'zone' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<TaxRatesQuery, TaxRatesQueryVariables>;
+export const ChannelsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'Channels' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'channels' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'items' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'defaultLanguageCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'currencyCode' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'pricesIncludeTax' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'defaultShippingZone' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'defaultTaxZone' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalItems' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ChannelsQuery, ChannelsQueryVariables>;
+export const ActiveChannelDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'ActiveChannel' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'activeChannel' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'code' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'defaultLanguageCode' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'currencyCode' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'pricesIncludeTax' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'defaultShippingZone' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'defaultTaxZone' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ActiveChannelQuery, ActiveChannelQueryVariables>;

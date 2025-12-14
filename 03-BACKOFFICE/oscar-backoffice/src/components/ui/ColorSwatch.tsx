@@ -58,11 +58,7 @@ export const ColorSwatch: React.FC<ColorSwatchProps> = ({
   if (!displayHex) {
     return (
       <div
-        className={cn(
-          'inline-flex items-center gap-1',
-          onClick && 'cursor-pointer',
-          className
-        )}
+        className={cn('inline-flex items-center gap-1', onClick && 'cursor-pointer', className)}
         onClick={onClick}
         title={color}
       >
@@ -77,15 +73,14 @@ export const ColorSwatch: React.FC<ColorSwatchProps> = ({
           <span className="text-[6px] text-gray-700 font-bold">?</span>
         </div>
         {showLabel && (
-          <span className={cn(labelSizeClasses[size], 'text-muted-foreground')}>
-            {color}
-          </span>
+          <span className={cn(labelSizeClasses[size], 'text-muted-foreground')}>{color}</span>
         )}
       </div>
     );
   }
 
-  const isWhiteOrLight = displayHex.toLowerCase() === '#ffffff' || displayHex.toLowerCase() === '#f5f5dc';
+  const isWhiteOrLight =
+    displayHex.toLowerCase() === '#ffffff' || displayHex.toLowerCase() === '#f5f5dc';
   const contrastColor = getContrastColor(displayHex);
 
   return (
@@ -111,10 +106,7 @@ export const ColorSwatch: React.FC<ColorSwatchProps> = ({
         {selected && (
           <div className="w-full h-full flex items-center justify-center">
             <svg
-              className={cn(
-                'w-3 h-3',
-                contrastColor === 'white' ? 'text-white' : 'text-black'
-              )}
+              className={cn('w-3 h-3', contrastColor === 'white' ? 'text-white' : 'text-black')}
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -127,11 +119,7 @@ export const ColorSwatch: React.FC<ColorSwatchProps> = ({
           </div>
         )}
       </div>
-      {showLabel && (
-        <span className={cn(labelSizeClasses[size], 'text-foreground')}>
-          {color}
-        </span>
-      )}
+      {showLabel && <span className={cn(labelSizeClasses[size], 'text-foreground')}>{color}</span>}
     </div>
   );
 };

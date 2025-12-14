@@ -166,11 +166,11 @@ export const Reports: React.FC = () => {
   const handleExportSalesCSV = () => {
     const data = orders.map((order) => ({
       'Code Commande': order.code,
-      'Date': formatDateForExport(order.orderPlacedAt),
-      'Client': order.customer ? `${order.customer.firstName} ${order.customer.lastName}` : 'Anonyme',
-      'Email': order.customer?.emailAddress || '-',
-      'Wilaya': order.customFields?.wilaya || '-',
-      'Statut': order.state,
+      Date: formatDateForExport(order.orderPlacedAt),
+      Client: order.customer ? `${order.customer.firstName} ${order.customer.lastName}` : 'Anonyme',
+      Email: order.customer?.emailAddress || '-',
+      Wilaya: order.customFields?.wilaya || '-',
+      Statut: order.state,
       'Nombre Articles': order.lines?.reduce((sum, l) => sum + l.quantity, 0) || 0,
       'Total TTC': formatCurrencyForExport(order.totalWithTax / 100),
     }));
@@ -180,32 +180,37 @@ export const Reports: React.FC = () => {
 
   const handleExportProductsCSV = () => {
     const data = productPerformance.map(([_, product], index) => ({
-      'Rang': index + 1,
-      'Produit': product.name,
+      Rang: index + 1,
+      Produit: product.name,
       'Quantité Vendue': product.quantity,
-      'Chiffre d\'Affaires': formatCurrencyForExport(product.revenue / 100),
+      "Chiffre d'Affaires": formatCurrencyForExport(product.revenue / 100),
     }));
     exportToCSV(data, 'rapport-produits-top-ventes');
   };
 
   const handleExportStockCSV = () => {
     const data = lowStockVariants.map((variant) => ({
-      'Produit': variant.product?.name || '-',
-      'Variante': variant.name,
-      'SKU': variant.sku,
+      Produit: variant.product?.name || '-',
+      Variante: variant.name,
+      SKU: variant.sku,
       'Stock Actuel': variant.stockOnHand,
       'Seuil Alerte': variant.customFields?.minStockAlert || 5,
-      'Statut': variant.stockOnHand <= 0 ? 'Rupture' : variant.stockOnHand <= (variant.customFields?.minStockAlert || 5) ? 'Stock Faible' : 'OK',
+      Statut:
+        variant.stockOnHand <= 0
+          ? 'Rupture'
+          : variant.stockOnHand <= (variant.customFields?.minStockAlert || 5)
+            ? 'Stock Faible'
+            : 'OK',
     }));
     exportToCSV(data, 'rapport-alertes-stock');
   };
 
   const handleExportWilayasCSV = () => {
     const data = salesMetrics.topWilayas.map(([wilaya, stats], index) => ({
-      'Rang': index + 1,
-      'Wilaya': wilaya,
+      Rang: index + 1,
+      Wilaya: wilaya,
       'Nombre Commandes': stats.count,
-      'Chiffre d\'Affaires': formatCurrencyForExport(stats.revenue / 100),
+      "Chiffre d'Affaires": formatCurrencyForExport(stats.revenue / 100),
     }));
     exportToCSV(data, 'rapport-ventes-par-wilaya');
   };
@@ -384,7 +389,9 @@ export const Reports: React.FC = () => {
                   Meilleures ventes
                 </h4>
                 {productPerformance.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4">Aucune vente dans cette période</p>
+                  <p className="text-muted-foreground text-center py-4">
+                    Aucune vente dans cette période
+                  </p>
                 ) : (
                   <div className="space-y-3">
                     {productPerformance.map(([productId, data], index) => (
@@ -398,7 +405,9 @@ export const Reports: React.FC = () => {
                           </span>
                           <div>
                             <p className="font-medium text-foreground">{data.name}</p>
-                            <p className="text-sm text-muted-foreground">{data.quantity} unités vendues</p>
+                            <p className="text-sm text-muted-foreground">
+                              {data.quantity} unités vendues
+                            </p>
                           </div>
                         </div>
                         <p className="font-semibold text-foreground">{formatPrice(data.revenue)}</p>
