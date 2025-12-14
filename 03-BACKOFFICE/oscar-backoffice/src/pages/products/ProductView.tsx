@@ -75,9 +75,9 @@ export const ProductView: React.FC = () => {
   if (error || !product) {
     return (
       <div className="flex flex-col items-center justify-center min-h-96">
-        <Package className="h-16 w-16 text-gray-300 mb-4" />
-        <p className="text-gray-500 text-lg mb-4">Produit non trouvé</p>
-        <Link to="/products" className="text-blue-600 hover:text-blue-700">
+        <Package className="h-16 w-16 text-muted-foreground mb-4" />
+        <p className="text-muted-foreground text-lg mb-4">Produit non trouvé</p>
+        <Link to="/products" className="text-primary hover:text-primary/80">
           Retour à la liste
         </Link>
       </div>
@@ -101,7 +101,7 @@ export const ProductView: React.FC = () => {
           </Button>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900">{product.name}</h1>
+              <h1 className="text-2xl font-bold text-foreground">{product.name}</h1>
               <Badge variant={product.enabled ? 'success' : 'default'}>
                 {product.enabled ? 'Actif' : 'Inactif'}
               </Badge>
@@ -112,7 +112,7 @@ export const ProductView: React.FC = () => {
                 </Badge>
               )}
             </div>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               ID: {product.id} | Slug: {product.slug}
             </p>
           </div>
@@ -146,7 +146,7 @@ export const ProductView: React.FC = () => {
                     <img
                       src={product.featuredAsset.preview}
                       alt={product.name}
-                      className="w-full max-h-96 object-contain rounded-lg bg-gray-50"
+                      className="w-full max-h-96 object-contain rounded-lg bg-muted"
                     />
                     <Badge variant="warning" className="absolute top-2 left-2">
                       <Star className="h-3 w-3 mr-1" />
@@ -154,10 +154,10 @@ export const ProductView: React.FC = () => {
                     </Badge>
                   </div>
                 ) : (
-                  <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <div className="h-64 bg-muted rounded-lg flex items-center justify-center">
                     <div className="text-center">
-                      <ImageIcon className="h-16 w-16 text-gray-300 mx-auto mb-2" />
-                      <p className="text-gray-400">Aucune image</p>
+                      <ImageIcon className="h-16 w-16 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-muted-foreground">Aucune image</p>
                     </div>
                   </div>
                 )}
@@ -165,7 +165,7 @@ export const ProductView: React.FC = () => {
                 {/* Gallery */}
                 {product.assets && product.assets.length > 1 && (
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">
+                    <p className="text-sm font-medium text-foreground mb-2">
                       Galerie ({product.assets.length} images)
                     </p>
                     <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
@@ -175,10 +175,10 @@ export const ProductView: React.FC = () => {
                           href={asset.source}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`relative rounded-lg overflow-hidden border-2 hover:border-blue-400 transition-colors ${
+                          className={`relative rounded-lg overflow-hidden border-2 hover:border-primary transition-colors ${
                             product.featuredAsset?.id === asset.id
                               ? 'border-yellow-500'
-                              : 'border-gray-200'
+                              : 'border-border'
                           }`}
                         >
                           <img
@@ -208,9 +208,9 @@ export const ProductView: React.FC = () => {
             <CardContent>
               <div className="prose prose-sm max-w-none">
                 {product.description ? (
-                  <p className="text-gray-700 whitespace-pre-wrap">{product.description}</p>
+                  <p className="text-foreground whitespace-pre-wrap">{product.description}</p>
                 ) : (
-                  <p className="text-gray-400 italic">Aucune description</p>
+                  <p className="text-muted-foreground italic">Aucune description</p>
                 )}
               </div>
             </CardContent>
@@ -229,43 +229,43 @@ export const ProductView: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* French */}
                   <div className="space-y-2">
-                    <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                    <h4 className="font-medium text-foreground flex items-center gap-2">
                       <span className="text-sm">FR</span> Français
                     </h4>
                     {product.customFields?.nameFr ? (
                       <>
-                        <p className="text-sm text-gray-700">
+                        <p className="text-sm text-foreground">
                           <span className="font-medium">Nom:</span> {product.customFields.nameFr}
                         </p>
                         {product.customFields?.descriptionFr && (
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-muted-foreground">
                             {product.customFields.descriptionFr}
                           </p>
                         )}
                       </>
                     ) : (
-                      <p className="text-sm text-gray-400 italic">Non traduit</p>
+                      <p className="text-sm text-muted-foreground italic">Non traduit</p>
                     )}
                   </div>
 
                   {/* Arabic */}
                   <div className="space-y-2" dir="rtl">
-                    <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                    <h4 className="font-medium text-foreground flex items-center gap-2">
                       <span className="text-sm">AR</span> العربية
                     </h4>
                     {product.customFields?.nameAr ? (
                       <>
-                        <p className="text-sm text-gray-700">
+                        <p className="text-sm text-foreground">
                           <span className="font-medium">الاسم:</span> {product.customFields.nameAr}
                         </p>
                         {product.customFields?.descriptionAr && (
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-muted-foreground">
                             {product.customFields.descriptionAr}
                           </p>
                         )}
                       </>
                     ) : (
-                      <p className="text-sm text-gray-400 italic">غير مترجم</p>
+                      <p className="text-sm text-muted-foreground italic">غير مترجم</p>
                     )}
                   </div>
                 </div>
@@ -284,42 +284,42 @@ export const ProductView: React.FC = () => {
             <CardContent>
               {product.variants && product.variants.length > 0 ? (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-border">
+                    <thead className="bg-background/50">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                           SKU
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                           Nom
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                           Options
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                           Prix
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                           Prix TTC
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                           Stock
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                           Statut
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-card divide-y divide-border">
                       {product.variants.map((variant) => (
-                        <tr key={variant.id} className="hover:bg-gray-50">
+                        <tr key={variant.id} className="hover:bg-accent">
                           <td className="px-4 py-3">
-                            <span className="text-sm font-mono font-medium text-gray-900">
+                            <span className="text-sm font-mono font-medium text-foreground">
                               {variant.sku}
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            <span className="text-sm text-gray-700">{variant.name}</span>
+                            <span className="text-sm text-foreground">{variant.name}</span>
                           </td>
                           <td className="px-4 py-3">
                             {variant.options && variant.options.length > 0 ? (
@@ -331,16 +331,16 @@ export const ProductView: React.FC = () => {
                                 ))}
                               </div>
                             ) : (
-                              <span className="text-gray-400 text-sm">-</span>
+                              <span className="text-muted-foreground text-sm">-</span>
                             )}
                           </td>
                           <td className="px-4 py-3">
-                            <span className="text-sm font-medium text-gray-900">
+                            <span className="text-sm font-medium text-foreground">
                               {formatPrice(variant.price / 100)}
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            <span className="text-sm text-gray-600">
+                            <span className="text-sm text-muted-foreground">
                               {formatPrice(variant.priceWithTax / 100)}
                             </span>
                           </td>
@@ -348,16 +348,16 @@ export const ProductView: React.FC = () => {
                             <span
                               className={`text-sm font-medium ${
                                 variant.stockOnHand === 0
-                                  ? 'text-red-600'
+                                  ? 'text-red-500'
                                   : variant.stockOnHand <
                                       (variant.customFields?.minStockAlert || 10)
-                                    ? 'text-orange-600'
-                                    : 'text-green-600'
+                                    ? 'text-orange-500'
+                                    : 'text-green-500'
                               }`}
                             >
                               {variant.stockOnHand}
                               {variant.stockAllocated > 0 && (
-                                <span className="text-gray-400 text-xs ml-1">
+                                <span className="text-muted-foreground text-xs ml-1">
                                   ({variant.stockAllocated} réservé)
                                 </span>
                               )}
@@ -375,8 +375,8 @@ export const ProductView: React.FC = () => {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <Box className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-500">Aucune variante</p>
+                  <Box className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-muted-foreground">Aucune variante</p>
                 </div>
               )}
             </CardContent>
@@ -391,49 +391,49 @@ export const ProductView: React.FC = () => {
               <CardTitle>Résumé</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between py-2 border-b">
-                <span className="text-sm text-gray-500">Prix principal</span>
-                <span className="font-semibold text-gray-900">
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm text-muted-foreground">Prix principal</span>
+                <span className="font-semibold text-foreground">
                   {mainVariant?.price ? formatPrice(mainVariant.price / 100) : '-'}
                 </span>
               </div>
               {product.customFields?.salePrice && (
-                <div className="flex items-center justify-between py-2 border-b">
-                  <span className="text-sm text-gray-500">Prix promo</span>
-                  <span className="font-semibold text-green-600">
+                <div className="flex items-center justify-between py-2 border-b border-border">
+                  <span className="text-sm text-muted-foreground">Prix promo</span>
+                  <span className="font-semibold text-green-500">
                     {formatPrice(product.customFields.salePrice / 100)}
                   </span>
                 </div>
               )}
-              <div className="flex items-center justify-between py-2 border-b">
-                <span className="text-sm text-gray-500">Stock total</span>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm text-muted-foreground">Stock total</span>
                 <span
                   className={`font-semibold ${
                     totalStock === 0
-                      ? 'text-red-600'
+                      ? 'text-red-500'
                       : totalStock < 10
-                        ? 'text-orange-600'
-                        : 'text-green-600'
+                        ? 'text-orange-500'
+                        : 'text-green-500'
                   }`}
                 >
                   {totalStock} unités
                 </span>
               </div>
-              <div className="flex items-center justify-between py-2 border-b">
-                <span className="text-sm text-gray-500">Variantes</span>
-                <span className="font-semibold text-gray-900">{product.variants?.length || 0}</span>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm text-muted-foreground">Variantes</span>
+                <span className="font-semibold text-foreground">{product.variants?.length || 0}</span>
               </div>
-              <div className="flex items-center justify-between py-2 border-b">
-                <span className="text-sm text-gray-500">Vues</span>
-                <span className="font-semibold text-gray-900 flex items-center gap-1">
-                  <Eye className="h-4 w-4 text-gray-400" />
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm text-muted-foreground">Vues</span>
+                <span className="font-semibold text-foreground flex items-center gap-1">
+                  <Eye className="h-4 w-4 text-muted-foreground" />
                   {product.customFields?.viewCount || 0}
                 </span>
               </div>
               {product.customFields?.weightKg && (
-                <div className="flex items-center justify-between py-2 border-b">
-                  <span className="text-sm text-gray-500">Poids</span>
-                  <span className="font-semibold text-gray-900">
+                <div className="flex items-center justify-between py-2 border-b border-border">
+                  <span className="text-sm text-muted-foreground">Poids</span>
+                  <span className="font-semibold text-foreground">
                     {product.customFields.weightKg} kg
                   </span>
                 </div>
@@ -454,7 +454,7 @@ export const ProductView: React.FC = () => {
               <CardContent className="space-y-4">
                 {product.customFields?.availableSizes?.length > 0 && (
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">Tailles</p>
+                    <p className="text-sm font-medium text-foreground mb-2">Tailles</p>
                     <div className="flex flex-wrap gap-2">
                       {product.customFields.availableSizes.map((size, i) => (
                         <Badge key={i} variant="default">
@@ -466,7 +466,7 @@ export const ProductView: React.FC = () => {
                 )}
                 {product.customFields?.availableColors?.length > 0 && (
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">Couleurs</p>
+                    <p className="text-sm font-medium text-foreground mb-2">Couleurs</p>
                     <div className="flex flex-wrap gap-2">
                       {product.customFields.availableColors.map((color, i) => (
                         <Badge key={i} variant="default">
@@ -495,16 +495,16 @@ export const ProductView: React.FC = () => {
                     <Link
                       key={col.id}
                       to={`/categories/${col.id}`}
-                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors"
                     >
-                      <FolderTree className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm text-gray-700">{col.name}</span>
-                      <ExternalLink className="h-3 w-3 text-gray-400 ml-auto" />
+                      <FolderTree className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-foreground">{col.name}</span>
+                      <ExternalLink className="h-3 w-3 text-muted-foreground ml-auto" />
                     </Link>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-gray-400 italic">Aucune catégorie</p>
+                <p className="text-sm text-muted-foreground italic">Aucune catégorie</p>
               )}
             </CardContent>
           </Card>
@@ -519,7 +519,7 @@ export const ProductView: React.FC = () => {
                 <div className="space-y-2">
                   {product.facetValues.map((fv) => (
                     <div key={fv.id} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">{fv.facet.name}</span>
+                      <span className="text-sm text-muted-foreground">{fv.facet.name}</span>
                       <Badge variant="default">{fv.name}</Badge>
                     </div>
                   ))}
@@ -538,14 +538,14 @@ export const ProductView: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <p className="text-xs text-gray-500">Créé le</p>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-xs text-muted-foreground">Créé le</p>
+                <p className="text-sm font-medium text-foreground">
                   {formatDateTime(product.createdAt)}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Modifié le</p>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-xs text-muted-foreground">Modifié le</p>
+                <p className="text-sm font-medium text-foreground">
                   {formatDateTime(product.updatedAt)}
                 </p>
               </div>
@@ -562,7 +562,7 @@ export const ProductView: React.FC = () => {
                 <div className="space-y-3">
                   {product.optionGroups.map((group) => (
                     <div key={group.id}>
-                      <p className="text-sm font-medium text-gray-900">{group.name}</p>
+                      <p className="text-sm font-medium text-foreground">{group.name}</p>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {group.options?.map((opt) => (
                           <Badge key={opt.id} variant="default" className="text-xs">

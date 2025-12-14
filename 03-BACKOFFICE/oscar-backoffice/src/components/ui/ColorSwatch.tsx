@@ -71,13 +71,13 @@ export const ColorSwatch: React.FC<ColorSwatchProps> = ({
             sizeClasses[size],
             'rounded-full bg-gray-400 flex items-center justify-center',
             'border border-gray-500',
-            selected && 'ring-2 ring-blue-500 ring-offset-1'
+            selected && 'ring-2 ring-primary ring-offset-1'
           )}
         >
           <span className="text-[6px] text-gray-700 font-bold">?</span>
         </div>
         {showLabel && (
-          <span className={cn(labelSizeClasses[size], 'text-gray-400')}>
+          <span className={cn(labelSizeClasses[size], 'text-muted-foreground')}>
             {color}
           </span>
         )}
@@ -104,7 +104,7 @@ export const ColorSwatch: React.FC<ColorSwatchProps> = ({
           'rounded-full flex-shrink-0',
           isWhiteOrLight && 'border border-gray-400',
           !isWhiteOrLight && 'border border-gray-600',
-          selected && 'ring-2 ring-blue-500 ring-offset-1 ring-offset-gray-900'
+          selected && 'ring-2 ring-primary ring-offset-1 ring-offset-background'
         )}
         style={{ backgroundColor: displayHex }}
       >
@@ -128,7 +128,7 @@ export const ColorSwatch: React.FC<ColorSwatchProps> = ({
         )}
       </div>
       {showLabel && (
-        <span className={cn(labelSizeClasses[size], 'text-gray-300')}>
+        <span className={cn(labelSizeClasses[size], 'text-foreground')}>
           {color}
         </span>
       )}

@@ -12,28 +12,28 @@ interface AlertProps {
 export const Alert: React.FC<AlertProps> = ({ variant = 'info', title, children, className }) => {
   const variantConfig = {
     success: {
-      container: 'bg-green-900/30 border-green-500/30',
-      icon: <CheckCircle className="h-5 w-5 text-green-400" />,
-      title: 'text-green-300',
-      text: 'text-green-400',
+      container: 'bg-success/10 border-success/30',
+      icon: <CheckCircle className="h-5 w-5 text-success" />,
+      title: 'text-success',
+      text: 'text-success/80',
     },
     error: {
-      container: 'bg-red-900/30 border-red-500/30',
-      icon: <XCircle className="h-5 w-5 text-red-400" />,
-      title: 'text-red-300',
-      text: 'text-red-400',
+      container: 'bg-destructive/10 border-destructive/30',
+      icon: <XCircle className="h-5 w-5 text-destructive" />,
+      title: 'text-destructive',
+      text: 'text-destructive/80',
     },
     warning: {
-      container: 'bg-yellow-900/30 border-yellow-500/30',
-      icon: <AlertCircle className="h-5 w-5 text-yellow-400" />,
-      title: 'text-yellow-300',
-      text: 'text-yellow-400',
+      container: 'bg-warning/10 border-warning/30',
+      icon: <AlertCircle className="h-5 w-5 text-warning" />,
+      title: 'text-warning',
+      text: 'text-warning/80',
     },
     info: {
-      container: 'bg-blue-900/30 border-blue-500/30',
-      icon: <Info className="h-5 w-5 text-blue-400" />,
-      title: 'text-blue-300',
-      text: 'text-blue-400',
+      container: 'bg-primary/10 border-primary/30',
+      icon: <Info className="h-5 w-5 text-primary" />,
+      title: 'text-primary',
+      text: 'text-primary/80',
     },
   };
 

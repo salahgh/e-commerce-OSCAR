@@ -266,20 +266,20 @@ export const ProductList: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-100">Produits</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="text-3xl font-bold text-foreground">Produits</h1>
+          <p className="text-muted-foreground mt-1">
             {totalItems} produit{totalItems > 1 ? 's' : ''} au total
           </p>
         </div>
         <div className="flex items-center gap-3">
           {/* Filter Mode Toggle */}
-          <div className="flex items-center bg-gray-700 rounded-lg p-1" title="Mode de filtrage">
+          <div className="flex items-center bg-muted rounded-lg p-1" title="Mode de filtrage">
             <button
               onClick={() => setFilterMode('basic')}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                 filterMode === 'basic'
-                  ? 'bg-gray-800 text-blue-400 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-200'
+                  ? 'bg-card text-primary shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Basique
@@ -288,8 +288,8 @@ export const ProductList: React.FC = () => {
               onClick={() => setFilterMode('faceted')}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
                 filterMode === 'faceted'
-                  ? 'bg-gray-800 text-blue-400 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-200'
+                  ? 'bg-card text-primary shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <Sparkles className="h-4 w-4" />
@@ -297,13 +297,13 @@ export const ProductList: React.FC = () => {
             </button>
           </div>
           {/* View Mode Toggle */}
-          <div className="flex items-center bg-gray-700 rounded-lg p-1">
+          <div className="flex items-center bg-muted rounded-lg p-1">
             <button
               onClick={() => setViewMode('table')}
               className={`p-2 rounded-md transition-colors ${
                 viewMode === 'table'
-                  ? 'bg-gray-800 text-blue-400 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-200'
+                  ? 'bg-card text-primary shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
               title="Vue tableau"
             >
@@ -313,8 +313,8 @@ export const ProductList: React.FC = () => {
               onClick={() => setViewMode('grid')}
               className={`p-2 rounded-md transition-colors ${
                 viewMode === 'grid'
-                  ? 'bg-gray-800 text-blue-400 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-200'
+                  ? 'bg-card text-primary shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
               title="Vue grille"
             >
@@ -323,7 +323,7 @@ export const ProductList: React.FC = () => {
           </div>
           <Link
             to="/products/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
           >
             <Plus className="h-5 w-5" />
             Nouveau produit
@@ -332,10 +332,10 @@ export const ProductList: React.FC = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-gray-800 rounded-lg shadow p-4">
+      <div className="bg-card rounded-lg shadow p-4">
         <div className="flex items-center gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <input
               type="text"
               placeholder="Rechercher un produit par nom, SKU..."
@@ -348,7 +348,7 @@ export const ProductList: React.FC = () => {
                 }
                 setCurrentPage(0);
               }}
-              className="w-full pl-10 pr-4 py-3 border border-gray-600 rounded-lg bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className="w-full pl-10 pr-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none"
             />
           </div>
           <button
@@ -361,8 +361,8 @@ export const ProductList: React.FC = () => {
             }}
             className={`flex items-center gap-2 px-4 py-3 border rounded-lg transition-colors relative ${
               (filterMode === 'faceted' ? facetedFilters.activeFilterCount : activeFilterCount) > 0
-                ? 'border-blue-500 text-blue-400 bg-blue-900/30 hover:bg-blue-900/50'
-                : 'border-gray-600 text-gray-500 hover:bg-gray-700'
+                ? 'border-primary text-primary bg-primary/10 hover:bg-primary/20'
+                : 'border-border text-muted-foreground hover:bg-accent'
             }`}
           >
             {filterMode === 'faceted' ? (
@@ -381,7 +381,7 @@ export const ProductList: React.FC = () => {
 
         {/* Active Filters Display - Basic Mode */}
         {filterMode === 'basic' && hasActiveFilters && (
-          <div className="mt-3 pt-3 border-t border-gray-700">
+          <div className="mt-3 pt-3 border-t border-border">
             <ActiveFilters
               filters={filters}
               onClearFilter={clearFilter}
@@ -393,9 +393,9 @@ export const ProductList: React.FC = () => {
 
         {/* Active Filters Display - Faceted Mode */}
         {filterMode === 'faceted' && facetedFilters.activeFilterCount > 0 && (
-          <div className="mt-3 pt-3 border-t border-gray-700">
+          <div className="mt-3 pt-3 border-t border-border">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm text-gray-500">Filtres actifs:</span>
+              <span className="text-sm text-muted-foreground">Filtres actifs:</span>
 
               {/* Search term */}
               {facetedFilters.state.searchTerm && (
@@ -475,19 +475,19 @@ export const ProductList: React.FC = () => {
           </div>
         )}
 
-        <div className="mt-3 flex items-center gap-2 text-sm text-gray-500">
+        <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
           <Info className="h-4 w-4" />
           <span>Survolez un produit pour voir tous ses détails</span>
         </div>
       </div>
 
       {/* Products View */}
-      <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div className="bg-card rounded-lg shadow overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="flex items-center gap-3">
               <svg
-                className="animate-spin h-6 w-6 text-blue-600"
+                className="animate-spin h-6 w-6 text-primary"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -506,13 +506,13 @@ export const ProductList: React.FC = () => {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 />
               </svg>
-              <span className="text-gray-500">Chargement...</span>
+              <span className="text-muted-foreground">Chargement...</span>
             </div>
           </div>
         ) : products.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12">
-            <Package className="h-16 w-16 text-gray-500 mb-4" />
-            <p className="text-gray-500 text-lg">Aucun produit trouvé</p>
+            <Package className="h-16 w-16 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground text-lg">Aucun produit trouvé</p>
             {(filterMode === 'basic' ? hasActiveFilters : facetedFilters.activeFilterCount > 0) && (
               <button
                 onClick={() => {
@@ -552,9 +552,9 @@ export const ProductList: React.FC = () => {
                       />
                     }
                   >
-                    <div className="bg-gray-700/50 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-200 border border-gray-600 hover:border-blue-500 group">
+                    <div className="bg-accent/50 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-200 border border-border hover:border-primary group">
                       {/* Image */}
-                      <div className="aspect-[4/3] relative bg-gray-700">
+                      <div className="aspect-[4/3] relative bg-muted">
                         {product.featuredAsset?.preview ? (
                           <img
                             src={product.featuredAsset.preview}
@@ -563,7 +563,7 @@ export const ProductList: React.FC = () => {
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <Package className="h-10 w-10 text-gray-500" />
+                            <Package className="h-10 w-10 text-muted-foreground" />
                           </div>
                         )}
                         {/* Status Badges */}
@@ -572,7 +572,7 @@ export const ProductList: React.FC = () => {
                             className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                               product.enabled
                                 ? 'bg-green-900/50 text-green-300'
-                                : 'bg-gray-700 text-gray-300'
+                                : 'bg-muted text-muted-foreground'
                             }`}
                           >
                             {product.enabled ? 'Actif' : 'Inactif'}
@@ -603,13 +603,13 @@ export const ProductList: React.FC = () => {
                       </div>
                       {/* Content */}
                       <div className="p-4">
-                        <h3 className="font-medium text-gray-100 truncate mb-1">{product.name}</h3>
-                        <p className="text-sm text-gray-500 truncate mb-2">
+                        <h3 className="font-medium text-foreground truncate mb-1">{product.name}</h3>
+                        <p className="text-sm text-muted-foreground truncate mb-2">
                           {mainVariant?.sku || product.slug}
                         </p>
                         <div className="flex items-center justify-between">
                           <div>
-                            <span className="text-lg font-bold text-gray-100">
+                            <span className="text-lg font-bold text-foreground">
                               {mainVariant?.price ? formatPrice(mainVariant.price) : '-'}
                             </span>
                             {product.customFields?.salePrice && (
@@ -640,33 +640,33 @@ export const ProductList: React.FC = () => {
         ) : (
           /* Table View */
           <div className="overflow-x-auto">
-            <table className="w-full divide-y divide-gray-700 table-fixed">
-              <thead className="bg-gray-800/50">
+            <table className="w-full divide-y divide-border table-fixed">
+              <thead className="bg-background/50">
                 <tr>
-                  <th className="w-[22%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="w-[22%] px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Produit
                   </th>
-                  <th className="w-[16%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="w-[16%] px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Traductions
                   </th>
-                  <th className="w-[14%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="w-[14%] px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     SKU / Variantes
                   </th>
-                  <th className="w-[12%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="w-[12%] px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Prix
                   </th>
-                  <th className="w-[12%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="w-[12%] px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Stock
                   </th>
-                  <th className="w-[12%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="w-[12%] px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Statut
                   </th>
-                  <th className="w-[12%] px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="w-[12%] px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-gray-800 divide-y divide-gray-700">
+              <tbody className="bg-card divide-y divide-border">
                 {products.map((product) => {
                   const mainVariant = product.variants?.[0];
                   const totalStock =
@@ -676,7 +676,7 @@ export const ProductList: React.FC = () => {
                   return (
                     <tr
                       key={product.id}
-                      className="hover:bg-blue-900/30 cursor-pointer transition-colors group"
+                      className="hover:bg-primary/10 cursor-pointer transition-colors group"
                       onClick={() => navigate(`/products/${product.id}`)}
                     >
                       <td className="px-4 py-3 whitespace-nowrap">
@@ -699,18 +699,18 @@ export const ProductList: React.FC = () => {
                               <img
                                 src={product.featuredAsset.preview}
                                 alt={product.name}
-                                className="h-12 w-12 rounded-lg object-cover border border-gray-700"
+                                className="h-12 w-12 rounded-lg object-cover border border-border"
                               />
                             ) : (
-                              <div className="h-12 w-12 rounded-lg bg-gray-700 flex items-center justify-center">
-                                <Package className="h-6 w-6 text-gray-500" />
+                              <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center">
+                                <Package className="h-6 w-6 text-muted-foreground" />
                               </div>
                             )}
                             <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-100 max-w-[200px] truncate">
+                              <div className="text-sm font-medium text-foreground max-w-[200px] truncate">
                                 {product.name}
                               </div>
-                              <div className="text-sm text-gray-500 truncate max-w-[200px]">
+                              <div className="text-sm text-muted-foreground truncate max-w-[200px]">
                                 {product.slug}
                               </div>
                             </div>
@@ -720,36 +720,36 @@ export const ProductList: React.FC = () => {
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="space-y-1">
                           {product.customFields?.nameFr ? (
-                            <div className="text-sm text-gray-100 truncate max-w-[150px]">
-                              <span className="text-gray-500 text-xs mr-1">FR</span>
+                            <div className="text-sm text-foreground truncate max-w-[150px]">
+                              <span className="text-muted-foreground text-xs mr-1">FR</span>
                               {product.customFields.nameFr}
                             </div>
                           ) : (
-                            <div className="text-sm text-gray-500">-</div>
+                            <div className="text-sm text-muted-foreground">-</div>
                           )}
                           {product.customFields?.nameAr && (
                             <div
-                              className="text-sm text-gray-500 truncate max-w-[150px]"
+                              className="text-sm text-muted-foreground truncate max-w-[150px]"
                               dir="rtl"
                             >
-                              <span className="text-gray-500 text-xs ml-1">AR</span>
+                              <span className="text-muted-foreground text-xs ml-1">AR</span>
                               {product.customFields.nameAr}
                             </div>
                           )}
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="text-sm font-mono text-gray-100">
+                        <div className="text-sm font-mono text-foreground">
                           {mainVariant?.sku || '-'}
                         </div>
                         {variantCount > 1 && (
-                          <div className="text-xs text-blue-600 mt-0.5">
+                          <div className="text-xs text-primary mt-0.5">
                             +{variantCount - 1} variantes
                           </div>
                         )}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="text-sm font-semibold text-gray-100">
+                        <div className="text-sm font-semibold text-foreground">
                           {mainVariant?.price ? formatPrice(mainVariant.price) : '-'}
                         </div>
                         {product.customFields?.salePrice && (
@@ -785,7 +785,7 @@ export const ProductList: React.FC = () => {
                             className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                               product.enabled
                                 ? 'bg-green-900/50 text-green-300'
-                                : 'bg-gray-700 text-gray-300'
+                                : 'bg-muted text-muted-foreground'
                             }`}
                           >
                             {product.enabled ? 'Actif' : 'Inactif'}
@@ -804,7 +804,7 @@ export const ProductList: React.FC = () => {
                               e.stopPropagation();
                               navigate(`/products/${product.id}`);
                             }}
-                            className="text-blue-400 hover:text-blue-300 p-2 rounded-lg hover:bg-blue-900/50"
+                            className="text-primary hover:text-primary/80 p-2 rounded-lg hover:bg-primary/10"
                             title="Voir les details"
                           >
                             <Eye className="h-5 w-5" />
@@ -839,15 +839,15 @@ export const ProductList: React.FC = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="bg-gray-800/50 px-6 py-4 flex items-center justify-between border-t border-gray-700">
-                <div className="text-sm text-gray-400">
+              <div className="bg-background/50 px-6 py-4 flex items-center justify-between border-t border-border">
+                <div className="text-sm text-muted-foreground">
                   Page {currentPage + 1} sur {totalPages} ({totalItems} produits)
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
                     disabled={currentPage === 0}
-                    className="px-3 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                    className="px-3 py-2 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                   >
                     <ChevronLeft className="h-4 w-4" />
                     Précédent
@@ -855,7 +855,7 @@ export const ProductList: React.FC = () => {
                   <button
                     onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
                     disabled={currentPage >= totalPages - 1}
-                    className="px-3 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                    className="px-3 py-2 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                   >
                     Suivant
                     <ChevronRight className="h-4 w-4" />
@@ -868,15 +868,15 @@ export const ProductList: React.FC = () => {
 
         {/* Grid Pagination */}
         {viewMode === 'grid' && totalPages > 1 && (
-          <div className="bg-gray-800/50 px-6 py-4 flex items-center justify-between border-t border-gray-700">
-            <div className="text-sm text-gray-400">
+          <div className="bg-background/50 px-6 py-4 flex items-center justify-between border-t border-border">
+            <div className="text-sm text-muted-foreground">
               Page {currentPage + 1} sur {totalPages} ({totalItems} produits)
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
                 disabled={currentPage === 0}
-                className="px-3 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                className="px-3 py-2 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
               >
                 <ChevronLeft className="h-4 w-4" />
                 Précédent
@@ -884,7 +884,7 @@ export const ProductList: React.FC = () => {
               <button
                 onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={currentPage >= totalPages - 1}
-                className="px-3 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                className="px-3 py-2 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
               >
                 Suivant
                 <ChevronRight className="h-4 w-4" />

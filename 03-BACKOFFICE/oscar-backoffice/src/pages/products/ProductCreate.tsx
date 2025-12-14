@@ -486,15 +486,15 @@ export const ProductCreate: React.FC = () => {
                 placeholder="Laisser vide si pas de promo"
               />
               <div className="flex flex-col justify-end">
-                <label className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600">
+                <label className="flex items-center gap-3 p-3 bg-muted rounded-lg cursor-pointer hover:bg-accent">
                   <input
                     type="checkbox"
                     name="enabled"
                     checked={formData.enabled}
                     onChange={handleInputChange}
-                    className="h-4 w-4 text-blue-600 border-gray-500 rounded bg-gray-600"
+                    className="h-4 w-4 text-primary border-border rounded bg-card"
                   />
-                  <span className="text-sm font-medium text-gray-300">Produit actif</span>
+                  <span className="text-sm font-medium text-muted-foreground">Produit actif</span>
                 </label>
               </div>
             </div>
@@ -524,11 +524,11 @@ export const ProductCreate: React.FC = () => {
                 name="isFeatured"
                 checked={formData.isFeatured}
                 onChange={handleInputChange}
-                className="h-5 w-5 text-yellow-600 border-gray-500 rounded bg-gray-600"
+                className="h-5 w-5 text-yellow-600 border-border rounded bg-card"
               />
               <div className="flex items-center gap-2">
                 <Star className="h-5 w-5 text-yellow-500" />
-                <span className="font-medium text-gray-100">Produit vedette</span>
+                <span className="font-medium text-foreground">Produit vedette</span>
               </div>
             </label>
           </div>
@@ -615,8 +615,8 @@ export const ProductCreate: React.FC = () => {
               onClick={() => fileInputRef.current?.click()}
               className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
                 isDraggingOver
-                  ? 'border-blue-500 bg-blue-900/30'
-                  : 'border-gray-600 hover:border-blue-400 hover:bg-gray-700/50'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border hover:border-primary hover:bg-muted/50'
               }`}
             >
               <input
@@ -628,21 +628,21 @@ export const ProductCreate: React.FC = () => {
                 onChange={handleFileSelect}
               />
               <Upload
-                className={`h-12 w-12 mx-auto mb-4 ${isDraggingOver ? 'text-blue-500' : 'text-gray-400'}`}
+                className={`h-12 w-12 mx-auto mb-4 ${isDraggingOver ? 'text-primary' : 'text-muted-foreground'}`}
               />
-              <p className="text-lg font-medium text-gray-300">Glissez-deposez vos images ici</p>
-              <p className="text-sm text-gray-400 mt-2">
+              <p className="text-lg font-medium text-foreground">Glissez-deposez vos images ici</p>
+              <p className="text-sm text-muted-foreground mt-2">
                 ou cliquez pour selectionner des fichiers
               </p>
-              <p className="text-xs text-gray-500 mt-4">PNG, JPG, WEBP jusqu a 10MB chacun</p>
+              <p className="text-xs text-muted-foreground/70 mt-4">PNG, JPG, WEBP jusqu a 10MB chacun</p>
             </div>
 
             {/* Image gallery */}
             {images.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-medium text-gray-300">Images ({images.length})</h3>
-                  <p className="text-xs text-gray-400">
+                  <h3 className="text-sm font-medium text-foreground">Images ({images.length})</h3>
+                  <p className="text-xs text-muted-foreground">
                     Glissez pour reorganiser - Cliquez sur <Star className="inline h-3 w-3" /> pour
                     definir l image principale
                   </p>
@@ -658,7 +658,7 @@ export const ProductCreate: React.FC = () => {
                       className={`relative group rounded-lg overflow-hidden border-2 cursor-move ${
                         featuredImageIndex === index
                           ? 'border-yellow-500 ring-2 ring-yellow-500/30'
-                          : 'border-gray-600'
+                          : 'border-border'
                       } ${draggedImageIndex === index ? 'opacity-50' : ''}`}
                     >
                       <img
@@ -666,8 +666,8 @@ export const ProductCreate: React.FC = () => {
                         alt={image.name}
                         className="h-32 w-full object-cover"
                       />
-                      <div className="absolute top-1 left-1 p-1 bg-gray-900/80 rounded opacity-0 group-hover:opacity-100">
-                        <GripVertical className="h-4 w-4 text-gray-400" />
+                      <div className="absolute top-1 left-1 p-1 bg-background/80 rounded opacity-0 group-hover:opacity-100">
+                        <GripVertical className="h-4 w-4 text-muted-foreground" />
                       </div>
                       {featuredImageIndex === index && (
                         <Badge variant="warning" className="absolute top-1 right-1 text-xs">
@@ -707,10 +707,10 @@ export const ProductCreate: React.FC = () => {
             )}
 
             {images.length === 0 && (
-              <div className="text-center py-8 text-gray-400">
-                <ImageIcon className="h-16 w-16 mx-auto mb-4 text-gray-500" />
+              <div className="text-center py-8 text-muted-foreground">
+                <ImageIcon className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
                 <p>Aucune image ajoutee</p>
-                <p className="text-sm text-gray-500">Les images sont optionnelles mais recommandees</p>
+                <p className="text-sm text-muted-foreground/70">Les images sont optionnelles mais recommandees</p>
               </div>
             )}
           </div>
@@ -726,7 +726,7 @@ export const ProductCreate: React.FC = () => {
                   <CardTitle className="text-base">Groupes d options (optionnel)</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-400 mb-4">
+                  <p className="text-sm text-muted-foreground mb-4">
                     Selectionnez les groupes d options pour creer des variantes (ex: Taille,
                     Couleur)
                   </p>
@@ -738,8 +738,8 @@ export const ProductCreate: React.FC = () => {
                         onClick={() => toggleOptionGroup(group.id)}
                         className={`px-4 py-2 rounded-lg border-2 transition-colors ${
                           selectedOptionGroups.includes(group.id)
-                            ? 'border-blue-500 bg-blue-900/30 text-blue-400'
-                            : 'border-gray-600 hover:border-gray-500 text-gray-300'
+                            ? 'border-primary bg-primary/10 text-primary'
+                            : 'border-border hover:border-muted-foreground text-muted-foreground'
                         }`}
                       >
                         {selectedOptionGroups.includes(group.id) && (
@@ -774,16 +774,16 @@ export const ProductCreate: React.FC = () => {
                   </p>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-700">
-                    <thead className="bg-gray-700/50">
+                  <table className="min-w-full divide-y divide-border">
+                    <thead className="bg-muted/50">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                           SKU *
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                           Prix (DZD)
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                           Stock
                         </th>
                         {selectedOptionGroups.map((groupId) => {
@@ -791,7 +791,7 @@ export const ProductCreate: React.FC = () => {
                           return (
                             <th
                               key={groupId}
-                              className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase"
+                              className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase"
                             >
                               {group?.name || 'Option'}
                             </th>
@@ -800,16 +800,16 @@ export const ProductCreate: React.FC = () => {
                         <th className="px-4 py-3 w-16"></th>
                       </tr>
                     </thead>
-                    <tbody className="bg-gray-800 divide-y divide-gray-700">
+                    <tbody className="bg-card divide-y divide-border">
                       {variants.map((variant, index) => (
-                        <tr key={index} className="hover:bg-gray-700/50">
+                        <tr key={index} className="hover:bg-accent">
                           <td className="px-4 py-3">
                             <input
                               type="text"
                               value={variant.sku}
                               onChange={(e) => updateVariant(index, 'sku', e.target.value)}
                               placeholder="SKU-001"
-                              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              className="w-full px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary"
                             />
                           </td>
                           <td className="px-4 py-3">
@@ -821,7 +821,7 @@ export const ProductCreate: React.FC = () => {
                               }
                               placeholder="0"
                               min="0"
-                              className="w-28 px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              className="w-28 px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary"
                             />
                           </td>
                           <td className="px-4 py-3">
@@ -833,7 +833,7 @@ export const ProductCreate: React.FC = () => {
                               }
                               placeholder="0"
                               min="0"
-                              className="w-20 px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              className="w-20 px-3 py-2 bg-muted border border-border text-foreground placeholder-muted-foreground rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary"
                             />
                           </td>
                           {selectedOptionGroups.map((groupId) => {
@@ -845,7 +845,7 @@ export const ProductCreate: React.FC = () => {
                                   onChange={(e) =>
                                     updateVariantOption(index, groupId, e.target.value)
                                   }
-                                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  className="w-full px-3 py-2 bg-muted border border-border text-foreground rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary"
                                 >
                                   <option value="">--</option>
                                   {group?.options?.map((option: any) => (
@@ -894,7 +894,7 @@ export const ProductCreate: React.FC = () => {
               </CardHeader>
               <CardContent>
                 {collections.length === 0 ? (
-                  <p className="text-sm text-gray-400">Aucune categorie disponible</p>
+                  <p className="text-sm text-muted-foreground">Aucune categorie disponible</p>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {collections.map((collection: any) => (
@@ -902,8 +902,8 @@ export const ProductCreate: React.FC = () => {
                         key={collection.id}
                         className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
                           selectedCollections.includes(collection.id)
-                            ? 'border-blue-500 bg-blue-900/30'
-                            : 'border-gray-600 hover:border-gray-500'
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border hover:border-muted-foreground'
                         }`}
                       >
                         <input
@@ -918,12 +918,12 @@ export const ProductCreate: React.FC = () => {
                               );
                             }
                           }}
-                          className="h-5 w-5 text-blue-600 border-gray-500 rounded bg-gray-600"
+                          className="h-5 w-5 text-primary border-border rounded bg-card"
                         />
                         <div>
-                          <p className="font-medium text-gray-100">{collection.name}</p>
+                          <p className="font-medium text-foreground">{collection.name}</p>
                           {collection.slug && (
-                            <p className="text-xs text-gray-400">/{collection.slug}</p>
+                            <p className="text-xs text-muted-foreground">/{collection.slug}</p>
                           )}
                         </div>
                       </label>
@@ -940,23 +940,23 @@ export const ProductCreate: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-4 bg-gray-700/50 rounded-lg">
-                    <p className="text-sm text-gray-400">Produit</p>
-                    <p className="font-semibold text-gray-100">{formData.name || '-'}</p>
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Produit</p>
+                    <p className="font-semibold text-foreground">{formData.name || '-'}</p>
                   </div>
-                  <div className="p-4 bg-gray-700/50 rounded-lg">
-                    <p className="text-sm text-gray-400">Images</p>
-                    <p className="font-semibold text-gray-100">{images.length}</p>
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Images</p>
+                    <p className="font-semibold text-foreground">{images.length}</p>
                   </div>
-                  <div className="p-4 bg-gray-700/50 rounded-lg">
-                    <p className="text-sm text-gray-400">Variantes</p>
-                    <p className="font-semibold text-gray-100">
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Variantes</p>
+                    <p className="font-semibold text-foreground">
                       {variants.filter((v) => v.sku).length}
                     </p>
                   </div>
-                  <div className="p-4 bg-gray-700/50 rounded-lg">
-                    <p className="text-sm text-gray-400">Categories</p>
-                    <p className="font-semibold text-gray-100">{selectedCollections.length}</p>
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Categories</p>
+                    <p className="font-semibold text-foreground">{selectedCollections.length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -981,12 +981,12 @@ export const ProductCreate: React.FC = () => {
           >
             Retour
           </Button>
-          <h1 className="text-2xl font-bold text-gray-100">Nouveau produit</h1>
+          <h1 className="text-2xl font-bold text-foreground">Nouveau produit</h1>
         </div>
       </div>
 
       {/* Progress steps */}
-      <div className="flex items-center justify-between bg-gray-800 rounded-xl p-4 shadow-sm overflow-x-auto border border-gray-700">
+      <div className="flex items-center justify-between bg-card rounded-xl p-4 shadow-sm overflow-x-auto border border-border">
         {STEPS.map((step, index) => {
           const Icon = step.icon;
           const isActive = index === currentStep;
@@ -998,19 +998,19 @@ export const ProductCreate: React.FC = () => {
                 onClick={() => goToStep(index)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${
                   isActive
-                    ? 'bg-blue-900/50 text-blue-400'
+                    ? 'bg-primary/20 text-primary'
                     : isCompleted
                       ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50'
-                      : 'text-gray-400 hover:bg-gray-700'
+                      : 'text-muted-foreground hover:bg-accent'
                 }`}
               >
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center ${
                     isActive
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-primary text-primary-foreground'
                       : isCompleted
                         ? 'bg-green-500 text-white'
-                        : 'bg-gray-600 text-gray-400'
+                        : 'bg-muted text-muted-foreground'
                   }`}
                 >
                   {isCompleted ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
@@ -1020,7 +1020,7 @@ export const ProductCreate: React.FC = () => {
               {index < STEPS.length - 1 && (
                 <div
                   className={`flex-1 h-0.5 mx-2 min-w-[20px] ${
-                    index < currentStep ? 'bg-green-500' : 'bg-gray-600'
+                    index < currentStep ? 'bg-green-500' : 'bg-muted'
                   }`}
                 />
               )}

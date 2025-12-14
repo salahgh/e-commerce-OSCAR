@@ -20,13 +20,13 @@ import { toggleSidebar } from '../../store/slices/uiSlice';
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
   { icon: Package, label: 'Produits', path: '/products' },
-  { icon: FolderTree, label: 'Catégories', path: '/categories' },
+  { icon: FolderTree, label: 'Categories', path: '/categories' },
   { icon: ShoppingCart, label: 'Commandes', path: '/orders' },
   { icon: Users, label: 'Clients', path: '/customers' },
   { icon: Shield, label: 'Administrateurs', path: '/users' },
   { icon: UserCircle, label: 'Mon Profil', path: '/profile' },
   { icon: BarChart3, label: 'Rapports', path: '/reports' },
-  { icon: Settings, label: 'Paramètres', path: '/settings' },
+  { icon: Settings, label: 'Parametres', path: '/settings' },
 ];
 
 export const Sidebar: React.FC = () => {
@@ -47,22 +47,22 @@ export const Sidebar: React.FC = () => {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-30 h-screen bg-gray-800 border-r border-gray-700 transition-transform duration-300',
+          'fixed top-0 left-0 z-30 h-screen bg-sidebar border-r border-sidebar-border transition-transform duration-300',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
           sidebarOpen ? 'w-64' : 'lg:w-20'
         )}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-700">
+        <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+            <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold">
               O
             </div>
-            {sidebarOpen && <span className="font-semibold text-xl text-gray-100">OSCAR</span>}
+            {sidebarOpen && <span className="font-semibold text-xl text-sidebar-foreground">OSCAR</span>}
           </div>
           <button
             onClick={() => dispatch(toggleSidebar())}
-            className="lg:block hidden text-gray-400 hover:text-gray-200"
+            className="lg:block hidden text-muted-foreground hover:text-foreground"
           >
             <ChevronLeft
               className={cn('h-5 w-5 transition-transform', !sidebarOpen && 'rotate-180')}
@@ -82,7 +82,7 @@ export const Sidebar: React.FC = () => {
                 to={item.path}
                 className={cn(
                   'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
-                  isActive ? 'bg-blue-900/50 text-blue-400' : 'text-gray-300 hover:bg-gray-700',
+                  isActive ? 'bg-sidebar-active text-sidebar-active-foreground' : 'text-sidebar-foreground hover:bg-accent',
                   !sidebarOpen && 'lg:justify-center'
                 )}
                 title={!sidebarOpen ? item.label : undefined}

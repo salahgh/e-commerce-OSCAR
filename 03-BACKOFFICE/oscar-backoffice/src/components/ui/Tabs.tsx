@@ -22,7 +22,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, defaultTab, className }) => {
   return (
     <div className={className}>
       {/* Tab Headers */}
-      <div className="border-b border-gray-700">
+      <div className="border-b border-border">
         <nav className="-mb-px flex gap-4">
           {tabs.map((tab) => (
             <button
@@ -32,8 +32,8 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, defaultTab, className }) => {
               className={cn(
                 'flex items-center gap-2 px-4 py-3 border-b-2 font-medium text-sm transition-colors',
                 activeTab === tab.id
-                  ? 'border-blue-500 text-blue-400'
-                  : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
               )}
             >
               {tab.icon}

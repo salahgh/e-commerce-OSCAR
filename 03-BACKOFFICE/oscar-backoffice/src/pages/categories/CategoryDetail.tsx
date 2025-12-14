@@ -268,10 +268,10 @@ export const CategoryDetail: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="h-8 w-8 text-red-600" />
+          <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="h-8 w-8 text-destructive" />
           </div>
-          <p className="text-red-600 text-lg font-medium">
+          <p className="text-destructive text-lg font-medium">
             {error ? `Erreur: ${error.message}` : 'Categorie non trouvee'}
           </p>
           <Button variant="secondary" onClick={() => navigate('/categories')} className="mt-4">
@@ -301,16 +301,16 @@ export const CategoryDetail: React.FC = () => {
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate('/categories')}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-accent rounded-lg transition-colors"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-5 w-5 text-foreground" />
         </button>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-foreground">
             {isNew ? 'Nouvelle categorie' : collection?.name}
           </h1>
           {!isNew && collection && (
-            <div className="flex items-center gap-2 mt-1 text-gray-600">
+            <div className="flex items-center gap-2 mt-1 text-muted-foreground">
               {collection.breadcrumbs?.map((crumb, index) => (
                 <React.Fragment key={crumb.id}>
                   {index > 0 && <ChevronRight className="h-4 w-4" />}
@@ -340,18 +340,18 @@ export const CategoryDetail: React.FC = () => {
               {/* Left Column - Main Info */}
               <div className="lg:col-span-2 space-y-6">
                 {/* Basic Information Card */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
-                    <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                      <Settings className="h-5 w-5 text-blue-600" />
+                <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+                  <div className="px-6 py-4 border-b border-border bg-primary/5">
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                      <Settings className="h-5 w-5 text-primary" />
                       Informations generales
                     </h2>
                   </div>
                   <div className="p-6 space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                          Nom <span className="text-red-500">*</span>
+                        <label className="block text-sm font-medium text-foreground mb-1.5">
+                          Nom <span className="text-destructive">*</span>
                         </label>
                         <input
                           type="text"
@@ -366,26 +366,26 @@ export const CategoryDetail: React.FC = () => {
                           onBlur={handleBlur}
                           placeholder="Ex: Vetements Homme"
                           className={cn(
-                            'w-full px-4 py-2.5 border rounded-lg transition-all duration-200',
-                            'focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none',
+                            'w-full px-4 py-2.5 border rounded-lg transition-all duration-200 bg-background text-foreground placeholder-muted-foreground',
+                            'focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none',
                             touched.name && errors.name
-                              ? 'border-red-300 bg-red-50'
-                              : 'border-gray-300 hover:border-gray-400'
+                              ? 'border-destructive bg-destructive/10'
+                              : 'border-border hover:border-muted-foreground'
                           )}
                         />
                         {touched.name && errors.name && (
-                          <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
+                          <p className="mt-1.5 text-sm text-destructive flex items-center gap-1">
                             <AlertCircle className="h-3.5 w-3.5" />
                             {errors.name}
                           </p>
                         )}
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                          Slug (URL) <span className="text-red-500">*</span>
+                        <label className="block text-sm font-medium text-foreground mb-1.5">
+                          Slug (URL) <span className="text-destructive">*</span>
                         </label>
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
                             /categorie/
                           </span>
                           <input
@@ -396,16 +396,16 @@ export const CategoryDetail: React.FC = () => {
                             onBlur={handleBlur}
                             placeholder="vetements-homme"
                             className={cn(
-                              'w-full pl-24 pr-4 py-2.5 border rounded-lg transition-all duration-200',
-                              'focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-mono text-sm',
+                              'w-full pl-24 pr-4 py-2.5 border rounded-lg transition-all duration-200 bg-background text-foreground placeholder-muted-foreground',
+                              'focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none font-mono text-sm',
                               touched.slug && errors.slug
-                                ? 'border-red-300 bg-red-50'
-                                : 'border-gray-300 hover:border-gray-400'
+                                ? 'border-destructive bg-destructive/10'
+                                : 'border-border hover:border-muted-foreground'
                             )}
                           />
                         </div>
                         {touched.slug && errors.slug && (
-                          <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
+                          <p className="mt-1.5 text-sm text-destructive flex items-center gap-1">
                             <AlertCircle className="h-3.5 w-3.5" />
                             {errors.slug}
                           </p>
@@ -414,7 +414,7 @@ export const CategoryDetail: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      <label className="block text-sm font-medium text-foreground mb-1.5">
                         Description
                       </label>
                       <textarea
@@ -424,13 +424,13 @@ export const CategoryDetail: React.FC = () => {
                         onBlur={handleBlur}
                         rows={3}
                         placeholder="Description de la categorie..."
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all duration-200 hover:border-gray-400 resize-none"
+                        className="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-200 hover:border-muted-foreground resize-none bg-background text-foreground placeholder-muted-foreground"
                       />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        <label className="block text-sm font-medium text-foreground mb-1.5">
                           Categorie parente
                         </label>
                         <select
@@ -438,7 +438,7 @@ export const CategoryDetail: React.FC = () => {
                           value={values.parentId}
                           onChange={handleChange}
                           onBlur={handleBlur}
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all duration-200 hover:border-gray-400 bg-white"
+                          className="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-200 hover:border-muted-foreground bg-background text-foreground"
                         >
                           {getParentOptions().map((opt) => (
                             <option key={opt.value} value={opt.value}>
@@ -448,7 +448,7 @@ export const CategoryDetail: React.FC = () => {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        <label className="block text-sm font-medium text-foreground mb-1.5">
                           Ordre d'affichage
                         </label>
                         <input
@@ -458,28 +458,28 @@ export const CategoryDetail: React.FC = () => {
                           onChange={handleChange}
                           onBlur={handleBlur}
                           min={0}
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all duration-200 hover:border-gray-400"
+                          className="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-200 hover:border-muted-foreground bg-background text-foreground"
                         />
                       </div>
                     </div>
 
                     {/* Visibility Toggle */}
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                       <div className="flex items-center gap-3">
                         {values.isPrivate ? (
-                          <div className="p-2 bg-amber-100 rounded-lg">
-                            <EyeOff className="h-5 w-5 text-amber-600" />
+                          <div className="p-2 bg-amber-500/20 rounded-lg">
+                            <EyeOff className="h-5 w-5 text-amber-500" />
                           </div>
                         ) : (
-                          <div className="p-2 bg-green-100 rounded-lg">
-                            <Eye className="h-5 w-5 text-green-600" />
+                          <div className="p-2 bg-green-500/20 rounded-lg">
+                            <Eye className="h-5 w-5 text-green-500" />
                           </div>
                         )}
                         <div>
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium text-foreground">
                             {values.isPrivate ? 'Categorie privee' : 'Categorie publique'}
                           </p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-muted-foreground">
                             {values.isPrivate
                               ? 'Non visible sur le site'
                               : 'Visible sur le site'}
@@ -494,17 +494,17 @@ export const CategoryDetail: React.FC = () => {
                           onChange={handleChange}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                        <div className="w-11 h-6 bg-muted-foreground/30 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
                       </label>
                     </div>
                   </div>
                 </div>
 
                 {/* Translations Card */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-pink-50">
-                    <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                      <Globe className="h-5 w-5 text-purple-600" />
+                <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+                  <div className="px-6 py-4 border-b border-border bg-purple-500/5">
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                      <Globe className="h-5 w-5 text-purple-500" />
                       Traductions
                     </h2>
                   </div>
@@ -512,12 +512,12 @@ export const CategoryDetail: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* French */}
                       <div className="space-y-4">
-                        <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                        <div className="flex items-center gap-2 pb-2 border-b border-border">
                           <span className="w-8 h-6 rounded bg-gradient-to-r from-blue-500 via-white to-red-500 flex-shrink-0"></span>
-                          <span className="font-medium text-gray-900">Francais</span>
+                          <span className="font-medium text-foreground">Francais</span>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          <label className="block text-sm font-medium text-foreground mb-1.5">
                             Nom (FR)
                           </label>
                           <input
@@ -527,11 +527,11 @@ export const CategoryDetail: React.FC = () => {
                             onChange={handleChange}
                             onBlur={handleBlur}
                             placeholder="Nom en francais"
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all duration-200 hover:border-gray-400"
+                            className="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-200 hover:border-muted-foreground bg-background text-foreground placeholder-muted-foreground"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          <label className="block text-sm font-medium text-foreground mb-1.5">
                             Description (FR)
                           </label>
                           <textarea
@@ -541,19 +541,19 @@ export const CategoryDetail: React.FC = () => {
                             onBlur={handleBlur}
                             rows={3}
                             placeholder="Description en francais..."
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all duration-200 hover:border-gray-400 resize-none"
+                            className="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-200 hover:border-muted-foreground resize-none bg-background text-foreground placeholder-muted-foreground"
                           />
                         </div>
                       </div>
 
                       {/* Arabic */}
                       <div className="space-y-4">
-                        <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                        <div className="flex items-center gap-2 pb-2 border-b border-border">
                           <span className="w-8 h-6 rounded bg-gradient-to-r from-green-600 via-white to-green-600 flex-shrink-0"></span>
-                          <span className="font-medium text-gray-900">Arabe</span>
+                          <span className="font-medium text-foreground">Arabe</span>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          <label className="block text-sm font-medium text-foreground mb-1.5">
                             Nom (AR)
                           </label>
                           <input
@@ -564,11 +564,11 @@ export const CategoryDetail: React.FC = () => {
                             onBlur={handleBlur}
                             dir="rtl"
                             placeholder="الاسم بالعربية"
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all duration-200 hover:border-gray-400"
+                            className="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-200 hover:border-muted-foreground bg-background text-foreground placeholder-muted-foreground"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          <label className="block text-sm font-medium text-foreground mb-1.5">
                             Description (AR)
                           </label>
                           <textarea
@@ -579,7 +579,7 @@ export const CategoryDetail: React.FC = () => {
                             rows={3}
                             dir="rtl"
                             placeholder="الوصف بالعربية..."
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all duration-200 hover:border-gray-400 resize-none"
+                            className="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-200 hover:border-muted-foreground resize-none bg-background text-foreground placeholder-muted-foreground"
                           />
                         </div>
                       </div>
@@ -589,10 +589,10 @@ export const CategoryDetail: React.FC = () => {
 
                 {/* Children Card (only when editing and has children) */}
                 {!isNew && collection?.children && collection.children.length > 0 && (
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-green-50 to-teal-50">
-                      <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                        <FolderTree className="h-5 w-5 text-green-600" />
+                  <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+                    <div className="px-6 py-4 border-b border-border bg-green-500/5">
+                      <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                        <FolderTree className="h-5 w-5 text-green-500" />
                         Sous-categories ({collection.children.length})
                       </h2>
                     </div>
@@ -600,15 +600,15 @@ export const CategoryDetail: React.FC = () => {
                       {collection.children.map((child, index) => (
                         <div
                           key={child.id}
-                          className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
+                          className="flex items-center justify-between p-4 bg-muted rounded-lg hover:bg-accent transition-colors group"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="flex items-center justify-center w-8 h-8 bg-white rounded-lg shadow-sm text-gray-400 group-hover:text-gray-600">
+                            <div className="flex items-center justify-center w-8 h-8 bg-card rounded-lg shadow-sm text-muted-foreground group-hover:text-foreground">
                               <GripVertical className="h-4 w-4" />
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900">{child.name}</p>
-                              <p className="text-sm text-gray-500">
+                              <p className="font-medium text-foreground">{child.name}</p>
+                              <p className="text-sm text-muted-foreground">
                                 {child.customFields?.nameFr && (
                                   <span className="mr-2">FR: {child.customFields.nameFr}</span>
                                 )}
@@ -619,7 +619,7 @@ export const CategoryDetail: React.FC = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1.5 text-sm text-gray-500 bg-white px-2.5 py-1 rounded-full shadow-sm">
+                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-card px-2.5 py-1 rounded-full shadow-sm">
                               <Package className="h-4 w-4" />
                               <span>{child.productVariants?.totalItems || 0}</span>
                             </div>
@@ -643,17 +643,17 @@ export const CategoryDetail: React.FC = () => {
               {/* Right Column - Image & Actions */}
               <div className="space-y-6">
                 {/* Image Upload Card */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden sticky top-4">
-                  <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-orange-50">
-                    <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                      <ImageIcon className="h-5 w-5 text-amber-600" />
+                <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden sticky top-4">
+                  <div className="px-6 py-4 border-b border-border bg-amber-500/5">
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                      <ImageIcon className="h-5 w-5 text-amber-500" />
                       Image de la categorie
                     </h2>
                   </div>
                   <div className="p-6">
                     {featuredImage ? (
                       <div className="relative group">
-                        <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 border-2 border-gray-200">
+                        <div className="aspect-square rounded-xl overflow-hidden bg-muted border-2 border-border">
                           <img
                             src={featuredImage.preview}
                             alt="Apercu"
@@ -665,15 +665,15 @@ export const CategoryDetail: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => fileInputRef.current?.click()}
-                              className="p-3 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors"
+                              className="p-3 bg-card rounded-full shadow-lg hover:bg-accent transition-colors"
                               title="Changer l'image"
                             >
-                              <Upload className="h-5 w-5 text-gray-700" />
+                              <Upload className="h-5 w-5 text-foreground" />
                             </button>
                             <button
                               type="button"
                               onClick={removeImage}
-                              className="p-3 bg-red-500 rounded-full shadow-lg hover:bg-red-600 transition-colors"
+                              className="p-3 bg-destructive rounded-full shadow-lg hover:bg-destructive/90 transition-colors"
                               title="Supprimer l'image"
                             >
                               <Trash2 className="h-5 w-5 text-white" />
@@ -682,7 +682,7 @@ export const CategoryDetail: React.FC = () => {
                         </div>
                         {featuredImage.isExisting && (
                           <div className="absolute top-3 left-3">
-                            <span className="px-2.5 py-1 bg-blue-600 text-white text-xs font-medium rounded-full shadow">
+                            <span className="px-2.5 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full shadow">
                               Image actuelle
                             </span>
                           </div>
@@ -698,31 +698,31 @@ export const CategoryDetail: React.FC = () => {
                           'aspect-square rounded-xl border-2 border-dashed transition-all duration-300 cursor-pointer',
                           'flex flex-col items-center justify-center gap-4',
                           isDragging
-                            ? 'border-blue-500 bg-blue-50 scale-[1.02]'
-                            : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+                            ? 'border-primary bg-primary/10 scale-[1.02]'
+                            : 'border-border hover:border-primary hover:bg-muted'
                         )}
                       >
                         <div
                           className={cn(
                             'p-4 rounded-full transition-colors',
-                            isDragging ? 'bg-blue-100' : 'bg-gray-100'
+                            isDragging ? 'bg-primary/20' : 'bg-muted'
                           )}
                         >
                           <Upload
                             className={cn(
                               'h-8 w-8 transition-colors',
-                              isDragging ? 'text-blue-600' : 'text-gray-400'
+                              isDragging ? 'text-primary' : 'text-muted-foreground'
                             )}
                           />
                         </div>
                         <div className="text-center px-4">
-                          <p className="font-medium text-gray-700">
+                          <p className="font-medium text-foreground">
                             {isDragging ? 'Deposez l\'image ici' : 'Glissez une image ici'}
                           </p>
-                          <p className="text-sm text-gray-500 mt-1">
+                          <p className="text-sm text-muted-foreground mt-1">
                             ou cliquez pour parcourir
                           </p>
-                          <p className="text-xs text-gray-400 mt-2">
+                          <p className="text-xs text-muted-foreground/70 mt-2">
                             PNG, JPG jusqu'a 5MB
                           </p>
                         </div>
@@ -741,12 +741,12 @@ export const CategoryDetail: React.FC = () => {
                     />
 
                     {/* Image Tips */}
-                    <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <div className="mt-4 p-3 bg-primary/10 rounded-lg">
                       <div className="flex gap-2">
-                        <Info className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                        <div className="text-xs text-blue-700">
+                        <Info className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                        <div className="text-xs text-primary">
                           <p className="font-medium">Conseils pour l'image :</p>
-                          <ul className="mt-1 space-y-0.5 list-disc list-inside text-blue-600">
+                          <ul className="mt-1 space-y-0.5 list-disc list-inside text-primary/80">
                             <li>Format carre recommande (1:1)</li>
                             <li>Resolution minimum 400x400px</li>
                             <li>Fond neutre ou transparent</li>
@@ -759,45 +759,45 @@ export const CategoryDetail: React.FC = () => {
 
                 {/* Quick Stats (only when editing) */}
                 {!isNew && collection && (
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-100">
-                      <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                        <Sparkles className="h-5 w-5 text-indigo-600" />
+                  <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+                    <div className="px-6 py-4 border-b border-border">
+                      <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                        <Sparkles className="h-5 w-5 text-indigo-500" />
                         Statistiques
                       </h2>
                     </div>
                     <div className="p-4 grid grid-cols-2 gap-4">
-                      <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg text-center">
-                        <p className="text-2xl font-bold text-blue-600">
+                      <div className="p-4 bg-blue-500/10 rounded-lg text-center">
+                        <p className="text-2xl font-bold text-blue-500">
                           {collection.productVariants?.totalItems || 0}
                         </p>
-                        <p className="text-sm text-gray-600">Produits</p>
+                        <p className="text-sm text-muted-foreground">Produits</p>
                       </div>
-                      <div className="p-4 bg-gradient-to-br from-green-50 to-teal-50 rounded-lg text-center">
-                        <p className="text-2xl font-bold text-green-600">
+                      <div className="p-4 bg-green-500/10 rounded-lg text-center">
+                        <p className="text-2xl font-bold text-green-500">
                           {collection.children?.length || 0}
                         </p>
-                        <p className="text-sm text-gray-600">Sous-categories</p>
+                        <p className="text-sm text-muted-foreground">Sous-categories</p>
                       </div>
-                      <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg text-center">
-                        <p className="text-2xl font-bold text-purple-600">{collection.position}</p>
-                        <p className="text-sm text-gray-600">Position</p>
+                      <div className="p-4 bg-purple-500/10 rounded-lg text-center">
+                        <p className="text-2xl font-bold text-purple-500">{collection.position}</p>
+                        <p className="text-sm text-muted-foreground">Position</p>
                       </div>
-                      <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg text-center">
+                      <div className="p-4 bg-amber-500/10 rounded-lg text-center">
                         <Badge
                           variant={collection.isPrivate ? 'warning' : 'success'}
                           className="text-sm"
                         >
                           {collection.isPrivate ? 'Prive' : 'Public'}
                         </Badge>
-                        <p className="text-sm text-gray-600 mt-1">Visibilite</p>
+                        <p className="text-sm text-muted-foreground mt-1">Visibilite</p>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {/* Action Buttons */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 space-y-3">
+                <div className="bg-card rounded-xl shadow-sm border border-border p-4 space-y-3">
                   <Button
                     type="submit"
                     className="w-full"
