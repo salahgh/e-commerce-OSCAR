@@ -65,6 +65,125 @@ exports.shopApiExtensions = (0, graphql_tag_1.default) `
   }
 `;
 exports.adminApiExtensions = (0, graphql_tag_1.default) `
+  # ==================== KPI METRICS ====================
+
+  """
+  Comprehensive KPI metrics for the dashboard
+  """
+  type KpiMetrics {
+    # Revenue metrics (in cents)
+    revenueToday: Int!
+    revenueThisWeek: Int!
+    revenueThisMonth: Int!
+    revenueLastMonth: Int!
+    revenueGrowth: Float!
+
+    # Order metrics
+    ordersToday: Int!
+    ordersThisWeek: Int!
+    ordersThisMonth: Int!
+    totalOrders: Int!
+    pendingOrders: Int!
+    processingOrders: Int!
+    shippedOrders: Int!
+    deliveredOrders: Int!
+    cancelledOrders: Int!
+
+    # Customer metrics
+    newCustomersToday: Int!
+    newCustomersThisWeek: Int!
+    newCustomersThisMonth: Int!
+    totalCustomers: Int!
+
+    # Product metrics
+    totalProducts: Int!
+    activeProducts: Int!
+    lowStockProducts: Int!
+    outOfStockProducts: Int!
+
+    # Calculated metrics
+    averageOrderValue: Float!
+    conversionRate: Float!
+  }
+
+  # ==================== CHART DATA ====================
+
+  """
+  Sales trend data point for line chart
+  """
+  type SalesTrendDataPoint {
+    date: String!
+    revenue: Int!
+    orders: Int!
+  }
+
+  """
+  Orders by status data point for bar chart
+  """
+  type OrdersChartDataPoint {
+    date: String!
+    pending: Int!
+    processing: Int!
+    shipped: Int!
+    delivered: Int!
+    cancelled: Int!
+  }
+
+  """
+  Revenue by category data point for pie chart
+  """
+  type RevenueByCategoryDataPoint {
+    categoryId: ID!
+    categoryName: String!
+    revenue: Int!
+    percentage: Float!
+  }
+
+  # ==================== ACTIVITY DATA ====================
+
+  """
+  Recent order for activity feed
+  """
+  type RecentOrderItem {
+    id: ID!
+    code: String!
+    customerName: String!
+    customerEmail: String!
+    total: Int!
+    state: String!
+    itemCount: Int!
+    createdAt: DateTime!
+  }
+
+  """
+  Low stock alert item
+  """
+  type LowStockAlert {
+    productId: ID!
+    productName: String!
+    variantId: ID!
+    variantName: String!
+    sku: String!
+    currentStock: Int!
+    threshold: Int!
+  }
+
+  """
+  Top selling product item
+  """
+  type TopSellingProduct {
+    productId: ID!
+    productName: String!
+    variantId: ID!
+    variantName: String!
+    sku: String!
+    quantitySold: Int!
+    revenue: Int!
+    imageUrl: String
+  }
+
+  # ==================== LEGACY TYPES (kept for compatibility) ====================
+
   type LowStockProduct {
     product: Product!
     currentStock: Int!
@@ -80,17 +199,56 @@ exports.adminApiExtensions = (0, graphql_tag_1.default) `
     lowStockProductsCount: Int!
   }
 
+  # ==================== QUERIES ====================
+
   extend type Query {
     """
-    Get products with low stock (for admin alerts)
+    Get comprehensive KPI metrics for the dashboard
+    """
+    dashboardKpiMetrics: KpiMetrics!
+
+    """
+    Get sales trend data for line chart
+    """
+    dashboardSalesTrend(days: Int): [SalesTrendDataPoint!]!
+
+    """
+    Get orders by status for bar chart
+    """
+    dashboardOrdersByStatus(days: Int): [OrdersChartDataPoint!]!
+
+    """
+    Get revenue by category for pie chart
+    """
+    dashboardRevenueByCategory: [RevenueByCategoryDataPoint!]!
+
+    """
+    Get recent orders for activity feed
+    """
+    dashboardRecentOrders(limit: Int): [RecentOrderItem!]!
+
+    """
+    Get low stock alerts
+    """
+    dashboardLowStockAlerts(threshold: Int): [LowStockAlert!]!
+
+    """
+    Get top selling products
+    """
+    dashboardTopSellingProducts(limit: Int): [TopSellingProduct!]!
+
+    """
+    Get products with low stock (legacy - for admin alerts)
     """
     lowStockProducts(threshold: Int): [Product!]!
 
     """
-    Get dashboard statistics
+    Get dashboard statistics (legacy)
     """
     oscarDashboardStats: DashboardStats!
   }
+
+  # ==================== MUTATIONS ====================
 
   extend type Mutation {
     """

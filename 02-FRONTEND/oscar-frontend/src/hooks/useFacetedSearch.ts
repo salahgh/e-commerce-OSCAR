@@ -139,14 +139,13 @@ export function useFacetedSearch(): UseFacetedSearchReturn {
     return input;
   }, [state, facetGroups]);
 
-  // Fetch products
+  // Fetch products - don't skip, search should work independently of facets
   const {
     data: searchData,
     loading: searchLoading,
     error: searchError,
   } = useQuery(SearchProductsWithFacetsDocument, {
     variables: { input: searchInput },
-    skip: facetsLoading, // Wait for facets to load first
   });
 
   // Update facet counts from search results

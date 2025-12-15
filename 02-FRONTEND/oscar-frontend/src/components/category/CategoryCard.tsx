@@ -45,7 +45,7 @@ export default function CategoryCard({
               alt={name}
               width={48}
               height={48}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           ) : (
             <Folder className="h-6 w-6 text-muted-foreground" />
@@ -79,7 +79,7 @@ export default function CategoryCard({
             src={imageUrl}
             alt={name}
             fill
-            className="object-cover transition-transform group-hover:scale-105"
+            className="object-contain transition-transform group-hover:scale-105"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
@@ -112,7 +112,7 @@ export default function CategoryCard({
             src={imageUrl}
             alt={name}
             fill
-            className="object-cover transition-transform group-hover:scale-105"
+            className="object-contain transition-transform group-hover:scale-105"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">

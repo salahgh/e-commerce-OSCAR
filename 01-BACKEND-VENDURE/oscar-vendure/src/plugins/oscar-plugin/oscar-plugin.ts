@@ -1,5 +1,6 @@
 import { PluginCommonModule, VendurePlugin } from '@vendure/core';
 import { OscarService } from './services/oscar.service';
+import { DashboardService } from './services/dashboard.service';
 import { OscarAdminResolver } from './api/oscar-admin.resolver';
 import { OscarShopResolver } from './api/oscar-shop.resolver';
 import { adminApiExtensions, shopApiExtensions } from './api/api-extensions';
@@ -15,7 +16,7 @@ import { adminApiExtensions, shopApiExtensions } from './api/api-extensions';
  */
 @VendurePlugin({
   imports: [PluginCommonModule],
-  providers: [OscarService],
+  providers: [OscarService, DashboardService],
   adminApiExtensions: {
     schema: adminApiExtensions,
     resolvers: [OscarAdminResolver],

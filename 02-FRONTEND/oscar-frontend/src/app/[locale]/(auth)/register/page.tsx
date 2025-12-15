@@ -17,7 +17,28 @@ import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Mail, Lock, Eye, EyeOff, User, Phone, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Lock, Eye, EyeOff, User, Phone, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+
+// Convert phone number to email format for Vendure auth
+function phoneToEmail(phone: string): string {
+  const cleaned = phone.replace(/\s/g, '').replace(/\D/g, '');
+  return `+213${cleaned}@phone.dz`;
+}
+
+// Format phone number for display (XXX XX XX XX)
+function formatPhoneDisplay(phone: string): string {
+  const cleaned = phone.replace(/\s/g, '').replace(/\D/g, '');
+  if (cleaned.length <= 3) return cleaned;
+  if (cleaned.length <= 5) return `${cleaned.slice(0, 3)} ${cleaned.slice(3)}`;
+  if (cleaned.length <= 7) return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 5)} ${cleaned.slice(5)}`;
+  return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 5)} ${cleaned.slice(5, 7)} ${cleaned.slice(7, 9)}`;
+}
+
+// Validate Algerian phone number (without the +213 prefix)
+function validateAlgerianPhone(phone: string): boolean {
+  const cleaned = phone.replace(/\s/g, '').replace(/\D/g, '');
+  return /^[567]\d{8}$/.test(cleaned);
+}
 
 export default function RegisterPage() {
   const t = useTranslations('auth');
@@ -30,7 +51,6 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
     phone: '',
     password: '',
     confirmPassword: '',
@@ -53,10 +73,11 @@ export default function RegisterPage() {
     if (!formData.lastName.trim()) {
       newErrors.lastName = t('validation.lastNameRequired');
     }
-    if (!formData.email.trim()) {
-      newErrors.email = t('validation.emailRequired');
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = t('validation.emailInvalid');
+    // Phone number is required
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Le numéro de téléphone est requis';
+    } else if (!validateAlgerianPhone(formData.phone)) {
+      newErrors.phone = 'Numéro invalide. Format: 5XX XX XX XX, 6XX XX XX XX ou 7XX XX XX XX';
     }
     if (!formData.password) {
       newErrors.password = t('validation.passwordRequired');
@@ -74,6 +95,11 @@ export default function RegisterPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 9);
+    handleChange('phone', value);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -85,22 +111,24 @@ export default function RegisterPage() {
     setIsSubmitting(true);
 
     try {
+      // Convert phone to email format for Vendure
+      const fullPhoneNumber = `+213${formData.phone}`;
+      const emailAddress = phoneToEmail(formData.phone);
+
       const result = await register({
-        emailAddress: formData.email,
+        emailAddress: emailAddress,
         firstName: formData.firstName,
         lastName: formData.lastName,
-        phoneNumber: formData.phone || undefined,
+        phoneNumber: fullPhoneNumber,
         password: formData.password,
       });
 
       if (result.requiresVerification) {
         setSuccess(true);
-        // Redirect to verification pending page after a short delay
         setTimeout(() => {
-          router.push(`/${locale}/verification-pending?email=${encodeURIComponent(formData.email)}`);
+          router.push(`/${locale}/login`);
         }, 2000);
       } else {
-        // If verification not required, redirect to home
         router.push(`/${locale}`);
       }
     } catch (err: any) {
@@ -199,39 +227,30 @@ export default function RegisterPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">{t('fields.email')}</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                placeholder={t('placeholders.email')}
-                className="pl-10"
-                value={formData.email}
-                onChange={(e) => handleChange('email', e.target.value)}
-                required
-                autoComplete="email"
-              />
-            </div>
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone">{t('fields.phone')} (optional)</Label>
+            <Label htmlFor="phone">Numéro de téléphone</Label>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <div className="absolute left-10 top-1/2 -translate-y-1/2 text-muted-foreground font-medium border-r pr-2">
+                +213
+              </div>
               <Input
                 id="phone"
                 type="tel"
-                placeholder={t('placeholders.phone')}
-                className="pl-10"
-                value={formData.phone}
-                onChange={(e) => handleChange('phone', e.target.value)}
+                placeholder="5XX XX XX XX"
+                className="pl-[5.5rem]"
+                value={formatPhoneDisplay(formData.phone)}
+                onChange={handlePhoneChange}
+                required
                 autoComplete="tel"
+                maxLength={12}
               />
             </div>
+            <p className="text-xs text-muted-foreground">
+              Entrez votre numéro sans le 0 (ex: 551234567)
+            </p>
+            {errors.phone && (
+              <p className="text-sm text-destructive">{errors.phone}</p>
+            )}
           </div>
 
           <div className="space-y-2">

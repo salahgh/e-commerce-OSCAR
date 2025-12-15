@@ -38,12 +38,21 @@ export default function ProductDetailPage() {
 
   const selectedVariant = product?.variants.find((v) => v.id === selectedVariantId);
 
-  // Get all images (product + variant)
+  // Get all images (product + variant) - deduplicate by ID
   const allImages = product
-    ? [
-        ...(product.featuredAsset ? [product.featuredAsset] : []),
-        ...(product.assets || []),
-      ]
+    ? (() => {
+        const images = [
+          ...(product.featuredAsset ? [product.featuredAsset] : []),
+          ...(product.assets || []),
+        ];
+        // Deduplicate by ID
+        const seen = new Set<string>();
+        return images.filter((img) => {
+          if (seen.has(img.id)) return false;
+          seen.add(img.id);
+          return true;
+        });
+      })()
     : [];
 
   const handleAddToCart = async () => {

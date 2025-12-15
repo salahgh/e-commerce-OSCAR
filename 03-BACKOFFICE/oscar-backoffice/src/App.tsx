@@ -25,6 +25,7 @@ import { Settings } from './pages/settings/Settings';
 import { Reports } from './pages/reports/Reports';
 import { BulkOperations } from './pages/products/BulkOperations';
 import { UserList, UserDetail, UserForm, RoleList, RoleForm } from './pages/users';
+import { PromotionList, PromotionForm } from './pages/promotions';
 
 // Component to initialize theme from localStorage
 const ThemeInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -85,6 +86,13 @@ function App() {
                     <Route index element={<CategoryList />} />
                     <Route path="new" element={<CategoryDetail />} />
                     <Route path=":id" element={<CategoryDetail />} />
+                  </Route>
+
+                  {/* Promotions */}
+                  <Route path="promotions">
+                    <Route index element={<PromotionList />} />
+                    <Route path="new" element={<PromotionForm />} />
+                    <Route path=":id" element={<PromotionForm />} />
                   </Route>
 
                   {/* Users (Administrators) */}

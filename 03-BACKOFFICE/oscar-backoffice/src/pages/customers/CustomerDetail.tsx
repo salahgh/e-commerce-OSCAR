@@ -45,6 +45,7 @@ import {
   AlertTriangle,
   Ban,
   UserCheck,
+  MessageSquare,
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { addToast } from '../../store/slices/uiSlice';
@@ -59,6 +60,7 @@ import { Select } from '../../components/ui/Select';
 import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { TextArea } from '../../components/ui/TextArea';
 import { formatDateTime, formatPrice } from '../../lib/utils';
 
 const WILAYAS = [
@@ -268,6 +270,7 @@ const validationSchema = Yup.object({
   phoneNumber: Yup.string(),
   wilaya: Yup.string(),
   city: Yup.string(),
+  adminNotes: Yup.string(),
 });
 
 export const CustomerDetail: React.FC = () => {
@@ -362,6 +365,7 @@ export const CustomerDetail: React.FC = () => {
     phoneNumber: string;
     wilaya: string;
     city: string;
+    adminNotes: string;
   }) => {
     try {
       const result = await updateCustomer({
@@ -375,6 +379,7 @@ export const CustomerDetail: React.FC = () => {
             customFields: {
               wilaya: values.wilaya || null,
               city: values.city || null,
+              adminNotes: values.adminNotes || null,
             },
           },
         },
@@ -828,6 +833,7 @@ export const CustomerDetail: React.FC = () => {
                       phoneNumber: customer.phoneNumber || '',
                       wilaya: customer.customFields?.wilaya || '',
                       city: customer.customFields?.city || '',
+                      adminNotes: customer.customFields?.adminNotes || '',
                     }}
                     validationSchema={validationSchema}
                     onSubmit={handleSave}
@@ -900,6 +906,15 @@ export const CustomerDetail: React.FC = () => {
                             onBlur={handleBlur}
                           />
                         </div>
+                        <TextArea
+                          label="Notes internes"
+                          name="adminNotes"
+                          value={values.adminNotes}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          rows={4}
+                          placeholder="Notes internes sur ce client (visible uniquement par les administrateurs)..."
+                        />
                         <div className="flex justify-end gap-3 pt-4">
                           <Button
                             type="button"
@@ -967,6 +982,31 @@ export const CustomerDetail: React.FC = () => {
                       </div>
                     </div>
                   </div>
+                )}
+              </div>
+            </div>
+
+            {/* Admin Notes Card */}
+            <div className="bg-card rounded-xl border border-border overflow-hidden">
+              <div className="p-4 border-b border-border flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-yellow-400" />
+                  Notes internes
+                </h3>
+                {!isEditing && (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="p-2 hover:bg-accent rounded-lg text-muted-foreground hover:text-foreground transition-all"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <div className="p-6">
+                {customer.customFields?.adminNotes ? (
+                  <p className="text-foreground whitespace-pre-wrap">{customer.customFields.adminNotes}</p>
+                ) : (
+                  <p className="text-muted-foreground italic">Aucune note pour ce client</p>
                 )}
               </div>
             </div>

@@ -16,7 +16,28 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Mail, Loader2, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Phone, Loader2, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
+
+// Convert phone number to email format for Vendure auth
+function phoneToEmail(phone: string): string {
+  const cleaned = phone.replace(/\s/g, '').replace(/\D/g, '');
+  return `+213${cleaned}@phone.dz`;
+}
+
+// Format phone number for display (XXX XX XX XX)
+function formatPhoneDisplay(phone: string): string {
+  const cleaned = phone.replace(/\s/g, '').replace(/\D/g, '');
+  if (cleaned.length <= 3) return cleaned;
+  if (cleaned.length <= 5) return `${cleaned.slice(0, 3)} ${cleaned.slice(3)}`;
+  if (cleaned.length <= 7) return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 5)} ${cleaned.slice(5)}`;
+  return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 5)} ${cleaned.slice(5, 7)} ${cleaned.slice(7, 9)}`;
+}
+
+// Validate Algerian phone number (without the +213 prefix)
+function validateAlgerianPhone(phone: string): boolean {
+  const cleaned = phone.replace(/\s/g, '').replace(/\D/g, '');
+  return /^[567]\d{8}$/.test(cleaned);
+}
 
 export default function ForgotPasswordPage() {
   const t = useTranslations('auth');
@@ -25,24 +46,35 @@ export default function ForgotPasswordPage() {
 
   const { requestPasswordReset } = useAuth();
 
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 9);
+    setPhone(value);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (!email.trim()) {
-      setError(t('validation.emailRequired'));
+    if (!phone.trim()) {
+      setError('Le numéro de téléphone est requis');
+      return;
+    }
+
+    if (!validateAlgerianPhone(phone)) {
+      setError('Numéro de téléphone invalide');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      await requestPasswordReset(email);
+      const emailIdentifier = phoneToEmail(phone);
+      await requestPasswordReset(emailIdentifier);
       setSent(true);
     } catch (err: any) {
       setError(err.message || t('errors.registrationFailed'));
@@ -59,11 +91,11 @@ export default function ForgotPasswordPage() {
             <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
               <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
-            <h2 className="text-xl font-semibold">{t('forgotPassword.success')}</h2>
+            <h2 className="text-xl font-semibold">Lien envoyé!</h2>
             <p className="text-muted-foreground">
-              {t('forgotPassword.checkEmail')}
+              Si un compte est associé à ce numéro, vous recevrez un SMS avec les instructions.
             </p>
-            <p className="text-sm font-medium">{email}</p>
+            <p className="text-sm font-medium">+213 {formatPhoneDisplay(phone)}</p>
             <div className="space-y-3 pt-4">
               <Button asChild className="w-full">
                 <Link href={`/${locale}/login`}>
@@ -75,7 +107,7 @@ export default function ForgotPasswordPage() {
                 className="w-full"
                 onClick={() => {
                   setSent(false);
-                  setEmail('');
+                  setPhone('');
                 }}
               >
                 {t('verificationPending.resend')}
@@ -94,7 +126,7 @@ export default function ForgotPasswordPage() {
           {t('forgotPassword.title')}
         </CardTitle>
         <CardDescription>
-          {t('forgotPassword.description')}
+          Entrez votre numéro de téléphone pour réinitialiser votre mot de passe.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -107,18 +139,22 @@ export default function ForgotPasswordPage() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email">{t('fields.email')}</Label>
+            <Label htmlFor="phone">Numéro de téléphone</Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <div className="absolute left-10 top-1/2 -translate-y-1/2 text-muted-foreground font-medium border-r pr-2">
+                +213
+              </div>
               <Input
-                id="email"
-                type="email"
-                placeholder={t('placeholders.email')}
-                className="pl-10"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="phone"
+                type="tel"
+                placeholder="5XX XX XX XX"
+                className="pl-[5.5rem]"
+                value={formatPhoneDisplay(phone)}
+                onChange={handlePhoneChange}
                 required
-                autoComplete="email"
+                autoComplete="tel"
+                maxLength={12}
               />
             </div>
           </div>

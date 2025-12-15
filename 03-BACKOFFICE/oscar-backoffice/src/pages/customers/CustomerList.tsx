@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@apollo/client';
 import { Link } from 'react-router-dom';
 import {
@@ -12,11 +12,13 @@ import {
   MapPin,
   CheckCircle,
   XCircle,
+  ShoppingCart,
+  DollarSign,
 } from 'lucide-react';
 import { AdminCustomersDocument } from '../../graphql/generated/graphql';
 import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
-import { formatDateTime } from '../../lib/utils';
+import { formatDateTime, formatPrice } from '../../lib/utils';
 
 const WILAYAS = [
   'Adrar',
@@ -85,17 +87,25 @@ export const CustomerList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 10;
 
+  // Build filter based on search term (searches email, firstName, or lastName)
+  const buildFilter = () => {
+    if (!searchTerm) return undefined;
+    return {
+      _or: [
+        { emailAddress: { contains: searchTerm } },
+        { firstName: { contains: searchTerm } },
+        { lastName: { contains: searchTerm } },
+      ],
+    };
+  };
+
   const { data, loading, error } = useQuery(AdminCustomersDocument, {
     variables: {
       options: {
         skip: currentPage * pageSize,
         take: pageSize,
         sort: { createdAt: 'DESC' as any },
-        filter: searchTerm
-          ? {
-              emailAddress: { contains: searchTerm },
-            }
-          : undefined,
+        filter: buildFilter(),
       },
     },
   });
@@ -104,10 +114,23 @@ export const CustomerList: React.FC = () => {
   const totalItems = data?.customers?.totalItems || 0;
   const totalPages = Math.ceil(totalItems / pageSize);
 
+  // Calculate stats for each customer
+  const customersWithStats = useMemo(() => {
+    return customers.map((customer) => {
+      const orders = customer.orders?.items || [];
+      const totalOrders = customer.orders?.totalItems || 0;
+      const completedStates = ['PaymentSettled', 'Shipped', 'Delivered', 'PartiallyShipped', 'PartiallyDelivered'];
+      const totalSpent = orders
+        .filter((o) => completedStates.includes(o.state))
+        .reduce((sum, o) => sum + (o.totalWithTax || 0), 0);
+      return { ...customer, totalOrders, totalSpent };
+    });
+  }, [customers]);
+
   // Filter by wilaya locally
   const filteredCustomers = wilayaFilter
-    ? customers.filter((c) => c.customFields?.wilaya === wilayaFilter)
-    : customers;
+    ? customersWithStats.filter((c) => c.customFields?.wilaya === wilayaFilter)
+    : customersWithStats;
 
   if (error) {
     return (
@@ -144,7 +167,7 @@ export const CustomerList: React.FC = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Rechercher par email..."
+              placeholder="Rechercher par nom, prénom ou email..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -207,6 +230,12 @@ export const CustomerList: React.FC = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Wilaya
                   </th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Commandes
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Total dépensé
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Statut
                   </th>
@@ -259,6 +288,22 @@ export const CustomerList: React.FC = () => {
                       ) : (
                         <span className="text-sm text-muted-foreground">-</span>
                       )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <ShoppingCart className="h-4 w-4 text-blue-400" />
+                        <span className="text-sm font-medium text-foreground">
+                          {customer.totalOrders}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <DollarSign className="h-4 w-4 text-green-400" />
+                        <span className="text-sm font-medium text-foreground">
+                          {formatPrice(customer.totalSpent)}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {customer.user?.verified ? (

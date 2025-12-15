@@ -26,6 +26,14 @@ fragment OrderLineFields on OrderLine {
   }
 }
 
+fragment DiscountFields on Discount {
+  adjustmentSource
+  amount
+  amountWithTax
+  description
+  type
+}
+
 fragment OrderFields on Order {
   id
   code
@@ -38,6 +46,10 @@ fragment OrderFields on Order {
   shippingWithTax
   totalWithTax
   currencyCode
+  couponCodes
+  discounts {
+    ...DiscountFields
+  }
   lines {
     ...OrderLineFields
   }
@@ -369,5 +381,37 @@ query GetCustomerOrders($options: OrderListOptions) {
       }
       totalItems
     }
+  }
+}
+
+# Apply coupon code to active order
+mutation ApplyCouponCode($couponCode: String!) {
+  applyCouponCode(couponCode: $couponCode) {
+    ... on Order {
+      ...OrderFields
+    }
+    ... on CouponCodeExpiredError {
+      errorCode
+      message
+      couponCode
+    }
+    ... on CouponCodeInvalidError {
+      errorCode
+      message
+      couponCode
+    }
+    ... on CouponCodeLimitError {
+      errorCode
+      message
+      couponCode
+      limit
+    }
+  }
+}
+
+# Remove coupon code from active order
+mutation RemoveCouponCode($couponCode: String!) {
+  removeCouponCode(couponCode: $couponCode) {
+    ...OrderFields
   }
 }
