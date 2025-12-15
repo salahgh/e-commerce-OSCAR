@@ -8,11 +8,9 @@ import {
   Package,
   AlertTriangle,
   Clock,
-  Eye,
   ChevronRight,
   DollarSign,
   BarChart3,
-  Calendar,
   RefreshCw,
 } from 'lucide-react';
 import { formatPrice, formatDateTime } from '../lib/utils';
@@ -31,15 +29,15 @@ const ORDER_STATUS: Record<
 > = {
   AddingItems: { label: 'En cours', variant: 'default' },
   ArrangingPayment: { label: 'Paiement', variant: 'info' },
-  PaymentAuthorized: { label: 'Autorisé', variant: 'info' },
-  PaymentSettled: { label: 'Payé', variant: 'success' },
-  PartiallyShipped: { label: 'Partiellement expédié', variant: 'warning' },
-  Shipped: { label: 'Expédié', variant: 'info' },
-  PartiallyDelivered: { label: 'Partiellement livré', variant: 'warning' },
-  Delivered: { label: 'Livré', variant: 'success' },
+  PaymentAuthorized: { label: 'Autorise', variant: 'info' },
+  PaymentSettled: { label: 'Paye', variant: 'success' },
+  PartiallyShipped: { label: 'Partiellement expedie', variant: 'warning' },
+  Shipped: { label: 'Expedie', variant: 'info' },
+  PartiallyDelivered: { label: 'Partiellement livre', variant: 'warning' },
+  Delivered: { label: 'Livre', variant: 'success' },
   Modifying: { label: 'En modification', variant: 'warning' },
   ArrangingAdditionalPayment: { label: 'Paiement additionnel', variant: 'info' },
-  Cancelled: { label: 'Annulé', variant: 'danger' },
+  Cancelled: { label: 'Annule', variant: 'danger' },
 };
 
 const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
@@ -58,16 +56,17 @@ export const Dashboard: React.FC = () => {
     categoryData,
     topProducts,
     recentOrders,
-    lowStockProducts,
+    lowStockAlerts,
     chartsLoading,
     kpisLoading,
     recentOrdersLoading,
     lowStockLoading,
+    refetch,
   } = useDashboardData(dateRange);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
-    // Trigger refetch by toggling date range
+    refetch();
     setTimeout(() => setIsRefreshing(false), 1000);
   };
 
@@ -112,12 +111,15 @@ export const Dashboard: React.FC = () => {
       {/* KPI Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <KPICard
-          title="Revenu Total"
-          value={kpis.totalRevenue / 100}
+          title="Revenu ce mois"
+          value={kpis.revenueThisMonth / 100}
           icon={<DollarSign className="h-6 w-6" />}
           iconBgColor="bg-blue-500/20"
           iconColor="text-blue-400"
-          trend={kpis.trends.revenue}
+          trend={{
+            value: kpis.revenueGrowth,
+            isPositive: kpis.revenueGrowth >= 0,
+          }}
           subtitle={`Panier moyen: ${formatPrice(kpis.averageOrderValue / 100)}`}
           isCurrency
           loading={kpisLoading}
@@ -128,7 +130,6 @@ export const Dashboard: React.FC = () => {
           icon={<ShoppingCart className="h-6 w-6" />}
           iconBgColor="bg-green-500/20"
           iconColor="text-green-400"
-          trend={kpis.trends.orders}
           subtitle={`${kpis.pendingOrders} en attente`}
           loading={kpisLoading}
         />
@@ -138,8 +139,7 @@ export const Dashboard: React.FC = () => {
           icon={<Users className="h-6 w-6" />}
           iconBgColor="bg-purple-500/20"
           iconColor="text-purple-400"
-          trend={kpis.trends.customers}
-          subtitle="Clients enregistrés"
+          subtitle={`${kpis.newCustomersThisMonth} nouveaux ce mois`}
           loading={kpisLoading}
         />
         <KPICard
@@ -148,8 +148,7 @@ export const Dashboard: React.FC = () => {
           icon={<BarChart3 className="h-6 w-6" />}
           iconBgColor="bg-orange-500/20"
           iconColor="text-orange-400"
-          trend={kpis.trends.aov}
-          subtitle={`${kpis.lowStockCount} produits stock bas`}
+          subtitle={`${kpis.lowStockProducts} produits stock bas`}
           loading={kpisLoading}
         />
       </div>
@@ -170,7 +169,7 @@ export const Dashboard: React.FC = () => {
           <div className="flex items-center justify-between p-6 border-b border-border">
             <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
               <Clock className="h-5 w-5 text-blue-400" />
-              Commandes Récentes
+              Commandes Recentes
             </h3>
             <Link
               to="/orders"
@@ -200,7 +199,7 @@ export const Dashboard: React.FC = () => {
               <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                 <ShoppingCart className="h-12 w-12 mb-3 opacity-50" />
                 <p className="font-medium">Aucune commande</p>
-                <p className="text-sm">Les nouvelles commandes apparaîtront ici</p>
+                <p className="text-sm">Les nouvelles commandes apparaitront ici</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -229,14 +228,14 @@ export const Dashboard: React.FC = () => {
                             <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
                           </div>
                           <p className="text-sm text-muted-foreground mt-0.5">
-                            {order.wilaya && <span>{order.wilaya} • </span>}
-                            {order.orderPlacedAt && formatDateTime(order.orderPlacedAt)}
+                            {order.itemCount} article{order.itemCount > 1 ? 's' : ''} •{' '}
+                            {order.createdAt && formatDateTime(order.createdAt)}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="text-lg font-semibold text-foreground">
-                          {formatPrice(order.totalWithTax)}
+                          {formatPrice(order.total)}
                         </p>
                       </div>
                     </Link>
@@ -271,7 +270,7 @@ export const Dashboard: React.FC = () => {
                   </div>
                 ))}
               </div>
-            ) : lowStockProducts.length === 0 ? (
+            ) : lowStockAlerts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                 <Package className="h-12 w-12 mb-3 opacity-50" />
                 <p className="font-medium text-success">Stock OK</p>
@@ -279,15 +278,15 @@ export const Dashboard: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                {lowStockProducts.map((product) => {
-                  const stockLevel = product.stockOnHand;
+                {lowStockAlerts.slice(0, 10).map((alert) => {
+                  const stockLevel = alert.currentStock;
                   const isCritical = stockLevel === 0;
                   const isLow = stockLevel < 5;
 
                   return (
                     <Link
-                      key={product.id}
-                      to={`/products/${product.id}`}
+                      key={alert.variantId}
+                      to={`/products/${alert.productId}`}
                       className={`block p-4 rounded-lg transition-all border ${
                         isCritical
                           ? 'bg-red-900/20 border-red-700/50 hover:bg-red-900/30'
@@ -298,8 +297,8 @@ export const Dashboard: React.FC = () => {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-foreground truncate">{product.name}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{product.sku}</p>
+                          <p className="font-medium text-foreground truncate">{alert.productName}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{alert.sku}</p>
                         </div>
                         <div className="flex items-center gap-2 ml-4">
                           <span
@@ -314,7 +313,7 @@ export const Dashboard: React.FC = () => {
                             {stockLevel}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            / {product.minStock}
+                            / {alert.threshold}
                           </span>
                         </div>
                       </div>
@@ -325,16 +324,16 @@ export const Dashboard: React.FC = () => {
                             isCritical ? 'bg-red-500' : isLow ? 'bg-orange-500' : 'bg-yellow-500'
                           }`}
                           style={{
-                            width: `${Math.min((stockLevel / product.minStock) * 100, 100)}%`,
+                            width: `${Math.min((stockLevel / alert.threshold) * 100, 100)}%`,
                           }}
                         />
                       </div>
                     </Link>
                   );
                 })}
-                {lowStockProducts.length > 10 && (
+                {lowStockAlerts.length > 10 && (
                   <p className="text-sm text-muted-foreground text-center pt-2">
-                    Et {lowStockProducts.length - 10} autres produits...
+                    Et {lowStockAlerts.length - 10} autres produits...
                   </p>
                 )}
               </div>
@@ -352,7 +351,7 @@ export const Dashboard: React.FC = () => {
             className="flex flex-col items-center p-4 bg-blue-500/10 rounded-xl hover:bg-blue-500/20 transition-all border border-blue-500/20 hover:border-blue-500/40 group"
           >
             <Package className="h-8 w-8 text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
-            <span className="text-sm font-medium text-foreground">Gérer Produits</span>
+            <span className="text-sm font-medium text-foreground">Gerer Produits</span>
           </Link>
           <Link
             to="/orders"
@@ -373,7 +372,7 @@ export const Dashboard: React.FC = () => {
             className="flex flex-col items-center p-4 bg-orange-500/10 rounded-xl hover:bg-orange-500/20 transition-all border border-orange-500/20 hover:border-orange-500/40 group"
           >
             <TrendingUp className="h-8 w-8 text-orange-400 mb-2 group-hover:scale-110 transition-transform" />
-            <span className="text-sm font-medium text-foreground">Catégories</span>
+            <span className="text-sm font-medium text-foreground">Categories</span>
           </Link>
         </div>
       </div>

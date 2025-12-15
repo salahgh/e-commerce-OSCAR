@@ -17,6 +17,13 @@ query SalesReportOrders($options: OrderListOptions) {
         firstName
         lastName
         emailAddress
+        createdAt
+        orders {
+          totalItems
+        }
+        customFields {
+          wilaya
+        }
       }
       lines {
         id
@@ -27,6 +34,15 @@ query SalesReportOrders($options: OrderListOptions) {
           product {
             id
             name
+            facetValues {
+              id
+              name
+              facet {
+                id
+                name
+                code
+              }
+            }
           }
         }
         quantity
@@ -107,9 +123,137 @@ query CustomersReport($options: CustomerListOptions) {
       createdAt
       orders {
         totalItems
+        items {
+          id
+          totalWithTax
+          orderPlacedAt
+          state
+        }
       }
       customFields {
         wilaya
+      }
+    }
+    totalItems
+  }
+}
+
+# Get all customers count for new vs returning analysis
+query AllCustomersCount {
+  customers(options: { take: 0 }) {
+    totalItems
+  }
+}
+
+# Get all product variants for stock overview
+query StockOverview($options: ProductVariantListOptions) {
+  productVariants(options: $options) {
+    items {
+      id
+      sku
+      name
+      price
+      stockOnHand
+      stockAllocated
+      enabled
+      product {
+        id
+        name
+        enabled
+        featuredAsset {
+          id
+          preview
+        }
+        facetValues {
+          id
+          name
+          facet {
+            id
+            name
+            code
+          }
+        }
+      }
+      customFields {
+        minStockAlert
+      }
+    }
+    totalItems
+  }
+}
+
+# Get stock movements for a variant
+query StockMovements($variantId: ID!, $options: StockMovementListOptions) {
+  productVariant(id: $variantId) {
+    id
+    name
+    stockMovements(options: $options) {
+      totalItems
+      items {
+        ... on StockMovement {
+          id
+          createdAt
+          quantity
+          type
+        }
+        ... on StockAdjustment {
+          id
+          createdAt
+          quantity
+          type
+        }
+        ... on Allocation {
+          id
+          createdAt
+          quantity
+          type
+          orderLine {
+            id
+            order {
+              id
+              code
+            }
+          }
+        }
+        ... on Sale {
+          id
+          createdAt
+          quantity
+          type
+        }
+        ... on Cancellation {
+          id
+          createdAt
+          quantity
+          type
+          orderLine {
+            id
+            order {
+              id
+              code
+            }
+          }
+        }
+        ... on Release {
+          id
+          createdAt
+          quantity
+          type
+        }
+      }
+    }
+  }
+}
+
+# Get categories for category filter in reports
+query CategoriesForReport {
+  collections(options: { take: 100 }) {
+    items {
+      id
+      name
+      slug
+      productVariants {
+        totalItems
       }
     }
     totalItems

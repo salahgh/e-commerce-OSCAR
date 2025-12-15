@@ -1,153 +1,179 @@
 'use client';
 
-import { useState, Suspense } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery, gql } from '@apollo/client';
 import {
-  ChevronLeft,
-  ChevronRight,
   Package,
   Heart,
   ShoppingCart,
   Grid3X3,
   LayoutGrid,
   Search,
-  ArrowUpDown,
+  Loader2,
 } from 'lucide-react';
 
 import { Button, Skeleton } from '@/components/ui';
 import { useCart } from '@/contexts/CartContext';
-import { useFacetedSearch } from '@/hooks/useFacetedSearch';
-import {
-  FacetedFilterSidebar,
-  MobileFilterDrawer,
-  MobileFilterButton,
-  ActiveFilterPills,
-  ProductGridSkeleton,
-} from '@/components/facets';
-import { formatPrice } from '@/lib/facet-utils';
 import { cn } from '@/lib/utils';
 
-// Product card for search results
-function SearchProductCard({
+const PRODUCTS_PER_PAGE = 12;
+
+// Direct products query (not using search index)
+const GET_PRODUCTS = gql`
+  query GetProducts($options: ProductListOptions) {
+    products(options: $options) {
+      items {
+        id
+        name
+        slug
+        description
+        featuredAsset {
+          id
+          preview
+        }
+        variants {
+          id
+          priceWithTax
+          currencyCode
+          stockLevel
+        }
+      }
+      totalItems
+    }
+  }
+`;
+
+// Helper to format price
+function formatPrice(priceInCents: number, currencyCode: string = 'DZD'): string {
+  const price = priceInCents / 100;
+  return new Intl.NumberFormat('fr-DZ', {
+    style: 'currency',
+    currency: currencyCode,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price);
+}
+
+// Product card component
+function ProductCard({
   product,
   locale,
-  onAddToCart,
   viewMode,
 }: {
   product: {
-    productId: string;
-    productName: string;
+    id: string;
+    name: string;
     slug: string;
     description?: string;
-    productAsset?: { id: string; preview: string } | null;
-    priceWithTax:
-      | { __typename: 'SinglePrice'; value: number }
-      | { __typename: 'PriceRange'; min: number; max: number };
-    currencyCode: string;
-    inStock: boolean;
+    featuredAsset?: { id: string; preview: string } | null;
+    variants: Array<{
+      id: string;
+      priceWithTax: number;
+      currencyCode: string;
+      stockLevel: string;
+    }>;
   };
   locale: string;
-  onAddToCart: (productId: string) => void;
   viewMode: 'grid' | 'compact';
 }) {
-  const getPrice = () => {
-    if (product.priceWithTax.__typename === 'SinglePrice') {
-      return formatPrice(product.priceWithTax.value, product.currencyCode);
+  const { addToCart } = useCart();
+  const minPrice = Math.min(...product.variants.map((v) => v.priceWithTax));
+  const maxPrice = Math.max(...product.variants.map((v) => v.priceWithTax));
+  const currencyCode = product.variants[0]?.currencyCode || 'DZD';
+  const inStock = product.variants.some((v) => v.stockLevel !== 'OUT_OF_STOCK');
+
+  const priceDisplay = minPrice === maxPrice
+    ? formatPrice(minPrice, currencyCode)
+    : `${formatPrice(minPrice, currencyCode)} - ${formatPrice(maxPrice, currencyCode)}`;
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (product.variants[0]) {
+      try {
+        await addToCart(product.variants[0].id, 1);
+      } catch (err) {
+        console.error('Failed to add to cart:', err);
+      }
     }
-    const { min, max } = product.priceWithTax;
-    if (min === max) {
-      return formatPrice(min, product.currencyCode);
-    }
-    return `${formatPrice(min, product.currencyCode)} - ${formatPrice(max, product.currencyCode)}`;
   };
 
   if (viewMode === 'compact') {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="group flex gap-4 p-4 bg-white rounded-xl border border-gray-100 hover:shadow-lg hover:border-primary-200 transition-all"
+      <Link
+        href={`/${locale}/products/${product.slug}`}
+        className="group flex gap-4 p-4 bg-card rounded-xl border border-border hover:shadow-lg hover:border-primary/30 transition-all"
       >
         {/* Image */}
-        <Link
-          href={`/${locale}/products/${product.slug}`}
-          className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100"
-        >
-          {product.productAsset?.preview ? (
+        <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
+          {product.featuredAsset?.preview ? (
             <Image
-              src={product.productAsset.preview}
-              alt={product.productName}
+              src={product.featuredAsset.preview}
+              alt={product.name}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              className="object-contain group-hover:scale-105 transition-transform duration-300"
               sizes="96px"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Package className="h-8 w-8 text-gray-400" />
+              <Package className="h-8 w-8 text-muted-foreground" />
             </div>
           )}
-        </Link>
+        </div>
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <Link href={`/${locale}/products/${product.slug}`}>
-            <h3 className="font-medium text-gray-900 line-clamp-1 group-hover:text-primary-600 transition-colors">
-              {product.productName}
-            </h3>
-          </Link>
+          <h3 className="font-medium text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+            {product.name}
+          </h3>
           {product.description && (
-            <p className="text-sm text-gray-500 line-clamp-1 mt-1">
+            <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
               {product.description.replace(/<[^>]*>/g, '').slice(0, 100)}
             </p>
           )}
           <div className="flex items-center justify-between mt-2">
-            <span className="text-lg font-bold text-primary-600">{getPrice()}</span>
+            <span className="text-lg font-bold text-foreground">{priceDisplay}</span>
             <div className="flex items-center gap-2">
-              {!product.inStock && (
-                <span className="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded">
+              {!inStock && (
+                <span className="text-xs text-destructive bg-destructive/10 px-2 py-0.5 rounded">
                   Rupture
                 </span>
               )}
               <Button
                 size="sm"
-                variant={product.inStock ? 'default' : 'outline'}
-                disabled={!product.inStock}
-                onClick={() => onAddToCart(product.productId)}
+                variant={inStock ? 'default' : 'outline'}
+                disabled={!inStock}
+                onClick={handleAddToCart}
               >
                 <ShoppingCart className="h-4 w-4" />
               </Button>
             </div>
           </div>
         </div>
-      </motion.div>
+      </Link>
     );
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-xl hover:border-primary-200 transition-all duration-300"
+    <Link
+      href={`/${locale}/products/${product.slug}`}
+      className="group bg-card rounded-xl border border-border overflow-hidden hover:shadow-xl hover:border-primary/30 transition-all duration-300"
     >
       {/* Product Image */}
-      <Link
-        href={`/${locale}/products/${product.slug}`}
-        className="block aspect-square relative overflow-hidden bg-gray-50"
-      >
-        {product.productAsset?.preview ? (
+      <div className="aspect-square relative overflow-hidden bg-muted">
+        {product.featuredAsset?.preview ? (
           <Image
-            src={product.productAsset.preview}
-            alt={product.productName}
+            src={product.featuredAsset.preview}
+            alt={product.name}
             fill
-            className="object-cover group-hover:scale-110 transition-transform duration-500"
+            className="object-contain group-hover:scale-110 transition-transform duration-500"
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Package className="h-12 w-12 text-gray-300" />
+            <Package className="h-12 w-12 text-muted-foreground/50" />
           </div>
         )}
 
@@ -156,119 +182,154 @@ function SearchProductCard({
 
         {/* Quick Actions */}
         <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="p-2.5 bg-white rounded-full shadow-lg hover:bg-gray-50"
+          <button
+            className="p-2.5 bg-background rounded-full shadow-lg hover:bg-muted"
             aria-label="Ajouter aux favoris"
+            onClick={(e) => e.preventDefault()}
           >
-            <Heart className="h-4 w-4 text-gray-600" />
-          </motion.button>
+            <Heart className="h-4 w-4 text-foreground" />
+          </button>
         </div>
 
         {/* Stock Badge */}
-        {!product.inStock && (
-          <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-medium px-3 py-1 rounded-full shadow-md">
+        {!inStock && (
+          <div className="absolute top-3 left-3 bg-foreground text-background text-xs font-medium px-3 py-1 rounded-full shadow-md">
             Rupture de stock
           </div>
         )}
 
         {/* Quick Add Button */}
-        <motion.button
-          whileHover={{ y: -2 }}
-          whileTap={{ scale: 0.95 }}
-          className="absolute bottom-3 left-3 right-3 py-2.5 bg-white/95 backdrop-blur-sm
-                     text-primary-600 font-medium rounded-lg shadow-lg
+        <button
+          className="absolute bottom-3 left-3 right-3 py-2.5 bg-background/95 backdrop-blur-sm
+                     text-foreground font-medium rounded-lg shadow-lg
                      opacity-0 group-hover:opacity-100 transition-all
                      flex items-center justify-center gap-2
-                     hover:bg-primary-600 hover:text-white disabled:opacity-50"
-          disabled={!product.inStock}
-          onClick={(e) => {
-            e.preventDefault();
-            onAddToCart(product.productId);
-          }}
+                     hover:bg-foreground hover:text-background disabled:opacity-50"
+          disabled={!inStock}
+          onClick={handleAddToCart}
         >
           <ShoppingCart className="h-4 w-4" />
           Ajouter au panier
-        </motion.button>
-      </Link>
+        </button>
+      </div>
 
       {/* Product Info */}
       <div className="p-4">
-        <Link href={`/${locale}/products/${product.slug}`}>
-          <h3 className="font-medium text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors min-h-[2.5rem]">
-            {product.productName}
-          </h3>
-        </Link>
+        <h3 className="font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors min-h-[2.5rem]">
+          {product.name}
+        </h3>
 
         <div className="mt-3 flex items-center justify-between">
-          <span className="text-xl font-bold text-primary-600">{getPrice()}</span>
+          <span className="text-xl font-bold text-foreground">{priceDisplay}</span>
         </div>
       </div>
-    </motion.div>
+    </Link>
   );
 }
 
-function ProductsPageContent() {
+// Loading skeleton
+function ProductGridSkeleton({ count = 12 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="rounded-xl border bg-card overflow-hidden">
+          <Skeleton className="aspect-square" />
+          <div className="p-4">
+            <Skeleton className="h-5 w-3/4 mb-2" />
+            <Skeleton className="h-6 w-1/3" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function ProductsPage() {
   const locale = useLocale();
-  const { addToCart } = useCart();
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'compact'>('grid');
-  const [localSearchTerm, setLocalSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loaderRef = useRef<HTMLDivElement>(null);
 
-  const {
-    state,
-    facetGroups,
-    products,
-    totalItems,
-    loading,
-    facetsLoading,
-    error,
-    setSearchTerm,
-    toggleFacetValue,
-    clearFacetGroup,
-    setPriceRange,
-    setSorting,
-    setPage,
-    clearAllFilters,
-    getActiveFiltersCount,
-  } = useFacetedSearch();
+  const { data, loading, error, fetchMore } = useQuery(GET_PRODUCTS, {
+    variables: {
+      options: {
+        take: PRODUCTS_PER_PAGE,
+        skip: 0,
+      },
+    },
+    notifyOnNetworkStatusChange: true,
+  });
 
-  const pageSize = state.perPage;
-  const totalPages = Math.ceil(totalItems / pageSize);
-  const activeFiltersCount = getActiveFiltersCount();
+  const products = data?.products?.items || [];
+  const totalItems = data?.products?.totalItems || 0;
 
-  const handleAddToCart = async (productId: string) => {
-    try {
-      // Note: In a real app, you'd need to get the variant ID
-      // For now, we're using productId as a placeholder
-      await addToCart(productId, 1);
-    } catch (err) {
-      console.error('Failed to add to cart:', err);
+  // Update hasMore when data changes
+  useEffect(() => {
+    if (data?.products) {
+      setHasMore(products.length < totalItems);
     }
-  };
+  }, [data, products.length, totalItems]);
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  // Filter products by search term (client-side)
+  const filteredProducts = searchTerm
+    ? products.filter((p: any) =>
+        p.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : products;
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearchTerm(localSearchTerm);
-  };
+  // Load more products
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore || loading) return;
+
+    setIsLoadingMore(true);
+    try {
+      await fetchMore({
+        variables: {
+          options: {
+            skip: products.length,
+            take: PRODUCTS_PER_PAGE,
+          },
+        },
+      });
+      // Apollo cache merge will handle combining the results
+      // Check if we've loaded all products
+      setHasMore(products.length + PRODUCTS_PER_PAGE < totalItems);
+    } catch (err) {
+      console.error('Error loading more products:', err);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [products.length, fetchMore, hasMore, isLoadingMore, loading, totalItems]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !loading) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, loading, loadMore]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {state.searchTerm
-              ? `Resultats pour "${state.searchTerm}"`
-              : 'Tous les Produits'}
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Tous les Produits
           </h1>
-          <p className="text-gray-500">
+          <p className="text-muted-foreground">
             {loading ? (
               <span className="animate-pulse">Chargement...</span>
             ) : (
@@ -277,285 +338,123 @@ function ProductsPageContent() {
           </p>
         </div>
 
-        {/* Search Bar (Full Width) */}
+        {/* Search Bar */}
         <div className="mb-6">
-          <form onSubmit={handleSearchSubmit} className="relative max-w-2xl">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <div className="relative max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <input
               type="search"
-              value={localSearchTerm}
-              onChange={(e) => setLocalSearchTerm(e.target.value)}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Rechercher des produits..."
-              className="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl
-                         focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500
-                         bg-white shadow-sm text-gray-900 placeholder-gray-400"
+              className="w-full pl-12 pr-4 py-3 border border-border rounded-xl
+                         focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
+                         bg-card text-foreground placeholder-muted-foreground"
             />
-            {localSearchTerm && (
-              <button
-                type="button"
-                onClick={() => {
-                  setLocalSearchTerm('');
-                  setSearchTerm('');
-                }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                <span className="sr-only">Effacer</span>
-                ×
-              </button>
-            )}
-          </form>
+          </div>
         </div>
-
-        {/* Active Filters */}
-        <AnimatePresence>
-          {activeFiltersCount > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mb-6"
-            >
-              <ActiveFilterPills
-                searchTerm={state.searchTerm}
-                facetGroups={facetGroups}
-                selectedFacetValueIds={state.facetValueIds}
-                priceMin={state.priceMin}
-                priceMax={state.priceMax}
-                onClearSearch={() => {
-                  setSearchTerm('');
-                  setLocalSearchTerm('');
-                }}
-                onRemoveFacetValue={toggleFacetValue}
-                onClearPrice={() => setPriceRange(undefined, undefined)}
-                onClearAll={clearAllFilters}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Toolbar */}
-        <div className="flex items-center justify-between mb-6 gap-4">
-          {/* Mobile Filter Button */}
-          <MobileFilterButton
-            onClick={() => setShowMobileFilters(true)}
-            activeFiltersCount={activeFiltersCount}
-          />
-
-          {/* Sort & View Controls */}
-          <div className="flex items-center gap-3 ml-auto">
-            {/* Sort Dropdown */}
-            <div className="relative">
-              <select
-                value={`${state.sortBy}-${state.sortOrder}`}
-                onChange={(e) => {
-                  const [sortBy, sortOrder] = e.target.value.split('-') as [
-                    'name' | 'price' | 'createdAt',
-                    'ASC' | 'DESC'
-                  ];
-                  setSorting(sortBy, sortOrder);
-                }}
-                className="appearance-none pl-4 pr-10 py-2.5 border border-gray-200 rounded-xl
-                           bg-white text-sm font-medium text-gray-700
-                           focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500
-                           cursor-pointer"
-              >
-                <option value="name-ASC">Nom A-Z</option>
-                <option value="name-DESC">Nom Z-A</option>
-                <option value="price-ASC">Prix croissant</option>
-                <option value="price-DESC">Prix decroissant</option>
-                <option value="createdAt-DESC">Plus recents</option>
-                <option value="createdAt-ASC">Plus anciens</option>
-              </select>
-              <ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-            </div>
-
-            {/* View Mode Toggle */}
-            <div className="hidden md:flex items-center bg-gray-100 rounded-xl p-1">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={cn(
-                  'p-2 rounded-lg transition-all',
-                  viewMode === 'grid'
-                    ? 'bg-white text-primary-600 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
-                )}
-                aria-label="Vue grille"
-              >
-                <Grid3X3 className="h-5 w-5" />
-              </button>
-              <button
-                onClick={() => setViewMode('compact')}
-                className={cn(
-                  'p-2 rounded-lg transition-all',
-                  viewMode === 'compact'
-                    ? 'bg-white text-primary-600 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
-                )}
-                aria-label="Vue compacte"
-              >
-                <LayoutGrid className="h-5 w-5" />
-              </button>
-            </div>
+        <div className="flex items-center justify-end mb-6 gap-4">
+          {/* View Mode Toggle */}
+          <div className="flex items-center bg-muted rounded-xl p-1">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={cn(
+                'p-2 rounded-lg transition-all',
+                viewMode === 'grid'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+              aria-label="Vue grille"
+            >
+              <Grid3X3 className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => setViewMode('compact')}
+              className={cn(
+                'p-2 rounded-lg transition-all',
+                viewMode === 'compact'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+              aria-label="Vue compacte"
+            >
+              <LayoutGrid className="h-5 w-5" />
+            </button>
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Filters Sidebar (Desktop) */}
-          <aside className="hidden lg:block lg:col-span-1">
-            <div className="sticky top-24">
-              <FacetedFilterSidebar
-                facetGroups={facetGroups}
-                state={state}
-                onToggleFacetValue={toggleFacetValue}
-                onClearFacetGroup={clearFacetGroup}
-                onPriceChange={setPriceRange}
-                onClearAll={clearAllFilters}
-                loading={facetsLoading}
-              />
+        {/* Content */}
+        {loading ? (
+          <ProductGridSkeleton count={12} />
+        ) : error ? (
+          <div className="bg-card rounded-xl border border-border p-12 text-center">
+            <div className="text-destructive mb-4">
+              <Package className="h-16 w-16 mx-auto opacity-50" />
             </div>
-          </aside>
-
-          {/* Products Grid */}
-          <div className="lg:col-span-3">
-            {loading ? (
-              <ProductGridSkeleton count={12} />
-            ) : error ? (
-              <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-                <div className="text-red-500 mb-4">
-                  <Package className="h-16 w-16 mx-auto opacity-50" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Erreur lors du chargement
-                </h3>
-                <p className="text-gray-500 mb-4">{error.message}</p>
-                <Button onClick={() => window.location.reload()}>Reessayer</Button>
-              </div>
-            ) : products.length === 0 ? (
-              <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-                <Package className="h-20 w-20 mx-auto text-gray-300 mb-6" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  Aucun produit trouve
-                </h3>
-                <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                  {state.searchTerm
-                    ? `Aucun produit ne correspond a "${state.searchTerm}"`
-                    : 'Aucun produit disponible avec les filtres selectionnes.'}
-                </p>
-                {activeFiltersCount > 0 && (
-                  <Button variant="outline" onClick={clearAllFilters}>
-                    Effacer les filtres
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <>
-                {/* Products */}
-                <div
-                  className={cn(
-                    viewMode === 'grid'
-                      ? 'grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6'
-                      : 'space-y-4'
-                  )}
-                >
-                  <AnimatePresence mode="popLayout">
-                    {products.map((product) => (
-                      <SearchProductCard
-                        key={product.productId}
-                        product={product}
-                        locale={locale}
-                        onAddToCart={handleAddToCart}
-                        viewMode={viewMode}
-                      />
-                    ))}
-                  </AnimatePresence>
-                </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-12">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(state.page - 1)}
-                      disabled={state.page === 1}
-                      className="rounded-lg"
-                    >
-                      <ChevronLeft className="h-4 w-4 mr-1" />
-                      Precedent
-                    </Button>
-
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                        let pageNum = i + 1;
-                        if (totalPages > 5) {
-                          if (state.page < 3) {
-                            pageNum = i + 1;
-                          } else if (state.page > totalPages - 2) {
-                            pageNum = totalPages - 4 + i;
-                          } else {
-                            pageNum = state.page - 2 + i;
-                          }
-                        }
-                        return (
-                          <Button
-                            key={pageNum}
-                            variant={pageNum === state.page ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => handlePageChange(pageNum)}
-                            className="min-w-[40px] rounded-lg"
-                          >
-                            {pageNum}
-                          </Button>
-                        );
-                      })}
-                    </div>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(state.page + 1)}
-                      disabled={state.page >= totalPages}
-                      className="rounded-lg"
-                    >
-                      Suivant
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  </div>
-                )}
-              </>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Erreur lors du chargement
+            </h3>
+            <p className="text-muted-foreground mb-4">{error.message}</p>
+            <Button onClick={() => window.location.reload()}>Reessayer</Button>
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="bg-card rounded-xl border border-border p-12 text-center">
+            <Package className="h-20 w-20 mx-auto text-muted-foreground/50 mb-6" />
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              Aucun produit trouve
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              {searchTerm
+                ? `Aucun produit ne correspond a "${searchTerm}"`
+                : 'Aucun produit disponible.'}
+            </p>
+            {searchTerm && (
+              <Button variant="outline" onClick={() => setSearchTerm('')}>
+                Effacer la recherche
+              </Button>
             )}
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Products Grid */}
+            <div
+              className={cn(
+                viewMode === 'grid'
+                  ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6'
+                  : 'space-y-4'
+              )}
+            >
+              {filteredProducts.map((product: any) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  locale={locale}
+                  viewMode={viewMode}
+                />
+              ))}
+            </div>
+
+            {/* Infinite Scroll Loader */}
+            {!searchTerm && (
+              <div ref={loaderRef} className="mt-8 flex justify-center py-4">
+                {isLoadingMore && (
+                  <div className="flex items-center gap-3 text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>Chargement...</span>
+                  </div>
+                )}
+                {!hasMore && products.length > 0 && (
+                  <p className="text-muted-foreground text-sm">
+                    Vous avez vu tous les {totalItems} produits
+                  </p>
+                )}
+              </div>
+            )}
+          </>
+        )}
       </div>
-
-      {/* Mobile Filter Drawer */}
-      <MobileFilterDrawer
-        isOpen={showMobileFilters}
-        onClose={() => setShowMobileFilters(false)}
-        facetGroups={facetGroups}
-        state={state}
-        totalProducts={totalItems}
-        onToggleFacetValue={toggleFacetValue}
-        onClearFacetGroup={clearFacetGroup}
-        onPriceChange={setPriceRange}
-        onClearAll={clearAllFilters}
-        loading={facetsLoading}
-      />
     </div>
-  );
-}
-
-export default function ProductsPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="container mx-auto px-4 py-8">
-          <ProductGridSkeleton count={12} />
-        </div>
-      }
-    >
-      <ProductsPageContent />
-    </Suspense>
   );
 }

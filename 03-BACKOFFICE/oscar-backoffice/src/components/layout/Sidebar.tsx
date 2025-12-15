@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   UserCircle,
   Shield,
+  Tag,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAppSelector } from '../../hooks/useAppSelector';
@@ -34,14 +35,13 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
-  // Dashboard temporarily disabled - will review later
-  // {
-  //   icon: LayoutDashboard,
-  //   label: 'Dashboard',
-  //   path: '/',
-  //   permissions: ['ReadCatalog', 'ReadOrder', 'ReadCustomer'],
-  //   hideWhenNoAccess: true,
-  // },
+  {
+    icon: LayoutDashboard,
+    label: 'Dashboard',
+    path: '/',
+    permissions: ['ReadCatalog', 'ReadOrder', 'ReadCustomer'],
+    hideWhenNoAccess: true,
+  },
   {
     icon: Package,
     label: 'Produits',
@@ -65,6 +65,12 @@ const menuItems: MenuItem[] = [
     label: 'Clients',
     path: '/customers',
     permissions: ['ReadCustomer'],
+  },
+  {
+    icon: Tag,
+    label: 'Codes Promo',
+    path: '/promotions',
+    permissions: ['ReadPromotion'],
   },
   {
     icon: Shield,

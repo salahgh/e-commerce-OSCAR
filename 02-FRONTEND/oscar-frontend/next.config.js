@@ -12,6 +12,12 @@ const nextConfig = {
       {
         protocol: 'http',
         hostname: 'localhost',
+        port: '8085',
+      },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '8085',
       },
       {
         protocol: 'https',
@@ -23,6 +29,8 @@ const nextConfig = {
       },
     ],
     formats: ['image/avif', 'image/webp'],
+    // Allow images from localhost in development
+    unoptimized: process.env.NODE_ENV === 'development',
   },
   // Removed optimizeCss as it requires critters package
   // experimental: {

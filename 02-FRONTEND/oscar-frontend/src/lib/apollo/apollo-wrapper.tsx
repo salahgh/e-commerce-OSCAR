@@ -11,7 +11,8 @@ import { setContext } from '@apollo/client/link/context';
 
 function makeClient() {
   const httpLink = new HttpLink({
-    uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8080/graphql',
+    uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8085/shop-api',
+    credentials: 'include', // Required for Vendure session cookies
     fetchOptions: { cache: 'no-store' },
   });
 
@@ -35,12 +36,16 @@ function makeClient() {
         Query: {
           fields: {
             products: {
-              keyArgs: ['filter', 'sort'],
-              merge(existing, incoming) {
-                if (!existing) return incoming;
+              keyArgs: false, // Don't cache by arguments, we handle pagination manually
+              merge(existing, incoming, { args }) {
+                // If skip is 0, this is a fresh query, return incoming
+                if (!existing || args?.options?.skip === 0) {
+                  return incoming;
+                }
+                // Otherwise merge items for infinite scroll
                 return {
                   ...incoming,
-                  edges: [...existing.edges, ...incoming.edges],
+                  items: [...(existing.items || []), ...(incoming.items || [])],
                 };
               },
             },

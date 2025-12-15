@@ -12,11 +12,18 @@ import {
   DollarSign,
   BarChart3,
   RefreshCw,
+  Percent,
+  PackageX,
+  UserPlus,
+  Truck,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react';
 import { formatPrice, formatDateTime } from '../lib/utils';
 import {
   KPICard,
   SalesLineChart,
+  OrdersBarChart,
   CategoryPieChart,
   TopProductsBarChart,
   LockedSection,
@@ -33,15 +40,15 @@ const ORDER_STATUS: Record<
 > = {
   AddingItems: { label: 'En cours', variant: 'default' },
   ArrangingPayment: { label: 'Paiement', variant: 'info' },
-  PaymentAuthorized: { label: 'Autorisé', variant: 'info' },
-  PaymentSettled: { label: 'Payé', variant: 'success' },
-  PartiallyShipped: { label: 'Partiellement expédié', variant: 'warning' },
-  Shipped: { label: 'Expédié', variant: 'info' },
-  PartiallyDelivered: { label: 'Partiellement livré', variant: 'warning' },
-  Delivered: { label: 'Livré', variant: 'success' },
+  PaymentAuthorized: { label: 'Autorise', variant: 'info' },
+  PaymentSettled: { label: 'Paye', variant: 'success' },
+  PartiallyShipped: { label: 'Partiellement expedie', variant: 'warning' },
+  Shipped: { label: 'Expedie', variant: 'info' },
+  PartiallyDelivered: { label: 'Partiellement livre', variant: 'warning' },
+  Delivered: { label: 'Livre', variant: 'success' },
   Modifying: { label: 'En modification', variant: 'warning' },
   ArrangingAdditionalPayment: { label: 'Paiement additionnel', variant: 'info' },
-  Cancelled: { label: 'Annulé', variant: 'danger' },
+  Cancelled: { label: 'Annule', variant: 'danger' },
 };
 
 const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
@@ -63,18 +70,23 @@ export const Dashboard: React.FC = () => {
   const {
     kpis,
     salesData,
+    ordersByStatus,
     categoryData,
     topProducts,
     recentOrders,
-    lowStockProducts,
+    lowStockAlerts,
     chartsLoading,
     kpisLoading,
     recentOrdersLoading,
     lowStockLoading,
+    topProductsLoading,
+    ordersByStatusLoading,
+    refetch,
   } = useDashboardData(dateRange);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
+    refetch();
     setTimeout(() => setIsRefreshing(false), 1000);
   };
 
@@ -114,63 +126,67 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* KPI Cards */}
+      {/* Primary KPI Cards - Revenue & Orders */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {canReadOrders ? (
           <KPICard
-            title="Revenu Total"
-            value={kpis.totalRevenue / 100}
+            title="Revenu ce mois"
+            value={kpis.revenueThisMonth / 100}
             icon={<DollarSign className="h-6 w-6" />}
             iconBgColor="bg-blue-500/20"
             iconColor="text-blue-400"
-            trend={kpis.trends.revenue}
+            trend={{
+              value: kpis.revenueGrowth,
+              isPositive: kpis.revenueGrowth >= 0,
+            }}
             subtitle={`Panier moyen: ${formatPrice(kpis.averageOrderValue / 100)}`}
             isCurrency
             loading={kpisLoading}
           />
         ) : (
-          <LockedKPICard title="Revenu Total" permission="ReadOrder" />
+          <LockedKPICard title="Revenu ce mois" permission="ReadOrder" />
         )}
 
         {canReadOrders ? (
           <KPICard
-            title="Commandes"
-            value={kpis.totalOrders}
+            title="Commandes ce mois"
+            value={kpis.ordersThisMonth}
             icon={<ShoppingCart className="h-6 w-6" />}
             iconBgColor="bg-green-500/20"
             iconColor="text-green-400"
-            trend={kpis.trends.orders}
+            trend={{
+              value: kpis.ordersThisMonth > 0 ? ((kpis.ordersThisMonth - kpis.ordersThisWeek * 4) / (kpis.ordersThisWeek * 4 || 1)) * 100 : 0,
+              isPositive: true,
+            }}
             subtitle={`${kpis.pendingOrders} en attente`}
             loading={kpisLoading}
           />
         ) : (
-          <LockedKPICard title="Commandes" permission="ReadOrder" />
+          <LockedKPICard title="Commandes ce mois" permission="ReadOrder" />
         )}
 
         {canReadCustomers ? (
           <KPICard
-            title="Clients"
-            value={kpis.totalCustomers}
-            icon={<Users className="h-6 w-6" />}
+            title="Nouveaux clients"
+            value={kpis.newCustomersThisMonth}
+            icon={<UserPlus className="h-6 w-6" />}
             iconBgColor="bg-purple-500/20"
             iconColor="text-purple-400"
-            trend={kpis.trends.customers}
-            subtitle="Clients enregistrés"
+            subtitle={`${kpis.totalCustomers} clients au total`}
             loading={kpisLoading}
           />
         ) : (
-          <LockedKPICard title="Clients" permission="ReadCustomer" />
+          <LockedKPICard title="Nouveaux clients" permission="ReadCustomer" />
         )}
 
         {canReadOrders ? (
           <KPICard
             title="Taux de conversion"
             value={`${kpis.conversionRate.toFixed(1)}%`}
-            icon={<BarChart3 className="h-6 w-6" />}
+            icon={<Percent className="h-6 w-6" />}
             iconBgColor="bg-orange-500/20"
             iconColor="text-orange-400"
-            trend={kpis.trends.aov}
-            subtitle={`${kpis.lowStockCount} produits stock bas`}
+            subtitle={`${kpis.deliveredOrders} commandes livrees`}
             loading={kpisLoading}
           />
         ) : (
@@ -178,26 +194,100 @@ export const Dashboard: React.FC = () => {
         )}
       </div>
 
+      {/* Secondary KPI Cards - Orders Status & Stock */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        {canReadOrders ? (
+          <>
+            <div className="bg-card rounded-xl p-4 border border-border">
+              <div className="flex items-center gap-2 mb-2">
+                <Clock className="h-4 w-4 text-amber-400" />
+                <span className="text-xs text-muted-foreground">En attente</span>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{kpis.pendingOrders}</p>
+            </div>
+            <div className="bg-card rounded-xl p-4 border border-border">
+              <div className="flex items-center gap-2 mb-2">
+                <BarChart3 className="h-4 w-4 text-blue-400" />
+                <span className="text-xs text-muted-foreground">En cours</span>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{kpis.processingOrders}</p>
+            </div>
+            <div className="bg-card rounded-xl p-4 border border-border">
+              <div className="flex items-center gap-2 mb-2">
+                <Truck className="h-4 w-4 text-purple-400" />
+                <span className="text-xs text-muted-foreground">Expedies</span>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{kpis.shippedOrders}</p>
+            </div>
+            <div className="bg-card rounded-xl p-4 border border-border">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle className="h-4 w-4 text-green-400" />
+                <span className="text-xs text-muted-foreground">Livres</span>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{kpis.deliveredOrders}</p>
+            </div>
+            <div className="bg-card rounded-xl p-4 border border-border">
+              <div className="flex items-center gap-2 mb-2">
+                <XCircle className="h-4 w-4 text-red-400" />
+                <span className="text-xs text-muted-foreground">Annules</span>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{kpis.cancelledOrders}</p>
+            </div>
+          </>
+        ) : (
+          <>
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="bg-card rounded-xl p-4 border border-border opacity-50">
+                <div className="h-4 w-20 bg-muted rounded mb-2" />
+                <div className="h-8 w-12 bg-muted rounded" />
+              </div>
+            ))}
+          </>
+        )}
+
+        {canReadCatalog ? (
+          <div className="bg-card rounded-xl p-4 border border-border">
+            <div className="flex items-center gap-2 mb-2">
+              <PackageX className="h-4 w-4 text-orange-400" />
+              <span className="text-xs text-muted-foreground">Stock bas</span>
+            </div>
+            <p className="text-2xl font-bold text-foreground">{kpis.lowStockProducts}</p>
+          </div>
+        ) : (
+          <div className="bg-card rounded-xl p-4 border border-border opacity-50">
+            <div className="h-4 w-20 bg-muted rounded mb-2" />
+            <div className="h-8 w-12 bg-muted rounded" />
+          </div>
+        )}
+      </div>
+
       {/* Sales Chart */}
       {canReadOrders ? (
         <SalesLineChart data={salesData} loading={chartsLoading} />
       ) : (
-        <LockedSection title="Évolution des ventes" permission="ReadOrder" />
+        <LockedSection title="Evolution des ventes" permission="ReadOrder" />
       )}
 
-      {/* Two Column Charts */}
+      {/* Orders by Status Chart & Category Pie Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {canReadOrders ? (
+          <OrdersBarChart data={ordersByStatus} loading={ordersByStatusLoading} />
+        ) : (
+          <LockedSection title="Commandes par statut" permission="ReadOrder" />
+        )}
         {canReadCatalog ? (
           <CategoryPieChart data={categoryData} loading={chartsLoading} />
         ) : (
-          <LockedSection title="Ventes par catégorie" permission="ReadCatalog" />
-        )}
-        {canReadCatalog ? (
-          <TopProductsBarChart data={topProducts} loading={chartsLoading} metric="revenue" />
-        ) : (
-          <LockedSection title="Top produits" permission="ReadCatalog" />
+          <LockedSection title="Ventes par categorie" permission="ReadCatalog" />
         )}
       </div>
+
+      {/* Top Products Chart */}
+      {canReadCatalog ? (
+        <TopProductsBarChart data={topProducts} loading={topProductsLoading} metric="revenue" />
+      ) : (
+        <LockedSection title="Top produits" permission="ReadCatalog" />
+      )}
 
       {/* Recent Orders & Low Stock */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -206,7 +296,7 @@ export const Dashboard: React.FC = () => {
             <div className="flex items-center justify-between p-6 border-b border-border">
               <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
                 <Clock className="h-5 w-5 text-blue-400" />
-                Commandes Récentes
+                Commandes Recentes
               </h3>
               <Link
                 to="/orders"
@@ -236,7 +326,7 @@ export const Dashboard: React.FC = () => {
                 <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <ShoppingCart className="h-12 w-12 mb-3 opacity-50" />
                   <p className="font-medium">Aucune commande</p>
-                  <p className="text-sm">Les nouvelles commandes apparaîtront ici</p>
+                  <p className="text-sm">Les nouvelles commandes apparaitront ici</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -265,14 +355,14 @@ export const Dashboard: React.FC = () => {
                               <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
                             </div>
                             <p className="text-sm text-muted-foreground mt-0.5">
-                              {order.wilaya && <span>{order.wilaya} • </span>}
-                              {order.orderPlacedAt && formatDateTime(order.orderPlacedAt)}
+                              {order.itemCount} article{order.itemCount > 1 ? 's' : ''} •{' '}
+                              {order.createdAt && formatDateTime(order.createdAt)}
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-semibold text-foreground">
-                            {formatPrice(order.totalWithTax)}
+                            {formatPrice(order.total)}
                           </p>
                         </div>
                       </Link>
@@ -284,7 +374,7 @@ export const Dashboard: React.FC = () => {
           </div>
         ) : (
           <LockedSection
-            title="Commandes Récentes"
+            title="Commandes Recentes"
             permission="ReadOrder"
             className="lg:col-span-2"
           />
@@ -314,7 +404,7 @@ export const Dashboard: React.FC = () => {
                     </div>
                   ))}
                 </div>
-              ) : lowStockProducts.length === 0 ? (
+              ) : lowStockAlerts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <Package className="h-12 w-12 mb-3 opacity-50" />
                   <p className="font-medium text-success">Stock OK</p>
@@ -322,14 +412,14 @@ export const Dashboard: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {lowStockProducts.map((product) => {
-                    const stockLevel = product.stockOnHand;
+                  {lowStockAlerts.slice(0, 10).map((alert) => {
+                    const stockLevel = alert.currentStock;
                     const isCritical = stockLevel === 0;
                     const isLow = stockLevel < 5;
                     return (
                       <Link
-                        key={product.id}
-                        to={`/products/${product.id}`}
+                        key={alert.variantId}
+                        to={`/products/${alert.productId}`}
                         className={`block p-4 rounded-lg transition-all border ${
                           isCritical
                             ? 'bg-red-900/20 border-red-700/50 hover:bg-red-900/30'
@@ -340,8 +430,8 @@ export const Dashboard: React.FC = () => {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-foreground truncate">{product.name}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">{product.sku}</p>
+                            <p className="font-medium text-foreground truncate">{alert.productName}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{alert.sku}</p>
                           </div>
                           <div className="flex items-center gap-2 ml-4">
                             <span
@@ -356,7 +446,7 @@ export const Dashboard: React.FC = () => {
                               {stockLevel}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              / {product.minStock}
+                              / {alert.threshold}
                             </span>
                           </div>
                         </div>
@@ -370,16 +460,16 @@ export const Dashboard: React.FC = () => {
                                   : 'bg-yellow-500'
                             }`}
                             style={{
-                              width: `${Math.min((stockLevel / product.minStock) * 100, 100)}%`,
+                              width: `${Math.min((stockLevel / alert.threshold) * 100, 100)}%`,
                             }}
                           />
                         </div>
                       </Link>
                     );
                   })}
-                  {lowStockProducts.length > 10 && (
+                  {lowStockAlerts.length > 10 && (
                     <p className="text-sm text-muted-foreground text-center pt-2">
-                      Et {lowStockProducts.length - 10} autres produits...
+                      Et {lowStockAlerts.length - 10} autres produits...
                     </p>
                   )}
                 </div>
@@ -401,12 +491,13 @@ export const Dashboard: React.FC = () => {
               className="flex flex-col items-center p-4 bg-blue-500/10 rounded-xl hover:bg-blue-500/20 transition-all border border-blue-500/20 hover:border-blue-500/40 group"
             >
               <Package className="h-8 w-8 text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium text-foreground">Gérer Produits</span>
+              <span className="text-sm font-medium text-foreground">Gerer Produits</span>
+              <span className="text-xs text-muted-foreground mt-1">{kpis.totalProducts} produits</span>
             </Link>
           ) : (
             <LockedQuickAction
               icon={<Package className="h-8 w-8 text-blue-400 mb-2 opacity-50" />}
-              label="Gérer Produits"
+              label="Gerer Produits"
               permission="ReadCatalog"
               bgColor="bg-blue-500/10"
               borderColor="border-blue-500/20"
@@ -420,6 +511,7 @@ export const Dashboard: React.FC = () => {
             >
               <ShoppingCart className="h-8 w-8 text-green-400 mb-2 group-hover:scale-110 transition-transform" />
               <span className="text-sm font-medium text-foreground">Commandes</span>
+              <span className="text-xs text-muted-foreground mt-1">{kpis.totalOrders} commandes</span>
             </Link>
           ) : (
             <LockedQuickAction
@@ -438,6 +530,7 @@ export const Dashboard: React.FC = () => {
             >
               <Users className="h-8 w-8 text-purple-400 mb-2 group-hover:scale-110 transition-transform" />
               <span className="text-sm font-medium text-foreground">Clients</span>
+              <span className="text-xs text-muted-foreground mt-1">{kpis.totalCustomers} clients</span>
             </Link>
           ) : (
             <LockedQuickAction
@@ -455,12 +548,13 @@ export const Dashboard: React.FC = () => {
               className="flex flex-col items-center p-4 bg-orange-500/10 rounded-xl hover:bg-orange-500/20 transition-all border border-orange-500/20 hover:border-orange-500/40 group"
             >
               <TrendingUp className="h-8 w-8 text-orange-400 mb-2 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium text-foreground">Catégories</span>
+              <span className="text-sm font-medium text-foreground">Categories</span>
+              <span className="text-xs text-muted-foreground mt-1">{categoryData.length} categories</span>
             </Link>
           ) : (
             <LockedQuickAction
               icon={<TrendingUp className="h-8 w-8 text-orange-400 mb-2 opacity-50" />}
-              label="Catégories"
+              label="Categories"
               permission="ReadCatalog"
               bgColor="bg-orange-500/10"
               borderColor="border-orange-500/20"

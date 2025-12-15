@@ -27,10 +27,14 @@ const getCorsOrigins = (): string[] | boolean => {
       'http://localhost:5174',
       'http://localhost:5175',
       'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002',
       'http://127.0.0.1:5173',
       'http://127.0.0.1:5174',
       'http://127.0.0.1:5175',
       'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001',
+      'http://127.0.0.1:3002',
     ];
   }
   // In production, read from CORS_ORIGINS env variable
@@ -124,6 +128,7 @@ export const config: VendureConfig = {
     Customer: [
       { name: 'wilaya', type: 'string', label: [{ languageCode: LanguageCode.en, value: 'Wilaya' }] },
       { name: 'city', type: 'string', label: [{ languageCode: LanguageCode.en, value: 'City' }] },
+      { name: 'adminNotes', type: 'text', label: [{ languageCode: LanguageCode.en, value: 'Admin Notes' }] },
     ],
     Order: [
       { name: 'customerNotes', type: 'text', label: [{ languageCode: LanguageCode.en, value: 'Customer Notes' }] },

@@ -837,6 +837,7 @@ input CreateCountryInput {
 input CreateCustomerCustomFieldsInput {
   wilaya: String
   city: String
+  adminNotes: String
 }
 
 input CreateCustomerGroupInput {
@@ -864,11 +865,15 @@ input CreateFacetInput {
   customFields: JSON
 }
 
+input CreateFacetValueCustomFieldsInput {
+  colorHex: String
+}
+
 input CreateFacetValueInput {
   facetId: ID!
   code: String!
   translations: [FacetValueTranslationInput!]!
-  customFields: JSON
+  customFields: CreateFacetValueCustomFieldsInput
 }
 
 input CreateFacetValueWithFacetInput {
@@ -1558,6 +1563,7 @@ type Customer implements Node {
 type CustomerCustomFields {
   wilaya: String
   city: String
+  adminNotes: String
 }
 
 input CustomerFilterParameter {
@@ -1574,6 +1580,7 @@ input CustomerFilterParameter {
   _or: [CustomerFilterParameter!]
   wilaya: StringOperators
   city: StringOperators
+  adminNotes: StringOperators
 }
 
 type CustomerGroup implements Node {
@@ -1662,6 +1669,7 @@ input CustomerSortParameter {
   emailAddress: SortOrder
   wilaya: SortOrder
   city: SortOrder
+  adminNotes: SortOrder
 }
 
 interface CustomField {
@@ -2029,7 +2037,11 @@ type FacetValue implements Node {
   name: String!
   code: String!
   translations: [FacetValueTranslation!]!
-  customFields: JSON
+  customFields: FacetValueCustomFields
+}
+
+type FacetValueCustomFields {
+  colorHex: String
 }
 
 """
@@ -2055,6 +2067,7 @@ input FacetValueFilterParameter {
   code: StringOperators
   _and: [FacetValueFilterParameter!]
   _or: [FacetValueFilterParameter!]
+  colorHex: StringOperators
 }
 
 type FacetValueList implements PaginatedList {
@@ -2098,6 +2111,7 @@ input FacetValueSortParameter {
   facetId: SortOrder
   name: SortOrder
   code: SortOrder
+  colorHex: SortOrder
 }
 
 type FacetValueTranslation {
@@ -2485,6 +2499,34 @@ enum JobState {
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSON
+
+"""Comprehensive KPI metrics for the dashboard"""
+type KpiMetrics {
+  revenueToday: Int!
+  revenueThisWeek: Int!
+  revenueThisMonth: Int!
+  revenueLastMonth: Int!
+  revenueGrowth: Float!
+  ordersToday: Int!
+  ordersThisWeek: Int!
+  ordersThisMonth: Int!
+  totalOrders: Int!
+  pendingOrders: Int!
+  processingOrders: Int!
+  shippedOrders: Int!
+  deliveredOrders: Int!
+  cancelledOrders: Int!
+  newCustomersToday: Int!
+  newCustomersThisWeek: Int!
+  newCustomersThisMonth: Int!
+  totalCustomers: Int!
+  totalProducts: Int!
+  activeProducts: Int!
+  lowStockProducts: Int!
+  outOfStockProducts: Int!
+  averageOrderValue: Float!
+  conversionRate: Float!
+}
 
 """
 @description
@@ -3017,6 +3059,17 @@ type LocalizedString {
 enum LogicalOperator {
   AND
   OR
+}
+
+"""Low stock alert item"""
+type LowStockAlert {
+  productId: ID!
+  productName: String!
+  variantId: ID!
+  variantName: String!
+  sku: String!
+  currentStock: Int!
+  threshold: Int!
 }
 
 type LowStockProduct {
@@ -4006,6 +4059,16 @@ type OrderModificationStateError implements ErrorResult {
 type OrderProcessState {
   name: String!
   to: [String!]!
+}
+
+"""Orders by status data point for bar chart"""
+type OrdersChartDataPoint {
+  date: String!
+  pending: Int!
+  processing: Int!
+  shipped: Int!
+  delivered: Int!
+  cancelled: Int!
 }
 
 input OrderSortParameter {
@@ -5183,11 +5246,44 @@ type Query {
   """Get metrics for the given interval and metric types."""
   metricSummary(input: MetricSummaryInput): [MetricSummary!]!
 
-  """Get products with low stock (for admin alerts)"""
+  """Get comprehensive KPI metrics for the dashboard"""
+  dashboardKpiMetrics: KpiMetrics!
+
+  """Get sales trend data for line chart"""
+  dashboardSalesTrend(days: Int): [SalesTrendDataPoint!]!
+
+  """Get orders by status for bar chart"""
+  dashboardOrdersByStatus(days: Int): [OrdersChartDataPoint!]!
+
+  """Get revenue by category for pie chart"""
+  dashboardRevenueByCategory: [RevenueByCategoryDataPoint!]!
+
+  """Get recent orders for activity feed"""
+  dashboardRecentOrders(limit: Int): [RecentOrderItem!]!
+
+  """Get low stock alerts"""
+  dashboardLowStockAlerts(threshold: Int): [LowStockAlert!]!
+
+  """Get top selling products"""
+  dashboardTopSellingProducts(limit: Int): [TopSellingProduct!]!
+
+  """Get products with low stock (legacy - for admin alerts)"""
   lowStockProducts(threshold: Int): [Product!]!
 
-  """Get dashboard statistics"""
+  """Get dashboard statistics (legacy)"""
   oscarDashboardStats: DashboardStats!
+}
+
+"""Recent order for activity feed"""
+type RecentOrderItem {
+  id: ID!
+  code: String!
+  customerName: String!
+  customerEmail: String!
+  total: Int!
+  state: String!
+  itemCount: Int!
+  createdAt: DateTime!
 }
 
 type Refund implements Node {
@@ -5371,6 +5467,14 @@ type Return implements Node & StockMovement {
   customFields: JSON
 }
 
+"""Revenue by category data point for pie chart"""
+type RevenueByCategoryDataPoint {
+  categoryId: ID!
+  categoryName: String!
+  revenue: Int!
+  percentage: Float!
+}
+
 type Role implements Node {
   id: ID!
   createdAt: DateTime!
@@ -5432,6 +5536,13 @@ type Sale implements Node & StockMovement {
   type: StockMovementType!
   quantity: Int!
   customFields: JSON
+}
+
+"""Sales trend data point for line chart"""
+type SalesTrendDataPoint {
+  date: String!
+  revenue: Int!
+  orders: Int!
 }
 
 type ScheduledTask {
@@ -6169,6 +6280,18 @@ type TextStructFieldConfig implements StructField {
   ui: JSON
 }
 
+"""Top selling product item"""
+type TopSellingProduct {
+  productId: ID!
+  productName: String!
+  variantId: ID!
+  variantName: String!
+  sku: String!
+  quantitySold: Int!
+  revenue: Int!
+  imageUrl: String
+}
+
 union TransitionFulfillmentToStateResult = Fulfillment | FulfillmentStateTransitionError
 
 union TransitionOrderToStateResult = Order | OrderStateTransitionError
@@ -6283,6 +6406,7 @@ input UpdateCountryInput {
 input UpdateCustomerCustomFieldsInput {
   wilaya: String
   city: String
+  adminNotes: String
 }
 
 input UpdateCustomerGroupInput {
@@ -6316,11 +6440,15 @@ input UpdateFacetInput {
   customFields: JSON
 }
 
+input UpdateFacetValueCustomFieldsInput {
+  colorHex: String
+}
+
 input UpdateFacetValueInput {
   id: ID!
   code: String
   translations: [FacetValueTranslationInput!]
-  customFields: JSON
+  customFields: UpdateFacetValueCustomFieldsInput
 }
 
 input UpdateGlobalSettingsInput {

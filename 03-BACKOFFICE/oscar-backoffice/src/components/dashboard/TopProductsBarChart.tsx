@@ -1,10 +1,10 @@
 import React from 'react';
 import { formatPrice } from '../../lib/utils';
 import { Package } from 'lucide-react';
-import type { ProductData } from '../../hooks/useDashboardData';
+import type { TopSellingProduct } from '../../hooks/useDashboardData';
 
 interface TopProductsBarChartProps {
-  data: ProductData[];
+  data: TopSellingProduct[];
   loading?: boolean;
   metric?: 'revenue' | 'quantity';
 }
@@ -43,11 +43,11 @@ export const TopProductsBarChart: React.FC<TopProductsBarChartProps> = ({
 
   // Sort by selected metric and take top 10
   const sortedData = [...data]
-    .sort((a, b) => (metric === 'revenue' ? b.revenue - a.revenue : b.quantity - a.quantity))
+    .sort((a, b) => (metric === 'revenue' ? b.revenue - a.revenue : b.quantitySold - a.quantitySold))
     .slice(0, 10);
 
   const maxValue = Math.max(
-    ...sortedData.map((d) => (metric === 'revenue' ? d.revenue : d.quantity))
+    ...sortedData.map((d) => (metric === 'revenue' ? d.revenue : d.quantitySold))
   );
 
   return (
@@ -65,22 +65,22 @@ export const TopProductsBarChart: React.FC<TopProductsBarChartProps> = ({
       {/* Custom horizontal bar list for better control */}
       <div className="space-y-3">
         {sortedData.map((product, index) => {
-          const value = metric === 'revenue' ? product.revenue : product.quantity;
-          const percentage = (value / maxValue) * 100;
+          const value = metric === 'revenue' ? product.revenue : product.quantitySold;
+          const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
           const gradientOpacity = 1 - index * 0.08;
 
           return (
-            <div key={product.id} className="group">
+            <div key={product.variantId} className="group">
               <div className="flex items-center gap-3 mb-1">
                 {/* Rank */}
                 <span className="text-sm font-medium text-muted-foreground w-5">{index + 1}.</span>
 
                 {/* Product image or placeholder */}
                 <div className="w-8 h-8 rounded bg-muted flex-shrink-0 overflow-hidden">
-                  {product.image ? (
+                  {product.imageUrl ? (
                     <img
-                      src={product.image}
-                      alt={product.name}
+                      src={product.imageUrl}
+                      alt={product.productName}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -91,13 +91,20 @@ export const TopProductsBarChart: React.FC<TopProductsBarChartProps> = ({
                 </div>
 
                 {/* Product name */}
-                <span className="text-sm text-muted-foreground truncate flex-1 group-hover:text-foreground transition-colors">
-                  {product.name}
-                </span>
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm text-muted-foreground truncate block group-hover:text-foreground transition-colors">
+                    {product.productName}
+                  </span>
+                  {product.variantName && product.variantName !== product.productName && (
+                    <span className="text-xs text-muted-foreground/70 truncate block">
+                      {product.variantName}
+                    </span>
+                  )}
+                </div>
 
                 {/* Value */}
                 <span className="text-sm font-medium text-foreground">
-                  {metric === 'revenue' ? formatPrice(product.revenue) : product.quantity}
+                  {metric === 'revenue' ? formatPrice(product.revenue) : `${product.quantitySold} vendus`}
                 </span>
               </div>
 
@@ -125,7 +132,7 @@ export const TopProductsBarChart: React.FC<TopProductsBarChartProps> = ({
           <span className="text-foreground font-medium">
             {metric === 'revenue'
               ? formatPrice(sortedData.reduce((sum, p) => sum + p.revenue, 0))
-              : `${sortedData.reduce((sum, p) => sum + p.quantity, 0)} unites`}
+              : `${sortedData.reduce((sum, p) => sum + p.quantitySold, 0)} unites`}
           </span>
         </div>
       </div>
