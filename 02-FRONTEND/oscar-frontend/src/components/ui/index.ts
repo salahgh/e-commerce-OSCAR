@@ -17,5 +17,10 @@ export * from './separator';
 export * from './tabs';
 export * from './toast';
 export * from './toaster';
+export * from './radio';
+export * from './QuantitySelector';
+export * from './PriceDisplay';
+export * from './StockIndicator';
+export * from './OptimizedImage';
 // Note: sonner exports Toaster which conflicts with toaster, use direct import if needed
 // export * from './sonner';

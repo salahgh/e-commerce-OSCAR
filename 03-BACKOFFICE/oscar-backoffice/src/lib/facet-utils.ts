@@ -348,3 +348,47 @@ export function getActiveFilterCount(state: Partial<AdminFilterState>): number {
 
   return count;
 }
+
+/**
+ * Validate and normalize price range
+ * Ensures min <= max and returns validated values
+ * @param min - Minimum price in cents
+ * @param max - Maximum price in cents
+ * @returns Validated price range
+ */
+export function validatePriceRange(
+  min?: number,
+  max?: number
+): { min?: number; max?: number; isValid: boolean; error?: string } {
+  if (min === undefined && max === undefined) {
+    return { min, max, isValid: true };
+  }
+
+  if (min !== undefined && min < 0) {
+    return { min: 0, max, isValid: false, error: 'Le prix minimum ne peut pas etre negatif' };
+  }
+
+  if (max !== undefined && max < 0) {
+    return { min, max: 0, isValid: false, error: 'Le prix maximum ne peut pas etre negatif' };
+  }
+
+  if (min !== undefined && max !== undefined && min > max) {
+    // Auto-swap if min > max
+    return { min: max, max: min, isValid: true };
+  }
+
+  return { min, max, isValid: true };
+}
+
+/**
+ * Check if a price falls within a range
+ * @param price - Price to check (in cents)
+ * @param min - Minimum price (in cents)
+ * @param max - Maximum price (in cents)
+ * @returns true if price is within range
+ */
+export function isPriceInRange(price: number, min?: number, max?: number): boolean {
+  if (min !== undefined && price < min) return false;
+  if (max !== undefined && price > max) return false;
+  return true;
+}

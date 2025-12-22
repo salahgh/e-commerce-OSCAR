@@ -2,11 +2,19 @@ import { Metadata } from 'next';
 import { Button } from '@/components/ui';
 import Link from 'next/link';
 import { ShoppingBag, TrendingUp, Shield, Truck } from 'lucide-react';
+import { HomePageJsonLd } from '@/components/seo';
+import { generateMetadata as genMeta, siteConfig, pageMeta } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'OSCAR Fashion - Accueil',
-  description: 'Découvrez les dernières tendances de la mode chez OSCAR Fashion',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return genMeta({
+    title: pageMeta.home.title,
+    description: pageMeta.home.description,
+    canonical: '',
+    openGraph: {
+      type: 'website',
+    },
+  });
+}
 
 export default function HomePage() {
   const features = [
@@ -34,6 +42,9 @@ export default function HomePage() {
 
   return (
     <div>
+      {/* Structured Data */}
+      <HomePageJsonLd />
+
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-primary to-primary-dark text-white">
         <div className="container-custom py-24 md:py-32">
