@@ -1,18 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  Image,
   Dimensions,
   TouchableOpacity,
+  Share,
+  Platform,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGetProductQuery } from '../../src/graphql/generated/graphql';
 import { Button, LoadingSpinner, ErrorState, Badge, Chip } from '../../src/components/ui';
+import { ImageCarousel } from '../../src/components/products';
 import { colors, spacing, typography } from '../../src/theme';
 import { useCart } from '../../src/contexts/CartContext';
 
@@ -21,15 +24,16 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, i18n } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { addToCart, loading: cartLoading } = useCart();
 
   // State
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const [addToCartSuccess, setAddToCartSuccess] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   // Fetch product details
   const { data, loading, error, refetch } = useGetProductQuery({
@@ -63,6 +67,42 @@ export default function ProductDetailScreen() {
         return product.descriptionFr || product.descriptionEn || product.descriptionAr || '';
     }
   };
+
+  // Share product
+  const handleShare = useCallback(async () => {
+    if (!product) return;
+
+    const productName = getName();
+    const productUrl = `https://oscar-fashion.com/products/${product.id}`;
+    const price = product.salePrice || product.basePrice;
+
+    try {
+      await Share.share({
+        message: Platform.OS === 'ios'
+          ? `Check out ${productName} - ${price?.toFixed(2)} DZD`
+          : `Check out ${productName} - ${price?.toFixed(2)} DZD\n${productUrl}`,
+        url: Platform.OS === 'ios' ? productUrl : undefined,
+        title: productName,
+      });
+    } catch (error) {
+      console.error('Share error:', error);
+    }
+  }, [product]);
+
+  // Toggle favorite
+  const handleToggleFavorite = useCallback(() => {
+    setIsFavorite((prev) => !prev);
+    // TODO: Implement favorite/wishlist API call
+  }, []);
+
+  // Go back
+  const handleGoBack = useCallback(() => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.push('/');
+    }
+  }, []);
 
   const handleAddToCart = async () => {
     if (!product?.id) return;
@@ -130,41 +170,54 @@ export default function ProductDetailScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Floating Header */}
+      <View style={[styles.floatingHeader, { top: insets.top + spacing.sm }]}>
+        <TouchableOpacity
+          style={styles.floatingButton}
+          onPress={handleGoBack}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </TouchableOpacity>
+
+        <View style={styles.floatingActions}>
+          <TouchableOpacity
+            style={styles.floatingButton}
+            onPress={handleToggleFavorite}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name={isFavorite ? 'heart' : 'heart-outline'}
+              size={24}
+              color={isFavorite ? colors.error : colors.text.primary}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.floatingButton}
+            onPress={handleShare}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="share-outline" size={24} color={colors.text.primary} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Image Gallery */}
+        {/* Image Gallery with Carousel */}
         <View style={styles.imageContainer}>
-          {images.length > 0 ? (
-            <>
-              <Image
-                source={{ uri: images[selectedImageIndex] }}
-                style={styles.mainImage}
-                resizeMode="cover"
-              />
+          <ImageCarousel
+            images={images}
+            height={SCREEN_WIDTH}
+            showThumbnails={images.length > 1}
+            showIndicators={images.length > 1}
+            enableZoom
+          />
 
-              {/* Badges */}
-              <View style={styles.badgeContainer}>
-                {product.isFeatured && <Badge label="Featured" variant="primary" />}
-                {hasDiscount && <Badge label={`-${discountPercentage}%`} variant="danger" />}
-              </View>
-
-              {/* Image Dots */}
-              {images.length > 1 && (
-                <View style={styles.imageDots}>
-                  {images.map((_, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      onPress={() => setSelectedImageIndex(index)}
-                      style={[styles.dot, selectedImageIndex === index && styles.dotActive]}
-                    />
-                  ))}
-                </View>
-              )}
-            </>
-          ) : (
-            <View style={styles.placeholderImage}>
-              <Text style={styles.placeholderText}>No Image</Text>
-            </View>
-          )}
+          {/* Badges */}
+          <View style={styles.badgeContainer}>
+            {product.isFeatured && <Badge label="Featured" variant="primary" />}
+            {hasDiscount && <Badge label={`-${discountPercentage}%`} variant="danger" />}
+          </View>
         </View>
 
         {/* Product Info */}
@@ -309,52 +362,42 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  imageContainer: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_WIDTH,
-    position: 'relative',
+  floatingHeader: {
+    position: 'absolute',
+    left: spacing.md,
+    right: spacing.md,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    zIndex: 100,
   },
-  mainImage: {
-    width: '100%',
-    height: '100%',
-  },
-  placeholderImage: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: colors.border,
+  floatingButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  placeholderText: {
-    ...typography.styles.body,
-    color: colors.text.tertiary,
+  floatingActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  imageContainer: {
+    width: SCREEN_WIDTH,
+    position: 'relative',
   },
   badgeContainer: {
     position: 'absolute',
-    top: spacing.md,
+    top: spacing.md + 60, // Below floating header
     right: spacing.md,
     flexDirection: 'column',
     gap: spacing.xs,
-  },
-  imageDots: {
-    position: 'absolute',
-    bottom: spacing.md,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.xs,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.white,
-    opacity: 0.5,
-  },
-  dotActive: {
-    opacity: 1,
-    backgroundColor: colors.primary,
   },
   content: {
     padding: spacing.lg,

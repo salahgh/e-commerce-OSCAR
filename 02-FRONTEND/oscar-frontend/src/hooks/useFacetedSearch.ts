@@ -82,6 +82,7 @@ export function useFacetedSearch(): UseFacetedSearchReturn {
     error: facetsError,
   } = useQuery(GetFacetsWithDetailsDocument);
 
+
   // Build facet groups from API data
   const facetGroups = useMemo<FacetGroup[]>(() => {
     if (!facetsData?.facets?.items) return [];

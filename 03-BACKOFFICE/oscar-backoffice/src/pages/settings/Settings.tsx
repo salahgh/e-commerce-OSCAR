@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { Link } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
@@ -31,6 +31,13 @@ import {
   Image,
   ExternalLink,
   TestTube,
+  Database,
+  RefreshCw,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Loader2,
+  PlayCircle,
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { addToast } from '../../store/slices/uiSlice';
@@ -43,6 +50,11 @@ import {
   ShippingZonesDocument,
   AdminUsersDocument,
   UpdateShippingMethodDocument,
+  ReindexDocument,
+  GetJobDocument,
+  GetJobsDocument,
+  JobState,
+  RunPendingSearchIndexUpdatesDocument,
 } from '../../graphql/generated/graphql';
 import { Tabs } from '../../components/ui/Tabs';
 import { Badge } from '../../components/ui/Badge';
@@ -73,6 +85,7 @@ export const Settings: React.FC = () => {
   const [editingPayment, setEditingPayment] = useState<string | null>(null);
   const [editingShipping, setEditingShipping] = useState<string | null>(null);
   const [testEmailAddress, setTestEmailAddress] = useState('');
+  const [activeJobId, setActiveJobId] = useState<string | null>(null);
 
   // Queries
   const { data: channelData, loading: channelLoading } = useQuery(ActiveChannelDocument);
@@ -92,9 +105,103 @@ export const Settings: React.FC = () => {
     variables: { options: { take: 10 } },
   });
 
+  // Job status query (polls when a job is active)
+  const { data: jobData } = useQuery(GetJobDocument, {
+    variables: { jobId: activeJobId! },
+    skip: !activeJobId,
+    pollInterval: activeJobId ? 1000 : 0,
+  });
+
+  // Recent jobs (no filter to see all jobs including reindex)
+  const { data: jobsData, loading: jobsLoading, refetch: refetchJobs } = useQuery(GetJobsDocument, {
+    variables: {
+      options: {
+        take: 10,
+        sort: { createdAt: 'DESC' as any },
+      },
+    },
+    fetchPolicy: 'network-only',
+  });
+
   // Mutations
   const [updatePaymentMethod] = useMutation(UpdatePaymentMethodDocument);
   const [updateShippingMethod] = useMutation(UpdateShippingMethodDocument);
+  const [reindex, { loading: reindexing }] = useMutation(ReindexDocument);
+  const [runPendingUpdates, { loading: runningPending }] = useMutation(RunPendingSearchIndexUpdatesDocument);
+
+  // Stop polling when job completes
+  useEffect(() => {
+    if (jobData?.job?.isSettled) {
+      const job = jobData.job;
+      setActiveJobId(null);
+      refetchJobs();
+      dispatch(
+        addToast({
+          message: job.state === JobState.Completed
+            ? 'Reindexation terminee avec succes'
+            : 'Erreur lors de la reindexation',
+          type: job.state === JobState.Completed ? 'success' : 'error',
+        })
+      );
+    }
+  }, [jobData, dispatch, refetchJobs]);
+
+  // Handle reindex button click
+  const handleReindex = async () => {
+    try {
+      const result = await reindex();
+      console.log('Reindex result:', result);
+      if (result.data?.reindex) {
+        const job = result.data.reindex;
+        setActiveJobId(job.id);
+        dispatch(addToast({
+          message: `Reindexation demarree (Job #${job.id.slice(-6)}, Queue: ${job.queueName})`,
+          type: 'info'
+        }));
+        // Refresh job list to show the new job
+        refetchJobs();
+      }
+    } catch (err: any) {
+      console.error('Reindex error:', err);
+      dispatch(addToast({ message: err.message || 'Erreur lors du demarrage', type: 'error' }));
+    }
+  };
+
+  // Handle run pending updates
+  const handleRunPendingUpdates = async () => {
+    try {
+      await runPendingUpdates();
+      dispatch(addToast({ message: 'Mises a jour en attente executees', type: 'success' }));
+      refetchJobs();
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+  };
+
+  // Format job state for display
+  const getJobStateInfo = (state: JobState) => {
+    switch (state) {
+      case JobState.Completed:
+        return { label: 'Termine', color: 'success' as const, icon: CheckCircle };
+      case JobState.Running:
+        return { label: 'En cours', color: 'info' as const, icon: Loader2 };
+      case JobState.Pending:
+        return { label: 'En attente', color: 'warning' as const, icon: Clock };
+      case JobState.Failed:
+        return { label: 'Echoue', color: 'error' as const, icon: XCircle };
+      case JobState.Cancelled:
+        return { label: 'Annule', color: 'warning' as const, icon: XCircle };
+      default:
+        return { label: state, color: 'default' as const, icon: Clock };
+    }
+  };
+
+  // Format duration
+  const formatDuration = (ms: number) => {
+    if (ms < 1000) return `${ms}ms`;
+    if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
+    return `${Math.floor(ms / 60000)}m ${Math.round((ms % 60000) / 1000)}s`;
+  };
 
   const channel = channelData?.activeChannel;
   const globalSettings = globalData?.globalSettings;
@@ -878,6 +985,168 @@ export const Settings: React.FC = () => {
             <span>Voir tous les administrateurs et gérer les rôles</span>
             <ChevronRight className="h-5 w-5" />
           </Link>
+        </div>
+      ),
+    },
+    {
+      id: 'system',
+      label: 'Systeme',
+      icon: <Database className="h-4 w-4" />,
+      content: (
+        <div className="space-y-6">
+          {/* Search Index Section */}
+          <div className="bg-muted/50 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+              <Database className="h-5 w-5 text-blue-500" />
+              Index de recherche
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              L'index de recherche permet d'effectuer des recherches rapides sur les produits.
+              Si les produits n'apparaissent pas dans la recherche, reconstruisez l'index.
+            </p>
+
+            {/* Current Job Progress */}
+            {activeJobId && jobData?.job && (
+              <div className="mb-4 p-4 bg-blue-900/20 border border-blue-800 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-blue-300">
+                    Reindexation en cours...
+                  </span>
+                  <span className="text-sm text-blue-400">
+                    {Math.round(jobData.job.progress)}%
+                  </span>
+                </div>
+                <div className="w-full bg-blue-900/50 rounded-full h-2">
+                  <div
+                    className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${jobData.job.progress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleReindex}
+                disabled={reindexing || !!activeJobId}
+              >
+                {reindexing || activeJobId ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                )}
+                Reconstruire l'index
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleRunPendingUpdates}
+                disabled={runningPending}
+              >
+                {runningPending ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <PlayCircle className="h-4 w-4 mr-2" />
+                )}
+                Executer les mises a jour
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => refetchJobs()}
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Job History */}
+          <div className="bg-muted/50 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+              <Clock className="h-5 w-5 text-purple-500" />
+              Historique des taches
+            </h3>
+
+            {jobsLoading ? (
+              <div className="flex justify-center py-4">
+                <Spinner size="md" />
+              </div>
+            ) : jobsData?.jobs?.items && jobsData.jobs.items.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="text-left text-sm text-muted-foreground border-b border-border">
+                      <th className="pb-2 font-medium">Queue</th>
+                      <th className="pb-2 font-medium">Statut</th>
+                      <th className="pb-2 font-medium">Progres</th>
+                      <th className="pb-2 font-medium">Duree</th>
+                      <th className="pb-2 font-medium">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {jobsData.jobs.items.map((job) => {
+                      const stateInfo = getJobStateInfo(job.state);
+                      const StateIcon = stateInfo.icon;
+                      return (
+                        <tr key={job.id} className="text-sm">
+                          <td className="py-3">
+                            <div className="flex items-center gap-2">
+                              <Database className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-foreground font-mono text-xs">
+                                {job.queueName}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-3">
+                            <Badge variant={stateInfo.color} className="flex items-center gap-1 w-fit">
+                              <StateIcon className={`h-3 w-3 ${job.state === JobState.Running ? 'animate-spin' : ''}`} />
+                              {stateInfo.label}
+                            </Badge>
+                          </td>
+                          <td className="py-3 text-foreground">
+                            {Math.round(job.progress)}%
+                          </td>
+                          <td className="py-3 text-muted-foreground">
+                            {job.duration ? formatDuration(job.duration) : '-'}
+                          </td>
+                          <td className="py-3 text-muted-foreground">
+                            {new Date(job.createdAt).toLocaleString('fr-FR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Aucune tache recente
+              </p>
+            )}
+          </div>
+
+          {/* Info Box */}
+          <div className="bg-amber-900/20 border border-amber-800 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-medium text-amber-300">Quand reconstruire l'index ?</p>
+                <ul className="mt-2 text-amber-400/80 space-y-1">
+                  <li>• Apres avoir ajoute ou modifie de nombreux produits</li>
+                  <li>• Si les resultats de recherche semblent incomplets</li>
+                  <li>• Apres une migration ou restauration de donnees</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       ),
     },

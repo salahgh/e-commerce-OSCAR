@@ -493,16 +493,26 @@ interface PriceRangeFilterProps {
 function PriceRangeFilter({ minPrice, maxPrice, onPriceChange }: PriceRangeFilterProps) {
   const [localMin, setLocalMin] = useState<string>(minPrice ? String(minPrice / 100) : '');
   const [localMax, setLocalMax] = useState<string>(maxPrice ? String(maxPrice / 100) : '');
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const applyPreset = (preset: (typeof PRICE_PRESETS)[number]) => {
     onPriceChange(preset.min, preset.max);
     setLocalMin(preset.min ? String(preset.min / 100) : '');
     setLocalMax(preset.max ? String(preset.max / 100) : '');
+    setValidationError(null);
   };
 
   const handleApply = () => {
     const min = localMin ? parseInt(localMin, 10) * 100 : undefined;
     const max = localMax ? parseInt(localMax, 10) * 100 : undefined;
+
+    // Validate min <= max
+    if (min !== undefined && max !== undefined && min > max) {
+      setValidationError('Le prix minimum doit etre inferieur au maximum');
+      return;
+    }
+
+    setValidationError(null);
     onPriceChange(min, max);
   };
 
@@ -513,10 +523,16 @@ function PriceRangeFilter({ minPrice, maxPrice, onPriceChange }: PriceRangeFilte
           <input
             type="number"
             value={localMin}
-            onChange={(e) => setLocalMin(e.target.value)}
+            onChange={(e) => {
+              setLocalMin(e.target.value);
+              setValidationError(null);
+            }}
             placeholder="Min"
-            className="w-full px-3 py-2 border border-gray-600 rounded-lg text-sm bg-gray-800 text-gray-100 placeholder-gray-500
-                       focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+            className={cn(
+              "w-full px-3 py-2 border rounded-lg text-sm bg-gray-800 text-gray-100 placeholder-gray-500",
+              "focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500",
+              validationError ? "border-red-500" : "border-gray-600"
+            )}
           />
         </div>
         <span className="text-gray-500">—</span>
@@ -524,10 +540,16 @@ function PriceRangeFilter({ minPrice, maxPrice, onPriceChange }: PriceRangeFilte
           <input
             type="number"
             value={localMax}
-            onChange={(e) => setLocalMax(e.target.value)}
+            onChange={(e) => {
+              setLocalMax(e.target.value);
+              setValidationError(null);
+            }}
             placeholder="Max"
-            className="w-full px-3 py-2 border border-gray-600 rounded-lg text-sm bg-gray-800 text-gray-100 placeholder-gray-500
-                       focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+            className={cn(
+              "w-full px-3 py-2 border rounded-lg text-sm bg-gray-800 text-gray-100 placeholder-gray-500",
+              "focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500",
+              validationError ? "border-red-500" : "border-gray-600"
+            )}
           />
         </div>
         <button
@@ -539,8 +561,12 @@ function PriceRangeFilter({ minPrice, maxPrice, onPriceChange }: PriceRangeFilte
         </button>
       </div>
 
+      {validationError && (
+        <p className="text-xs text-red-400">{validationError}</p>
+      )}
+
       <div className="flex flex-wrap gap-1.5">
-        {PRICE_PRESETS.slice(0, 3).map((preset, index) => (
+        {PRICE_PRESETS.map((preset, index) => (
           <button
             key={index}
             onClick={() => applyPreset(preset)}

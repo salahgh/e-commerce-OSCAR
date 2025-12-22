@@ -7,12 +7,15 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  Keyboard,
 } from 'react-native';
 import { Link, router } from 'expo-router';
 import { Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../src/contexts/AuthContext';
-import { Input, Button, ErrorBanner } from '../../src/components/ui';
+import { Input, Button, ErrorBanner, Checkbox } from '../../src/components/ui';
 import { colors, spacing, typography } from '../../src/theme';
 import { registerSchema } from '../../src/utils/validation';
 
@@ -27,9 +30,18 @@ interface RegisterFormValues {
 export default function RegisterScreen() {
   const { t } = useTranslation();
   const { register } = useAuth();
+  const insets = useSafeAreaInsets();
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   const handleRegister = async (values: RegisterFormValues) => {
+    if (!acceptTerms) {
+      setError('Please accept the Terms & Conditions to continue.');
+      return;
+    }
+    Keyboard.dismiss();
     try {
       setError(null);
       await register({
@@ -51,9 +63,22 @@ export default function RegisterScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + spacing.lg }]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Logo */}
+        <View style={styles.logoContainer}>
+          <View style={styles.logo}>
+            <Text style={styles.logoText}>O</Text>
+          </View>
+        </View>
+
         {/* Header */}
         <View style={styles.header}>
+          <Text style={styles.brandName}>OSCAR</Text>
+          <Text style={styles.brandTagline}>FASHION</Text>
           <Text style={styles.title}>{t('auth.register')}</Text>
           <Text style={styles.subtitle}>Create your OSCAR Fashion account</Text>
         </View>
@@ -122,10 +147,18 @@ export default function RegisterScreen() {
                 onChangeText={handleChange('password')}
                 onBlur={handleBlur('password')}
                 error={touched.password && errors.password ? errors.password : undefined}
-                secureTextEntry
+                secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 textContentType="newPassword"
                 helperText="Minimum 6 characters"
+                rightIcon={
+                  <Ionicons
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color={colors.text.tertiary}
+                  />
+                }
+                onRightIconPress={() => setShowPassword(!showPassword)}
               />
 
               <Input
@@ -139,9 +172,25 @@ export default function RegisterScreen() {
                     ? errors.confirmPassword
                     : undefined
                 }
-                secureTextEntry
+                secureTextEntry={!showConfirmPassword}
                 autoCapitalize="none"
                 textContentType="newPassword"
+                rightIcon={
+                  <Ionicons
+                    name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color={colors.text.tertiary}
+                  />
+                }
+                onRightIconPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              />
+
+              {/* Terms and Conditions Checkbox */}
+              <Checkbox
+                checked={acceptTerms}
+                onChange={setAcceptTerms}
+                label="I accept the Terms & Conditions and Privacy Policy"
+                containerStyle={styles.termsCheckbox}
               />
 
               {/* Register Button */}
@@ -151,14 +200,8 @@ export default function RegisterScreen() {
                 loading={isSubmitting}
                 fullWidth
                 style={styles.registerButton}
+                disabled={!acceptTerms}
               />
-
-              {/* Terms and Conditions */}
-              <Text style={styles.termsText}>
-                By registering, you agree to our{' '}
-                <Text style={styles.termsLink}>Terms & Conditions</Text> and{' '}
-                <Text style={styles.termsLink}>Privacy Policy</Text>
-              </Text>
             </View>
           )}
         </Formik>
@@ -185,16 +228,49 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     padding: spacing['2xl'],
-    paddingTop: spacing['4xl'],
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  logo: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  logoText: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: colors.surface,
   },
   header: {
-    marginBottom: spacing['3xl'],
+    marginBottom: spacing['2xl'],
     alignItems: 'center',
   },
-  title: {
-    ...typography.styles.h1,
+  brandName: {
+    fontSize: 24,
+    fontWeight: 'bold',
     color: colors.primary,
-    marginBottom: spacing.sm,
+    letterSpacing: 6,
+  },
+  brandTagline: {
+    fontSize: 10,
+    color: colors.text.tertiary,
+    letterSpacing: 8,
+    marginBottom: spacing.lg,
+  },
+  title: {
+    ...typography.styles.h2,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
   },
   subtitle: {
     ...typography.styles.body,
@@ -211,18 +287,12 @@ const styles = StyleSheet.create({
   nameInput: {
     flex: 1,
   },
+  termsCheckbox: {
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
+  },
   registerButton: {
-    marginTop: spacing.lg,
-  },
-  termsText: {
-    ...typography.styles.caption,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-    marginTop: spacing.lg,
-  },
-  termsLink: {
-    color: colors.primary,
-    fontWeight: typography.fontWeight.medium,
+    marginTop: spacing.md,
   },
   loginContainer: {
     flexDirection: 'row',

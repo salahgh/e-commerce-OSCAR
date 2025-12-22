@@ -69,7 +69,9 @@
       "Bash(powershell.exe -Command \"Stop-Process -Id 55724 -Force\")",
       "Bash(cmd /c \"cd /d D:\\e-commerce-OSCAR\\02-FRONTEND\\oscar-frontend && npm run codegen\")",
       "Bash(pushd:*)",
-      "Bash(popd:*)"
+      "Bash(popd:*)",
+      "Bash(head:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []
