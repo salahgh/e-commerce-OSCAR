@@ -94,7 +94,7 @@ export default function SplashScreen() {
 
       if (hasCompletedOnboarding === 'true') {
         // User has seen onboarding, go to auth
-        router.replace('/(auth)/login');
+        router.replace('/(tabs)');
       } else {
         // First time user, show onboarding
         router.replace('/onboarding');

@@ -12,13 +12,13 @@ import {
 import { router } from 'expo-router';
 import { Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
-import { useMutation } from '@apollo/client';
+
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Input, Button, ErrorBanner } from '../../src/components/ui';
 import { colors, spacing, typography } from '../../src/theme';
 import { forgotPasswordSchema } from '../../src/utils/validation';
-import { FORGOT_PASSWORD_MUTATION } from '../../src/graphql/mutations/auth.graphql';
+import { useForgotPasswordMutation } from '../../src/graphql/generated/graphql';
 
 interface ForgotPasswordFormValues {
   email: string;
@@ -33,7 +33,7 @@ export default function ForgotPasswordScreen() {
   const successScale = useRef(new Animated.Value(0)).current;
   const successOpacity = useRef(new Animated.Value(0)).current;
 
-  const [forgotPassword] = useMutation(FORGOT_PASSWORD_MUTATION);
+  const [forgotPassword] = useForgotPasswordMutation();
 
   useEffect(() => {
     if (success) {

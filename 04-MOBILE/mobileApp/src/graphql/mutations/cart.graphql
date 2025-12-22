@@ -1,66 +1,332 @@
-# Cart Mutations
+# Vendure Shop API - Cart Mutations
 
-mutation AddToCart($input: AddToCartRequestInput!) {
-  addToCart(input: $input) {
+fragment OrderLineFields on OrderLine {
+  id
+  quantity
+  linePriceWithTax
+  unitPriceWithTax
+  productVariant {
     id
-    userId
-    items {
+    name
+    sku
+    priceWithTax
+    product {
       id
-      productId
-      productName
-      productImage
-      quantity
-      price
-      subtotal
-      selectedSize
-      selectedColor
+      name
+      slug
+      featuredAsset {
+        id
+        preview
+      }
     }
-    totalAmount
-    createdAt
-    updatedAt
+    options {
+      id
+      code
+      name
+      group {
+        id
+        code
+        name
+      }
+    }
+  }
+  featuredAsset {
+    id
+    preview
   }
 }
 
-mutation UpdateCartItem($itemId: Long!, $input: UpdateCartItemRequestInput!) {
-  updateCartItem(itemId: $itemId, input: $input) {
+fragment OrderFields on Order {
+  id
+  code
+  state
+  active
+  createdAt
+  updatedAt
+  totalQuantity
+  subTotalWithTax
+  shippingWithTax
+  totalWithTax
+  currencyCode
+  couponCodes
+  lines {
+    ...OrderLineFields
+  }
+  shippingAddress {
+    fullName
+    streetLine1
+    streetLine2
+    city
+    province
+    postalCode
+    country
+    phoneNumber
+  }
+  billingAddress {
+    fullName
+    streetLine1
+    streetLine2
+    city
+    province
+    postalCode
+    country
+    phoneNumber
+  }
+  customer {
     id
-    userId
-    items {
+    firstName
+    lastName
+    emailAddress
+  }
+  shippingLines {
+    shippingMethod {
       id
-      productId
-      productName
-      productImage
-      quantity
-      price
-      subtotal
-      selectedSize
-      selectedColor
+      name
     }
-    totalAmount
-    updatedAt
+    priceWithTax
   }
 }
 
-mutation RemoveFromCart($itemId: Long!) {
-  removeFromCart(itemId: $itemId) {
-    id
-    userId
-    items {
-      id
-      productId
-      productName
-      productImage
-      quantity
-      price
-      subtotal
-      selectedSize
-      selectedColor
+# Add item to cart
+mutation AddItemToOrder($productVariantId: ID!, $quantity: Int!) {
+  addItemToOrder(productVariantId: $productVariantId, quantity: $quantity) {
+    ... on Order {
+      ...OrderFields
     }
-    totalAmount
-    updatedAt
+    ... on OrderModificationError {
+      errorCode
+      message
+    }
+    ... on OrderLimitError {
+      errorCode
+      message
+      maxItems
+    }
+    ... on NegativeQuantityError {
+      errorCode
+      message
+    }
+    ... on InsufficientStockError {
+      errorCode
+      message
+      quantityAvailable
+      order {
+        ...OrderFields
+      }
+    }
   }
 }
 
-mutation ClearCart {
-  clearCart
+# Update order line quantity
+mutation AdjustOrderLine($orderLineId: ID!, $quantity: Int!) {
+  adjustOrderLine(orderLineId: $orderLineId, quantity: $quantity) {
+    ... on Order {
+      ...OrderFields
+    }
+    ... on OrderModificationError {
+      errorCode
+      message
+    }
+    ... on OrderLimitError {
+      errorCode
+      message
+      maxItems
+    }
+    ... on NegativeQuantityError {
+      errorCode
+      message
+    }
+    ... on InsufficientStockError {
+      errorCode
+      message
+      quantityAvailable
+      order {
+        ...OrderFields
+      }
+    }
+  }
+}
+
+# Remove order line
+mutation RemoveOrderLine($orderLineId: ID!) {
+  removeOrderLine(orderLineId: $orderLineId) {
+    ... on Order {
+      ...OrderFields
+    }
+    ... on OrderModificationError {
+      errorCode
+      message
+    }
+  }
+}
+
+# Remove all order lines (clear cart)
+mutation RemoveAllOrderLines {
+  removeAllOrderLines {
+    ... on Order {
+      ...OrderFields
+    }
+    ... on OrderModificationError {
+      errorCode
+      message
+    }
+  }
+}
+
+# Set shipping address
+mutation SetOrderShippingAddress($input: CreateAddressInput!) {
+  setOrderShippingAddress(input: $input) {
+    ... on Order {
+      ...OrderFields
+    }
+    ... on NoActiveOrderError {
+      errorCode
+      message
+    }
+  }
+}
+
+# Set billing address
+mutation SetOrderBillingAddress($input: CreateAddressInput!) {
+  setOrderBillingAddress(input: $input) {
+    ... on Order {
+      ...OrderFields
+    }
+    ... on NoActiveOrderError {
+      errorCode
+      message
+    }
+  }
+}
+
+# Set shipping method
+mutation SetOrderShippingMethod($shippingMethodId: [ID!]!) {
+  setOrderShippingMethod(shippingMethodId: $shippingMethodId) {
+    ... on Order {
+      ...OrderFields
+    }
+    ... on OrderModificationError {
+      errorCode
+      message
+    }
+    ... on IneligibleShippingMethodError {
+      errorCode
+      message
+    }
+    ... on NoActiveOrderError {
+      errorCode
+      message
+    }
+  }
+}
+
+# Transition to arranging payment
+mutation TransitionOrderToState($state: String!) {
+  transitionOrderToState(state: $state) {
+    ... on Order {
+      ...OrderFields
+    }
+    ... on OrderStateTransitionError {
+      errorCode
+      message
+      transitionError
+      fromState
+      toState
+    }
+  }
+}
+
+# Add payment
+mutation AddPaymentToOrder($input: PaymentInput!) {
+  addPaymentToOrder(input: $input) {
+    ... on Order {
+      ...OrderFields
+    }
+    ... on OrderPaymentStateError {
+      errorCode
+      message
+    }
+    ... on IneligiblePaymentMethodError {
+      errorCode
+      message
+    }
+    ... on PaymentFailedError {
+      errorCode
+      message
+      paymentErrorMessage
+    }
+    ... on PaymentDeclinedError {
+      errorCode
+      message
+      paymentErrorMessage
+    }
+    ... on OrderStateTransitionError {
+      errorCode
+      message
+      transitionError
+      fromState
+      toState
+    }
+    ... on NoActiveOrderError {
+      errorCode
+      message
+    }
+  }
+}
+
+# Apply coupon code
+mutation ApplyCouponCode($couponCode: String!) {
+  applyCouponCode(couponCode: $couponCode) {
+    ... on Order {
+      ...OrderFields
+    }
+    ... on CouponCodeExpiredError {
+      errorCode
+      message
+      couponCode
+    }
+    ... on CouponCodeInvalidError {
+      errorCode
+      message
+      couponCode
+    }
+    ... on CouponCodeLimitError {
+      errorCode
+      message
+      couponCode
+      limit
+    }
+  }
+}
+
+# Remove coupon code
+mutation RemoveCouponCode($couponCode: String!) {
+  removeCouponCode(couponCode: $couponCode) {
+    ...OrderFields
+  }
+}
+
+# Set customer for order (guest checkout)
+mutation SetCustomerForOrder($input: CreateCustomerInput!) {
+  setCustomerForOrder(input: $input) {
+    ... on Order {
+      ...OrderFields
+    }
+    ... on AlreadyLoggedInError {
+      errorCode
+      message
+    }
+    ... on EmailAddressConflictError {
+      errorCode
+      message
+    }
+    ... on GuestCheckoutError {
+      errorCode
+      message
+    }
+    ... on NoActiveOrderError {
+      errorCode
+      message
+    }
+  }
 }

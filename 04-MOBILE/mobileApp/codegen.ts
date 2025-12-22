@@ -2,7 +2,7 @@ import type { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
   overwrite: true,
-  schema: 'schema.graphql',
+  schema: 'http://localhost:8085/shop-api',
   documents: ['src/graphql/**/*.{ts,tsx,graphql}'],
   generates: {
     'src/graphql/generated/graphql.ts': {
@@ -12,10 +12,12 @@ const config: CodegenConfig = {
         withHOC: false,
         withComponent: false,
         skipTypename: false,
+        apolloReactHooksImportFrom: '@apollo/client/react',
         scalars: {
-          LocalDateTime: 'string',
-          BigDecimal: 'number',
-          Long: 'number',
+          DateTime: 'string',
+          Money: 'number',
+          JSON: 'Record<string, any>',
+          Upload: 'File',
         },
       },
     },

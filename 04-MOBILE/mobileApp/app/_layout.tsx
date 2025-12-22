@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ApolloProvider } from '@apollo/client';
+import { ApolloProvider } from '@apollo/client/react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import 'react-native-reanimated';
 import '../src/i18n';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '../hooks/use-color-scheme';
 import { apolloClient } from '../src/apollo/client';
 import { AuthProvider, useAuth } from '../src/contexts/AuthContext';
 import { CartProvider } from '../src/contexts/CartContext';
@@ -19,6 +19,9 @@ import { LoadingSpinner } from '../src/components/ui';
 export const unstable_settings = {
   initialRouteName: 'splash',
 };
+
+// Routes that require authentication
+const PROTECTED_ROUTES = ['checkout', 'orders', 'profile', 'payment'];
 
 function RootNavigator() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -31,15 +34,16 @@ function RootNavigator() {
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboarding = segments[0] === 'onboarding';
     const inSplash = segments[0] === 'splash';
+    const currentRoute = segments[0] as string;
 
     // Don't redirect if in splash or onboarding
     if (inSplash || inOnboarding) return;
 
-    if (!isAuthenticated && !inAuthGroup) {
-      // Redirect to login if not authenticated
+    // Only redirect to login if accessing a protected route without authentication
+    if (!isAuthenticated && PROTECTED_ROUTES.includes(currentRoute)) {
       router.replace('/(auth)/login');
     } else if (isAuthenticated && inAuthGroup) {
-      // Redirect to home if authenticated
+      // Redirect to home if authenticated and trying to access auth pages
       router.replace('/(tabs)');
     }
   }, [isAuthenticated, isLoading, segments]);
