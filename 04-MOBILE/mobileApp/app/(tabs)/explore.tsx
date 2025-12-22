@@ -16,126 +16,143 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import {
   useSearchProductsQuery,
-  useGetCategoriesQuery,
-  ProductResponse,
+  useGetRootCollectionsQuery,
 } from '../../src/graphql/generated/graphql';
 import { ProductCard } from '../../src/components/products';
 import { FilterBottomSheet, FilterOptions } from '../../src/components/products/FilterBottomSheet';
 import { LoadingSpinner, EmptyState } from '../../src/components/ui';
 import { colors, spacing, typography } from '../../src/theme';
+import { formatPrice } from '../../src/utils/vendureAdapters';
 
 const PAGE_SIZE = 20;
+
+interface DisplayProduct {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  imageUrl?: string;
+  price: number;
+  inStock: boolean;
+}
 
 export default function ExploreScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams<{ q?: string; category?: string }>();
+  const params = useLocalSearchParams<{ q?: string; collection?: string }>();
 
   // State
   const [searchQuery, setSearchQuery] = useState(params.q || '');
   const [searchInput, setSearchInput] = useState(params.q || '');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    params.category || null
+  const [selectedCollection, setSelectedCollection] = useState<string | null>(
+    params.collection || null
   );
   const [filters, setFilters] = useState<FilterOptions>({});
   const [showFilters, setShowFilters] = useState(false);
-  const [page, setPage] = useState(1);
-  const [allProducts, setAllProducts] = useState<ProductResponse[]>([]);
-  const [hasMore, setHasMore] = useState(true);
 
   const searchInputRef = useRef<TextInput>(null);
 
-  // Fetch categories
-  const { data: categoriesData } = useGetCategoriesQuery();
+  // Fetch collections (categories)
+  const { data: collectionsData } = useGetRootCollectionsQuery();
 
-  // Fetch products
+  // Fetch products using Vendure search
   const { data, loading, error, refetch, fetchMore } = useSearchProductsQuery({
     variables: {
-      query: searchQuery || undefined,
-      categoryId: selectedCategory ? parseInt(selectedCategory) : undefined,
-      minPrice: filters.priceRange?.min,
-      maxPrice: filters.priceRange?.max === Infinity ? undefined : filters.priceRange?.max,
-      sizes: filters.sizes?.length ? filters.sizes : undefined,
-      colors: filters.colors?.length ? filters.colors : undefined,
-      inStock: filters.inStock,
-      onSale: filters.onSale,
-      sortBy: filters.sortBy,
-      page: 1,
-      pageSize: PAGE_SIZE,
+      input: {
+        term: searchQuery || undefined,
+        collectionSlug: selectedCollection || undefined,
+        take: PAGE_SIZE,
+        skip: 0,
+        groupByProduct: true,
+      },
     },
     notifyOnNetworkStatusChange: true,
-    onCompleted: (data) => {
-      const products = data?.searchProducts?.products || [];
-      setAllProducts(products);
-      setHasMore(products.length === PAGE_SIZE);
-      setPage(1);
-    },
   });
 
-  const categories = useMemo(() => {
+  const collections = useMemo(() => {
     return (
-      categoriesData?.categories?.map((cat: any) => ({
-        id: cat.id?.toString() || '',
-        name: cat.nameFr || cat.nameEn || '',
+      collectionsData?.collections?.items?.map((col: any) => ({
+        id: col.slug,
+        name: col.name,
       })) || []
     );
-  }, [categoriesData]);
+  }, [collectionsData]);
+
+  // Transform Vendure search results to display format
+  const products: DisplayProduct[] = useMemo(() => {
+    const items = data?.search?.items || [];
+    return items.map((item: any) => {
+      const price = item.priceWithTax;
+      const priceValue = price?.__typename === 'SinglePrice' ? price.value : price?.min;
+      return {
+        id: item.productId,
+        name: item.productName,
+        slug: item.slug,
+        description: item.description,
+        imageUrl: item.productAsset?.preview,
+        price: formatPrice(priceValue || 0),
+        inStock: item.inStock,
+      };
+    });
+  }, [data]);
+
+  const totalItems = data?.search?.totalItems || 0;
+  const hasMore = products.length < totalItems;
 
   const handleSearch = useCallback(() => {
     Keyboard.dismiss();
     setSearchQuery(searchInput.trim());
-    setPage(1);
-    setAllProducts([]);
   }, [searchInput]);
 
   const handleClearSearch = useCallback(() => {
     setSearchInput('');
     setSearchQuery('');
-    setPage(1);
-    setAllProducts([]);
     searchInputRef.current?.focus();
   }, []);
 
-  const handleCategoryPress = useCallback((categoryId: string | null) => {
-    setSelectedCategory(categoryId);
-    setPage(1);
-    setAllProducts([]);
+  const handleCollectionPress = useCallback((collectionSlug: string | null) => {
+    setSelectedCollection(collectionSlug);
   }, []);
 
   const handleFilterApply = useCallback((newFilters: FilterOptions) => {
     setFilters(newFilters);
-    setPage(1);
-    setAllProducts([]);
   }, []);
 
   const handleRefresh = useCallback(async () => {
-    setPage(1);
     await refetch();
   }, [refetch]);
 
   const handleLoadMore = useCallback(async () => {
     if (!hasMore || loading) return;
 
-    const nextPage = page + 1;
     try {
-      const result = await fetchMore({
+      await fetchMore({
         variables: {
-          page: nextPage,
+          input: {
+            term: searchQuery || undefined,
+            collectionSlug: selectedCollection || undefined,
+            take: PAGE_SIZE,
+            skip: products.length,
+            groupByProduct: true,
+          },
+        },
+        updateQuery: (prev, { fetchMoreResult }) => {
+          if (!fetchMoreResult) return prev;
+          return {
+            ...prev,
+            search: {
+              ...prev.search,
+              items: [...(prev.search?.items || []), ...(fetchMoreResult.search?.items || [])],
+            },
+          };
         },
       });
-
-      const newProducts = result.data?.searchProducts?.products || [];
-      if (newProducts.length < PAGE_SIZE) {
-        setHasMore(false);
-      }
-      setAllProducts((prev) => [...prev, ...newProducts]);
-      setPage(nextPage);
     } catch (error) {
       console.error('Load more error:', error);
     }
-  }, [page, hasMore, loading, fetchMore]);
+  }, [products.length, hasMore, loading, fetchMore, searchQuery, selectedCollection]);
 
-  const handleProductPress = useCallback((product: ProductResponse) => {
+  const handleProductPress = useCallback((product: DisplayProduct) => {
     router.push(`/products/${product.id}`);
   }, []);
 
@@ -153,28 +170,28 @@ export default function ExploreScreen() {
 
   const renderHeader = () => (
     <View>
-      {/* Category Tabs */}
+      {/* Collection Tabs */}
       <View style={styles.categoryTabsContainer}>
         <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}
-          data={[{ id: null, name: 'All' }, ...categories]}
+          data={[{ id: null, name: t('common.all', 'All') }, ...collections]}
           keyExtractor={(item) => item.id?.toString() || 'all'}
           contentContainerStyle={styles.categoryTabs}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={[
                 styles.categoryTab,
-                (item.id === null ? selectedCategory === null : selectedCategory === item.id) &&
+                (item.id === null ? selectedCollection === null : selectedCollection === item.id) &&
                   styles.categoryTabActive,
               ]}
-              onPress={() => handleCategoryPress(item.id)}
+              onPress={() => handleCollectionPress(item.id)}
               activeOpacity={0.7}
             >
               <Text
                 style={[
                   styles.categoryTabText,
-                  (item.id === null ? selectedCategory === null : selectedCategory === item.id) &&
+                  (item.id === null ? selectedCollection === null : selectedCollection === item.id) &&
                     styles.categoryTabTextActive,
                 ]}
               >
@@ -189,18 +206,18 @@ export default function ExploreScreen() {
       {!loading && (
         <View style={styles.resultsInfo}>
           <Text style={styles.resultsCount}>
-            {allProducts.length} products found
+            {totalItems} {t('products.productsFound', 'products found')}
           </Text>
-          {(searchQuery || activeFiltersCount > 0) && (
+          {(searchQuery || selectedCollection || activeFiltersCount > 0) && (
             <TouchableOpacity
               onPress={() => {
                 setSearchQuery('');
                 setSearchInput('');
                 setFilters({});
-                setSelectedCategory(null);
+                setSelectedCollection(null);
               }}
             >
-              <Text style={styles.clearAll}>Clear All</Text>
+              <Text style={styles.clearAll}>{t('common.clearAll', 'Clear All')}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -208,9 +225,9 @@ export default function ExploreScreen() {
     </View>
   );
 
-  const renderProduct = ({ item, index }: { item: ProductResponse; index: number }) => (
+  const renderProduct = ({ item, index }: { item: DisplayProduct; index: number }) => (
     <View style={[styles.productCard, index % 2 === 1 && styles.productCardRight]}>
-      <ProductCard product={item} onPress={() => handleProductPress(item)} />
+      <ProductCard product={item as any} onPress={() => handleProductPress(item)} />
     </View>
   );
 
@@ -228,12 +245,7 @@ export default function ExploreScreen() {
     return (
       <EmptyState
         icon="search-outline"
-        title="No products found"
-        message={
-          searchQuery
-            ? `No results for "${searchQuery}". Try a different search.`
-            : 'Try adjusting your filters or search for something else.'
-        }
+        title={t('products.noProductsFound', 'No products found')}
       />
     );
   };
@@ -242,7 +254,7 @@ export default function ExploreScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Explore</Text>
+        <Text style={styles.headerTitle}>{t('explore.title', 'Explore')}</Text>
       </View>
 
       {/* Search Bar */}
@@ -288,11 +300,11 @@ export default function ExploreScreen() {
       </View>
 
       {/* Product Grid */}
-      {loading && allProducts.length === 0 ? (
+      {loading && products.length === 0 ? (
         <LoadingSpinner />
       ) : (
         <FlatList
-          data={allProducts}
+          data={products}
           renderItem={renderProduct}
           keyExtractor={(item) => item.id?.toString() || ''}
           numColumns={2}
@@ -304,7 +316,7 @@ export default function ExploreScreen() {
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
-              refreshing={loading && allProducts.length > 0}
+              refreshing={loading && products.length > 0}
               onRefresh={handleRefresh}
               colors={[colors.primary]}
               tintColor={colors.primary}
@@ -321,7 +333,7 @@ export default function ExploreScreen() {
         onClose={() => setShowFilters(false)}
         onApply={handleFilterApply}
         initialFilters={filters}
-        availableCategories={categories}
+        availableCategories={collections}
       />
     </View>
   );

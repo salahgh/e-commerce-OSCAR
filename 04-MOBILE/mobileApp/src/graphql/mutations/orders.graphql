@@ -1,40 +1,5 @@
-# Order Mutations
+# Vendure Shop API - Order Mutations
+# Note: Most order mutations are in cart.graphql (checkout flow)
 
-mutation CreateOrder($input: CreateOrderRequestInput!) {
-  createOrder(input: $input) {
-    id
-    orderNumber
-    userId
-    userEmail
-    status
-    subtotal
-    shippingCost
-    totalAmount
-    paymentMethod
-    shippingAddress
-    phoneNumber
-    notes
-    items {
-      id
-      productId
-      productName
-      productImage
-      quantity
-      price
-      subtotal
-      selectedSize
-      selectedColor
-    }
-    createdAt
-    updatedAt
-  }
-}
-
-mutation CancelOrder($id: Long!) {
-  cancelOrder(id: $id) {
-    id
-    orderNumber
-    status
-    updatedAt
-  }
-}
+# This file contains additional order-related mutations if needed
+# Currently, all cart/checkout mutations are handled in cart.graphql

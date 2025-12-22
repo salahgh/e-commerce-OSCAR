@@ -12,18 +12,17 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import {
-  useGetFeaturedProductsQuery,
   useGetNewArrivalsQuery,
-  useGetCategoriesQuery,
+  useGetRootCollectionsQuery,
+  useSearchProductsQuery,
 } from '../../src/graphql/generated/graphql';
-import { ProductCard, SearchBar } from '../../src/components/products';
 import { HeroBanner, CategoryScroll, ProductSection } from '../../src/components/home';
 import { LoadingSpinner, ErrorState } from '../../src/components/ui';
 import { CartBadge } from '../../src/components/cart';
 import { colors, spacing, typography } from '../../src/theme';
 import { useAuth } from '../../src/contexts/AuthContext';
+import { formatPrice } from '../../src/utils/vendureAdapters';
 
-// Sample banner data - in production, this would come from an API
 const bannerSlides = [
   {
     id: '1',
@@ -51,7 +50,6 @@ const bannerSlides = [
   },
 ];
 
-// Default categories with icons
 const defaultCategories = [
   { id: '1', name: 'Women', slug: 'women', icon: 'woman-outline' as const },
   { id: '2', name: 'Men', slug: 'men', icon: 'man-outline' as const },
@@ -65,16 +63,19 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
-  const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch featured products
+  // Fetch featured products using search
   const {
     data: featuredData,
     loading: featuredLoading,
     error: featuredError,
     refetch: refetchFeatured,
-  } = useGetFeaturedProductsQuery();
+  } = useSearchProductsQuery({
+    variables: {
+      input: { take: 10 },
+    },
+  });
 
   // Fetch new arrivals
   const {
@@ -82,14 +83,14 @@ export default function HomeScreen() {
     loading: newArrivalsLoading,
     refetch: refetchNewArrivals,
   } = useGetNewArrivalsQuery({
-    variables: { limit: 10 },
+    variables: { take: 10 },
   });
 
-  // Fetch categories
+  // Fetch collections (categories)
   const {
-    data: categoriesData,
-    refetch: refetchCategories,
-  } = useGetCategoriesQuery();
+    data: collectionsData,
+    refetch: refetchCollections,
+  } = useGetRootCollectionsQuery();
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -97,20 +98,12 @@ export default function HomeScreen() {
       await Promise.all([
         refetchFeatured(),
         refetchNewArrivals(),
-        refetchCategories(),
+        refetchCollections(),
       ]);
     } finally {
       setRefreshing(false);
     }
-  }, [refetchFeatured, refetchNewArrivals, refetchCategories]);
-
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      router.push(`/(tabs)/explore?q=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      router.push('/(tabs)/explore');
-    }
-  };
+  }, [refetchFeatured, refetchNewArrivals, refetchCollections]);
 
   const handleSeeAllFeatured = () => {
     router.push('/products?featured=true');
@@ -140,14 +133,44 @@ export default function HomeScreen() {
     );
   }
 
-  const featuredProducts = featuredData?.featuredProducts || [];
-  const newArrivals = newArrivalsData?.newArrivals || [];
-  const categories = categoriesData?.categories?.map((cat: any) => ({
-    id: cat.id?.toString() || '',
-    name: cat.nameFr || cat.nameEn || '',
-    slug: cat.slug || '',
-    imageUrl: cat.imageUrl,
-  })) || defaultCategories;
+  // Transform Vendure search results to product format
+  const featuredProducts = (featuredData?.search?.items || []).map((item: any) => {
+    const price = item.priceWithTax;
+    const priceValue = price?.__typename === 'SinglePrice' ? price.value : price?.min;
+    return {
+      id: item.productId,
+      name: item.productName,
+      slug: item.slug,
+      description: item.description,
+      imageUrl: item.productAsset?.preview,
+      price: formatPrice(priceValue || 0),
+      inStock: item.inStock,
+    };
+  });
+
+  // Transform new arrivals products
+  const newArrivals = (newArrivalsData?.products?.items || []).map((product: any) => {
+    const defaultVariant = product.variants?.[0];
+    return {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      description: product.description,
+      imageUrl: product.featuredAsset?.preview,
+      price: defaultVariant ? formatPrice(defaultVariant.priceWithTax) : 0,
+      inStock: defaultVariant?.stockLevel !== 'OUT_OF_STOCK',
+    };
+  });
+
+  // Transform collections to categories format
+  const categories = (collectionsData?.collections?.items || []).map((collection: any) => ({
+    id: collection.id,
+    name: collection.name,
+    slug: collection.slug,
+    imageUrl: collection.featuredAsset?.preview,
+  }));
+
+  const displayCategories = categories.length > 0 ? categories : defaultCategories;
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -204,7 +227,7 @@ export default function HomeScreen() {
         {/* Categories */}
         <View style={styles.section}>
           <CategoryScroll
-            categories={categories}
+            categories={displayCategories}
             title={t('home.shopByCategory', 'Shop by Category')}
             showSeeAll
             onSeeAll={handleSeeAllCategories}

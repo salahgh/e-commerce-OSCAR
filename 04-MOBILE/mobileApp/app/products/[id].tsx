@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -18,84 +18,93 @@ import { Button, LoadingSpinner, ErrorState, Badge, Chip } from '../../src/compo
 import { ImageCarousel } from '../../src/components/products';
 import { colors, spacing, typography } from '../../src/theme';
 import { useCart } from '../../src/contexts/CartContext';
+import { formatPrice } from '../../src/utils/vendureAdapters';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { addToCart, loading: cartLoading } = useCart();
 
-  // State
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const [addToCartSuccess, setAddToCartSuccess] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  // Fetch product details
   const { data, loading, error, refetch } = useGetProductQuery({
-    variables: { id: parseInt(id) },
+    variables: { id },
   });
 
   const product = data?.product;
 
-  // Get product name based on language
-  const getName = () => {
-    if (!product) return '';
-    switch (i18n.language) {
-      case 'ar':
-        return product.nameAr || product.nameFr || product.nameEn || '';
-      case 'en':
-        return product.nameEn || product.nameFr || product.nameAr || '';
-      default:
-        return product.nameFr || product.nameEn || product.nameAr || '';
-    }
+  // Get unique option groups from variants
+  const optionGroups = useMemo(() => {
+    if (!product?.variants) return [];
+
+    const groups: Record<string, Set<string>> = {};
+
+    product.variants.forEach((variant: any) => {
+      variant.options?.forEach((option: any) => {
+        const groupName = option.group?.name || 'Option';
+        if (!groups[groupName]) {
+          groups[groupName] = new Set();
+        }
+        groups[groupName].add(option.name);
+      });
+    });
+
+    return Object.entries(groups).map(([name, values]) => ({
+      name,
+      values: Array.from(values),
+    }));
+  }, [product]);
+
+  // Find matching variant based on selected options
+  const selectedVariant = useMemo(() => {
+    if (!product?.variants || product.variants.length === 0) return null;
+    if (product.variants.length === 1) return product.variants[0];
+
+    return product.variants.find((variant: any) => {
+      return variant.options?.every((option: any) => {
+        const groupName = option.group?.name || 'Option';
+        return selectedOptions[groupName] === option.name;
+      });
+    }) || product.variants[0];
+  }, [product, selectedOptions]);
+
+  const handleOptionSelect = (groupName: string, value: string) => {
+    setSelectedOptions(prev => ({
+      ...prev,
+      [groupName]: value,
+    }));
   };
 
-  // Get product description based on language
-  const getDescription = () => {
-    if (!product) return '';
-    switch (i18n.language) {
-      case 'ar':
-        return product.descriptionAr || product.descriptionFr || product.descriptionEn || '';
-      case 'en':
-        return product.descriptionEn || product.descriptionFr || product.descriptionAr || '';
-      default:
-        return product.descriptionFr || product.descriptionEn || product.descriptionAr || '';
-    }
-  };
-
-  // Share product
   const handleShare = useCallback(async () => {
     if (!product) return;
 
-    const productName = getName();
-    const productUrl = `https://oscar-fashion.com/products/${product.id}`;
-    const price = product.salePrice || product.basePrice;
+    const productUrl = `https://oscar-fashion.com/products/${product.slug}`;
+    const price = selectedVariant ? formatPrice(selectedVariant.priceWithTax) : 0;
 
     try {
       await Share.share({
         message: Platform.OS === 'ios'
-          ? `Check out ${productName} - ${price?.toFixed(2)} DZD`
-          : `Check out ${productName} - ${price?.toFixed(2)} DZD\n${productUrl}`,
+          ? `Check out ${product.name} - ${price} DZD`
+          : `Check out ${product.name} - ${price} DZD\n${productUrl}`,
         url: Platform.OS === 'ios' ? productUrl : undefined,
-        title: productName,
+        title: product.name,
       });
     } catch (error) {
       console.error('Share error:', error);
     }
-  }, [product]);
+  }, [product, selectedVariant]);
 
-  // Toggle favorite
   const handleToggleFavorite = useCallback(() => {
     setIsFavorite((prev) => !prev);
-    // TODO: Implement favorite/wishlist API call
   }, []);
 
-  // Go back
   const handleGoBack = useCallback(() => {
     if (router.canGoBack()) {
       router.back();
@@ -105,28 +114,18 @@ export default function ProductDetailScreen() {
   }, []);
 
   const handleAddToCart = async () => {
-    if (!product?.id) return;
+    if (!selectedVariant?.id) return;
 
     try {
       setAddingToCart(true);
       setAddToCartSuccess(false);
 
-      await addToCart({
-        productId: product.id,
-        quantity,
-        selectedSize: selectedSize || undefined,
-        selectedColor: selectedColor || undefined,
-      });
+      await addToCart(selectedVariant.id, quantity);
 
       setAddToCartSuccess(true);
-
-      // Show success message for 2 seconds
       setTimeout(() => {
         setAddToCartSuccess(false);
       }, 2000);
-
-      // Optionally navigate to cart
-      // router.push('/cart');
     } catch (error: any) {
       console.error('Add to cart error:', error);
       alert(error.message || t('cart.addToCartError', 'Failed to add item to cart'));
@@ -136,7 +135,7 @@ export default function ProductDetailScreen() {
   };
 
   const incrementQuantity = () => {
-    setQuantity((prev) => Math.min(prev + 1, product?.stockQuantity || 99));
+    setQuantity((prev) => prev + 1);
   };
 
   const decrementQuantity = () => {
@@ -157,16 +156,21 @@ export default function ProductDetailScreen() {
     );
   }
 
-  const hasDiscount = product.salePrice && product.salePrice < (product.basePrice || 0);
-  const displayPrice = hasDiscount ? product.salePrice : product.basePrice;
-  const discountPercentage = hasDiscount
-    ? Math.round(((product.basePrice! - product.salePrice!) / product.basePrice!) * 100)
-    : 0;
+  const price = selectedVariant ? formatPrice(selectedVariant.priceWithTax) : 0;
+  const stockLevel = selectedVariant?.stockLevel || 'OUT_OF_STOCK';
+  const isOutOfStock = stockLevel === 'OUT_OF_STOCK';
+  const isLowStock = stockLevel === 'LOW_STOCK';
 
-  const isOutOfStock = (product.stockQuantity || 0) === 0;
-  const isLowStock = (product.stockQuantity || 0) > 0 && (product.stockQuantity || 0) <= 5;
+  const images = [
+    product.featuredAsset?.preview,
+    ...(product.assets?.map((a: any) => a.preview) || []),
+  ].filter(Boolean);
 
-  const images = product.imageUrls || [];
+  const collectionName = product.collections?.[0]?.name;
+
+  // Check if all required options are selected
+  const allOptionsSelected = optionGroups.every(group => selectedOptions[group.name]);
+  const canAddToCart = !isOutOfStock && (optionGroups.length === 0 || allOptionsSelected);
 
   return (
     <View style={styles.container}>
@@ -203,7 +207,7 @@ export default function ProductDetailScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Image Gallery with Carousel */}
+        {/* Image Gallery */}
         <View style={styles.imageContainer}>
           <ImageCarousel
             images={images}
@@ -212,87 +216,60 @@ export default function ProductDetailScreen() {
             showIndicators={images.length > 1}
             enableZoom
           />
-
-          {/* Badges */}
-          <View style={styles.badgeContainer}>
-            {product.isFeatured && <Badge label="Featured" variant="primary" />}
-            {hasDiscount && <Badge label={`-${discountPercentage}%`} variant="danger" />}
-          </View>
         </View>
 
         {/* Product Info */}
         <View style={styles.content}>
-          {/* Category */}
-          {product.categoryName && <Text style={styles.category}>{product.categoryName}</Text>}
+          {/* Collection/Category */}
+          {collectionName && <Text style={styles.category}>{collectionName}</Text>}
 
           {/* Name */}
-          <Text style={styles.name}>{getName()}</Text>
+          <Text style={styles.name}>{product.name}</Text>
 
           {/* SKU */}
-          {product.sku && <Text style={styles.sku}>SKU: {product.sku}</Text>}
+          {selectedVariant?.sku && <Text style={styles.sku}>SKU: {selectedVariant.sku}</Text>}
 
           {/* Price */}
           <View style={styles.priceContainer}>
-            {hasDiscount && (
-              <Text style={styles.oldPrice}>{product.basePrice?.toFixed(2)} DZD</Text>
-            )}
-            <Text style={styles.price}>{displayPrice?.toFixed(2)} DZD</Text>
+            <Text style={styles.price}>{price} DZD</Text>
           </View>
 
           {/* Stock Status */}
           {isOutOfStock ? (
             <Text style={styles.outOfStock}>{t('products.outOfStock', 'Out of Stock')}</Text>
           ) : isLowStock ? (
-            <Text style={styles.lowStock}>
-              {t('products.onlyLeft', { count: product.stockQuantity })}
-            </Text>
+            <Text style={styles.lowStock}>{t('products.lowStock', 'Low Stock')}</Text>
           ) : (
             <Text style={styles.inStock}>{t('products.inStock', 'In Stock')}</Text>
           )}
 
           {/* Description */}
-          {getDescription() && (
+          {product.description && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t('products.description', 'Description')}</Text>
-              <Text style={styles.description}>{getDescription()}</Text>
+              <Text style={styles.description}>{product.description}</Text>
             </View>
           )}
 
-          {/* Size Selection */}
-          {product.availableSizes && product.availableSizes.length > 0 && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{t('products.selectSize', 'Select Size')}</Text>
+          {/* Option Selection (Size, Color, etc.) */}
+          {optionGroups.map((group) => (
+            <View key={group.name} style={styles.section}>
+              <Text style={styles.sectionTitle}>
+                {t(`products.select${group.name}`, `Select ${group.name}`)}
+              </Text>
               <View style={styles.optionsRow}>
-                {product.availableSizes.map((size) => (
+                {group.values.map((value) => (
                   <Chip
-                    key={size}
-                    label={size || ''}
-                    selected={selectedSize === size}
-                    onPress={() => setSelectedSize(size)}
+                    key={value}
+                    label={value}
+                    selected={selectedOptions[group.name] === value}
+                    onPress={() => handleOptionSelect(group.name, value)}
                     style={styles.optionChip}
                   />
                 ))}
               </View>
             </View>
-          )}
-
-          {/* Color Selection */}
-          {product.availableColors && product.availableColors.length > 0 && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{t('products.selectColor', 'Select Color')}</Text>
-              <View style={styles.optionsRow}>
-                {product.availableColors.map((color) => (
-                  <Chip
-                    key={color}
-                    label={color || ''}
-                    selected={selectedColor === color}
-                    onPress={() => setSelectedColor(color)}
-                    style={styles.optionChip}
-                  />
-                ))}
-              </View>
-            </View>
-          )}
+          ))}
 
           {/* Quantity Selector */}
           {!isOutOfStock && (
@@ -314,17 +291,8 @@ export default function ProductDetailScreen() {
                 <TouchableOpacity
                   onPress={incrementQuantity}
                   style={styles.quantityButton}
-                  disabled={quantity >= (product.stockQuantity || 0)}
                 >
-                  <Ionicons
-                    name="add"
-                    size={20}
-                    color={
-                      quantity >= (product.stockQuantity || 0)
-                        ? colors.text.tertiary
-                        : colors.primary
-                    }
-                  />
+                  <Ionicons name="add" size={20} color={colors.primary} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -338,17 +306,13 @@ export default function ProductDetailScreen() {
           <Button
             title={
               addToCartSuccess
-                ? t('cart.addedToCart', '✓ Added to Cart')
+                ? t('cart.addedToCart', 'Added to Cart')
                 : t('products.addToCart', 'Add to Cart')
             }
             onPress={handleAddToCart}
             fullWidth
             loading={addingToCart}
-            disabled={
-              addingToCart ||
-              (product.availableSizes && product.availableSizes.length > 0 && !selectedSize) ||
-              (product.availableColors && product.availableColors.length > 0 && !selectedColor)
-            }
+            disabled={addingToCart || !canAddToCart}
             variant={addToCartSuccess ? 'secondary' : 'primary'}
           />
         </View>
@@ -392,13 +356,6 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH,
     position: 'relative',
   },
-  badgeContainer: {
-    position: 'absolute',
-    top: spacing.md + 60, // Below floating header
-    right: spacing.md,
-    flexDirection: 'column',
-    gap: spacing.xs,
-  },
   content: {
     padding: spacing.lg,
   },
@@ -429,11 +386,6 @@ const styles = StyleSheet.create({
     ...typography.styles.h2,
     color: colors.primary,
     fontWeight: typography.fontWeight.bold,
-  },
-  oldPrice: {
-    ...typography.styles.body,
-    color: colors.text.tertiary,
-    textDecorationLine: 'line-through',
   },
   outOfStock: {
     ...typography.styles.body,

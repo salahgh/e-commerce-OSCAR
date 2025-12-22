@@ -104,10 +104,10 @@ export default function OnboardingScreen() {
   const completeOnboarding = async () => {
     try {
       await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
-      router.replace('/(auth)/login');
+      router.replace('/(tabs)');
     } catch (error) {
       console.error('Error saving onboarding status:', error);
-      router.replace('/(auth)/login');
+      router.replace('/(tabs)');
     }
   };
 
