@@ -11,13 +11,10 @@ import {
   Layers,
   FolderTree,
   Upload,
-  X,
-  Plus,
   Trash2,
   Star,
   Check,
   GripVertical,
-  AlertCircle,
 } from 'lucide-react';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
@@ -29,6 +26,8 @@ import {
   UpdateCollectionFiltersDocument,
   AdminProductOptionGroupsDocument,
   AddOptionGroupToProductDocument,
+  CreateProductOptionGroupDocument,
+  CreateProductOptionDocument,
   LanguageCode,
 } from '../../graphql/generated/graphql';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -36,6 +35,8 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { TextArea } from '../../components/ui/TextArea';
 import { Badge } from '../../components/ui/Badge';
+import { VariantManagerCreate } from '../../components/products/VariantManagerCreate';
+import type { LocalOptionGroup, LocalVariant } from '../../components/products/VariantManagerCreate';
 
 // Wizard steps
 const STEPS = [
@@ -52,13 +53,6 @@ interface UploadedImage {
   preview: string;
   name: string;
   uploading?: boolean;
-}
-
-interface VariantConfig {
-  sku: string;
-  price: number;
-  stock: number;
-  options: Record<string, string>;
 }
 
 export const ProductCreate: React.FC = () => {
@@ -92,11 +86,9 @@ export const ProductCreate: React.FC = () => {
   const [draggedImageIndex, setDraggedImageIndex] = useState<number | null>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
-  // Variants
-  const [selectedOptionGroups, setSelectedOptionGroups] = useState<string[]>([]);
-  const [variants, setVariants] = useState<VariantConfig[]>([
-    { sku: '', price: 0, stock: 0, options: {} },
-  ]);
+  // Variants - using local state types from VariantManagerCreate
+  const [selectedOptionGroups, setSelectedOptionGroups] = useState<LocalOptionGroup[]>([]);
+  const [pendingVariants, setPendingVariants] = useState<LocalVariant[]>([]);
 
   // Categories
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
@@ -116,6 +108,8 @@ export const ProductCreate: React.FC = () => {
   const [createAssets] = useMutation(CreateAssetsDocument);
   const [updateCollectionFilters] = useMutation(UpdateCollectionFiltersDocument);
   const [addOptionGroupToProduct] = useMutation(AddOptionGroupToProductDocument);
+  const [createProductOptionGroup] = useMutation(CreateProductOptionGroupDocument);
+  const [createProductOption] = useMutation(CreateProductOptionDocument);
 
   const collections = collectionsData?.collections?.items || [];
   const optionGroups = optionGroupsData?.productOptionGroups || [];
@@ -218,35 +212,6 @@ export const ProductCreate: React.FC = () => {
     setDraggedImageIndex(null);
   };
 
-  // Variant handling
-  const addVariant = () => {
-    setVariants((prev) => [...prev, { sku: '', price: 0, stock: 0, options: {} }]);
-  };
-
-  const removeVariant = (index: number) => {
-    if (variants.length > 1) {
-      setVariants((prev) => prev.filter((_, i) => i !== index));
-    }
-  };
-
-  const updateVariant = (index: number, field: keyof VariantConfig, value: any) => {
-    setVariants((prev) => prev.map((v, i) => (i === index ? { ...v, [field]: value } : v)));
-  };
-
-  const updateVariantOption = (variantIndex: number, optionGroupId: string, optionId: string) => {
-    setVariants((prev) =>
-      prev.map((v, i) =>
-        i === variantIndex ? { ...v, options: { ...v.options, [optionGroupId]: optionId } } : v
-      )
-    );
-  };
-
-  // Toggle option group selection
-  const toggleOptionGroup = (groupId: string) => {
-    setSelectedOptionGroups((prev) =>
-      prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId]
-    );
-  };
 
   // Helper to get product IDs from collection filters
   const getProductIdsFromCollection = (collection: any): string[] => {
@@ -268,7 +233,14 @@ export const ProductCreate: React.FC = () => {
       return;
     }
 
-    if (variants.every((v) => !v.sku)) {
+    // If there are option groups, we need at least one variant
+    if (selectedOptionGroups.length > 0 && pendingVariants.length === 0) {
+      dispatch(addToast({ message: 'Au moins une variante est requise', type: 'error' }));
+      return;
+    }
+
+    // If no option groups, we still need at least one variant with SKU
+    if (selectedOptionGroups.length === 0 && pendingVariants.every((v) => !v.sku.trim())) {
       dispatch(addToast({ message: 'Au moins une variante avec SKU est requise', type: 'error' }));
       return;
     }
@@ -347,36 +319,99 @@ export const ProductCreate: React.FC = () => {
         throw new Error('Echec de la creation du produit');
       }
 
-      // Step 3: Add option groups to product
-      for (const groupId of selectedOptionGroups) {
+      // Step 3: Process option groups and build ID mappings
+      // Map temp IDs to real IDs for both groups and options
+      const optionIdMap = new Map<string, string>(); // tempId -> realId
+
+      for (const group of selectedOptionGroups) {
+        let realGroupId = group.id;
+
+        if (group.isNew) {
+          // Create new option group
+          const groupResult = await createProductOptionGroup({
+            variables: {
+              input: {
+                code: group.code,
+                translations: [
+                  {
+                    languageCode: LanguageCode.En,
+                    name: group.name,
+                  },
+                ],
+                options: [], // We'll create options separately
+              },
+            },
+          });
+          realGroupId = groupResult.data?.createProductOptionGroup?.id || '';
+          if (!realGroupId) {
+            throw new Error(`Echec de la creation du groupe d'options: ${group.name}`);
+          }
+        }
+
+        // Add option group to product
         await addOptionGroupToProduct({
           variables: {
             productId,
-            optionGroupId: groupId,
+            optionGroupId: realGroupId,
           },
         });
+
+        // Process options for this group
+        for (const option of group.options) {
+          if (option.isNew) {
+            // Create new option
+            const optionResult = await createProductOption({
+              variables: {
+                input: {
+                  productOptionGroupId: realGroupId,
+                  code: option.code,
+                  translations: [
+                    {
+                      languageCode: LanguageCode.En,
+                      name: option.name,
+                    },
+                  ],
+                },
+              },
+            });
+            const realOptionId = optionResult.data?.createProductOption?.id || '';
+            if (realOptionId) {
+              optionIdMap.set(option.id, realOptionId);
+            }
+          } else {
+            // Existing option - ID stays the same
+            optionIdMap.set(option.id, option.id);
+          }
+        }
       }
 
-      // Step 4: Create variants
-      const validVariants = variants.filter((v) => v.sku.trim());
-      if (validVariants.length > 0) {
-        await createVariants({
-          variables: {
-            input: validVariants.map((v) => ({
-              productId,
-              sku: v.sku,
-              price: Math.round(v.price * 100),
-              stockOnHand: v.stock,
-              optionIds: Object.values(v.options).filter(Boolean),
-              translations: [
-                {
-                  languageCode: LanguageCode.En,
-                  name: v.sku,
-                },
-              ],
-            })),
-          },
-        });
+      // Step 4: Create variants with resolved option IDs
+      if (pendingVariants.length > 0) {
+        const variantInputs = pendingVariants
+          .filter((v) => v.sku.trim())
+          .map((v) => ({
+            productId,
+            sku: v.sku,
+            price: Math.round(v.price * 100), // Convert to cents
+            stockOnHand: v.stock,
+            optionIds: v.optionIds
+              .map((tempId) => optionIdMap.get(tempId) || tempId)
+              .filter(Boolean),
+            translations: [
+              {
+                languageCode: LanguageCode.En,
+                name: v.optionLabels || v.sku,
+              },
+            ],
+          }));
+
+        if (variantInputs.length > 0) {
+          await createVariants({
+            variables: {
+              input: variantInputs,
+            },
+          });
+        }
       }
 
       // Step 5: Add product to selected collections
@@ -426,7 +461,10 @@ export const ProductCreate: React.FC = () => {
       case 4:
         return true;
       case 3:
-        return variants.some((v) => v.sku.trim());
+        // If no option groups, allow to proceed (variants optional for simple products)
+        // If option groups exist, need at least one variant
+        if (selectedOptionGroups.length === 0) return true;
+        return pendingVariants.length > 0;
       default:
         return true;
     }
@@ -486,15 +524,15 @@ export const ProductCreate: React.FC = () => {
                 placeholder="Laisser vide si pas de promo"
               />
               <div className="flex flex-col justify-end">
-                <label className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600">
+                <label className="flex items-center gap-3 p-3 bg-muted rounded-lg cursor-pointer hover:bg-accent">
                   <input
                     type="checkbox"
                     name="enabled"
                     checked={formData.enabled}
                     onChange={handleInputChange}
-                    className="h-4 w-4 text-blue-600 border-gray-500 rounded bg-gray-600"
+                    className="h-4 w-4 text-primary border-border rounded bg-card"
                   />
-                  <span className="text-sm font-medium text-gray-300">Produit actif</span>
+                  <span className="text-sm font-medium text-muted-foreground">Produit actif</span>
                 </label>
               </div>
             </div>
@@ -524,11 +562,11 @@ export const ProductCreate: React.FC = () => {
                 name="isFeatured"
                 checked={formData.isFeatured}
                 onChange={handleInputChange}
-                className="h-5 w-5 text-yellow-600 border-gray-500 rounded bg-gray-600"
+                className="h-5 w-5 text-yellow-600 border-border rounded bg-card"
               />
               <div className="flex items-center gap-2">
                 <Star className="h-5 w-5 text-yellow-500" />
-                <span className="font-medium text-gray-100">Produit vedette</span>
+                <span className="font-medium text-foreground">Produit vedette</span>
               </div>
             </label>
           </div>
@@ -615,8 +653,8 @@ export const ProductCreate: React.FC = () => {
               onClick={() => fileInputRef.current?.click()}
               className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
                 isDraggingOver
-                  ? 'border-blue-500 bg-blue-900/30'
-                  : 'border-gray-600 hover:border-blue-400 hover:bg-gray-700/50'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border hover:border-primary hover:bg-muted/50'
               }`}
             >
               <input
@@ -628,21 +666,23 @@ export const ProductCreate: React.FC = () => {
                 onChange={handleFileSelect}
               />
               <Upload
-                className={`h-12 w-12 mx-auto mb-4 ${isDraggingOver ? 'text-blue-500' : 'text-gray-400'}`}
+                className={`h-12 w-12 mx-auto mb-4 ${isDraggingOver ? 'text-primary' : 'text-muted-foreground'}`}
               />
-              <p className="text-lg font-medium text-gray-300">Glissez-deposez vos images ici</p>
-              <p className="text-sm text-gray-400 mt-2">
+              <p className="text-lg font-medium text-foreground">Glissez-deposez vos images ici</p>
+              <p className="text-sm text-muted-foreground mt-2">
                 ou cliquez pour selectionner des fichiers
               </p>
-              <p className="text-xs text-gray-500 mt-4">PNG, JPG, WEBP jusqu a 10MB chacun</p>
+              <p className="text-xs text-muted-foreground/70 mt-4">
+                PNG, JPG, WEBP jusqu a 10MB chacun
+              </p>
             </div>
 
             {/* Image gallery */}
             {images.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-medium text-gray-300">Images ({images.length})</h3>
-                  <p className="text-xs text-gray-400">
+                  <h3 className="text-sm font-medium text-foreground">Images ({images.length})</h3>
+                  <p className="text-xs text-muted-foreground">
                     Glissez pour reorganiser - Cliquez sur <Star className="inline h-3 w-3" /> pour
                     definir l image principale
                   </p>
@@ -658,7 +698,7 @@ export const ProductCreate: React.FC = () => {
                       className={`relative group rounded-lg overflow-hidden border-2 cursor-move ${
                         featuredImageIndex === index
                           ? 'border-yellow-500 ring-2 ring-yellow-500/30'
-                          : 'border-gray-600'
+                          : 'border-border'
                       } ${draggedImageIndex === index ? 'opacity-50' : ''}`}
                     >
                       <img
@@ -666,8 +706,8 @@ export const ProductCreate: React.FC = () => {
                         alt={image.name}
                         className="h-32 w-full object-cover"
                       />
-                      <div className="absolute top-1 left-1 p-1 bg-gray-900/80 rounded opacity-0 group-hover:opacity-100">
-                        <GripVertical className="h-4 w-4 text-gray-400" />
+                      <div className="absolute top-1 left-1 p-1 bg-background/80 rounded opacity-0 group-hover:opacity-100">
+                        <GripVertical className="h-4 w-4 text-muted-foreground" />
                       </div>
                       {featuredImageIndex === index && (
                         <Badge variant="warning" className="absolute top-1 right-1 text-xs">
@@ -707,10 +747,12 @@ export const ProductCreate: React.FC = () => {
             )}
 
             {images.length === 0 && (
-              <div className="text-center py-8 text-gray-400">
-                <ImageIcon className="h-16 w-16 mx-auto mb-4 text-gray-500" />
+              <div className="text-center py-8 text-muted-foreground">
+                <ImageIcon className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
                 <p>Aucune image ajoutee</p>
-                <p className="text-sm text-gray-500">Les images sont optionnelles mais recommandees</p>
+                <p className="text-sm text-muted-foreground/70">
+                  Les images sont optionnelles mais recommandees
+                </p>
               </div>
             )}
           </div>
@@ -718,164 +760,23 @@ export const ProductCreate: React.FC = () => {
 
       case 3:
         return (
-          <div className="space-y-6">
-            {/* Option groups selection */}
-            {optionGroups.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Groupes d options (optionnel)</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-400 mb-4">
-                    Selectionnez les groupes d options pour creer des variantes (ex: Taille,
-                    Couleur)
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {optionGroups.map((group: any) => (
-                      <button
-                        key={group.id}
-                        type="button"
-                        onClick={() => toggleOptionGroup(group.id)}
-                        className={`px-4 py-2 rounded-lg border-2 transition-colors ${
-                          selectedOptionGroups.includes(group.id)
-                            ? 'border-blue-500 bg-blue-900/30 text-blue-400'
-                            : 'border-gray-600 hover:border-gray-500 text-gray-300'
-                        }`}
-                      >
-                        {selectedOptionGroups.includes(group.id) && (
-                          <Check className="inline h-4 w-4 mr-1" />
-                        )}
-                        {group.name}
-                      </button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Variants table */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-base">Variantes du produit</CardTitle>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={addVariant}
-                  icon={<Plus className="h-4 w-4" />}
-                >
-                  Ajouter une variante
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-yellow-900/30 border border-yellow-700 rounded-lg p-3 mb-4">
-                  <p className="text-sm text-yellow-300 flex items-center gap-2">
-                    <AlertCircle className="h-4 w-4" />
-                    Chaque produit doit avoir au moins une variante avec un SKU unique.
-                  </p>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-700">
-                    <thead className="bg-gray-700/50">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
-                          SKU *
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
-                          Prix (DZD)
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
-                          Stock
-                        </th>
-                        {selectedOptionGroups.map((groupId) => {
-                          const group = optionGroups.find((g: any) => g.id === groupId);
-                          return (
-                            <th
-                              key={groupId}
-                              className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase"
-                            >
-                              {group?.name || 'Option'}
-                            </th>
-                          );
-                        })}
-                        <th className="px-4 py-3 w-16"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-gray-800 divide-y divide-gray-700">
-                      {variants.map((variant, index) => (
-                        <tr key={index} className="hover:bg-gray-700/50">
-                          <td className="px-4 py-3">
-                            <input
-                              type="text"
-                              value={variant.sku}
-                              onChange={(e) => updateVariant(index, 'sku', e.target.value)}
-                              placeholder="SKU-001"
-                              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            />
-                          </td>
-                          <td className="px-4 py-3">
-                            <input
-                              type="number"
-                              value={variant.price || ''}
-                              onChange={(e) =>
-                                updateVariant(index, 'price', parseFloat(e.target.value) || 0)
-                              }
-                              placeholder="0"
-                              min="0"
-                              className="w-28 px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            />
-                          </td>
-                          <td className="px-4 py-3">
-                            <input
-                              type="number"
-                              value={variant.stock || ''}
-                              onChange={(e) =>
-                                updateVariant(index, 'stock', parseInt(e.target.value) || 0)
-                              }
-                              placeholder="0"
-                              min="0"
-                              className="w-20 px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            />
-                          </td>
-                          {selectedOptionGroups.map((groupId) => {
-                            const group = optionGroups.find((g: any) => g.id === groupId);
-                            return (
-                              <td key={groupId} className="px-4 py-3">
-                                <select
-                                  value={variant.options[groupId] || ''}
-                                  onChange={(e) =>
-                                    updateVariantOption(index, groupId, e.target.value)
-                                  }
-                                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                  <option value="">--</option>
-                                  {group?.options?.map((option: any) => (
-                                    <option key={option.id} value={option.id}>
-                                      {option.name}
-                                    </option>
-                                  ))}
-                                </select>
-                              </td>
-                            );
-                          })}
-                          <td className="px-4 py-3">
-                            {variants.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => removeVariant(index)}
-                                className="p-2 text-red-400 hover:bg-red-900/30 rounded-lg"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <VariantManagerCreate
+            productName={formData.name}
+            allOptionGroups={optionGroups.map((g: any) => ({
+              id: g.id,
+              code: g.code,
+              name: g.name,
+              options: g.options?.map((o: any) => ({
+                id: o.id,
+                code: o.code,
+                name: o.name,
+              })) || [],
+            }))}
+            selectedOptionGroups={selectedOptionGroups}
+            pendingVariants={pendingVariants}
+            onOptionGroupsChange={setSelectedOptionGroups}
+            onVariantsChange={setPendingVariants}
+          />
         );
 
       case 4:
@@ -894,7 +795,7 @@ export const ProductCreate: React.FC = () => {
               </CardHeader>
               <CardContent>
                 {collections.length === 0 ? (
-                  <p className="text-sm text-gray-400">Aucune categorie disponible</p>
+                  <p className="text-sm text-muted-foreground">Aucune categorie disponible</p>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {collections.map((collection: any) => (
@@ -902,8 +803,8 @@ export const ProductCreate: React.FC = () => {
                         key={collection.id}
                         className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
                           selectedCollections.includes(collection.id)
-                            ? 'border-blue-500 bg-blue-900/30'
-                            : 'border-gray-600 hover:border-gray-500'
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border hover:border-muted-foreground'
                         }`}
                       >
                         <input
@@ -918,12 +819,12 @@ export const ProductCreate: React.FC = () => {
                               );
                             }
                           }}
-                          className="h-5 w-5 text-blue-600 border-gray-500 rounded bg-gray-600"
+                          className="h-5 w-5 text-primary border-border rounded bg-card"
                         />
                         <div>
-                          <p className="font-medium text-gray-100">{collection.name}</p>
+                          <p className="font-medium text-foreground">{collection.name}</p>
                           {collection.slug && (
-                            <p className="text-xs text-gray-400">/{collection.slug}</p>
+                            <p className="text-xs text-muted-foreground">/{collection.slug}</p>
                           )}
                         </div>
                       </label>
@@ -940,23 +841,23 @@ export const ProductCreate: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-4 bg-gray-700/50 rounded-lg">
-                    <p className="text-sm text-gray-400">Produit</p>
-                    <p className="font-semibold text-gray-100">{formData.name || '-'}</p>
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Produit</p>
+                    <p className="font-semibold text-foreground">{formData.name || '-'}</p>
                   </div>
-                  <div className="p-4 bg-gray-700/50 rounded-lg">
-                    <p className="text-sm text-gray-400">Images</p>
-                    <p className="font-semibold text-gray-100">{images.length}</p>
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Images</p>
+                    <p className="font-semibold text-foreground">{images.length}</p>
                   </div>
-                  <div className="p-4 bg-gray-700/50 rounded-lg">
-                    <p className="text-sm text-gray-400">Variantes</p>
-                    <p className="font-semibold text-gray-100">
-                      {variants.filter((v) => v.sku).length}
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Variantes</p>
+                    <p className="font-semibold text-foreground">
+                      {pendingVariants.filter((v) => v.sku).length}
                     </p>
                   </div>
-                  <div className="p-4 bg-gray-700/50 rounded-lg">
-                    <p className="text-sm text-gray-400">Categories</p>
-                    <p className="font-semibold text-gray-100">{selectedCollections.length}</p>
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Categories</p>
+                    <p className="font-semibold text-foreground">{selectedCollections.length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -981,12 +882,12 @@ export const ProductCreate: React.FC = () => {
           >
             Retour
           </Button>
-          <h1 className="text-2xl font-bold text-gray-100">Nouveau produit</h1>
+          <h1 className="text-2xl font-bold text-foreground">Nouveau produit</h1>
         </div>
       </div>
 
       {/* Progress steps */}
-      <div className="flex items-center justify-between bg-gray-800 rounded-xl p-4 shadow-sm overflow-x-auto border border-gray-700">
+      <div className="flex items-center justify-between bg-card rounded-xl p-4 shadow-sm overflow-x-auto border border-border">
         {STEPS.map((step, index) => {
           const Icon = step.icon;
           const isActive = index === currentStep;
@@ -998,19 +899,19 @@ export const ProductCreate: React.FC = () => {
                 onClick={() => goToStep(index)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${
                   isActive
-                    ? 'bg-blue-900/50 text-blue-400'
+                    ? 'bg-primary/20 text-primary'
                     : isCompleted
                       ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50'
-                      : 'text-gray-400 hover:bg-gray-700'
+                      : 'text-muted-foreground hover:bg-accent'
                 }`}
               >
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center ${
                     isActive
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-primary text-primary-foreground'
                       : isCompleted
                         ? 'bg-green-500 text-white'
-                        : 'bg-gray-600 text-gray-400'
+                        : 'bg-muted text-muted-foreground'
                   }`}
                 >
                   {isCompleted ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
@@ -1020,7 +921,7 @@ export const ProductCreate: React.FC = () => {
               {index < STEPS.length - 1 && (
                 <div
                   className={`flex-1 h-0.5 mx-2 min-w-[20px] ${
-                    index < currentStep ? 'bg-green-500' : 'bg-gray-600'
+                    index < currentStep ? 'bg-green-500' : 'bg-muted'
                   }`}
                 />
               )}

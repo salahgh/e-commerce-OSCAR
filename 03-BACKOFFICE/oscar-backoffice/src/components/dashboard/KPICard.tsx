@@ -31,26 +31,26 @@ export const KPICard: React.FC<KPICardProps> = ({
   const formattedValue = isCurrency
     ? formatPrice(typeof value === 'number' ? value : parseFloat(value as string))
     : typeof value === 'number'
-    ? value.toLocaleString('fr-FR')
-    : value;
+      ? value.toLocaleString('fr-FR')
+      : value;
 
   if (loading) {
     return (
-      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 animate-pulse">
+      <div className="bg-card rounded-xl p-6 border border-border animate-pulse">
         <div className="flex items-center justify-between mb-4">
           <div className={`p-3 rounded-xl ${iconBgColor}`}>
-            <div className="h-6 w-6 bg-gray-600 rounded" />
+            <div className="h-6 w-6 bg-muted rounded" />
           </div>
-          <div className="h-4 w-16 bg-gray-700 rounded" />
+          <div className="h-4 w-16 bg-muted rounded" />
         </div>
-        <div className="h-8 w-24 bg-gray-700 rounded mb-2" />
-        <div className="h-4 w-32 bg-gray-700 rounded" />
+        <div className="h-8 w-24 bg-muted rounded mb-2" />
+        <div className="h-4 w-32 bg-muted rounded" />
       </div>
     );
   }
 
   return (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 hover:border-gray-600 transition-all group">
+    <div className="bg-card rounded-xl p-6 border border-border hover:border-muted-foreground/50 transition-all group">
       <div className="flex items-center justify-between mb-4">
         <div className={`p-3 rounded-xl ${iconBgColor} group-hover:scale-110 transition-transform`}>
           <div className={iconColor}>{icon}</div>
@@ -59,10 +59,10 @@ export const KPICard: React.FC<KPICardProps> = ({
           <div
             className={`flex items-center gap-1 text-sm font-medium px-2 py-1 rounded-lg ${
               trend.isPositive
-                ? 'bg-green-500/20 text-green-400'
+                ? 'bg-success/20 text-success'
                 : trend.value === 0
-                ? 'bg-gray-500/20 text-gray-400'
-                : 'bg-red-500/20 text-red-400'
+                  ? 'bg-muted text-muted-foreground'
+                  : 'bg-destructive/20 text-destructive'
             }`}
           >
             {trend.isPositive ? (
@@ -77,9 +77,9 @@ export const KPICard: React.FC<KPICardProps> = ({
         )}
       </div>
       <div className="space-y-1">
-        <h3 className="text-3xl font-bold text-white">{formattedValue}</h3>
-        <p className="text-sm text-gray-400">{title}</p>
-        {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
+        <h3 className="text-3xl font-bold text-foreground">{formattedValue}</h3>
+        <p className="text-sm text-muted-foreground">{title}</p>
+        {subtitle && <p className="text-xs text-muted-foreground/70">{subtitle}</p>}
       </div>
     </div>
   );

@@ -243,12 +243,12 @@ export const BulkOperations: React.FC = () => {
               <Spinner size="lg" />
             </div>
           ) : products.length === 0 ? (
-            <div className="text-center py-8 bg-gray-50 rounded-lg">
-              <Package className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">Aucun produit</p>
+            <div className="text-center py-8 bg-muted rounded-lg">
+              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">Aucun produit</p>
             </div>
           ) : (
-            <div className="border border-gray-200 rounded-lg divide-y divide-gray-200 max-h-96 overflow-y-auto">
+            <div className="border border-border rounded-lg divide-y divide-border max-h-96 overflow-y-auto">
               {products.map((product) => {
                 const variant = product.variants?.[0];
                 const isSelected = selectedProducts.has(product.id);
@@ -256,8 +256,8 @@ export const BulkOperations: React.FC = () => {
                 return (
                   <div
                     key={product.id}
-                    className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-50 ${
-                      isSelected ? 'bg-blue-50' : ''
+                    className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-accent ${
+                      isSelected ? 'bg-primary/10' : ''
                     }`}
                     onClick={() => toggleProduct(product.id)}
                   >
@@ -265,7 +265,7 @@ export const BulkOperations: React.FC = () => {
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => toggleProduct(product.id)}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded"
+                      className="w-4 h-4 text-primary border-border rounded bg-card"
                       onClick={(e) => e.stopPropagation()}
                     />
                     {product.featuredAsset?.preview ? (
@@ -275,16 +275,18 @@ export const BulkOperations: React.FC = () => {
                         className="w-10 h-10 rounded object-cover"
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded bg-gray-200 flex items-center justify-center">
-                        <Package className="h-5 w-5 text-gray-400" />
+                      <div className="w-10 h-10 rounded bg-muted flex items-center justify-center">
+                        <Package className="h-5 w-5 text-muted-foreground" />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 truncate">{product.name}</p>
-                      <p className="text-sm text-gray-500">SKU: {variant?.sku || 'N/A'}</p>
+                      <p className="font-medium text-foreground truncate">{product.name}</p>
+                      <p className="text-sm text-muted-foreground">SKU: {variant?.sku || 'N/A'}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">{formatPrice(variant?.price || 0)}</p>
+                      <p className="font-medium text-foreground">
+                        {formatPrice(variant?.price || 0)}
+                      </p>
                       <Badge variant={product.enabled ? 'success' : 'default'} className="text-xs">
                         {product.enabled ? 'Actif' : 'Inactif'}
                       </Badge>
@@ -304,15 +306,15 @@ export const BulkOperations: React.FC = () => {
       content: (
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Importer des produits</h3>
-            <p className="text-sm text-gray-500 mt-1">
+            <h3 className="text-lg font-semibold text-foreground">Importer des produits</h3>
+            <p className="text-sm text-muted-foreground mt-1">
               Importez vos produits depuis un fichier CSV
             </p>
           </div>
 
           {/* File Upload */}
           <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-400 transition-colors"
+            className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
             onClick={() => fileInputRef.current?.click()}
           >
             <input
@@ -322,23 +324,26 @@ export const BulkOperations: React.FC = () => {
               onChange={handleFileSelect}
               className="hidden"
             />
-            <FileSpreadsheet className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-700 font-medium">
+            <FileSpreadsheet className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-foreground font-medium">
               {importFile ? importFile.name : 'Cliquez pour sélectionner un fichier CSV'}
             </p>
-            <p className="text-sm text-gray-500 mt-1">ou glissez-déposez le fichier ici</p>
+            <p className="text-sm text-muted-foreground mt-1">ou glissez-déposez le fichier ici</p>
           </div>
 
           {/* Import Preview */}
           {importPreview.length > 0 && (
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium text-gray-900 mb-3">Aperçu des données</h4>
+            <div className="bg-muted rounded-lg p-4">
+              <h4 className="font-medium text-foreground mb-3">Aperçu des données</h4>
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-200">
+                    <tr className="border-b border-border">
                       {Object.keys(importPreview[0]).map((header) => (
-                        <th key={header} className="px-3 py-2 text-left font-medium text-gray-700">
+                        <th
+                          key={header}
+                          className="px-3 py-2 text-left font-medium text-foreground"
+                        >
                           {header}
                         </th>
                       ))}
@@ -346,9 +351,9 @@ export const BulkOperations: React.FC = () => {
                   </thead>
                   <tbody>
                     {importPreview.map((row, index) => (
-                      <tr key={index} className="border-b border-gray-100">
+                      <tr key={index} className="border-b border-border/50">
                         {Object.values(row).map((value, i) => (
-                          <td key={i} className="px-3 py-2 text-gray-600">
+                          <td key={i} className="px-3 py-2 text-muted-foreground">
                             {String(value).substring(0, 30)}
                           </td>
                         ))}
@@ -385,12 +390,12 @@ export const BulkOperations: React.FC = () => {
           )}
 
           {/* CSV Format Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-medium text-blue-900 mb-2">Format CSV attendu</h4>
-            <p className="text-sm text-blue-800 mb-2">
+          <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4">
+            <h4 className="font-medium text-blue-300 mb-2">Format CSV attendu</h4>
+            <p className="text-sm text-blue-300/80 mb-2">
               Le fichier doit contenir les colonnes suivantes:
             </p>
-            <code className="block text-xs bg-blue-100 p-2 rounded text-blue-900">
+            <code className="block text-xs bg-blue-900/50 p-2 rounded text-blue-300">
               name,nameFr,nameAr,description,price,sku,stock
             </code>
           </div>
@@ -404,15 +409,17 @@ export const BulkOperations: React.FC = () => {
       content: (
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Exporter les produits</h3>
-            <p className="text-sm text-gray-500 mt-1">Téléchargez vos produits au format CSV</p>
+            <h3 className="text-lg font-semibold text-foreground">Exporter les produits</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Téléchargez vos produits au format CSV
+            </p>
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-6">
+          <div className="bg-muted rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-900">Export CSV complet</p>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="font-medium text-foreground">Export CSV complet</p>
+                <p className="text-sm text-muted-foreground mt-1">
                   Exporte tous les produits avec leurs informations
                 </p>
               </div>
@@ -422,9 +429,9 @@ export const BulkOperations: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h4 className="font-medium text-gray-900 mb-4">Données exportées</h4>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div className="bg-muted rounded-lg p-6">
+            <h4 className="font-medium text-foreground mb-4">Données exportées</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-foreground">
               <div className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-500" />
                 <span>ID</span>
@@ -460,8 +467,8 @@ export const BulkOperations: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-            <p className="text-sm text-amber-800">
+          <div className="bg-amber-900/30 border border-amber-700 rounded-lg p-4">
+            <p className="text-sm text-amber-300">
               <AlertTriangle className="h-4 w-4 inline mr-1" />
               L'export inclut uniquement le premier variant de chaque produit. Pour un export
               complet des variants, utilisez l'interface Vendure Admin.
@@ -477,8 +484,8 @@ export const BulkOperations: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Opérations en masse</h1>
-          <p className="text-gray-600 mt-1">Gérez vos produits en lot</p>
+          <h1 className="text-3xl font-bold text-foreground">Opérations en masse</h1>
+          <p className="text-muted-foreground mt-1">Gérez vos produits en lot</p>
         </div>
         <Button variant="ghost" icon={<RefreshCw className="h-4 w-4" />} onClick={() => refetch()}>
           Actualiser
@@ -486,7 +493,7 @@ export const BulkOperations: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-card rounded-lg shadow border border-border">
         <Tabs tabs={tabs} defaultTab="bulk-actions" />
       </div>
 

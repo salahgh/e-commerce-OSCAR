@@ -97,10 +97,10 @@ export function buildFacetValueFilters(
   // Group selected values by facet
   const valuesByFacet = new Map<string, string[]>();
 
-  facetGroups.forEach(facet => {
+  facetGroups.forEach((facet) => {
     const selectedInFacet = facet.values
-      .filter(v => facetValueIds.includes(v.id))
-      .map(v => v.id);
+      .filter((v) => facetValueIds.includes(v.id))
+      .map((v) => v.id);
 
     if (selectedInFacet.length > 0) {
       valuesByFacet.set(facet.id, selectedInFacet);
@@ -159,7 +159,12 @@ export function parseAdminFilterParams(searchParams: URLSearchParams): Partial<A
   if (featured === 'false') state.isFeatured = false;
 
   const stock = searchParams.get('stock');
-  if (stock === 'in_stock' || stock === 'low_stock' || stock === 'out_of_stock' || stock === 'all') {
+  if (
+    stock === 'in_stock' ||
+    stock === 'low_stock' ||
+    stock === 'out_of_stock' ||
+    stock === 'all'
+  ) {
     state.stockStatus = stock;
   }
 
@@ -202,10 +207,10 @@ export function serializeAdminFilterParams(
 
   // Group facet value IDs by facet code
   if (state.facetValueIds && state.facetValueIds.length > 0) {
-    facetGroups.forEach(facet => {
+    facetGroups.forEach((facet) => {
       const selectedInFacet = facet.values
-        .filter(v => state.facetValueIds?.includes(v.id))
-        .map(v => v.id);
+        .filter((v) => state.facetValueIds?.includes(v.id))
+        .map((v) => v.id);
 
       if (selectedInFacet.length > 0) {
         params.set(`f_${facet.code}`, selectedInFacet.join(','));
@@ -342,4 +347,48 @@ export function getActiveFilterCount(state: Partial<AdminFilterState>): number {
   if (state.priceMin !== undefined || state.priceMax !== undefined) count++;
 
   return count;
+}
+
+/**
+ * Validate and normalize price range
+ * Ensures min <= max and returns validated values
+ * @param min - Minimum price in cents
+ * @param max - Maximum price in cents
+ * @returns Validated price range
+ */
+export function validatePriceRange(
+  min?: number,
+  max?: number
+): { min?: number; max?: number; isValid: boolean; error?: string } {
+  if (min === undefined && max === undefined) {
+    return { min, max, isValid: true };
+  }
+
+  if (min !== undefined && min < 0) {
+    return { min: 0, max, isValid: false, error: 'Le prix minimum ne peut pas etre negatif' };
+  }
+
+  if (max !== undefined && max < 0) {
+    return { min, max: 0, isValid: false, error: 'Le prix maximum ne peut pas etre negatif' };
+  }
+
+  if (min !== undefined && max !== undefined && min > max) {
+    // Auto-swap if min > max
+    return { min: max, max: min, isValid: true };
+  }
+
+  return { min, max, isValid: true };
+}
+
+/**
+ * Check if a price falls within a range
+ * @param price - Price to check (in cents)
+ * @param min - Minimum price (in cents)
+ * @param max - Maximum price (in cents)
+ * @returns true if price is within range
+ */
+export function isPriceInRange(price: number, min?: number, max?: number): boolean {
+  if (min !== undefined && price < min) return false;
+  if (max !== undefined && price > max) return false;
+  return true;
 }

@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { usePathname, useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { Menu, Search, ShoppingCart, User, Heart, X } from 'lucide-react';
+import { Menu, Search, ShoppingCart, User, Heart, X, LogIn, LogOut, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Header() {
   const pathname = usePathname();
@@ -15,9 +16,11 @@ export default function Header() {
   const router = useRouter();
   const locale = (params.locale as string) || 'fr';
   const { cart } = useCart();
+  const { customer, isAuthenticated, logout, loading: authLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const cartItemCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
@@ -121,11 +124,89 @@ export default function Header() {
               </Link>
             </Button>
 
-            <Button variant="ghost" size="icon" asChild>
-              <Link href={`/${locale}/user/profile`} aria-label="Profile">
-                <User className="h-5 w-5" />
-              </Link>
-            </Button>
+            {/* User Authentication Section */}
+            {authLoading ? (
+              <Button variant="ghost" size="icon" disabled>
+                <User className="h-5 w-5 animate-pulse" />
+              </Button>
+            ) : isAuthenticated ? (
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="relative"
+                  aria-label="Menu utilisateur"
+                >
+                  <UserCircle className="h-5 w-5" />
+                </Button>
+                {userMenuOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setUserMenuOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-lg z-50">
+                      <div className="p-3 border-b border-border">
+                        <p className="font-medium text-sm truncate">
+                          {customer?.firstName} {customer?.lastName}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {customer?.phoneNumber || customer?.emailAddress}
+                        </p>
+                      </div>
+                      <div className="p-2">
+                        <Link
+                          href={`/${locale}/user/profile`}
+                          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <User className="h-4 w-4" />
+                          Mon Profil
+                        </Link>
+                        <Link
+                          href={`/${locale}/user/orders`}
+                          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <ShoppingCart className="h-4 w-4" />
+                          Mes Commandes
+                        </Link>
+                        <button
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            logout();
+                          }}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md hover:bg-destructive/10 text-destructive transition-colors"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Déconnexion
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="sm" asChild className="hidden sm:flex">
+                  <Link href={`/${locale}/login`}>
+                    <LogIn className="h-4 w-4 mr-1" />
+                    Connexion
+                  </Link>
+                </Button>
+                <Button variant="default" size="sm" asChild className="hidden sm:flex">
+                  <Link href={`/${locale}/register`}>
+                    S'inscrire
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="icon" asChild className="sm:hidden">
+                  <Link href={`/${locale}/login`} aria-label="Connexion">
+                    <LogIn className="h-5 w-5" />
+                  </Link>
+                </Button>
+              </div>
+            )}
 
             <ThemeToggle />
           </div>
@@ -174,6 +255,67 @@ export default function Header() {
                 {item.name}
               </Link>
             ))}
+
+            {/* Mobile Auth Section */}
+            <div className="border-t border-border pt-4 mt-4">
+              {isAuthenticated ? (
+                <>
+                  <div className="px-4 py-2 mb-2">
+                    <p className="font-medium text-sm">
+                      {customer?.firstName} {customer?.lastName}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {customer?.phoneNumber || customer?.emailAddress}
+                    </p>
+                  </div>
+                  <Link
+                    href={`/${locale}/user/profile`}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-accent transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <User className="h-4 w-4" />
+                    Mon Profil
+                  </Link>
+                  <Link
+                    href={`/${locale}/user/orders`}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-accent transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    Mes Commandes
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      logout();
+                    }}
+                    className="flex items-center gap-2 w-full px-4 py-2 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Déconnexion
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href={`/${locale}/login`}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-accent transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <LogIn className="h-4 w-4" />
+                    Connexion
+                  </Link>
+                  <Link
+                    href={`/${locale}/register`}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <User className="h-4 w-4" />
+                    S'inscrire
+                  </Link>
+                </>
+              )}
+            </div>
           </nav>
         </div>
       )}

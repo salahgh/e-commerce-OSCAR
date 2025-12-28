@@ -1,4 +1,117 @@
 # Dashboard queries for OSCAR Backoffice
+# Uses the comprehensive dashboard API from oscar-plugin
+
+# ==================== KPI METRICS ====================
+
+query DashboardKpiMetrics {
+  dashboardKpiMetrics {
+    # Revenue metrics (in cents)
+    revenueToday
+    revenueThisWeek
+    revenueThisMonth
+    revenueLastMonth
+    revenueGrowth
+
+    # Order metrics
+    ordersToday
+    ordersThisWeek
+    ordersThisMonth
+    totalOrders
+    pendingOrders
+    processingOrders
+    shippedOrders
+    deliveredOrders
+    cancelledOrders
+
+    # Customer metrics
+    newCustomersToday
+    newCustomersThisWeek
+    newCustomersThisMonth
+    totalCustomers
+
+    # Product metrics
+    totalProducts
+    activeProducts
+    lowStockProducts
+    outOfStockProducts
+
+    # Calculated metrics
+    averageOrderValue
+    conversionRate
+  }
+}
+
+# ==================== CHART DATA ====================
+
+query DashboardSalesTrend($days: Int) {
+  dashboardSalesTrend(days: $days) {
+    date
+    revenue
+    orders
+  }
+}
+
+query DashboardOrdersByStatus($days: Int) {
+  dashboardOrdersByStatus(days: $days) {
+    date
+    pending
+    processing
+    shipped
+    delivered
+    cancelled
+  }
+}
+
+query DashboardRevenueByCategory {
+  dashboardRevenueByCategory {
+    categoryId
+    categoryName
+    revenue
+    percentage
+  }
+}
+
+# ==================== ACTIVITY DATA ====================
+
+query DashboardRecentOrders($limit: Int) {
+  dashboardRecentOrders(limit: $limit) {
+    id
+    code
+    customerName
+    customerEmail
+    total
+    state
+    itemCount
+    createdAt
+  }
+}
+
+query DashboardLowStockAlerts($threshold: Int) {
+  dashboardLowStockAlerts(threshold: $threshold) {
+    productId
+    productName
+    variantId
+    variantName
+    sku
+    currentStock
+    threshold
+  }
+}
+
+query DashboardTopSellingProducts($limit: Int) {
+  dashboardTopSellingProducts(limit: $limit) {
+    productId
+    productName
+    variantId
+    variantName
+    sku
+    quantitySold
+    revenue
+    imageUrl
+  }
+}
+
+# ==================== LEGACY QUERIES (kept for compatibility) ====================
 
 query OscarDashboardStats {
   oscarDashboardStats {
@@ -49,69 +162,5 @@ query LowStockProducts($threshold: Int) {
     customFields {
       nameFr
     }
-  }
-}
-
-# Get orders for sales analysis (with line items for category/product breakdown)
-query DashboardOrdersAnalysis($options: OrderListOptions) {
-  orders(options: $options) {
-    items {
-      id
-      code
-      state
-      totalWithTax
-      orderPlacedAt
-      lines {
-        id
-        quantity
-        linePriceWithTax
-        productVariant {
-          id
-          name
-          sku
-          product {
-            id
-            name
-            slug
-            featuredAsset {
-              preview
-            }
-            collections {
-              id
-              name
-              slug
-            }
-            customFields {
-              nameFr
-            }
-          }
-        }
-      }
-    }
-    totalItems
-  }
-}
-
-# Get top products for the dashboard
-query DashboardTopProducts($options: ProductListOptions) {
-  products(options: $options) {
-    items {
-      id
-      name
-      slug
-      featuredAsset {
-        preview
-      }
-      customFields {
-        nameFr
-        viewCount
-      }
-      variants {
-        id
-        stockOnHand
-        priceWithTax
-      }
-    }
-    totalItems
   }
 }

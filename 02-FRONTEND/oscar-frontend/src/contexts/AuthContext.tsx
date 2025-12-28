@@ -63,17 +63,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   // Queries
-  const { data: customerData, refetch: refetchCustomerQuery } = useActiveCustomerQuery({
+  const { data: customerData, loading: queryLoading, error: queryError, refetch: refetchCustomerQuery } = useActiveCustomerQuery({
     fetchPolicy: 'network-only',
-    onCompleted: (data) => {
-      setCustomer(data.activeCustomer ?? null);
-      setLoading(false);
-    },
-    onError: () => {
-      setCustomer(null);
-      setLoading(false);
-    },
   });
+
+  // Handle query results with useEffect (Apollo 3.14+ recommended pattern)
+  useEffect(() => {
+    if (!queryLoading) {
+      if (queryError) {
+        setCustomer(null);
+      } else {
+        setCustomer(customerData?.activeCustomer ?? null);
+      }
+      setLoading(false);
+    }
+  }, [customerData, queryLoading, queryError]);
 
   // Mutations
   const [shopLogin] = useShopLoginMutation();

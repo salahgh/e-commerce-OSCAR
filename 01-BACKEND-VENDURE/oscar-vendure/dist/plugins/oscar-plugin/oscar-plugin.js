@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OscarPlugin = void 0;
 const core_1 = require("@vendure/core");
 const oscar_service_1 = require("./services/oscar.service");
+const dashboard_service_1 = require("./services/dashboard.service");
 const oscar_admin_resolver_1 = require("./api/oscar-admin.resolver");
 const oscar_shop_resolver_1 = require("./api/oscar-shop.resolver");
 const api_extensions_1 = require("./api/api-extensions");
@@ -27,7 +28,7 @@ exports.OscarPlugin = OscarPlugin;
 exports.OscarPlugin = OscarPlugin = __decorate([
     (0, core_1.VendurePlugin)({
         imports: [core_1.PluginCommonModule],
-        providers: [oscar_service_1.OscarService],
+        providers: [oscar_service_1.OscarService, dashboard_service_1.DashboardService],
         adminApiExtensions: {
             schema: api_extensions_1.adminApiExtensions,
             resolvers: [oscar_admin_resolver_1.OscarAdminResolver],

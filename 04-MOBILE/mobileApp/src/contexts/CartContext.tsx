@@ -1,27 +1,40 @@
 import React, { createContext, useCallback, useEffect } from 'react';
 import {
-  useGetCartQuery,
-  useAddToCartMutation,
-  useUpdateCartItemMutation,
-  useRemoveFromCartMutation,
-  useClearCartMutation,
-  CartResponse,
-  CartItemResponse,
-  AddToCartRequestInput,
-  UpdateCartItemRequestInput,
+  useGetActiveOrderQuery,
+  useAddItemToOrderMutation,
+  useAdjustOrderLineMutation,
+  useRemoveOrderLineMutation,
+  useRemoveAllOrderLinesMutation,
+  Order,
+  OrderLine,
 } from '../graphql/generated/graphql';
-import { useAuth } from './AuthContext';
+import { formatPrice } from '../utils/vendureAdapters';
+
+interface CartItem {
+  id: string;
+  productVariantId: string;
+  productId: string;
+  productName: string;
+  variantName: string;
+  sku: string;
+  quantity: number;
+  unitPrice: number;
+  linePrice: number;
+  imageUrl: string | null;
+}
 
 interface CartContextValue {
-  cart: CartResponse | null;
-  items: CartItemResponse[];
+  order: Order | null;
+  items: CartItem[];
   itemCount: number;
-  totalAmount: number;
+  subTotal: number;
+  shipping: number;
+  total: number;
   loading: boolean;
   error: any;
-  addToCart: (input: AddToCartRequestInput) => Promise<void>;
-  updateCartItem: (itemId: number, input: UpdateCartItemRequestInput) => Promise<void>;
-  removeFromCart: (itemId: number) => Promise<void>;
+  addToCart: (productVariantId: string, quantity: number) => Promise<void>;
+  updateQuantity: (orderLineId: string, quantity: number) => Promise<void>;
+  removeFromCart: (orderLineId: string) => Promise<void>;
   clearCart: () => Promise<void>;
   refetchCart: () => void;
 }
@@ -29,103 +42,140 @@ interface CartContextValue {
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-
-  // Query cart
   const {
-    data: cartData,
-    loading: cartLoading,
-    error: cartError,
+    data: orderData,
+    loading: orderLoading,
+    error: orderError,
     refetch: refetchCart,
-  } = useGetCartQuery({
-    skip: !isAuthenticated,
+  } = useGetActiveOrderQuery({
     fetchPolicy: 'cache-and-network',
   });
 
-  // Mutations
-  const [addToCartMutation, { loading: addLoading }] = useAddToCartMutation();
-  const [updateCartItemMutation, { loading: updateLoading }] = useUpdateCartItemMutation();
-  const [removeFromCartMutation, { loading: removeLoading }] = useRemoveFromCartMutation();
-  const [clearCartMutation, { loading: clearLoading }] = useClearCartMutation();
-
-  // Refetch cart when user logs in
-  useEffect(() => {
-    if (isAuthenticated) {
-      refetchCart();
-    }
-  }, [isAuthenticated, refetchCart]);
+  const [addItemMutation, { loading: addLoading }] = useAddItemToOrderMutation();
+  const [adjustLineMutation, { loading: adjustLoading }] = useAdjustOrderLineMutation();
+  const [removeLineMutation, { loading: removeLoading }] = useRemoveOrderLineMutation();
+  const [removeAllLinesMutation, { loading: clearLoading }] = useRemoveAllOrderLinesMutation();
 
   const addToCart = useCallback(
-    async (input: AddToCartRequestInput) => {
+    async (productVariantId: string, quantity: number) => {
       try {
-        await addToCartMutation({
-          variables: { input },
-          refetchQueries: ['GetCart'],
+        const { data } = await addItemMutation({
+          variables: { productVariantId, quantity },
+          refetchQueries: ['GetActiveOrder'],
         });
+
+        if (data?.addItemToOrder) {
+          const result = data.addItemToOrder;
+          if ('errorCode' in result) {
+            const errorResult = result as { errorCode: string; message: string };
+            throw new Error(errorResult.message || 'Failed to add item to cart');
+          }
+        }
       } catch (error) {
         console.error('Add to cart error:', error);
         throw error;
       }
     },
-    [addToCartMutation]
+    [addItemMutation]
   );
 
-  const updateCartItem = useCallback(
-    async (itemId: number, input: UpdateCartItemRequestInput) => {
+  const updateQuantity = useCallback(
+    async (orderLineId: string, quantity: number) => {
       try {
-        await updateCartItemMutation({
-          variables: { itemId, input },
-          refetchQueries: ['GetCart'],
+        const { data } = await adjustLineMutation({
+          variables: { orderLineId, quantity },
+          refetchQueries: ['GetActiveOrder'],
         });
+
+        if (data?.adjustOrderLine) {
+          const result = data.adjustOrderLine;
+          if ('errorCode' in result) {
+            const errorResult = result as { errorCode: string; message: string };
+            throw new Error(errorResult.message || 'Failed to update cart item');
+          }
+        }
       } catch (error) {
         console.error('Update cart item error:', error);
         throw error;
       }
     },
-    [updateCartItemMutation]
+    [adjustLineMutation]
   );
 
   const removeFromCart = useCallback(
-    async (itemId: number) => {
+    async (orderLineId: string) => {
       try {
-        await removeFromCartMutation({
-          variables: { itemId },
-          refetchQueries: ['GetCart'],
+        const { data } = await removeLineMutation({
+          variables: { orderLineId },
+          refetchQueries: ['GetActiveOrder'],
         });
+
+        if (data?.removeOrderLine) {
+          const result = data.removeOrderLine;
+          if ('errorCode' in result) {
+            const errorResult = result as { errorCode: string; message: string };
+            throw new Error(errorResult.message || 'Failed to remove item from cart');
+          }
+        }
       } catch (error) {
         console.error('Remove from cart error:', error);
         throw error;
       }
     },
-    [removeFromCartMutation]
+    [removeLineMutation]
   );
 
   const clearCart = useCallback(async () => {
     try {
-      await clearCartMutation({
-        refetchQueries: ['GetCart'],
+      const { data } = await removeAllLinesMutation({
+        refetchQueries: ['GetActiveOrder'],
       });
+
+      if (data?.removeAllOrderLines) {
+        const result = data.removeAllOrderLines;
+        if ('errorCode' in result) {
+          const errorResult = result as { errorCode: string; message: string };
+          throw new Error(errorResult.message || 'Failed to clear cart');
+        }
+      }
     } catch (error) {
       console.error('Clear cart error:', error);
       throw error;
     }
-  }, [clearCartMutation]);
+  }, [removeAllLinesMutation]);
 
-  const cart = cartData?.myCart || null;
-  const items = (cart?.items as CartItemResponse[]) || [];
-  const itemCount = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
-  const totalAmount = cart?.totalAmount || 0;
-  const loading = cartLoading || addLoading || updateLoading || removeLoading || clearLoading;
+  const order = orderData?.activeOrder || null;
+
+  const items: CartItem[] = (order?.lines || []).map((line: any) => ({
+    id: line.id,
+    productVariantId: line.productVariant?.id || '',
+    productId: line.productVariant?.product?.id || '',
+    productName: line.productVariant?.product?.name || '',
+    variantName: line.productVariant?.name || '',
+    sku: line.productVariant?.sku || '',
+    quantity: line.quantity,
+    unitPrice: formatPrice(line.unitPriceWithTax),
+    linePrice: formatPrice(line.linePriceWithTax),
+    imageUrl: line.featuredAsset?.preview || line.productVariant?.product?.featuredAsset?.preview || null,
+  }));
+
+  const itemCount = order?.totalQuantity || 0;
+  const subTotal = order ? formatPrice(order.subTotalWithTax) : 0;
+  const shipping = order ? formatPrice(order.shippingWithTax) : 0;
+  const total = order ? formatPrice(order.totalWithTax) : 0;
+  const loading = orderLoading || addLoading || adjustLoading || removeLoading || clearLoading;
 
   const value: CartContextValue = {
-    cart,
+    order: order as Order | null,
     items,
     itemCount,
-    totalAmount,
+    subTotal,
+    shipping,
+    total,
     loading,
-    error: cartError,
+    error: orderError,
     addToCart,
-    updateCartItem,
+    updateQuantity,
     removeFromCart,
     clearCart,
     refetchCart,

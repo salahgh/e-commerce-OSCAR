@@ -61,7 +61,7 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({
   // Categories
   if (filters.categoryIds.length > 0) {
     const categoryNames = filters.categoryIds
-      .map(id => collections.find(c => c.id === id)?.name)
+      .map((id) => collections.find((c) => c.id === id)?.name)
       .filter(Boolean)
       .join(', ');
     badges.push({ key: 'categoryIds', label: `Catégories: ${categoryNames}` });
@@ -73,7 +73,7 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({
   }
 
   // Colors
-  filters.colors.forEach(color => {
+  filters.colors.forEach((color) => {
     badges.push({ key: 'colors', label: color, value: color, color: color });
   });
 
@@ -87,15 +87,13 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({
           key={`${badge.key}-${index}`}
           className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
         >
-          {badge.color && (
-            <ColorSwatch color={badge.color} size="xs" />
-          )}
+          {badge.color && <ColorSwatch color={badge.color} size="xs" />}
           <span>{badge.label}</span>
           <button
             onClick={() => {
               if (badge.key === 'colors' && badge.value) {
                 // Remove specific color from array
-                const newColors = filters.colors.filter(c => c !== badge.value);
+                const newColors = filters.colors.filter((c) => c !== badge.value);
                 // Need to handle this differently - just clear for now
               }
               onClearFilter(badge.key);

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run codegen:*)",
+      "Bash(npx tsc:*)"
+    ]
+  }
+}

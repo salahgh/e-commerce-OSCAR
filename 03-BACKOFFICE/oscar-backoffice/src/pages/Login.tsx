@@ -10,7 +10,7 @@ import { AdminLoginDocument } from '../graphql/generated/graphql';
 
 const LoginSchema = Yup.object().shape({
   username: Yup.string().required("Nom d'utilisateur requis"),
-  password: Yup.string().min(4, 'Minimum 4 caractères').required('Mot de passe requis'),
+  password: Yup.string().min(4, 'Minimum 4 caracteres').required('Mot de passe requis'),
 });
 
 export const Login: React.FC = () => {
@@ -59,7 +59,7 @@ export const Login: React.FC = () => {
                 },
               })
             );
-            dispatch(addToast({ message: 'Connexion réussie!', type: 'success' }));
+            dispatch(addToast({ message: 'Connexion reussie!', type: 'success' }));
             navigate('/');
           }
           // Check for InvalidCredentialsError
@@ -77,61 +77,63 @@ export const Login: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-700">
+        <div className="bg-card rounded-2xl shadow-xl p-8 border border-border">
           {/* Logo */}
           <div className="flex justify-center mb-8">
-            <div className="h-16 w-16 bg-blue-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-blue-500/20">
+            <div className="h-16 w-16 bg-primary rounded-xl flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-lg">
               O
             </div>
           </div>
 
-          <h1 className="text-2xl font-bold text-center text-gray-100 mb-2">Back-Office OSCAR</h1>
-          <p className="text-center text-gray-400 mb-8">
-            Connectez-vous pour accéder au panneau d'administration
+          <h1 className="text-2xl font-bold text-center text-foreground mb-2">Back-Office OSCAR</h1>
+          <p className="text-center text-muted-foreground mb-8">
+            Connectez-vous pour acceder au panneau d'administration
           </p>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-900/30 border border-red-500/30 rounded-lg">
-              <p className="text-red-400 text-sm">{error}</p>
+            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/30 rounded-lg">
+              <p className="text-destructive text-sm">{error}</p>
             </div>
           )}
 
           <form onSubmit={formik.handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Nom d'utilisateur
               </label>
               <input
                 type="text"
                 {...formik.getFieldProps('username')}
-                className={`w-full px-4 py-3 border rounded-lg bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors ${
+                className={`w-full px-4 py-3 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-ring outline-none transition-colors ${
                   formik.touched.username && formik.errors.username
-                    ? 'border-red-500'
-                    : 'border-gray-600'
+                    ? 'border-destructive'
+                    : 'border-input'
                 }`}
                 placeholder="superadmin"
               />
               {formik.touched.username && formik.errors.username && (
-                <p className="mt-1 text-sm text-red-400">{formik.errors.username}</p>
+                <p className="mt-1 text-sm text-destructive">{formik.errors.username}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Mot de passe</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
+                Mot de passe
+              </label>
               <input
                 type="password"
                 {...formik.getFieldProps('password')}
-                className={`w-full px-4 py-3 border rounded-lg bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors ${
+                className={`w-full px-4 py-3 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-ring focus:border-ring outline-none transition-colors ${
                   formik.touched.password && formik.errors.password
-                    ? 'border-red-500'
-                    : 'border-gray-600'
+                    ? 'border-destructive'
+                    : 'border-input'
                 }`}
                 placeholder="••••••••"
               />
               {formik.touched.password && formik.errors.password && (
-                <p className="mt-1 text-sm text-red-400">{formik.errors.password}</p>
+                <p className="mt-1 text-sm text-destructive">{formik.errors.password}</p>
               )}
             </div>
 
@@ -141,9 +143,9 @@ export const Login: React.FC = () => {
                 id="rememberMe"
                 {...formik.getFieldProps('rememberMe')}
                 checked={formik.values.rememberMe}
-                className="h-4 w-4 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500"
+                className="h-4 w-4 text-primary bg-card border-input rounded focus:ring-ring"
               />
-              <label htmlFor="rememberMe" className="ml-2 text-sm text-gray-400">
+              <label htmlFor="rememberMe" className="ml-2 text-sm text-muted-foreground">
                 Se souvenir de moi
               </label>
             </div>
@@ -151,12 +153,12 @@ export const Login: React.FC = () => {
             <button
               type="submit"
               disabled={loading || formik.isSubmitting}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               {loading || formik.isSubmitting ? (
                 <>
                   <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-primary-foreground"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -183,15 +185,15 @@ export const Login: React.FC = () => {
             </button>
           </form>
 
-          <div className="mt-6 p-4 bg-blue-900/30 rounded-lg border border-blue-500/30">
-            <p className="text-sm text-blue-300 font-medium mb-2">Compte superadmin:</p>
-            <p className="text-xs text-blue-400">Utilisateur: superadmin</p>
-            <p className="text-xs text-blue-400">Mot de passe: superadmin123</p>
+          <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/30">
+            <p className="text-sm text-primary font-medium mb-2">Compte superadmin:</p>
+            <p className="text-xs text-primary/80">Utilisateur: superadmin</p>
+            <p className="text-xs text-primary/80">Mot de passe: superadmin123</p>
           </div>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
-          © 2025 OSCAR Fashion. Tous droits réservés.
+        <p className="text-center text-sm text-muted-foreground mt-6">
+          2025 OSCAR Fashion. Tous droits reserves.
         </p>
       </div>
     </div>

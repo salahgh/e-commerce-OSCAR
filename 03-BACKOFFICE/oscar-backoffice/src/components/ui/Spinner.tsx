@@ -14,7 +14,7 @@ export const Spinner: React.FC<SpinnerProps> = ({ size = 'md', className }) => {
     lg: 'h-12 w-12',
   };
 
-  return <Loader2 className={cn('animate-spin text-blue-400', sizeClasses[size], className)} />;
+  return <Loader2 className={cn('animate-spin text-primary', sizeClasses[size], className)} />;
 };
 
 interface LoadingProps {
@@ -25,7 +25,7 @@ export const Loading: React.FC<LoadingProps> = ({ message = 'Chargement...' }) =
   return (
     <div className="flex flex-col items-center justify-center py-12">
       <Spinner size="lg" />
-      <p className="mt-4 text-gray-400">{message}</p>
+      <p className="mt-4 text-muted-foreground">{message}</p>
     </div>
   );
 };

@@ -7,11 +7,12 @@ import { CartProvider } from '@/contexts/CartContext';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { Toaster } from 'react-hot-toast';
 import { locales } from '@/i18n/config';
+import { PWAInstallPrompt, OfflineIndicator, UpdateAvailableBanner } from '@/components/pwa';
 import '../globals.css';
 
 const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-inter',
+  display: 'swap',
 });
 
 export default async function LocaleLayout({
@@ -39,13 +40,43 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
-      <body className={inter.variable}>
+      <head>
+        {/* PWA Meta Tags */}
+        <meta name="application-name" content="OSCAR Fashion" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="OSCAR Fashion" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="msapplication-TileColor" content="#000000" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        <meta name="theme-color" content="#000000" />
+
+        {/* PWA Links */}
+        <link rel="manifest" href="/manifest.json" />
+
+        {/* Preconnect to important origins */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8085'} />
+      </head>
+      <body className={inter.className}>
         <ThemeProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <ApolloWrapper>
               <AuthProvider>
                 <CartProvider>
+                  {/* Offline indicator */}
+                  <OfflineIndicator />
+
                   {children}
+
+                  {/* PWA Install Prompt */}
+                  <PWAInstallPrompt />
+
+                  {/* Update Available Banner */}
+                  <UpdateAvailableBanner />
+
                   <Toaster
                     position={locale === 'ar' ? 'top-left' : 'top-right'}
                     toastOptions={{
