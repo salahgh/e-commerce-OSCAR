@@ -436,6 +436,7 @@ export type CreateAddressInput = {
 };
 
 export type CreateCustomerCustomFieldsInput = {
+  adminNotes?: InputMaybe<Scalars['String']['input']>;
   city?: InputMaybe<Scalars['String']['input']>;
   wilaya?: InputMaybe<Scalars['String']['input']>;
 };
@@ -836,6 +837,7 @@ export type CustomerOrdersArgs = {
 
 export type CustomerCustomFields = {
   __typename?: 'CustomerCustomFields';
+  adminNotes?: Maybe<Scalars['String']['output']>;
   city?: Maybe<Scalars['String']['output']>;
   wilaya?: Maybe<Scalars['String']['output']>;
 };
@@ -843,6 +845,7 @@ export type CustomerCustomFields = {
 export type CustomerFilterParameter = {
   _and?: InputMaybe<Array<CustomerFilterParameter>>;
   _or?: InputMaybe<Array<CustomerFilterParameter>>;
+  adminNotes?: InputMaybe<StringOperators>;
   city?: InputMaybe<StringOperators>;
   createdAt?: InputMaybe<DateOperators>;
   emailAddress?: InputMaybe<StringOperators>;
@@ -889,6 +892,7 @@ export type CustomerListOptions = {
 };
 
 export type CustomerSortParameter = {
+  adminNotes?: InputMaybe<SortOrder>;
   city?: InputMaybe<SortOrder>;
   createdAt?: InputMaybe<SortOrder>;
   emailAddress?: InputMaybe<SortOrder>;
@@ -3239,6 +3243,7 @@ export type RegisterCustomerAccountResult =
   | Success;
 
 export type RegisterCustomerCustomFieldsInput = {
+  adminNotes?: InputMaybe<Scalars['String']['input']>;
   city?: InputMaybe<Scalars['String']['input']>;
   wilaya?: InputMaybe<Scalars['String']['input']>;
 };
@@ -3675,6 +3680,7 @@ export type UpdateAddressInput = {
 };
 
 export type UpdateCustomerCustomFieldsInput = {
+  adminNotes?: InputMaybe<Scalars['String']['input']>;
   city?: InputMaybe<Scalars['String']['input']>;
   wilaya?: InputMaybe<Scalars['String']['input']>;
 };
@@ -4149,6 +4155,15 @@ export type OrderLineFieldsFragment = {
   featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
 };
 
+export type DiscountFieldsFragment = {
+  __typename?: 'Discount';
+  adjustmentSource: string;
+  amount: number;
+  amountWithTax: number;
+  description: string;
+  type: AdjustmentType;
+};
+
 export type OrderFieldsFragment = {
   __typename?: 'Order';
   id: string;
@@ -4162,6 +4177,15 @@ export type OrderFieldsFragment = {
   shippingWithTax: number;
   totalWithTax: number;
   currencyCode: CurrencyCode;
+  couponCodes: Array<string>;
+  discounts: Array<{
+    __typename?: 'Discount';
+    adjustmentSource: string;
+    amount: number;
+    amountWithTax: number;
+    description: string;
+    type: AdjustmentType;
+  }>;
   lines: Array<{
     __typename?: 'OrderLine';
     id: string;
@@ -4251,6 +4275,15 @@ export type GetActiveOrderQuery = {
     shippingWithTax: number;
     totalWithTax: number;
     currencyCode: CurrencyCode;
+    couponCodes: Array<string>;
+    discounts: Array<{
+      __typename?: 'Discount';
+      adjustmentSource: string;
+      amount: number;
+      amountWithTax: number;
+      description: string;
+      type: AdjustmentType;
+    }>;
     lines: Array<{
       __typename?: 'OrderLine';
       id: string;
@@ -4350,6 +4383,15 @@ export type AddItemToOrderMutation = {
           shippingWithTax: number;
           totalWithTax: number;
           currencyCode: CurrencyCode;
+          couponCodes: Array<string>;
+          discounts: Array<{
+            __typename?: 'Discount';
+            adjustmentSource: string;
+            amount: number;
+            amountWithTax: number;
+            description: string;
+            type: AdjustmentType;
+          }>;
           lines: Array<{
             __typename?: 'OrderLine';
             id: string;
@@ -4436,6 +4478,15 @@ export type AddItemToOrderMutation = {
         shippingWithTax: number;
         totalWithTax: number;
         currencyCode: CurrencyCode;
+        couponCodes: Array<string>;
+        discounts: Array<{
+          __typename?: 'Discount';
+          adjustmentSource: string;
+          amount: number;
+          amountWithTax: number;
+          description: string;
+          type: AdjustmentType;
+        }>;
         lines: Array<{
           __typename?: 'OrderLine';
           id: string;
@@ -4538,6 +4589,15 @@ export type AdjustOrderLineMutation = {
           shippingWithTax: number;
           totalWithTax: number;
           currencyCode: CurrencyCode;
+          couponCodes: Array<string>;
+          discounts: Array<{
+            __typename?: 'Discount';
+            adjustmentSource: string;
+            amount: number;
+            amountWithTax: number;
+            description: string;
+            type: AdjustmentType;
+          }>;
           lines: Array<{
             __typename?: 'OrderLine';
             id: string;
@@ -4624,6 +4684,15 @@ export type AdjustOrderLineMutation = {
         shippingWithTax: number;
         totalWithTax: number;
         currencyCode: CurrencyCode;
+        couponCodes: Array<string>;
+        discounts: Array<{
+          __typename?: 'Discount';
+          adjustmentSource: string;
+          amount: number;
+          amountWithTax: number;
+          description: string;
+          type: AdjustmentType;
+        }>;
         lines: Array<{
           __typename?: 'OrderLine';
           id: string;
@@ -4720,6 +4789,15 @@ export type RemoveOrderLineMutation = {
         shippingWithTax: number;
         totalWithTax: number;
         currencyCode: CurrencyCode;
+        couponCodes: Array<string>;
+        discounts: Array<{
+          __typename?: 'Discount';
+          adjustmentSource: string;
+          amount: number;
+          amountWithTax: number;
+          description: string;
+          type: AdjustmentType;
+        }>;
         lines: Array<{
           __typename?: 'OrderLine';
           id: string;
@@ -4813,6 +4891,15 @@ export type RemoveAllOrderLinesMutation = {
         shippingWithTax: number;
         totalWithTax: number;
         currencyCode: CurrencyCode;
+        couponCodes: Array<string>;
+        discounts: Array<{
+          __typename?: 'Discount';
+          adjustmentSource: string;
+          amount: number;
+          amountWithTax: number;
+          description: string;
+          type: AdjustmentType;
+        }>;
         lines: Array<{
           __typename?: 'OrderLine';
           id: string;
@@ -4912,6 +4999,15 @@ export type SetCustomerForOrderMutation = {
         shippingWithTax: number;
         totalWithTax: number;
         currencyCode: CurrencyCode;
+        couponCodes: Array<string>;
+        discounts: Array<{
+          __typename?: 'Discount';
+          adjustmentSource: string;
+          amount: number;
+          amountWithTax: number;
+          description: string;
+          type: AdjustmentType;
+        }>;
         lines: Array<{
           __typename?: 'OrderLine';
           id: string;
@@ -5006,6 +5102,15 @@ export type SetOrderShippingAddressMutation = {
         shippingWithTax: number;
         totalWithTax: number;
         currencyCode: CurrencyCode;
+        couponCodes: Array<string>;
+        discounts: Array<{
+          __typename?: 'Discount';
+          adjustmentSource: string;
+          amount: number;
+          amountWithTax: number;
+          description: string;
+          type: AdjustmentType;
+        }>;
         lines: Array<{
           __typename?: 'OrderLine';
           id: string;
@@ -5100,6 +5205,15 @@ export type SetOrderBillingAddressMutation = {
         shippingWithTax: number;
         totalWithTax: number;
         currencyCode: CurrencyCode;
+        couponCodes: Array<string>;
+        discounts: Array<{
+          __typename?: 'Discount';
+          adjustmentSource: string;
+          amount: number;
+          amountWithTax: number;
+          description: string;
+          type: AdjustmentType;
+        }>;
         lines: Array<{
           __typename?: 'OrderLine';
           id: string;
@@ -5210,10 +5324,19 @@ export type SetOrderShippingMethodMutation = {
         shippingWithTax: number;
         totalWithTax: number;
         currencyCode: CurrencyCode;
+        couponCodes: Array<string>;
         shippingLines: Array<{
           __typename?: 'ShippingLine';
           priceWithTax: number;
           shippingMethod: { __typename?: 'ShippingMethod'; id: string; name: string };
+        }>;
+        discounts: Array<{
+          __typename?: 'Discount';
+          adjustmentSource: string;
+          amount: number;
+          amountWithTax: number;
+          description: string;
+          type: AdjustmentType;
         }>;
         lines: Array<{
           __typename?: 'OrderLine';
@@ -5324,6 +5447,15 @@ export type TransitionOrderToStateMutation = {
         shippingWithTax: number;
         totalWithTax: number;
         currencyCode: CurrencyCode;
+        couponCodes: Array<string>;
+        discounts: Array<{
+          __typename?: 'Discount';
+          adjustmentSource: string;
+          amount: number;
+          amountWithTax: number;
+          description: string;
+          type: AdjustmentType;
+        }>;
         lines: Array<{
           __typename?: 'OrderLine';
           id: string;
@@ -5428,6 +5560,15 @@ export type AddPaymentToOrderMutation = {
         shippingWithTax: number;
         totalWithTax: number;
         currencyCode: CurrencyCode;
+        couponCodes: Array<string>;
+        discounts: Array<{
+          __typename?: 'Discount';
+          adjustmentSource: string;
+          amount: number;
+          amountWithTax: number;
+          description: string;
+          type: AdjustmentType;
+        }>;
         lines: Array<{
           __typename?: 'OrderLine';
           id: string;
@@ -5541,6 +5682,15 @@ export type GetOrderByCodeQuery = {
     shippingWithTax: number;
     totalWithTax: number;
     currencyCode: CurrencyCode;
+    couponCodes: Array<string>;
+    discounts: Array<{
+      __typename?: 'Discount';
+      adjustmentSource: string;
+      amount: number;
+      amountWithTax: number;
+      description: string;
+      type: AdjustmentType;
+    }>;
     lines: Array<{
       __typename?: 'OrderLine';
       id: string;
@@ -5641,6 +5791,228 @@ export type GetCustomerOrdersQuery = {
         }>;
       }>;
     };
+  } | null;
+};
+
+export type ApplyCouponCodeMutationVariables = Exact<{
+  couponCode: Scalars['String']['input'];
+}>;
+
+export type ApplyCouponCodeMutation = {
+  __typename?: 'Mutation';
+  applyCouponCode:
+    | {
+        __typename?: 'CouponCodeExpiredError';
+        errorCode: ErrorCode;
+        message: string;
+        couponCode: string;
+      }
+    | {
+        __typename?: 'CouponCodeInvalidError';
+        errorCode: ErrorCode;
+        message: string;
+        couponCode: string;
+      }
+    | {
+        __typename?: 'CouponCodeLimitError';
+        errorCode: ErrorCode;
+        message: string;
+        couponCode: string;
+        limit: number;
+      }
+    | {
+        __typename?: 'Order';
+        id: string;
+        code: string;
+        state: string;
+        active: boolean;
+        createdAt: string;
+        updatedAt: string;
+        totalQuantity: number;
+        subTotalWithTax: number;
+        shippingWithTax: number;
+        totalWithTax: number;
+        currencyCode: CurrencyCode;
+        couponCodes: Array<string>;
+        discounts: Array<{
+          __typename?: 'Discount';
+          adjustmentSource: string;
+          amount: number;
+          amountWithTax: number;
+          description: string;
+          type: AdjustmentType;
+        }>;
+        lines: Array<{
+          __typename?: 'OrderLine';
+          id: string;
+          quantity: number;
+          linePriceWithTax: number;
+          unitPriceWithTax: number;
+          productVariant: {
+            __typename?: 'ProductVariant';
+            id: string;
+            name: string;
+            sku: string;
+            priceWithTax: number;
+            product: {
+              __typename?: 'Product';
+              id: string;
+              name: string;
+              slug: string;
+              featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+            };
+          };
+          featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+        }>;
+        shippingAddress?: {
+          __typename?: 'OrderAddress';
+          fullName?: string | null;
+          streetLine1?: string | null;
+          streetLine2?: string | null;
+          city?: string | null;
+          province?: string | null;
+          postalCode?: string | null;
+          country?: string | null;
+          phoneNumber?: string | null;
+        } | null;
+        billingAddress?: {
+          __typename?: 'OrderAddress';
+          fullName?: string | null;
+          streetLine1?: string | null;
+          streetLine2?: string | null;
+          city?: string | null;
+          province?: string | null;
+          postalCode?: string | null;
+          country?: string | null;
+          phoneNumber?: string | null;
+        } | null;
+        customer?: {
+          __typename?: 'Customer';
+          id: string;
+          firstName: string;
+          lastName: string;
+          emailAddress: string;
+        } | null;
+        payments?: Array<{
+          __typename?: 'Payment';
+          id: string;
+          method: string;
+          amount: number;
+          state: string;
+          transactionId?: string | null;
+          createdAt: string;
+          metadata?: Record<string, any> | null;
+        }> | null;
+        fulfillments?: Array<{
+          __typename?: 'Fulfillment';
+          id: string;
+          state: string;
+          method: string;
+          trackingCode?: string | null;
+          createdAt: string;
+          lines: Array<{ __typename?: 'FulfillmentLine'; orderLineId: string; quantity: number }>;
+        }> | null;
+      };
+};
+
+export type RemoveCouponCodeMutationVariables = Exact<{
+  couponCode: Scalars['String']['input'];
+}>;
+
+export type RemoveCouponCodeMutation = {
+  __typename?: 'Mutation';
+  removeCouponCode?: {
+    __typename?: 'Order';
+    id: string;
+    code: string;
+    state: string;
+    active: boolean;
+    createdAt: string;
+    updatedAt: string;
+    totalQuantity: number;
+    subTotalWithTax: number;
+    shippingWithTax: number;
+    totalWithTax: number;
+    currencyCode: CurrencyCode;
+    couponCodes: Array<string>;
+    discounts: Array<{
+      __typename?: 'Discount';
+      adjustmentSource: string;
+      amount: number;
+      amountWithTax: number;
+      description: string;
+      type: AdjustmentType;
+    }>;
+    lines: Array<{
+      __typename?: 'OrderLine';
+      id: string;
+      quantity: number;
+      linePriceWithTax: number;
+      unitPriceWithTax: number;
+      productVariant: {
+        __typename?: 'ProductVariant';
+        id: string;
+        name: string;
+        sku: string;
+        priceWithTax: number;
+        product: {
+          __typename?: 'Product';
+          id: string;
+          name: string;
+          slug: string;
+          featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+        };
+      };
+      featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+    }>;
+    shippingAddress?: {
+      __typename?: 'OrderAddress';
+      fullName?: string | null;
+      streetLine1?: string | null;
+      streetLine2?: string | null;
+      city?: string | null;
+      province?: string | null;
+      postalCode?: string | null;
+      country?: string | null;
+      phoneNumber?: string | null;
+    } | null;
+    billingAddress?: {
+      __typename?: 'OrderAddress';
+      fullName?: string | null;
+      streetLine1?: string | null;
+      streetLine2?: string | null;
+      city?: string | null;
+      province?: string | null;
+      postalCode?: string | null;
+      country?: string | null;
+      phoneNumber?: string | null;
+    } | null;
+    customer?: {
+      __typename?: 'Customer';
+      id: string;
+      firstName: string;
+      lastName: string;
+      emailAddress: string;
+    } | null;
+    payments?: Array<{
+      __typename?: 'Payment';
+      id: string;
+      method: string;
+      amount: number;
+      state: string;
+      transactionId?: string | null;
+      createdAt: string;
+      metadata?: Record<string, any> | null;
+    }> | null;
+    fulfillments?: Array<{
+      __typename?: 'Fulfillment';
+      id: string;
+      state: string;
+      method: string;
+      trackingCode?: string | null;
+      createdAt: string;
+      lines: Array<{ __typename?: 'FulfillmentLine'; orderLineId: string; quantity: number }>;
+    }> | null;
   } | null;
 };
 
@@ -6881,6 +7253,15 @@ export const CustomerFieldsFragmentDoc = gql`
     }
   }
 `;
+export const DiscountFieldsFragmentDoc = gql`
+  fragment DiscountFields on Discount {
+    adjustmentSource
+    amount
+    amountWithTax
+    description
+    type
+  }
+`;
 export const OrderLineFieldsFragmentDoc = gql`
   fragment OrderLineFields on OrderLine {
     id
@@ -6921,6 +7302,10 @@ export const OrderFieldsFragmentDoc = gql`
     shippingWithTax
     totalWithTax
     currencyCode
+    couponCodes
+    discounts {
+      ...DiscountFields
+    }
     lines {
       ...OrderLineFields
     }
@@ -6971,6 +7356,7 @@ export const OrderFieldsFragmentDoc = gql`
       }
     }
   }
+  ${DiscountFieldsFragmentDoc}
   ${OrderLineFieldsFragmentDoc}
 `;
 export const CustomerOrderFieldsFragmentDoc = gql`
@@ -8947,6 +9333,120 @@ export type GetCustomerOrdersSuspenseQueryHookResult = ReturnType<
 export type GetCustomerOrdersQueryResult = Apollo.QueryResult<
   GetCustomerOrdersQuery,
   GetCustomerOrdersQueryVariables
+>;
+export const ApplyCouponCodeDocument = gql`
+  mutation ApplyCouponCode($couponCode: String!) {
+    applyCouponCode(couponCode: $couponCode) {
+      ... on Order {
+        ...OrderFields
+      }
+      ... on CouponCodeExpiredError {
+        errorCode
+        message
+        couponCode
+      }
+      ... on CouponCodeInvalidError {
+        errorCode
+        message
+        couponCode
+      }
+      ... on CouponCodeLimitError {
+        errorCode
+        message
+        couponCode
+        limit
+      }
+    }
+  }
+  ${OrderFieldsFragmentDoc}
+`;
+export type ApplyCouponCodeMutationFn = Apollo.MutationFunction<
+  ApplyCouponCodeMutation,
+  ApplyCouponCodeMutationVariables
+>;
+
+/**
+ * __useApplyCouponCodeMutation__
+ *
+ * To run a mutation, you first call `useApplyCouponCodeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApplyCouponCodeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [applyCouponCodeMutation, { data, loading, error }] = useApplyCouponCodeMutation({
+ *   variables: {
+ *      couponCode: // value for 'couponCode'
+ *   },
+ * });
+ */
+export function useApplyCouponCodeMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ApplyCouponCodeMutation,
+    ApplyCouponCodeMutationVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ApplyCouponCodeMutation, ApplyCouponCodeMutationVariables>(
+    ApplyCouponCodeDocument,
+    options
+  );
+}
+export type ApplyCouponCodeMutationHookResult = ReturnType<typeof useApplyCouponCodeMutation>;
+export type ApplyCouponCodeMutationResult = Apollo.MutationResult<ApplyCouponCodeMutation>;
+export type ApplyCouponCodeMutationOptions = Apollo.BaseMutationOptions<
+  ApplyCouponCodeMutation,
+  ApplyCouponCodeMutationVariables
+>;
+export const RemoveCouponCodeDocument = gql`
+  mutation RemoveCouponCode($couponCode: String!) {
+    removeCouponCode(couponCode: $couponCode) {
+      ...OrderFields
+    }
+  }
+  ${OrderFieldsFragmentDoc}
+`;
+export type RemoveCouponCodeMutationFn = Apollo.MutationFunction<
+  RemoveCouponCodeMutation,
+  RemoveCouponCodeMutationVariables
+>;
+
+/**
+ * __useRemoveCouponCodeMutation__
+ *
+ * To run a mutation, you first call `useRemoveCouponCodeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRemoveCouponCodeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [removeCouponCodeMutation, { data, loading, error }] = useRemoveCouponCodeMutation({
+ *   variables: {
+ *      couponCode: // value for 'couponCode'
+ *   },
+ * });
+ */
+export function useRemoveCouponCodeMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    RemoveCouponCodeMutation,
+    RemoveCouponCodeMutationVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<RemoveCouponCodeMutation, RemoveCouponCodeMutationVariables>(
+    RemoveCouponCodeDocument,
+    options
+  );
+}
+export type RemoveCouponCodeMutationHookResult = ReturnType<typeof useRemoveCouponCodeMutation>;
+export type RemoveCouponCodeMutationResult = Apollo.MutationResult<RemoveCouponCodeMutation>;
+export type RemoveCouponCodeMutationOptions = Apollo.BaseMutationOptions<
+  RemoveCouponCodeMutation,
+  RemoveCouponCodeMutationVariables
 >;
 export const GetMyOrdersDocument = gql`
   query GetMyOrders($options: OrderListOptions) {

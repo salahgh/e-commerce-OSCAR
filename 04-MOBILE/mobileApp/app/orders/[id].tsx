@@ -1,29 +1,51 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { OrderStatusBadge, OrderTimeline, OrderStatus } from '../../src/components/orders';
-import { Button, Divider, LoadingSpinner, ErrorState } from '../../src/components/ui';
-import { useGetOrderQuery, useCancelOrderMutation } from '../../src/graphql/generated/graphql';
+import { Button, Divider, LoadingSpinner, ErrorState, Badge } from '../../src/components/ui';
+import { useGetOrderByCodeQuery } from '../../src/graphql/generated/graphql';
 import { colors, spacing, typography } from '../../src/theme';
+import { formatPrice } from '../../src/utils/vendureAdapters';
+
+// Map Vendure order states to display info
+const orderStateMap: Record<string, { label: string; color: string; icon: string }> = {
+  AddingItems: { label: 'Draft', color: colors.text.tertiary, icon: 'cart-outline' },
+  ArrangingPayment: { label: 'Awaiting Payment', color: colors.warning, icon: 'time-outline' },
+  PaymentAuthorized: { label: 'Payment Authorized', color: colors.info, icon: 'card-outline' },
+  PaymentSettled: { label: 'Paid', color: colors.success, icon: 'checkmark-circle-outline' },
+  PartiallyShipped: { label: 'Partially Shipped', color: colors.info, icon: 'cube-outline' },
+  Shipped: { label: 'Shipped', color: colors.info, icon: 'airplane-outline' },
+  PartiallyDelivered: { label: 'Partially Delivered', color: colors.info, icon: 'cube-outline' },
+  Delivered: { label: 'Delivered', color: colors.success, icon: 'checkmark-done-outline' },
+  Modifying: { label: 'Modifying', color: colors.warning, icon: 'create-outline' },
+  ArrangingAdditionalPayment: { label: 'Additional Payment Required', color: colors.warning, icon: 'card-outline' },
+  Cancelled: { label: 'Cancelled', color: colors.error, icon: 'close-circle-outline' },
+};
+
+function getOrderStateInfo(state: string) {
+  return (
+    orderStateMap[state] || {
+      label: state,
+      color: colors.text.secondary,
+      icon: 'help-outline',
+    }
+  );
+}
 
 export default function OrderDetailScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams<{ id: string }>();
-  const orderId = parseInt(params.id);
+  const orderCode = params.id;
 
-  const { data, loading, error, refetch } = useGetOrderQuery({
-    variables: { id: orderId },
-    skip: !orderId,
+  const { data, loading, error, refetch } = useGetOrderByCodeQuery({
+    variables: { code: orderCode },
+    skip: !orderCode,
     fetchPolicy: 'cache-and-network',
   });
 
-  const [cancelOrder, { loading: cancelling }] = useCancelOrderMutation();
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-
-  const order = data?.order;
+  const order = data?.orderByCode;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -34,46 +56,6 @@ export default function OrderDetailScreen() {
       hour: '2-digit',
       minute: '2-digit',
     });
-  };
-
-  const handleCancelOrder = () => {
-    Alert.alert(
-      t('orders.cancelOrder', 'Cancel Order'),
-      t('orders.cancelOrderConfirm', 'Are you sure you want to cancel this order?'),
-      [
-        {
-          text: t('common.no', 'No'),
-          style: 'cancel',
-        },
-        {
-          text: t('common.yes', 'Yes'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await cancelOrder({
-                variables: { id: orderId },
-                refetchQueries: ['GetMyOrders', 'GetOrder'],
-              });
-              Alert.alert(
-                t('orders.cancelSuccess', 'Order Cancelled'),
-                t('orders.cancelSuccessMessage', 'Your order has been cancelled successfully.')
-              );
-              refetch();
-            } catch (err: any) {
-              Alert.alert(
-                t('orders.cancelError', 'Cancellation Failed'),
-                err.message ||
-                  t('orders.cancelErrorMessage', 'Failed to cancel order. Please try again.')
-              );
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  const canCancelOrder = () => {
-    return order?.status === 'PENDING' || order?.status === 'CONFIRMED';
   };
 
   if (loading && !data) {
@@ -96,8 +78,34 @@ export default function OrderDetailScreen() {
     );
   }
 
-  const SHIPPING_COST = order.shippingCost || 0;
-  const SUBTOTAL = order.subtotal || order.totalAmount - SHIPPING_COST;
+  const stateInfo = getOrderStateInfo(order.state);
+  const shippingCost = order.shippingWithTax || 0;
+  const subTotal = order.subTotalWithTax || 0;
+  const totalAmount = order.totalWithTax || 0;
+
+  // Format address
+  const formatAddress = () => {
+    const addr = order.shippingAddress;
+    if (!addr) return t('orders.noAddress', 'No address provided');
+
+    const parts = [
+      addr.fullName,
+      addr.streetLine1,
+      addr.streetLine2,
+      `${addr.city}${addr.province ? `, ${addr.province}` : ''}`,
+      addr.postalCode,
+      addr.country,
+    ].filter(Boolean);
+
+    return parts.join('\n');
+  };
+
+  // Get payment method from payments
+  const paymentMethod = order.payments?.[0]?.method || t('orders.notPaid', 'Not paid yet');
+  const paidAt = order.payments?.[0]?.createdAt;
+
+  // Get tracking code from fulfillments
+  const trackingCode = order.fulfillments?.[0]?.trackingCode;
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -107,20 +115,30 @@ export default function OrderDetailScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <Text style={styles.orderNumber}>#{order.orderNumber}</Text>
+          <Text style={styles.orderNumber}>#{order.code}</Text>
           <Text style={styles.orderDate}>{formatDate(order.createdAt)}</Text>
         </View>
-        <OrderStatusBadge status={order.status as OrderStatus} size="medium" />
+        <Badge
+          label={stateInfo.label}
+          variant="info"
+          style={{ backgroundColor: stateInfo.color + '20' }}
+          textStyle={{ color: stateInfo.color }}
+        />
       </View>
 
       <View style={styles.content}>
-        {/* Timeline */}
-        <OrderTimeline
-          currentStatus={order.status as OrderStatus}
-          createdAt={order.createdAt}
-          paidAt={order.paidAt}
-          deliveredAt={order.deliveredAt}
-        />
+        {/* Status Card */}
+        <View style={styles.statusCard}>
+          <View style={styles.statusIconContainer}>
+            <Ionicons name={stateInfo.icon as any} size={32} color={stateInfo.color} />
+          </View>
+          <View style={styles.statusInfo}>
+            <Text style={[styles.statusLabel, { color: stateInfo.color }]}>{stateInfo.label}</Text>
+            <Text style={styles.statusDate}>
+              {t('orders.lastUpdated', 'Last updated')}: {formatDate(order.updatedAt)}
+            </Text>
+          </View>
+        </View>
 
         {/* Shipping Information */}
         <View style={styles.section}>
@@ -130,17 +148,27 @@ export default function OrderDetailScreen() {
           <View style={styles.sectionContent}>
             <View style={styles.infoRow}>
               <Ionicons name="location-outline" size={20} color={colors.text.secondary} />
-              <Text style={styles.infoText}>{order.shippingAddress}</Text>
+              <Text style={styles.infoText}>{formatAddress()}</Text>
             </View>
-            <View style={styles.infoRow}>
-              <Ionicons name="call-outline" size={20} color={colors.text.secondary} />
-              <Text style={styles.infoText}>{order.phoneNumber}</Text>
-            </View>
-            {order.trackingNumber && (
+            {order.shippingAddress?.phoneNumber && (
+              <View style={styles.infoRow}>
+                <Ionicons name="call-outline" size={20} color={colors.text.secondary} />
+                <Text style={styles.infoText}>{order.shippingAddress.phoneNumber}</Text>
+              </View>
+            )}
+            {trackingCode && (
               <View style={styles.infoRow}>
                 <Ionicons name="qr-code-outline" size={20} color={colors.text.secondary} />
                 <Text style={styles.infoText}>
-                  {t('orders.trackingNumber', 'Tracking')}: {order.trackingNumber}
+                  {t('orders.trackingNumber', 'Tracking')}: {trackingCode}
+                </Text>
+              </View>
+            )}
+            {order.shippingLines?.[0] && (
+              <View style={styles.infoRow}>
+                <Ionicons name="car-outline" size={20} color={colors.text.secondary} />
+                <Text style={styles.infoText}>
+                  {order.shippingLines[0].shippingMethod?.name}
                 </Text>
               </View>
             )}
@@ -155,17 +183,13 @@ export default function OrderDetailScreen() {
           <View style={styles.sectionContent}>
             <View style={styles.infoRow}>
               <Ionicons name="card-outline" size={20} color={colors.text.secondary} />
-              <Text style={styles.infoText}>
-                {order.paymentMethod === 'COD'
-                  ? t('orders.cashOnDelivery', 'Cash on Delivery')
-                  : order.paymentMethod}
-              </Text>
+              <Text style={styles.infoText}>{paymentMethod}</Text>
             </View>
-            {order.paidAt && (
+            {paidAt && (
               <View style={styles.infoRow}>
                 <Ionicons name="checkmark-circle-outline" size={20} color={colors.success} />
                 <Text style={styles.infoText}>
-                  {t('orders.paidOn', 'Paid on')} {formatDate(order.paidAt)}
+                  {t('orders.paidOn', 'Paid on')} {formatDate(paidAt)}
                 </Text>
               </View>
             )}
@@ -174,45 +198,51 @@ export default function OrderDetailScreen() {
 
         {/* Order Items */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('orders.orderItems', 'Order Items')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('orders.orderItems', 'Order Items')} ({order.totalQuantity})
+          </Text>
           <View style={styles.itemsList}>
-            {order.items?.map((item) => (
-              <View key={item.id} style={styles.itemCard}>
-                <View style={styles.itemImageContainer}>
-                  {item.productImage ? (
-                    <Image
-                      source={{ uri: item.productImage }}
-                      style={styles.itemImage}
-                      resizeMode="cover"
-                    />
-                  ) : (
-                    <View style={styles.placeholderImage}>
-                      <Ionicons name="image-outline" size={24} color={colors.text.tertiary} />
-                    </View>
-                  )}
-                </View>
-                <View style={styles.itemDetails}>
-                  <Text style={styles.itemName} numberOfLines={2}>
-                    {item.productName}
-                  </Text>
-                  {(item.selectedSize || item.selectedColor) && (
-                    <View style={styles.itemAttributes}>
-                      {item.selectedSize && (
-                        <Text style={styles.itemAttribute}>Size: {item.selectedSize}</Text>
-                      )}
-                      {item.selectedColor && (
-                        <Text style={styles.itemAttribute}>Color: {item.selectedColor}</Text>
-                      )}
-                    </View>
-                  )}
-                  <View style={styles.itemPriceRow}>
-                    <Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>
-                    <Text style={styles.itemPrice}>{item.price.toFixed(2)} DZD</Text>
+            {order.lines?.map((line) => {
+              const productImage =
+                line.featuredAsset?.preview ||
+                line.productVariant?.product?.featuredAsset?.preview;
+
+              return (
+                <View key={line.id} style={styles.itemCard}>
+                  <View style={styles.itemImageContainer}>
+                    {productImage ? (
+                      <Image
+                        source={{ uri: productImage }}
+                        style={styles.itemImage}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View style={styles.placeholderImage}>
+                        <Ionicons name="image-outline" size={24} color={colors.text.tertiary} />
+                      </View>
+                    )}
                   </View>
+                  <View style={styles.itemDetails}>
+                    <Text style={styles.itemName} numberOfLines={2}>
+                      {line.productVariant?.product?.name}
+                    </Text>
+                    {line.productVariant?.name &&
+                      line.productVariant.name !== line.productVariant?.product?.name && (
+                        <Text style={styles.itemVariant}>{line.productVariant.name}</Text>
+                      )}
+                    <View style={styles.itemPriceRow}>
+                      <Text style={styles.itemQuantity}>Qty: {line.quantity}</Text>
+                      <Text style={styles.itemPrice}>
+                        {formatPrice(line.unitPriceWithTax)} DZD
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.itemSubtotal}>
+                    {formatPrice(line.linePriceWithTax)} DZD
+                  </Text>
                 </View>
-                <Text style={styles.itemSubtotal}>{item.subtotal.toFixed(2)} DZD</Text>
-              </View>
-            ))}
+              );
+            })}
           </View>
         </View>
 
@@ -222,45 +252,24 @@ export default function OrderDetailScreen() {
           <View style={styles.summaryContent}>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>{t('orders.subtotal', 'Subtotal')}</Text>
-              <Text style={styles.summaryValue}>{SUBTOTAL.toFixed(2)} DZD</Text>
+              <Text style={styles.summaryValue}>{formatPrice(subTotal)} DZD</Text>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>{t('orders.shipping', 'Shipping')}</Text>
               <Text style={styles.summaryValue}>
-                {SHIPPING_COST > 0 ? `${SHIPPING_COST.toFixed(2)} DZD` : t('orders.free', 'Free')}
+                {shippingCost > 0 ? `${formatPrice(shippingCost)} DZD` : t('orders.free', 'Free')}
               </Text>
             </View>
             <Divider style={styles.divider} />
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>{t('orders.total', 'Total')}</Text>
-              <Text style={styles.totalValue}>{order.totalAmount.toFixed(2)} DZD</Text>
+              <Text style={styles.totalValue}>{formatPrice(totalAmount)} DZD</Text>
             </View>
           </View>
         </View>
 
-        {/* Notes */}
-        {order.notes && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('orders.notes', 'Delivery Notes')}</Text>
-            <View style={styles.sectionContent}>
-              <Text style={styles.notesText}>{order.notes}</Text>
-            </View>
-          </View>
-        )}
-
         {/* Actions */}
         <View style={styles.actions}>
-          {canCancelOrder() && (
-            <Button
-              title={t('orders.cancelOrder', 'Cancel Order')}
-              onPress={handleCancelOrder}
-              variant="outline"
-              fullWidth
-              loading={cancelling}
-              disabled={cancelling}
-              style={styles.cancelButton}
-            />
-          )}
           <Button
             title={t('orders.reorder', 'Reorder Items')}
             onPress={() => {
@@ -320,7 +329,7 @@ const styles = StyleSheet.create({
     ...typography.styles.h4,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
-    marginBottom: spacing.xxs,
+    marginBottom: spacing.xs,
   },
   orderDate: {
     ...typography.styles.caption,
@@ -328,6 +337,35 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.lg,
+  },
+  statusCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+  statusIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: spacing.md,
+  },
+  statusInfo: {
+    flex: 1,
+  },
+  statusLabel: {
+    ...typography.styles.h4,
+    fontWeight: typography.fontWeight.bold,
+    marginBottom: spacing.xs,
+  },
+  statusDate: {
+    ...typography.styles.caption,
+    color: colors.text.secondary,
   },
   section: {
     marginBottom: spacing.lg,
@@ -390,14 +428,10 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     marginBottom: spacing.xs,
   },
-  itemAttributes: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.xs,
-  },
-  itemAttribute: {
+  itemVariant: {
     ...typography.styles.caption,
     color: colors.text.secondary,
+    marginBottom: spacing.xs,
   },
   itemPriceRow: {
     flexDirection: 'row',
@@ -417,6 +451,7 @@ const styles = StyleSheet.create({
     ...typography.styles.body,
     fontWeight: typography.fontWeight.semiBold,
     color: colors.text.primary,
+    alignSelf: 'flex-start',
   },
   summaryContent: {
     backgroundColor: colors.surface,
@@ -455,18 +490,10 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: colors.primary,
   },
-  notesText: {
-    ...typography.styles.body,
-    color: colors.text.primary,
-    fontStyle: 'italic',
-  },
   actions: {
     gap: spacing.md,
     marginTop: spacing.md,
     marginBottom: spacing.xl,
-  },
-  cancelButton: {
-    borderColor: colors.error,
   },
   reorderButton: {},
 });

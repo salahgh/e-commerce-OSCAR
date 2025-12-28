@@ -1,145 +1,195 @@
-# Product Queries
+# Vendure Shop API - Product Operations
 
-query GetProducts($page: Int, $size: Int, $sortBy: String, $sortDirection: String) {
-  products(page: $page, size: $size, sortBy: $sortBy, sortDirection: $sortDirection) {
-    content {
+fragment AssetFields on Asset {
+  id
+  preview
+  source
+  width
+  height
+  name
+}
+
+fragment ProductVariantFields on ProductVariant {
+  id
+  name
+  sku
+  priceWithTax
+  currencyCode
+  stockLevel
+  featuredAsset {
+    ...AssetFields
+  }
+  options {
+    id
+    code
+    name
+    group {
       id
-      sku
-      nameAr
-      nameFr
-      nameEn
-      descriptionAr
-      descriptionFr
-      descriptionEn
-      basePrice
-      salePrice
-      stockQuantity
-      imageUrls
-      categoryId
-      categoryName
-      isFeatured
-      availableSizes
-      availableColors
-      viewCount
-      createdAt
-      updatedAt
+      code
+      name
     }
-    totalElements
-    totalPages
-    number
-    size
-    first
-    last
-    hasNext
-    hasPrevious
   }
 }
 
-query GetProduct($id: Long!) {
+fragment ProductFields on Product {
+  id
+  name
+  slug
+  description
+  featuredAsset {
+    ...AssetFields
+  }
+  assets {
+    ...AssetFields
+  }
+  variants {
+    ...ProductVariantFields
+  }
+  collections {
+    id
+    name
+    slug
+  }
+  facetValues {
+    id
+    name
+    code
+    facet {
+      id
+      name
+      code
+    }
+  }
+}
+
+# Get all products with pagination
+query GetProducts($options: ProductListOptions) {
+  products(options: $options) {
+    items {
+      ...ProductFields
+    }
+    totalItems
+  }
+}
+
+# Get product by ID
+query GetProduct($id: ID!) {
   product(id: $id) {
-    id
-    sku
-    nameAr
-    nameFr
-    nameEn
-    descriptionAr
-    descriptionFr
-    descriptionEn
-    basePrice
-    salePrice
-    stockQuantity
-    imageUrls
-    categoryId
-    categoryName
-    isFeatured
-    availableSizes
-    availableColors
-    viewCount
-    createdAt
-    updatedAt
+    ...ProductFields
   }
 }
 
-query GetProductBySku($sku: String!) {
-  productBySku(sku: $sku) {
-    id
-    sku
-    nameAr
-    nameFr
-    nameEn
-    descriptionAr
-    descriptionFr
-    descriptionEn
-    basePrice
-    salePrice
-    stockQuantity
-    imageUrls
-    categoryId
-    categoryName
-    isFeatured
-    availableSizes
-    availableColors
-    viewCount
-    createdAt
-    updatedAt
+# Get product by slug
+query GetProductBySlug($slug: String!) {
+  product(slug: $slug) {
+    ...ProductFields
   }
 }
 
+# Search products
+query SearchProducts($input: SearchInput!) {
+  search(input: $input) {
+    items {
+      productId
+      productName
+      slug
+      description
+      productAsset {
+        id
+        preview
+      }
+      priceWithTax {
+        ... on SinglePrice {
+          value
+        }
+        ... on PriceRange {
+          min
+          max
+        }
+      }
+      currencyCode
+      collectionIds
+      inStock
+    }
+    totalItems
+    facetValues {
+      facetValue {
+        id
+        name
+        code
+        facet {
+          id
+          name
+          code
+        }
+      }
+      count
+    }
+  }
+}
+
+# Get featured products
 query GetFeaturedProducts {
-  featuredProducts {
-    id
-    sku
-    nameAr
-    nameFr
-    nameEn
-    basePrice
-    salePrice
-    stockQuantity
-    imageUrls
-    categoryId
-    categoryName
-    isFeatured
+  search(input: { collectionSlug: "featured", take: 10 }) {
+    items {
+      productId
+      productName
+      slug
+      description
+      productAsset {
+        id
+        preview
+      }
+      priceWithTax {
+        ... on SinglePrice {
+          value
+        }
+        ... on PriceRange {
+          min
+          max
+        }
+      }
+      currencyCode
+      inStock
+    }
+    totalItems
   }
 }
 
-query SearchProducts($keyword: String!, $page: Int, $size: Int) {
-  searchProducts(keyword: $keyword, page: $page, size: $size) {
-    content {
-      id
-      sku
-      nameAr
-      nameFr
-      nameEn
-      basePrice
-      salePrice
-      stockQuantity
-      imageUrls
-      categoryId
-      categoryName
-      isFeatured
+# Get new arrivals
+query GetNewArrivals($take: Int) {
+  products(options: { take: $take, sort: { createdAt: DESC } }) {
+    items {
+      ...ProductFields
     }
-    totalElements
-    totalPages
+    totalItems
   }
 }
 
-query GetProductsByCategory($categoryId: Long!, $page: Int, $size: Int) {
-  productsByCategory(categoryId: $categoryId, page: $page, size: $size) {
-    content {
-      id
-      sku
-      nameAr
-      nameFr
-      nameEn
-      basePrice
-      salePrice
-      stockQuantity
-      imageUrls
-      categoryId
-      categoryName
-      isFeatured
+# Get products by collection
+query GetProductsByCollection($collectionSlug: String!, $take: Int, $skip: Int) {
+  search(input: { collectionSlug: $collectionSlug, take: $take, skip: $skip }) {
+    items {
+      productId
+      productName
+      slug
+      description
+      productAsset {
+        id
+        preview
+      }
+      priceWithTax {
+        ... on SinglePrice {
+          value
+        }
+        ... on PriceRange {
+          min
+          max
+        }
+      }
+      currencyCode
+      inStock
     }
-    totalElements
-    totalPages
+    totalItems
   }
 }

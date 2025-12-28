@@ -15,23 +15,40 @@ const cash_on_delivery_handler_1 = require("./plugins/oscar-plugin/payment/cash-
 const cib_payment_handler_1 = require("./plugins/oscar-plugin/payment/cib-payment-handler");
 const baridimob_payment_handler_1 = require("./plugins/oscar-plugin/payment/baridimob-payment-handler");
 const IS_DEV = process.env.NODE_ENV !== 'production';
+// Parse CORS origins from environment variable
+const getCorsOrigins = () => {
+    if (IS_DEV) {
+        return [
+            'http://localhost:5173',
+            'http://localhost:5174',
+            'http://localhost:5175',
+            'http://localhost:3000',
+            'http://localhost:3001',
+            'http://localhost:3002',
+            'http://127.0.0.1:5173',
+            'http://127.0.0.1:5174',
+            'http://127.0.0.1:5175',
+            'http://127.0.0.1:3000',
+            'http://127.0.0.1:3001',
+            'http://127.0.0.1:3002',
+        ];
+    }
+    // In production, read from CORS_ORIGINS env variable
+    const corsOrigins = process.env.CORS_ORIGINS;
+    if (corsOrigins) {
+        return corsOrigins.split(',').map(origin => origin.trim());
+    }
+    // Default: allow all origins (set CORS_ORIGINS for stricter security)
+    return true;
+};
 exports.config = {
     apiOptions: {
-        port: 8085,
+        port: Number(process.env.PORT) || 8085,
         adminApiPath: 'admin-api',
         shopApiPath: 'shop-api',
         // CORS settings to allow frontend apps
         cors: {
-            origin: IS_DEV ? [
-                'http://localhost:5173',
-                'http://localhost:5174',
-                'http://localhost:5175',
-                'http://localhost:3000',
-                'http://127.0.0.1:5173',
-                'http://127.0.0.1:5174',
-                'http://127.0.0.1:5175',
-                'http://127.0.0.1:3000'
-            ] : false,
+            origin: getCorsOrigins(),
             credentials: true,
         },
         // The following options are useful in development mode,
@@ -106,6 +123,7 @@ exports.config = {
         Customer: [
             { name: 'wilaya', type: 'string', label: [{ languageCode: core_1.LanguageCode.en, value: 'Wilaya' }] },
             { name: 'city', type: 'string', label: [{ languageCode: core_1.LanguageCode.en, value: 'City' }] },
+            { name: 'adminNotes', type: 'text', label: [{ languageCode: core_1.LanguageCode.en, value: 'Admin Notes' }] },
         ],
         Order: [
             { name: 'customerNotes', type: 'text', label: [{ languageCode: core_1.LanguageCode.en, value: 'Customer Notes' }] },

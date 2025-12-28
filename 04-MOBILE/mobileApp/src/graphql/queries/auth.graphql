@@ -1,16 +1,35 @@
-# Authentication Queries
+# Vendure Shop API - Authentication Queries
 
-query GetCurrentUser {
-  me {
+fragment CustomerFields on Customer {
+  id
+  createdAt
+  updatedAt
+  firstName
+  lastName
+  emailAddress
+  phoneNumber
+  addresses {
     id
-    email
-    firstName
-    lastName
-    phone
-    role
-    isActive
-    emailVerified
-    createdAt
-    updatedAt
+    fullName
+    company
+    streetLine1
+    streetLine2
+    city
+    province
+    postalCode
+    country {
+      code
+      name
+    }
+    phoneNumber
+    defaultShippingAddress
+    defaultBillingAddress
+  }
+}
+
+# Get the currently logged-in customer
+query ActiveCustomer {
+  activeCustomer {
+    ...CustomerFields
   }
 }

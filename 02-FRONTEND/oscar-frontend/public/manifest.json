@@ -1,0 +1,17 @@
+{
+  "name": "OSCAR Fashion",
+  "short_name": "OSCAR",
+  "description": "Boutique de mode en ligne - Vetements, Accessoires et Plus",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["shopping", "fashion", "lifestyle"],
+  "icons": [],
+  "prefer_related_applications": false,
+  "related_applications": []
+}

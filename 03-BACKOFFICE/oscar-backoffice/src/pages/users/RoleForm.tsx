@@ -26,14 +26,12 @@ const validationSchema = Yup.object().shape({
     .matches(/^[a-z_]+$/, 'Le code doit être en minuscules avec des underscores')
     .required('Le code est requis'),
   description: Yup.string().required('La description est requise'),
-  permissions: Yup.array()
-    .of(Yup.string())
-    .min(1, 'Au moins une permission est requise'),
+  permissions: Yup.array().of(Yup.string()).min(1, 'Au moins une permission est requise'),
 });
 
 // Permission categories for grouping
 const PERMISSION_CATEGORIES = {
-  'Catalogue': [
+  Catalogue: [
     Permission.CreateCatalog,
     Permission.ReadCatalog,
     Permission.UpdateCatalog,
@@ -51,13 +49,13 @@ const PERMISSION_CATEGORIES = {
     Permission.UpdateCollection,
     Permission.DeleteCollection,
   ],
-  'Commandes': [
+  Commandes: [
     Permission.CreateOrder,
     Permission.ReadOrder,
     Permission.UpdateOrder,
     Permission.DeleteOrder,
   ],
-  'Clients': [
+  Clients: [
     Permission.CreateCustomer,
     Permission.ReadCustomer,
     Permission.UpdateCustomer,
@@ -67,38 +65,38 @@ const PERMISSION_CATEGORIES = {
     Permission.UpdateCustomerGroup,
     Permission.DeleteCustomerGroup,
   ],
-  'Administrateurs': [
+  Administrateurs: [
     Permission.CreateAdministrator,
     Permission.ReadAdministrator,
     Permission.UpdateAdministrator,
     Permission.DeleteAdministrator,
   ],
-  'Paramètres': [
+  Paramètres: [
     Permission.CreateSettings,
     Permission.ReadSettings,
     Permission.UpdateSettings,
     Permission.DeleteSettings,
     Permission.UpdateGlobalSettings,
   ],
-  'Paiements': [
+  Paiements: [
     Permission.CreatePaymentMethod,
     Permission.ReadPaymentMethod,
     Permission.UpdatePaymentMethod,
     Permission.DeletePaymentMethod,
   ],
-  'Livraison': [
+  Livraison: [
     Permission.CreateShippingMethod,
     Permission.ReadShippingMethod,
     Permission.UpdateShippingMethod,
     Permission.DeleteShippingMethod,
   ],
-  'Promotions': [
+  Promotions: [
     Permission.CreatePromotion,
     Permission.ReadPromotion,
     Permission.UpdatePromotion,
     Permission.DeletePromotion,
   ],
-  'Assets': [
+  Assets: [
     Permission.CreateAsset,
     Permission.ReadAsset,
     Permission.UpdateAsset,
@@ -142,9 +140,7 @@ export const RoleForm: React.FC = () => {
   const submitting = creating || updating;
 
   const formatPermission = (permission: string): string => {
-    return permission
-      .replace(/([A-Z])/g, ' $1')
-      .trim();
+    return permission.replace(/([A-Z])/g, ' $1').trim();
   };
 
   const initialValues: FormValues = {
@@ -190,10 +186,10 @@ export const RoleForm: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
-          <p className="text-gray-400 text-lg">Rôle non trouvé</p>
+          <p className="text-muted-foreground text-lg">Rôle non trouvé</p>
           <button
             onClick={() => navigate('/users/roles')}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
           >
             Retour à la liste
           </button>
@@ -208,15 +204,15 @@ export const RoleForm: React.FC = () => {
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate('/users/roles')}
-          className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded-lg"
+          className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-100">
+          <h1 className="text-3xl font-bold text-foreground">
             {isEdit ? 'Modifier le rôle' : 'Nouveau rôle'}
           </h1>
-          <p className="text-gray-400 mt-1">
+          <p className="text-muted-foreground mt-1">
             {isEdit
               ? `Modification du rôle "${role?.code}"`
               : 'Créer un nouveau rôle avec des permissions personnalisées'}
@@ -233,43 +229,37 @@ export const RoleForm: React.FC = () => {
         {({ values, setFieldValue, errors, touched }) => (
           <Form className="space-y-6">
             {/* Basic Info */}
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="bg-card border-border">
               <div className="p-6 space-y-6">
-                <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
                   <Shield className="h-5 w-5 text-blue-400" />
                   Informations du rôle
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Code *
-                    </label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Code *</label>
                     <Field
                       type="text"
                       name="code"
                       disabled={isEdit}
-                      className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50"
+                      className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none disabled:opacity-50"
                       placeholder="manager_role"
                     />
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       Minuscules et underscores uniquement
                     </p>
-                    <ErrorMessage
-                      name="code"
-                      component="p"
-                      className="mt-1 text-sm text-red-400"
-                    />
+                    <ErrorMessage name="code" component="p" className="mt-1 text-sm text-red-400" />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Description *
                     </label>
                     <Field
                       type="text"
                       name="description"
-                      className="w-full px-4 py-3 border border-gray-600 rounded-lg bg-gray-900 text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                       placeholder="Gestionnaire des commandes"
                     />
                     <ErrorMessage
@@ -283,15 +273,16 @@ export const RoleForm: React.FC = () => {
             </Card>
 
             {/* Permissions */}
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="bg-card border-border">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
                     <Key className="h-5 w-5 text-blue-400" />
                     Permissions *
                   </h2>
-                  <span className="text-sm text-gray-400">
-                    {values.permissions.length} sélectionnée{values.permissions.length > 1 ? 's' : ''}
+                  <span className="text-sm text-muted-foreground">
+                    {values.permissions.length} sélectionnée
+                    {values.permissions.length > 1 ? 's' : ''}
                   </span>
                 </div>
 
@@ -309,9 +300,9 @@ export const RoleForm: React.FC = () => {
                     return (
                       <div
                         key={category}
-                        className="border border-gray-700 rounded-lg overflow-hidden"
+                        className="border border-border rounded-lg overflow-hidden"
                       >
-                        <div className="bg-gray-900 px-4 py-3 flex items-center justify-between">
+                        <div className="bg-background px-4 py-3 flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <input
                               type="checkbox"
@@ -328,11 +319,11 @@ export const RoleForm: React.FC = () => {
                                   );
                                 }
                               }}
-                              className="h-4 w-4 text-blue-600 rounded border-gray-600 bg-gray-800 focus:ring-blue-500"
+                              className="h-4 w-4 text-primary rounded border-border bg-card focus:ring-primary"
                             />
-                            <span className="font-medium text-gray-100">{category}</span>
+                            <span className="font-medium text-foreground">{category}</span>
                           </div>
-                          <span className="text-sm text-gray-400">
+                          <span className="text-sm text-muted-foreground">
                             {selectedCount}/{permissions.length}
                           </span>
                         </div>
@@ -359,9 +350,9 @@ export const RoleForm: React.FC = () => {
                                     );
                                   }
                                 }}
-                                className="h-4 w-4 text-blue-600 rounded border-gray-600 bg-gray-800 focus:ring-blue-500"
+                                className="h-4 w-4 text-primary rounded border-border bg-card focus:ring-primary"
                               />
-                              <span className="text-sm text-gray-300">
+                              <span className="text-sm text-foreground">
                                 {formatPermission(permission)}
                               </span>
                             </label>
@@ -379,14 +370,14 @@ export const RoleForm: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/users/roles')}
-                className="px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700"
+                className="px-6 py-3 border border-border text-foreground rounded-lg hover:bg-accent"
               >
                 Annuler
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {submitting ? (
                   <>

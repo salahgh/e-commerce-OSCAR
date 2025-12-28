@@ -91,15 +91,15 @@ export const AdminProfile: React.FC = () => {
             {(admin.firstName?.[0] || '') + (admin.lastName?.[0] || '')}
           </span>
         </div>
-        <h1 className="text-3xl font-bold text-gray-100">Mon Profil</h1>
-        <p className="text-gray-400 mt-1">{admin.emailAddress}</p>
+        <h1 className="text-3xl font-bold text-foreground">Mon Profil</h1>
+        <p className="text-muted-foreground mt-1">{admin.emailAddress}</p>
       </div>
 
       {/* Profile Info Card */}
-      <div className="bg-gray-800 rounded-lg shadow p-6">
+      <div className="bg-card rounded-lg shadow p-6">
         <div className="flex items-center gap-2 mb-6">
-          <User className="h-5 w-5 text-gray-500" />
-          <h2 className="text-lg font-semibold text-gray-100">Informations</h2>
+          <User className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-lg font-semibold text-foreground">Informations</h2>
         </div>
 
         <Formik
@@ -162,14 +162,14 @@ export const AdminProfile: React.FC = () => {
       </div>
 
       {/* Roles Card */}
-      <div className="bg-gray-800 rounded-lg shadow p-6">
+      <div className="bg-card rounded-lg shadow p-6">
         <div className="flex items-center gap-2 mb-4">
-          <Shield className="h-5 w-5 text-gray-500" />
-          <h2 className="text-lg font-semibold text-gray-100">Rôles</h2>
+          <Shield className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-lg font-semibold text-foreground">Rôles</h2>
         </div>
         <div className="flex flex-wrap gap-2">
           {roles.length === 0 ? (
-            <p className="text-gray-400">Aucun rôle assigné</p>
+            <p className="text-muted-foreground">Aucun rôle assigné</p>
           ) : (
             roles.map((role) => (
               <Badge key={role.id} variant="info" className="text-sm">
@@ -181,19 +181,21 @@ export const AdminProfile: React.FC = () => {
       </div>
 
       {/* Account Info Card */}
-      <div className="bg-gray-800 rounded-lg shadow p-6">
+      <div className="bg-card rounded-lg shadow p-6">
         <div className="flex items-center gap-2 mb-4">
-          <Calendar className="h-5 w-5 text-gray-500" />
-          <h2 className="text-lg font-semibold text-gray-100">Compte</h2>
+          <Calendar className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-lg font-semibold text-foreground">Compte</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-gray-400">ID</p>
-            <p className="font-medium text-gray-100">{admin.id}</p>
+            <p className="text-muted-foreground">ID</p>
+            <p className="font-medium text-foreground">{admin.id}</p>
           </div>
           <div>
-            <p className="text-gray-400">Identifiant</p>
-            <p className="font-medium text-gray-100">{admin.user?.identifier || admin.emailAddress}</p>
+            <p className="text-muted-foreground">Identifiant</p>
+            <p className="font-medium text-foreground">
+              {admin.user?.identifier || admin.emailAddress}
+            </p>
           </div>
         </div>
       </div>

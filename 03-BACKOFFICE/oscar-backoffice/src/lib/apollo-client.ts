@@ -31,12 +31,17 @@ const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
 
       // Handle Vendure auth errors - but DON'T redirect on dashboard page to avoid loops
       const errorCode = (error as any).extensions?.code;
-      const isDashboardQuery = ['OscarDashboardStats', 'RecentOrders', 'LowStockProducts', 'DashboardOrdersAnalysis'].includes(operation.operationName);
+      const isDashboardQuery = [
+        'OscarDashboardStats',
+        'RecentOrders',
+        'LowStockProducts',
+        'DashboardOrdersAnalysis',
+      ].includes(operation.operationName);
 
       if (
         (errorCode === 'FORBIDDEN' ||
-        message.includes('You are not currently authorized') ||
-        message.includes('Not authenticated')) &&
+          message.includes('You are not currently authorized') ||
+          message.includes('Not authenticated')) &&
         !isDashboardQuery
       ) {
         localStorage.removeItem('vendure_auth_token');

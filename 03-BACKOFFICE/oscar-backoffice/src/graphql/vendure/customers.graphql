@@ -15,6 +15,13 @@ query AdminCustomers($options: CustomerListOptions) {
         verified
         lastLogin
       }
+      orders {
+        totalItems
+        items {
+          totalWithTax
+          state
+        }
+      }
       customFields {
         wilaya
         city
@@ -68,6 +75,7 @@ query AdminCustomer($id: ID!) {
     customFields {
       wilaya
       city
+      adminNotes
     }
   }
 }
@@ -84,6 +92,7 @@ mutation UpdateCustomer($input: UpdateCustomerInput!) {
       customFields {
         wilaya
         city
+        adminNotes
       }
     }
     ... on EmailAddressConflictError {

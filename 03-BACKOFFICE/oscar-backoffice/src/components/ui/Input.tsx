@@ -15,28 +15,30 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label htmlFor={inputId} className="block text-sm font-medium text-gray-300 mb-1">
+          <label htmlFor={inputId} className="block text-sm font-medium text-muted-foreground mb-1">
             {label}
           </label>
         )}
         <div className="relative">
           {icon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">{icon}</div>
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+              {icon}
+            </div>
           )}
           <input
             id={inputId}
             ref={ref}
             className={cn(
-              'w-full px-3 py-2 border rounded-lg bg-gray-800 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:bg-gray-900 disabled:cursor-not-allowed',
+              'w-full px-3 py-2 border rounded-lg bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-colors disabled:bg-muted disabled:cursor-not-allowed',
               icon && 'pl-10',
-              error ? 'border-red-500' : 'border-gray-600',
+              error ? 'border-destructive' : 'border-input',
               className
             )}
             {...props}
           />
         </div>
-        {error && <p className="mt-1 text-sm text-red-400">{error}</p>}
-        {helperText && !error && <p className="mt-1 text-sm text-gray-400">{helperText}</p>}
+        {error && <p className="mt-1 text-sm text-destructive">{error}</p>}
+        {helperText && !error && <p className="mt-1 text-sm text-muted-foreground">{helperText}</p>}
       </div>
     );
   }

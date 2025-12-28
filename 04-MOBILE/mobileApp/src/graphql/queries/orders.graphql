@@ -1,71 +1,140 @@
-# Order Queries
+# Vendure Shop API - Order Queries
 
-query GetMyOrders($page: Int, $size: Int) {
-  myOrders(page: $page, size: $size) {
-    content {
+fragment CustomerOrderFields on Order {
+  id
+  code
+  state
+  active
+  createdAt
+  updatedAt
+  totalQuantity
+  subTotalWithTax
+  shippingWithTax
+  totalWithTax
+  currencyCode
+  lines {
+    id
+    quantity
+    linePriceWithTax
+    unitPriceWithTax
+    productVariant {
       id
-      orderNumber
-      userId
-      userEmail
-      status
-      subtotal
-      shippingCost
-      totalAmount
-      paymentMethod
-      shippingAddress
-      phoneNumber
-      notes
-      trackingNumber
-      items {
+      name
+      sku
+      product {
         id
-        productId
-        productName
-        productImage
-        quantity
-        price
-        subtotal
-        selectedSize
-        selectedColor
+        name
+        slug
+        featuredAsset {
+          id
+          preview
+        }
       }
-      createdAt
-      updatedAt
-      paidAt
-      deliveredAt
     }
-    totalElements
-    totalPages
+    featuredAsset {
+      id
+      preview
+    }
+  }
+  shippingAddress {
+    fullName
+    streetLine1
+    streetLine2
+    city
+    province
+    postalCode
+    country
+    phoneNumber
+  }
+  billingAddress {
+    fullName
+    streetLine1
+    streetLine2
+    city
+    province
+    postalCode
+    country
+    phoneNumber
+  }
+  shippingLines {
+    shippingMethod {
+      id
+      name
+      description
+    }
+    priceWithTax
+  }
+  payments {
+    id
+    method
+    amount
+    state
+    transactionId
+    createdAt
+    metadata
+  }
+  fulfillments {
+    id
+    state
+    method
+    trackingCode
+    createdAt
+    lines {
+      orderLineId
+      quantity
+    }
   }
 }
 
-query GetOrder($id: Long!) {
-  order(id: $id) {
-    id
-    orderNumber
-    userId
-    userEmail
-    status
-    subtotal
-    shippingCost
-    totalAmount
-    paymentMethod
-    shippingAddress
-    phoneNumber
-    notes
-    trackingNumber
-    items {
-      id
-      productId
-      productName
-      productImage
-      quantity
-      price
-      subtotal
-      selectedSize
-      selectedColor
+# Get customer order history
+query GetMyOrders($options: OrderListOptions) {
+  activeCustomer {
+    orders(options: $options) {
+      items {
+        id
+        code
+        state
+        createdAt
+        totalWithTax
+        currencyCode
+        totalQuantity
+        lines {
+          id
+          quantity
+          productVariant {
+            name
+            product {
+              name
+              featuredAsset {
+                preview
+              }
+            }
+          }
+          featuredAsset {
+            preview
+          }
+        }
+      }
+      totalItems
     }
-    createdAt
-    updatedAt
-    paidAt
-    deliveredAt
   }
+}
+
+# Get single order by code
+query GetOrderByCode($code: String!) {
+  orderByCode(code: $code) {
+    ...CustomerOrderFields
+  }
+}
+
+# Get single order by ID
+query GetOrder($id: ID!) {
+  order(id: $id) {
+    ...CustomerOrderFields
+  }
+}
+
+# Get next order states
+query GetNextOrderStates {
+  nextOrderStates
 }

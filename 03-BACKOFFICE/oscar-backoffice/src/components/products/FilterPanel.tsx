@@ -33,13 +33,13 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const toggleArrayFilter = (
-    key: 'sizes' | 'colors' | 'categoryIds',
-    value: string
-  ) => {
+  const toggleArrayFilter = (key: 'sizes' | 'colors' | 'categoryIds', value: string) => {
     const current = filters[key] as string[];
     if (current.includes(value)) {
-      onFilterChange(key, current.filter(v => v !== value));
+      onFilterChange(
+        key,
+        current.filter((v) => v !== value)
+      );
     } else {
       onFilterChange(key, [...current, value]);
     }
@@ -48,20 +48,14 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/30 z-40"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} />
 
       {/* Panel */}
       <div className="fixed right-0 top-0 h-full w-96 bg-gray-800 shadow-xl z-50 flex flex-col border-l border-gray-700">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h2 className="text-lg font-semibold text-gray-100">Filtres avancés</h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
             <X className="h-5 w-5 text-gray-400" />
           </button>
         </div>
@@ -70,9 +64,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
           {/* Status Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Statut
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Statut</label>
             <div className="flex gap-2">
               <button
                 onClick={() => onFilterChange('enabled', undefined)}
@@ -143,11 +135,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 
           {/* Stock Status Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              État du stock
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">État du stock</label>
             <div className="flex flex-wrap gap-2">
-              {STOCK_STATUS_OPTIONS.map(option => (
+              {STOCK_STATUS_OPTIONS.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => onFilterChange('stockStatus', option.value)}
@@ -174,7 +164,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                 type="number"
                 placeholder="Min"
                 value={filters.minPrice ?? ''}
-                onChange={(e) => onFilterChange('minPrice', e.target.value ? Number(e.target.value) : undefined)}
+                onChange={(e) =>
+                  onFilterChange('minPrice', e.target.value ? Number(e.target.value) : undefined)
+                }
                 className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
               <span className="text-gray-500">-</span>
@@ -182,7 +174,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                 type="number"
                 placeholder="Max"
                 value={filters.maxPrice ?? ''}
-                onChange={(e) => onFilterChange('maxPrice', e.target.value ? Number(e.target.value) : undefined)}
+                onChange={(e) =>
+                  onFilterChange('maxPrice', e.target.value ? Number(e.target.value) : undefined)
+                }
                 className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
             </div>
@@ -191,11 +185,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
           {/* Categories Filter */}
           {collections.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Catégories
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Catégories</label>
               <div className="space-y-1 max-h-40 overflow-y-auto border border-gray-600 rounded-lg p-2 bg-gray-700/50">
-                {collections.map(collection => (
+                {collections.map((collection) => (
                   <label
                     key={collection.id}
                     className="flex items-center gap-2 p-1.5 hover:bg-gray-600 rounded cursor-pointer"
@@ -221,11 +213,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 
           {/* Sizes Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Tailles
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Tailles</label>
             <div className="flex flex-wrap gap-2">
-              {AVAILABLE_SIZES.map(size => (
+              {AVAILABLE_SIZES.map((size) => (
                 <button
                   key={size}
                   onClick={() => toggleArrayFilter('sizes', size)}
@@ -244,11 +234,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 
           {/* Colors Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Couleurs
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Couleurs</label>
             <div className="flex flex-wrap gap-2">
-              {COLOR_PALETTE.map(color => (
+              {COLOR_PALETTE.map((color) => (
                 <ColorSwatch
                   key={color.name}
                   color={color.name}

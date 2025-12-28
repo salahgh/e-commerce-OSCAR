@@ -1,45 +1,125 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+  TouchableOpacity,
+} from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { useGetFeaturedProductsQuery } from '../../src/graphql/generated/graphql';
-import { ProductCard, SearchBar } from '../../src/components/products';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import {
+  useGetNewArrivalsQuery,
+  useGetRootCollectionsQuery,
+  useSearchProductsQuery,
+} from '../../src/graphql/generated/graphql';
+import { HeroBanner, CategoryScroll, ProductSection } from '../../src/components/home';
 import { LoadingSpinner, ErrorState } from '../../src/components/ui';
+import { CartBadge } from '../../src/components/cart';
 import { colors, spacing, typography } from '../../src/theme';
 import { useAuth } from '../../src/contexts/AuthContext';
+import { formatPrice } from '../../src/utils/vendureAdapters';
+
+const bannerSlides = [
+  {
+    id: '1',
+    title: 'New Collection',
+    subtitle: 'Discover the latest trends in fashion',
+    imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800',
+    buttonText: 'Shop Now',
+    link: '/products?collection=new',
+  },
+  {
+    id: '2',
+    title: 'Summer Sale',
+    subtitle: 'Up to 50% off on selected items',
+    imageUrl: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800',
+    buttonText: 'View Offers',
+    link: '/products?sale=true',
+  },
+  {
+    id: '3',
+    title: 'Premium Quality',
+    subtitle: 'Handpicked fashion for you',
+    imageUrl: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=800',
+    buttonText: 'Explore',
+    link: '/products',
+  },
+];
+
+const defaultCategories = [
+  { id: '1', name: 'Women', slug: 'women', icon: 'woman-outline' as const },
+  { id: '2', name: 'Men', slug: 'men', icon: 'man-outline' as const },
+  { id: '3', name: 'Accessories', slug: 'accessories', icon: 'watch-outline' as const },
+  { id: '4', name: 'Shoes', slug: 'shoes', icon: 'footsteps-outline' as const },
+  { id: '5', name: 'Bags', slug: 'bags', icon: 'bag-outline' as const },
+  { id: '6', name: 'Jewelry', slug: 'jewelry', icon: 'diamond-outline' as const },
+];
 
 export default function HomeScreen() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState('');
+  const insets = useSafeAreaInsets();
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch featured products
+  // Fetch featured products using search
   const {
     data: featuredData,
     loading: featuredLoading,
     error: featuredError,
     refetch: refetchFeatured,
-  } = useGetFeaturedProductsQuery();
+  } = useSearchProductsQuery({
+    variables: {
+      input: { take: 10 },
+    },
+  });
 
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      router.push(`/products/search?q=${encodeURIComponent(searchQuery.trim())}`);
+  // Fetch new arrivals
+  const {
+    data: newArrivalsData,
+    loading: newArrivalsLoading,
+    refetch: refetchNewArrivals,
+  } = useGetNewArrivalsQuery({
+    variables: { take: 10 },
+  });
+
+  // Fetch collections (categories)
+  const {
+    data: collectionsData,
+    refetch: refetchCollections,
+  } = useGetRootCollectionsQuery();
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        refetchFeatured(),
+        refetchNewArrivals(),
+        refetchCollections(),
+      ]);
+    } finally {
+      setRefreshing(false);
     }
+  }, [refetchFeatured, refetchNewArrivals, refetchCollections]);
+
+  const handleSeeAllFeatured = () => {
+    router.push('/products?featured=true');
   };
 
-  const handleRefresh = () => {
-    refetchFeatured();
+  const handleSeeAllNewArrivals = () => {
+    router.push('/products?sort=newest');
   };
 
-  const handleSeeAllProducts = () => {
-    router.push('/products');
+  const handleSeeAllCategories = () => {
+    router.push('/(tabs)/explore');
   };
 
-  const handleSeeCategory = (category: string) => {
-    router.push(`/products?category=${encodeURIComponent(category)}`);
-  };
+  const loading = featuredLoading && newArrivalsLoading;
 
-  if (featuredLoading) {
+  if (loading && !refreshing) {
     return <LoadingSpinner />;
   }
 
@@ -48,107 +128,161 @@ export default function HomeScreen() {
       <ErrorState
         title={t('common.error', 'Error')}
         message={featuredError.message}
-        onRetry={refetchFeatured}
+        onRetry={handleRefresh}
       />
     );
   }
 
-  const featuredProducts = featuredData?.featuredProducts || [];
+  // Transform Vendure search results to product format
+  const featuredProducts = (featuredData?.search?.items || []).map((item: any) => {
+    const price = item.priceWithTax;
+    const priceValue = price?.__typename === 'SinglePrice' ? price.value : price?.min;
+    return {
+      id: item.productId,
+      name: item.productName,
+      slug: item.slug,
+      description: item.description,
+      imageUrl: item.productAsset?.preview,
+      price: formatPrice(priceValue || 0),
+      inStock: item.inStock,
+    };
+  });
+
+  // Transform new arrivals products
+  const newArrivals = (newArrivalsData?.products?.items || []).map((product: any) => {
+    const defaultVariant = product.variants?.[0];
+    return {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      description: product.description,
+      imageUrl: product.featuredAsset?.preview,
+      price: defaultVariant ? formatPrice(defaultVariant.priceWithTax) : 0,
+      inStock: defaultVariant?.stockLevel !== 'OUT_OF_STOCK',
+    };
+  });
+
+  // Transform collections to categories format
+  const categories = (collectionsData?.collections?.items || []).map((collection: any) => ({
+    id: collection.id,
+    name: collection.name,
+    slug: collection.slug,
+    imageUrl: collection.featuredAsset?.preview,
+  }));
+
+  const displayCategories = categories.length > 0 ? categories : defaultCategories;
 
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl
-          refreshing={featuredLoading}
-          onRefresh={handleRefresh}
-          colors={[colors.primary]}
-          tintColor={colors.primary}
-        />
-      }
-    >
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>
             {user?.firstName
-              ? t('home.greeting', { name: user.firstName })
+              ? `Hello, ${user.firstName}`
               : t('home.welcome', 'Welcome')}
           </Text>
-          <Text style={styles.subtitle}>OSCAR Fashion</Text>
+          <Text style={styles.brandName}>OSCAR Fashion</Text>
         </View>
-      </View>
-
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <SearchBar
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onSearch={handleSearch}
-          placeholder={t('products.searchPlaceholder', 'Search for fashion items...')}
-        />
-      </View>
-
-      {/* Featured Products */}
-      {featuredProducts.length > 0 && (
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('home.featured', 'Featured Products')}</Text>
-            <TouchableOpacity onPress={handleSeeAllProducts}>
-              <Text style={styles.seeAll}>{t('home.seeAll', 'See All')}</Text>
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalScroll}
-          >
-            {featuredProducts.map((product) => (
-              <View key={product.id} style={styles.horizontalCard}>
-                <ProductCard product={product} />
-              </View>
-            ))}
-          </ScrollView>
-        </View>
-      )}
-
-      {/* Categories Quick Access */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('home.shopByCategory', 'Shop by Category')}</Text>
-        <View style={styles.categoriesGrid}>
-          <TouchableOpacity style={styles.categoryCard} onPress={() => handleSeeCategory('women')}>
-            <Text style={styles.categoryEmoji}>👗</Text>
-            <Text style={styles.categoryText}>{t('categories.women', 'Women')}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.categoryCard} onPress={() => handleSeeCategory('men')}>
-            <Text style={styles.categoryEmoji}>👔</Text>
-            <Text style={styles.categoryText}>{t('categories.men', 'Men')}</Text>
-          </TouchableOpacity>
-
+        <View style={styles.headerRight}>
           <TouchableOpacity
-            style={styles.categoryCard}
-            onPress={() => handleSeeCategory('accessories')}
+            style={styles.headerIcon}
+            onPress={() => router.push('/profile/notifications')}
           >
-            <Text style={styles.categoryEmoji}>👜</Text>
-            <Text style={styles.categoryText}>{t('categories.accessories', 'Accessories')}</Text>
+            <Ionicons name="notifications-outline" size={24} color={colors.text.primary} />
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.categoryCard} onPress={() => handleSeeCategory('shoes')}>
-            <Text style={styles.categoryEmoji}>👟</Text>
-            <Text style={styles.categoryText}>{t('categories.shoes', 'Shoes')}</Text>
-          </TouchableOpacity>
+          <CartBadge />
         </View>
       </View>
 
-      {/* Call to Action */}
-      <TouchableOpacity style={styles.ctaButton} onPress={handleSeeAllProducts}>
-        <Text style={styles.ctaText}>{t('home.browseAllProducts', 'Browse All Products')}</Text>
-      </TouchableOpacity>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+          />
+        }
+      >
+        {/* Search Bar */}
+        <TouchableOpacity
+          style={styles.searchContainer}
+          onPress={() => router.push('/search')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.searchBar}>
+            <Ionicons name="search-outline" size={20} color={colors.text.tertiary} />
+            <Text style={styles.searchPlaceholder}>
+              {t('products.searchPlaceholder', 'Search for fashion items...')}
+            </Text>
+          </View>
+        </TouchableOpacity>
 
-      <View style={styles.bottomSpacer} />
-    </ScrollView>
+        {/* Hero Banner */}
+        <HeroBanner slides={bannerSlides} autoScroll height={200} />
+
+        {/* Categories */}
+        <View style={styles.section}>
+          <CategoryScroll
+            categories={displayCategories}
+            title={t('home.shopByCategory', 'Shop by Category')}
+            showSeeAll
+            onSeeAll={handleSeeAllCategories}
+          />
+        </View>
+
+        {/* Featured Products */}
+        {featuredProducts.length > 0 && (
+          <ProductSection
+            title={t('home.featured', 'Featured Products')}
+            products={featuredProducts}
+            onSeeAll={handleSeeAllFeatured}
+            variant="horizontal"
+          />
+        )}
+
+        {/* New Arrivals */}
+        {newArrivals.length > 0 && (
+          <ProductSection
+            title={t('home.newArrivals', 'New Arrivals')}
+            products={newArrivals}
+            onSeeAll={handleSeeAllNewArrivals}
+            variant="horizontal"
+          />
+        )}
+
+        {/* Promotional Section */}
+        <TouchableOpacity
+          style={styles.promoSection}
+          onPress={() => router.push('/products')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.promoContent}>
+            <Ionicons name="gift-outline" size={32} color={colors.primary} />
+            <View style={styles.promoText}>
+              <Text style={styles.promoTitle}>Free Delivery</Text>
+              <Text style={styles.promoSubtitle}>On orders over 5000 DZD</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color={colors.primary} />
+          </View>
+        </TouchableOpacity>
+
+        {/* Browse All Button */}
+        <TouchableOpacity
+          style={styles.ctaButton}
+          onPress={() => router.push('/products')}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.ctaText}>{t('home.browseAllProducts', 'Browse All Products')}</Text>
+          <Ionicons name="arrow-forward" size={20} color={colors.surface} />
+        </TouchableOpacity>
+
+        <View style={styles.bottomSpacer} />
+      </ScrollView>
+    </View>
   );
 }
 
@@ -161,95 +295,98 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: spacing.lg,
-    paddingTop: spacing.xl,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   greeting: {
-    ...typography.styles.h2,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    marginBottom: 2,
   },
-  subtitle: {
-    ...typography.styles.body,
+  brandName: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
     color: colors.primary,
-    fontWeight: typography.fontWeight.semiBold,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  headerIcon: {
+    padding: spacing.xs,
+  },
+  scrollView: {
+    flex: 1,
   },
   searchContainer: {
     paddingHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: spacing.borderRadius.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: spacing.sm,
+  },
+  searchPlaceholder: {
+    fontSize: typography.fontSize.md,
+    color: colors.text.tertiary,
   },
   section: {
-    marginBottom: spacing.xl,
+    marginTop: spacing.lg,
   },
-  sectionHeader: {
+  promoSection: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    backgroundColor: colors.secondaryLight,
+    borderRadius: spacing.borderRadius.lg,
+    overflow: 'hidden',
+  },
+  promoContent: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-  },
-  sectionTitle: {
-    ...typography.styles.h3,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-  },
-  seeAll: {
-    ...typography.styles.body,
-    color: colors.primary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  horizontalScroll: {
-    paddingLeft: spacing.lg,
-    gap: spacing.md,
-  },
-  horizontalCard: {
-    width: 180,
-  },
-  categoriesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: spacing.lg,
-    gap: spacing.md,
-  },
-  categoryCard: {
-    flex: 1,
-    minWidth: '45%',
-    backgroundColor: colors.surface,
-    borderRadius: 12,
     padding: spacing.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    aspectRatio: 1,
-    elevation: 2,
-    shadowColor: colors.text.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    gap: spacing.md,
   },
-  categoryEmoji: {
-    fontSize: 48,
-    marginBottom: spacing.sm,
+  promoText: {
+    flex: 1,
   },
-  categoryText: {
-    ...typography.styles.body,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.semiBold,
-    textAlign: 'center',
+  promoTitle: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary,
+  },
+  promoSubtitle: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    marginTop: 2,
   },
   ctaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.primary,
     marginHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: spacing.xl,
+    borderRadius: spacing.borderRadius.lg,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
   },
   ctaText: {
-    ...typography.styles.body,
-    color: colors.white,
+    fontSize: typography.fontSize.md,
     fontWeight: typography.fontWeight.semiBold,
+    color: colors.surface,
   },
   bottomSpacer: {
-    height: spacing.xl,
+    height: spacing['2xl'],
   },
 });

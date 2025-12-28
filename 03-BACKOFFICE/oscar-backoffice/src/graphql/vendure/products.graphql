@@ -256,15 +256,29 @@ query AdminFacetsWithValues($options: FacetListOptions) {
 }
 
 # Search products with faceted filtering (admin version)
+# This query uses Vendure's full-text search which searches both product name AND SKU
 query AdminSearchProducts($input: SearchInput!) {
   search(input: $input) {
     items {
       productId
       productName
+      productVariantId
+      productVariantName
+      sku
       slug
       description
       enabled
+      inStock
+      score
       productAsset {
+        id
+        preview
+        focalPoint {
+          x
+          y
+        }
+      }
+      productVariantAsset {
         id
         preview
       }
@@ -287,8 +301,10 @@ query AdminSearchProducts($input: SearchInput!) {
         }
       }
       currencyCode
+      channelIds
       collectionIds
-      inStock
+      facetIds
+      facetValueIds
     }
     totalItems
     facetValues {
@@ -301,6 +317,14 @@ query AdminSearchProducts($input: SearchInput!) {
           name
           code
         }
+      }
+      count
+    }
+    collections {
+      collection {
+        id
+        name
+        slug
       }
       count
     }

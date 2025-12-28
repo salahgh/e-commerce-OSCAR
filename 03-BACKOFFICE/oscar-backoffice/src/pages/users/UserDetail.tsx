@@ -41,10 +41,12 @@ export const UserDetail: React.FC = () => {
         dispatch(addToast({ type: 'success', message: 'Administrateur supprimé avec succès' }));
         setTimeout(() => navigate('/users'), 1500);
       } else {
-        dispatch(addToast({
-          type: 'error',
-          message: result.deleteAdministrator.message || 'Erreur lors de la suppression',
-        }));
+        dispatch(
+          addToast({
+            type: 'error',
+            message: result.deleteAdministrator.message || 'Erreur lors de la suppression',
+          })
+        );
       }
       setShowDeleteDialog(false);
     },
@@ -74,9 +76,7 @@ export const UserDetail: React.FC = () => {
 
   const formatRoleCode = (code: string): string => {
     if (code === '__super_admin_role__') return 'Super Admin';
-    return code
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, (l) => l.toUpperCase());
+    return code.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   const formatPermission = (permission: string): string => {
@@ -114,10 +114,10 @@ export const UserDetail: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
-          <p className="text-gray-400 text-lg">Administrateur non trouvé</p>
+          <p className="text-muted-foreground text-lg">Administrateur non trouvé</p>
           <button
             onClick={() => navigate('/users')}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
           >
             Retour à la liste
           </button>
@@ -144,15 +144,15 @@ export const UserDetail: React.FC = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/users')}
-            className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded-lg"
+            className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-100">
+            <h1 className="text-3xl font-bold text-foreground">
               {admin.firstName} {admin.lastName}
             </h1>
-            <p className="text-gray-400 mt-1">ID: {admin.id}</p>
+            <p className="text-muted-foreground mt-1">ID: {admin.id}</p>
           </div>
         </div>
         <div className="flex gap-3">
@@ -175,9 +175,9 @@ export const UserDetail: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Admin Info */}
-        <Card className="lg:col-span-2 bg-gray-800 border-gray-700">
+        <Card className="lg:col-span-2 bg-card border-border">
           <div className="p-6">
-            <h2 className="text-lg font-semibold text-gray-100 mb-6">Informations</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-6">Informations</h2>
 
             <div className="flex items-start gap-6 mb-6">
               <div className="h-20 w-20 rounded-full bg-blue-900/50 flex items-center justify-center">
@@ -186,12 +186,12 @@ export const UserDetail: React.FC = () => {
                 </span>
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-semibold text-gray-100">
+                <h3 className="text-xl font-semibold text-foreground">
                   {admin.firstName} {admin.lastName}
                 </h3>
                 <div className="flex items-center gap-2 mt-2">
-                  <Mail className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-300">{admin.emailAddress}</span>
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-foreground">{admin.emailAddress}</span>
                 </div>
                 <div className="flex items-center gap-2 mt-2">
                   {admin.user?.verified ? (
@@ -209,23 +209,21 @@ export const UserDetail: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-6 border-t border-gray-700">
+            <div className="grid grid-cols-2 gap-4 pt-6 border-t border-border">
               <div>
-                <div className="flex items-center gap-2 text-gray-400 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm">
                   <Calendar className="h-4 w-4" />
                   Créé le
                 </div>
-                <p className="text-gray-100 mt-1">{formatDateTime(admin.createdAt)}</p>
+                <p className="text-foreground mt-1">{formatDateTime(admin.createdAt)}</p>
               </div>
               <div>
-                <div className="flex items-center gap-2 text-gray-400 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm">
                   <Clock className="h-4 w-4" />
                   Dernière connexion
                 </div>
-                <p className="text-gray-100 mt-1">
-                  {admin.user?.lastLogin
-                    ? formatDateTime(admin.user.lastLogin)
-                    : 'Jamais connecté'}
+                <p className="text-foreground mt-1">
+                  {admin.user?.lastLogin ? formatDateTime(admin.user.lastLogin) : 'Jamais connecté'}
                 </p>
               </div>
             </div>
@@ -233,9 +231,9 @@ export const UserDetail: React.FC = () => {
         </Card>
 
         {/* Roles */}
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-card border-border">
           <div className="p-6">
-            <h2 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
               <Shield className="h-5 w-5 text-blue-400" />
               Rôles assignés
             </h2>
@@ -243,34 +241,32 @@ export const UserDetail: React.FC = () => {
             {admin.user?.roles && admin.user.roles.length > 0 ? (
               <div className="space-y-4">
                 {admin.user.roles.map((role) => (
-                  <div
-                    key={role.id}
-                    className="p-4 bg-gray-900 rounded-lg border border-gray-700"
-                  >
+                  <div key={role.id} className="p-4 bg-background rounded-lg border border-border">
                     <div className="flex items-center justify-between mb-2">
                       <Badge variant={getRoleBadgeVariant(role.code)}>
                         {formatRoleCode(role.code)}
                       </Badge>
                     </div>
                     {role.description && (
-                      <p className="text-sm text-gray-400 mb-3">{role.description}</p>
+                      <p className="text-sm text-muted-foreground mb-3">{role.description}</p>
                     )}
                     {role.permissions && role.permissions.length > 0 && (
                       <div>
-                        <p className="text-xs text-gray-500 mb-2">
-                          {role.permissions.length} permission{role.permissions.length > 1 ? 's' : ''}
+                        <p className="text-xs text-muted-foreground mb-2">
+                          {role.permissions.length} permission
+                          {role.permissions.length > 1 ? 's' : ''}
                         </p>
                         <div className="flex flex-wrap gap-1">
                           {role.permissions.slice(0, 5).map((perm) => (
                             <span
                               key={perm}
-                              className="text-xs px-2 py-1 bg-gray-800 text-gray-400 rounded"
+                              className="text-xs px-2 py-1 bg-card text-muted-foreground rounded"
                             >
                               {formatPermission(perm)}
                             </span>
                           ))}
                           {role.permissions.length > 5 && (
-                            <span className="text-xs px-2 py-1 bg-gray-800 text-gray-400 rounded">
+                            <span className="text-xs px-2 py-1 bg-card text-muted-foreground rounded">
                               +{role.permissions.length - 5} autres
                             </span>
                           )}
@@ -281,7 +277,7 @@ export const UserDetail: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-gray-400 text-sm">Aucun rôle assigné</p>
+              <p className="text-muted-foreground text-sm">Aucun rôle assigné</p>
             )}
           </div>
         </Card>

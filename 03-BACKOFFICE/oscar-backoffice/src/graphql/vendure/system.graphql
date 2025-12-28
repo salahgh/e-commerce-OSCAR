@@ -1,0 +1,77 @@
+# Vendure Admin API - System Operations (Search Index & Job Management)
+
+# Trigger a full search index rebuild
+mutation Reindex {
+  reindex {
+    id
+    state
+    progress
+    queueName
+    createdAt
+    startedAt
+    settledAt
+    isSettled
+    duration
+    error
+  }
+}
+
+# Get a single job by ID (for polling progress)
+query GetJob($jobId: ID!) {
+  job(jobId: $jobId) {
+    id
+    state
+    progress
+    queueName
+    duration
+    result
+    error
+    isSettled
+    createdAt
+    startedAt
+    settledAt
+  }
+}
+
+# Get list of jobs with filtering (for job history)
+query GetJobs($options: JobListOptions) {
+  jobs(options: $options) {
+    items {
+      id
+      state
+      progress
+      queueName
+      createdAt
+      startedAt
+      settledAt
+      duration
+      isSettled
+      error
+    }
+    totalItems
+  }
+}
+
+# Run pending search index updates (for incremental updates)
+mutation RunPendingSearchIndexUpdates {
+  runPendingSearchIndexUpdates {
+    success
+  }
+}
+
+# Cancel a running job
+mutation CancelJob($jobId: ID!) {
+  cancelJob(jobId: $jobId) {
+    id
+    state
+    isSettled
+  }
+}
+
+# Get job queue status
+query GetJobQueues {
+  jobQueues {
+    name
+    running
+  }
+}

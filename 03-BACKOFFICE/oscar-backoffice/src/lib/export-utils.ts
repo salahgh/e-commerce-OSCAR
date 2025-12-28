@@ -172,8 +172,8 @@ export const generateInvoiceHTML = (order: {
         ${order.shippingAddress.province ? `<p>${order.shippingAddress.province}</p>` : ''}
         `
             : order.customFields?.wilaya
-            ? `<p>${order.customFields.city || ''}, ${order.customFields.wilaya}</p>`
-            : ''
+              ? `<p>${order.customFields.city || ''}, ${order.customFields.wilaya}</p>`
+              : ''
         }
       </div>
     </div>

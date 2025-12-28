@@ -70,14 +70,14 @@ function ProductItem({
         {/* Quick Action Buttons */}
         <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
-            className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
+            className="p-2 bg-background rounded-full shadow-md hover:bg-muted"
             aria-label="Ajouter aux favoris"
             onClick={(e) => {
               e.preventDefault();
               // TODO: Add to wishlist
             }}
           >
-            <Heart className="h-4 w-4 text-gray-600" />
+            <Heart className="h-4 w-4 text-foreground" />
           </button>
         </div>
       </div>

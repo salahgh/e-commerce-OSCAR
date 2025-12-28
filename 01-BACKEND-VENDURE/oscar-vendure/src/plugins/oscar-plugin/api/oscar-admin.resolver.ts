@@ -13,16 +13,90 @@ import {
   TransactionalConnection,
 } from '@vendure/core';
 import { OscarService } from '../services/oscar.service';
+import {
+  DashboardService,
+  KpiMetrics,
+  SalesTrendDataPoint,
+  OrdersChartDataPoint,
+  RevenueByCategoryDataPoint,
+  RecentOrder,
+  LowStockAlert,
+  TopSellingProduct,
+} from '../services/dashboard.service';
 
 @Resolver()
 export class OscarAdminResolver {
   constructor(
     private oscarService: OscarService,
+    private dashboardService: DashboardService,
     private productService: ProductService,
     private orderService: OrderService,
     private customerService: CustomerService,
     private connection: TransactionalConnection,
   ) {}
+
+  // ==================== DASHBOARD KPI QUERIES ====================
+
+  @Query()
+  @Allow(Permission.ReadOrder, Permission.ReadCustomer, Permission.ReadCatalog)
+  async dashboardKpiMetrics(@Ctx() ctx: RequestContext): Promise<KpiMetrics> {
+    return this.dashboardService.getKpiMetrics(ctx);
+  }
+
+  @Query()
+  @Allow(Permission.ReadOrder)
+  async dashboardSalesTrend(
+    @Ctx() ctx: RequestContext,
+    @Args() args: { days?: number },
+  ): Promise<SalesTrendDataPoint[]> {
+    return this.dashboardService.getSalesTrend(ctx, args.days ?? 30);
+  }
+
+  @Query()
+  @Allow(Permission.ReadOrder)
+  async dashboardOrdersByStatus(
+    @Ctx() ctx: RequestContext,
+    @Args() args: { days?: number },
+  ): Promise<OrdersChartDataPoint[]> {
+    return this.dashboardService.getOrdersByStatus(ctx, args.days ?? 7);
+  }
+
+  @Query()
+  @Allow(Permission.ReadOrder, Permission.ReadCatalog)
+  async dashboardRevenueByCategory(
+    @Ctx() ctx: RequestContext,
+  ): Promise<RevenueByCategoryDataPoint[]> {
+    return this.dashboardService.getRevenueByCategory(ctx);
+  }
+
+  @Query()
+  @Allow(Permission.ReadOrder)
+  async dashboardRecentOrders(
+    @Ctx() ctx: RequestContext,
+    @Args() args: { limit?: number },
+  ): Promise<RecentOrder[]> {
+    return this.dashboardService.getRecentOrders(ctx, args.limit ?? 10);
+  }
+
+  @Query()
+  @Allow(Permission.ReadCatalog)
+  async dashboardLowStockAlerts(
+    @Ctx() ctx: RequestContext,
+    @Args() args: { threshold?: number },
+  ): Promise<LowStockAlert[]> {
+    return this.dashboardService.getLowStockAlerts(ctx, args.threshold ?? 10);
+  }
+
+  @Query()
+  @Allow(Permission.ReadOrder, Permission.ReadCatalog)
+  async dashboardTopSellingProducts(
+    @Ctx() ctx: RequestContext,
+    @Args() args: { limit?: number },
+  ): Promise<TopSellingProduct[]> {
+    return this.dashboardService.getTopSellingProducts(ctx, args.limit ?? 10);
+  }
+
+  // ==================== LEGACY QUERIES (kept for compatibility) ====================
 
   @Query()
   @Allow(Permission.ReadCatalog)
@@ -72,6 +146,8 @@ export class OscarAdminResolver {
       lowStockProductsCount: 0, // Would need proper stock checking
     };
   }
+
+  // ==================== MUTATIONS ====================
 
   @Mutation()
   @Allow(Permission.UpdateCatalog)

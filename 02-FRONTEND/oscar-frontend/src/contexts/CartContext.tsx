@@ -9,6 +9,8 @@ import {
   useAdjustOrderLineMutation,
   useRemoveOrderLineMutation,
   useRemoveAllOrderLinesMutation,
+  useApplyCouponCodeMutation,
+  useRemoveCouponCodeMutation,
   OrderFieldsFragment,
 } from '@/graphql/generated/graphql';
 
@@ -26,6 +28,14 @@ interface CartItem {
   productSlug?: string;
 }
 
+interface Discount {
+  adjustmentSource: string;
+  amount: number;
+  amountWithTax: number;
+  description: string;
+  type: string;
+}
+
 interface Cart {
   id: string;
   code: string;
@@ -36,6 +46,8 @@ interface Cart {
   shipping: number;
   total: number;
   currencyCode: string;
+  couponCodes: string[];
+  discounts: Discount[];
 }
 
 interface CartContextType {
@@ -45,6 +57,8 @@ interface CartContextType {
   updateQuantity: (orderLineId: string, quantity: number) => Promise<void>;
   removeItem: (orderLineId: string) => Promise<void>;
   clearCart: () => Promise<void>;
+  applyCoupon: (couponCode: string) => Promise<boolean>;
+  removeCoupon: (couponCode: string) => Promise<void>;
   itemCount: number;
   refetchCart: () => Promise<void>;
 }
@@ -74,6 +88,14 @@ function mapOrderToCart(order: OrderFieldsFragment): Cart {
     shipping: order.shippingWithTax / 100,
     total: order.totalWithTax / 100,
     currencyCode: order.currencyCode,
+    couponCodes: order.couponCodes || [],
+    discounts: (order.discounts || []).map((d) => ({
+      adjustmentSource: d.adjustmentSource,
+      amount: d.amount / 100,
+      amountWithTax: d.amountWithTax / 100,
+      description: d.description,
+      type: d.type,
+    })),
   };
 }
 
@@ -91,6 +113,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [adjustLineMutation] = useAdjustOrderLineMutation();
   const [removeLineMutation] = useRemoveOrderLineMutation();
   const [removeAllLinesMutation] = useRemoveAllOrderLinesMutation();
+  const [applyCouponMutation] = useApplyCouponCodeMutation();
+  const [removeCouponMutation] = useRemoveCouponCodeMutation();
 
   // Update cart when data changes
   useEffect(() => {
@@ -214,6 +238,59 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const applyCoupon = async (couponCode: string): Promise<boolean> => {
+    try {
+      const { data: result } = await applyCouponMutation({
+        variables: { couponCode },
+      });
+
+      if (result?.applyCouponCode) {
+        const response = result.applyCouponCode;
+
+        if ('errorCode' in response) {
+          // Handle specific error types
+          if (response.errorCode === 'COUPON_CODE_INVALID_ERROR') {
+            toast.error('Code promo invalide');
+          } else if (response.errorCode === 'COUPON_CODE_EXPIRED_ERROR') {
+            toast.error('Ce code promo a expiré');
+          } else if (response.errorCode === 'COUPON_CODE_LIMIT_ERROR') {
+            toast.error('Ce code promo a atteint sa limite d\'utilisation');
+          } else {
+            toast.error((response as any).message || 'Code promo invalide');
+          }
+          return false;
+        }
+
+        if ('id' in response) {
+          setCart(mapOrderToCart(response as OrderFieldsFragment));
+          toast.success('Code promo appliqué avec succès!');
+          return true;
+        }
+      }
+      return false;
+    } catch (error: any) {
+      console.error('Error applying coupon:', error);
+      toast.error(error.message || 'Erreur lors de l\'application du code promo');
+      return false;
+    }
+  };
+
+  const removeCoupon = async (couponCode: string) => {
+    try {
+      const { data: result } = await removeCouponMutation({
+        variables: { couponCode },
+      });
+
+      if (result?.removeCouponCode) {
+        setCart(mapOrderToCart(result.removeCouponCode as OrderFieldsFragment));
+        toast.success('Code promo retiré');
+      }
+    } catch (error: any) {
+      console.error('Error removing coupon:', error);
+      toast.error(error.message || 'Erreur lors de la suppression du code promo');
+    }
+  };
+
   const itemCount = cart?.totalQuantity || 0;
 
   return (
@@ -225,6 +302,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         updateQuantity,
         removeItem,
         clearCart,
+        applyCoupon,
+        removeCoupon,
         itemCount,
         refetchCart,
       }}
