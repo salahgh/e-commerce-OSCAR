@@ -188,7 +188,7 @@ export const Settings: React.FC = () => {
       case JobState.Pending:
         return { label: 'En attente', color: 'warning' as const, icon: Clock };
       case JobState.Failed:
-        return { label: 'Echoue', color: 'error' as const, icon: XCircle };
+        return { label: 'Echoue', color: 'danger' as const, icon: XCircle };
       case JobState.Cancelled:
         return { label: 'Annule', color: 'warning' as const, icon: XCircle };
       default:
