@@ -146,7 +146,10 @@ export const config: VendureConfig = {
       route: 'assets',
       assetUploadDir: path.join(__dirname, '../static/assets'),
     }),
-    DefaultJobQueuePlugin.init({ useDatabaseForBuffer: true }),
+    DefaultJobQueuePlugin.init({
+      useDatabaseForBuffer: true,
+      pollInterval: 1000, // Check for new jobs every second
+    }),
     DefaultSchedulerPlugin,
     DefaultSearchPlugin.init({ bufferUpdates: false, indexStockStatus: true }),
     EmailPlugin.init({

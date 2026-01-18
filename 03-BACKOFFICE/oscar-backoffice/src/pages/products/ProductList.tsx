@@ -19,10 +19,13 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  RefreshCw,
+  Database,
+  Settings,
 } from 'lucide-react';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
-import { DeleteProductDocument, AdminSearchProductsDocument } from '../../graphql/generated/graphql';
+import { DeleteProductDocument, AdminSearchProductsDocument, ReindexDocument } from '../../graphql/generated/graphql';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { formatDate } from '../../lib/utils';
 import { useUnifiedSearch, type SortByField } from '../../hooks/useUnifiedSearch';
@@ -64,6 +67,27 @@ export const ProductList: React.FC = () => {
   const [deleteProduct, { loading: deleting }] = useMutation(DeleteProductDocument, {
     refetchQueries: [{ query: AdminSearchProductsDocument }],
   });
+
+  // Reindex mutation
+  const [reindex, { loading: reindexing }] = useMutation(ReindexDocument);
+
+  const handleReindex = async () => {
+    try {
+      const result = await reindex();
+      if (result.data?.reindex) {
+        dispatch(addToast({
+          message: 'Reindexation demarree. Les produits apparaitront dans quelques instants.',
+          type: 'info'
+        }));
+        // Reload the page after a short delay to show results
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
+      }
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur lors de la reindexation', type: 'error' }));
+    }
+  };
 
   const handleDeleteClick = (product: { id: string; name: string }) => {
     setProductToDelete(product);
@@ -498,13 +522,44 @@ export const ProductList: React.FC = () => {
           <div className="flex flex-col items-center justify-center py-12">
             <Package className="h-16 w-16 text-muted-foreground mb-4" />
             <p className="text-muted-foreground text-lg">Aucun produit trouve</p>
-            {search.activeFilterCount > 0 && (
+            {search.activeFilterCount > 0 ? (
               <button
                 onClick={() => search.clearAllFilters()}
                 className="mt-4 text-blue-600 hover:text-blue-700"
               >
                 Effacer tous les filtres
               </button>
+            ) : (
+              <div className="mt-6 space-y-4 text-center">
+                <div className="bg-amber-900/20 border border-amber-700 rounded-lg p-4 max-w-md">
+                  <div className="flex items-start gap-3">
+                    <Database className="h-5 w-5 text-amber-400 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm text-left">
+                      <p className="font-medium text-amber-300">L'index de recherche est peut-etre vide</p>
+                      <p className="text-amber-400/80 mt-1">
+                        Si des produits existent dans la base de donnees, reconstruisez l'index pour les afficher.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 justify-center">
+                  <button
+                    onClick={handleReindex}
+                    disabled={reindexing}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${reindexing ? 'animate-spin' : ''}`} />
+                    {reindexing ? 'Reindexation...' : 'Reconstruire l\'index'}
+                  </button>
+                  <Link
+                    to="/settings"
+                    className="inline-flex items-center gap-2 px-4 py-2 border border-border text-foreground font-medium rounded-lg hover:bg-accent transition-colors"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Parametres systeme
+                  </Link>
+                </div>
+              </div>
             )}
           </div>
         ) : viewMode === 'grid' ? (

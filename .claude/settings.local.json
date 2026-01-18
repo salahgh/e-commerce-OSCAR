@@ -82,7 +82,9 @@
       "Bash(export ANDROID_HOME=\"D:/androidSDK\")",
       "Bash(export PATH=\"$PATH:$ANDROID_HOME/platform-tools\")",
       "Bash(npx expo install:*)",
-      "Bash(npx expo start:*)"
+      "Bash(npx expo start:*)",
+      "Bash(npm run cleanup-jobs:*)",
+      "Bash(npm run cleanup-db:*)"
     ],
     "deny": [],
     "ask": []

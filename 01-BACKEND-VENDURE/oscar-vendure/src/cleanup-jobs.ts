@@ -37,7 +37,7 @@ async function cleanupJobs() {
       .createQueryBuilder()
       .delete()
       .where('state = :state', { state: 'COMPLETED' })
-      .andWhere('settledAt < :date', { date: sevenDaysAgo })
+      .andWhere('"settledAt" < :date', { date: sevenDaysAgo })
       .execute();
     console.log(`🗑️  Deleted ${oldCompletedResult.affected || 0} old COMPLETED jobs`);
 
@@ -45,64 +45,89 @@ async function cleanupJobs() {
     const failedResult = await jobRepo.delete({ state: 'FAILED' });
     console.log(`🗑️  Deleted ${failedResult.affected || 0} FAILED jobs`);
 
-    // Now trigger a fresh reindex
+    // Delete CANCELLED jobs
+    const cancelledResult = await jobRepo.delete({ state: 'CANCELLED' });
+    console.log(`🗑️  Deleted ${cancelledResult.affected || 0} CANCELLED jobs`);
+
+    // Now trigger a fresh reindex using the JobQueueService
     console.log('\n🔍 Triggering fresh search index rebuild...');
 
     const jobQueueService = app.get(JobQueueService);
 
     // Make sure workers are running
+    console.log('   Starting job queue workers...');
     await jobQueueService.start();
-    console.log('✅ Job queue workers started');
 
-    const { SearchIndexService } = await import('@vendure/core');
-    const searchIndexService = app.get(SearchIndexService);
+    // Get the SearchIndexService from the app container
+    // It's registered by the DefaultSearchPlugin
+    const searchIndexService = app.get('SearchIndexService');
 
-    const job = await searchIndexService.reindex({ ctx: undefined as any });
-    console.log(`✅ Created reindex job: ${job.id}`);
+    if (!searchIndexService) {
+      console.log('❌ SearchIndexService not found. Is DefaultSearchPlugin enabled?');
+    } else {
+      // Create a minimal request context
+      const { RequestContext, Channel } = await import('@vendure/core');
+      const channelRepo = connection.getRepository(Channel);
+      const defaultChannel = await channelRepo.findOne({ where: { code: '__default_channel__' } });
 
-    // Wait for it to start processing
-    console.log('\n⏱️  Waiting for job to start...');
+      if (defaultChannel) {
+        const ctx = new RequestContext({
+          channel: defaultChannel,
+          apiType: 'admin',
+          isAuthorized: true,
+          authorizedAsOwnerOnly: false,
+        });
 
-    let attempts = 0;
-    while (attempts < 30) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      attempts++;
+        const job = await searchIndexService.reindex(ctx);
+        console.log(`✅ Created reindex job: ${job.id}`);
 
-      const currentJob = await jobRepo.findOne({ where: { id: job.id } });
-      if (!currentJob) {
-        console.log('❌ Job not found');
-        break;
+        // Wait for it to start processing
+        console.log('\n⏱️  Waiting for job to process...');
+
+        let attempts = 0;
+        while (attempts < 60) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          attempts++;
+
+          const currentJob = await jobRepo.findOne({ where: { id: job.id } });
+          if (!currentJob) {
+            console.log('\n❌ Job not found');
+            break;
+          }
+
+          process.stdout.write(`\r   [${attempts}s] ${currentJob.state} - ${currentJob.progress}%    `);
+
+          if (currentJob.state === 'COMPLETED') {
+            console.log('\n\n✅ Reindex COMPLETED successfully!');
+            console.log(`   Duration: ${currentJob.duration}ms`);
+            break;
+          }
+
+          if (currentJob.state === 'FAILED') {
+            console.log('\n\n❌ Reindex FAILED:', currentJob.error);
+            break;
+          }
+
+          if (currentJob.state === 'CANCELLED') {
+            console.log('\n\n⚠️  Reindex was CANCELLED');
+            break;
+          }
+        }
+
+        if (attempts >= 60) {
+          console.log('\n\n⚠️  Timeout after 60 seconds');
+        }
+      } else {
+        console.log('❌ Default channel not found');
       }
-
-      process.stdout.write(`\r   Attempt ${attempts}: ${currentJob.state} (${currentJob.progress}%)   `);
-
-      if (currentJob.state === 'RUNNING') {
-        console.log('\n\n✅ Job is now RUNNING! Workers are processing.');
-        break;
-      }
-
-      if (currentJob.state === 'COMPLETED') {
-        console.log('\n\n✅ Job COMPLETED!');
-        break;
-      }
-
-      if (currentJob.state === 'FAILED') {
-        console.log('\n\n❌ Job FAILED:', currentJob.error);
-        break;
-      }
-    }
-
-    if (attempts >= 30) {
-      console.log('\n\n⚠️  Job still PENDING after 30 seconds.');
-      console.log('   This indicates the job queue workers are not running.');
-      console.log('   Try keeping the Vendure server running: npm run dev');
     }
 
   } catch (error: any) {
     console.error('\n❌ Error:', error.message);
+    console.error(error.stack);
   }
 
-  console.log('\n👋 Done!');
+  console.log('\n👋 Shutting down...');
   await app.close();
   process.exit(0);
 }

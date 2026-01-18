@@ -55,6 +55,7 @@ import {
   GetJobsDocument,
   JobState,
   RunPendingSearchIndexUpdatesDocument,
+  CancelJobDocument,
 } from '../../graphql/generated/graphql';
 import { Tabs } from '../../components/ui/Tabs';
 import { Badge } from '../../components/ui/Badge';
@@ -116,7 +117,7 @@ export const Settings: React.FC = () => {
   const { data: jobsData, loading: jobsLoading, refetch: refetchJobs } = useQuery(GetJobsDocument, {
     variables: {
       options: {
-        take: 10,
+        take: 50, // Fetch more to see all pending jobs
         sort: { createdAt: 'DESC' as any },
       },
     },
@@ -128,6 +129,35 @@ export const Settings: React.FC = () => {
   const [updateShippingMethod] = useMutation(UpdateShippingMethodDocument);
   const [reindex, { loading: reindexing }] = useMutation(ReindexDocument);
   const [runPendingUpdates, { loading: runningPending }] = useMutation(RunPendingSearchIndexUpdatesDocument);
+  const [cancelJob] = useMutation(CancelJobDocument);
+  const [cancellingJobs, setCancellingJobs] = useState(false);
+
+  // Handle cancel all pending jobs
+  const handleCancelPendingJobs = async () => {
+    const pendingJobs = jobsData?.jobs?.items?.filter(j => j.state === JobState.Pending) || [];
+    if (pendingJobs.length === 0) {
+      dispatch(addToast({ message: 'Aucune tache en attente', type: 'info' }));
+      return;
+    }
+
+    setCancellingJobs(true);
+    try {
+      let cancelled = 0;
+      for (const job of pendingJobs) {
+        try {
+          await cancelJob({ variables: { jobId: job.id } });
+          cancelled++;
+        } catch (e) {
+          // Job might already be processed, continue
+        }
+      }
+      dispatch(addToast({ message: `${cancelled} tache(s) annulee(s)`, type: 'success' }));
+      refetchJobs();
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+    setCancellingJobs(false);
+  };
 
   // Stop polling when job completes
   useEffect(() => {
@@ -1061,6 +1091,34 @@ export const Settings: React.FC = () => {
                 <RefreshCw className="h-4 w-4" />
               </Button>
             </div>
+
+            {/* Show cancel button if there are pending jobs */}
+            {jobsData?.jobs?.items?.some(j => j.state === JobState.Pending) && (
+              <div className="mt-4 p-3 bg-amber-900/20 border border-amber-700 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-amber-300 text-sm">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>
+                      {jobsData.jobs.items.filter(j => j.state === JobState.Pending).length} tache(s) bloquee(s) en attente
+                    </span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancelPendingJobs}
+                    disabled={cancellingJobs}
+                    className="border-amber-600 text-amber-300 hover:bg-amber-900/50"
+                  >
+                    {cancellingJobs ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <XCircle className="h-4 w-4 mr-2" />
+                    )}
+                    Annuler les taches bloquees
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Job History */}
@@ -1144,6 +1202,25 @@ export const Settings: React.FC = () => {
                   <li>• Si les resultats de recherche semblent incomplets</li>
                   <li>• Apres une migration ou restauration de donnees</li>
                 </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Troubleshooting Box */}
+          <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <Server className="h-5 w-5 text-blue-500 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-medium text-blue-300">Taches bloquees en attente ?</p>
+                <p className="mt-2 text-blue-400/80">
+                  Si les taches restent en "En attente" (Pending), redemarrez le serveur Vendure:
+                </p>
+                <code className="block mt-2 bg-blue-900/50 text-blue-300 px-3 py-2 rounded font-mono text-xs">
+                  cd 01-BACKEND-VENDURE/oscar-vendure && npm run dev
+                </code>
+                <p className="mt-2 text-blue-400/80">
+                  Ou utilisez le script de reindexation: <code className="bg-blue-900/50 px-1 rounded">npm run reindex</code>
+                </p>
               </div>
             </div>
           </div>
