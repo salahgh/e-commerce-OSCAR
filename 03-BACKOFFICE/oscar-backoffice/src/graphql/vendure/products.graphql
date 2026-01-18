@@ -2,6 +2,7 @@
 
 # ==================== QUERIES ====================
 
+
 # List all products with filtering and pagination
 query AdminProducts($options: ProductListOptions) {
   products(options: $options) {
