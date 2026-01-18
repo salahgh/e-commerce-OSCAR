@@ -10,6 +10,10 @@
     "populate": "ts-node ./src/populate.ts",
     "seed-orders": "ts-node ./src/seed-orders.ts",
     "link-products": "ts-node ./src/link-products-to-collections.ts",
+    "reindex": "ts-node ./src/reindex.ts",
+    "fix-jobs": "ts-node ./src/fix-jobs.ts",
+    "cleanup-jobs": "ts-node ./src/cleanup-jobs.ts",
+    "cleanup-db": "ts-node ./src/cleanup-jobs-db.ts",
     "migration:generate": "ts-node ./node_modules/.bin/typeorm migration:generate -d ./src/vendure-config.ts",
     "migration:run": "ts-node ./node_modules/.bin/typeorm migration:run -d ./src/vendure-config.ts",
     "migration:revert": "ts-node ./node_modules/.bin/typeorm migration:revert -d ./src/vendure-config.ts"

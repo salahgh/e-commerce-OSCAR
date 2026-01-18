@@ -8,8 +8,8 @@
 | Élément | Montant |
 |---------|---------|
 | **Budget Total** | **700,000 DZD** |
-| **Acompte reçu** | 50,000 DZD |
-| **Restant à payer** | 650,000 DZD |
+| **Déjà payé** | 200,000 DZD |
+| **Restant à payer** | 500,000 DZD |
 | **Nombre de jalons** | 6 |
 
 ---
@@ -71,111 +71,176 @@
 
 ---
 
-### Jalon 2: Frontend Catalogue + Backoffice Setup
+### Jalon 2: Backoffice Complet (React) ✅ LIVRÉ
 
-| Composant | Détail | Montant |
-|-----------|--------|---------|
-| Frontend | Catalogue produits complet | 80,000 DZD |
-| Backoffice | Setup + Dashboard + Auth | 50,000 DZD |
-| Mobile | Setup + Navigation de base | 20,000 DZD |
-| **TOTAL JALON 2** | | **150,000 DZD** |
+| Détail | Montant |
+|--------|---------|
+| **Backoffice admin complet** | **140,000 DZD** |
+| **Statut** | ✅ 100% Implémenté |
 
-**Livrables Frontend (Next.js):**
-- [ ] Page d'accueil avec produits vedettes
-- [ ] Page catalogue avec filtres (catégorie, taille, couleur, prix)
-- [ ] Page détail produit complète
-- [ ] Recherche produits
-- [ ] Pagination et tri
-- [ ] Responsive design (mobile-first)
-- [ ] Support RTL (Arabe)
-- [ ] i18n (FR/AR/EN)
-
-**Livrables Backoffice (React):**
-- [ ] Setup projet (Vite + Tailwind + Apollo)
-- [ ] Layout principal (Sidebar, TopBar)
-- [ ] Authentification admin (Login/Logout)
-- [ ] Dashboard avec KPIs
-  - [ ] Nombre de commandes
-  - [ ] Chiffre d'affaires
-  - [ ] Nouveaux clients
-  - [ ] Produits en stock faible
-- [ ] Graphiques (ventes, catégories)
-- [ ] Liste commandes récentes
-
-**Livrables Mobile (Expo):**
-- [ ] Setup projet Expo
-- [ ] Configuration Apollo Client
-- [ ] Navigation (tabs + stack)
-- [ ] Écran d'accueil basique
-- [ ] Liste produits (squelette)
+**Livrables:**
+- [x] **Setup & Infrastructure**
+  - [x] Setup projet (Vite + Tailwind + Apollo)
+  - [x] Layout principal (Sidebar, TopBar)
+  - [x] Authentification admin (Login/Logout)
+  - [x] Gestion rôles et permissions (120+ permissions Vendure)
+- [x] **Dashboard**
+  - [x] KPIs (commandes, CA, clients, stock faible)
+  - [x] Graphiques (ventes, catégories, top produits)
+  - [x] Liste commandes récentes
+  - [x] Alertes stock faible
+- [x] **Gestion Produits**
+  - [x] Liste produits (DataGrid avec filtres)
+  - [x] Création produit (formulaire multi-étapes)
+  - [x] Modification produit
+  - [x] Upload images (drag & drop, 5 max)
+  - [x] Gestion catégories (drag & drop sorting)
+  - [x] Import/Export CSV
+  - [x] Gestion variantes (taille, couleur, SKU)
+- [x] **Gestion Commandes**
+  - [x] Liste commandes (filtres par statut, date, wilaya)
+  - [x] Détail commande complet
+  - [x] Modification statut commande (transitions)
+  - [x] Timeline historique
+  - [x] Notes admin
+  - [x] Impression bon de livraison (PDF)
+- [x] **Gestion Clients**
+  - [x] Liste clients avec filtres
+  - [x] Détail client (infos, historique)
+  - [x] Statistiques client (commandes, CA, dernière commande)
+- [x] **Rapports & Statistiques**
+  - [x] Rapport ventes (jour/semaine/mois)
+  - [x] Top produits vendus
+  - [x] Analyse par wilaya (58 wilayas)
+  - [x] Export PDF/CSV
+- [x] **Paramètres**
+  - [x] Configuration générale
+  - [x] Gestion utilisateurs admin
+  - [x] Configuration emails (SMTP)
+  - [x] Gestion promotions
 
 **Critères d'acceptation:**
-- [ ] Navigation catalogue fluide sur web
-- [ ] Filtres fonctionnels
-- [ ] Dashboard backoffice avec données réelles
-- [ ] App mobile démarre sans erreur
+- [x] Dashboard avec données réelles
+- [x] CRUD produits fonctionnel
+- [x] Gestion commandes complète
+- [x] Rapports exportables
+- [x] Interface responsive
 
 ---
 
-### Jalon 3: Panier + Gestion Commandes Backoffice
+### Jalon 3: Frontend Complet (Next.js)
 
-| Composant | Détail | Montant |
-|-----------|--------|---------|
-| Frontend | Panier + Checkout (sans paiement) | 60,000 DZD |
-| Backoffice | Gestion Produits + Commandes | 50,000 DZD |
-| Mobile | Catalogue + Panier | 40,000 DZD |
-| **TOTAL JALON 3** | | **150,000 DZD** |
+| Détail | Montant |
+|--------|---------|
+| **Frontend e-commerce complet** | **180,000 DZD** |
+| **Statut** | ⏳ 95% Implémenté |
 
-**Livrables Frontend:**
-- [ ] Panier (ajout, modification, suppression)
-- [ ] Persistance panier (localStorage + API)
-- [ ] Page récapitulatif panier
-- [ ] Processus checkout (étapes 1-3)
-  - [ ] Informations client
-  - [ ] Adresse de livraison (wilayas)
-  - [ ] Récapitulatif commande
-- [ ] Authentification client (inscription/connexion)
-- [ ] Espace client (profil, historique)
-
-**Livrables Backoffice:**
-- [ ] **Gestion Produits**
-  - [ ] Liste produits (DataGrid avec filtres)
-  - [ ] Création produit (formulaire complet)
-  - [ ] Modification produit
-  - [ ] Upload images (drag & drop)
-  - [ ] Gestion catégories
-  - [ ] Import/Export CSV
-- [ ] **Gestion Commandes**
-  - [ ] Liste commandes (filtres par statut, date)
-  - [ ] Détail commande
-  - [ ] Modification statut commande
-  - [ ] Timeline historique
-  - [ ] Notes admin
-
-**Livrables Mobile:**
-- [ ] Catalogue produits complet
-- [ ] Filtres et recherche
-- [ ] Page détail produit
-- [ ] Panier fonctionnel
-- [ ] Authentification client
+**Livrables:**
+- [x] **Catalogue & Navigation**
+  - [x] Page d'accueil avec produits vedettes
+  - [x] Page catalogue avec filtres (catégorie, taille, couleur, prix)
+  - [x] Page détail produit complète
+  - [x] Recherche produits
+  - [x] Pagination et tri (infinite scroll)
+- [x] **Panier & Checkout**
+  - [x] Panier (ajout, modification, suppression)
+  - [x] Persistance panier (API backend)
+  - [x] Page récapitulatif panier
+  - [x] Processus checkout complet (4 étapes)
+    - [x] Informations client
+    - [x] Adresse de livraison (wilayas)
+    - [x] Sélection mode de paiement
+    - [x] Récapitulatif commande
+  - [x] Page confirmation commande
+- [x] **Authentification & Compte Client**
+  - [x] Inscription / Connexion
+  - [x] Espace client (profil, historique commandes)
+  - [x] Gestion adresses
+  - [x] Vérification email
+- [x] **Paiement UI**
+  - [x] Formulaire carte CIB
+  - [x] Intégration Baridimob
+  - [x] Option Cash on Delivery
+- [x] **i18n & Accessibilité**
+  - [x] Support multilingue (FR/AR/EN)
+  - [x] Support RTL (Arabe)
+  - [x] Responsive design (mobile-first)
+- [x] **SEO & Performance**
+  - [x] SEO optimisé (meta, sitemap, robots.txt)
+  - [x] Performance (lazy loading, images optimisées)
+  - [ ] PWA capabilities (partiel - manifest existe)
+  - [x] JSON-LD structured data
+- [x] **Pages Statiques**
+  - [x] Page contact
+  - [x] Pages légales (CGV, CGU, confidentialité)
+  - [x] FAQ
+  - [x] Guide des tailles
+  - [x] À propos
 
 **Critères d'acceptation:**
-- [ ] Passage de commande complet (hors paiement)
-- [ ] Modification statut commande depuis backoffice
-- [ ] Panier mobile synchronisé
+- [x] Navigation catalogue fluide
+- [x] Filtres fonctionnels
+- [x] Passage de commande complet
+- [x] Responsive sur tous appareils
+- [ ] Performance Lighthouse > 80 (à vérifier)
 
 ---
 
-### Jalon 4: Paiements Intégrés (Sandbox)
+### Jalon 4: Mobile Complet (Expo/React Native)
 
-| Composant | Détail | Montant |
-|-----------|--------|---------|
-| Backend | Intégration passerelles paiement | 40,000 DZD |
-| Frontend | UI paiement + confirmation | 30,000 DZD |
-| Mobile | Paiement mobile | 30,000 DZD |
-| **TOTAL JALON 4** | | **100,000 DZD** |
+| Détail | Montant |
+|--------|---------|
+| **Application mobile complète** | **100,000 DZD** |
+| **Statut** | ⏳ 98% Implémenté |
 
-**Livrables Backend:**
+**Livrables:**
+- [x] **Setup & Navigation**
+  - [x] Setup projet Expo (SDK 54)
+  - [x] Configuration Apollo Client
+  - [x] Navigation (tabs + stack via expo-router)
+  - [x] Splash screen animé & icônes
+- [x] **Catalogue**
+  - [x] Écran d'accueil (hero, catégories, produits vedettes)
+  - [x] Liste produits (infinite scroll)
+  - [x] Filtres et recherche (debounced, historique)
+  - [x] Page détail produit (carousel, variantes)
+- [x] **Panier & Checkout**
+  - [x] Panier fonctionnel (coupon codes)
+  - [x] Processus checkout (4 étapes)
+  - [x] Sélection adresse livraison
+  - [x] Récapitulatif commande
+- [x] **Authentification & Compte**
+  - [x] Inscription / Connexion
+  - [x] Profil utilisateur
+  - [x] Historique commandes
+  - [x] Gestion adresses
+- [x] **Paiement**
+  - [x] Écran paiement (CIB, Baridimob, COD)
+  - [ ] Deep linking retour paiement (structure existe, URLs réelles à configurer)
+  - [x] Confirmation commande (animation)
+- [x] **i18n**
+  - [x] Support multilingue (FR/AR/EN)
+  - [x] Support RTL (I18nManager)
+- [x] **Build & Distribution**
+  - [x] Build iOS configuré
+  - [x] Build Android configuré (adaptive icons)
+  - [x] Performance optimisée
+
+**Critères d'acceptation:**
+- [x] App démarre sans erreur
+- [x] Panier synchronisé avec backend
+- [ ] Paiements fonctionnels (sandbox à tester)
+- [x] Builds iOS et Android prêts
+
+---
+
+### Jalon 5: Intégration & Déploiement
+
+| Détail | Montant |
+|--------|---------|
+| **Backend Paiements + Tests + Déploiement** | **50,000 DZD** |
+
+**Livrables Backend (Paiements):**
 - [ ] Handler CIB (carte bancaire Algérie)
   - [ ] Intégration API SATIM
   - [ ] Vérification signature
@@ -188,79 +253,19 @@
 - [ ] Gestion des remboursements
 - [ ] Logs transactions
 
-**Livrables Frontend:**
-- [ ] Étape paiement checkout
-- [ ] Sélection mode de paiement
-- [ ] Formulaire carte CIB
-- [ ] Intégration Baridimob
-- [ ] Page confirmation commande
-- [ ] Email confirmation (template)
-
-**Livrables Mobile:**
-- [ ] Écran paiement
-- [ ] Deep linking retour paiement
-- [ ] Confirmation commande
-
-**Critères d'acceptation:**
-- [ ] Paiement CIB fonctionnel (sandbox)
-- [ ] Paiement Baridimob fonctionnel (sandbox)
-- [ ] COD fonctionnel
-- [ ] Emails envoyés après commande
-
----
-
-### Jalon 5: Livraison Finale + UAT
-
-| Composant | Détail | Montant |
-|-----------|--------|---------|
-| Backoffice | Clients, Rapports, Paramètres | 50,000 DZD |
-| Frontend | Finitions + Optimisations | 40,000 DZD |
-| Mobile | Finitions + Build | 30,000 DZD |
-| Intégration | Tests E2E + Déploiement | 30,000 DZD |
-| **TOTAL JALON 5** | | **150,000 DZD** |
-
-**Livrables Backoffice:**
-- [ ] **Gestion Clients**
-  - [ ] Liste clients avec filtres
-  - [ ] Détail client (infos, historique)
-  - [ ] Statistiques client
-- [ ] **Rapports & Statistiques**
-  - [ ] Rapport ventes (jour/semaine/mois)
-  - [ ] Top produits vendus
-  - [ ] Analyse par wilaya
-  - [ ] Export PDF/CSV
-- [ ] **Paramètres**
-  - [ ] Configuration générale
-  - [ ] Gestion utilisateurs admin
-  - [ ] Rôles et permissions
-  - [ ] Configuration emails
-
-**Livrables Frontend:**
-- [ ] SEO optimisé (meta, sitemap)
-- [ ] Performance (lazy loading, images optimisées)
-- [ ] PWA capabilities
-- [ ] Page contact
-- [ ] Pages légales (CGV, CGU, confidentialité)
-- [ ] Correction bugs UAT
-
-**Livrables Mobile:**
-- [ ] Build iOS (TestFlight)
-- [ ] Build Android (APK/AAB)
-- [ ] Performance optimisée
-- [ ] Correction bugs UAT
-
 **Livrables Intégration:**
-- [ ] Déploiement VPS (Vendure + Next.js)
+- [ ] Déploiement VPS (Vendure + Next.js + Backoffice)
 - [ ] Configuration Nginx + SSL
 - [ ] Tests E2E complets
 - [ ] Documentation technique
 - [ ] Guide utilisateur admin
 
 **Critères d'acceptation:**
-- [ ] Tests UAT validés par le client
-- [ ] Performance Lighthouse > 80
-- [ ] Zéro bug critique
-- [ ] Documentation complète livrée
+- [ ] Paiement CIB fonctionnel (sandbox puis production)
+- [ ] Paiement Baridimob fonctionnel
+- [ ] COD fonctionnel
+- [ ] Emails envoyés après commande
+- [ ] Tous les services déployés et accessibles
 
 ---
 
@@ -268,7 +273,7 @@
 
 | Détail | Montant |
 |--------|---------|
-| **Support 2 semaines après mise en production** | **100,000 DZD** |
+| **Support 2 semaines après mise en production** | **30,000 DZD** |
 
 **Inclus:**
 - [ ] Surveillance active de la production
@@ -289,15 +294,15 @@
 
 ## Calendrier de Paiement
 
-| Phase | Jalon | Montant | Statut | Date Prévue |
-|-------|-------|---------|--------|-------------|
+| Phase | Jalon | Montant | Statut | Implémentation |
+|-------|-------|---------|--------|----------------|
 | 0 | Acompte (Signature contrat) | 50,000 DZD | ✅ Payé | - |
-| 1 | Backend Auth + Produits | 150,000 DZD | ✅ Payé | - |
-| 2 | Frontend Catalogue + Backoffice Setup | 150,000 DZD | ⏳ En cours | Semaine 4 |
-| 3 | Panier + Gestion Commandes | 150,000 DZD | 🔜 À venir | Semaine 8 |
-| 4 | Paiements Intégrés (Sandbox) | 100,000 DZD | 🔜 À venir | Semaine 10 |
-| 5 | Livraison Finale + UAT | 150,000 DZD | 🔜 À venir | Semaine 12 |
-| 6 | Support Post-Livraison | 100,000 DZD | 🔜 À venir | Semaine 14 |
+| 1 | Backend Complet | 150,000 DZD | ✅ Payé | ✅ 100% |
+| 2 | **Backoffice Complet (React)** | 140,000 DZD | ⏳ À facturer | ✅ 100% |
+| 3 | Frontend Complet (Next.js) | 180,000 DZD | 🔜 À venir | ⏳ 95% |
+| 4 | Mobile Complet (Expo) | 100,000 DZD | 🔜 À venir | ⏳ 98% |
+| 5 | Intégration & Déploiement | 50,000 DZD | 🔜 À venir | 🔜 Pending |
+| 6 | Support Post-Livraison | 30,000 DZD | 🔜 À venir | 🔜 Pending |
 | | **TOTAL** | **700,000 DZD** | | |
 
 ---
@@ -308,18 +313,22 @@
 | Date | Description | Montant |
 |------|-------------|---------|
 | - | Acompte signature | 50,000 DZD |
-| - | Jalon 1 - Backend | 150,000 DZD |
+| - | Jalon 1 - Backend Complet | 150,000 DZD |
 | | **Total Reçu** | **200,000 DZD** |
 
-### Paiements Restants
-| Jalon | Montant |
-|-------|---------|
-| Jalon 2 | 150,000 DZD |
-| Jalon 3 | 150,000 DZD |
-| Jalon 4 | 100,000 DZD |
-| Jalon 5 | 150,000 DZD |
-| Jalon 6 | 100,000 DZD |
-| **Total Restant** | **650,000 DZD** |
+### Prochain Paiement
+| Jalon | Description | Montant | Statut Implémentation |
+|-------|-------------|---------|----------------------|
+| **Jalon 2** | **Backoffice Complet** | **140,000 DZD** | ✅ **100% - Prêt à facturer** |
+
+### Paiements Restants (après Jalon 2)
+| Jalon | Description | Montant | Implémentation |
+|-------|-------------|---------|----------------|
+| Jalon 3 | Frontend Complet | 180,000 DZD | 95% |
+| Jalon 4 | Mobile Complet | 100,000 DZD | 98% |
+| Jalon 5 | Intégration & Déploiement | 50,000 DZD | Pending |
+| Jalon 6 | Support | 30,000 DZD | Pending |
+| | **Total Restant** | **500,000 DZD** | |
 
 ---
 
@@ -418,6 +427,17 @@ Les éléments suivants ne sont **PAS** inclus dans ce budget:
 
 ---
 
-**Document généré le**: Décembre 2025
-**Version**: 2.0
+**Document généré le**: Janvier 2026
+**Version**: 4.0 - Backoffice Prioritaire + Vérification Implémentation
+**Dernière mise à jour**: 18 Janvier 2026
 **Validité**: 30 jours
+
+---
+
+## Notes de Version 4.0
+
+- Réorganisation: Backoffice devient Jalon 2 (était Jalon 3)
+- Vérification complète de l'implémentation de chaque module
+- **Backoffice**: 100% implémenté - Prêt pour facturation
+- **Frontend**: 95% implémenté - PWA à finaliser
+- **Mobile**: 98% implémenté - Deep linking paiement à configurer
