@@ -61,13 +61,13 @@ const validationSchema = Yup.object({
 });
 
 interface FormValues {
-  name: string;
+  name: string; // Primary language: French
   slug: string;
   description: string;
-  nameFr: string;
-  slugFr: string;
-  descriptionFr: string;
-  nameAr: string;
+  nameEn: string; // Translation: English
+  slugEn: string;
+  descriptionEn: string;
+  nameAr: string; // Translation: Arabic
   slugAr: string;
   descriptionAr: string;
   parentId: string;
@@ -247,20 +247,21 @@ export const CategoryDetail: React.FC = () => {
 
       const baseInput = {
         translations: [
+          // Primary language: French
           {
-            languageCode: LanguageCode.En,
+            languageCode: LanguageCode.Fr,
             name: values.name,
             slug: values.slug,
             description: values.description,
           },
-          // Add French translation if any French field is filled
-          ...(values.nameFr || values.descriptionFr
+          // Add English translation if any English field is filled
+          ...(values.nameEn || values.descriptionEn
             ? [
                 {
-                  languageCode: LanguageCode.Fr,
-                  name: values.nameFr || values.name,
-                  slug: values.slugFr || values.slug,
-                  description: values.descriptionFr || values.description,
+                  languageCode: LanguageCode.En,
+                  name: values.nameEn || values.name,
+                  slug: values.slugEn || values.slug,
+                  description: values.descriptionEn || values.description,
                 },
               ]
             : []),
@@ -361,16 +362,17 @@ export const CategoryDetail: React.FC = () => {
     );
   }
 
+  // French is primary language - read from 'fr' translation or fall back to default name
   const initialValues: FormValues = {
-    name: collection?.name || '',
-    slug: collection?.slug || '',
-    description: collection?.description || '',
-    nameFr: getTranslation(collection?.translations, 'fr', 'name'),
+    name: getTranslation(collection?.translations, 'fr', 'name') || collection?.name || '',
+    slug: getTranslation(collection?.translations, 'fr', 'slug') || collection?.slug || '',
+    description: getTranslation(collection?.translations, 'fr', 'description') || collection?.description || '',
+    nameEn: getTranslation(collection?.translations, 'en', 'name'),
+    slugEn: getTranslation(collection?.translations, 'en', 'slug'),
+    descriptionEn: getTranslation(collection?.translations, 'en', 'description'),
     nameAr: getTranslation(collection?.translations, 'ar', 'name'),
-    descriptionFr: getTranslation(collection?.translations, 'fr', 'description'),
-    descriptionAr: getTranslation(collection?.translations, 'ar', 'description'),
-    slugFr: getTranslation(collection?.translations, 'fr', 'slug'),
     slugAr: getTranslation(collection?.translations, 'ar', 'slug'),
+    descriptionAr: getTranslation(collection?.translations, 'ar', 'description'),
     parentId: collection?.parentId || '',
     isPrivate: collection?.isPrivate || false,
     displayOrder: collection?.customFields?.displayOrder || 0,
@@ -429,6 +431,11 @@ export const CategoryDetail: React.FC = () => {
                     </h2>
                   </div>
                   <div className="p-6 space-y-5">
+                    <div className="flex items-center gap-2 pb-4 border-b border-border">
+                      <span className="px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded text-xs font-bold">FR</span>
+                      <span className="font-medium text-foreground">Langue principale : Francais</span>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
                         <label className="block text-sm font-medium text-foreground mb-1.5">
@@ -589,37 +596,37 @@ export const CategoryDetail: React.FC = () => {
                   </div>
                   <div className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* French */}
+                      {/* English */}
                       <div className="space-y-4">
                         <div className="flex items-center gap-2 pb-2 border-b border-border">
-                          <span className="w-8 h-6 rounded bg-gradient-to-r from-blue-500 via-white to-red-500 flex-shrink-0"></span>
-                          <span className="font-medium text-foreground">Francais</span>
+                          <span className="w-8 h-6 rounded bg-gradient-to-r from-blue-800 via-white to-red-600 flex-shrink-0"></span>
+                          <span className="font-medium text-foreground">Anglais</span>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-foreground mb-1.5">
-                            Nom (FR)
+                            Nom (EN)
                           </label>
                           <input
                             type="text"
-                            name="nameFr"
-                            value={values.nameFr}
+                            name="nameEn"
+                            value={values.nameEn}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            placeholder="Nom en francais"
+                            placeholder="Name in English"
                             className="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-200 hover:border-muted-foreground bg-background text-foreground placeholder-muted-foreground"
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-foreground mb-1.5">
-                            Description (FR)
+                            Description (EN)
                           </label>
                           <textarea
-                            name="descriptionFr"
-                            value={values.descriptionFr}
+                            name="descriptionEn"
+                            value={values.descriptionEn}
                             onChange={handleChange}
                             onBlur={handleBlur}
                             rows={3}
-                            placeholder="Description en francais..."
+                            placeholder="Description in English..."
                             className="w-full px-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-200 hover:border-muted-foreground resize-none bg-background text-foreground placeholder-muted-foreground"
                           />
                         </div>
@@ -705,10 +712,12 @@ export const CategoryDetail: React.FC = () => {
                               <GripVertical className="h-4 w-4" />
                             </div>
                             <div>
-                              <p className="font-medium text-foreground">{child.name}</p>
+                              <p className="font-medium text-foreground">
+                                {getTranslation(child.translations, 'fr', 'name') || child.name}
+                              </p>
                               <p className="text-sm text-muted-foreground">
-                                {getTranslation(child.translations, 'fr', 'name') && (
-                                  <span className="mr-2">FR: {getTranslation(child.translations, 'fr', 'name')}</span>
+                                {getTranslation(child.translations, 'en', 'name') && (
+                                  <span className="mr-2">EN: {getTranslation(child.translations, 'en', 'name')}</span>
                                 )}
                                 {getTranslation(child.translations, 'ar', 'name') && (
                                   <span dir="rtl">AR: {getTranslation(child.translations, 'ar', 'name')}</span>

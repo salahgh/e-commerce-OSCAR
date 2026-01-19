@@ -79,6 +79,24 @@ export const apolloClient = new ApolloClient({
               return incoming;
             },
           },
+          assets: {
+            keyArgs: ['options'],
+            merge(existing, incoming) {
+              return incoming;
+            },
+          },
+          collections: {
+            keyArgs: ['options'],
+            merge(existing, incoming) {
+              return incoming;
+            },
+          },
+          facets: {
+            keyArgs: ['options'],
+            merge(existing, incoming) {
+              return incoming;
+            },
+          },
         },
       },
     },

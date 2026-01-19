@@ -578,7 +578,7 @@ export const ProductList: React.FC = () => {
                       <img
                         src={result.productAsset.preview}
                         alt={result.productName}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
@@ -694,7 +694,7 @@ export const ProductList: React.FC = () => {
                           <img
                             src={result.productAsset.preview}
                             alt={result.productName}
-                            className="h-12 w-12 rounded-lg object-cover border border-border"
+                            className="h-12 w-12 rounded-lg object-contain border border-border"
                           />
                         ) : (
                           <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center">

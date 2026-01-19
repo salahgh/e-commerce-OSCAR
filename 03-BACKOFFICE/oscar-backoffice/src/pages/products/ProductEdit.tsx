@@ -14,10 +14,12 @@ import {
   Star,
   Eye,
   FolderTree,
+  Tag,
   Upload,
   Check,
   GripVertical,
   RefreshCw,
+  ImagePlus,
 } from 'lucide-react';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
@@ -31,6 +33,7 @@ import {
   CreateAssetsDocument,
   AddAssetsToProductDocument,
   AdminProductOptionGroupsDocument,
+  UpdateProductFacetsDocument,
   LanguageCode,
 } from '../../graphql/generated/graphql';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -41,6 +44,8 @@ import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { VariantManager } from '../../components/products/VariantManager';
+import { FacetSelector } from '../../components/products/FacetSelector';
+import { AssetPickerModal } from '../../components/ui/AssetPickerModal';
 import { formatPrice, formatDateTime } from '../../lib/utils';
 
 // Wizard steps - matching ProductCreate
@@ -49,6 +54,7 @@ const STEPS = [
   { id: 'translations', label: 'Traductions', icon: Globe },
   { id: 'images', label: 'Images', icon: ImageIcon },
   { id: 'variants', label: 'Variantes', icon: Layers },
+  { id: 'facets', label: 'Attributs', icon: Tag },
   { id: 'categories', label: 'Catégories', icon: FolderTree },
 ];
 
@@ -61,14 +67,14 @@ const getTranslation = (translations: any[] | undefined, lang: string, field: st
 
 // Validation schema for product form
 const ProductSchema = Yup.object().shape({
-  name: Yup.string().required('Nom requis'),
+  name: Yup.string().required('Nom requis'), // Primary language: French
   slug: Yup.string().required('Slug requis'),
   description: Yup.string(),
   enabled: Yup.boolean(),
-  nameFr: Yup.string(),
-  slugFr: Yup.string(),
-  descriptionFr: Yup.string(),
-  nameAr: Yup.string(),
+  nameEn: Yup.string(), // English translation
+  slugEn: Yup.string(),
+  descriptionEn: Yup.string(),
+  nameAr: Yup.string(), // Arabic translation
   slugAr: Yup.string(),
   descriptionAr: Yup.string(),
 });
@@ -89,15 +95,21 @@ export const ProductEdit: React.FC = () => {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [draggedImageIndex, setDraggedImageIndex] = useState<number | null>(null);
+  const [showAssetPicker, setShowAssetPicker] = useState(false);
 
   // Collections state
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [savingCollections, setSavingCollections] = useState(false);
 
+  // Facets state
+  const [selectedFacetValueIds, setSelectedFacetValueIds] = useState<string[]>([]);
+  const [savingFacets, setSavingFacets] = useState(false);
+
   // Fetch product data
   const { data, loading, error, refetch } = useQuery(AdminProductDocument, {
     variables: { id: id! },
     skip: !id,
+    fetchPolicy: 'network-only', // Force fresh fetch to ensure assets are loaded
   });
 
   // Fetch all collections for category assignment
@@ -115,6 +127,7 @@ export const ProductEdit: React.FC = () => {
   const [updateCollectionFilters] = useMutation(UpdateCollectionFiltersDocument);
   const [createAssets] = useMutation(CreateAssetsDocument);
   const [addAssetsToProduct] = useMutation(AddAssetsToProductDocument);
+  const [updateProductFacets] = useMutation(UpdateProductFacetsDocument);
 
   const product = data?.product;
   const allCollections = collectionsData?.collections?.items || [];
@@ -148,18 +161,26 @@ export const ProductEdit: React.FC = () => {
     }
   }, [allCollections.length, id]);
 
-  // Initialize formik with product data - using native Vendure translations
+  // Update selected facet values when product data is loaded
+  useEffect(() => {
+    if (product?.facetValues) {
+      setSelectedFacetValueIds(product.facetValues.map((fv: any) => fv.id));
+    }
+  }, [product?.facetValues]);
+
+  // Initialize formik with product data - using native Vendure translations (French is primary)
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      name: product?.name || '',
-      slug: product?.slug || '',
-      description: product?.description || '',
+      // Primary language: French - read from 'fr' translation or fall back to default name
+      name: getTranslation(product?.translations, 'fr', 'name') || product?.name || '',
+      slug: getTranslation(product?.translations, 'fr', 'slug') || product?.slug || '',
+      description: getTranslation(product?.translations, 'fr', 'description') || product?.description || '',
       enabled: product?.enabled ?? true,
-      // French translations
-      nameFr: getTranslation(product?.translations, 'fr', 'name'),
-      slugFr: getTranslation(product?.translations, 'fr', 'slug'),
-      descriptionFr: getTranslation(product?.translations, 'fr', 'description'),
+      // English translations
+      nameEn: getTranslation(product?.translations, 'en', 'name'),
+      slugEn: getTranslation(product?.translations, 'en', 'slug'),
+      descriptionEn: getTranslation(product?.translations, 'en', 'description'),
       // Arabic translations
       nameAr: getTranslation(product?.translations, 'ar', 'name'),
       slugAr: getTranslation(product?.translations, 'ar', 'slug'),
@@ -168,23 +189,23 @@ export const ProductEdit: React.FC = () => {
     validationSchema: ProductSchema,
     onSubmit: async (values) => {
       try {
-        // Build translations array with EN, FR, AR
+        // Build translations array with FR (primary), EN, AR
         const translations = [
           {
-            languageCode: LanguageCode.En,
+            languageCode: LanguageCode.Fr,
             name: values.name,
             slug: values.slug,
             description: values.description,
           },
         ];
 
-        // Add French translation if any French field is filled
-        if (values.nameFr || values.descriptionFr) {
+        // Add English translation if any English field is filled
+        if (values.nameEn || values.descriptionEn) {
           translations.push({
-            languageCode: LanguageCode.Fr,
-            name: values.nameFr || values.name,
-            slug: values.slugFr || values.slug,
-            description: values.descriptionFr || values.description,
+            languageCode: LanguageCode.En,
+            name: values.nameEn || values.name,
+            slug: values.slugEn || values.slug,
+            description: values.descriptionEn || values.description,
           });
         }
 
@@ -320,6 +341,46 @@ export const ProductEdit: React.FC = () => {
     }
   };
 
+  // Handle selecting assets from the library picker
+  const handleSelectFromLibrary = async (selectedAssets: any[]) => {
+    if (!product || selectedAssets.length === 0) {
+      setShowAssetPicker(false);
+      return;
+    }
+
+    try {
+      const existingAssetIds = product.assets?.map((a) => a.id) || [];
+      const newAssetIds = selectedAssets
+        .map((a) => a.id)
+        .filter((id) => !existingAssetIds.includes(id)); // Avoid duplicates
+
+      if (newAssetIds.length === 0) {
+        dispatch(addToast({ message: 'Ces images sont déjà associées au produit', type: 'info' }));
+        setShowAssetPicker(false);
+        return;
+      }
+
+      await addAssetsToProduct({
+        variables: {
+          productId: id!,
+          assetIds: [...existingAssetIds, ...newAssetIds],
+        },
+      });
+
+      dispatch(
+        addToast({ message: `${newAssetIds.length} image(s) ajoutée(s) depuis la bibliothèque!`, type: 'success' })
+      );
+      refetch();
+    } catch (err: any) {
+      console.error('Add assets error:', err);
+      dispatch(
+        addToast({ message: err.message || 'Erreur lors de l\'ajout des images', type: 'error' })
+      );
+    } finally {
+      setShowAssetPicker(false);
+    }
+  };
+
   // Handle image drag reordering
   const handleImageDragStart = (index: number) => {
     setDraggedImageIndex(index);
@@ -432,6 +493,33 @@ export const ProductEdit: React.FC = () => {
     }
   };
 
+  // Handle saving facet values
+  const handleSaveFacets = async () => {
+    if (!id) return;
+
+    setSavingFacets(true);
+    try {
+      await updateProductFacets({
+        variables: {
+          productId: id,
+          facetValueIds: selectedFacetValueIds,
+        },
+      });
+
+      dispatch(addToast({ message: 'Attributs mis à jour!', type: 'success' }));
+      refetch();
+    } catch (err: any) {
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de la mise à jour des attributs',
+          type: 'error',
+        })
+      );
+    } finally {
+      setSavingFacets(false);
+    }
+  };
+
   // Handle product deletion
   const handleDelete = async () => {
     try {
@@ -481,9 +569,14 @@ export const ProductEdit: React.FC = () => {
   // Tab content components
   const GeneralTab = (
     <div className="space-y-6">
+      <div className="flex items-center gap-2 pb-4 border-b border-border">
+        <span className="px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded text-xs font-bold">FR</span>
+        <span className="font-medium text-foreground">Langue principale : Francais</span>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Input
-          label="Nom (Anglais) *"
+          label="Nom *"
           value={formik.values.name}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
@@ -499,11 +592,11 @@ export const ProductEdit: React.FC = () => {
           name="slug"
           error={formik.touched.slug ? formik.errors.slug : undefined}
           required
-          helperText="URL-friendly identifier"
+          helperText="Identifiant URL unique"
         />
       </div>
       <TextArea
-        label="Description (Anglais)"
+        label="Description"
         value={formik.values.description}
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
@@ -527,7 +620,7 @@ export const ProductEdit: React.FC = () => {
       <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mb-6">
         <p className="text-sm text-blue-300">
           <Globe className="inline h-4 w-4 mr-2" />
-          Configurez les traductions française et arabe pour ce produit.
+          Configurez les traductions anglaise et arabe pour ce produit.
         </p>
       </div>
 
@@ -535,31 +628,31 @@ export const ProductEdit: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <span className="px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded text-xs font-bold">FR</span> Français
+              <span className="px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded text-xs font-bold">EN</span> Anglais
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Input
               label="Nom"
-              value={formik.values.nameFr}
+              value={formik.values.nameEn}
               onChange={formik.handleChange}
-              name="nameFr"
-              placeholder="Nom du produit en français"
+              name="nameEn"
+              placeholder="Product name in English"
             />
             <Input
               label="Slug (URL)"
-              value={formik.values.slugFr}
+              value={formik.values.slugEn}
               onChange={formik.handleChange}
-              name="slugFr"
-              placeholder="mon-produit-fr"
+              name="slugEn"
+              placeholder="my-product-en"
             />
             <TextArea
               label="Description"
-              value={formik.values.descriptionFr}
+              value={formik.values.descriptionEn}
               onChange={formik.handleChange}
-              name="descriptionFr"
+              name="descriptionEn"
               rows={4}
-              placeholder="Description en français"
+              placeholder="Description in English"
             />
           </CardContent>
         </Card>
@@ -647,6 +740,18 @@ export const ProductEdit: React.FC = () => {
         )}
       </div>
 
+      {/* Select from Library Button */}
+      <div className="flex justify-center">
+        <button
+          type="button"
+          onClick={() => setShowAssetPicker(true)}
+          className="flex items-center gap-2 px-6 py-3 border-2 border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors font-medium"
+        >
+          <ImagePlus className="h-5 w-5" />
+          Sélectionner depuis la bibliothèque
+        </button>
+      </div>
+
       {/* Featured Asset */}
       {product.featuredAsset && (
         <div>
@@ -655,7 +760,7 @@ export const ProductEdit: React.FC = () => {
             <img
               src={product.featuredAsset.preview}
               alt={product.featuredAsset.name}
-              className="h-48 w-48 object-cover rounded-lg border-2 border-yellow-500 ring-2 ring-yellow-500/30"
+              className="h-48 w-48 object-contain rounded-lg border-2 border-yellow-500 ring-2 ring-yellow-500/30"
             />
             <Badge variant="warning" className="absolute top-2 left-2">
               <Star className="h-3 w-3 mr-1" />
@@ -694,7 +799,7 @@ export const ProductEdit: React.FC = () => {
                       : 'border-border hover:border-muted-foreground'
                   } ${draggedImageIndex === index ? 'opacity-50 scale-95' : ''}`}
                 >
-                  <img src={asset.preview} alt={asset.name} className="h-32 w-full object-cover" />
+                  <img src={asset.preview} alt={asset.name} className="h-32 w-full object-contain" />
                   <div className="absolute top-1 left-1 p-1 bg-background/80 rounded opacity-0 group-hover:opacity-100 transition-opacity">
                     <GripVertical className="h-4 w-4 text-muted-foreground" />
                   </div>
@@ -765,6 +870,34 @@ export const ProductEdit: React.FC = () => {
       allOptionGroups={allOptionGroups}
       onRefetch={refetch}
     />
+  );
+
+  const FacetsTab = (
+    <div className="space-y-6">
+      <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4">
+        <p className="text-sm text-blue-300">
+          <Tag className="inline h-4 w-4 mr-2" />
+          Sélectionnez les attributs (taille, couleur, etc.) pour ce produit.
+        </p>
+      </div>
+
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-medium text-foreground">Attributs</h3>
+        <Button
+          onClick={handleSaveFacets}
+          loading={savingFacets}
+          disabled={savingFacets}
+          icon={<Save className="h-4 w-4" />}
+        >
+          Sauvegarder les attributs
+        </Button>
+      </div>
+
+      <FacetSelector
+        selectedIds={selectedFacetValueIds}
+        onChange={setSelectedFacetValueIds}
+      />
+    </div>
   );
 
   const CategoriesTab = (
@@ -850,6 +983,8 @@ export const ProductEdit: React.FC = () => {
       case 3:
         return VariantsTab;
       case 4:
+        return FacetsTab;
+      case 5:
         return CategoriesTab;
       default:
         return null;
@@ -908,7 +1043,7 @@ export const ProductEdit: React.FC = () => {
                 <img
                   src={product.featuredAsset.preview}
                   alt=""
-                  className="h-12 w-12 rounded-lg object-cover"
+                  className="h-12 w-12 rounded-lg object-contain"
                 />
               ) : (
                 <div className="h-12 w-12 bg-muted rounded-lg flex items-center justify-center">
@@ -1036,6 +1171,16 @@ export const ProductEdit: React.FC = () => {
         confirmText="Supprimer"
         variant="danger"
         loading={deleting}
+      />
+
+      {/* Asset Picker Modal */}
+      <AssetPickerModal
+        isOpen={showAssetPicker}
+        onClose={() => setShowAssetPicker(false)}
+        onSelect={handleSelectFromLibrary}
+        multiple={true}
+        selectedIds={product.assets?.map((a) => a.id) || []}
+        title="Sélectionner des images"
       />
     </div>
   );

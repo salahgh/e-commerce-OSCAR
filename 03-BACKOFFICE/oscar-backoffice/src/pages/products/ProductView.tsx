@@ -16,6 +16,7 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  Box,
 } from 'lucide-react';
 import {
   AdminProductDocument,
@@ -200,7 +201,7 @@ export const ProductView: React.FC = () => {
                           <img
                             src={asset.preview}
                             alt={asset.name}
-                            className="h-20 w-full object-cover"
+                            className="h-20 w-full object-contain"
                           />
                           {product.featuredAsset?.id === asset.id && (
                             <div className="absolute top-1 right-1">

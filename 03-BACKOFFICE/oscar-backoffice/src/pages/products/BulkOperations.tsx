@@ -279,7 +279,7 @@ export const BulkOperations: React.FC = () => {
                       <img
                         src={product.featuredAsset.preview}
                         alt={product.name}
-                        className="w-10 h-10 rounded object-cover"
+                        className="w-10 h-10 rounded object-contain"
                       />
                     ) : (
                       <div className="w-10 h-10 rounded bg-muted flex items-center justify-center">

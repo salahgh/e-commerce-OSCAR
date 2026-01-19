@@ -17,6 +17,8 @@ import {
   Film,
   File,
   RefreshCw,
+  SortAsc,
+  SortDesc,
 } from 'lucide-react';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
@@ -32,8 +34,19 @@ import { formatDate } from '../../lib/utils';
 import { PermissionGate } from '../../components/auth/PermissionGate';
 
 type ViewMode = 'grid' | 'list';
+type TypeFilter = 'all' | 'image' | 'video';
+type SortOption = 'createdAt_DESC' | 'createdAt_ASC' | 'name_ASC' | 'name_DESC' | 'fileSize_DESC' | 'fileSize_ASC';
 
 const PAGE_SIZE = 24;
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: 'createdAt_DESC', label: 'Plus recents' },
+  { value: 'createdAt_ASC', label: 'Plus anciens' },
+  { value: 'name_ASC', label: 'Nom (A-Z)' },
+  { value: 'name_DESC', label: 'Nom (Z-A)' },
+  { value: 'fileSize_DESC', label: 'Taille (grande)' },
+  { value: 'fileSize_ASC', label: 'Taille (petite)' },
+];
 
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 B';
@@ -58,6 +71,8 @@ export const AssetList: React.FC = () => {
   const dispatch = useAppDispatch();
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const [sortOption, setSortOption] = useState<SortOption>('createdAt_DESC');
   const [page, setPage] = useState(1);
   const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -65,18 +80,37 @@ export const AssetList: React.FC = () => {
   const [previewAsset, setPreviewAsset] = useState<any | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
+  // Build filter based on search and type filter
+  const buildFilter = () => {
+    const filter: any = {};
+
+    if (searchTerm) {
+      filter.name = { contains: searchTerm };
+    }
+
+    if (typeFilter === 'image') {
+      filter.type = { eq: AssetType.Image };
+    } else if (typeFilter === 'video') {
+      filter.type = { eq: AssetType.Video };
+    }
+
+    return Object.keys(filter).length > 0 ? filter : undefined;
+  };
+
+  // Build sort option
+  const buildSort = () => {
+    const [field, direction] = sortOption.split('_');
+    return { [field]: direction as any };
+  };
+
   // Query assets
   const { data, loading, error, refetch } = useQuery(AdminAssetsDocument, {
     variables: {
       options: {
         take: PAGE_SIZE,
         skip: (page - 1) * PAGE_SIZE,
-        filter: searchTerm
-          ? {
-              name: { contains: searchTerm },
-            }
-          : undefined,
-        sort: { createdAt: 'DESC' as any },
+        filter: buildFilter(),
+        sort: buildSort(),
       },
     },
     fetchPolicy: 'cache-and-network',
@@ -180,25 +214,47 @@ export const AssetList: React.FC = () => {
   }, [assets, selectedAssets.size]);
 
   // Handle bulk delete
-  const handleBulkDelete = async () => {
+  const handleBulkDelete = async (force: boolean = false) => {
     try {
-      await deleteAssets({
+      const result = await deleteAssets({
         variables: {
           input: {
             assetIds: Array.from(selectedAssets),
-            force: false,
+            force: force,
           },
         },
       });
-      dispatch(
-        addToast({
-          message: `${selectedAssets.size} fichier(s) supprime(s)`,
-          type: 'success',
-        })
-      );
-      setSelectedAssets(new Set());
-      setShowDeleteDialog(false);
-      refetch();
+
+      const response = result.data?.deleteAssets;
+
+      if (response?.result === 'DELETED') {
+        dispatch(
+          addToast({
+            message: `${selectedAssets.size} fichier(s) supprime(s)`,
+            type: 'success',
+          })
+        );
+        setSelectedAssets(new Set());
+        setShowDeleteDialog(false);
+        refetch();
+      } else if (response?.result === 'NOT_DELETED') {
+        // Assets are in use, ask if user wants to force delete
+        const shouldForce = window.confirm(
+          `${response.message || 'Certains fichiers sont utilisés par des produits.'}\n\nVoulez-vous forcer la suppression ?`
+        );
+        if (shouldForce) {
+          await handleBulkDelete(true);
+        } else {
+          setShowDeleteDialog(false);
+        }
+      } else {
+        dispatch(
+          addToast({
+            message: response?.message || 'Erreur lors de la suppression',
+            type: 'error',
+          })
+        );
+      }
     } catch (err: any) {
       dispatch(
         addToast({
@@ -317,9 +373,11 @@ export const AssetList: React.FC = () => {
         )}
       </div>
 
-      {/* Search and Actions */}
-      <div className="bg-card rounded-lg shadow p-4">
-        <div className="flex items-center gap-4">
+      {/* Search, Filters and Actions */}
+      <div className="bg-card rounded-lg shadow p-4 space-y-4">
+        {/* Top row: Search and type filter */}
+        <div className="flex flex-col md:flex-row gap-4">
+          {/* Search */}
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <input
@@ -334,30 +392,99 @@ export const AssetList: React.FC = () => {
             />
           </div>
 
-          {selectedAssets.size > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">
-                {selectedAssets.size} selectionne(s)
-              </span>
-              <button
-                onClick={() => setSelectedAssets(new Set())}
-                className="p-2 text-muted-foreground hover:text-foreground"
-                title="Deselectionner tout"
-              >
-                <X className="h-5 w-5" />
-              </button>
-              <PermissionGate permission="DeleteCatalog" disableMode>
-                <button
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="flex items-center gap-2 px-3 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Supprimer
-                </button>
-              </PermissionGate>
-            </div>
-          )}
+          {/* Type filter buttons */}
+          <div className="flex items-center bg-muted rounded-lg p-1">
+            <button
+              onClick={() => {
+                setTypeFilter('all');
+                setPage(1);
+              }}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                typeFilter === 'all'
+                  ? 'bg-card text-primary shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Tous
+            </button>
+            <button
+              onClick={() => {
+                setTypeFilter('image');
+                setPage(1);
+              }}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                typeFilter === 'image'
+                  ? 'bg-card text-primary shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <FileImage className="h-4 w-4" />
+              Images
+            </button>
+            <button
+              onClick={() => {
+                setTypeFilter('video');
+                setPage(1);
+              }}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                typeFilter === 'video'
+                  ? 'bg-card text-primary shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Film className="h-4 w-4" />
+              Videos
+            </button>
+          </div>
+
+          {/* Sort dropdown */}
+          <div className="relative">
+            <select
+              value={sortOption}
+              onChange={(e) => {
+                setSortOption(e.target.value as SortOption);
+                setPage(1);
+              }}
+              className="appearance-none pl-10 pr-8 py-3 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none cursor-pointer"
+            >
+              {SORT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            {sortOption.includes('DESC') ? (
+              <SortDesc className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+            ) : (
+              <SortAsc className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+            )}
+          </div>
         </div>
+
+        {/* Bottom row: Selection actions */}
+        {selectedAssets.size > 0 && (
+          <div className="flex items-center gap-2 pt-2 border-t border-border">
+            <span className="text-sm text-muted-foreground">
+              {selectedAssets.size} selectionne(s)
+            </span>
+            <button
+              onClick={() => setSelectedAssets(new Set())}
+              className="p-2 text-muted-foreground hover:text-foreground"
+              title="Deselectionner tout"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <PermissionGate permission="DeleteCatalog" disableMode>
+              <button
+                onClick={() => setShowDeleteDialog(true)}
+                className="flex items-center gap-2 px-3 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90"
+              >
+                <Trash2 className="h-4 w-4" />
+                Supprimer
+              </button>
+            </PermissionGate>
+          </div>
+        )}
       </div>
 
       {/* Assets Grid/List */}
@@ -422,7 +549,7 @@ export const AssetList: React.FC = () => {
                       <img
                         src={asset.preview}
                         alt={asset.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-muted">
@@ -527,7 +654,7 @@ export const AssetList: React.FC = () => {
                         <img
                           src={asset.preview}
                           alt={asset.name}
-                          className="h-12 w-12 rounded object-cover"
+                          className="h-12 w-12 rounded object-contain"
                         />
                       ) : (
                         <div className="h-12 w-12 rounded bg-muted flex items-center justify-center">
@@ -670,7 +797,7 @@ export const AssetList: React.FC = () => {
       <ConfirmDialog
         isOpen={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
-        onConfirm={handleBulkDelete}
+        onConfirm={() => handleBulkDelete(false)}
         title="Supprimer les medias"
         message={`Etes-vous sur de vouloir supprimer ${selectedAssets.size} fichier(s)? Cette action est irreversible.`}
         confirmText="Supprimer"

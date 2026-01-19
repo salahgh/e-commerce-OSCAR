@@ -148,7 +148,7 @@ const SortableFlatItem: React.FC<SortableFlatItemProps> = ({ collection, collect
       {/* Name & Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="font-medium text-foreground truncate">{collection.name}</span>
+          <span className="font-medium text-foreground truncate">{getTranslation(collection.translations, 'fr', 'name') || collection.name}</span>
           {collection.isPrivate && (
             <span title="Privé">
               <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -159,7 +159,7 @@ const SortableFlatItem: React.FC<SortableFlatItemProps> = ({ collection, collect
           {parent && parent.id !== '1' && (
             <span className="mr-2">
               <FolderTree className="h-3 w-3 inline mr-1" />
-              {parent.name}
+              {getTranslation(parent.translations, 'fr', 'name') || parent.name}
             </span>
           )}
           <span className="text-muted-foreground/70">/{collection.slug}</span>
@@ -168,7 +168,7 @@ const SortableFlatItem: React.FC<SortableFlatItemProps> = ({ collection, collect
 
       {/* Translations */}
       <div className="hidden lg:block text-sm text-muted-foreground max-w-48 truncate">
-        {getTranslation(collection.translations, 'fr', 'name') && <span>FR: {getTranslation(collection.translations, 'fr', 'name')}</span>}
+        {getTranslation(collection.translations, 'en', 'name') && <span>EN: {getTranslation(collection.translations, 'en', 'name')}</span>}
       </div>
 
       {/* Product Count */}
@@ -340,7 +340,7 @@ const SortableTreeItem: React.FC<SortableTreeItemProps> = ({
         {/* Name */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-medium text-foreground truncate">{collection.name}</span>
+            <span className="font-medium text-foreground truncate">{getTranslation(collection.translations, 'fr', 'name') || collection.name}</span>
             {collection.isPrivate && (
               <span title="Privé">
                 <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -348,8 +348,8 @@ const SortableTreeItem: React.FC<SortableTreeItemProps> = ({
             )}
           </div>
           <div className="text-sm text-muted-foreground truncate">
-            {getTranslation(collection.translations, 'fr', 'name') && (
-              <span className="mr-3">FR: {getTranslation(collection.translations, 'fr', 'name')}</span>
+            {getTranslation(collection.translations, 'en', 'name') && (
+              <span className="mr-3">EN: {getTranslation(collection.translations, 'en', 'name')}</span>
             )}
             {getTranslation(collection.translations, 'ar', 'name') && (
               <span dir="rtl">AR: {getTranslation(collection.translations, 'ar', 'name')}</span>
@@ -833,7 +833,7 @@ export const CategoryList: React.FC = () => {
           {/* Name */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-medium text-foreground truncate">{collection.name}</span>
+              <span className="font-medium text-foreground truncate">{getTranslation(collection.translations, 'fr', 'name') || collection.name}</span>
               {collection.isPrivate && (
                 <span title="Privé">
                   <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -841,8 +841,8 @@ export const CategoryList: React.FC = () => {
               )}
             </div>
             <div className="text-sm text-muted-foreground truncate">
-              {getTranslation(collection.translations, 'fr', 'name') && (
-                <span className="mr-3">FR: {getTranslation(collection.translations, 'fr', 'name')}</span>
+              {getTranslation(collection.translations, 'en', 'name') && (
+                <span className="mr-3">EN: {getTranslation(collection.translations, 'en', 'name')}</span>
               )}
               {getTranslation(collection.translations, 'ar', 'name') && (
                 <span dir="rtl">AR: {getTranslation(collection.translations, 'ar', 'name')}</span>
@@ -914,7 +914,7 @@ export const CategoryList: React.FC = () => {
         {/* Name & Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-medium text-foreground truncate">{collection.name}</span>
+            <span className="font-medium text-foreground truncate">{getTranslation(collection.translations, 'fr', 'name') || collection.name}</span>
             {collection.isPrivate && (
               <span title="Privé">
                 <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -925,7 +925,7 @@ export const CategoryList: React.FC = () => {
             {parent && parent.id !== '1' && (
               <span className="mr-2">
                 <FolderTree className="h-3 w-3 inline mr-1" />
-                {parent.name}
+                {getTranslation(parent.translations, 'fr', 'name') || parent.name}
               </span>
             )}
             <span className="text-muted-foreground/70">/{collection.slug}</span>
@@ -934,7 +934,7 @@ export const CategoryList: React.FC = () => {
 
         {/* Translations */}
         <div className="hidden lg:block text-sm text-muted-foreground max-w-48 truncate">
-          {getTranslation(collection.translations, 'fr', 'name') && <span>FR: {getTranslation(collection.translations, 'fr', 'name')}</span>}
+          {getTranslation(collection.translations, 'en', 'name') && <span>EN: {getTranslation(collection.translations, 'en', 'name')}</span>}
         </div>
 
         {/* Product Count */}
