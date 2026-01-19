@@ -1,0 +1,161 @@
+# Query single facet with full details
+query AdminFacet($id: ID!) {
+  facet(id: $id) {
+    id
+    createdAt
+    updatedAt
+    name
+    code
+    isPrivate
+    translations {
+      id
+      languageCode
+      name
+    }
+    values {
+      id
+      name
+      code
+      translations {
+        id
+        languageCode
+        name
+      }
+      facet {
+        id
+        name
+        code
+      }
+      customFields {
+        colorHex
+      }
+    }
+  }
+}
+
+# Query facets list with pagination and filtering
+query AdminFacetList($options: FacetListOptions) {
+  facets(options: $options) {
+    items {
+      id
+      createdAt
+      updatedAt
+      name
+      code
+      isPrivate
+      translations {
+        id
+        languageCode
+        name
+      }
+      values {
+        id
+        name
+        code
+        translations {
+          id
+          languageCode
+          name
+        }
+        customFields {
+          colorHex
+        }
+      }
+    }
+    totalItems
+  }
+}
+
+# Create a new facet
+mutation CreateFacet($input: CreateFacetInput!) {
+  createFacet(input: $input) {
+    id
+    name
+    code
+    isPrivate
+    translations {
+      id
+      languageCode
+      name
+    }
+    values {
+      id
+      name
+      code
+    }
+  }
+}
+
+# Update an existing facet
+mutation UpdateFacet($input: UpdateFacetInput!) {
+  updateFacet(input: $input) {
+    id
+    name
+    code
+    isPrivate
+    translations {
+      id
+      languageCode
+      name
+    }
+    values {
+      id
+      name
+      code
+    }
+  }
+}
+
+# Delete a facet
+mutation DeleteFacet($id: ID!, $force: Boolean) {
+  deleteFacet(id: $id, force: $force) {
+    result
+    message
+  }
+}
+
+# Create new facet values
+mutation CreateFacetValues($input: [CreateFacetValueInput!]!) {
+  createFacetValues(input: $input) {
+    id
+    name
+    code
+    translations {
+      id
+      languageCode
+      name
+    }
+    facet {
+      id
+      name
+    }
+    customFields {
+      colorHex
+    }
+  }
+}
+
+# Update existing facet values
+mutation UpdateFacetValues($input: [UpdateFacetValueInput!]!) {
+  updateFacetValues(input: $input) {
+    id
+    name
+    code
+    translations {
+      id
+      languageCode
+      name
+    }
+    customFields {
+      colorHex
+    }
+  }
+}
+
+# Delete facet values
+mutation DeleteFacetValues($ids: [ID!]!, $force: Boolean) {
+  deleteFacetValues(ids: $ids, force: $force) {
+    result
+    message
+  }
+}

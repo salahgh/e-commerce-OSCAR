@@ -14,6 +14,7 @@ import {
   Shield,
   Tag,
   Image,
+  Palette,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAppSelector } from '../../hooks/useAppSelector';
@@ -59,6 +60,12 @@ const menuItems: MenuItem[] = [
     icon: Image,
     label: 'Medias',
     path: '/assets',
+    permissions: ['ReadCatalog'],
+  },
+  {
+    icon: Palette,
+    label: 'Attributs',
+    path: '/facets',
     permissions: ['ReadCatalog'],
   },
   {

@@ -10,11 +10,13 @@ import {
   Image as ImageIcon,
   Layers,
   FolderTree,
+  Tag,
   Upload,
   Trash2,
   Star,
   Check,
   GripVertical,
+  ImagePlus,
 } from 'lucide-react';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
@@ -28,6 +30,7 @@ import {
   AddOptionGroupToProductDocument,
   CreateProductOptionGroupDocument,
   CreateProductOptionDocument,
+  UpdateProductFacetsDocument,
   LanguageCode,
 } from '../../graphql/generated/graphql';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -37,6 +40,8 @@ import { TextArea } from '../../components/ui/TextArea';
 import { Badge } from '../../components/ui/Badge';
 import { VariantManagerCreate } from '../../components/products/VariantManagerCreate';
 import type { LocalOptionGroup, LocalVariant } from '../../components/products/VariantManagerCreate';
+import { FacetSelector } from '../../components/products/FacetSelector';
+import { AssetPickerModal } from '../../components/ui/AssetPickerModal';
 
 // Wizard steps
 const STEPS = [
@@ -44,6 +49,7 @@ const STEPS = [
   { id: 'translations', label: 'Traductions', icon: Globe },
   { id: 'images', label: 'Images', icon: ImageIcon },
   { id: 'variants', label: 'Variantes', icon: Layers },
+  { id: 'facets', label: 'Attributs', icon: Tag },
   { id: 'categories', label: 'Catégories', icon: FolderTree },
 ];
 
@@ -53,6 +59,7 @@ interface UploadedImage {
   preview: string;
   name: string;
   uploading?: boolean;
+  assetId?: string; // For images selected from the library
 }
 
 export const ProductCreate: React.FC = () => {
@@ -63,16 +70,16 @@ export const ProductCreate: React.FC = () => {
   // Current step
   const [currentStep, setCurrentStep] = useState(0);
 
-  // Form data - using native Vendure translations
+  // Form data - using native Vendure translations (French is primary)
   const [formData, setFormData] = useState({
-    name: '',
+    name: '', // Primary language: French
     slug: '',
     description: '',
     enabled: true,
-    // French translations
-    nameFr: '',
-    slugFr: '',
-    descriptionFr: '',
+    // English translations
+    nameEn: '',
+    slugEn: '',
+    descriptionEn: '',
     // Arabic translations
     nameAr: '',
     slugAr: '',
@@ -84,6 +91,7 @@ export const ProductCreate: React.FC = () => {
   const [featuredImageIndex, setFeaturedImageIndex] = useState<number>(0);
   const [draggedImageIndex, setDraggedImageIndex] = useState<number | null>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [showAssetPicker, setShowAssetPicker] = useState(false);
 
   // Variants - using local state types from VariantManagerCreate
   const [selectedOptionGroups, setSelectedOptionGroups] = useState<LocalOptionGroup[]>([]);
@@ -91,6 +99,9 @@ export const ProductCreate: React.FC = () => {
 
   // Categories
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+
+  // Facet values (attributes)
+  const [selectedFacetValueIds, setSelectedFacetValueIds] = useState<string[]>([]);
 
   // Loading states
   const [creating, setCreating] = useState(false);
@@ -109,6 +120,7 @@ export const ProductCreate: React.FC = () => {
   const [addOptionGroupToProduct] = useMutation(AddOptionGroupToProductDocument);
   const [createProductOptionGroup] = useMutation(CreateProductOptionGroupDocument);
   const [createProductOption] = useMutation(CreateProductOptionDocument);
+  const [updateProductFacets] = useMutation(UpdateProductFacetsDocument);
 
   const collections = collectionsData?.collections?.items || [];
   const optionGroups = optionGroupsData?.productOptionGroups || [];
@@ -211,6 +223,34 @@ export const ProductCreate: React.FC = () => {
     setDraggedImageIndex(null);
   };
 
+  // Handle selecting assets from the library picker
+  const handleSelectFromLibrary = (selectedAssets: any[]) => {
+    if (selectedAssets.length === 0) {
+      setShowAssetPicker(false);
+      return;
+    }
+
+    // Convert selected assets to UploadedImage format
+    const existingIds = images.map((img) => img.assetId).filter(Boolean);
+    const newImages: UploadedImage[] = selectedAssets
+      .filter((asset) => !existingIds.includes(asset.id)) // Avoid duplicates
+      .map((asset) => ({
+        file: null as any, // No file for library assets
+        preview: asset.preview,
+        assetId: asset.id,
+        name: asset.name,
+      }));
+
+    if (newImages.length === 0) {
+      dispatch(addToast({ message: 'Ces images sont déjà sélectionnées', type: 'info' }));
+    } else {
+      setImages([...images, ...newImages]);
+      dispatch(
+        addToast({ message: `${newImages.length} image(s) ajoutée(s) depuis la bibliothèque!`, type: 'success' })
+      );
+    }
+    setShowAssetPicker(false);
+  };
 
   // Helper to get product IDs from collection filters
   const getProductIdsFromCollection = (collection: any): string[] => {
@@ -247,12 +287,16 @@ export const ProductCreate: React.FC = () => {
     setCreating(true);
 
     try {
-      // Step 1: Upload images if any
-      let uploadedAssetIds: string[] = [];
+      // Step 1: Handle images - upload new files and collect library asset IDs
+      let allAssetIds: string[] = [];
       let featuredAssetId: string | undefined;
 
       if (images.length > 0) {
-        const filesToUpload = images.filter((img) => img.file);
+        // Separate images: those from library (have assetId) vs those to upload (have file)
+        const filesToUpload = images.filter((img) => img.file && !img.assetId);
+
+        // Upload new files if any
+        let newUploadedIds: string[] = [];
         if (filesToUpload.length > 0) {
           const assetResult = await createAssets({
             variables: {
@@ -261,33 +305,40 @@ export const ProductCreate: React.FC = () => {
           });
 
           const uploadedAssets = assetResult.data?.createAssets || [];
-          uploadedAssetIds = uploadedAssets
+          newUploadedIds = uploadedAssets
             .filter((a: any) => a.__typename === 'Asset' || a.id)
             .map((a: any) => a.id);
+        }
 
-          if (uploadedAssetIds.length > 0) {
-            featuredAssetId = uploadedAssetIds[featuredImageIndex] || uploadedAssetIds[0];
-          }
+        // Build final asset IDs list maintaining original order
+        let uploadIndex = 0;
+        allAssetIds = images.map((img) => {
+          if (img.assetId) return img.assetId;
+          return newUploadedIds[uploadIndex++] || '';
+        }).filter(Boolean);
+
+        if (allAssetIds.length > 0) {
+          featuredAssetId = allAssetIds[featuredImageIndex] || allAssetIds[0];
         }
       }
 
-      // Step 2: Create the product with multi-language translations
+      // Step 2: Create the product with multi-language translations (French is primary)
       const translations = [
         {
-          languageCode: LanguageCode.En,
+          languageCode: LanguageCode.Fr,
           name: formData.name,
           slug: formData.slug,
           description: formData.description,
         },
       ];
 
-      // Add French translation if any French field is filled
-      if (formData.nameFr || formData.descriptionFr) {
+      // Add English translation if any English field is filled
+      if (formData.nameEn || formData.descriptionEn) {
         translations.push({
-          languageCode: LanguageCode.Fr,
-          name: formData.nameFr || formData.name,
-          slug: formData.slugFr || formData.slug,
-          description: formData.descriptionFr || formData.description,
+          languageCode: LanguageCode.En,
+          name: formData.nameEn || formData.name,
+          slug: formData.slugEn || formData.slug,
+          description: formData.descriptionEn || formData.description,
         });
       }
 
@@ -305,7 +356,7 @@ export const ProductCreate: React.FC = () => {
         variables: {
           input: {
             enabled: formData.enabled,
-            assetIds: uploadedAssetIds,
+            assetIds: allAssetIds,
             featuredAssetId,
             translations,
           },
@@ -412,7 +463,17 @@ export const ProductCreate: React.FC = () => {
         }
       }
 
-      // Step 5: Add product to selected collections
+      // Step 5: Update product facets (attributes)
+      if (selectedFacetValueIds.length > 0) {
+        await updateProductFacets({
+          variables: {
+            productId,
+            facetValueIds: selectedFacetValueIds,
+          },
+        });
+      }
+
+      // Step 6: Add product to selected collections
       for (const collectionId of selectedCollections) {
         const collection = collections.find((c: any) => c.id === collectionId);
         if (!collection) continue;
@@ -457,6 +518,7 @@ export const ProductCreate: React.FC = () => {
       case 1:
       case 2:
       case 4:
+      case 5:
         return true;
       case 3:
         // If no option groups, allow to proceed (variants optional for simple products)
@@ -474,6 +536,11 @@ export const ProductCreate: React.FC = () => {
       case 0:
         return (
           <div className="space-y-6">
+            <div className="flex items-center gap-2 pb-4 border-b border-border">
+              <span className="px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded text-xs font-bold">FR</span>
+              <span className="font-medium text-foreground">Langue principale : Francais</span>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Input
                 label="Nom du produit *"
@@ -522,7 +589,7 @@ export const ProductCreate: React.FC = () => {
             <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4">
               <p className="text-sm text-blue-300">
                 <Globe className="inline h-4 w-4 mr-2" />
-                Configurez les traductions francaise et arabe pour ce produit. Ces champs sont
+                Configurez les traductions anglaise et arabe pour ce produit. Ces champs sont
                 optionnels.
               </p>
             </div>
@@ -531,40 +598,40 @@ export const ProductCreate: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <span className="px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded text-xs font-bold">FR</span> Francais
+                    <span className="px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded text-xs font-bold">EN</span> Anglais
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <Input
                     label="Nom"
-                    name="nameFr"
-                    value={formData.nameFr}
+                    name="nameEn"
+                    value={formData.nameEn}
                     onChange={(e) => {
                       handleInputChange(e);
-                      // Auto-generate French slug if empty
-                      if (!formData.slugFr) {
+                      // Auto-generate English slug if empty
+                      if (!formData.slugEn) {
                         setFormData(prev => ({
                           ...prev,
-                          slugFr: generateSlug(e.target.value),
+                          slugEn: generateSlug(e.target.value),
                         }));
                       }
                     }}
-                    placeholder="Nom du produit en francais"
+                    placeholder="Product name in English"
                   />
                   <Input
                     label="Slug (URL)"
-                    name="slugFr"
-                    value={formData.slugFr}
+                    name="slugEn"
+                    value={formData.slugEn}
                     onChange={handleInputChange}
-                    placeholder="mon-produit-fr"
+                    placeholder="my-product-en"
                   />
                   <TextArea
                     label="Description"
-                    name="descriptionFr"
-                    value={formData.descriptionFr}
+                    name="descriptionEn"
+                    value={formData.descriptionEn}
                     onChange={handleInputChange}
                     rows={4}
-                    placeholder="Description en francais"
+                    placeholder="Description in English"
                   />
                 </CardContent>
               </Card>
@@ -644,6 +711,18 @@ export const ProductCreate: React.FC = () => {
               </p>
             </div>
 
+            {/* Select from Library Button */}
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => setShowAssetPicker(true)}
+                className="flex items-center gap-2 px-6 py-3 border-2 border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors font-medium"
+              >
+                <ImagePlus className="h-5 w-5" />
+                Sélectionner depuis la bibliothèque
+              </button>
+            </div>
+
             {/* Image gallery */}
             {images.length > 0 && (
               <div>
@@ -671,7 +750,7 @@ export const ProductCreate: React.FC = () => {
                       <img
                         src={image.preview}
                         alt={image.name}
-                        className="h-32 w-full object-cover"
+                        className="h-32 w-full object-contain"
                       />
                       <div className="absolute top-1 left-1 p-1 bg-background/80 rounded opacity-0 group-hover:opacity-100">
                         <GripVertical className="h-4 w-4 text-muted-foreground" />
@@ -751,6 +830,23 @@ export const ProductCreate: React.FC = () => {
           <div className="space-y-6">
             <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4">
               <p className="text-sm text-blue-300">
+                <Tag className="inline h-4 w-4 mr-2" />
+                Selectionnez les attributs (taille, couleur, etc.) pour ce produit.
+              </p>
+            </div>
+
+            <FacetSelector
+              selectedIds={selectedFacetValueIds}
+              onChange={setSelectedFacetValueIds}
+            />
+          </div>
+        );
+
+      case 5:
+        return (
+          <div className="space-y-6">
+            <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4">
+              <p className="text-sm text-blue-300">
                 <FolderTree className="inline h-4 w-4 mr-2" />
                 Selectionnez les categories ou ce produit sera visible.
               </p>
@@ -807,7 +903,7 @@ export const ProductCreate: React.FC = () => {
                 <CardTitle className="text-base">Resume</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <p className="text-sm text-muted-foreground">Produit</p>
                     <p className="font-semibold text-foreground">{formData.name || '-'}</p>
@@ -821,6 +917,10 @@ export const ProductCreate: React.FC = () => {
                     <p className="font-semibold text-foreground">
                       {pendingVariants.filter((v) => v.sku).length}
                     </p>
+                  </div>
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Attributs</p>
+                    <p className="font-semibold text-foreground">{selectedFacetValueIds.length}</p>
                   </div>
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <p className="text-sm text-muted-foreground">Categories</p>
@@ -935,6 +1035,16 @@ export const ProductCreate: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Asset Picker Modal */}
+      <AssetPickerModal
+        isOpen={showAssetPicker}
+        onClose={() => setShowAssetPicker(false)}
+        onSelect={handleSelectFromLibrary}
+        multiple={true}
+        selectedIds={images.filter((img) => img.assetId).map((img) => img.assetId!)}
+        title="Sélectionner des images"
+      />
     </div>
   );
 };

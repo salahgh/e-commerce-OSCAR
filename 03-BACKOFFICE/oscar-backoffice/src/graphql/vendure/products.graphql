@@ -591,63 +591,9 @@ mutation RemoveOptionGroupFromProduct($productId: ID!, $optionGroupId: ID!, $for
   }
 }
 
-# ==================== ASSET MUTATIONS ====================
-
-# Upload assets (images)
-mutation CreateAssets($input: [CreateAssetInput!]!) {
-  createAssets(input: $input) {
-    ... on Asset {
-      id
-      name
-      preview
-      source
-      width
-      height
-      fileSize
-      mimeType
-    }
-    ... on MimeTypeError {
-      errorCode
-      message
-      fileName
-      mimeType
-    }
-  }
-}
-
-# Update asset
-mutation UpdateAsset($input: UpdateAssetInput!) {
-  updateAsset(input: $input) {
-    id
-    name
-    preview
-    source
-    focalPoint {
-      x
-      y
-    }
-    tags {
-      id
-      value
-    }
-  }
-}
-
-# Delete a single asset
-mutation DeleteAsset($input: DeleteAssetInput!) {
-  deleteAsset(input: $input) {
-    result
-    message
-  }
-}
-
-# Delete multiple assets
-mutation DeleteAssets($input: DeleteAssetsInput!) {
-  deleteAssets(input: $input) {
-    result
-    message
-  }
-}
+# ==================== PRODUCT ASSET MUTATIONS ====================
+# Note: General asset mutations (CreateAssets, UpdateAsset, DeleteAsset, DeleteAssets)
+# are defined in assets.graphql. These are product-specific asset operations.
 
 # Add assets to product (update product's assetIds)
 mutation AddAssetsToProduct($productId: ID!, $assetIds: [ID!]!) {

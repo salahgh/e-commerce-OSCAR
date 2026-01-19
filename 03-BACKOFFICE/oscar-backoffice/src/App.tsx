@@ -27,6 +27,7 @@ import { Reports } from './pages/reports/Reports';
 import { BulkOperations } from './pages/products/BulkOperations';
 import { UserList, UserDetail, UserForm, RoleList, RoleForm } from './pages/users';
 import { PromotionList, PromotionForm } from './pages/promotions';
+import { FacetList, FacetDetail } from './pages/facets';
 
 // Component to initialize theme from localStorage
 const ThemeInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -87,6 +88,13 @@ function App() {
                     <Route index element={<CategoryList />} />
                     <Route path="new" element={<CategoryDetail />} />
                     <Route path=":id" element={<CategoryDetail />} />
+                  </Route>
+
+                  {/* Facets / Attributes */}
+                  <Route path="facets">
+                    <Route index element={<FacetList />} />
+                    <Route path="new" element={<FacetDetail />} />
+                    <Route path=":id" element={<FacetDetail />} />
                   </Route>
 
                   {/* Assets / Media */}
