@@ -153,16 +153,23 @@ export const BulkOperations: React.FC = () => {
     reader.readAsText(file);
   };
 
+  // Helper to get translation from product
+  const getTranslation = (translations: any[] | undefined, lang: string): string => {
+    if (!translations) return '';
+    const translation = translations.find((t: any) => t.languageCode === lang);
+    return translation?.name || '';
+  };
+
   // Export products to CSV
   const exportProducts = () => {
     const headers = ['ID', 'Name', 'Name FR', 'Name AR', 'SKU', 'Price', 'Stock', 'Enabled'];
-    const rows = products.map((p) => {
+    const rows = products.map((p: any) => {
       const variant = p.variants?.[0];
       return [
         p.id,
         `"${p.name}"`,
-        `"${p.customFields?.nameFr || ''}"`,
-        `"${p.customFields?.nameAr || ''}"`,
+        `"${getTranslation(p.translations, 'fr')}"`,
+        `"${getTranslation(p.translations, 'ar')}"`,
         variant?.sku || '',
         variant?.price || 0,
         variant?.stockOnHand || 0,

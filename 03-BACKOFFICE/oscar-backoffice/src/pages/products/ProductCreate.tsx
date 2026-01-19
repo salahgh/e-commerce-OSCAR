@@ -63,21 +63,20 @@ export const ProductCreate: React.FC = () => {
   // Current step
   const [currentStep, setCurrentStep] = useState(0);
 
-  // Form data
+  // Form data - using native Vendure translations
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
     description: '',
     enabled: true,
+    // French translations
     nameFr: '',
-    nameAr: '',
+    slugFr: '',
     descriptionFr: '',
+    // Arabic translations
+    nameAr: '',
+    slugAr: '',
     descriptionAr: '',
-    isFeatured: false,
-    weightKg: '',
-    availableSizes: '',
-    availableColors: '',
-    salePrice: '',
   });
 
   // Images
@@ -272,44 +271,43 @@ export const ProductCreate: React.FC = () => {
         }
       }
 
-      // Step 2: Create the product
+      // Step 2: Create the product with multi-language translations
+      const translations = [
+        {
+          languageCode: LanguageCode.En,
+          name: formData.name,
+          slug: formData.slug,
+          description: formData.description,
+        },
+      ];
+
+      // Add French translation if any French field is filled
+      if (formData.nameFr || formData.descriptionFr) {
+        translations.push({
+          languageCode: LanguageCode.Fr,
+          name: formData.nameFr || formData.name,
+          slug: formData.slugFr || formData.slug,
+          description: formData.descriptionFr || formData.description,
+        });
+      }
+
+      // Add Arabic translation if any Arabic field is filled
+      if (formData.nameAr || formData.descriptionAr) {
+        translations.push({
+          languageCode: LanguageCode.Ar,
+          name: formData.nameAr || formData.name,
+          slug: formData.slugAr || formData.slug,
+          description: formData.descriptionAr || formData.description,
+        });
+      }
+
       const productResult = await createProduct({
         variables: {
           input: {
             enabled: formData.enabled,
             assetIds: uploadedAssetIds,
             featuredAssetId,
-            translations: [
-              {
-                languageCode: LanguageCode.En,
-                name: formData.name,
-                slug: formData.slug,
-                description: formData.description,
-              },
-            ],
-            customFields: {
-              nameFr: formData.nameFr || null,
-              nameAr: formData.nameAr || null,
-              descriptionFr: formData.descriptionFr || null,
-              descriptionAr: formData.descriptionAr || null,
-              isFeatured: formData.isFeatured,
-              weightKg: formData.weightKg ? parseFloat(formData.weightKg) : null,
-              salePrice: formData.salePrice
-                ? Math.round(parseFloat(formData.salePrice) * 100)
-                : null,
-              availableSizes: formData.availableSizes
-                ? formData.availableSizes
-                    .split(',')
-                    .map((s) => s.trim())
-                    .filter(Boolean)
-                : [],
-              availableColors: formData.availableColors
-                ? formData.availableColors
-                    .split(',')
-                    .map((s) => s.trim())
-                    .filter(Boolean)
-                : [],
-            },
+            translations,
           },
         },
       });
@@ -505,69 +503,15 @@ export const ProductCreate: React.FC = () => {
               placeholder="Description detaillee du produit..."
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Input
-                label="Poids (kg)"
-                name="weightKg"
-                type="number"
-                step="0.1"
-                value={formData.weightKg}
-                onChange={handleInputChange}
-                placeholder="0.5"
-              />
-              <Input
-                label="Prix promo (DZD)"
-                name="salePrice"
-                type="number"
-                value={formData.salePrice}
-                onChange={handleInputChange}
-                placeholder="Laisser vide si pas de promo"
-              />
-              <div className="flex flex-col justify-end">
-                <label className="flex items-center gap-3 p-3 bg-muted rounded-lg cursor-pointer hover:bg-accent">
-                  <input
-                    type="checkbox"
-                    name="enabled"
-                    checked={formData.enabled}
-                    onChange={handleInputChange}
-                    className="h-4 w-4 text-primary border-border rounded bg-card"
-                  />
-                  <span className="text-sm font-medium text-muted-foreground">Produit actif</span>
-                </label>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Tailles disponibles"
-                name="availableSizes"
-                value={formData.availableSizes}
-                onChange={handleInputChange}
-                placeholder="S, M, L, XL, XXL"
-                helperText="Separer par des virgules"
-              />
-              <Input
-                label="Couleurs disponibles"
-                name="availableColors"
-                value={formData.availableColors}
-                onChange={handleInputChange}
-                placeholder="Noir, Blanc, Bleu"
-                helperText="Separer par des virgules"
-              />
-            </div>
-
-            <label className="flex items-center gap-3 p-4 bg-yellow-900/30 border border-yellow-700 rounded-lg cursor-pointer hover:bg-yellow-900/50">
+            <label className="flex items-center gap-3 p-3 bg-muted rounded-lg cursor-pointer hover:bg-accent w-fit">
               <input
                 type="checkbox"
-                name="isFeatured"
-                checked={formData.isFeatured}
+                name="enabled"
+                checked={formData.enabled}
                 onChange={handleInputChange}
-                className="h-5 w-5 text-yellow-600 border-border rounded bg-card"
+                className="h-4 w-4 text-primary border-border rounded bg-card"
               />
-              <div className="flex items-center gap-2">
-                <Star className="h-5 w-5 text-yellow-500" />
-                <span className="font-medium text-foreground">Produit vedette</span>
-              </div>
+              <span className="text-sm font-medium text-muted-foreground">Produit actif</span>
             </label>
           </div>
         );
@@ -587,7 +531,7 @@ export const ProductCreate: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <span>FR</span> Francais
+                    <span className="px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded text-xs font-bold">FR</span> Francais
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -595,8 +539,24 @@ export const ProductCreate: React.FC = () => {
                     label="Nom"
                     name="nameFr"
                     value={formData.nameFr}
-                    onChange={handleInputChange}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      // Auto-generate French slug if empty
+                      if (!formData.slugFr) {
+                        setFormData(prev => ({
+                          ...prev,
+                          slugFr: generateSlug(e.target.value),
+                        }));
+                      }
+                    }}
                     placeholder="Nom du produit en francais"
+                  />
+                  <Input
+                    label="Slug (URL)"
+                    name="slugFr"
+                    value={formData.slugFr}
+                    onChange={handleInputChange}
+                    placeholder="mon-produit-fr"
                   />
                   <TextArea
                     label="Description"
@@ -612,7 +572,7 @@ export const ProductCreate: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <span>AR</span> Arabe
+                    <span className="px-2 py-0.5 bg-green-500/20 text-green-500 rounded text-xs font-bold">AR</span> Arabe
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -623,6 +583,13 @@ export const ProductCreate: React.FC = () => {
                     onChange={handleInputChange}
                     placeholder="اسم المنتج بالعربية"
                     dir="rtl"
+                  />
+                  <Input
+                    label="Slug (URL)"
+                    name="slugAr"
+                    value={formData.slugAr}
+                    onChange={handleInputChange}
+                    placeholder="mon-produit-ar"
                   />
                   <TextArea
                     label="Description"

@@ -83,17 +83,11 @@ query AdminProducts($options: ProductListOptions) {
           name
         }
       }
-      customFields {
-        nameFr
-        nameAr
-        descriptionFr
-        descriptionAr
-        salePrice
-        isFeatured
-        viewCount
-        weightKg
-        availableSizes
-        availableColors
+      translations {
+        languageCode
+        name
+        slug
+        description
       }
     }
     totalItems
@@ -176,17 +170,11 @@ query AdminProduct($id: ID!) {
         minStockAlert
       }
     }
-    customFields {
-      nameFr
-      nameAr
-      descriptionFr
-      descriptionAr
-      salePrice
-      isFeatured
-      viewCount
-      weightKg
-      availableSizes
-      availableColors
+    translations {
+      languageCode
+      name
+      slug
+      description
     }
     collections {
       id
@@ -372,16 +360,11 @@ mutation CreateProduct($input: CreateProductInput!) {
         name
       }
     }
-    customFields {
-      nameFr
-      nameAr
-      descriptionFr
-      descriptionAr
-      salePrice
-      isFeatured
-      weightKg
-      availableSizes
-      availableColors
+    translations {
+      languageCode
+      name
+      slug
+      description
     }
   }
 }
@@ -412,17 +395,11 @@ mutation UpdateProduct($input: UpdateProductInput!) {
         name
       }
     }
-    customFields {
-      nameFr
-      nameAr
-      descriptionFr
-      descriptionAr
-      salePrice
-      isFeatured
-      viewCount
-      weightKg
-      availableSizes
-      availableColors
+    translations {
+      languageCode
+      name
+      slug
+      description
     }
   }
 }
@@ -775,12 +752,4 @@ mutation UpdateVariantsStock($input: [UpdateProductVariantInput!]!) {
   }
 }
 
-# Toggle product featured status
-mutation ToggleProductFeatured($productId: ID!) {
-  toggleProductFeatured(productId: $productId) {
-    id
-    customFields {
-      isFeatured
-    }
-  }
-}
+# Note: ToggleProductFeatured mutation removed - isFeatured custom field no longer exists

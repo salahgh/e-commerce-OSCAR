@@ -9,11 +9,8 @@ import {
   Layers,
   Image as ImageIcon,
   Star,
-  Eye,
   FolderTree,
   Calendar,
-  Tag,
-  Box,
   ExternalLink,
   AlertTriangle,
   CheckCircle,
@@ -29,6 +26,13 @@ import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
 import { formatPrice, formatDateTime } from '../../lib/utils';
+
+// Helper to get translation by language
+const getTranslation = (translations: any[] | undefined, lang: string, field: string): string => {
+  if (!translations) return '';
+  const translation = translations.find((t: any) => t.languageCode === lang);
+  return translation?.[field] || '';
+};
 
 export const ProductView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -123,12 +127,6 @@ export const ProductView: React.FC = () => {
               <Badge variant={product.enabled ? 'success' : 'default'}>
                 {product.enabled ? 'Actif' : 'Inactif'}
               </Badge>
-              {product.customFields?.isFeatured && (
-                <Badge variant="warning">
-                  <Star className="h-3 w-3 mr-1" />
-                  Vedette
-                </Badge>
-              )}
             </div>
             <p className="text-sm text-muted-foreground mt-1">
               ID: {product.id} | Slug: {product.slug}
@@ -235,7 +233,7 @@ export const ProductView: React.FC = () => {
           </Card>
 
           {/* Translations */}
-          {(product.customFields?.nameFr || product.customFields?.nameAr) && (
+          {(getTranslation(product.translations, 'fr', 'name') || getTranslation(product.translations, 'ar', 'name')) && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -248,16 +246,16 @@ export const ProductView: React.FC = () => {
                   {/* French */}
                   <div className="space-y-2">
                     <h4 className="font-medium text-foreground flex items-center gap-2">
-                      <span className="text-sm">FR</span> Français
+                      <span className="text-sm px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded">FR</span> Français
                     </h4>
-                    {product.customFields?.nameFr ? (
+                    {getTranslation(product.translations, 'fr', 'name') ? (
                       <>
                         <p className="text-sm text-foreground">
-                          <span className="font-medium">Nom:</span> {product.customFields.nameFr}
+                          <span className="font-medium">Nom:</span> {getTranslation(product.translations, 'fr', 'name')}
                         </p>
-                        {product.customFields?.descriptionFr && (
+                        {getTranslation(product.translations, 'fr', 'description') && (
                           <p className="text-sm text-muted-foreground">
-                            {product.customFields.descriptionFr}
+                            {getTranslation(product.translations, 'fr', 'description')}
                           </p>
                         )}
                       </>
@@ -269,16 +267,16 @@ export const ProductView: React.FC = () => {
                   {/* Arabic */}
                   <div className="space-y-2" dir="rtl">
                     <h4 className="font-medium text-foreground flex items-center gap-2">
-                      <span className="text-sm">AR</span> العربية
+                      <span className="text-sm px-2 py-0.5 bg-green-500/20 text-green-500 rounded" dir="ltr">AR</span> العربية
                     </h4>
-                    {product.customFields?.nameAr ? (
+                    {getTranslation(product.translations, 'ar', 'name') ? (
                       <>
                         <p className="text-sm text-foreground">
-                          <span className="font-medium">الاسم:</span> {product.customFields.nameAr}
+                          <span className="font-medium">الاسم:</span> {getTranslation(product.translations, 'ar', 'name')}
                         </p>
-                        {product.customFields?.descriptionAr && (
+                        {getTranslation(product.translations, 'ar', 'description') && (
                           <p className="text-sm text-muted-foreground">
-                            {product.customFields.descriptionAr}
+                            {getTranslation(product.translations, 'ar', 'description')}
                           </p>
                         )}
                       </>
@@ -471,14 +469,6 @@ export const ProductView: React.FC = () => {
                   {mainVariant?.price ? formatPrice(mainVariant.price / 100) : '-'}
                 </span>
               </div>
-              {product.customFields?.salePrice && (
-                <div className="flex items-center justify-between py-2 border-b border-border">
-                  <span className="text-sm text-muted-foreground">Prix promo</span>
-                  <span className="font-semibold text-green-500">
-                    {formatPrice(product.customFields.salePrice / 100)}
-                  </span>
-                </div>
-              )}
               <div className="flex items-center justify-between py-2 border-b border-border">
                 <span className="text-sm text-muted-foreground">Stock total</span>
                 <span
@@ -500,61 +490,13 @@ export const ProductView: React.FC = () => {
                 </span>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-border">
-                <span className="text-sm text-muted-foreground">Vues</span>
-                <span className="font-semibold text-foreground flex items-center gap-1">
-                  <Eye className="h-4 w-4 text-muted-foreground" />
-                  {product.customFields?.viewCount || 0}
+                <span className="text-sm text-muted-foreground">Images</span>
+                <span className="font-semibold text-foreground">
+                  {product.assets?.length || 0}
                 </span>
               </div>
-              {product.customFields?.weightKg && (
-                <div className="flex items-center justify-between py-2 border-b border-border">
-                  <span className="text-sm text-muted-foreground">Poids</span>
-                  <span className="font-semibold text-foreground">
-                    {product.customFields.weightKg} kg
-                  </span>
-                </div>
-              )}
             </CardContent>
           </Card>
-
-          {/* Attributes */}
-          {(product.customFields?.availableSizes?.length > 0 ||
-            product.customFields?.availableColors?.length > 0) && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Tag className="h-5 w-5" />
-                  Attributs
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {product.customFields?.availableSizes?.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-2">Tailles</p>
-                    <div className="flex flex-wrap gap-2">
-                      {product.customFields.availableSizes.map((size, i) => (
-                        <Badge key={i} variant="default">
-                          {size}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {product.customFields?.availableColors?.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-2">Couleurs</p>
-                    <div className="flex flex-wrap gap-2">
-                      {product.customFields.availableColors.map((color, i) => (
-                        <Badge key={i} variant="default">
-                          {color}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
 
           {/* Categories */}
           <Card>

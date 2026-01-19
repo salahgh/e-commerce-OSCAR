@@ -1,0 +1,67 @@
+# Vendure Admin API - Asset Management Operations
+
+# ==================== QUERIES ====================
+
+# List all assets with filtering and pagination
+query AdminAssets($options: AssetListOptions) {
+  assets(options: $options) {
+    items {
+      id
+      createdAt
+      updatedAt
+      name
+      type
+      fileSize
+      mimeType
+      width
+      height
+      source
+      preview
+      focalPoint {
+        x
+        y
+      }
+      tags {
+        id
+        value
+      }
+    }
+    totalItems
+  }
+}
+
+# Get single asset by ID
+query AdminAsset($id: ID!) {
+  asset(id: $id) {
+    id
+    createdAt
+    updatedAt
+    name
+    type
+    fileSize
+    mimeType
+    width
+    height
+    source
+    preview
+    focalPoint {
+      x
+      y
+    }
+    tags {
+      id
+      value
+    }
+  }
+}
+
+# Get all tags for filtering
+query AssetTags {
+  tags {
+    items {
+      id
+      value
+    }
+    totalItems
+  }
+}

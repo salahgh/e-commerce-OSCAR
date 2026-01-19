@@ -1,7 +1,6 @@
 import React, { type ReactNode } from 'react';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { cn } from '../../lib/utils';
-import { ColorSwatch } from './ColorSwatch';
 
 interface TooltipProps {
   children: ReactNode;
@@ -152,22 +151,23 @@ interface ProductTooltipContentProps {
         name: string;
       } | null;
     }>;
-    customFields?: {
-      nameFr?: string | null;
-      nameAr?: string | null;
-      descriptionFr?: string | null;
-      descriptionAr?: string | null;
-      salePrice?: number | null;
-      isFeatured?: boolean | null;
-      viewCount?: number | null;
-      weightKg?: number | null;
-      availableSizes?: string[] | null;
-      availableColors?: string[] | null;
-    } | null;
+    translations?: Array<{
+      languageCode: string;
+      name: string;
+      slug?: string;
+      description?: string;
+    }>;
   };
   formatPrice: (price: number) => string;
   formatDate?: (date: string) => string;
 }
+
+// Helper to get translation by language
+const getTranslation = (translations: any[] | undefined, lang: string, field: string): string => {
+  if (!translations) return '';
+  const translation = translations.find((t: any) => t.languageCode === lang);
+  return translation?.[field] || '';
+};
 
 export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
   product,
@@ -262,11 +262,6 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
             >
               {product.enabled ? '● Actif' : '○ Inactif'}
             </span>
-            {product.customFields?.isFeatured && (
-              <span className="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-500/20 text-amber-400 ring-1 ring-amber-500/30">
-                ★ Vedette
-              </span>
-            )}
             {product.variants && product.variants.length > 0 && (
               <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-purple-500/20 text-purple-400">
                 {product.variants.length} variante{product.variants.length > 1 ? 's' : ''}
@@ -292,21 +287,19 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
               </div>
             </div>
             <div className="text-center p-1.5 bg-card/80 rounded-lg">
-              <div className="text-[10px] text-muted-foreground uppercase">Vues</div>
-              <div className="font-bold text-sm text-blue-400">
-                {product.customFields?.viewCount ?? 0}
-              </div>
-            </div>
-            <div className="text-center p-1.5 bg-card/80 rounded-lg">
               <div className="text-[10px] text-muted-foreground uppercase">Images</div>
               <div className="font-bold text-sm text-indigo-400">{product.assets?.length ?? 0}</div>
+            </div>
+            <div className="text-center p-1.5 bg-card/80 rounded-lg">
+              <div className="text-[10px] text-muted-foreground uppercase">Variantes</div>
+              <div className="font-bold text-sm text-purple-400">{enabledVariants}</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Multi-language Names Section */}
-      {(product.customFields?.nameFr || product.customFields?.nameAr) && (
+      {(getTranslation(product.translations, 'fr', 'name') || getTranslation(product.translations, 'ar', 'name')) && (
         <div className="mb-3 p-3 bg-gradient-to-r from-card to-card/50 rounded-lg border border-border">
           <div className="text-muted-foreground uppercase text-[10px] font-semibold mb-2 flex items-center gap-1">
             <span>🌐</span> Traductions du nom
@@ -316,11 +309,11 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
               <span className="w-8 text-[10px] font-bold text-blue-400 bg-blue-500/20 px-1 py-0.5 rounded text-center">
                 FR
               </span>
-              <span className="text-foreground text-sm">{product.customFields?.nameFr || '—'}</span>
+              <span className="text-foreground text-sm">{getTranslation(product.translations, 'fr', 'name') || '—'}</span>
             </div>
             <div className="flex items-center gap-2" dir="rtl">
               <span className="text-foreground text-sm flex-1">
-                {product.customFields?.nameAr || '—'}
+                {getTranslation(product.translations, 'ar', 'name') || '—'}
               </span>
               <span
                 className="w-8 text-[10px] font-bold text-green-400 bg-green-500/20 px-1 py-0.5 rounded text-center"
@@ -335,8 +328,8 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
 
       {/* Descriptions Section */}
       {(product.description ||
-        product.customFields?.descriptionFr ||
-        product.customFields?.descriptionAr) && (
+        getTranslation(product.translations, 'fr', 'description') ||
+        getTranslation(product.translations, 'ar', 'description')) && (
         <div className="mb-3 p-3 bg-card/50 rounded-lg border border-border/50">
           <div className="text-muted-foreground uppercase text-[10px] font-semibold mb-2">
             📝 Descriptions
@@ -350,21 +343,21 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
                 </p>
               </div>
             )}
-            {product.customFields?.descriptionFr && (
+            {getTranslation(product.translations, 'fr', 'description') && (
               <div>
                 <span className="text-[10px] font-bold text-blue-400">FR:</span>
                 <p className="text-foreground text-xs mt-0.5 line-clamp-2">
-                  {stripHtml(product.customFields.descriptionFr)}
+                  {stripHtml(getTranslation(product.translations, 'fr', 'description'))}
                 </p>
               </div>
             )}
-            {product.customFields?.descriptionAr && (
+            {getTranslation(product.translations, 'ar', 'description') && (
               <div dir="rtl">
                 <span className="text-[10px] font-bold text-green-400" dir="ltr">
                   AR:
                 </span>
                 <p className="text-foreground text-xs mt-0.5 line-clamp-2">
-                  {stripHtml(product.customFields.descriptionAr)}
+                  {stripHtml(getTranslation(product.translations, 'ar', 'description'))}
                 </p>
               </div>
             )}
@@ -385,14 +378,6 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
               {formatPrice(minPrice / 100)} — {formatPrice(maxPrice / 100)}
             </div>
           )}
-          {product.customFields?.salePrice && (
-            <div className="mt-1 flex items-center gap-1">
-              <span className="text-orange-400 text-xs font-semibold">Promo:</span>
-              <span className="text-orange-400 font-bold">
-                {formatPrice(product.customFields.salePrice / 100)}
-              </span>
-            </div>
-          )}
         </div>
         <div className="p-3 bg-gradient-to-br from-blue-900/30 to-blue-900/10 rounded-lg border border-blue-800/30">
           <div className="text-blue-400/70 uppercase text-[10px] font-semibold mb-1">
@@ -411,7 +396,7 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
       </div>
 
       {/* Stock & Inventory Section */}
-      <div className="grid grid-cols-4 gap-2 mb-3">
+      <div className="grid grid-cols-3 gap-2 mb-3">
         <div className="text-center p-2 bg-card rounded-lg">
           <div className="text-[9px] text-muted-foreground uppercase">Total</div>
           <div
@@ -434,10 +419,6 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
         <div className="text-center p-2 bg-card rounded-lg">
           <div className="text-[9px] text-muted-foreground uppercase">Disponible</div>
           <div className="font-bold text-cyan-400">{totalStock - totalAllocated}</div>
-        </div>
-        <div className="text-center p-2 bg-card rounded-lg">
-          <div className="text-[9px] text-muted-foreground uppercase">Poids</div>
-          <div className="font-bold text-foreground">{product.customFields?.weightKg ?? '—'}kg</div>
         </div>
       </div>
 
@@ -597,44 +578,6 @@ export const ProductTooltipContent: React.FC<ProductTooltipContentProps> = ({
         </div>
       )}
 
-      {/* Sizes & Colors */}
-      {((product.customFields?.availableSizes && product.customFields.availableSizes.length > 0) ||
-        (product.customFields?.availableColors &&
-          product.customFields.availableColors.length > 0)) && (
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          {product.customFields?.availableSizes &&
-            product.customFields.availableSizes.length > 0 && (
-              <div className="bg-card/50 rounded-lg p-2 border border-border/50">
-                <div className="text-muted-foreground uppercase text-[10px] font-semibold mb-1.5">
-                  👕 Tailles ({product.customFields.availableSizes.length})
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {product.customFields.availableSizes.map((size) => (
-                    <span
-                      key={size}
-                      className="px-2 py-0.5 text-xs bg-muted text-foreground rounded font-medium"
-                    >
-                      {size}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          {product.customFields?.availableColors &&
-            product.customFields.availableColors.length > 0 && (
-              <div className="bg-card/50 rounded-lg p-2 border border-border/50">
-                <div className="text-muted-foreground uppercase text-[10px] font-semibold mb-1.5">
-                  🎨 Couleurs ({product.customFields.availableColors.length})
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {product.customFields.availableColors.map((color) => (
-                    <ColorSwatch key={color} color={color} size="md" showLabel />
-                  ))}
-                </div>
-              </div>
-            )}
-        </div>
-      )}
 
       {/* Footer with Dates */}
       <div className="pt-3 border-t border-border">
