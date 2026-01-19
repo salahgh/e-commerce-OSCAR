@@ -98,26 +98,13 @@ exports.config = {
     // When adding or changing custom fields, remember to generate
     // a database migration. See https://docs.vendure.io/guides/developer-guide/migrations/
     customFields: {
-        Product: [
-            { name: 'nameFr', type: 'string', label: [{ languageCode: core_1.LanguageCode.en, value: 'Name (French)' }] },
-            { name: 'nameAr', type: 'string', label: [{ languageCode: core_1.LanguageCode.en, value: 'Name (Arabic)' }] },
-            { name: 'descriptionFr', type: 'text', label: [{ languageCode: core_1.LanguageCode.en, value: 'Description (French)' }] },
-            { name: 'descriptionAr', type: 'text', label: [{ languageCode: core_1.LanguageCode.en, value: 'Description (Arabic)' }] },
-            { name: 'salePrice', type: 'int', label: [{ languageCode: core_1.LanguageCode.en, value: 'Sale Price' }] },
-            { name: 'isFeatured', type: 'boolean', label: [{ languageCode: core_1.LanguageCode.en, value: 'Featured Product' }] },
-            { name: 'viewCount', type: 'int', label: [{ languageCode: core_1.LanguageCode.en, value: 'View Count' }] },
-            { name: 'weightKg', type: 'float', label: [{ languageCode: core_1.LanguageCode.en, value: 'Weight (kg)' }] },
-            { name: 'availableSizes', type: 'string', list: true, label: [{ languageCode: core_1.LanguageCode.en, value: 'Available Sizes' }] },
-            { name: 'availableColors', type: 'string', list: true, label: [{ languageCode: core_1.LanguageCode.en, value: 'Available Colors' }] },
-        ],
+        // Product custom fields removed - using native Vendure translations instead
+        // To migrate existing data, run a migration script before deployment
         ProductVariant: [
             { name: 'minStockAlert', type: 'int', label: [{ languageCode: core_1.LanguageCode.en, value: 'Min Stock Alert' }] },
         ],
+        // Collection translation custom fields removed - using native Vendure translations instead
         Collection: [
-            { name: 'nameFr', type: 'string', label: [{ languageCode: core_1.LanguageCode.en, value: 'Name (French)' }] },
-            { name: 'nameAr', type: 'string', label: [{ languageCode: core_1.LanguageCode.en, value: 'Name (Arabic)' }] },
-            { name: 'descriptionFr', type: 'text', label: [{ languageCode: core_1.LanguageCode.en, value: 'Description (French)' }] },
-            { name: 'descriptionAr', type: 'text', label: [{ languageCode: core_1.LanguageCode.en, value: 'Description (Arabic)' }] },
             { name: 'displayOrder', type: 'int', label: [{ languageCode: core_1.LanguageCode.en, value: 'Display Order' }] },
         ],
         Customer: [
@@ -141,7 +128,10 @@ exports.config = {
             route: 'assets',
             assetUploadDir: path_1.default.join(__dirname, '../static/assets'),
         }),
-        core_1.DefaultJobQueuePlugin.init({ useDatabaseForBuffer: true }),
+        core_1.DefaultJobQueuePlugin.init({
+            useDatabaseForBuffer: true,
+            pollInterval: 1000, // Check for new jobs every second
+        }),
         core_1.DefaultSchedulerPlugin,
         core_1.DefaultSearchPlugin.init({ bufferUpdates: false, indexStockStatus: true }),
         email_plugin_1.EmailPlugin.init({
