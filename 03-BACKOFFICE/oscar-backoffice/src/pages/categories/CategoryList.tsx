@@ -50,6 +50,13 @@ import { Spinner } from '../../components/ui/Spinner';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { cn } from '../../lib/utils';
 
+// Helper to get translation by language
+const getTranslation = (translations: any[] | undefined, lang: string, field: string): string => {
+  if (!translations) return '';
+  const translation = translations.find((t: any) => t.languageCode === lang);
+  return translation?.[field] || '';
+};
+
 // Sortable Flat Item Component
 interface SortableFlatItemProps {
   collection: any;
@@ -161,7 +168,7 @@ const SortableFlatItem: React.FC<SortableFlatItemProps> = ({ collection, collect
 
       {/* Translations */}
       <div className="hidden lg:block text-sm text-muted-foreground max-w-48 truncate">
-        {collection.customFields?.nameFr && <span>FR: {collection.customFields.nameFr}</span>}
+        {getTranslation(collection.translations, 'fr', 'name') && <span>FR: {getTranslation(collection.translations, 'fr', 'name')}</span>}
       </div>
 
       {/* Product Count */}
@@ -341,11 +348,11 @@ const SortableTreeItem: React.FC<SortableTreeItemProps> = ({
             )}
           </div>
           <div className="text-sm text-muted-foreground truncate">
-            {collection.customFields?.nameFr && (
-              <span className="mr-3">FR: {collection.customFields.nameFr}</span>
+            {getTranslation(collection.translations, 'fr', 'name') && (
+              <span className="mr-3">FR: {getTranslation(collection.translations, 'fr', 'name')}</span>
             )}
-            {collection.customFields?.nameAr && (
-              <span dir="rtl">AR: {collection.customFields.nameAr}</span>
+            {getTranslation(collection.translations, 'ar', 'name') && (
+              <span dir="rtl">AR: {getTranslation(collection.translations, 'ar', 'name')}</span>
             )}
           </div>
         </div>
@@ -562,13 +569,13 @@ export const CategoryList: React.FC = () => {
       // Search in description
       if (c.description?.toLowerCase().includes(term)) return true;
       // Search in French name
-      if (c.customFields?.nameFr?.toLowerCase().includes(term)) return true;
+      if (getTranslation(c.translations, 'fr', 'name')?.toLowerCase().includes(term)) return true;
       // Search in Arabic name
-      if (c.customFields?.nameAr?.toLowerCase().includes(term)) return true;
+      if (getTranslation(c.translations, 'ar', 'name')?.toLowerCase().includes(term)) return true;
       // Search in French description
-      if (c.customFields?.descriptionFr?.toLowerCase().includes(term)) return true;
+      if (getTranslation(c.translations, 'fr', 'description')?.toLowerCase().includes(term)) return true;
       // Search in Arabic description
-      if (c.customFields?.descriptionAr?.toLowerCase().includes(term)) return true;
+      if (getTranslation(c.translations, 'ar', 'description')?.toLowerCase().includes(term)) return true;
       return false;
     });
 
@@ -646,8 +653,8 @@ export const CategoryList: React.FC = () => {
         if (c.name.toLowerCase().includes(term)) return true;
         if (c.slug.toLowerCase().includes(term)) return true;
         if (c.description?.toLowerCase().includes(term)) return true;
-        if (c.customFields?.nameFr?.toLowerCase().includes(term)) return true;
-        if (c.customFields?.nameAr?.toLowerCase().includes(term)) return true;
+        if (getTranslation(c.translations, 'fr', 'name')?.toLowerCase().includes(term)) return true;
+        if (getTranslation(c.translations, 'ar', 'name')?.toLowerCase().includes(term)) return true;
         return false;
       });
     }
@@ -834,11 +841,11 @@ export const CategoryList: React.FC = () => {
               )}
             </div>
             <div className="text-sm text-muted-foreground truncate">
-              {collection.customFields?.nameFr && (
-                <span className="mr-3">FR: {collection.customFields.nameFr}</span>
+              {getTranslation(collection.translations, 'fr', 'name') && (
+                <span className="mr-3">FR: {getTranslation(collection.translations, 'fr', 'name')}</span>
               )}
-              {collection.customFields?.nameAr && (
-                <span dir="rtl">AR: {collection.customFields.nameAr}</span>
+              {getTranslation(collection.translations, 'ar', 'name') && (
+                <span dir="rtl">AR: {getTranslation(collection.translations, 'ar', 'name')}</span>
               )}
             </div>
           </div>
@@ -927,7 +934,7 @@ export const CategoryList: React.FC = () => {
 
         {/* Translations */}
         <div className="hidden lg:block text-sm text-muted-foreground max-w-48 truncate">
-          {collection.customFields?.nameFr && <span>FR: {collection.customFields.nameFr}</span>}
+          {getTranslation(collection.translations, 'fr', 'name') && <span>FR: {getTranslation(collection.translations, 'fr', 'name')}</span>}
         </div>
 
         {/* Product Count */}

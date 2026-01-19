@@ -20,6 +20,7 @@ import { CustomerList } from './pages/customers/CustomerList';
 import { CustomerDetail } from './pages/customers/CustomerDetail';
 import { CategoryList } from './pages/categories/CategoryList';
 import { CategoryDetail } from './pages/categories/CategoryDetail';
+import { AssetList } from './pages/assets/AssetList';
 import { AdminProfile } from './pages/profile/AdminProfile';
 import { Settings } from './pages/settings/Settings';
 import { Reports } from './pages/reports/Reports';
@@ -87,6 +88,9 @@ function App() {
                     <Route path="new" element={<CategoryDetail />} />
                     <Route path=":id" element={<CategoryDetail />} />
                   </Route>
+
+                  {/* Assets / Media */}
+                  <Route path="assets" element={<AssetList />} />
 
                   {/* Promotions */}
                   <Route path="promotions">

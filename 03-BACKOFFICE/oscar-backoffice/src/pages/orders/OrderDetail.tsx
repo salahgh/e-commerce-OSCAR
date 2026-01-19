@@ -50,6 +50,13 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { formatPrice, formatDateTime, formatDate } from '../../lib/utils';
 import { printInvoice } from '../../lib/export-utils';
 
+// Helper to get French translation from product translations
+const getProductNameFr = (translations: any[] | undefined): string => {
+  if (!translations) return '';
+  const frTranslation = translations.find((t: any) => t.languageCode === 'fr');
+  return frTranslation?.name || '';
+};
+
 // Order status configuration with allowed transitions and colors
 const ORDER_STATUS: Record<
   string,
@@ -337,7 +344,7 @@ export const OrderDetail: React.FC = () => {
       lines: (order.lines || []).map((line) => ({
         productVariant: {
           name:
-            line.productVariant?.product?.customFields?.nameFr ||
+            getProductNameFr(line.productVariant?.product?.translations) ||
             line.productVariant?.product?.name ||
             line.productVariant?.name ||
             'Produit',
@@ -697,7 +704,7 @@ export const OrderDetail: React.FC = () => {
                       )}
                       <div className="flex-1 min-w-0">
                         <p className="text-foreground font-medium truncate">
-                          {line.productVariant?.product?.customFields?.nameFr ||
+                          {getProductNameFr(line.productVariant?.product?.translations) ||
                             line.productVariant?.product?.name ||
                             line.productVariant?.name}
                         </p>

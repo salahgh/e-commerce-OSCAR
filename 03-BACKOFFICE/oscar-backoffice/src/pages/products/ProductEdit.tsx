@@ -52,6 +52,13 @@ const STEPS = [
   { id: 'categories', label: 'Catégories', icon: FolderTree },
 ];
 
+// Helper to get translation value from product translations array
+const getTranslation = (translations: any[] | undefined, lang: string, field: string): string => {
+  if (!translations) return '';
+  const translation = translations.find((t: any) => t.languageCode === lang);
+  return translation?.[field] || '';
+};
+
 // Validation schema for product form
 const ProductSchema = Yup.object().shape({
   name: Yup.string().required('Nom requis'),
@@ -59,14 +66,11 @@ const ProductSchema = Yup.object().shape({
   description: Yup.string(),
   enabled: Yup.boolean(),
   nameFr: Yup.string(),
-  nameAr: Yup.string(),
+  slugFr: Yup.string(),
   descriptionFr: Yup.string(),
+  nameAr: Yup.string(),
+  slugAr: Yup.string(),
   descriptionAr: Yup.string(),
-  salePrice: Yup.number().nullable().min(0, 'Prix doit être positif'),
-  isFeatured: Yup.boolean(),
-  weightKg: Yup.number().nullable().min(0, 'Poids doit être positif'),
-  availableSizes: Yup.string(),
-  availableColors: Yup.string(),
 });
 
 export const ProductEdit: React.FC = () => {
@@ -144,7 +148,7 @@ export const ProductEdit: React.FC = () => {
     }
   }, [allCollections.length, id]);
 
-  // Initialize formik with product data
+  // Initialize formik with product data - using native Vendure translations
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -152,53 +156,54 @@ export const ProductEdit: React.FC = () => {
       slug: product?.slug || '',
       description: product?.description || '',
       enabled: product?.enabled ?? true,
-      nameFr: product?.customFields?.nameFr || '',
-      nameAr: product?.customFields?.nameAr || '',
-      descriptionFr: product?.customFields?.descriptionFr || '',
-      descriptionAr: product?.customFields?.descriptionAr || '',
-      salePrice: product?.customFields?.salePrice ? product.customFields.salePrice / 100 : null,
-      isFeatured: product?.customFields?.isFeatured ?? false,
-      weightKg: product?.customFields?.weightKg || null,
-      availableSizes: product?.customFields?.availableSizes?.join(', ') || '',
-      availableColors: product?.customFields?.availableColors?.join(', ') || '',
+      // French translations
+      nameFr: getTranslation(product?.translations, 'fr', 'name'),
+      slugFr: getTranslation(product?.translations, 'fr', 'slug'),
+      descriptionFr: getTranslation(product?.translations, 'fr', 'description'),
+      // Arabic translations
+      nameAr: getTranslation(product?.translations, 'ar', 'name'),
+      slugAr: getTranslation(product?.translations, 'ar', 'slug'),
+      descriptionAr: getTranslation(product?.translations, 'ar', 'description'),
     },
     validationSchema: ProductSchema,
     onSubmit: async (values) => {
       try {
+        // Build translations array with EN, FR, AR
+        const translations = [
+          {
+            languageCode: LanguageCode.En,
+            name: values.name,
+            slug: values.slug,
+            description: values.description,
+          },
+        ];
+
+        // Add French translation if any French field is filled
+        if (values.nameFr || values.descriptionFr) {
+          translations.push({
+            languageCode: LanguageCode.Fr,
+            name: values.nameFr || values.name,
+            slug: values.slugFr || values.slug,
+            description: values.descriptionFr || values.description,
+          });
+        }
+
+        // Add Arabic translation if any Arabic field is filled
+        if (values.nameAr || values.descriptionAr) {
+          translations.push({
+            languageCode: LanguageCode.Ar,
+            name: values.nameAr || values.name,
+            slug: values.slugAr || values.slug,
+            description: values.descriptionAr || values.description,
+          });
+        }
+
         await updateProduct({
           variables: {
             input: {
               id: id!,
               enabled: values.enabled,
-              translations: [
-                {
-                  languageCode: LanguageCode.En,
-                  name: values.name,
-                  slug: values.slug,
-                  description: values.description,
-                },
-              ],
-              customFields: {
-                nameFr: values.nameFr || null,
-                nameAr: values.nameAr || null,
-                descriptionFr: values.descriptionFr || null,
-                descriptionAr: values.descriptionAr || null,
-                salePrice: values.salePrice ? Math.round(values.salePrice * 100) : null,
-                isFeatured: values.isFeatured,
-                weightKg: values.weightKg || null,
-                availableSizes: values.availableSizes
-                  ? values.availableSizes
-                      .split(',')
-                      .map((s) => s.trim())
-                      .filter(Boolean)
-                  : [],
-                availableColors: values.availableColors
-                  ? values.availableColors
-                      .split(',')
-                      .map((s) => s.trim())
-                      .filter(Boolean)
-                  : [],
-              },
+              translations,
             },
           },
         });
@@ -505,66 +510,15 @@ export const ProductEdit: React.FC = () => {
         name="description"
         rows={4}
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Input
-          label="Poids (kg)"
-          type="number"
-          step="0.1"
-          value={formik.values.weightKg ?? ''}
-          onChange={formik.handleChange}
-          name="weightKg"
-          placeholder="0.5"
-          error={formik.touched.weightKg ? formik.errors.weightKg : undefined}
+      <label className="flex items-center gap-2 p-3 bg-muted rounded-lg cursor-pointer hover:bg-accent w-fit">
+        <input
+          type="checkbox"
+          checked={formik.values.enabled}
+          onChange={(e) => formik.setFieldValue('enabled', e.target.checked)}
+          className="h-4 w-4 text-primary border-border rounded focus:ring-primary bg-card"
         />
-        <Input
-          label="Prix promo (DZD)"
-          type="number"
-          value={formik.values.salePrice ?? ''}
-          onChange={formik.handleChange}
-          name="salePrice"
-          placeholder="Laisser vide si pas de promo"
-          error={formik.touched.salePrice ? formik.errors.salePrice : undefined}
-        />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Input
-          label="Tailles disponibles"
-          value={formik.values.availableSizes}
-          onChange={formik.handleChange}
-          name="availableSizes"
-          placeholder="S, M, L, XL, XXL"
-          helperText="Séparer par des virgules"
-        />
-        <Input
-          label="Couleurs disponibles"
-          value={formik.values.availableColors}
-          onChange={formik.handleChange}
-          name="availableColors"
-          placeholder="Noir, Blanc, Bleu, Rouge"
-          helperText="Séparer par des virgules"
-        />
-      </div>
-      <div className="flex flex-wrap items-center gap-4">
-        <label className="flex items-center gap-2 p-3 bg-muted rounded-lg cursor-pointer hover:bg-accent">
-          <input
-            type="checkbox"
-            checked={formik.values.enabled}
-            onChange={(e) => formik.setFieldValue('enabled', e.target.checked)}
-            className="h-4 w-4 text-primary border-border rounded focus:ring-primary bg-card"
-          />
-          <span className="text-sm font-medium text-muted-foreground">Produit actif</span>
-        </label>
-        <label className="flex items-center gap-2 p-3 bg-yellow-900/30 border border-yellow-700 rounded-lg cursor-pointer hover:bg-yellow-900/50">
-          <input
-            type="checkbox"
-            checked={formik.values.isFeatured}
-            onChange={(e) => formik.setFieldValue('isFeatured', e.target.checked)}
-            className="h-4 w-4 text-yellow-600 border-border rounded focus:ring-yellow-500 bg-card"
-          />
-          <Star className="h-4 w-4 text-yellow-500" />
-          <span className="text-sm font-medium text-foreground">Produit vedette</span>
-        </label>
-      </div>
+        <span className="text-sm font-medium text-muted-foreground">Produit actif</span>
+      </label>
     </div>
   );
 
@@ -581,19 +535,26 @@ export const ProductEdit: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <span>FR</span> Français
+              <span className="px-2 py-0.5 bg-blue-500/20 text-blue-500 rounded text-xs font-bold">FR</span> Français
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Input
-              label="Nom (Français)"
+              label="Nom"
               value={formik.values.nameFr}
               onChange={formik.handleChange}
               name="nameFr"
               placeholder="Nom du produit en français"
             />
+            <Input
+              label="Slug (URL)"
+              value={formik.values.slugFr}
+              onChange={formik.handleChange}
+              name="slugFr"
+              placeholder="mon-produit-fr"
+            />
             <TextArea
-              label="Description (Français)"
+              label="Description"
               value={formik.values.descriptionFr}
               onChange={formik.handleChange}
               name="descriptionFr"
@@ -606,20 +567,27 @@ export const ProductEdit: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <span>AR</span> Arabe
+              <span className="px-2 py-0.5 bg-green-500/20 text-green-500 rounded text-xs font-bold">AR</span> Arabe
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Input
-              label="Nom (Arabe)"
+              label="Nom"
               value={formik.values.nameAr}
               onChange={formik.handleChange}
               name="nameAr"
               placeholder="اسم المنتج بالعربية"
               dir="rtl"
             />
+            <Input
+              label="Slug (URL)"
+              value={formik.values.slugAr}
+              onChange={formik.handleChange}
+              name="slugAr"
+              placeholder="mon-produit-ar"
+            />
             <TextArea
-              label="Description (Arabe)"
+              label="Description"
               value={formik.values.descriptionAr}
               onChange={formik.handleChange}
               name="descriptionAr"
@@ -906,12 +874,6 @@ export const ProductEdit: React.FC = () => {
               <Badge variant={product.enabled ? 'success' : 'default'}>
                 {product.enabled ? 'Actif' : 'Inactif'}
               </Badge>
-              {product.customFields?.isFeatured && (
-                <Badge variant="warning">
-                  <Star className="h-3 w-3 mr-1" />
-                  Vedette
-                </Badge>
-              )}
             </div>
             <p className="text-sm text-muted-foreground mt-1">
               ID: {product.id} | Créé le {formatDateTime(product.createdAt)}
@@ -938,7 +900,7 @@ export const ProductEdit: React.FC = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -966,11 +928,6 @@ export const ProductEdit: React.FC = () => {
             <p className="text-xl font-bold text-foreground">
               {mainVariant?.price ? formatPrice(mainVariant.price / 100) : '-'}
             </p>
-            {product.customFields?.salePrice && (
-              <p className="text-sm text-green-400">
-                Promo: {formatPrice(product.customFields.salePrice / 100)}
-              </p>
-            )}
           </CardContent>
         </Card>
         <Card>
@@ -989,15 +946,6 @@ export const ProductEdit: React.FC = () => {
             </p>
             <p className="text-sm text-muted-foreground">
               {product.variants?.length || 0} variante(s)
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Vues</p>
-            <p className="text-xl font-bold text-foreground flex items-center gap-2">
-              <Eye className="h-5 w-5 text-muted-foreground" />
-              {product.customFields?.viewCount || 0}
             </p>
           </CardContent>
         </Card>

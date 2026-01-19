@@ -30,17 +30,6 @@ runMigrations(config)
       console.log('✅ Job queue workers started');
     }
 
-    // Check for pending jobs
-    const connection = app.get('Connection');
-    const pendingCount = await connection.getRepository('job_record').count({
-      where: { state: 'PENDING' },
-    });
-
-    if (pendingCount > 0) {
-      console.log(`\n⚠️  Found ${pendingCount} pending jobs in queue`);
-      console.log('   They will be processed automatically');
-    }
-
     console.log('\n✅ Server ready to handle requests!\n');
   })
   .catch((err) => {

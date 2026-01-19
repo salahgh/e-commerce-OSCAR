@@ -21,6 +21,8 @@ import {
   Sparkles,
   Info,
   AlertCircle,
+  FolderOpen,
+  Filter,
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { addToast } from '../../store/slices/uiSlice';
@@ -40,7 +42,16 @@ import { Select } from '../../components/ui/Select';
 import { Spinner } from '../../components/ui/Spinner';
 import { Tabs } from '../../components/ui/Tabs';
 import { Badge } from '../../components/ui/Badge';
+import { AssetPickerModal } from '../../components/ui/AssetPickerModal';
+import { CollectionFilterBuilder } from '../../components/collections/CollectionFilterBuilder';
 import { cn } from '../../lib/utils';
+
+// Helper to get translation by language
+const getTranslation = (translations: any[] | undefined, lang: string, field: string): string => {
+  if (!translations) return '';
+  const translation = translations.find((t: any) => t.languageCode === lang);
+  return translation?.[field] || '';
+};
 
 const validationSchema = Yup.object({
   name: Yup.string().required('Nom requis').min(2, 'Minimum 2 caracteres'),
@@ -54,8 +65,10 @@ interface FormValues {
   slug: string;
   description: string;
   nameFr: string;
-  nameAr: string;
+  slugFr: string;
   descriptionFr: string;
+  nameAr: string;
+  slugAr: string;
   descriptionAr: string;
   parentId: string;
   isPrivate: boolean;
@@ -77,6 +90,11 @@ export const CategoryDetail: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [featuredImage, setFeaturedImage] = useState<ImageFile | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [showAssetPicker, setShowAssetPicker] = useState(false);
+  const [collectionFilters, setCollectionFilters] = useState<Array<{
+    code: string;
+    arguments: Array<{ name: string; value: string }>;
+  }>>([]);
 
   // Fetch current collection (if editing)
   const { data, loading, error } = useQuery(AdminCollectionDocument, {
@@ -89,6 +107,15 @@ export const CategoryDetail: React.FC = () => {
           isExisting: true,
           id: data.collection.featuredAsset.id,
         });
+      }
+      // Initialize filters from collection
+      if (data?.collection?.filters) {
+        setCollectionFilters(
+          data.collection.filters.map((f: any) => ({
+            code: f.code,
+            arguments: f.args.map((a: any) => ({ name: a.name, value: a.value })),
+          }))
+        );
       }
     },
   });
@@ -226,15 +253,36 @@ export const CategoryDetail: React.FC = () => {
             slug: values.slug,
             description: values.description,
           },
+          // Add French translation if any French field is filled
+          ...(values.nameFr || values.descriptionFr
+            ? [
+                {
+                  languageCode: LanguageCode.Fr,
+                  name: values.nameFr || values.name,
+                  slug: values.slugFr || values.slug,
+                  description: values.descriptionFr || values.description,
+                },
+              ]
+            : []),
+          // Add Arabic translation if any Arabic field is filled
+          ...(values.nameAr || values.descriptionAr
+            ? [
+                {
+                  languageCode: LanguageCode.Ar,
+                  name: values.nameAr || values.name,
+                  slug: values.slugAr || values.slug,
+                  description: values.descriptionAr || values.description,
+                },
+              ]
+            : []),
         ],
-        filters: [] as any[],
+        filters: collectionFilters.map((f) => ({
+          code: f.code,
+          arguments: f.arguments,
+        })),
         isPrivate: values.isPrivate,
         featuredAssetId: featuredAssetId || null,
         customFields: {
-          nameFr: values.nameFr || null,
-          nameAr: values.nameAr || null,
-          descriptionFr: values.descriptionFr || null,
-          descriptionAr: values.descriptionAr || null,
           displayOrder: values.displayOrder,
         },
       };
@@ -317,10 +365,12 @@ export const CategoryDetail: React.FC = () => {
     name: collection?.name || '',
     slug: collection?.slug || '',
     description: collection?.description || '',
-    nameFr: collection?.customFields?.nameFr || '',
-    nameAr: collection?.customFields?.nameAr || '',
-    descriptionFr: collection?.customFields?.descriptionFr || '',
-    descriptionAr: collection?.customFields?.descriptionAr || '',
+    nameFr: getTranslation(collection?.translations, 'fr', 'name'),
+    nameAr: getTranslation(collection?.translations, 'ar', 'name'),
+    descriptionFr: getTranslation(collection?.translations, 'fr', 'description'),
+    descriptionAr: getTranslation(collection?.translations, 'ar', 'description'),
+    slugFr: getTranslation(collection?.translations, 'fr', 'slug'),
+    slugAr: getTranslation(collection?.translations, 'ar', 'slug'),
     parentId: collection?.parentId || '',
     isPrivate: collection?.isPrivate || false,
     displayOrder: collection?.customFields?.displayOrder || 0,
@@ -616,6 +666,25 @@ export const CategoryDetail: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Product Filters Card */}
+                <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+                  <div className="px-6 py-4 border-b border-border bg-blue-500/5">
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                      <Filter className="h-5 w-5 text-blue-500" />
+                      Filtres de produits
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Definissez quels produits appartiennent a cette categorie
+                    </p>
+                  </div>
+                  <div className="p-6">
+                    <CollectionFilterBuilder
+                      filters={collectionFilters}
+                      onChange={setCollectionFilters}
+                    />
+                  </div>
+                </div>
+
                 {/* Children Card (only when editing and has children) */}
                 {!isNew && collection?.children && collection.children.length > 0 && (
                   <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
@@ -638,11 +707,11 @@ export const CategoryDetail: React.FC = () => {
                             <div>
                               <p className="font-medium text-foreground">{child.name}</p>
                               <p className="text-sm text-muted-foreground">
-                                {child.customFields?.nameFr && (
-                                  <span className="mr-2">FR: {child.customFields.nameFr}</span>
+                                {getTranslation(child.translations, 'fr', 'name') && (
+                                  <span className="mr-2">FR: {getTranslation(child.translations, 'fr', 'name')}</span>
                                 )}
-                                {child.customFields?.nameAr && (
-                                  <span dir="rtl">AR: {child.customFields.nameAr}</span>
+                                {getTranslation(child.translations, 'ar', 'name') && (
+                                  <span dir="rtl">AR: {getTranslation(child.translations, 'ar', 'name')}</span>
                                 )}
                               </p>
                             </div>
@@ -693,9 +762,17 @@ export const CategoryDetail: React.FC = () => {
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                             <button
                               type="button"
+                              onClick={() => setShowAssetPicker(true)}
+                              className="p-3 bg-card rounded-full shadow-lg hover:bg-accent transition-colors"
+                              title="Choisir depuis la bibliotheque"
+                            >
+                              <FolderOpen className="h-5 w-5 text-foreground" />
+                            </button>
+                            <button
+                              type="button"
                               onClick={() => fileInputRef.current?.click()}
                               className="p-3 bg-card rounded-full shadow-lg hover:bg-accent transition-colors"
-                              title="Changer l'image"
+                              title="Telecharger une nouvelle image"
                             >
                               <Upload className="h-5 w-5 text-foreground" />
                             </button>
@@ -718,42 +795,58 @@ export const CategoryDetail: React.FC = () => {
                         )}
                       </div>
                     ) : (
-                      <div
-                        onDrop={handleDrop}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onClick={() => fileInputRef.current?.click()}
-                        className={cn(
-                          'aspect-square rounded-xl border-2 border-dashed transition-all duration-300 cursor-pointer',
-                          'flex flex-col items-center justify-center gap-4',
-                          isDragging
-                            ? 'border-primary bg-primary/10 scale-[1.02]'
-                            : 'border-border hover:border-primary hover:bg-muted'
-                        )}
-                      >
+                      <div className="space-y-4">
+                        {/* Drag and drop zone */}
                         <div
+                          onDrop={handleDrop}
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
                           className={cn(
-                            'p-4 rounded-full transition-colors',
-                            isDragging ? 'bg-primary/20' : 'bg-muted'
+                            'aspect-video rounded-xl border-2 border-dashed transition-all duration-300',
+                            'flex flex-col items-center justify-center gap-3',
+                            isDragging
+                              ? 'border-primary bg-primary/10 scale-[1.02]'
+                              : 'border-border'
                           )}
                         >
-                          <Upload
+                          <div
                             className={cn(
-                              'h-8 w-8 transition-colors',
-                              isDragging ? 'text-primary' : 'text-muted-foreground'
+                              'p-3 rounded-full transition-colors',
+                              isDragging ? 'bg-primary/20' : 'bg-muted'
                             )}
-                          />
+                          >
+                            <Upload
+                              className={cn(
+                                'h-6 w-6 transition-colors',
+                                isDragging ? 'text-primary' : 'text-muted-foreground'
+                              )}
+                            />
+                          </div>
+                          <div className="text-center px-4">
+                            <p className="text-sm text-muted-foreground">
+                              {isDragging ? "Deposez l'image ici" : 'Glissez une image ici'}
+                            </p>
+                          </div>
                         </div>
-                        <div className="text-center px-4">
-                          <p className="font-medium text-foreground">
-                            {isDragging ? "Deposez l'image ici" : 'Glissez une image ici'}
-                          </p>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            ou cliquez pour parcourir
-                          </p>
-                          <p className="text-xs text-muted-foreground/70 mt-2">
-                            PNG, JPG jusqu'a 5MB
-                          </p>
+
+                        {/* Action buttons */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setShowAssetPicker(true)}
+                            className="flex flex-col items-center gap-2 p-4 bg-muted rounded-lg hover:bg-accent transition-colors border border-transparent hover:border-primary"
+                          >
+                            <FolderOpen className="h-6 w-6 text-primary" />
+                            <span className="text-sm font-medium text-foreground">Bibliotheque</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="flex flex-col items-center gap-2 p-4 bg-muted rounded-lg hover:bg-accent transition-colors border border-transparent hover:border-primary"
+                          >
+                            <Upload className="h-6 w-6 text-primary" />
+                            <span className="text-sm font-medium text-foreground">Telecharger</span>
+                          </button>
                         </div>
                       </div>
                     )}
@@ -850,6 +943,26 @@ export const CategoryDetail: React.FC = () => {
           </Form>
         )}
       </Formik>
+
+      {/* Asset Picker Modal */}
+      <AssetPickerModal
+        isOpen={showAssetPicker}
+        onClose={() => setShowAssetPicker(false)}
+        onSelect={(assets) => {
+          if (assets.length > 0) {
+            const asset = assets[0];
+            setFeaturedImage({
+              id: asset.id,
+              preview: asset.preview,
+              isExisting: true,
+            });
+          }
+          setShowAssetPicker(false);
+        }}
+        multiple={false}
+        selectedIds={featuredImage?.id ? [featuredImage.id] : []}
+        title="Selectionner une image"
+      />
     </div>
   );
 };

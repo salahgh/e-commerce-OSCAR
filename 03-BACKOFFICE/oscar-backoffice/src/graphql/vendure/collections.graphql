@@ -25,11 +25,13 @@ query AdminCollections($options: CollectionListOptions) {
       productVariants {
         totalItems
       }
+      translations {
+        languageCode
+        name
+        slug
+        description
+      }
       customFields {
-        nameFr
-        nameAr
-        descriptionFr
-        descriptionAr
         displayOrder
       }
     }
@@ -61,11 +63,13 @@ query AdminCollection($id: ID!) {
     productVariants {
       totalItems
     }
+    translations {
+      languageCode
+      name
+      slug
+      description
+    }
     customFields {
-      nameFr
-      nameAr
-      descriptionFr
-      descriptionAr
       displayOrder
     }
     filters {
@@ -83,9 +87,9 @@ query AdminCollection($id: ID!) {
       productVariants {
         totalItems
       }
-      customFields {
-        nameFr
-        nameAr
+      translations {
+        languageCode
+        name
       }
     }
   }
@@ -100,11 +104,13 @@ mutation CreateCollection($input: CreateCollectionInput!) {
     isPrivate
     position
     parentId
+    translations {
+      languageCode
+      name
+      slug
+      description
+    }
     customFields {
-      nameFr
-      nameAr
-      descriptionFr
-      descriptionAr
       displayOrder
     }
   }
@@ -119,11 +125,13 @@ mutation UpdateCollection($input: UpdateCollectionInput!) {
     isPrivate
     position
     parentId
+    translations {
+      languageCode
+      name
+      slug
+      description
+    }
     customFields {
-      nameFr
-      nameAr
-      descriptionFr
-      descriptionAr
       displayOrder
     }
   }
@@ -175,6 +183,59 @@ query AdminCollectionsWithFilters($options: CollectionListOptions) {
           name
           value
         }
+      }
+    }
+    totalItems
+  }
+}
+
+# Get available collection filter definitions
+query CollectionFilterDefinitions {
+  collectionFilters {
+    code
+    description
+    args {
+      name
+      type
+      required
+      defaultValue
+      ui
+      label
+      description
+    }
+  }
+}
+
+# Preview collection products before saving filters
+query PreviewCollectionProducts($input: PreviewCollectionVariantsInput!, $options: ProductVariantListOptions) {
+  previewCollectionVariants(input: $input, options: $options) {
+    items {
+      id
+      name
+      sku
+      product {
+        id
+        name
+        featuredAsset {
+          preview
+        }
+      }
+    }
+    totalItems
+  }
+}
+
+# Get all facets with their values (for filter builder)
+query AdminFacetsForFilter {
+  facets {
+    items {
+      id
+      name
+      code
+      values {
+        id
+        name
+        code
       }
     }
     totalItems

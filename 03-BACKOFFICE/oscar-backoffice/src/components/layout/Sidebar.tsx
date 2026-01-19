@@ -13,6 +13,7 @@ import {
   UserCircle,
   Shield,
   Tag,
+  Image,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAppSelector } from '../../hooks/useAppSelector';
@@ -52,6 +53,12 @@ const menuItems: MenuItem[] = [
     icon: FolderTree,
     label: 'Categories',
     path: '/categories',
+    permissions: ['ReadCatalog'],
+  },
+  {
+    icon: Image,
+    label: 'Medias',
+    path: '/assets',
     permissions: ['ReadCatalog'],
   },
   {

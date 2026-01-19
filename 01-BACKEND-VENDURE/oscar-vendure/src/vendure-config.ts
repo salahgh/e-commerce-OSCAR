@@ -103,26 +103,13 @@ export const config: VendureConfig = {
   // When adding or changing custom fields, remember to generate
   // a database migration. See https://docs.vendure.io/guides/developer-guide/migrations/
   customFields: {
-    Product: [
-      { name: 'nameFr', type: 'string', label: [{ languageCode: LanguageCode.en, value: 'Name (French)' }] },
-      { name: 'nameAr', type: 'string', label: [{ languageCode: LanguageCode.en, value: 'Name (Arabic)' }] },
-      { name: 'descriptionFr', type: 'text', label: [{ languageCode: LanguageCode.en, value: 'Description (French)' }] },
-      { name: 'descriptionAr', type: 'text', label: [{ languageCode: LanguageCode.en, value: 'Description (Arabic)' }] },
-      { name: 'salePrice', type: 'int', label: [{ languageCode: LanguageCode.en, value: 'Sale Price' }] },
-      { name: 'isFeatured', type: 'boolean', label: [{ languageCode: LanguageCode.en, value: 'Featured Product' }] },
-      { name: 'viewCount', type: 'int', label: [{ languageCode: LanguageCode.en, value: 'View Count' }] },
-      { name: 'weightKg', type: 'float', label: [{ languageCode: LanguageCode.en, value: 'Weight (kg)' }] },
-      { name: 'availableSizes', type: 'string', list: true, label: [{ languageCode: LanguageCode.en, value: 'Available Sizes' }] },
-      { name: 'availableColors', type: 'string', list: true, label: [{ languageCode: LanguageCode.en, value: 'Available Colors' }] },
-    ],
+    // Product custom fields removed - using native Vendure translations instead
+    // To migrate existing data, run a migration script before deployment
     ProductVariant: [
       { name: 'minStockAlert', type: 'int', label: [{ languageCode: LanguageCode.en, value: 'Min Stock Alert' }] },
     ],
+    // Collection translation custom fields removed - using native Vendure translations instead
     Collection: [
-      { name: 'nameFr', type: 'string', label: [{ languageCode: LanguageCode.en, value: 'Name (French)' }] },
-      { name: 'nameAr', type: 'string', label: [{ languageCode: LanguageCode.en, value: 'Name (Arabic)' }] },
-      { name: 'descriptionFr', type: 'text', label: [{ languageCode: LanguageCode.en, value: 'Description (French)' }] },
-      { name: 'descriptionAr', type: 'text', label: [{ languageCode: LanguageCode.en, value: 'Description (Arabic)' }] },
       { name: 'displayOrder', type: 'int', label: [{ languageCode: LanguageCode.en, value: 'Display Order' }] },
     ],
     Customer: [

@@ -159,8 +159,9 @@ query LowStockProducts($threshold: Int) {
         minStockAlert
       }
     }
-    customFields {
-      nameFr
+    translations {
+      languageCode
+      name
     }
   }
 }
