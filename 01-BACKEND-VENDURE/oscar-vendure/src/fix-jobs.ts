@@ -2,7 +2,17 @@
  * Script to diagnose and fix stuck jobs in the Vendure job queue
  * Run with: npm run fix-jobs
  */
-import { bootstrap, JobQueueService, JobState } from '@vendure/core';
+import { bootstrap, JobQueueService } from '@vendure/core';
+
+// Job states as string literals (compatible with all Vendure versions)
+const JobState = {
+  PENDING: 'PENDING',
+  RUNNING: 'RUNNING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED',
+  RETRYING: 'RETRYING',
+} as const;
 import { config } from './vendure-config';
 
 async function fixJobs() {
@@ -66,8 +76,21 @@ async function fixJobs() {
     // Trigger a new reindex
     console.log('\n🔍 Triggering a fresh search index rebuild...');
 
-    const { SearchIndexService } = await import('@vendure/core');
-    const searchIndexService = app.get(SearchIndexService);
+    // Try to get SearchIndexService from elasticsearch plugin or default search plugin
+    let searchIndexService: any;
+    try {
+      const { DefaultSearchPlugin } = await import('@vendure/core');
+      searchIndexService = app.get('SearchIndexService', { strict: false });
+    } catch {
+      console.log('   SearchIndexService not available - skipping reindex trigger');
+      console.log('   Please trigger reindex manually from admin UI');
+      return;
+    }
+
+    if (!searchIndexService) {
+      console.log('   SearchIndexService not found - skipping reindex trigger');
+      return;
+    }
 
     const job = await searchIndexService.reindex({ ctx: undefined as any });
     console.log(`   Created reindex job: ${job.id}`);

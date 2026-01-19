@@ -4,7 +4,17 @@
  *
  * This script bootstraps Vendure, triggers a reindex, and waits for completion.
  */
-import { bootstrap, JobQueueService, JobState } from '@vendure/core';
+import { bootstrap, JobQueueService } from '@vendure/core';
+
+// Job states as string literals (compatible with all Vendure versions)
+const JobState = {
+  PENDING: 'PENDING',
+  RUNNING: 'RUNNING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED',
+  RETRYING: 'RETRYING',
+} as const;
 import { config } from './vendure-config';
 
 async function reindexSearchIndex() {
@@ -15,8 +25,24 @@ async function reindexSearchIndex() {
   try {
     // Get services
     const jobQueueService = app.get(JobQueueService);
-    const { SearchIndexService } = await import('@vendure/core');
-    const searchIndexService = app.get(SearchIndexService);
+
+    // Try to get SearchIndexService (may be from default search or elasticsearch plugin)
+    let searchIndexService: any;
+    try {
+      searchIndexService = app.get('SearchIndexService', { strict: false });
+    } catch {
+      console.log('   SearchIndexService not available');
+      console.log('   Please trigger reindex manually from admin UI');
+      await app.close();
+      process.exit(1);
+    }
+
+    if (!searchIndexService) {
+      console.log('   SearchIndexService not found');
+      console.log('   Please trigger reindex manually from admin UI');
+      await app.close();
+      process.exit(1);
+    }
 
     // Log active queues
     const queues = await jobQueueService.getJobQueues();
