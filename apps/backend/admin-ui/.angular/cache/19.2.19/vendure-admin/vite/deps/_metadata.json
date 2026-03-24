@@ -1,0 +1,118 @@
+{
+  "hash": "6e7b1631",
+  "configHash": "6aeb0694",
+  "lockfileHash": "353fcf5c",
+  "browserHash": "2475dc6b",
+  "optimized": {
+    "@angular/common": {
+      "src": "../../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
+      "file": "@angular_common.js",
+      "fileHash": "321dcbc7",
+      "needsInterop": false
+    },
+    "@angular/core": {
+      "src": "../../../../../../../node_modules/@angular/core/fesm2022/core.mjs",
+      "file": "@angular_core.js",
+      "fileHash": "a0bc901b",
+      "needsInterop": false
+    },
+    "@angular/platform-browser": {
+      "src": "../../../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
+      "file": "@angular_platform-browser.js",
+      "fileHash": "a46b1c69",
+      "needsInterop": false
+    },
+    "@angular/router": {
+      "src": "../../../../../../../node_modules/@angular/router/fesm2022/router.mjs",
+      "file": "@angular_router.js",
+      "fileHash": "fec15bba",
+      "needsInterop": false
+    },
+    "@biesbjerg/ngx-translate-extract-marker": {
+      "src": "../../../../../../../node_modules/@biesbjerg/ngx-translate-extract-marker/fesm5/biesbjerg-ngx-translate-extract-marker.js",
+      "file": "@biesbjerg_ngx-translate-extract-marker.js",
+      "fileHash": "12ac9a8d",
+      "needsInterop": false
+    },
+    "@vendure/admin-ui/catalog": {
+      "src": "../../../../../../../node_modules/@vendure/admin-ui/fesm2022/vendure-admin-ui-catalog.mjs",
+      "file": "@vendure_admin-ui_catalog.js",
+      "fileHash": "aaa98354",
+      "needsInterop": false
+    },
+    "@vendure/admin-ui/core": {
+      "src": "../../../../../../../node_modules/@vendure/admin-ui/fesm2022/vendure-admin-ui-core.mjs",
+      "file": "@vendure_admin-ui_core.js",
+      "fileHash": "01ef4845",
+      "needsInterop": false
+    },
+    "@vendure/admin-ui/customer": {
+      "src": "../../../../../../../node_modules/@vendure/admin-ui/fesm2022/vendure-admin-ui-customer.mjs",
+      "file": "@vendure_admin-ui_customer.js",
+      "fileHash": "77873ebf",
+      "needsInterop": false
+    },
+    "@vendure/admin-ui/dashboard": {
+      "src": "../../../../../../../node_modules/@vendure/admin-ui/fesm2022/vendure-admin-ui-dashboard.mjs",
+      "file": "@vendure_admin-ui_dashboard.js",
+      "fileHash": "82c18350",
+      "needsInterop": false
+    },
+    "@vendure/admin-ui/login": {
+      "src": "../../../../../../../node_modules/@vendure/admin-ui/fesm2022/vendure-admin-ui-login.mjs",
+      "file": "@vendure_admin-ui_login.js",
+      "fileHash": "b6e9d3ac",
+      "needsInterop": false
+    },
+    "@vendure/admin-ui/marketing": {
+      "src": "../../../../../../../node_modules/@vendure/admin-ui/fesm2022/vendure-admin-ui-marketing.mjs",
+      "file": "@vendure_admin-ui_marketing.js",
+      "fileHash": "3bed31a5",
+      "needsInterop": false
+    },
+    "@vendure/admin-ui/order": {
+      "src": "../../../../../../../node_modules/@vendure/admin-ui/fesm2022/vendure-admin-ui-order.mjs",
+      "file": "@vendure_admin-ui_order.js",
+      "fileHash": "398cea94",
+      "needsInterop": false
+    },
+    "@vendure/admin-ui/settings": {
+      "src": "../../../../../../../node_modules/@vendure/admin-ui/fesm2022/vendure-admin-ui-settings.mjs",
+      "file": "@vendure_admin-ui_settings.js",
+      "fileHash": "3a18f600",
+      "needsInterop": false
+    },
+    "@vendure/admin-ui/system": {
+      "src": "../../../../../../../node_modules/@vendure/admin-ui/fesm2022/vendure-admin-ui-system.mjs",
+      "file": "@vendure_admin-ui_system.js",
+      "fileHash": "f68680ed",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-4N6AKVDB": {
+      "file": "chunk-4N6AKVDB.js"
+    },
+    "chunk-TPQONFQ4": {
+      "file": "chunk-TPQONFQ4.js"
+    },
+    "chunk-XP35EW32": {
+      "file": "chunk-XP35EW32.js"
+    },
+    "chunk-D34K77GY": {
+      "file": "chunk-D34K77GY.js"
+    },
+    "chunk-PKWAS5QE": {
+      "file": "chunk-PKWAS5QE.js"
+    },
+    "chunk-QGAN2XWN": {
+      "file": "chunk-QGAN2XWN.js"
+    },
+    "chunk-E52LK5WV": {
+      "file": "chunk-E52LK5WV.js"
+    },
+    "chunk-TXDUYLVM": {
+      "file": "chunk-TXDUYLVM.js"
+    }
+  }
+}

@@ -1,5 +1,17 @@
+# Dependencies
+node_modules/
+
 # Build outputs
+dist/
+.next/
+.expo/
+.turbo/
 /01-BACKEND/oscar-backend/target/
+
+# Environment
+.env
+.env.local
+.env.*.local
 
 # Temporary files
 *.tmp
@@ -18,3 +30,8 @@ Thumbs.db
 
 # Logs
 *.log
+*storybook.log
+storybook-static
+
+# pnpm
+pnpm-debug.log*

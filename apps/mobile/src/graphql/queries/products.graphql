@@ -1,0 +1,195 @@
+# Vendure Shop API - Product Operations
+
+fragment AssetFields on Asset {
+  id
+  preview
+  source
+  width
+  height
+  name
+}
+
+fragment ProductVariantFields on ProductVariant {
+  id
+  name
+  sku
+  priceWithTax
+  currencyCode
+  stockLevel
+  featuredAsset {
+    ...AssetFields
+  }
+  options {
+    id
+    code
+    name
+    group {
+      id
+      code
+      name
+    }
+  }
+}
+
+fragment ProductFields on Product {
+  id
+  name
+  slug
+  description
+  featuredAsset {
+    ...AssetFields
+  }
+  assets {
+    ...AssetFields
+  }
+  variants {
+    ...ProductVariantFields
+  }
+  collections {
+    id
+    name
+    slug
+  }
+  facetValues {
+    id
+    name
+    code
+    facet {
+      id
+      name
+      code
+    }
+  }
+}
+
+# Get all products with pagination
+query GetProducts($options: ProductListOptions) {
+  products(options: $options) {
+    items {
+      ...ProductFields
+    }
+    totalItems
+  }
+}
+
+# Get product by ID
+query GetProduct($id: ID!) {
+  product(id: $id) {
+    ...ProductFields
+  }
+}
+
+# Get product by slug
+query GetProductBySlug($slug: String!) {
+  product(slug: $slug) {
+    ...ProductFields
+  }
+}
+
+# Search products
+query SearchProducts($input: SearchInput!) {
+  search(input: $input) {
+    items {
+      productId
+      productName
+      slug
+      description
+      productAsset {
+        id
+        preview
+      }
+      priceWithTax {
+        ... on SinglePrice {
+          value
+        }
+        ... on PriceRange {
+          min
+          max
+        }
+      }
+      currencyCode
+      collectionIds
+      inStock
+    }
+    totalItems
+    facetValues {
+      facetValue {
+        id
+        name
+        code
+        facet {
+          id
+          name
+          code
+        }
+      }
+      count
+    }
+  }
+}
+
+# Get featured products
+query GetFeaturedProducts {
+  search(input: { collectionSlug: "featured", take: 10 }) {
+    items {
+      productId
+      productName
+      slug
+      description
+      productAsset {
+        id
+        preview
+      }
+      priceWithTax {
+        ... on SinglePrice {
+          value
+        }
+        ... on PriceRange {
+          min
+          max
+        }
+      }
+      currencyCode
+      inStock
+    }
+    totalItems
+  }
+}
+
+# Get new arrivals
+query GetNewArrivals($take: Int) {
+  products(options: { take: $take, sort: { createdAt: DESC } }) {
+    items {
+      ...ProductFields
+    }
+    totalItems
+  }
+}
+
+# Get products by collection
+query GetProductsByCollection($collectionSlug: String!, $take: Int, $skip: Int) {
+  search(input: { collectionSlug: $collectionSlug, take: $take, skip: $skip }) {
+    items {
+      productId
+      productName
+      slug
+      description
+      productAsset {
+        id
+        preview
+      }
+      priceWithTax {
+        ... on SinglePrice {
+          value
+        }
+        ... on PriceRange {
+          min
+          max
+        }
+      }
+      currencyCode
+      inStock
+    }
+    totalItems
+  }
+}

@@ -1,0 +1,5 @@
+# Vendure Shop API - Order Mutations
+# Note: Most order mutations are in cart.graphql (checkout flow)
+
+# This file contains additional order-related mutations if needed
+# Currently, all cart/checkout mutations are handled in cart.graphql

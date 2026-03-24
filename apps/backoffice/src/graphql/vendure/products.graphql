@@ -1,0 +1,701 @@
+# Vendure Admin API - Comprehensive Product Operations
+
+# ==================== QUERIES ====================
+
+
+# List all products with filtering and pagination
+query AdminProducts($options: ProductListOptions) {
+  products(options: $options) {
+    items {
+      id
+      createdAt
+      updatedAt
+      name
+      slug
+      description
+      enabled
+      featuredAsset {
+        id
+        name
+        preview
+        source
+      }
+      assets {
+        id
+        name
+        preview
+        source
+      }
+      variants {
+        id
+        name
+        sku
+        price
+        priceWithTax
+        stockOnHand
+        stockAllocated
+        enabled
+        options {
+          id
+          code
+          name
+        }
+        facetValues {
+          id
+          name
+          code
+          facet {
+            id
+            name
+            code
+          }
+        }
+        customFields {
+          minStockAlert
+        }
+      }
+      optionGroups {
+        id
+        code
+        name
+        options {
+          id
+          code
+          name
+        }
+      }
+      facetValues {
+        id
+        name
+        code
+        facet {
+          id
+          name
+          code
+        }
+      }
+      collections {
+        id
+        name
+        slug
+        parent {
+          id
+          name
+        }
+      }
+      translations {
+        languageCode
+        name
+        slug
+        description
+      }
+    }
+    totalItems
+  }
+}
+
+# Get single product with full details
+query AdminProduct($id: ID!) {
+  product(id: $id) {
+    id
+    createdAt
+    updatedAt
+    name
+    slug
+    description
+    enabled
+    featuredAsset {
+      id
+      name
+      preview
+      source
+      width
+      height
+      fileSize
+      mimeType
+    }
+    assets {
+      id
+      name
+      preview
+      source
+      width
+      height
+      fileSize
+      mimeType
+    }
+    optionGroups {
+      id
+      code
+      name
+      options {
+        id
+        code
+        name
+      }
+    }
+    variants {
+      id
+      createdAt
+      updatedAt
+      name
+      sku
+      price
+      priceWithTax
+      stockOnHand
+      stockAllocated
+      enabled
+      trackInventory
+      featuredAsset {
+        id
+        preview
+        source
+      }
+      assets {
+        id
+        preview
+        source
+      }
+      options {
+        id
+        code
+        name
+        group {
+          id
+          code
+          name
+        }
+      }
+      customFields {
+        minStockAlert
+      }
+    }
+    translations {
+      languageCode
+      name
+      slug
+      description
+    }
+    collections {
+      id
+      name
+      slug
+    }
+    facetValues {
+      id
+      name
+      code
+      facet {
+        id
+        name
+        code
+      }
+    }
+  }
+}
+
+# Get all product option groups (returns array directly, optional filterTerm)
+query AdminProductOptionGroups($filterTerm: String) {
+  productOptionGroups(filterTerm: $filterTerm) {
+    id
+    createdAt
+    name
+    code
+    options {
+      id
+      code
+      name
+    }
+  }
+}
+
+# Get all facets for product categorization
+query AdminFacets($options: FacetListOptions) {
+  facets(options: $options) {
+    items {
+      id
+      name
+      code
+      values {
+        id
+        name
+        code
+      }
+    }
+    totalItems
+  }
+}
+
+# Get facets with full values for faceted filtering
+query AdminFacetsWithValues($options: FacetListOptions) {
+  facets(options: $options) {
+    items {
+      id
+      name
+      code
+      isPrivate
+      values {
+        id
+        name
+        code
+      }
+    }
+    totalItems
+  }
+}
+
+# Search products with faceted filtering (admin version)
+# This query uses Vendure's full-text search which searches both product name AND SKU
+query AdminSearchProducts($input: SearchInput!) {
+  search(input: $input) {
+    items {
+      productId
+      productName
+      productVariantId
+      productVariantName
+      sku
+      slug
+      description
+      enabled
+      inStock
+      score
+      productAsset {
+        id
+        preview
+        focalPoint {
+          x
+          y
+        }
+      }
+      productVariantAsset {
+        id
+        preview
+      }
+      price {
+        ... on SinglePrice {
+          value
+        }
+        ... on PriceRange {
+          min
+          max
+        }
+      }
+      priceWithTax {
+        ... on SinglePrice {
+          value
+        }
+        ... on PriceRange {
+          min
+          max
+        }
+      }
+      currencyCode
+      channelIds
+      collectionIds
+      facetIds
+      facetValueIds
+    }
+    totalItems
+    facetValues {
+      facetValue {
+        id
+        name
+        code
+        facet {
+          id
+          name
+          code
+        }
+      }
+      count
+    }
+    collections {
+      collection {
+        id
+        name
+        slug
+      }
+      count
+    }
+  }
+}
+
+# Get tax categories for variant pricing
+query AdminTaxCategories {
+  taxCategories {
+    items {
+      id
+      name
+      isDefault
+    }
+    totalItems
+  }
+}
+
+# ==================== PRODUCT MUTATIONS ====================
+
+# Create a new product
+mutation CreateProduct($input: CreateProductInput!) {
+  createProduct(input: $input) {
+    id
+    name
+    slug
+    description
+    enabled
+    featuredAsset {
+      id
+      preview
+    }
+    assets {
+      id
+      preview
+    }
+    optionGroups {
+      id
+      code
+      name
+      options {
+        id
+        code
+        name
+      }
+    }
+    translations {
+      languageCode
+      name
+      slug
+      description
+    }
+  }
+}
+
+# Update an existing product
+mutation UpdateProduct($input: UpdateProductInput!) {
+  updateProduct(input: $input) {
+    id
+    name
+    slug
+    description
+    enabled
+    featuredAsset {
+      id
+      preview
+    }
+    assets {
+      id
+      preview
+    }
+    optionGroups {
+      id
+      code
+      name
+      options {
+        id
+        code
+        name
+      }
+    }
+    translations {
+      languageCode
+      name
+      slug
+      description
+    }
+  }
+}
+
+# Delete a single product
+mutation DeleteProduct($id: ID!) {
+  deleteProduct(id: $id) {
+    result
+    message
+  }
+}
+
+# Delete multiple products
+mutation DeleteProducts($ids: [ID!]!) {
+  deleteProducts(ids: $ids) {
+    result
+    message
+  }
+}
+
+# ==================== PRODUCT VARIANT MUTATIONS ====================
+
+# Create product variants
+mutation CreateProductVariants($input: [CreateProductVariantInput!]!) {
+  createProductVariants(input: $input) {
+    id
+    name
+    sku
+    price
+    priceWithTax
+    stockOnHand
+    enabled
+    trackInventory
+    featuredAsset {
+      id
+      preview
+    }
+    options {
+      id
+      code
+      name
+    }
+  }
+}
+
+# Update product variants
+mutation UpdateProductVariants($input: [UpdateProductVariantInput!]!) {
+  updateProductVariants(input: $input) {
+    id
+    name
+    sku
+    price
+    priceWithTax
+    stockOnHand
+    stockAllocated
+    enabled
+    trackInventory
+    featuredAsset {
+      id
+      preview
+    }
+    options {
+      id
+      code
+      name
+    }
+    customFields {
+      minStockAlert
+    }
+  }
+}
+
+# Delete a single product variant
+mutation DeleteProductVariant($id: ID!) {
+  deleteProductVariant(id: $id) {
+    result
+    message
+  }
+}
+
+# Delete multiple product variants
+mutation DeleteProductVariants($ids: [ID!]!) {
+  deleteProductVariants(ids: $ids) {
+    result
+    message
+  }
+}
+
+# ==================== OPTION GROUP MUTATIONS ====================
+
+# Create a new product option group
+mutation CreateProductOptionGroup($input: CreateProductOptionGroupInput!) {
+  createProductOptionGroup(input: $input) {
+    id
+    code
+    name
+    options {
+      id
+      code
+      name
+    }
+  }
+}
+
+# Update a product option group
+mutation UpdateProductOptionGroup($input: UpdateProductOptionGroupInput!) {
+  updateProductOptionGroup(input: $input) {
+    id
+    code
+    name
+    options {
+      id
+      code
+      name
+    }
+  }
+}
+
+# Create a new option within an option group
+mutation CreateProductOption($input: CreateProductOptionInput!) {
+  createProductOption(input: $input) {
+    id
+    code
+    name
+    group {
+      id
+      code
+      name
+    }
+  }
+}
+
+# Update a product option
+mutation UpdateProductOption($input: UpdateProductOptionInput!) {
+  updateProductOption(input: $input) {
+    id
+    code
+    name
+    group {
+      id
+      code
+      name
+    }
+  }
+}
+
+# Delete a product option
+mutation DeleteProductOption($id: ID!) {
+  deleteProductOption(id: $id) {
+    result
+    message
+  }
+}
+
+# Add an option group to a product
+mutation AddOptionGroupToProduct($productId: ID!, $optionGroupId: ID!) {
+  addOptionGroupToProduct(productId: $productId, optionGroupId: $optionGroupId) {
+    id
+    optionGroups {
+      id
+      code
+      name
+      options {
+        id
+        code
+        name
+      }
+    }
+  }
+}
+
+# Remove an option group from a product
+mutation RemoveOptionGroupFromProduct($productId: ID!, $optionGroupId: ID!, $force: Boolean) {
+  removeOptionGroupFromProduct(productId: $productId, optionGroupId: $optionGroupId, force: $force) {
+    ... on Product {
+      id
+      optionGroups {
+        id
+        code
+        name
+      }
+    }
+    ... on ProductOptionInUseError {
+      errorCode
+      message
+      optionGroupCode
+      productVariantCount
+    }
+  }
+}
+
+# ==================== PRODUCT ASSET MUTATIONS ====================
+# Note: General asset mutations (CreateAssets, UpdateAsset, DeleteAsset, DeleteAssets)
+# are defined in assets.graphql. These are product-specific asset operations.
+
+# Add assets to product (update product's assetIds)
+mutation AddAssetsToProduct($productId: ID!, $assetIds: [ID!]!) {
+  updateProduct(input: { id: $productId, assetIds: $assetIds }) {
+    id
+    assets {
+      id
+      name
+      preview
+      source
+    }
+  }
+}
+
+# Set featured asset for product
+mutation SetProductFeaturedAsset($productId: ID!, $assetId: ID!) {
+  updateProduct(input: { id: $productId, featuredAssetId: $assetId }) {
+    id
+    featuredAsset {
+      id
+      name
+      preview
+      source
+    }
+  }
+}
+
+# Set featured asset for variant
+mutation SetVariantFeaturedAsset($variantId: ID!, $assetId: ID!) {
+  updateProductVariants(input: [{ id: $variantId, featuredAssetId: $assetId }]) {
+    id
+    featuredAsset {
+      id
+      preview
+    }
+  }
+}
+
+# Add assets to variant
+mutation AddAssetsToVariant($variantId: ID!, $assetIds: [ID!]!) {
+  updateProductVariants(input: [{ id: $variantId, assetIds: $assetIds }]) {
+    id
+    assets {
+      id
+      preview
+      source
+    }
+  }
+}
+
+# ==================== CHANNEL MUTATIONS ====================
+
+# Assign products to channel
+mutation AssignProductsToChannel($input: AssignProductsToChannelInput!) {
+  assignProductsToChannel(input: $input) {
+    id
+  }
+}
+
+# Remove products from channel
+mutation RemoveProductsFromChannel($input: RemoveProductsFromChannelInput!) {
+  removeProductsFromChannel(input: $input) {
+    id
+  }
+}
+
+# ==================== FACET MUTATIONS ====================
+
+# Assign facet values to product
+mutation UpdateProductFacets($productId: ID!, $facetValueIds: [ID!]!) {
+  updateProduct(input: { id: $productId, facetValueIds: $facetValueIds }) {
+    id
+    facetValues {
+      id
+      name
+      facet {
+        id
+        name
+      }
+    }
+  }
+}
+
+# ==================== STOCK MUTATIONS ====================
+
+# Update stock for a single variant
+mutation UpdateVariantStock($variantId: ID!, $stockOnHand: Int!) {
+  updateProductVariants(input: [{ id: $variantId, stockOnHand: $stockOnHand }]) {
+    id
+    stockOnHand
+    stockAllocated
+  }
+}
+
+# Update stock for multiple variants
+mutation UpdateVariantsStock($input: [UpdateProductVariantInput!]!) {
+  updateProductVariants(input: $input) {
+    id
+    sku
+    stockOnHand
+    stockAllocated
+  }
+}
+
+# Note: ToggleProductFeatured mutation removed - isFeatured custom field no longer exists
