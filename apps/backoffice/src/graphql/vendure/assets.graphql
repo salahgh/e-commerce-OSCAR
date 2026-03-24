@@ -1,0 +1,125 @@
+# Vendure Admin API - Asset Management Operations
+
+# ==================== QUERIES ====================
+
+# List all assets with filtering and pagination
+query AdminAssets($options: AssetListOptions) {
+  assets(options: $options) {
+    items {
+      id
+      createdAt
+      updatedAt
+      name
+      type
+      fileSize
+      mimeType
+      width
+      height
+      source
+      preview
+      focalPoint {
+        x
+        y
+      }
+      tags {
+        id
+        value
+      }
+    }
+    totalItems
+  }
+}
+
+# Get single asset by ID
+query AdminAsset($id: ID!) {
+  asset(id: $id) {
+    id
+    createdAt
+    updatedAt
+    name
+    type
+    fileSize
+    mimeType
+    width
+    height
+    source
+    preview
+    focalPoint {
+      x
+      y
+    }
+    tags {
+      id
+      value
+    }
+  }
+}
+
+# Get all tags for filtering
+query AssetTags {
+  tags {
+    items {
+      id
+      value
+    }
+    totalItems
+  }
+}
+
+# ==================== MUTATIONS ====================
+
+# Create new assets (upload files)
+mutation CreateAssets($input: [CreateAssetInput!]!) {
+  createAssets(input: $input) {
+    ... on Asset {
+      id
+      name
+      preview
+      source
+      width
+      height
+      fileSize
+      mimeType
+    }
+    ... on MimeTypeError {
+      errorCode
+      message
+      fileName
+      mimeType
+    }
+  }
+}
+
+# Update asset metadata (name, focal point, tags)
+mutation UpdateAsset($input: UpdateAssetInput!) {
+  updateAsset(input: $input) {
+    id
+    name
+    preview
+    source
+    focalPoint {
+      x
+      y
+    }
+    tags {
+      id
+      value
+    }
+  }
+}
+
+# Delete single asset
+mutation DeleteAsset($input: DeleteAssetInput!) {
+  deleteAsset(input: $input) {
+    result
+    message
+  }
+}
+
+# Delete multiple assets
+mutation DeleteAssets($input: DeleteAssetsInput!) {
+  deleteAssets(input: $input) {
+    result
+    message
+  }
+}

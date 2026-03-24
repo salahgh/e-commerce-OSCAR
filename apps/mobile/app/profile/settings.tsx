@@ -1,0 +1,200 @@
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import { SettingsItem } from '../../src/components/profile';
+import { colors, spacing, typography } from '../../src/theme';
+
+export default function SettingsScreen() {
+  const { t, i18n } = useTranslation();
+  const router = useRouter();
+
+  const languages = [
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'en', name: 'English', flag: '🇬🇧' },
+    { code: 'ar', name: 'العربية', flag: '🇩🇿' },
+  ];
+
+  const handleLanguageChange = async (languageCode: string) => {
+    await i18n.changeLanguage(languageCode);
+    // Optionally save to storage
+  };
+
+  const getCurrentLanguage = () => {
+    return languages.find((lang) => lang.code === i18n.language) || languages[0];
+  };
+
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{t('profile.settings', 'Settings')}</Text>
+        <View style={styles.placeholder} />
+      </View>
+
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Language Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('profile.language', 'Language')}</Text>
+          <Text style={styles.sectionSubtitle}>
+            {t('profile.languageDesc', 'Select your preferred language')}
+          </Text>
+
+          <View style={styles.languageList}>
+            {languages.map((language) => {
+              const isSelected = i18n.language === language.code;
+
+              return (
+                <TouchableOpacity
+                  key={language.code}
+                  style={[styles.languageItem, isSelected && styles.languageItemSelected]}
+                  onPress={() => handleLanguageChange(language.code)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.languageFlag}>{language.flag}</Text>
+                  <Text style={[styles.languageName, isSelected && styles.languageNameSelected]}>
+                    {language.name}
+                  </Text>
+                  {isSelected && (
+                    <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Notifications Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('profile.notifications', 'Notifications')}</Text>
+          <SettingsItem
+            icon="notifications-outline"
+            label={t('profile.orderUpdates', 'Order Updates')}
+            value={t('profile.orderUpdatesDesc', 'Get notified about order status changes')}
+            showSwitch
+            switchValue={true}
+            onSwitchChange={(value) => {
+              // TODO: Implement notification settings
+            }}
+          />
+          <SettingsItem
+            icon="pricetag-outline"
+            label={t('profile.promotions', 'Promotions & Offers')}
+            value={t('profile.promotionsDesc', 'Receive updates about sales and special offers')}
+            showSwitch
+            switchValue={true}
+            onSwitchChange={(value) => {
+              // TODO: Implement notification settings
+            }}
+          />
+          <SettingsItem
+            icon="chatbubble-outline"
+            label={t('profile.newsletter', 'Newsletter')}
+            value={t('profile.newsletterDesc', 'Weekly fashion tips and trends')}
+            showSwitch
+            switchValue={false}
+            onSwitchChange={(value) => {
+              // TODO: Implement notification settings
+            }}
+          />
+        </View>
+
+        {/* Display Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('profile.display', 'Display')}</Text>
+          <SettingsItem
+            icon="moon-outline"
+            label={t('profile.darkMode', 'Dark Mode')}
+            value={t('profile.darkModeDesc', 'Switch to dark theme')}
+            showSwitch
+            switchValue={false}
+            onSwitchChange={(value) => {
+              // TODO: Implement dark mode
+            }}
+          />
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.surface,
+    padding: spacing.lg,
+    paddingTop: spacing.xl,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  headerTitle: {
+    ...typography.styles.h3,
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.bold,
+  },
+  placeholder: {
+    width: 40,
+  },
+  content: {
+    flex: 1,
+  },
+  section: {
+    padding: spacing.lg,
+  },
+  sectionTitle: {
+    ...typography.styles.h4,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
+  },
+  sectionSubtitle: {
+    ...typography.styles.bodySmall,
+    color: colors.text.secondary,
+    marginBottom: spacing.md,
+  },
+  languageList: {
+    gap: spacing.sm,
+  },
+  languageItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    padding: spacing.md,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colors.border,
+  },
+  languageItemSelected: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '10',
+  },
+  languageFlag: {
+    fontSize: 28,
+    marginRight: spacing.md,
+  },
+  languageName: {
+    ...typography.styles.body,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    flex: 1,
+  },
+  languageNameSelected: {
+    color: colors.primary,
+  },
+});

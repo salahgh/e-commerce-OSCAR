@@ -1,0 +1,11 @@
+schema: schema.graphql
+extensions:
+  endpoints:
+    Default GraphQL Endpoint:
+#      url: http://localhost:8085/graphql
+      url: http://localhost:8085/admin-api
+#      url: http://192.213.71.243:8090/SI_RH_DSN/graphql
+#      url: http://192.213.71.244:8090/SI_RH_DSN/graphql
+      headers:
+        user-agent: JS GraphQL
+      introspect: false

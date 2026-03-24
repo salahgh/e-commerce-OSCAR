@@ -1,0 +1,22 @@
+# Vendure Admin API - Admin Profile Operations
+
+mutation UpdateActiveAdministrator($input: UpdateActiveAdministratorInput!) {
+  updateActiveAdministrator(input: $input) {
+    id
+    firstName
+    lastName
+    emailAddress
+    user {
+      id
+      verified
+      lastLogin
+      roles {
+        id
+        code
+        description
+      }
+    }
+    createdAt
+    updatedAt
+  }
+}

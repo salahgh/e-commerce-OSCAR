@@ -1,0 +1,398 @@
+# Vendure Shop API - Product Operations
+
+fragment AssetFields on Asset {
+  id
+  preview
+  source
+  width
+  height
+  name
+}
+
+fragment ProductVariantFields on ProductVariant {
+  id
+  name
+  sku
+  priceWithTax
+  currencyCode
+  stockLevel
+  featuredAsset {
+    ...AssetFields
+  }
+  options {
+    id
+    code
+    name
+    group {
+      id
+      code
+      name
+    }
+  }
+}
+
+fragment ProductFields on Product {
+  id
+  name
+  slug
+  description
+  featuredAsset {
+    ...AssetFields
+  }
+  assets {
+    ...AssetFields
+  }
+  variants {
+    ...ProductVariantFields
+  }
+  collections {
+    id
+    name
+    slug
+  }
+  facetValues {
+    id
+    name
+    code
+    facet {
+      id
+      name
+      code
+    }
+  }
+}
+
+fragment CollectionFields on Collection {
+  id
+  name
+  slug
+  description
+  featuredAsset {
+    ...AssetFields
+  }
+  parent {
+    id
+    name
+    slug
+  }
+  children {
+    id
+    name
+    slug
+  }
+  breadcrumbs {
+    id
+    name
+    slug
+  }
+}
+
+# Get all products with pagination and filters
+query GetProducts($options: ProductListOptions) {
+  products(options: $options) {
+    items {
+      ...ProductFields
+    }
+    totalItems
+  }
+}
+
+# Get product by slug
+query GetProductBySlug($slug: String!) {
+  product(slug: $slug) {
+    ...ProductFields
+  }
+}
+
+# Get product by ID
+query GetProductById($id: ID!) {
+  product(id: $id) {
+    ...ProductFields
+  }
+}
+
+# Search products
+query SearchProducts($input: SearchInput!) {
+  search(input: $input) {
+    items {
+      productId
+      productName
+      slug
+      description
+      productAsset {
+        id
+        preview
+      }
+      priceWithTax {
+        ... on SinglePrice {
+          value
+        }
+        ... on PriceRange {
+          min
+          max
+        }
+      }
+      currencyCode
+      collectionIds
+      score
+    }
+    totalItems
+    facetValues {
+      facetValue {
+        id
+        name
+        code
+        facet {
+          id
+          name
+          code
+        }
+      }
+      count
+    }
+  }
+}
+
+# Get all collections
+query GetCollections($options: CollectionListOptions) {
+  collections(options: $options) {
+    items {
+      ...CollectionFields
+    }
+    totalItems
+  }
+}
+
+# Get collection by slug
+query GetCollectionBySlug($slug: String!) {
+  collection(slug: $slug) {
+    ...CollectionFields
+    productVariants {
+      items {
+        id
+        product {
+          ...ProductFields
+        }
+      }
+      totalItems
+    }
+  }
+}
+
+# Get collection by ID
+query GetCollectionById($id: ID!) {
+  collection(id: $id) {
+    ...CollectionFields
+    productVariants {
+      items {
+        id
+        product {
+          ...ProductFields
+        }
+      }
+      totalItems
+    }
+  }
+}
+
+# Get facet values for filtering (enhanced with customFields)
+query GetFacets {
+  facets {
+    items {
+      id
+      name
+      code
+      values {
+        id
+        name
+        code
+      }
+    }
+    totalItems
+  }
+}
+
+# Get facets with full details for faceted search
+query GetFacetsWithDetails {
+  facets {
+    items {
+      id
+      name
+      code
+      values {
+        id
+        name
+        code
+      }
+    }
+    totalItems
+  }
+}
+
+# Search products with faceted filtering (full faceted search support)
+query SearchProductsWithFacets($input: SearchInput!) {
+  search(input: $input) {
+    items {
+      productId
+      productName
+      slug
+      description
+      productAsset {
+        id
+        preview
+      }
+      priceWithTax {
+        ... on SinglePrice {
+          value
+        }
+        ... on PriceRange {
+          min
+          max
+        }
+      }
+      currencyCode
+      collectionIds
+      inStock
+    }
+    totalItems
+    facetValues {
+      facetValue {
+        id
+        name
+        code
+        facet {
+          id
+          name
+          code
+        }
+      }
+      count
+    }
+  }
+}
+
+# Get products by collection
+query GetProductsByCollection($collectionSlug: String!, $options: ProductVariantListOptions) {
+  collection(slug: $collectionSlug) {
+    id
+    name
+    slug
+    productVariants(options: $options) {
+      items {
+        id
+        product {
+          ...ProductFields
+        }
+      }
+      totalItems
+    }
+  }
+}
+
+# Get full collection tree (all nested categories)
+query GetCollectionTree {
+  collections(options: { take: 100 }) {
+    items {
+      id
+      name
+      slug
+      description
+      parentId
+      featuredAsset {
+        ...AssetFields
+      }
+      parent {
+        id
+        name
+        slug
+      }
+      children {
+        id
+        name
+        slug
+        featuredAsset {
+          ...AssetFields
+        }
+        children {
+          id
+          name
+          slug
+          featuredAsset {
+            ...AssetFields
+          }
+        }
+      }
+      breadcrumbs {
+        id
+        name
+        slug
+      }
+    }
+    totalItems
+  }
+}
+
+# Get collection with products (for category page)
+query GetCollectionWithProducts($slug: String!, $take: Int, $skip: Int) {
+  collection(slug: $slug) {
+    id
+    name
+    slug
+    description
+    featuredAsset {
+      ...AssetFields
+    }
+    parent {
+      id
+      name
+      slug
+    }
+    children {
+      id
+      name
+      slug
+      description
+      featuredAsset {
+        ...AssetFields
+      }
+    }
+    breadcrumbs {
+      id
+      name
+      slug
+    }
+    productVariants(options: { take: $take, skip: $skip }) {
+      items {
+        id
+        product {
+          ...ProductFields
+        }
+      }
+      totalItems
+    }
+  }
+}
+
+# Get root collections only (for main navigation)
+query GetRootCollections {
+  collections(options: { topLevelOnly: true, take: 50 }) {
+    items {
+      id
+      name
+      slug
+      description
+      featuredAsset {
+        ...AssetFields
+      }
+      children {
+        id
+        name
+        slug
+        featuredAsset {
+          ...AssetFields
+        }
+      }
+    }
+    totalItems
+  }
+}

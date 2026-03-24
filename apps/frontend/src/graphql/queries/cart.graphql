@@ -1,0 +1,22 @@
+# Cart Queries
+
+query GetCart {
+  myCart {
+    id
+    userId
+    items {
+      id
+      productId
+      productName
+      productImage
+      quantity
+      price
+      subtotal
+      selectedSize
+      selectedColor
+    }
+    totalAmount
+    createdAt
+    updatedAt
+  }
+}

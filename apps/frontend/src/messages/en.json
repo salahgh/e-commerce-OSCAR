@@ -1,0 +1,115 @@
+{
+  "HomePage": {
+    "title": "Welcome to OSCAR Fashion",
+    "subtitle": "Fashion & Elegance"
+  },
+  "Common": {
+    "loading": "Loading...",
+    "error": "An error occurred"
+  },
+  "auth": {
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "phone": "Phone"
+    },
+    "placeholders": {
+      "email": "your@email.com",
+      "password": "Enter your password",
+      "confirmPassword": "Confirm your password",
+      "firstName": "Your first name",
+      "lastName": "Your last name",
+      "phone": "0555 00 00 00"
+    },
+    "login": {
+      "title": "Sign In",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "signIn": "Sign in",
+      "signingIn": "Signing in...",
+      "termsNotice": "By continuing, you agree to our",
+      "termsLink": "Terms of Service",
+      "resendVerification": "Resend verification email"
+    },
+    "register": {
+      "title": "Create Account",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "createAccount": "Create account",
+      "creating": "Creating...",
+      "termsNotice": "By creating an account, you agree to our",
+      "termsLink": "Terms of Service",
+      "success": "Account created successfully!",
+      "checkEmail": "Check your email to verify your account."
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "description": "Enter your email to receive a reset link.",
+      "sendLink": "Send reset link",
+      "sending": "Sending...",
+      "backToLogin": "Back to login",
+      "success": "Email sent!",
+      "checkEmail": "Check your inbox to reset your password."
+    },
+    "resetPassword": {
+      "title": "New Password",
+      "description": "Enter your new password.",
+      "reset": "Reset password",
+      "resetting": "Resetting...",
+      "success": "Password changed!",
+      "redirecting": "Redirecting to login..."
+    },
+    "verifyEmail": {
+      "title": "Email Verification",
+      "verifying": "Verifying...",
+      "success": "Email verified successfully!",
+      "redirecting": "Redirecting..."
+    },
+    "verificationPending": {
+      "title": "Verify Your Email",
+      "description": "We sent a verification email to",
+      "resend": "Resend email",
+      "resending": "Sending...",
+      "resent": "Email sent!",
+      "checkSpam": "Check your spam folder too."
+    },
+    "profile": {
+      "title": "My Profile",
+      "personalInfo": "Personal Information",
+      "security": "Security",
+      "addresses": "Addresses",
+      "updateProfile": "Update",
+      "updating": "Updating...",
+      "changePassword": "Change Password",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmNewPassword": "Confirm new password",
+      "passwordChanged": "Password changed successfully!"
+    },
+    "errors": {
+      "loginFailed": "Invalid credentials",
+      "emailNotVerified": "Please verify your email before signing in.",
+      "registrationFailed": "Registration failed",
+      "passwordMismatch": "Passwords do not match",
+      "invalidToken": "Invalid or expired link",
+      "invalidEmail": "Invalid email",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "required": "This field is required"
+    },
+    "validation": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email",
+      "passwordRequired": "Password is required",
+      "passwordMin": "Password must be at least 8 characters",
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "phoneInvalid": "Invalid phone number",
+      "termsRequired": "You must accept the terms"
+    }
+  }
+}

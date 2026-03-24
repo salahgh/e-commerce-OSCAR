@@ -1,0 +1,180 @@
+# Vendure Shop API - Collection Operations (Categories)
+
+fragment CollectionFields on Collection {
+  id
+  name
+  slug
+  description
+  featuredAsset {
+    id
+    preview
+  }
+  parent {
+    id
+    name
+    slug
+  }
+  children {
+    id
+    name
+    slug
+    featuredAsset {
+      id
+      preview
+    }
+  }
+  breadcrumbs {
+    id
+    name
+    slug
+  }
+}
+
+# Get all collections
+query GetCollections($options: CollectionListOptions) {
+  collections(options: $options) {
+    items {
+      ...CollectionFields
+    }
+    totalItems
+  }
+}
+
+# Get root collections only (for main navigation)
+query GetRootCollections {
+  collections(options: { topLevelOnly: true, take: 50 }) {
+    items {
+      id
+      name
+      slug
+      description
+      featuredAsset {
+        id
+        preview
+      }
+      children {
+        id
+        name
+        slug
+        featuredAsset {
+          id
+          preview
+        }
+      }
+    }
+    totalItems
+  }
+}
+
+# Get collection by slug
+query GetCollectionBySlug($slug: String!) {
+  collection(slug: $slug) {
+    ...CollectionFields
+  }
+}
+
+# Get collection by ID
+query GetCollectionById($id: ID!) {
+  collection(id: $id) {
+    ...CollectionFields
+  }
+}
+
+# Get collection with products
+query GetCollectionWithProducts($slug: String!, $take: Int, $skip: Int) {
+  collection(slug: $slug) {
+    id
+    name
+    slug
+    description
+    featuredAsset {
+      id
+      preview
+    }
+    parent {
+      id
+      name
+      slug
+    }
+    children {
+      id
+      name
+      slug
+      description
+      featuredAsset {
+        id
+        preview
+      }
+    }
+    breadcrumbs {
+      id
+      name
+      slug
+    }
+    productVariants(options: { take: $take, skip: $skip }) {
+      items {
+        id
+        product {
+          id
+          name
+          slug
+          description
+          featuredAsset {
+            id
+            preview
+          }
+          variants {
+            id
+            name
+            sku
+            priceWithTax
+            currencyCode
+            stockLevel
+          }
+        }
+      }
+      totalItems
+    }
+  }
+}
+
+# Get full collection tree
+query GetCollectionTree {
+  collections(options: { take: 100 }) {
+    items {
+      id
+      name
+      slug
+      description
+      parentId
+      featuredAsset {
+        id
+        preview
+      }
+      parent {
+        id
+        name
+        slug
+      }
+      children {
+        id
+        name
+        slug
+        featuredAsset {
+          id
+          preview
+        }
+        children {
+          id
+          name
+          slug
+          featuredAsset {
+            id
+            preview
+          }
+        }
+      }
+    }
+    totalItems
+  }
+}

@@ -1,0 +1,243 @@
+# Vendure Admin API - Collection (Category) Operations
+
+query AdminCollections($options: CollectionListOptions) {
+  collections(options: $options) {
+    items {
+      id
+      createdAt
+      updatedAt
+      name
+      slug
+      description
+      isPrivate
+      position
+      parentId
+      breadcrumbs {
+        id
+        name
+        slug
+      }
+      featuredAsset {
+        id
+        preview
+        source
+      }
+      productVariants {
+        totalItems
+      }
+      translations {
+        languageCode
+        name
+        slug
+        description
+      }
+      customFields {
+        displayOrder
+      }
+    }
+    totalItems
+  }
+}
+
+query AdminCollection($id: ID!) {
+  collection(id: $id) {
+    id
+    createdAt
+    updatedAt
+    name
+    slug
+    description
+    isPrivate
+    position
+    parentId
+    breadcrumbs {
+      id
+      name
+      slug
+    }
+    featuredAsset {
+      id
+      preview
+      source
+    }
+    productVariants {
+      totalItems
+    }
+    translations {
+      languageCode
+      name
+      slug
+      description
+    }
+    customFields {
+      displayOrder
+    }
+    filters {
+      code
+      args {
+        name
+        value
+      }
+    }
+    children {
+      id
+      name
+      slug
+      position
+      productVariants {
+        totalItems
+      }
+      translations {
+        languageCode
+        name
+      }
+    }
+  }
+}
+
+mutation CreateCollection($input: CreateCollectionInput!) {
+  createCollection(input: $input) {
+    id
+    name
+    slug
+    description
+    isPrivate
+    position
+    parentId
+    translations {
+      languageCode
+      name
+      slug
+      description
+    }
+    customFields {
+      displayOrder
+    }
+  }
+}
+
+mutation UpdateCollection($input: UpdateCollectionInput!) {
+  updateCollection(input: $input) {
+    id
+    name
+    slug
+    description
+    isPrivate
+    position
+    parentId
+    translations {
+      languageCode
+      name
+      slug
+      description
+    }
+    customFields {
+      displayOrder
+    }
+  }
+}
+
+mutation DeleteCollection($id: ID!) {
+  deleteCollection(id: $id) {
+    result
+    message
+  }
+}
+
+mutation MoveCollection($input: MoveCollectionInput!) {
+  moveCollection(input: $input) {
+    id
+    name
+    slug
+    position
+    parentId
+  }
+}
+
+# Update collection filters (for assigning products to collections)
+mutation UpdateCollectionFilters($id: ID!, $filters: [ConfigurableOperationInput!]!) {
+  updateCollection(input: { id: $id, filters: $filters }) {
+    id
+    name
+    filters {
+      code
+      args {
+        name
+        value
+      }
+    }
+  }
+}
+
+# Get all collections with their filters (for product-collection management)
+query AdminCollectionsWithFilters($options: CollectionListOptions) {
+  collections(options: $options) {
+    items {
+      id
+      name
+      slug
+      parentId
+      filters {
+        code
+        args {
+          name
+          value
+        }
+      }
+    }
+    totalItems
+  }
+}
+
+# Get available collection filter definitions
+query CollectionFilterDefinitions {
+  collectionFilters {
+    code
+    description
+    args {
+      name
+      type
+      required
+      defaultValue
+      ui
+      label
+      description
+    }
+  }
+}
+
+# Preview collection products before saving filters
+query PreviewCollectionProducts($input: PreviewCollectionVariantsInput!, $options: ProductVariantListOptions) {
+  previewCollectionVariants(input: $input, options: $options) {
+    items {
+      id
+      name
+      sku
+      product {
+        id
+        name
+        featuredAsset {
+          preview
+        }
+      }
+    }
+    totalItems
+  }
+}
+
+# Get all facets with their values (for filter builder)
+query AdminFacetsForFilter {
+  facets {
+    items {
+      id
+      name
+      code
+      values {
+        id
+        name
+        code
+      }
+    }
+    totalItems
+  }
+}

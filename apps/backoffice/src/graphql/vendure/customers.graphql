@@ -1,0 +1,111 @@
+# Vendure Admin API - Customer Operations
+
+query AdminCustomers($options: CustomerListOptions) {
+  customers(options: $options) {
+    items {
+      id
+      createdAt
+      updatedAt
+      firstName
+      lastName
+      emailAddress
+      phoneNumber
+      user {
+        id
+        verified
+        lastLogin
+      }
+      orders {
+        totalItems
+        items {
+          totalWithTax
+          state
+        }
+      }
+      customFields {
+        wilaya
+        city
+      }
+    }
+    totalItems
+  }
+}
+
+query AdminCustomer($id: ID!) {
+  customer(id: $id) {
+    id
+    createdAt
+    updatedAt
+    firstName
+    lastName
+    emailAddress
+    phoneNumber
+    user {
+      id
+      verified
+      lastLogin
+    }
+    addresses {
+      id
+      fullName
+      company
+      streetLine1
+      streetLine2
+      city
+      province
+      postalCode
+      country {
+        code
+        name
+      }
+      phoneNumber
+      defaultShippingAddress
+      defaultBillingAddress
+    }
+    orders(options: { take: 10, sort: { orderPlacedAt: DESC } }) {
+      items {
+        id
+        code
+        state
+        totalWithTax
+        orderPlacedAt
+      }
+      totalItems
+    }
+    customFields {
+      wilaya
+      city
+      adminNotes
+    }
+  }
+}
+
+# Update customer
+mutation UpdateCustomer($input: UpdateCustomerInput!) {
+  updateCustomer(input: $input) {
+    ... on Customer {
+      id
+      firstName
+      lastName
+      emailAddress
+      phoneNumber
+      customFields {
+        wilaya
+        city
+        adminNotes
+      }
+    }
+    ... on EmailAddressConflictError {
+      errorCode
+      message
+    }
+  }
+}
+
+# Delete customer
+mutation DeleteCustomer($id: ID!) {
+  deleteCustomer(id: $id) {
+    result
+    message
+  }
+}

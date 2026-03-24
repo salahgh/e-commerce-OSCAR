@@ -1,0 +1,35 @@
+# Vendure Shop API - Authentication Queries
+
+fragment CustomerFields on Customer {
+  id
+  createdAt
+  updatedAt
+  firstName
+  lastName
+  emailAddress
+  phoneNumber
+  addresses {
+    id
+    fullName
+    company
+    streetLine1
+    streetLine2
+    city
+    province
+    postalCode
+    country {
+      code
+      name
+    }
+    phoneNumber
+    defaultShippingAddress
+    defaultBillingAddress
+  }
+}
+
+# Get the currently logged-in customer
+query ActiveCustomer {
+  activeCustomer {
+    ...CustomerFields
+  }
+}

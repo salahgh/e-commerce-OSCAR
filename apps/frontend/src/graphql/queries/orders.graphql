@@ -1,0 +1,71 @@
+# Order Queries
+
+query GetMyOrders($page: Int, $size: Int) {
+  myOrders(page: $page, size: $size) {
+    content {
+      id
+      orderNumber
+      userId
+      userEmail
+      status
+      subtotal
+      shippingCost
+      totalAmount
+      paymentMethod
+      shippingAddress
+      phoneNumber
+      notes
+      trackingNumber
+      items {
+        id
+        productId
+        productName
+        productImage
+        quantity
+        price
+        subtotal
+        selectedSize
+        selectedColor
+      }
+      createdAt
+      updatedAt
+      paidAt
+      deliveredAt
+    }
+    totalElements
+    totalPages
+  }
+}
+
+query GetOrder($id: Long!) {
+  order(id: $id) {
+    id
+    orderNumber
+    userId
+    userEmail
+    status
+    subtotal
+    shippingCost
+    totalAmount
+    paymentMethod
+    shippingAddress
+    phoneNumber
+    notes
+    trackingNumber
+    items {
+      id
+      productId
+      productName
+      productImage
+      quantity
+      price
+      subtotal
+      selectedSize
+      selectedColor
+    }
+    createdAt
+    updatedAt
+    paidAt
+    deliveredAt
+  }
+}
