@@ -1,3 +1,4 @@
+export * from './colors-palette';
 export * from './order-status';
 export * from './payment';
 export * from './sizes';
