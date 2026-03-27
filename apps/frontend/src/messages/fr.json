@@ -24,13 +24,18 @@
       "lastName": "Votre nom",
       "phone": "0555 00 00 00"
     },
+    "labels": {
+      "emailOrPhone": "Email ou numéro de téléphone",
+      "optional": "Optionnel"
+    },
     "login": {
-      "title": "Connexion",
-      "noAccount": "Pas encore de compte?",
-      "signUp": "S'inscrire",
+      "title": "Content de vous revoir",
+      "subtitle": "Connectez-vous pour continuer vos achats",
+      "noAccount": "Pas encore inscrit ?",
+      "signUp": "Créer un compte",
       "rememberMe": "Se souvenir de moi",
-      "forgotPassword": "Mot de passe oublie?",
-      "signIn": "Se connecter",
+      "forgotPassword": "Mot de passe oublié ?",
+      "signIn": "Cliquez ici pour continuer",
       "signingIn": "Connexion en cours...",
       "termsNotice": "En continuant, vous acceptez nos",
       "termsLink": "Conditions d'utilisation",

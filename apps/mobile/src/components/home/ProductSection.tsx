@@ -6,15 +6,15 @@ import {
   ScrollView,
   TouchableOpacity,
   FlatList,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ProductResponse } from '../../graphql/generated/graphql';
-import { ProductCard } from '../products/ProductCard';
+import { ProductCard, SimpleProduct } from '../products/ProductCard';
 import { colors, spacing, typography } from '../../theme';
 
 interface ProductSectionProps {
   title: string;
-  products: ProductResponse[];
+  products: SimpleProduct[];
   onSeeAll?: () => void;
   showSeeAll?: boolean;
   variant?: 'horizontal' | 'grid';
@@ -33,13 +33,13 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
 
   if (products.length === 0 && !loading) return null;
 
-  const renderHorizontalItem = ({ item }: { item: ProductResponse }) => (
+  const renderHorizontalItem = ({ item }: { item: SimpleProduct }) => (
     <View style={styles.horizontalCard}>
       <ProductCard product={item} />
     </View>
   );
 
-  const renderGridItem = ({ item, index }: { item: ProductResponse; index: number }) => (
+  const renderGridItem = ({ item, index }: { item: SimpleProduct; index: number }) => (
     <View style={[styles.gridCard, index % 2 === 1 && styles.gridCardRight]}>
       <ProductCard product={item} />
     </View>
@@ -83,7 +83,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
 
 // Compact product card for featured sections
 interface CompactProductCardProps {
-  product: ProductResponse;
+  product: SimpleProduct;
   onPress?: () => void;
 }
 
@@ -101,9 +101,7 @@ export const CompactProductCard: React.FC<CompactProductCardProps> = ({
     }
   };
 
-  const imageUrl = product.imageUrls?.[0];
-  const hasDiscount = product.salePrice && product.salePrice < (product.basePrice || 0);
-  const displayPrice = hasDiscount ? product.salePrice : product.basePrice;
+  const imageUrl = product.imageUrl;
 
   return (
     <TouchableOpacity
@@ -118,15 +116,13 @@ export const CompactProductCard: React.FC<CompactProductCardProps> = ({
       )}
       <View style={styles.compactInfo}>
         <Text style={styles.compactName} numberOfLines={1}>
-          {product.nameFr || product.nameEn || ''}
+          {product.name}
         </Text>
-        <Text style={styles.compactPrice}>{displayPrice?.toFixed(2)} DZD</Text>
+        <Text style={styles.compactPrice}>{product.price} DZD</Text>
       </View>
     </TouchableOpacity>
   );
 };
-
-import { Image } from 'react-native';
 
 const styles = StyleSheet.create({
   container: {

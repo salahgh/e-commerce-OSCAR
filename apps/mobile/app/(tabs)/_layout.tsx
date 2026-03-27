@@ -3,11 +3,11 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { colors, typography } from '../../src/theme';
-import { useCart } from '../../src/contexts/CartContext';
+import { colors, typography } from '@/src/theme';
+import { useCart } from '@/src/contexts/CartContext';
 
 export default function TabLayout() {
+
   const { itemCount } = useCart();
 
   return (
@@ -16,7 +16,6 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.text.tertiary,
         headerShown: false,
-        tabBarButton: HapticTab,
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
@@ -57,11 +56,11 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <View>
               <Ionicons name={focused ? 'cart' : 'cart-outline'} size={24} color={color} />
-              {itemCount > 0 && (
+              {itemCount > 0 ? (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{itemCount > 99 ? '99+' : itemCount}</Text>
                 </View>
-              )}
+              ) : null}
             </View>
           ),
         }}

@@ -58,6 +58,11 @@ interface ProductVariant {
     name: string;
     group?: { id: string; code: string; name: string };
   }>;
+  customFields?: {
+    minStockAlert?: number | null;
+    originalPrice?: number | null;
+    discountPercent?: number | null;
+  };
 }
 
 interface VariantManagerProps {
@@ -160,6 +165,8 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
     price: number;
     stock: number;
     enabled: boolean;
+    originalPrice: number;
+    discountPercent: number;
   }>>({});
 
   // Delete confirmation
@@ -480,6 +487,8 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
         price: Number(variant.price ?? 0) / 100,
         stock: variant.stockOnHand ?? 0,
         enabled: variant.enabled ?? true,
+        originalPrice: Number(variant.customFields?.originalPrice ?? 0) / 100,
+        discountPercent: variant.customFields?.discountPercent ?? 0,
       },
     });
   };
@@ -511,6 +520,10 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
             price: Math.round(edits.price * 100),
             stockOnHand: edits.stock,
             enabled: edits.enabled,
+            customFields: {
+              originalPrice: edits.originalPrice > 0 ? Math.round(edits.originalPrice * 100) : null,
+              discountPercent: edits.discountPercent > 0 ? edits.discountPercent : null,
+            },
           }],
         },
       });
@@ -1045,6 +1058,12 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
                       Stock
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                      Prix original
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                      Remise %
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                       Statut
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">
@@ -1126,6 +1145,48 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
                           }`}>
                             {variant.stockOnHand}
                           </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {editingVariant === variant.id ? (
+                          <Input
+                            type="number"
+                            value={variantEdits[variant.id]?.originalPrice ?? 0}
+                            onChange={(e) => setVariantEdits({
+                              ...variantEdits,
+                              [variant.id]: { ...variantEdits[variant.id], originalPrice: parseFloat(e.target.value) || 0 },
+                            })}
+                            className="w-28"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                          />
+                        ) : (
+                          <span className="text-muted-foreground">
+                            {variant.customFields?.originalPrice
+                              ? formatPrice(variant.customFields.originalPrice / 100)
+                              : '—'}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {editingVariant === variant.id ? (
+                          <Input
+                            type="number"
+                            value={variantEdits[variant.id]?.discountPercent ?? 0}
+                            onChange={(e) => setVariantEdits({
+                              ...variantEdits,
+                              [variant.id]: { ...variantEdits[variant.id], discountPercent: parseInt(e.target.value) || 0 },
+                            })}
+                            className="w-20"
+                            min="0"
+                            max="100"
+                            placeholder="0"
+                          />
+                        ) : (
+                          variant.customFields?.discountPercent
+                            ? <Badge variant="destructive">-{variant.customFields.discountPercent}%</Badge>
+                            : <span className="text-muted-foreground">—</span>
                         )}
                       </td>
                       <td className="px-4 py-3">

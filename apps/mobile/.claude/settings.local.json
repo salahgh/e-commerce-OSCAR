@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /d/e-commerce-OSCAR/apps/mobile/src -type f \\\\\\(-name *.ts -o -name *.tsx -o -name *.js -o -name *.graphql \\\\\\))",
+      "Bash(grep -r collections /d/e-commerce-OSCAR/apps/mobile/src --include=*.ts --include=*.tsx -i)",
+      "Bash(grep -E \"\\\\.\\(tsx|ts|js\\)$\")",
+      "Bash(grep -r \"collections\\\\|Collections\" /d/e-commerce-OSCAR/apps/mobile/app --include=*.tsx --include=*.ts)",
+      "Bash(npx graphql-codegen:*)",
+      "Bash(find D:/e-commerce-OSCAR -name *preview* -type d)",
+      "Bash(find D:/e-commerce-OSCAR/apps/backend -name *.png -o -name *.jpg -o -name *.webp)",
+      "Bash(adb reverse:*)",
+      "Bash(PGPASSWORD='majmajBS13..' psql -h localhost -U postgres -d oscar_vendure -c \"SELECT id, preview, source FROM asset WHERE id = '45';\" 2>&1)",
+      "Bash(cmd //c \"dir /s /b D:\\\\e-commerce-OSCAR\\\\apps\\\\backend\\\\static\\\\assets\" \")",
+      "Bash(cmd //c 'dir /s /b D:\\\\e-commerce-OSCAR\\\\apps\\\\backend\\\\static\\\\assets')",
+      "Bash(cmd //c 'dir /s /b D:\\\\e-commerce-OSCAR\\\\apps\\\\backend\\\\*__preview.png')",
+      "Bash(cmd //c 'dir /s /b D:\\\\e-commerce-OSCAR\\\\*__preview*')",
+      "Bash(cmd //c 'dir /s /b D:\\\\e-commerce-OSCAR\\\\*86b595b6*')",
+      "Bash(cmd //c 'dir /s /b D:\\\\*86b595b6*')",
+      "Bash(node:*)",
+      "Bash(cmd //c 'dir /s /b /a D:\\\\e-commerce-OSCAR\\\\apps\\\\backend\\\\static' 2>&1)",
+      "mcp__figma__get_design_context",
+      "Bash(xargs grep:*)",
+      "Bash(find /d/e-commerce-OSCAR/apps/backend/src -type f -name \"*.ts\" -exec grep -l \"Promotion\\\\|Adjustment\\\\|Discount\\\\|Price\" {})"
+    ]
+  }
+}

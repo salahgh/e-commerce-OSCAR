@@ -5,21 +5,21 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobileapp",
+    "scheme": "oscar-fashion",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.oscar.fashion"
     },
     "android": {
+      "package": "com.oscar.fashion",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": true
     },
     "web": {
       "output": "static",
@@ -41,11 +41,10 @@
       ]
     ],
     "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+      "typedRoutes": true
     },
     "extra": {
-      "graphqlUrl": "http://localhost:8085/graphql"
+      "graphqlUrl": "http://leqta.com:8085/shop-api"
     }
   }
 }

@@ -1,19 +1,27 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useTranslation } from 'react-i18next';
-import { ProductResponse } from '../../graphql/generated/graphql';
 import { colors, spacing, typography } from '../../theme';
-import { Badge } from '../ui';
+
+export interface SimpleProduct {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  imageUrl?: string | null;
+  price: string | number;
+  originalPrice?: string | number | null;
+  discountPercent?: number | null;
+  inStock?: boolean;
+}
 
 interface ProductCardProps {
-  product: ProductResponse;
-  onPress?: (product: ProductResponse) => void;
+  product: SimpleProduct;
+  onPress?: (product: SimpleProduct) => void;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
   const router = useRouter();
-  const { i18n } = useTranslation();
 
   const handlePress = () => {
     if (onPress) {
@@ -23,33 +31,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
     }
   };
 
-  // Get product name based on current language
-  const getName = () => {
-    switch (i18n.language) {
-      case 'ar':
-        return product.nameAr || product.nameFr || product.nameEn || '';
-      case 'en':
-        return product.nameEn || product.nameFr || product.nameAr || '';
-      default:
-        return product.nameFr || product.nameEn || product.nameAr || '';
-    }
-  };
-
-  // Get first image or placeholder
-  const imageUrl = product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : null;
-
-  // Check if product has sale price
-  const hasDiscount = product.salePrice && product.salePrice < (product.basePrice || 0);
-  const displayPrice = hasDiscount ? product.salePrice : product.basePrice;
-
-  // Calculate discount percentage
-  const discountPercentage = hasDiscount
-    ? Math.round(((product.basePrice! - product.salePrice!) / product.basePrice!) * 100)
-    : 0;
-
-  // Check stock status
-  const isLowStock = (product.stockQuantity || 0) > 0 && (product.stockQuantity || 0) <= 5;
-  const isOutOfStock = (product.stockQuantity || 0) === 0;
+  const imageUrl = product.imageUrl || null;
+  const isOutOfStock = product.inStock === false;
 
   return (
     <TouchableOpacity style={styles.card} onPress={handlePress} activeOpacity={0.7}>
@@ -63,12 +46,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
           </View>
         )}
 
-        {/* Badges */}
-        <View style={styles.badgeContainer}>
-          {product.isFeatured && <Badge label="Featured" variant="primary" size="small" />}
-          {hasDiscount && <Badge label={`-${discountPercentage}%`} variant="danger" size="small" />}
-        </View>
-
         {/* Stock Status */}
         {isOutOfStock && (
           <View style={styles.stockOverlay}>
@@ -79,22 +56,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
 
       {/* Product Info */}
       <View style={styles.info}>
-        {/* Category */}
-        {product.categoryName && <Text style={styles.category}>{product.categoryName}</Text>}
-
         {/* Product Name */}
         <Text style={styles.name} numberOfLines={2}>
-          {getName()}
+          {product.name}
         </Text>
 
         {/* Price */}
         <View style={styles.priceContainer}>
-          {hasDiscount && <Text style={styles.oldPrice}>{product.basePrice?.toFixed(2)} DZD</Text>}
-          <Text style={styles.price}>{displayPrice?.toFixed(2)} DZD</Text>
+          <Text style={styles.price}>{product.price} DZD</Text>
         </View>
-
-        {/* Stock Warning */}
-        {isLowStock && <Text style={styles.lowStock}>Only {product.stockQuantity} left!</Text>}
       </View>
     </TouchableOpacity>
   );
@@ -132,35 +102,22 @@ const styles = StyleSheet.create({
     ...typography.styles.bodySmall,
     color: colors.text.tertiary,
   },
-  badgeContainer: {
-    position: 'absolute',
-    top: spacing.sm,
-    right: spacing.sm,
-    flexDirection: 'column',
-    gap: spacing.xs,
-  },
   stockOverlay: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: colors.overlayDark,
     padding: spacing.sm,
     alignItems: 'center',
   },
   stockText: {
     ...typography.styles.bodySmall,
-    color: colors.white,
+    color: colors.text.inverse,
     fontWeight: typography.fontWeight.semiBold,
   },
   info: {
     padding: spacing.md,
-  },
-  category: {
-    ...typography.styles.caption,
-    color: colors.text.tertiary,
-    marginBottom: spacing.xs,
-    textTransform: 'uppercase',
   },
   name: {
     ...typography.styles.body,
@@ -179,15 +136,5 @@ const styles = StyleSheet.create({
     ...typography.styles.h4,
     color: colors.primary,
     fontWeight: typography.fontWeight.bold,
-  },
-  oldPrice: {
-    ...typography.styles.bodySmall,
-    color: colors.text.tertiary,
-    textDecorationLine: 'line-through',
-  },
-  lowStock: {
-    ...typography.styles.caption,
-    color: colors.warning,
-    fontWeight: typography.fontWeight.medium,
   },
 });

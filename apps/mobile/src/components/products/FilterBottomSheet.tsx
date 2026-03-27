@@ -172,11 +172,11 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
             {/* Header */}
             <View style={styles.header}>
               <Text style={styles.title}>Filters</Text>
-              {activeFiltersCount > 0 && (
+              {activeFiltersCount > 0 ? (
                 <TouchableOpacity onPress={handleReset}>
                   <Text style={styles.resetText}>Reset All</Text>
                 </TouchableOpacity>
-              )}
+              ) : null}
             </View>
 
             <ScrollView
@@ -208,7 +208,7 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
               </View>
 
               {/* Categories */}
-              {availableCategories.length > 0 && (
+              {availableCategories.length > 0 ? (
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>Categories</Text>
                   <View style={styles.chipContainer}>
@@ -222,7 +222,7 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
                     ))}
                   </View>
                 </View>
-              )}
+              ) : null}
 
               {/* Price Range */}
               <View style={styles.section}>

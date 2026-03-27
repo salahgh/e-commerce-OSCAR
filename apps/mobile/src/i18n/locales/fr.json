@@ -41,9 +41,16 @@
   },
   "home": {
     "title": "Accueil",
-    "featuredProducts": "Produits vedettes",
-    "newArrivals": "Nouveautés",
+    "searchPlaceholder": "Rechercher dans OSCAR",
     "categories": "Catégories",
+    "all": "Tout",
+    "women": "Femmes",
+    "men": "Hommes",
+    "kids": "Enfants",
+    "newArrivals": "Nouvel arrivage",
+    "bestSellers": "Meilleures ventes",
+    "pickedForYou": "Sélection pour vous",
+    "featuredProducts": "Produits vedettes",
     "popularProducts": "Produits populaires"
   },
   "products": {

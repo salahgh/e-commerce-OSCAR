@@ -2,12 +2,12 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
-import { CartItemResponse } from '../../graphql/generated/graphql';
+import { CartItemData } from '../cart/CartItem';
 import { colors, spacing, typography } from '../../theme';
 import { Divider } from '../ui';
 
 interface OrderSummaryProps {
-  items: CartItemResponse[];
+  items: CartItemData[];
   subtotal: number;
   shippingCost: number;
   total: number;

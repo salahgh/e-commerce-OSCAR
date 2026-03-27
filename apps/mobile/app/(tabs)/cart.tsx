@@ -173,9 +173,9 @@ export default function CartScreen() {
         <Text style={styles.itemName} numberOfLines={2}>
           {item.productName}
         </Text>
-        {item.variantName && item.variantName !== item.productName && (
+        {item.variantName && item.variantName !== item.productName ? (
           <Text style={styles.itemVariant}>{item.variantName}</Text>
-        )}
+        ) : null}
         <Text style={styles.itemPrice}>{item.unitPrice} DZD</Text>
 
         <View style={styles.quantityRow}>
@@ -266,12 +266,12 @@ export default function CartScreen() {
               )}
             </TouchableOpacity>
           </View>
-          {promoError && (
+          {promoError ? (
             <View style={styles.promoErrorContainer}>
               <Ionicons name="alert-circle" size={16} color={colors.error} />
               <Text style={styles.promoErrorText}>{promoError}</Text>
             </View>
-          )}
+          ) : null}
         </View>
       )}
     </View>
@@ -287,11 +287,11 @@ export default function CartScreen() {
             {itemCount} {itemCount === 1 ? t('cart.item', 'item') : t('cart.items', 'items')}
           </Text>
         </View>
-        {items.length > 0 && (
+        {items.length > 0 ? (
           <TouchableOpacity onPress={handleClearCart} disabled={loading}>
             <Text style={styles.clearButton}>{t('cart.clearAll', 'Clear All')}</Text>
           </TouchableOpacity>
-        )}
+        ) : null}
       </View>
 
       {/* Cart Items */}
@@ -329,14 +329,14 @@ export default function CartScreen() {
         </View>
 
         {/* Free Shipping Info */}
-        {total < 5000 && (
+        {total < 5000 ? (
           <View style={styles.freeShippingInfo}>
             <Ionicons name="gift-outline" size={16} color={colors.primary} />
             <Text style={styles.freeShippingText}>
               {t('cart.freeShippingHint', `Add ${5000 - total} DZD more for free shipping!`)}
             </Text>
           </View>
-        )}
+        ) : null}
 
         {/* Checkout Button */}
         <Button

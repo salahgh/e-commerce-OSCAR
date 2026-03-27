@@ -20,9 +20,13 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean };
   Int: { input: number; output: number };
   Float: { input: number; output: number };
+  /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
   DateTime: { input: string; output: string };
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: Record<string, any>; output: Record<string, any> };
+  /** The `Money` scalar type represents monetary values and supports signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point). */
   Money: { input: number; output: number };
+  /** The `Upload` scalar type represents a file upload. */
   Upload: { input: File; output: File };
 };
 
@@ -210,6 +214,7 @@ export type Collection = Node & {
   parent?: Maybe<Collection>;
   parentId: Scalars['ID']['output'];
   position: Scalars['Int']['output'];
+  productVariantCount: Scalars['Int']['output'];
   productVariants: ProductVariantList;
   slug: Scalars['String']['output'];
   translations: Array<CollectionTranslation>;
@@ -229,11 +234,7 @@ export type CollectionBreadcrumb = {
 
 export type CollectionCustomFields = {
   __typename?: 'CollectionCustomFields';
-  descriptionAr?: Maybe<Scalars['String']['output']>;
-  descriptionFr?: Maybe<Scalars['String']['output']>;
   displayOrder?: Maybe<Scalars['Int']['output']>;
-  nameAr?: Maybe<Scalars['String']['output']>;
-  nameFr?: Maybe<Scalars['String']['output']>;
 };
 
 export type CollectionFilterParameter = {
@@ -241,16 +242,13 @@ export type CollectionFilterParameter = {
   _or?: InputMaybe<Array<CollectionFilterParameter>>;
   createdAt?: InputMaybe<DateOperators>;
   description?: InputMaybe<StringOperators>;
-  descriptionAr?: InputMaybe<StringOperators>;
-  descriptionFr?: InputMaybe<StringOperators>;
   displayOrder?: InputMaybe<NumberOperators>;
   id?: InputMaybe<IdOperators>;
   languageCode?: InputMaybe<StringOperators>;
   name?: InputMaybe<StringOperators>;
-  nameAr?: InputMaybe<StringOperators>;
-  nameFr?: InputMaybe<StringOperators>;
   parentId?: InputMaybe<IdOperators>;
   position?: InputMaybe<NumberOperators>;
+  productVariantCount?: InputMaybe<NumberOperators>;
   slug?: InputMaybe<StringOperators>;
   updatedAt?: InputMaybe<DateOperators>;
 };
@@ -288,15 +286,12 @@ export type CollectionResult = {
 export type CollectionSortParameter = {
   createdAt?: InputMaybe<SortOrder>;
   description?: InputMaybe<SortOrder>;
-  descriptionAr?: InputMaybe<SortOrder>;
-  descriptionFr?: InputMaybe<SortOrder>;
   displayOrder?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   name?: InputMaybe<SortOrder>;
-  nameAr?: InputMaybe<SortOrder>;
-  nameFr?: InputMaybe<SortOrder>;
   parentId?: InputMaybe<SortOrder>;
   position?: InputMaybe<SortOrder>;
+  productVariantCount?: InputMaybe<SortOrder>;
   slug?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
 };
@@ -1850,11 +1845,11 @@ export type Mutation = {
    * _If `authOptions.requireVerification` is set to `true`:_
    *
    * 1. **The Customer is registered _with_ a password**. A verificationToken will be created (and typically emailed to the Customer). That
-   *    verificationToken would then be passed to the `verifyCustomerAccount` mutation _without_ a password. The Customer is then
-   *    verified and authenticated in one step.
+   * verificationToken would then be passed to the `verifyCustomerAccount` mutation _without_ a password. The Customer is then
+   * verified and authenticated in one step.
    * 2. **The Customer is registered _without_ a password**. A verificationToken will be created (and typically emailed to the Customer). That
-   *    verificationToken would then be passed to the `verifyCustomerAccount` mutation _with_ the chosen password of the Customer. The Customer is then
-   *    verified and authenticated in one step.
+   * verificationToken would then be passed to the `verifyCustomerAccount` mutation _with_ the chosen password of the Customer. The Customer is then
+   * verified and authenticated in one step.
    *
    * _If `authOptions.requireVerification` is set to `false`:_
    *
@@ -2527,10 +2522,10 @@ export type PaymentMethodTranslation = {
  * \@Query()
  * \@Allow(Permission.Owner)
  * async activeCustomer(\@Ctx() ctx: RequestContext): Promise<Customer | undefined> {
- *   const userId = ctx.activeUserId;
- *   if (userId) {
- *     return this.customerService.findOneByUserId(ctx, userId);
- *   }
+ * const userId = ctx.activeUserId;
+ * if (userId) {
+ * return this.customerService.findOneByUserId(ctx, userId);
+ * }
  * }
  * ```
  *
@@ -2742,7 +2737,7 @@ export type Product = Node & {
   assets: Array<Asset>;
   collections: Array<Collection>;
   createdAt: Scalars['DateTime']['output'];
-  customFields?: Maybe<ProductCustomFields>;
+  customFields?: Maybe<Scalars['JSON']['output']>;
   description: Scalars['String']['output'];
   enabled: Scalars['Boolean']['output'];
   facetValues: Array<FacetValue>;
@@ -2764,41 +2759,17 @@ export type ProductVariantListArgs = {
   options?: InputMaybe<ProductVariantListOptions>;
 };
 
-export type ProductCustomFields = {
-  __typename?: 'ProductCustomFields';
-  availableColors?: Maybe<Array<Scalars['String']['output']>>;
-  availableSizes?: Maybe<Array<Scalars['String']['output']>>;
-  descriptionAr?: Maybe<Scalars['String']['output']>;
-  descriptionFr?: Maybe<Scalars['String']['output']>;
-  isFeatured?: Maybe<Scalars['Boolean']['output']>;
-  nameAr?: Maybe<Scalars['String']['output']>;
-  nameFr?: Maybe<Scalars['String']['output']>;
-  salePrice?: Maybe<Scalars['Int']['output']>;
-  viewCount?: Maybe<Scalars['Int']['output']>;
-  weightKg?: Maybe<Scalars['Float']['output']>;
-};
-
 export type ProductFilterParameter = {
   _and?: InputMaybe<Array<ProductFilterParameter>>;
   _or?: InputMaybe<Array<ProductFilterParameter>>;
-  availableColors?: InputMaybe<StringListOperators>;
-  availableSizes?: InputMaybe<StringListOperators>;
   createdAt?: InputMaybe<DateOperators>;
   description?: InputMaybe<StringOperators>;
-  descriptionAr?: InputMaybe<StringOperators>;
-  descriptionFr?: InputMaybe<StringOperators>;
   enabled?: InputMaybe<BooleanOperators>;
   id?: InputMaybe<IdOperators>;
-  isFeatured?: InputMaybe<BooleanOperators>;
   languageCode?: InputMaybe<StringOperators>;
   name?: InputMaybe<StringOperators>;
-  nameAr?: InputMaybe<StringOperators>;
-  nameFr?: InputMaybe<StringOperators>;
-  salePrice?: InputMaybe<NumberOperators>;
   slug?: InputMaybe<StringOperators>;
   updatedAt?: InputMaybe<DateOperators>;
-  viewCount?: InputMaybe<NumberOperators>;
-  weightKg?: InputMaybe<NumberOperators>;
 };
 
 export type ProductList = PaginatedList & {
@@ -2868,18 +2839,10 @@ export type ProductOptionTranslation = {
 export type ProductSortParameter = {
   createdAt?: InputMaybe<SortOrder>;
   description?: InputMaybe<SortOrder>;
-  descriptionAr?: InputMaybe<SortOrder>;
-  descriptionFr?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
-  isFeatured?: InputMaybe<SortOrder>;
   name?: InputMaybe<SortOrder>;
-  nameAr?: InputMaybe<SortOrder>;
-  nameFr?: InputMaybe<SortOrder>;
-  salePrice?: InputMaybe<SortOrder>;
   slug?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
-  viewCount?: InputMaybe<SortOrder>;
-  weightKg?: InputMaybe<SortOrder>;
 };
 
 export type ProductTranslation = {
@@ -6641,6 +6604,25 @@ export type GetProductsByCollectionQuery = {
   };
 };
 
+export type GetBannerSlidesQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetBannerSlidesQuery = {
+  __typename?: 'Query';
+  collection?: {
+    __typename?: 'Collection';
+    id: string;
+    children?: Array<{
+      __typename?: 'Collection';
+      id: string;
+      name: string;
+      slug: string;
+      description: string;
+      featuredAsset?: { __typename?: 'Asset'; id: string; preview: string } | null;
+      customFields?: { __typename?: 'CollectionCustomFields'; displayOrder?: number | null } | null;
+    }> | null;
+  } | null;
+};
+
 export const CurrentUserFieldsFragmentDoc = gql`
   fragment CurrentUserFields on CurrentUser {
     id
@@ -8481,6 +8463,21 @@ export function useActiveCustomerLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useActiveCustomerSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    ActiveCustomerQuery,
+    ActiveCustomerQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<ActiveCustomerQuery, ActiveCustomerQueryVariables>;
+export function useActiveCustomerSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<ActiveCustomerQuery, ActiveCustomerQueryVariables>
+): ApolloReactHooks.UseSuspenseQueryResult<
+  ActiveCustomerQuery | undefined,
+  ActiveCustomerQueryVariables
+>;
 export function useActiveCustomerSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -8549,6 +8546,21 @@ export function useGetActiveOrderLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useGetActiveOrderSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetActiveOrderQuery,
+    GetActiveOrderQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<GetActiveOrderQuery, GetActiveOrderQueryVariables>;
+export function useGetActiveOrderSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<GetActiveOrderQuery, GetActiveOrderQueryVariables>
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetActiveOrderQuery | undefined,
+  GetActiveOrderQueryVariables
+>;
 export function useGetActiveOrderSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -8624,6 +8636,27 @@ export function useGetEligibleShippingMethodsLazyQuery(
     GetEligibleShippingMethodsQueryVariables
   >(GetEligibleShippingMethodsDocument, options);
 }
+// @ts-ignore
+export function useGetEligibleShippingMethodsSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetEligibleShippingMethodsQuery,
+    GetEligibleShippingMethodsQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetEligibleShippingMethodsQuery,
+  GetEligibleShippingMethodsQueryVariables
+>;
+export function useGetEligibleShippingMethodsSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<
+        GetEligibleShippingMethodsQuery,
+        GetEligibleShippingMethodsQueryVariables
+      >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetEligibleShippingMethodsQuery | undefined,
+  GetEligibleShippingMethodsQueryVariables
+>;
 export function useGetEligibleShippingMethodsSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -8706,6 +8739,27 @@ export function useGetEligiblePaymentMethodsLazyQuery(
     GetEligiblePaymentMethodsQueryVariables
   >(GetEligiblePaymentMethodsDocument, options);
 }
+// @ts-ignore
+export function useGetEligiblePaymentMethodsSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetEligiblePaymentMethodsQuery,
+    GetEligiblePaymentMethodsQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetEligiblePaymentMethodsQuery,
+  GetEligiblePaymentMethodsQueryVariables
+>;
+export function useGetEligiblePaymentMethodsSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<
+        GetEligiblePaymentMethodsQuery,
+        GetEligiblePaymentMethodsQueryVariables
+      >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetEligiblePaymentMethodsQuery | undefined,
+  GetEligiblePaymentMethodsQueryVariables
+>;
 export function useGetEligiblePaymentMethodsSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -8785,6 +8839,21 @@ export function useGetCollectionsLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useGetCollectionsSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetCollectionsQuery,
+    GetCollectionsQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<GetCollectionsQuery, GetCollectionsQueryVariables>;
+export function useGetCollectionsSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<GetCollectionsQuery, GetCollectionsQueryVariables>
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetCollectionsQuery | undefined,
+  GetCollectionsQueryVariables
+>;
 export function useGetCollectionsSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -8874,6 +8943,27 @@ export function useGetRootCollectionsLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useGetRootCollectionsSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetRootCollectionsQuery,
+    GetRootCollectionsQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetRootCollectionsQuery,
+  GetRootCollectionsQueryVariables
+>;
+export function useGetRootCollectionsSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<
+        GetRootCollectionsQuery,
+        GetRootCollectionsQueryVariables
+      >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetRootCollectionsQuery | undefined,
+  GetRootCollectionsQueryVariables
+>;
 export function useGetRootCollectionsSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -8952,6 +9042,27 @@ export function useGetCollectionBySlugLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useGetCollectionBySlugSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetCollectionBySlugQuery,
+    GetCollectionBySlugQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetCollectionBySlugQuery,
+  GetCollectionBySlugQueryVariables
+>;
+export function useGetCollectionBySlugSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<
+        GetCollectionBySlugQuery,
+        GetCollectionBySlugQueryVariables
+      >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetCollectionBySlugQuery | undefined,
+  GetCollectionBySlugQueryVariables
+>;
 export function useGetCollectionBySlugSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -9030,6 +9141,24 @@ export function useGetCollectionByIdLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useGetCollectionByIdSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetCollectionByIdQuery,
+    GetCollectionByIdQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<GetCollectionByIdQuery, GetCollectionByIdQueryVariables>;
+export function useGetCollectionByIdSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<
+        GetCollectionByIdQuery,
+        GetCollectionByIdQueryVariables
+      >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetCollectionByIdQuery | undefined,
+  GetCollectionByIdQueryVariables
+>;
 export function useGetCollectionByIdSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -9158,6 +9287,27 @@ export function useGetCollectionWithProductsLazyQuery(
     GetCollectionWithProductsQueryVariables
   >(GetCollectionWithProductsDocument, options);
 }
+// @ts-ignore
+export function useGetCollectionWithProductsSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetCollectionWithProductsQuery,
+    GetCollectionWithProductsQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetCollectionWithProductsQuery,
+  GetCollectionWithProductsQueryVariables
+>;
+export function useGetCollectionWithProductsSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<
+        GetCollectionWithProductsQuery,
+        GetCollectionWithProductsQueryVariables
+      >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetCollectionWithProductsQuery | undefined,
+  GetCollectionWithProductsQueryVariables
+>;
 export function useGetCollectionWithProductsSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -9269,6 +9419,24 @@ export function useGetCollectionTreeLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useGetCollectionTreeSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetCollectionTreeQuery,
+    GetCollectionTreeQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<GetCollectionTreeQuery, GetCollectionTreeQueryVariables>;
+export function useGetCollectionTreeSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<
+        GetCollectionTreeQuery,
+        GetCollectionTreeQueryVariables
+      >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetCollectionTreeQuery | undefined,
+  GetCollectionTreeQueryVariables
+>;
 export function useGetCollectionTreeSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -9364,6 +9532,18 @@ export function useGetMyOrdersLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useGetMyOrdersSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetMyOrdersQuery,
+    GetMyOrdersQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<GetMyOrdersQuery, GetMyOrdersQueryVariables>;
+export function useGetMyOrdersSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<GetMyOrdersQuery, GetMyOrdersQueryVariables>
+): ApolloReactHooks.UseSuspenseQueryResult<GetMyOrdersQuery | undefined, GetMyOrdersQueryVariables>;
 export function useGetMyOrdersSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -9435,6 +9615,21 @@ export function useGetOrderByCodeLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useGetOrderByCodeSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetOrderByCodeQuery,
+    GetOrderByCodeQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<GetOrderByCodeQuery, GetOrderByCodeQueryVariables>;
+export function useGetOrderByCodeSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<GetOrderByCodeQuery, GetOrderByCodeQueryVariables>
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetOrderByCodeQuery | undefined,
+  GetOrderByCodeQueryVariables
+>;
 export function useGetOrderByCodeSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -9502,6 +9697,15 @@ export function useGetOrderLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useGetOrderSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetOrderQuery, GetOrderQueryVariables>
+): ApolloReactHooks.UseSuspenseQueryResult<GetOrderQuery, GetOrderQueryVariables>;
+export function useGetOrderSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<GetOrderQuery, GetOrderQueryVariables>
+): ApolloReactHooks.UseSuspenseQueryResult<GetOrderQuery | undefined, GetOrderQueryVariables>;
 export function useGetOrderSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -9565,6 +9769,27 @@ export function useGetNextOrderStatesLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useGetNextOrderStatesSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetNextOrderStatesQuery,
+    GetNextOrderStatesQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetNextOrderStatesQuery,
+  GetNextOrderStatesQueryVariables
+>;
+export function useGetNextOrderStatesSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<
+        GetNextOrderStatesQuery,
+        GetNextOrderStatesQueryVariables
+      >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetNextOrderStatesQuery | undefined,
+  GetNextOrderStatesQueryVariables
+>;
 export function useGetNextOrderStatesSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -9639,6 +9864,18 @@ export function useGetProductsLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useGetProductsSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetProductsQuery,
+    GetProductsQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<GetProductsQuery, GetProductsQueryVariables>;
+export function useGetProductsSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<GetProductsQuery, GetProductsQueryVariables>
+): ApolloReactHooks.UseSuspenseQueryResult<GetProductsQuery | undefined, GetProductsQueryVariables>;
 export function useGetProductsSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -9704,6 +9941,15 @@ export function useGetProductLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useGetProductSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<GetProductQuery, GetProductQueryVariables>
+): ApolloReactHooks.UseSuspenseQueryResult<GetProductQuery, GetProductQueryVariables>;
+export function useGetProductSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<GetProductQuery, GetProductQueryVariables>
+): ApolloReactHooks.UseSuspenseQueryResult<GetProductQuery | undefined, GetProductQueryVariables>;
 export function useGetProductSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -9772,6 +10018,24 @@ export function useGetProductBySlugLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useGetProductBySlugSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetProductBySlugQuery,
+    GetProductBySlugQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<GetProductBySlugQuery, GetProductBySlugQueryVariables>;
+export function useGetProductBySlugSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<
+        GetProductBySlugQuery,
+        GetProductBySlugQueryVariables
+      >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetProductBySlugQuery | undefined,
+  GetProductBySlugQueryVariables
+>;
 export function useGetProductBySlugSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -9882,6 +10146,21 @@ export function useSearchProductsLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useSearchProductsSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    SearchProductsQuery,
+    SearchProductsQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<SearchProductsQuery, SearchProductsQueryVariables>;
+export function useSearchProductsSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<SearchProductsQuery, SearchProductsQueryVariables>
+): ApolloReactHooks.UseSuspenseQueryResult<
+  SearchProductsQuery | undefined,
+  SearchProductsQueryVariables
+>;
 export function useSearchProductsSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -9973,6 +10252,27 @@ export function useGetFeaturedProductsLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useGetFeaturedProductsSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetFeaturedProductsQuery,
+    GetFeaturedProductsQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetFeaturedProductsQuery,
+  GetFeaturedProductsQueryVariables
+>;
+export function useGetFeaturedProductsSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<
+        GetFeaturedProductsQuery,
+        GetFeaturedProductsQueryVariables
+      >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetFeaturedProductsQuery | undefined,
+  GetFeaturedProductsQueryVariables
+>;
 export function useGetFeaturedProductsSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -10050,6 +10350,21 @@ export function useGetNewArrivalsLazyQuery(
     options
   );
 }
+// @ts-ignore
+export function useGetNewArrivalsSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetNewArrivalsQuery,
+    GetNewArrivalsQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<GetNewArrivalsQuery, GetNewArrivalsQueryVariables>;
+export function useGetNewArrivalsSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<GetNewArrivalsQuery, GetNewArrivalsQueryVariables>
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetNewArrivalsQuery | undefined,
+  GetNewArrivalsQueryVariables
+>;
 export function useGetNewArrivalsSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -10145,6 +10460,27 @@ export function useGetProductsByCollectionLazyQuery(
     GetProductsByCollectionQueryVariables
   >(GetProductsByCollectionDocument, options);
 }
+// @ts-ignore
+export function useGetProductsByCollectionSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetProductsByCollectionQuery,
+    GetProductsByCollectionQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetProductsByCollectionQuery,
+  GetProductsByCollectionQueryVariables
+>;
+export function useGetProductsByCollectionSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<
+        GetProductsByCollectionQuery,
+        GetProductsByCollectionQueryVariables
+      >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetProductsByCollectionQuery | undefined,
+  GetProductsByCollectionQueryVariables
+>;
 export function useGetProductsByCollectionSuspenseQuery(
   baseOptions?:
     | ApolloReactHooks.SkipToken
@@ -10174,4 +10510,102 @@ export type GetProductsByCollectionSuspenseQueryHookResult = ReturnType<
 export type GetProductsByCollectionQueryResult = Apollo.QueryResult<
   GetProductsByCollectionQuery,
   GetProductsByCollectionQueryVariables
+>;
+export const GetBannerSlidesDocument = gql`
+  query GetBannerSlides {
+    collection(slug: "banners") {
+      id
+      children {
+        id
+        name
+        slug
+        description
+        featuredAsset {
+          id
+          preview
+        }
+        customFields {
+          displayOrder
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * __useGetBannerSlidesQuery__
+ *
+ * To run a query within a React component, call `useGetBannerSlidesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetBannerSlidesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetBannerSlidesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetBannerSlidesQuery(
+  baseOptions?: ApolloReactHooks.QueryHookOptions<
+    GetBannerSlidesQuery,
+    GetBannerSlidesQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useQuery<GetBannerSlidesQuery, GetBannerSlidesQueryVariables>(
+    GetBannerSlidesDocument,
+    options
+  );
+}
+export function useGetBannerSlidesLazyQuery(
+  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
+    GetBannerSlidesQuery,
+    GetBannerSlidesQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useLazyQuery<GetBannerSlidesQuery, GetBannerSlidesQueryVariables>(
+    GetBannerSlidesDocument,
+    options
+  );
+}
+// @ts-ignore
+export function useGetBannerSlidesSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    GetBannerSlidesQuery,
+    GetBannerSlidesQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<GetBannerSlidesQuery, GetBannerSlidesQueryVariables>;
+export function useGetBannerSlidesSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<GetBannerSlidesQuery, GetBannerSlidesQueryVariables>
+): ApolloReactHooks.UseSuspenseQueryResult<
+  GetBannerSlidesQuery | undefined,
+  GetBannerSlidesQueryVariables
+>;
+export function useGetBannerSlidesSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<GetBannerSlidesQuery, GetBannerSlidesQueryVariables>
+) {
+  const options =
+    baseOptions === ApolloReactHooks.skipToken
+      ? baseOptions
+      : { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useSuspenseQuery<GetBannerSlidesQuery, GetBannerSlidesQueryVariables>(
+    GetBannerSlidesDocument,
+    options
+  );
+}
+export type GetBannerSlidesQueryHookResult = ReturnType<typeof useGetBannerSlidesQuery>;
+export type GetBannerSlidesLazyQueryHookResult = ReturnType<typeof useGetBannerSlidesLazyQuery>;
+export type GetBannerSlidesSuspenseQueryHookResult = ReturnType<
+  typeof useGetBannerSlidesSuspenseQuery
+>;
+export type GetBannerSlidesQueryResult = Apollo.QueryResult<
+  GetBannerSlidesQuery,
+  GetBannerSlidesQueryVariables
 >;

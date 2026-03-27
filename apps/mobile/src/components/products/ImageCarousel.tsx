@@ -13,120 +13,10 @@ import {
   Text,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
-  runOnJS,
-} from 'react-native-reanimated';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { colors, spacing } from '../../theme';
+import { ZoomableImage } from './ZoomableImage';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-// Zoomable Image Component with Pinch-to-Zoom
-interface ZoomableImageProps {
-  uri: string;
-  onZoomChange?: (isZoomed: boolean) => void;
-}
-
-const ZoomableImage: React.FC<ZoomableImageProps> = ({ uri, onZoomChange }) => {
-  const scale = useSharedValue(1);
-  const savedScale = useSharedValue(1);
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
-  const savedTranslateX = useSharedValue(0);
-  const savedTranslateY = useSharedValue(0);
-
-  const pinchGesture = Gesture.Pinch()
-    .onUpdate((event) => {
-      scale.value = savedScale.value * event.scale;
-    })
-    .onEnd(() => {
-      if (scale.value < 1) {
-        scale.value = withSpring(1);
-        savedScale.value = 1;
-        translateX.value = withSpring(0);
-        translateY.value = withSpring(0);
-        savedTranslateX.value = 0;
-        savedTranslateY.value = 0;
-        if (onZoomChange) {
-          runOnJS(onZoomChange)(false);
-        }
-      } else if (scale.value > 4) {
-        scale.value = withSpring(4);
-        savedScale.value = 4;
-        if (onZoomChange) {
-          runOnJS(onZoomChange)(true);
-        }
-      } else {
-        savedScale.value = scale.value;
-        if (onZoomChange) {
-          runOnJS(onZoomChange)(scale.value > 1);
-        }
-      }
-    });
-
-  const panGesture = Gesture.Pan()
-    .onUpdate((event) => {
-      if (savedScale.value > 1) {
-        translateX.value = savedTranslateX.value + event.translationX;
-        translateY.value = savedTranslateY.value + event.translationY;
-      }
-    })
-    .onEnd(() => {
-      savedTranslateX.value = translateX.value;
-      savedTranslateY.value = translateY.value;
-    });
-
-  const doubleTapGesture = Gesture.Tap()
-    .numberOfTaps(2)
-    .onEnd(() => {
-      if (savedScale.value > 1) {
-        scale.value = withSpring(1);
-        savedScale.value = 1;
-        translateX.value = withSpring(0);
-        translateY.value = withSpring(0);
-        savedTranslateX.value = 0;
-        savedTranslateY.value = 0;
-        if (onZoomChange) {
-          runOnJS(onZoomChange)(false);
-        }
-      } else {
-        scale.value = withSpring(2);
-        savedScale.value = 2;
-        if (onZoomChange) {
-          runOnJS(onZoomChange)(true);
-        }
-      }
-    });
-
-  const composedGestures = Gesture.Simultaneous(
-    pinchGesture,
-    Gesture.Race(panGesture, doubleTapGesture)
-  );
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-      { scale: scale.value },
-    ],
-  }));
-
-  return (
-    <GestureDetector gesture={composedGestures}>
-      <View style={styles.zoomableContainer}>
-        <Animated.Image
-          source={{ uri }}
-          style={[styles.zoomableImage, animatedStyle]}
-          resizeMode="contain"
-        />
-      </View>
-    </GestureDetector>
-  );
-};
 
 interface ImageCarouselProps {
   images: string[];
@@ -288,7 +178,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
         animationType="fade"
         onRequestClose={() => setModalVisible(false)}
       >
-        <StatusBar backgroundColor="#000" barStyle="light-content" />
+        <StatusBar backgroundColor={colors.black} barStyle="light-content" />
         <View style={styles.modalContainer}>
           {/* Close Button */}
           <TouchableOpacity
@@ -414,7 +304,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: colors.black,
   },
   closeButton: {
     position: 'absolute',
@@ -424,7 +314,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: colors.overlayWhite,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -435,7 +325,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: colors.overlayWhite,
     borderRadius: 12,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
@@ -453,7 +343,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: colors.overlay,
     borderRadius: 16,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -463,26 +353,11 @@ const styles = StyleSheet.create({
     color: colors.text.inverse,
     fontSize: 12,
   },
-  zoomableContainer: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  zoomableImage: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT * 0.8,
-  },
   modalImageContainer: {
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  modalImage: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT * 0.8,
   },
   modalIndicatorContainer: {
     position: 'absolute',

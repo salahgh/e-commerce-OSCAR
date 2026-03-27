@@ -133,13 +133,13 @@ export const TabCartBadge: React.FC<TabCartBadgeProps> = ({
         size={24}
         color={color}
       />
-      {itemCount > 0 && (
+      {itemCount > 0 ? (
         <View style={styles.tabBadge}>
           <Text style={styles.tabBadgeText}>
             {itemCount > 99 ? '99+' : itemCount}
           </Text>
         </View>
-      )}
+      ) : null}
     </View>
   );
 };

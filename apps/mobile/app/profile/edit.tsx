@@ -15,8 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Input, Button, LoadingSpinner, ErrorState } from '../../src/components/ui';
 import {
-  useGetCurrentUserQuery,
-  useUpdateProfileMutation,
+  useActiveCustomerQuery,
+  useUpdateCustomerProfileMutation,
 } from '../../src/graphql/generated/graphql';
 import { updateProfileSchema } from '../../src/utils/validation';
 import { colors, spacing, typography } from '../../src/theme';
@@ -33,13 +33,13 @@ export default function EditProfileScreen() {
   const router = useRouter();
   const [submitError, setSubmitError] = useState<string>('');
 
-  const { data, loading, error, refetch } = useGetCurrentUserQuery({
+  const { data, loading, error, refetch } = useActiveCustomerQuery({
     fetchPolicy: 'cache-and-network',
   });
 
-  const [updateProfile, { loading: updating }] = useUpdateProfileMutation();
+  const [updateProfile, { loading: updating }] = useUpdateCustomerProfileMutation();
 
-  const user = data?.me;
+  const customer = data?.activeCustomer;
 
   const handleSubmit = async (values: EditProfileFormValues) => {
     try {
@@ -50,11 +50,10 @@ export default function EditProfileScreen() {
           input: {
             firstName: values.firstName.trim(),
             lastName: values.lastName.trim(),
-            email: values.email.trim().toLowerCase(),
-            phone: values.phone.trim() || undefined,
+            phoneNumber: values.phone.trim() || undefined,
           },
         },
-        refetchQueries: ['GetCurrentUser'],
+        refetchQueries: ['ActiveCustomer'],
       });
 
       Alert.alert(
@@ -80,7 +79,7 @@ export default function EditProfileScreen() {
     );
   }
 
-  if (error || !user) {
+  if (error || !customer) {
     return (
       <View style={styles.container}>
         <ErrorState
@@ -93,10 +92,10 @@ export default function EditProfileScreen() {
   }
 
   const initialValues: EditProfileFormValues = {
-    firstName: user.firstName || '',
-    lastName: user.lastName || '',
-    email: user.email,
-    phone: user.phone || '',
+    firstName: customer.firstName || '',
+    lastName: customer.lastName || '',
+    email: customer.emailAddress,
+    phone: customer.phoneNumber || '',
   };
 
   return (

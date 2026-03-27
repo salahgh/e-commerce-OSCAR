@@ -1,14 +1,20 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '../../theme';
 import { Button } from './Button';
 
+type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
+
 interface EmptyStateProps {
-  icon?: React.ReactNode;
+  icon?: IoniconsName | React.ReactNode;
   title: string;
   description?: string;
+  message?: string;
   actionLabel?: string;
+  actionText?: string;
   onActionPress?: () => void;
+  onAction?: () => void;
   style?: ViewStyle;
 }
 
@@ -16,26 +22,41 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   icon,
   title,
   description,
+  message,
   actionLabel,
+  actionText,
   onActionPress,
+  onAction,
   style,
 }) => {
+  const displayMessage = description || message;
+  const displayActionLabel = actionLabel || actionText;
+  const displayOnAction = onActionPress || onAction;
+
+  const renderIcon = () => {
+    if (!icon) return null;
+    if (typeof icon === 'string') {
+      return <Ionicons name={icon as IoniconsName} size={64} color={colors.text.tertiary} />;
+    }
+    return icon;
+  };
+
   return (
     <View style={[styles.container, style]}>
-      {icon && <View style={styles.iconContainer}>{icon}</View>}
+      {icon ? <View style={styles.iconContainer}>{renderIcon()}</View> : null}
 
       <Text style={styles.title}>{title}</Text>
 
-      {description && <Text style={styles.description}>{description}</Text>}
+      {displayMessage ? <Text style={styles.description}>{displayMessage}</Text> : null}
 
-      {actionLabel && onActionPress && (
+      {displayActionLabel && displayOnAction ? (
         <Button
-          title={actionLabel}
-          onPress={onActionPress}
+          title={displayActionLabel}
+          onPress={displayOnAction}
           variant="primary"
           style={styles.action}
         />
-      )}
+      ) : null}
     </View>
   );
 };

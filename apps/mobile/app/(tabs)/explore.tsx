@@ -203,12 +203,12 @@ export default function ExploreScreen() {
       </View>
 
       {/* Results count */}
-      {!loading && (
+      {!loading ? (
         <View style={styles.resultsInfo}>
           <Text style={styles.resultsCount}>
             {totalItems} {t('products.productsFound', 'products found')}
           </Text>
-          {(searchQuery || selectedCollection || activeFiltersCount > 0) && (
+          {searchQuery || selectedCollection || activeFiltersCount > 0 ? (
             <TouchableOpacity
               onPress={() => {
                 setSearchQuery('');
@@ -219,9 +219,9 @@ export default function ExploreScreen() {
             >
               <Text style={styles.clearAll}>{t('common.clearAll', 'Clear All')}</Text>
             </TouchableOpacity>
-          )}
+          ) : null}
         </View>
-      )}
+      ) : null}
     </View>
   );
 
@@ -273,11 +273,11 @@ export default function ExploreScreen() {
             autoCapitalize="none"
             autoCorrect={false}
           />
-          {searchInput.length > 0 && (
+          {searchInput.length > 0 ? (
             <TouchableOpacity onPress={handleClearSearch}>
               <Ionicons name="close-circle" size={20} color={colors.text.tertiary} />
             </TouchableOpacity>
-          )}
+          ) : null}
         </View>
 
         {/* Filter Button */}
@@ -291,11 +291,11 @@ export default function ExploreScreen() {
             size={20}
             color={activeFiltersCount > 0 ? colors.surface : colors.text.primary}
           />
-          {activeFiltersCount > 0 && (
+          {activeFiltersCount > 0 ? (
             <View style={styles.filterBadge}>
               <Text style={styles.filterBadgeText}>{activeFiltersCount}</Text>
             </View>
-          )}
+          ) : null}
         </TouchableOpacity>
       </View>
 

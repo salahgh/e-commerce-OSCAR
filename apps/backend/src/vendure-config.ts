@@ -49,6 +49,7 @@ const getCorsOrigins = (): string[] | boolean => {
 export const config: VendureConfig = {
   apiOptions: {
     port: Number(process.env.PORT) || 8085,
+    hostname: '0.0.0.0',
     adminApiPath: 'admin-api',
     shopApiPath: 'shop-api',
     // CORS settings to allow frontend apps
@@ -107,6 +108,8 @@ export const config: VendureConfig = {
     // To migrate existing data, run a migration script before deployment
     ProductVariant: [
       { name: 'minStockAlert', type: 'int', label: [{ languageCode: LanguageCode.en, value: 'Min Stock Alert' }] },
+      { name: 'originalPrice', type: 'int', nullable: true, label: [{ languageCode: LanguageCode.en, value: 'Original Price (cents)' }] },
+      { name: 'discountPercent', type: 'int', nullable: true, min: 0, max: 100, label: [{ languageCode: LanguageCode.en, value: 'Discount Percent' }] },
     ],
     // Collection translation custom fields removed - using native Vendure translations instead
     Collection: [

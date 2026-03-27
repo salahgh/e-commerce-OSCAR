@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ProfileHeader, SettingsItem } from '../../src/components/profile';
 import { LoadingSpinner, ErrorState } from '../../src/components/ui';
 import { useAuth } from '../../src/contexts/AuthContext';
-import { useGetCurrentUserQuery } from '../../src/graphql/generated/graphql';
+import { useActiveCustomerQuery } from '../../src/graphql/generated/graphql';
 import { colors, spacing, typography } from '../../src/theme';
 
 export default function ProfileScreen() {
@@ -13,11 +13,11 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { logout } = useAuth();
 
-  const { data, loading, error, refetch } = useGetCurrentUserQuery({
+  const { data, loading, error, refetch } = useActiveCustomerQuery({
     fetchPolicy: 'cache-and-network',
   });
 
-  const user = data?.me;
+  const customer = data?.activeCustomer;
 
   const handleLogout = () => {
     Alert.alert(
@@ -61,7 +61,7 @@ export default function ProfileScreen() {
     );
   }
 
-  if (error || !user) {
+  if (error || !customer) {
     return (
       <View style={styles.container}>
         <ErrorState
@@ -84,10 +84,10 @@ export default function ProfileScreen() {
       <View style={styles.content}>
         {/* Profile Header */}
         <ProfileHeader
-          firstName={user.firstName}
-          lastName={user.lastName}
-          email={user.email}
-          phone={user.phone}
+          firstName={customer.firstName}
+          lastName={customer.lastName}
+          email={customer.emailAddress}
+          phone={customer.phoneNumber || undefined}
           onEditPress={() => router.push('/profile/edit')}
         />
 

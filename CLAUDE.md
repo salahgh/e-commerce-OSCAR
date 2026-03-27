@@ -4,16 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-OSCAR Fashion is an e-commerce platform for the Algerian fashion market. It's a **pnpm + Turborepo monorepo** with 4 apps and 2 shared packages:
+OSCAR Fashion is an e-commerce platform for the Algerian fashion market. It's a **pnpm + Turborepo monorepo** with 3 apps and 2 shared packages:
 
 | Package | Path | Stack | Dev Port |
 |---------|------|-------|----------|
 | Backend | `apps/backend` | Vendure 3.5 (NestJS), TypeORM, PostgreSQL | 8085 |
 | Frontend | `apps/frontend` | Next.js 16, React 19, Apollo Client, Tailwind | 3000 |
 | Back-Office | `apps/backoffice` | React 19, Vite 7, Apollo Client, Redux Toolkit | 5173 |
-| Mobile | `apps/mobile` | Expo 54, React Native 0.81, Apollo Client 4 | 8081 |
 | Shared | `packages/shared` | Pure TS: colors, constants, formatters, facet-utils | — |
 | GraphQL Shop | `packages/graphql-shop` | Shared shop-api codegen: types + Apollo hooks | — |
+
+> **Mobile app** (`apps/mobile`) is a standalone Expo project, not part of the monorepo workspace. Run it independently with `cd apps/mobile && npx expo start`.
 
 ## Common Commands
 
@@ -24,7 +25,6 @@ pnpm dev                   # Dev all apps
 pnpm dev:backend           # Dev backend only
 pnpm dev:frontend          # Dev frontend only
 pnpm dev:backoffice        # Dev backoffice only
-pnpm dev:mobile            # Dev mobile only
 pnpm build                 # Build all apps
 pnpm codegen               # Run GraphQL codegen across all apps
 pnpm type-check            # TypeScript check all apps
@@ -37,7 +37,6 @@ pnpm --filter @oscar/backend populate    # Seed database
 pnpm --filter @oscar/frontend dev        # Next.js dev → :3000
 pnpm --filter @oscar/frontend storybook  # Component stories → :6006
 pnpm --filter @oscar/backoffice dev      # Vite dev → :5173
-pnpm --filter @oscar/mobile start        # Expo dev server
 ```
 
 ### GraphQL Codegen
@@ -57,7 +56,7 @@ pnpm --filter @oscar/backend reindex
 ## Architecture
 
 ### Monorepo Structure
-- **pnpm workspaces** with `node-linker=hoisted` (required for Expo/Metro compatibility)
+- **pnpm workspaces** with `node-linker=hoisted`
 - **Turborepo** orchestrates `build`, `dev`, `codegen`, `type-check`, `lint` tasks
 - Shared packages use raw TypeScript (`"main": "src/index.ts"`) — no build step, each app's bundler transpiles
 
@@ -76,7 +75,7 @@ pnpm --filter @oscar/backend reindex
 - `src/operations/` — All shared `.graphql` files (auth, cart, products, orders)
 - `src/generated/graphql.ts` — Auto-generated TypeScript types + Apollo hooks
 - `src/scalars.ts` — Vendure scalar type mappings
-- Used by frontend and mobile; backoffice has its own admin-api codegen
+- Used by frontend; backoffice has its own admin-api codegen
 
 ### GraphQL-First
 All apps communicate via Vendure's GraphQL API. No REST endpoints.
@@ -98,25 +97,15 @@ All apps communicate via Vendure's GraphQL API. No REST endpoints.
 - Translation files: `src/messages/{ar,fr,en}.json`
 - Use navigation helpers from `@/i18n/routing` (`Link`, `redirect`, `useRouter`, `usePathname`) instead of next/link or next/navigation
 
-### Mobile Routing
-- **Expo Router** with file-based routing (Next.js-style)
-- Route groups: `(tabs)` for bottom tab navigation, `(auth)` for auth screens
-- Dynamic routes: `products/[id]`, `orders/[id]`
-- Protected routes redirect to `/(auth)/login` when unauthenticated
-- 5-tab bottom navigation: Home, Explore, Orders, Cart (with badge), Profile
-- **i18next** + react-i18next for i18n (same locales: fr default, ar, en)
-- RTL auto-applied when Arabic is selected
-
 ### State Management Patterns
 - **Apollo Client cache** for all GraphQL data (all apps)
-- **AuthContext** + **CartContext** for auth and cart state (frontend and mobile)
+- **AuthContext** + **CartContext** for auth and cart state (frontend)
 - Redux Toolkit used in back-office for more complex admin state; minimal in frontend
-- Prefer contexts and Apollo cache over Redux in frontend/mobile
+- Prefer contexts and Apollo cache over Redux in frontend
 
 ### Styling & Design System
 - **Tailwind CSS** with CSS variable-based theming (frontend + back-office, supports dark mode via `next-themes`)
 - **shadcn/ui** components in frontend `src/components/ui/`
-- Mobile uses a custom theme system: `src/theme/` with colors, spacing, typography exports
 - Path aliases: `@/*` maps to `src/*` in all apps
 
 ### Backend Plugin System
@@ -129,7 +118,6 @@ Custom business logic lives in `apps/backend/src/plugins/oscar-plugin/`:
 ### Authentication
 - Vendure native auth strategy (email/password)
 - Frontend: JWT in localStorage, Apollo auth link attaches Bearer token + Accept-Language header
-- Mobile: token in `expo-secure-store`, attached via `vendure-token` header; auto-captures token from response headers
 - Vendure returns union types for auth operations (e.g., `CurrentUser | InvalidCredentialsError`) — always handle error variants
 - Back-office uses role-based access control (RBAC) with `<ProtectedRoute>` components
 

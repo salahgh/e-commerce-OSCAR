@@ -937,6 +937,8 @@ input CreateProductOptionInput {
 
 input CreateProductVariantCustomFieldsInput {
   minStockAlert: Int
+  originalPrice: Int
+  discountPercent: Int
 }
 
 input CreateProductVariantInput {
@@ -4812,6 +4814,8 @@ type ProductVariant implements Node {
 
 type ProductVariantCustomFields {
   minStockAlert: Int
+  originalPrice: Int
+  discountPercent: Int
 }
 
 input ProductVariantFilterParameter {
@@ -6419,6 +6423,8 @@ input UpdateProductOptionInput {
 
 input UpdateProductVariantCustomFieldsInput {
   minStockAlert: Int
+  originalPrice: Int
+  discountPercent: Int
 }
 
 input UpdateProductVariantInput {
