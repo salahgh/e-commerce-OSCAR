@@ -20,7 +20,8 @@
       "Bash(cmd //c 'dir /s /b /a D:\\\\e-commerce-OSCAR\\\\apps\\\\backend\\\\static' 2>&1)",
       "mcp__figma__get_design_context",
       "Bash(xargs grep:*)",
-      "Bash(find /d/e-commerce-OSCAR/apps/backend/src -type f -name \"*.ts\" -exec grep -l \"Promotion\\\\|Adjustment\\\\|Discount\\\\|Price\" {})"
+      "Bash(find /d/e-commerce-OSCAR/apps/backend/src -type f -name \"*.ts\" -exec grep -l \"Promotion\\\\|Adjustment\\\\|Discount\\\\|Price\" {})",
+      "Bash(pnpm build:*)"
     ]
   }
 }

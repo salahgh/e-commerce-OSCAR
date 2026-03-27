@@ -1185,7 +1185,7 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
                           />
                         ) : (
                           variant.customFields?.discountPercent
-                            ? <Badge variant="destructive">-{variant.customFields.discountPercent}%</Badge>
+                            ? <Badge variant="danger">-{variant.customFields.discountPercent}%</Badge>
                             : <span className="text-muted-foreground">—</span>
                         )}
                       </td>
