@@ -1,9 +1,11 @@
 export { ProductCard } from './ProductCard';
+export type { SimpleProduct } from './ProductCard';
 export { ProductGrid } from './ProductGrid';
 export { ProductListItem } from './ProductListItem';
 export { SearchBar } from './SearchBar';
 export { FilterBar } from './FilterBar';
 export { ImageCarousel } from './ImageCarousel';
+export { ZoomableImage } from './ZoomableImage';
 export { VariantPicker, MultiVariantPicker } from './VariantPicker';
 export type { SortOption } from './FilterBar';
 export type { Variant, VariantGroup } from './VariantPicker';

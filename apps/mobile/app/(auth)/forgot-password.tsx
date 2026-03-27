@@ -18,7 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Input, Button, ErrorBanner } from '../../src/components/ui';
 import { colors, spacing, typography } from '../../src/theme';
 import { forgotPasswordSchema } from '../../src/utils/validation';
-import { useForgotPasswordMutation } from '../../src/graphql/generated/graphql';
+import { useRequestPasswordResetMutation } from '../../src/graphql/generated/graphql';
 
 interface ForgotPasswordFormValues {
   email: string;
@@ -33,7 +33,7 @@ export default function ForgotPasswordScreen() {
   const successScale = useRef(new Animated.Value(0)).current;
   const successOpacity = useRef(new Animated.Value(0)).current;
 
-  const [forgotPassword] = useForgotPasswordMutation();
+  const [requestPasswordReset] = useRequestPasswordResetMutation();
 
   useEffect(() => {
     if (success) {
@@ -57,9 +57,9 @@ export default function ForgotPasswordScreen() {
     try {
       setError(null);
       setSubmittedEmail(values.email);
-      await forgotPassword({
+      await requestPasswordReset({
         variables: {
-          email: values.email,
+          emailAddress: values.email,
         },
       });
       setSuccess(true);

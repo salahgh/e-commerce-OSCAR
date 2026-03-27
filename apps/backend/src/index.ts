@@ -7,6 +7,15 @@ Logger.info('Starting OSCAR Vendure Server...', 'Bootstrap');
 runMigrations(config)
   .then(() => bootstrap(config))
   .then(async (app) => {
+    // Normalize backslashes in asset URLs (Windows path fix)
+    const expressApp = app.getHttpAdapter().getInstance();
+    expressApp.use('/assets', (req: any, _res: any, next: any) => {
+      if (req.url.includes('\\')) {
+        req.url = req.url.replace(/\\/g, '/');
+      }
+      next();
+    });
+
     console.log('\n🚀 OSCAR Vendure Server is running');
     console.log('📊 Admin API: http://localhost:8085/admin-api');
     console.log('🛒 Shop API: http://localhost:8085/shop-api');

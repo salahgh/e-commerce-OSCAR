@@ -1,12 +1,14 @@
 import React from 'react';
-import { View, FlatList, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
-import { ProductResponse } from '../../graphql/generated/graphql';
-import { ProductCard } from './ProductCard';
+import { View, FlatList, StyleSheet, ActivityIndicator, RefreshControl, Dimensions } from 'react-native';
+import { SimpleProduct } from './ProductCard';
+import { ProductCardFigma, FigmaProduct } from '../home/ProductCardFigma';
 import { EmptyState, LoadingSpinner } from '../ui';
 import { colors, spacing } from '../../theme';
 
+const SCREEN_WIDTH = Dimensions.get('window').width;
+
 interface ProductGridProps {
-  products: ProductResponse[];
+  products: SimpleProduct[];
   loading?: boolean;
   refreshing?: boolean;
   onRefresh?: () => void;
@@ -15,7 +17,23 @@ interface ProductGridProps {
   loadingMore?: boolean;
   numColumns?: number;
   emptyMessage?: string;
-  onProductPress?: (product: ProductResponse) => void;
+  onProductPress?: (product: SimpleProduct) => void;
+}
+
+// Convert SimpleProduct to FigmaProduct
+function toFigmaProduct(p: SimpleProduct): FigmaProduct {
+  return {
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+    imageUrl: p.imageUrl,
+    price: p.price,
+    originalPrice: p.originalPrice,
+    discountPercent: p.discountPercent,
+    inStock: p.inStock,
+    rating: 0,
+    reviewCount: 0,
+  };
 }
 
 export const ProductGrid: React.FC<ProductGridProps> = ({
@@ -30,12 +48,17 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   emptyMessage = 'No products found',
   onProductPress,
 }) => {
-  const renderProduct = ({ item }: { item: ProductResponse }) => {
+  const cardWidth = (SCREEN_WIDTH - spacing.md * 2 - spacing.xs * (numColumns - 1)) / numColumns;
+
+  const renderProduct = ({ item }: { item: SimpleProduct }) => {
+    const figmaProduct = toFigmaProduct(item);
     return (
-      <View style={[styles.productWrapper, { width: `${100 / numColumns}%` }]}>
-        <View style={styles.productInner}>
-          <ProductCard product={item} onPress={onProductPress} />
-        </View>
+      <View style={styles.productWrapper}>
+        <ProductCardFigma
+          product={figmaProduct}
+          width={cardWidth}
+          onPress={onProductPress ? () => onProductPress(item) : undefined}
+        />
       </View>
     );
   };
@@ -76,9 +99,10 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
     <FlatList
       data={products}
       renderItem={renderProduct}
-      keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
+      keyExtractor={(item, index) => item.id?.toString() || `product-${index}`}
       numColumns={numColumns}
       contentContainerStyle={styles.container}
+      columnWrapperStyle={numColumns > 1 ? styles.row : undefined}
       showsVerticalScrollIndicator={false}
       refreshControl={
         onRefresh ? (
@@ -101,11 +125,11 @@ const styles = StyleSheet.create({
   container: {
     padding: spacing.md,
   },
-  productWrapper: {
-    padding: spacing.xs,
+  row: {
+    gap: spacing.xs,
   },
-  productInner: {
-    flex: 1,
+  productWrapper: {
+    marginBottom: spacing.xs,
   },
   footer: {
     paddingVertical: spacing.lg,

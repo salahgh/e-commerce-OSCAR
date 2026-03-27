@@ -6,15 +6,26 @@ import { ApolloProvider } from '@apollo/client/react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import 'react-native-reanimated';
-import '../src/i18n';
+import { loadSavedLanguage } from '@/src/i18n';
+import {
+  Gabarito_400Regular,
+  Gabarito_500Medium,
+  Gabarito_600SemiBold,
+  Gabarito_700Bold,
+} from '@expo-google-fonts/gabarito';
+import {
+  IBMPlexSansArabic_400Regular,
+  IBMPlexSansArabic_500Medium,
+  IBMPlexSansArabic_600SemiBold,
+  IBMPlexSansArabic_700Bold,
+} from '@expo-google-fonts/ibm-plex-sans-arabic';
+import { useFonts } from 'expo-font';
 
-import { useColorScheme } from '../hooks/use-color-scheme';
-import { apolloClient } from '../src/apollo/client';
-import { AuthProvider, useAuth } from '../src/contexts/AuthContext';
-import { CartProvider } from '../src/contexts/CartContext';
-import { ToastProvider } from '../src/components/ui/Toast';
-import { loadSavedLanguage } from '../src/i18n';
-import { LoadingSpinner } from '../src/components/ui';
+import { useColorScheme } from 'react-native';
+import { apolloClient } from '@/src/apollo/client';
+import { AuthProvider, useAuth } from '@/src/contexts/AuthContext';
+import { CartProvider } from '@/src/contexts/CartContext';
+import { ToastProvider , LoadingSpinner } from '@/src/components/ui';
 
 export const unstable_settings = {
   initialRouteName: 'splash',
@@ -55,15 +66,15 @@ function RootNavigator() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="splash" options={{ headerShown: false, animation: 'none' }} />
-      <Stack.Screen name="onboarding" options={{ headerShown: false, animation: 'fade' }} />
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="products" options={{ headerShown: false }} />
-      <Stack.Screen name="checkout" options={{ headerShown: false }} />
-      <Stack.Screen name="orders" options={{ headerShown: false }} />
-      <Stack.Screen name="profile" options={{ headerShown: false }} />
-      <Stack.Screen name="payment" options={{ headerShown: false }} />
-      <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+      {/*<Stack.Screen name="onboarding" options={{ headerShown: false, animation: 'fade' }} />*/}
+      {/*<Stack.Screen name="(auth)" options={{ headerShown: false }} />*/}
+      {/*<Stack.Screen name="(tabs)" options={{ headerShown: false }} />*/}
+      {/*<Stack.Screen name="search" options={{ headerShown: false }} />*/}
+      {/*<Stack.Screen name="products" options={{ headerShown: false }} />*/}
+      {/*<Stack.Screen name="checkout" options={{ headerShown: false }} />*/}
+      {/*<Stack.Screen name="orders" options={{ headerShown: false }} />*/}
+      {/*<Stack.Screen name="profile" options={{ headerShown: false }} />*/}
+      {/*<Stack.Screen name="payment" options={{ headerShown: false }} />*/}
     </Stack>
   );
 }
@@ -72,13 +83,24 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [languageLoaded, setLanguageLoaded] = useState(false);
 
+  const [fontsLoaded] = useFonts({
+    Gabarito_400Regular,
+    Gabarito_500Medium,
+    Gabarito_600SemiBold,
+    Gabarito_700Bold,
+    IBMPlexSansArabic_400Regular,
+    IBMPlexSansArabic_500Medium,
+    IBMPlexSansArabic_600SemiBold,
+    IBMPlexSansArabic_700Bold,
+  });
+
   useEffect(() => {
     loadSavedLanguage().then(() => {
       setLanguageLoaded(true);
     });
   }, []);
 
-  if (!languageLoaded) {
+  if (!languageLoaded || !fontsLoaded) {
     return <LoadingSpinner />;
   }
 

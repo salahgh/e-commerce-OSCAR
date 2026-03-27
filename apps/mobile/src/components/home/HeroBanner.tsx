@@ -12,7 +12,7 @@ import {
   NativeScrollEvent,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useRouter, Href } from 'expo-router';
 import { colors, spacing, typography } from '../../theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -71,7 +71,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 
   const handlePress = (slide: BannerSlide) => {
     if (slide.link) {
-      router.push(slide.link as any);
+      router.push(slide.link as Href);
     }
   };
 
@@ -87,7 +87,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         resizeMode="cover"
       >
         <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.7)']}
+          colors={['transparent', colors.overlayDark]}
           style={styles.gradient}
         >
           <View style={styles.slideContent}>
@@ -192,13 +192,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.surface,
     marginBottom: spacing.xs,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowColor: colors.overlay,
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
   slideSubtitle: {
     fontSize: typography.fontSize.md,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: colors.overlayWhiteMedium,
     marginBottom: spacing.md,
   },
   slideButton: {

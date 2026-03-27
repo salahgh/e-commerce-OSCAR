@@ -1,0 +1,9 @@
+schema: schema.graphql
+extensions:
+  endpoints:
+    Vendure Shop API:
+      url: http://localhost:8085/shop-api
+#      url: http://192.168.100.52:8085/shop-api
+      headers:
+        user-agent: JS GraphQL
+      introspect: true

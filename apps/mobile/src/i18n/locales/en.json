@@ -41,9 +41,16 @@
   },
   "home": {
     "title": "Home",
-    "featuredProducts": "Featured Products",
-    "newArrivals": "New Arrivals",
+    "searchPlaceholder": "Search in OSCAR",
     "categories": "Categories",
+    "all": "All",
+    "women": "Women",
+    "men": "Men",
+    "kids": "Kids",
+    "newArrivals": "New Arrivals",
+    "bestSellers": "Best Sellers",
+    "pickedForYou": "Picked for You",
+    "featuredProducts": "Featured Products",
     "popularProducts": "Popular Products"
   },
   "products": {

@@ -1,13 +1,13 @@
 {
   "name": "oscar-fashion",
   "private": true,
+  "packageManager": "pnpm@10.29.3",
   "description": "OSCAR Fashion E-Commerce Platform",
   "scripts": {
     "dev": "turbo run dev",
     "dev:backend": "turbo run dev --filter=@oscar/backend",
     "dev:frontend": "turbo run dev --filter=@oscar/frontend",
     "dev:backoffice": "turbo run dev --filter=@oscar/backoffice",
-    "dev:mobile": "turbo run dev --filter=@oscar/mobile",
     "build": "turbo run build",
     "codegen": "turbo run codegen",
     "type-check": "turbo run type-check",
@@ -15,6 +15,10 @@
     "format": "turbo run format"
   },
   "pnpm": {
+    "overrides": {
+      "react": "19.2.0",
+      "react-dom": "19.2.0"
+    },
     "onlyBuiltDependencies": [
       "@apollo/protobufjs",
       "@nestjs/core",
@@ -29,6 +33,7 @@
     ]
   },
   "devDependencies": {
+    "baseline-browser-mapping": "^2.10.11",
     "turbo": "^2.8.20"
   }
 }

@@ -52,6 +52,8 @@ query AdminProducts($options: ProductListOptions) {
         }
         customFields {
           minStockAlert
+          originalPrice
+          discountPercent
         }
       }
       optionGroups {
@@ -168,6 +170,8 @@ query AdminProduct($id: ID!) {
       }
       customFields {
         minStockAlert
+        originalPrice
+        discountPercent
       }
     }
     translations {
@@ -468,6 +472,8 @@ mutation UpdateProductVariants($input: [UpdateProductVariantInput!]!) {
     }
     customFields {
       minStockAlert
+      originalPrice
+      discountPercent
     }
   }
 }

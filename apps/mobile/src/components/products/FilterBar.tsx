@@ -1,16 +1,21 @@
 import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { Chip } from '../ui';
-import { CategoryResponse } from '../../graphql/generated/graphql';
 import { useTranslation } from 'react-i18next';
 import { spacing } from '../../theme';
 
 export type SortOption = 'newest' | 'price_asc' | 'price_desc' | 'popular';
 
+interface FilterCategory {
+  id: string;
+  name: string;
+  slug?: string;
+}
+
 interface FilterBarProps {
-  categories?: CategoryResponse[];
-  selectedCategory?: number | null;
-  onCategoryChange?: (categoryId: number | null) => void;
+  categories?: FilterCategory[];
+  selectedCategory?: string | null;
+  onCategoryChange?: (categoryId: string | null) => void;
   sortBy?: SortOption;
   onSortChange?: (sort: SortOption) => void;
   showSort?: boolean;
@@ -35,18 +40,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     { value: 'price_desc', label: t('products.sort.priceDesc', 'Price: High to Low') },
   ];
 
-  const getCategoryName = (category: CategoryResponse) => {
-    switch (i18n.language) {
-      case 'ar':
-        return category.nameAr || category.nameFr || category.nameEn || '';
-      case 'en':
-        return category.nameEn || category.nameFr || category.nameAr || '';
-      default:
-        return category.nameFr || category.nameEn || category.nameAr || '';
-    }
+  const getCategoryName = (category: FilterCategory) => {
+    return category.name || '';
   };
 
-  const handleCategoryPress = (categoryId: number | null) => {
+  const handleCategoryPress = (categoryId: string | null) => {
     if (onCategoryChange) {
       onCategoryChange(categoryId === selectedCategory ? null : categoryId);
     }
@@ -84,7 +82,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       )}
 
       {/* Category Filters */}
-      {showCategories && categories.length > 0 && (
+      {showCategories && categories.length > 0 ? (
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -99,17 +97,20 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           />
 
           {/* Individual Categories */}
-          {categories.map((category) => (
-            <Chip
-              key={category.id}
-              label={getCategoryName(category)}
-              selected={selectedCategory === category.id}
-              onPress={() => handleCategoryPress(category.id!)}
-              style={styles.chip}
-            />
-          ))}
+          {categories.map((category) => {
+            const key = category.slug || category.id;
+            return (
+              <Chip
+                key={category.id}
+                label={getCategoryName(category)}
+                selected={selectedCategory === key}
+                onPress={() => handleCategoryPress(key)}
+                style={styles.chip}
+              />
+            );
+          })}
         </ScrollView>
-      )}
+      ) : null}
     </View>
   );
 };

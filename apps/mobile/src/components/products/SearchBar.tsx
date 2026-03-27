@@ -71,7 +71,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       {loading ? (
         <ActivityIndicator size="small" color={colors.primary} style={styles.rightIcon} />
       ) : (
-        value.length > 0 && (
+        value.length > 0 ? (
           <TouchableOpacity
             onPress={handleClear}
             style={styles.clearButton}
@@ -79,7 +79,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           >
             <Ionicons name="close-circle" size={20} color={colors.text.tertiary} />
           </TouchableOpacity>
-        )
+        ) : null
       )}
     </View>
   );

@@ -2,6 +2,7 @@ import React from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
@@ -172,9 +173,6 @@ export const VariantPicker: React.FC<VariantPickerProps> = ({
       </TouchableOpacity>
     );
   };
-
-  // Import Image for image variant
-  const { Image } = require('react-native');
 
   const renderVariant = (variant: Variant) => {
     switch (group.type) {
@@ -377,7 +375,7 @@ const styles = StyleSheet.create({
   },
   imageOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    backgroundColor: colors.overlayWhiteLight,
   },
 
   // Disabled styles

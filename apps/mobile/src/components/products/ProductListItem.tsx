@@ -7,16 +7,14 @@ import {
   Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
-import { ProductResponse } from '../../graphql/generated/graphql';
+import { SimpleProduct } from './ProductCard';
 import { colors, spacing, typography } from '../../theme';
-import { Badge } from '../ui';
 
 interface ProductListItemProps {
-  product: ProductResponse;
-  onPress?: (product: ProductResponse) => void;
-  onAddToCart?: (product: ProductResponse) => void;
+  product: SimpleProduct;
+  onPress?: (product: SimpleProduct) => void;
+  onAddToCart?: (product: SimpleProduct) => void;
   showAddToCart?: boolean;
 }
 
@@ -27,7 +25,6 @@ export const ProductListItem: React.FC<ProductListItemProps> = ({
   showAddToCart = true,
 }) => {
   const router = useRouter();
-  const { i18n, t } = useTranslation();
 
   const handlePress = () => {
     if (onPress) {
@@ -37,44 +34,8 @@ export const ProductListItem: React.FC<ProductListItemProps> = ({
     }
   };
 
-  // Get product name based on current language
-  const getName = () => {
-    switch (i18n.language) {
-      case 'ar':
-        return product.nameAr || product.nameFr || product.nameEn || '';
-      case 'en':
-        return product.nameEn || product.nameFr || product.nameAr || '';
-      default:
-        return product.nameFr || product.nameEn || product.nameAr || '';
-    }
-  };
-
-  // Get product description based on current language
-  const getDescription = () => {
-    switch (i18n.language) {
-      case 'ar':
-        return product.descriptionAr || product.descriptionFr || product.descriptionEn || '';
-      case 'en':
-        return product.descriptionEn || product.descriptionFr || product.descriptionAr || '';
-      default:
-        return product.descriptionFr || product.descriptionEn || product.descriptionAr || '';
-    }
-  };
-
-  // Get first image or placeholder
-  const imageUrl = product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : null;
-
-  // Check if product has sale price
-  const hasDiscount = product.salePrice && product.salePrice < (product.basePrice || 0);
-  const displayPrice = hasDiscount ? product.salePrice : product.basePrice;
-
-  // Calculate discount percentage
-  const discountPercentage = hasDiscount
-    ? Math.round(((product.basePrice! - product.salePrice!) / product.basePrice!) * 100)
-    : 0;
-
-  // Check stock status
-  const isOutOfStock = (product.stockQuantity || 0) === 0;
+  const imageUrl = product.imageUrl || null;
+  const isOutOfStock = product.inStock === false;
 
   return (
     <TouchableOpacity
@@ -100,13 +61,6 @@ export const ProductListItem: React.FC<ProductListItemProps> = ({
           </View>
         )}
 
-        {/* Discount Badge */}
-        {hasDiscount && (
-          <View style={styles.discountBadge}>
-            <Text style={styles.discountText}>-{discountPercentage}%</Text>
-          </View>
-        )}
-
         {/* Out of Stock Overlay */}
         {isOutOfStock && (
           <View style={styles.stockOverlay}>
@@ -117,28 +71,22 @@ export const ProductListItem: React.FC<ProductListItemProps> = ({
 
       {/* Product Info */}
       <View style={styles.infoContainer}>
-        {/* Category */}
-        {product.categoryName && (
-          <Text style={styles.category}>{product.categoryName}</Text>
-        )}
-
         {/* Product Name */}
         <Text style={styles.name} numberOfLines={2}>
-          {getName()}
+          {product.name}
         </Text>
 
         {/* Description */}
-        <Text style={styles.description} numberOfLines={2}>
-          {getDescription()}
-        </Text>
+        {product.description && (
+          <Text style={styles.description} numberOfLines={2}>
+            {product.description}
+          </Text>
+        )}
 
         {/* Price Row */}
         <View style={styles.priceRow}>
           <View style={styles.priceContainer}>
-            <Text style={styles.price}>{displayPrice?.toFixed(2)} DZD</Text>
-            {hasDiscount && (
-              <Text style={styles.oldPrice}>{product.basePrice?.toFixed(2)} DZD</Text>
-            )}
+            <Text style={styles.price}>{product.price} DZD</Text>
           </View>
 
           {/* Add to Cart Button */}
@@ -153,16 +101,6 @@ export const ProductListItem: React.FC<ProductListItemProps> = ({
             >
               <Ionicons name="cart-outline" size={20} color={colors.text.inverse} />
             </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Badges */}
-        <View style={styles.badgeRow}>
-          {product.isFeatured && (
-            <Badge label="Featured" variant="primary" size="small" />
-          )}
-          {product.isNew && (
-            <Badge label="New" variant="success" size="small" />
           )}
         </View>
       </View>
@@ -199,20 +137,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  discountBadge: {
-    position: 'absolute',
-    top: spacing.xs,
-    left: spacing.xs,
-    backgroundColor: colors.error,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: spacing.borderRadius.sm,
-  },
-  discountText: {
-    fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.inverse,
-  },
   stockOverlay: {
     position: 'absolute',
     top: 0,
@@ -232,12 +156,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.md,
     justifyContent: 'space-between',
-  },
-  category: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
-    textTransform: 'uppercase',
-    marginBottom: spacing.xs,
   },
   name: {
     fontSize: typography.fontSize.md,
@@ -267,11 +185,6 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: colors.primary,
   },
-  oldPrice: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-    textDecorationLine: 'line-through',
-  },
   addToCartButton: {
     width: 36,
     height: 36,
@@ -279,10 +192,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-    marginTop: spacing.xs,
   },
 });

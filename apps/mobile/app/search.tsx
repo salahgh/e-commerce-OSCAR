@@ -14,13 +14,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  useSearchProductsQuery,
-  ProductResponse,
-} from '../src/graphql/generated/graphql';
-import { ProductCard } from '../src/components/products';
+import { useSearchProductsQuery } from '../src/graphql/generated/graphql';
+import { SimpleProduct } from '../src/components/products/ProductCard';
+import { ProductCardFigma, FigmaProduct } from '../src/components/home/ProductCardFigma';
 import { LoadingSpinner, EmptyState } from '../src/components/ui';
 import { colors, spacing, typography } from '../src/theme';
+import { formatPrice } from '../src/utils/vendureAdapters';
 
 const SEARCH_HISTORY_KEY = '@oscar_search_history';
 const MAX_HISTORY_ITEMS = 10;
@@ -52,14 +51,25 @@ export default function SearchScreen() {
   // Fetch search results
   const { data, loading, error } = useSearchProductsQuery({
     variables: {
-      query: debouncedQuery,
-      page: 1,
-      pageSize: 20,
+      input: { term: debouncedQuery, take: 20, groupByProduct: true },
     },
     skip: !debouncedQuery || debouncedQuery.length < 2,
   });
 
-  const searchResults = data?.searchProducts?.products || [];
+  // Transform Vendure search results to SimpleProduct format
+  const searchResults: SimpleProduct[] = (data?.search?.items || []).map((item: any) => {
+    const price = item.priceWithTax;
+    const priceValue = price?.__typename === 'SinglePrice' ? price.value : price?.min;
+    return {
+      id: item.productId,
+      name: item.productName,
+      slug: item.slug,
+      description: item.description,
+      imageUrl: item.productAsset?.preview,
+      price: formatPrice(priceValue || 0),
+      inStock: item.inStock,
+    };
+  });
 
   // Load search history on mount
   useEffect(() => {
@@ -167,7 +177,7 @@ export default function SearchScreen() {
     }
   }, []);
 
-  const handleProductPress = useCallback((product: ProductResponse) => {
+  const handleProductPress = useCallback((product: SimpleProduct) => {
     router.push(`/products/${product.id}`);
   }, []);
 
@@ -204,9 +214,12 @@ export default function SearchScreen() {
   );
 
   // Render product result item
-  const renderProductItem = ({ item }: { item: ProductResponse }) => (
+  const renderProductItem = ({ item }: { item: SimpleProduct }) => (
     <View style={styles.productItem}>
-      <ProductCard product={item} onPress={() => handleProductPress(item)} />
+      <ProductCardFigma
+        product={{ ...item, rating: 0, reviewCount: 0 }}
+        onPress={() => handleProductPress(item)}
+      />
     </View>
   );
 
@@ -214,7 +227,7 @@ export default function SearchScreen() {
   const renderSuggestions = () => (
     <View style={styles.suggestionsContainer}>
       {/* Search History */}
-      {searchHistory.length > 0 && (
+      {searchHistory.length > 0 ? (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t('search.recentSearches', 'Recent Searches')}</Text>
@@ -228,7 +241,7 @@ export default function SearchScreen() {
             </View>
           ))}
         </View>
-      )}
+      ) : null}
 
       {/* Popular Searches */}
       <View style={styles.section}>
@@ -332,11 +345,11 @@ export default function SearchScreen() {
             autoCorrect={false}
             autoFocus
           />
-          {searchQuery.length > 0 && (
+          {searchQuery.length > 0 ? (
             <TouchableOpacity onPress={handleClearSearch}>
               <Ionicons name="close-circle" size={20} color={colors.text.tertiary} />
             </TouchableOpacity>
-          )}
+          ) : null}
         </View>
       </View>
 

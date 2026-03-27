@@ -16,6 +16,10 @@ fragment ProductVariantFields on ProductVariant {
   priceWithTax
   currencyCode
   stockLevel
+  customFields {
+    originalPrice
+    discountPercent
+  }
   featuredAsset {
     ...AssetFields
   }
@@ -168,7 +172,7 @@ query GetNewArrivals($take: Int) {
 
 # Get products by collection
 query GetProductsByCollection($collectionSlug: String!, $take: Int, $skip: Int) {
-  search(input: { collectionSlug: $collectionSlug, take: $take, skip: $skip }) {
+  search(input: { collectionSlug: $collectionSlug, take: $take, skip: $skip, groupByProduct: true }) {
     items {
       productId
       productName

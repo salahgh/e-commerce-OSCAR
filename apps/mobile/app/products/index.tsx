@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
   useGetProductsQuery,
-  useGetActiveCategoriesQuery,
-  ProductResponse,
+  useGetCollectionsQuery,
+  useGetProductsByCollectionQuery,
 } from '../../src/graphql/generated/graphql';
+import { SimpleProduct } from '../../src/components/products/ProductCard';
 import { ProductGrid, SearchBar, FilterBar, SortOption } from '../../src/components/products';
 import { colors, spacing } from '../../src/theme';
+import { formatPrice } from '../../src/utils/vendureAdapters';
 
 export default function ProductsScreen() {
   const { t } = useTranslation();
@@ -16,95 +18,114 @@ export default function ProductsScreen() {
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    (params.category as string) || null
+  );
   const [sortBy, setSortBy] = useState<SortOption>('newest');
-  const [page, setPage] = useState(0);
-  const [allProducts, setAllProducts] = useState<ProductResponse[]>([]);
 
-  // Map sort option to GraphQL parameters
+  // Map sort option to Vendure ProductSortParameter
   const getSortParams = () => {
     switch (sortBy) {
       case 'newest':
-        return { sortBy: 'createdAt', sortDirection: 'DESC' };
-      case 'popular':
-        return { sortBy: 'viewCount', sortDirection: 'DESC' };
+        return { createdAt: 'DESC' as const };
       case 'price_asc':
-        return { sortBy: 'basePrice', sortDirection: 'ASC' };
+        return { price: 'ASC' as const };
       case 'price_desc':
-        return { sortBy: 'basePrice', sortDirection: 'DESC' };
+        return { price: 'DESC' as const };
       default:
-        return { sortBy: 'createdAt', sortDirection: 'DESC' };
+        return { createdAt: 'DESC' as const };
     }
   };
 
-  const sortParams = getSortParams();
-
-  // Fetch products
+  // Fetch all products (when no category filter)
   const {
     data: productsData,
     loading: productsLoading,
-    error: productsError,
     refetch: refetchProducts,
-    fetchMore,
   } = useGetProductsQuery({
     variables: {
-      page,
-      size: 20,
-      sortBy: sortParams.sortBy,
-      sortDirection: sortParams.sortDirection,
+      options: {
+        take: 50,
+        sort: getSortParams(),
+      },
     },
-    notifyOnNetworkStatusChange: true,
+    skip: !!selectedCategory,
   });
 
-  // Fetch categories
-  const { data: categoriesData } = useGetActiveCategoriesQuery();
+  // Fetch products by collection (when category is selected)
+  const {
+    data: collectionProductsData,
+    loading: collectionProductsLoading,
+    refetch: refetchCollectionProducts,
+  } = useGetProductsByCollectionQuery({
+    variables: {
+      collectionSlug: selectedCategory!,
+      take: 50,
+    },
+    skip: !selectedCategory,
+  });
 
-  // Update products list when data changes
-  useEffect(() => {
-    if (productsData?.products?.content) {
-      if (page === 0) {
-        setAllProducts(productsData.products.content as ProductResponse[]);
-      } else {
-        setAllProducts((prev) => [
-          ...prev,
-          ...(productsData.products.content as ProductResponse[]),
-        ]);
-      }
+  const isLoading = selectedCategory ? collectionProductsLoading : productsLoading;
+
+  // Fetch collections for filter
+  const { data: collectionsData } = useGetCollectionsQuery();
+
+  // Derive products directly from query data — no stale state
+  const products = useMemo<SimpleProduct[]>(() => {
+    if (selectedCategory && collectionProductsData?.search?.items) {
+      const seen = new Set<string>();
+      return collectionProductsData.search.items
+        .filter((item: any) => {
+          if (seen.has(item.productId)) return false;
+          seen.add(item.productId);
+          return true;
+        })
+        .map((item: any) => {
+          const price = item.priceWithTax;
+          const priceValue = price?.__typename === 'SinglePrice' ? price.value : price?.min;
+          return {
+            id: item.productId,
+            name: item.productName,
+            slug: item.slug,
+            description: item.description,
+            imageUrl: item.productAsset?.preview,
+            price: formatPrice(priceValue || 0),
+            inStock: item.inStock,
+          };
+        });
     }
-  }, [productsData, page]);
 
-  // Reset page when filters change
-  useEffect(() => {
-    setPage(0);
-    setAllProducts([]);
-  }, [selectedCategory, sortBy]);
-
-  // Handle category from URL params
-  useEffect(() => {
-    if (params.category) {
-      const category = categoriesData?.activeCategories?.find(
-        (cat) => cat.slug === params.category
-      );
-      if (category?.id) {
-        setSelectedCategory(category.id);
-      }
+    if (!selectedCategory && productsData?.products?.items) {
+      return productsData.products.items.map((product: any) => {
+        const defaultVariant = product.variants?.[0];
+        const customFields = defaultVariant?.customFields;
+        return {
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          description: product.description,
+          imageUrl: product.featuredAsset?.preview,
+          price: defaultVariant ? formatPrice(defaultVariant.priceWithTax) : 0,
+          originalPrice: customFields?.originalPrice ? formatPrice(customFields.originalPrice) : undefined,
+          discountPercent: customFields?.discountPercent ?? undefined,
+          inStock: defaultVariant?.stockLevel !== 'OUT_OF_STOCK',
+        };
+      });
     }
-  }, [params.category, categoriesData]);
 
-  const handleRefresh = () => {
-    setPage(0);
-    setAllProducts([]);
-    refetchProducts();
-  };
+    return [];
+  }, [productsData, collectionProductsData, selectedCategory]);
 
-  const handleLoadMore = () => {
-    if (productsData?.products?.hasNext && !productsLoading) {
-      setPage((prev) => prev + 1);
+  const handleRefresh = useCallback(() => {
+    if (selectedCategory) {
+      refetchCollectionProducts();
+    } else {
+      refetchProducts();
     }
-  };
+  }, [selectedCategory, refetchCollectionProducts, refetchProducts]);
 
-  const handleCategoryChange = (categoryId: number | null) => {
-    setSelectedCategory(categoryId);
+  const handleCategoryChange = (categorySlug: string | null) => {
+    setSelectedCategory(categorySlug);
   };
 
   const handleSortChange = (sort: SortOption) => {
@@ -112,14 +133,8 @@ export default function ProductsScreen() {
   };
 
   const handleSearch = () => {
-    // Navigate to search screen or filter locally
     console.log('Search:', searchQuery);
   };
-
-  // Filter products by category if selected
-  const filteredProducts = selectedCategory
-    ? allProducts.filter((product) => product.categoryId === selectedCategory)
-    : allProducts;
 
   return (
     <View style={styles.container}>
@@ -130,13 +145,13 @@ export default function ProductsScreen() {
           onChangeText={setSearchQuery}
           onSearch={handleSearch}
           placeholder={t('products.searchPlaceholder', 'Search products...')}
-          loading={productsLoading && page === 0}
+          loading={isLoading}
         />
       </View>
 
       {/* Filter Bar */}
       <FilterBar
-        categories={categoriesData?.activeCategories as any[]}
+        categories={collectionsData?.collections?.items as any[]}
         selectedCategory={selectedCategory}
         onCategoryChange={handleCategoryChange}
         sortBy={sortBy}
@@ -147,13 +162,13 @@ export default function ProductsScreen() {
 
       {/* Product Grid */}
       <ProductGrid
-        products={filteredProducts}
-        loading={productsLoading && page === 0}
-        refreshing={productsLoading && page === 0}
+        products={products}
+        loading={isLoading}
+        refreshing={isLoading}
         onRefresh={handleRefresh}
-        onLoadMore={handleLoadMore}
-        hasMore={productsData?.products?.hasNext || false}
-        loadingMore={productsLoading && page > 0}
+        onLoadMore={() => {}}
+        hasMore={false}
+        loadingMore={false}
         numColumns={2}
         emptyMessage={t('products.noProducts', 'No products found')}
       />

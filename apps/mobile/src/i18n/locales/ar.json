@@ -41,9 +41,16 @@
   },
   "home": {
     "title": "الرئيسية",
-    "featuredProducts": "المنتجات المميزة",
-    "newArrivals": "وصل حديثاً",
+    "searchPlaceholder": "البحث في أوسكار",
     "categories": "الفئات",
+    "all": "الكل",
+    "women": "نساء",
+    "men": "رجال",
+    "kids": "أطفال",
+    "newArrivals": "وصل حديثًا",
+    "bestSellers": "الأكثر مبيعًا",
+    "pickedForYou": "مختارة لك",
+    "featuredProducts": "المنتجات المميزة",
     "popularProducts": "المنتجات الشائعة"
   },
   "products": {

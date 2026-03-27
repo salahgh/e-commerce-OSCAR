@@ -138,6 +138,26 @@ query GetCollectionWithProducts($slug: String!, $take: Int, $skip: Int) {
   }
 }
 
+# Get banner slides (children of the "banners" collection)
+query GetBannerSlides {
+  collection(slug: "banners") {
+    id
+    children {
+      id
+      name
+      slug
+      description
+      featuredAsset {
+        id
+        preview
+      }
+      customFields {
+        displayOrder
+      }
+    }
+  }
+}
+
 # Get full collection tree
 query GetCollectionTree {
   collections(options: { take: 100 }) {

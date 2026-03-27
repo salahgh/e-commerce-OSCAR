@@ -14,7 +14,7 @@ import { Formik } from 'formik';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Input, Button } from '../../src/components/ui';
-import { useChangePasswordMutation } from '../../src/graphql/generated/graphql';
+import { useUpdateCustomerPasswordMutation } from '../../src/graphql/generated/graphql';
 import { changePasswordSchema } from '../../src/utils/validation';
 import { colors, spacing, typography } from '../../src/theme';
 
@@ -29,7 +29,7 @@ export default function ChangePasswordScreen() {
   const router = useRouter();
   const [submitError, setSubmitError] = useState<string>('');
 
-  const [changePassword, { loading: updating }] = useChangePasswordMutation();
+  const [updatePassword, { loading: updating }] = useUpdateCustomerPasswordMutation();
 
   const initialValues: ChangePasswordFormValues = {
     currentPassword: '',
@@ -41,12 +41,10 @@ export default function ChangePasswordScreen() {
     try {
       setSubmitError('');
 
-      await changePassword({
+      await updatePassword({
         variables: {
-          input: {
-            currentPassword: values.currentPassword,
-            newPassword: values.newPassword,
-          },
+          currentPassword: values.currentPassword,
+          newPassword: values.newPassword,
         },
       });
 

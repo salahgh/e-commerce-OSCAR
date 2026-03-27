@@ -1,8 +1,0 @@
-query mldjfd ($options :ProductListOptions){
-    products(options: $options){
-        items {
-            id
-            name
-        }
-    }
-}
