@@ -1,200 +1,317 @@
 #!/bin/bash
 #
-# OSCAR Deployment Script
-# Usage: ./deploy.sh
+# OSCAR Fashion Deployment Script (Monorepo)
+# Deploys Vendure, Next.js Frontend, and Backoffice using PM2
 #
-# This script deploys/updates the Vendure backend and Next.js frontend
+# The project is a pnpm + Turborepo monorepo. This script pulls the full repo,
+# installs deps at the root, builds via Turborepo, then starts each app with PM2.
+#
+# Usage: ./deploy.sh [--skip-build] [--vendure-only] [--frontend-only] [--backoffice-only]
 #
 
 set -e
 
 # Configuration
 PROJECT_ROOT="/var/www/oscar"
-VENDURE_DIR="$PROJECT_ROOT/vendure"
-FRONTEND_DIR="$PROJECT_ROOT/frontend"
-REPO_URL="https://github.com/your-username/e-commerce-OSCAR.git"  # CHANGE THIS
-BRANCH="main"
+REPO_URL="git@github.com:salahgh/e-commerce-OSCAR.git"
+REPO_DIR="$PROJECT_ROOT/repo"
+LOGS_DIR="$PROJECT_ROOT/logs"
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# App directories (inside the monorepo)
+VENDURE_DIR="$REPO_DIR/apps/backend"
+FRONTEND_DIR="$REPO_DIR/apps/frontend"
+BACKOFFICE_DIR="$REPO_DIR/apps/backoffice"
 
+# Options
+SKIP_BUILD=false
+DEPLOY_VENDURE=true
+DEPLOY_FRONTEND=true
+DEPLOY_BACKOFFICE=true
+
+# Parse arguments
+for arg in "$@"; do
+    case $arg in
+        --skip-build)
+            SKIP_BUILD=true
+            ;;
+        --vendure-only)
+            DEPLOY_VENDURE=true
+            DEPLOY_FRONTEND=false
+            DEPLOY_BACKOFFICE=false
+            ;;
+        --frontend-only)
+            DEPLOY_VENDURE=false
+            DEPLOY_FRONTEND=true
+            DEPLOY_BACKOFFICE=false
+            ;;
+        --backoffice-only)
+            DEPLOY_VENDURE=false
+            DEPLOY_FRONTEND=false
+            DEPLOY_BACKOFFICE=true
+            ;;
+    esac
+done
+
+echo "=============================================="
+echo "  OSCAR Fashion Deployment Script (Monorepo)"
+echo "=============================================="
+echo "  Repo Dir:        $REPO_DIR"
+echo "  Skip Build:      $SKIP_BUILD"
+echo "  Deploy Vendure:  $DEPLOY_VENDURE"
+echo "  Deploy Frontend: $DEPLOY_FRONTEND"
+echo "  Deploy Backoffice: $DEPLOY_BACKOFFICE"
+echo "=============================================="
 echo ""
-echo -e "${BLUE}========================================"
-echo "  OSCAR Deployment"
-echo "  $(date '+%Y-%m-%d %H:%M:%S')"
-echo "========================================${NC}"
-echo ""
 
 # ============================================
-# Backup Environment Files
+# Prerequisites Check
 # ============================================
-echo -e "${GREEN}[1/10] Backing up environment files...${NC}"
-[ -f "$VENDURE_DIR/.env" ] && cp "$VENDURE_DIR/.env" /tmp/.env.vendure.bak
-[ -f "$FRONTEND_DIR/.env" ] && cp "$FRONTEND_DIR/.env" /tmp/.env.frontend.bak
-[ -f "$FRONTEND_DIR/.env.local" ] && cp "$FRONTEND_DIR/.env.local" /tmp/.env.frontend.local.bak
-[ -f "$FRONTEND_DIR/.env.production" ] && cp "$FRONTEND_DIR/.env.production" /tmp/.env.frontend.prod.bak
-echo "Environment files backed up"
+echo "Checking prerequisites..."
 
-# ============================================
-# Pull Latest Code
-# ============================================
-echo ""
-echo -e "${GREEN}[2/10] Pulling latest code from repository...${NC}"
+check_command() {
+    local cmd=$1
+    local name=$2
+    echo -n "  $name: "
+    if command -v $cmd &> /dev/null; then
+        echo "OK ($($cmd --version 2>/dev/null | head -1 || echo 'installed'))"
+        return 0
+    else
+        echo "NOT FOUND"
+        return 1
+    fi
+}
 
-if [ -d "$PROJECT_ROOT/.git" ]; then
-    cd "$PROJECT_ROOT"
-    git fetch origin "$BRANCH"
-    git reset --hard "origin/$BRANCH"
-    echo "Code updated from $BRANCH branch"
+check_command node "Node.js" || { echo "Run: curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash - && sudo apt install -y nodejs"; exit 1; }
+check_command pnpm "pnpm" || { echo "Run: npm install -g pnpm"; exit 1; }
+check_command pm2 "PM2" || { echo "Run: npm install -g pm2"; exit 1; }
+check_command psql "PostgreSQL" || exit 1
+check_command git "Git" || exit 1
+
+# Check database connection
+echo -n "  Database: "
+if PGPASSWORD="${DB_PASSWORD:-majmajBS13..}" psql -h localhost -U oscar -d oscar_vendure -c "SELECT 1;" &> /dev/null; then
+    echo "OK (connected)"
 else
-    echo -e "${YELLOW}Repository not found. Cloning fresh...${NC}"
-    cd /var/www
-    rm -rf oscar
-    git clone -b "$BRANCH" "$REPO_URL" oscar
-    echo "Repository cloned"
-fi
-
-# Sync code to deployment directories
-echo "Syncing Vendure code..."
-rsync -av --delete \
-    --exclude 'node_modules' \
-    --exclude '.env' \
-    --exclude 'dist' \
-    --exclude 'static/assets' \
-    "$PROJECT_ROOT/01-BACKEND-VENDURE/oscar-vendure/" "$VENDURE_DIR/"
-
-echo "Syncing Frontend code..."
-rsync -av --delete \
-    --exclude 'node_modules' \
-    --exclude '.env*' \
-    --exclude '.next' \
-    --exclude 'out' \
-    "$PROJECT_ROOT/02-FRONTEND/oscar-frontend/" "$FRONTEND_DIR/"
-
-# ============================================
-# Restore Environment Files
-# ============================================
-echo ""
-echo -e "${GREEN}[3/10] Restoring environment files...${NC}"
-[ -f /tmp/.env.vendure.bak ] && cp /tmp/.env.vendure.bak "$VENDURE_DIR/.env"
-[ -f /tmp/.env.frontend.bak ] && cp /tmp/.env.frontend.bak "$FRONTEND_DIR/.env"
-[ -f /tmp/.env.frontend.local.bak ] && cp /tmp/.env.frontend.local.bak "$FRONTEND_DIR/.env.local"
-[ -f /tmp/.env.frontend.prod.bak ] && cp /tmp/.env.frontend.prod.bak "$FRONTEND_DIR/.env.production"
-
-# Check if environment files exist
-if [ ! -f "$VENDURE_DIR/.env" ]; then
-    echo -e "${RED}ERROR: Vendure .env file not found!${NC}"
-    echo "Please create $VENDURE_DIR/.env from the template"
+    echo "FAILED (check credentials)"
     exit 1
 fi
 
-if [ ! -f "$FRONTEND_DIR/.env.production" ] && [ ! -f "$FRONTEND_DIR/.env.local" ]; then
-    echo -e "${RED}ERROR: Frontend .env file not found!${NC}"
-    echo "Please create $FRONTEND_DIR/.env.production from the template"
+# Check project directory
+if [ ! -d "$PROJECT_ROOT" ]; then
+    echo ""
+    echo "ERROR: Project directory not found at $PROJECT_ROOT"
+    echo "Run setup scripts first to initialize the server."
     exit 1
 fi
 
-echo "Environment files restored"
+echo ""
+echo "All prerequisites passed!"
+echo ""
 
 # ============================================
-# Build and Deploy Vendure Backend
+# Backup .env files
+# ============================================
+echo "Backing up .env files..."
+[ -f "$VENDURE_DIR/.env" ] && cp "$VENDURE_DIR/.env" /tmp/.env.vendure.bak && echo "  Vendure .env backed up"
+[ -f "$FRONTEND_DIR/.env.production" ] && cp "$FRONTEND_DIR/.env.production" /tmp/.env.frontend.bak && echo "  Frontend .env backed up"
+[ -f "$BACKOFFICE_DIR/.env.production" ] && cp "$BACKOFFICE_DIR/.env.production" /tmp/.env.backoffice.bak && echo "  Backoffice .env backed up"
+
+# ============================================
+# Pull latest code from GitHub
 # ============================================
 echo ""
-echo -e "${GREEN}[4/10] Installing Vendure dependencies...${NC}"
-cd "$VENDURE_DIR"
-npm ci --production=false
+echo "Pulling latest code from GitHub..."
 
+if [ -d "$REPO_DIR/.git" ]; then
+    cd "$REPO_DIR"
+    git fetch origin main
+    git reset --hard origin/main
+    echo "  Code updated from main branch"
+else
+    echo "  Cloning repository..."
+    rm -rf "$REPO_DIR"
+    git clone -b main "$REPO_URL" "$REPO_DIR"
+    echo "  Repository cloned"
+fi
+
+# ============================================
+# Restore .env files
+# ============================================
 echo ""
-echo -e "${GREEN}[5/10] Building Vendure...${NC}"
-npm run build
+echo "Restoring .env files..."
+[ -f /tmp/.env.vendure.bak ] && cp /tmp/.env.vendure.bak "$VENDURE_DIR/.env" && echo "  Vendure .env restored"
+[ -f /tmp/.env.frontend.bak ] && cp /tmp/.env.frontend.bak "$FRONTEND_DIR/.env.production" && echo "  Frontend .env restored"
+[ -f /tmp/.env.backoffice.bak ] && cp /tmp/.env.backoffice.bak "$BACKOFFICE_DIR/.env.production" && echo "  Backoffice .env restored"
 
+# ============================================
+# Check .env files exist
+# ============================================
 echo ""
-echo -e "${GREEN}[6/10] Starting Vendure backend...${NC}"
-pm2 delete vendure 2>/dev/null || true
-pm2 start npm --name "vendure" -- run start
-pm2 save
+echo "Checking .env files..."
 
-# Wait for Vendure to be healthy
-echo "Waiting for Vendure API to be healthy..."
-MAX_RETRIES=30
-RETRY_COUNT=0
-until curl -sf "http://localhost:8085/shop-api?query=%7B__typename%7D" > /dev/null 2>&1; do
-    RETRY_COUNT=$((RETRY_COUNT + 1))
-    if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
-        echo -e "${RED}ERROR: Vendure failed to start within timeout${NC}"
-        pm2 logs vendure --lines 50
-        exit 1
+if [ "$DEPLOY_VENDURE" = true ] && [ ! -f "$VENDURE_DIR/.env" ]; then
+    echo "ERROR: Vendure .env not found!"
+    echo "Create it with: nano $VENDURE_DIR/.env"
+    exit 1
+fi
+
+if [ "$DEPLOY_FRONTEND" = true ] && [ ! -f "$FRONTEND_DIR/.env.production" ]; then
+    echo "ERROR: Frontend .env.production not found!"
+    echo "Create it with: nano $FRONTEND_DIR/.env.production"
+    exit 1
+fi
+
+if [ "$DEPLOY_BACKOFFICE" = true ] && [ ! -f "$BACKOFFICE_DIR/.env.production" ]; then
+    echo "ERROR: Backoffice .env.production not found!"
+    echo "Create it with: nano $BACKOFFICE_DIR/.env.production"
+    exit 1
+fi
+
+echo "  All required .env files found"
+
+# ============================================
+# Install dependencies & Build (monorepo)
+# ============================================
+if [ "$SKIP_BUILD" = false ]; then
+    echo ""
+    echo "=============================================="
+    echo "  Installing dependencies (pnpm)"
+    echo "=============================================="
+    cd "$REPO_DIR"
+    pnpm install --frozen-lockfile
+
+    echo ""
+    echo "=============================================="
+    echo "  Building with Turborepo"
+    echo "=============================================="
+
+    if [ "$DEPLOY_VENDURE" = true ] && [ "$DEPLOY_FRONTEND" = true ] && [ "$DEPLOY_BACKOFFICE" = true ]; then
+        pnpm build
+    else
+        [ "$DEPLOY_VENDURE" = true ] && pnpm --filter @oscar/backend build
+        [ "$DEPLOY_FRONTEND" = true ] && pnpm --filter @oscar/frontend build
+        [ "$DEPLOY_BACKOFFICE" = true ] && pnpm --filter @oscar/backoffice build
     fi
-    echo "  Waiting... ($RETRY_COUNT/$MAX_RETRIES)"
-    sleep 2
-done
-echo -e "${GREEN}Vendure API is healthy!${NC}"
+else
+    echo ""
+    echo "Skipping install & build (--skip-build)"
+fi
 
 # ============================================
-# Build and Deploy Next.js Frontend
+# Health check function with timeout
 # ============================================
-echo ""
-echo -e "${GREEN}[7/10] Installing Frontend dependencies...${NC}"
-cd "$FRONTEND_DIR"
-npm ci --production=false
+wait_for_service() {
+    local url=$1
+    local name=$2
+    local max_retries=${3:-30}
+    local retry_count=0
 
-echo ""
-echo -e "${GREEN}[8/10] Generating GraphQL types...${NC}"
-npm run codegen 2>/dev/null || echo "Skipping codegen (schema may need manual fetch)"
+    echo "  Waiting for $name to be healthy..."
+    until curl -sf "$url" > /dev/null 2>&1; do
+        retry_count=$((retry_count + 1))
+        if [ $retry_count -ge $max_retries ]; then
+            echo "  WARNING: $name health check timed out after $max_retries attempts"
+            return 1
+        fi
+        echo "    Attempt $retry_count/$max_retries..."
+        sleep 3
+    done
+    echo "  $name is healthy!"
+    return 0
+}
 
-echo ""
-echo -e "${GREEN}[9/10] Building Next.js frontend...${NC}"
-npm run build
+# ============================================
+# Deploy Vendure
+# ============================================
+if [ "$DEPLOY_VENDURE" = true ]; then
+    echo ""
+    echo "=============================================="
+    echo "  Starting Vendure Backend"
+    echo "=============================================="
 
-echo ""
-echo -e "${GREEN}[10/10] Starting Next.js frontend...${NC}"
-pm2 delete frontend 2>/dev/null || true
-pm2 start npm --name "frontend" -- run start
-pm2 save
+    pm2 delete vendure 2>/dev/null || true
+    pm2 start "node $VENDURE_DIR/dist/index.js" --name "vendure" --cwd "$VENDURE_DIR"
 
-# Wait for Next.js to be healthy
-echo "Waiting for Frontend to be healthy..."
-MAX_RETRIES=20
-RETRY_COUNT=0
-until curl -sf "http://localhost:3000" > /dev/null 2>&1; do
-    RETRY_COUNT=$((RETRY_COUNT + 1))
-    if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
-        echo -e "${RED}ERROR: Frontend failed to start within timeout${NC}"
-        pm2 logs frontend --lines 50
-        exit 1
+    wait_for_service "http://localhost:8085/shop-api?query=%7B__typename%7D" "Vendure API" 30
+fi
+
+# ============================================
+# Deploy Frontend
+# ============================================
+if [ "$DEPLOY_FRONTEND" = true ]; then
+    echo ""
+    echo "=============================================="
+    echo "  Starting Next.js Frontend"
+    echo "=============================================="
+
+    pm2 delete frontend 2>/dev/null || true
+    PORT=3001 pm2 start "npx next start -p 3001" --name "frontend" --cwd "$FRONTEND_DIR"
+
+    wait_for_service "http://localhost:3001" "Frontend" 30
+fi
+
+# ============================================
+# Deploy Backoffice
+# ============================================
+if [ "$DEPLOY_BACKOFFICE" = true ]; then
+    echo ""
+    echo "=============================================="
+    echo "  Starting React Backoffice"
+    echo "=============================================="
+
+    # Ensure serve is installed
+    if ! command -v serve &> /dev/null; then
+        echo "  Installing serve globally..."
+        npm install -g serve
     fi
-    echo "  Waiting... ($RETRY_COUNT/$MAX_RETRIES)"
-    sleep 2
-done
-echo -e "${GREEN}Frontend is healthy!${NC}"
+
+    pm2 delete backoffice 2>/dev/null || true
+    pm2 start serve --name "backoffice" -- -s "$BACKOFFICE_DIR/dist" -l 3002
+
+    wait_for_service "http://localhost:3002" "Backoffice" 30
+fi
 
 # ============================================
-# Configure PM2 to start on boot
+# Save PM2 configuration
 # ============================================
-pm2 startup systemd -u root --hp /root 2>/dev/null || true
+echo ""
+echo "Saving PM2 configuration..."
 pm2 save
 
 # ============================================
-# Final Status
+# Set correct ownership
+# ============================================
+echo "Setting file ownership..."
+sudo chown -R oscar:oscar "$PROJECT_ROOT"
+
+# ============================================
+# Summary
 # ============================================
 echo ""
-echo -e "${BLUE}========================================"
+echo "=============================================="
 echo "  Deployment Complete!"
-echo "========================================${NC}"
+echo "=============================================="
 echo ""
+echo "Services status:"
 pm2 status
 echo ""
-echo "Services:"
-echo "  - Vendure API: http://localhost:8085/shop-api"
-echo "  - Vendure Admin: http://localhost:8086/admin"
-echo "  - Frontend: http://localhost:3000"
+echo "Useful commands:"
+echo "  pm2 logs              - View all logs"
+echo "  pm2 logs vendure      - View Vendure logs"
+echo "  pm2 logs frontend     - View Frontend logs"
+echo "  pm2 logs backoffice   - View Backoffice logs"
+echo "  pm2 restart all       - Restart all services"
+echo "  pm2 monit             - Monitor processes"
 echo ""
-echo "Logs:"
-echo "  - pm2 logs vendure"
-echo "  - pm2 logs frontend"
+echo "URLs (internal):"
+echo "  Vendure API:   http://localhost:8085/shop-api"
+echo "  Vendure Admin: http://localhost:8085/admin"
+echo "  Frontend:      http://localhost:3001"
+echo "  Backoffice:    http://localhost:3002"
 echo ""
-echo -e "${GREEN}Deployment finished at $(date '+%Y-%m-%d %H:%M:%S')${NC}"
+echo "URLs (public via Nginx):"
+echo "  Store:         https://oscarfashion.com"
+echo "  Admin:         https://oscarfashion.com/admin"
+echo "  Backoffice:    https://oscarfashion.com/backoffice"
+echo "  Shop API:      https://oscarfashion.com/shop-api"
+echo ""
