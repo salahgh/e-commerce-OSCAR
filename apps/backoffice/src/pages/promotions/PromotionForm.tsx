@@ -16,6 +16,7 @@ import {
   ShoppingCart,
   Package,
   Sparkles,
+  Zap,
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { addToast } from '../../store/slices/uiSlice';
@@ -43,30 +44,64 @@ const generatePromoCode = (length: number = 8): string => {
   return result;
 };
 
-const validationSchema = Yup.object({
-  name: Yup.string().required('Nom requis'),
-  couponCode: Yup.string()
-    .matches(/^[A-Z0-9]*$/, 'Uniquement lettres majuscules et chiffres')
-    .nullable(),
-  discountType: Yup.string().oneOf(['percentage', 'fixed']).required('Type de réduction requis'),
-  discountValue: Yup.number()
-    .min(0, 'Valeur positive requise')
-    .required('Valeur de réduction requise'),
-  minOrderAmount: Yup.number().min(0, 'Valeur positive requise').nullable(),
-  usageLimit: Yup.number().min(0, 'Valeur positive requise').nullable(),
-  perCustomerUsageLimit: Yup.number().min(0, 'Valeur positive requise').nullable(),
-  startsAt: Yup.string().nullable(),
-  endsAt: Yup.string().nullable(),
-  enabled: Yup.boolean(),
-});
+// Icon mapping for known action codes
+const ACTION_ICONS: Record<string, React.ReactNode> = {
+  'order_percentage_discount': <Percent className="h-6 w-6" />,
+  'order_fixed_discount': <DollarSign className="h-6 w-6" />,
+  'collection-percentage-discount': <Package className="h-6 w-6" />,
+  'products_percentage_discount': <ShoppingCart className="h-6 w-6" />,
+  'facet_values_percentage_discount': <Tag className="h-6 w-6" />,
+  'buy_x_get_y_free': <Sparkles className="h-6 w-6" />,
+  'free_shipping': <Zap className="h-6 w-6" />,
+};
+
+// Friendly labels for known action codes
+const ACTION_LABELS: Record<string, string> = {
+  'order_percentage_discount': 'Pourcentage sur commande',
+  'order_fixed_discount': 'Montant fixe sur commande',
+  'collection-percentage-discount': 'Remise par collection (discount-XX)',
+  'products_percentage_discount': 'Pourcentage sur produits',
+  'facet_values_percentage_discount': 'Pourcentage par attribut',
+  'buy_x_get_y_free': 'Achetez X, obtenez Y gratuit',
+  'free_shipping': 'Livraison gratuite',
+};
+
+interface PromotionActionDef {
+  code: string;
+  description: string;
+  args: Array<{
+    name: string;
+    type: string;
+    required: boolean;
+    defaultValue: string;
+    list: boolean;
+    ui: any;
+    label: any;
+  }>;
+}
+
+interface PromotionConditionDef {
+  code: string;
+  description: string;
+  args: Array<{
+    name: string;
+    type: string;
+    required: boolean;
+    defaultValue: string;
+    list: boolean;
+    ui: any;
+    label: any;
+  }>;
+}
 
 interface FormValues {
   name: string;
   description: string;
   couponCode: string;
-  discountType: 'percentage' | 'fixed';
-  discountValue: number;
-  minOrderAmount: number | null;
+  selectedActionCode: string;
+  actionArgs: Record<string, string>;
+  selectedConditionCode: string;
+  conditionArgs: Record<string, string>;
   usageLimit: number | null;
   perCustomerUsageLimit: number | null;
   startsAt: string;
@@ -86,26 +121,27 @@ export const PromotionForm: React.FC = () => {
     skip: !isEdit,
   });
 
-  // Fetch available conditions and actions
+  // Fetch available conditions and actions from Vendure
   const { data: conditionsData } = useQuery(PromotionConditionsDocument);
   const { data: actionsData } = useQuery(PromotionActionsDocument);
 
-  // Mutations
   const [createPromotion, { loading: creating }] = useMutation(CreatePromotionDocument);
   const [updatePromotion, { loading: updating }] = useMutation(UpdatePromotionDocument);
 
   const promotion = promotionData?.promotion;
+  const availableActions: PromotionActionDef[] = (actionsData?.promotionActions as any[]) || [];
+  const availableConditions: PromotionConditionDef[] = (conditionsData?.promotionConditions as any[]) || [];
 
-  // Parse existing promotion data for form
   const getInitialValues = (): FormValues => {
     if (!promotion) {
       return {
         name: '',
         description: '',
         couponCode: '',
-        discountType: 'percentage',
-        discountValue: 10,
-        minOrderAmount: null,
+        selectedActionCode: availableActions[0]?.code || '',
+        actionArgs: {},
+        selectedConditionCode: '',
+        conditionArgs: {},
         usageLimit: null,
         perCustomerUsageLimit: null,
         startsAt: '',
@@ -114,35 +150,21 @@ export const PromotionForm: React.FC = () => {
       };
     }
 
-    // Parse discount from actions
-    let discountType: 'percentage' | 'fixed' = 'percentage';
-    let discountValue = 0;
+    // Parse existing action
     const action = promotion.actions?.[0];
-    if (action) {
-      if (action.code.includes('percentage') || action.code.includes('Percentage')) {
-        discountType = 'percentage';
-      } else {
-        discountType = 'fixed';
-      }
-      const valueArg = action.args?.find(
-        (a) => a.name === 'discount' || a.name === 'amount' || a.name === 'discountPercentage'
-      );
-      discountValue = valueArg ? parseInt(valueArg.value) : 0;
-      // Convert cents to DA for fixed amounts
-      if (discountType === 'fixed') {
-        discountValue = discountValue / 100;
+    const actionArgs: Record<string, string> = {};
+    if (action?.args) {
+      for (const arg of action.args) {
+        actionArgs[arg.name] = arg.value;
       }
     }
 
-    // Parse min order from conditions
-    let minOrderAmount: number | null = null;
-    const condition = promotion.conditions?.find(
-      (c) => c.code.includes('minimum') || c.code.includes('orderTotal')
-    );
-    if (condition) {
-      const amountArg = condition.args?.find((a) => a.name === 'amount' || a.name === 'orderTotal');
-      if (amountArg) {
-        minOrderAmount = parseInt(amountArg.value) / 100; // Convert cents to DA
+    // Parse existing condition
+    const condition = promotion.conditions?.[0];
+    const condArgs: Record<string, string> = {};
+    if (condition?.args) {
+      for (const arg of condition.args) {
+        condArgs[arg.name] = arg.value;
       }
     }
 
@@ -150,9 +172,10 @@ export const PromotionForm: React.FC = () => {
       name: promotion.name,
       description: promotion.description || '',
       couponCode: promotion.couponCode || '',
-      discountType,
-      discountValue,
-      minOrderAmount,
+      selectedActionCode: action?.code || '',
+      actionArgs,
+      selectedConditionCode: condition?.code || '',
+      conditionArgs: condArgs,
       usageLimit: promotion.usageLimit,
       perCustomerUsageLimit: promotion.perCustomerUsageLimit,
       startsAt: promotion.startsAt ? promotion.startsAt.split('T')[0] : '',
@@ -165,44 +188,32 @@ export const PromotionForm: React.FC = () => {
     try {
       // Build conditions array
       const conditions: any[] = [];
-      if (values.minOrderAmount && values.minOrderAmount > 0) {
-        conditions.push({
-          code: 'minimum_order_amount',
-          arguments: [
-            {
-              name: 'amount',
-              value: String(Math.round(values.minOrderAmount * 100)), // Convert DA to cents
-            },
-            {
-              name: 'taxInclusive',
-              value: 'true',
-            },
-          ],
-        });
+      if (values.selectedConditionCode) {
+        const condDef = availableConditions.find((c) => c.code === values.selectedConditionCode);
+        if (condDef) {
+          conditions.push({
+            code: values.selectedConditionCode,
+            arguments: condDef.args.map((a) => ({
+              name: a.name,
+              value: values.conditionArgs[a.name] || a.defaultValue || '',
+            })),
+          });
+        }
       }
 
       // Build actions array
       const actions: any[] = [];
-      if (values.discountType === 'percentage') {
-        actions.push({
-          code: 'order_percentage_discount',
-          arguments: [
-            {
-              name: 'discount',
-              value: String(values.discountValue),
-            },
-          ],
-        });
-      } else {
-        actions.push({
-          code: 'order_fixed_discount',
-          arguments: [
-            {
-              name: 'discount',
-              value: String(Math.round(values.discountValue * 100)), // Convert DA to cents
-            },
-          ],
-        });
+      if (values.selectedActionCode) {
+        const actDef = availableActions.find((a) => a.code === values.selectedActionCode);
+        if (actDef) {
+          actions.push({
+            code: values.selectedActionCode,
+            arguments: actDef.args.map((a) => ({
+              name: a.name,
+              value: values.actionArgs[a.name] || a.defaultValue || '',
+            })),
+          });
+        }
       }
 
       const input = {
@@ -231,7 +242,7 @@ export const PromotionForm: React.FC = () => {
           dispatch(addToast({ message: 'Erreur: conditions manquantes', type: 'error' }));
           return;
         }
-        dispatch(addToast({ message: 'Code promo mis à jour', type: 'success' }));
+        dispatch(addToast({ message: 'Promotion mise à jour', type: 'success' }));
       } else {
         const result = await createPromotion({
           variables: { input },
@@ -240,7 +251,7 @@ export const PromotionForm: React.FC = () => {
           dispatch(addToast({ message: 'Erreur: conditions manquantes', type: 'error' }));
           return;
         }
-        dispatch(addToast({ message: 'Code promo créé', type: 'success' }));
+        dispatch(addToast({ message: 'Promotion créée', type: 'success' }));
       }
       navigate('/promotions');
     } catch (err: any) {
@@ -256,6 +267,35 @@ export const PromotionForm: React.FC = () => {
     );
   }
 
+  const getActionLabel = (code: string) => ACTION_LABELS[code] || code;
+  const getActionIcon = (code: string) => ACTION_ICONS[code] || <Zap className="h-6 w-6" />;
+
+  const renderArgInput = (
+    arg: { name: string; type: string; required: boolean; defaultValue: string; ui: any; label: any },
+    values: FormValues,
+    setFieldValue: (field: string, value: any) => void,
+    prefix: 'actionArgs' | 'conditionArgs'
+  ) => {
+    const value = values[prefix][arg.name] || arg.defaultValue || '';
+    const label = arg.label?.[0]?.value || arg.name;
+    const suffix = arg.ui?.suffix || '';
+
+    return (
+      <Input
+        key={arg.name}
+        label={`${label}${suffix ? ` (${suffix})` : ''}`}
+        name={`${prefix}.${arg.name}`}
+        type={arg.type === 'float' || arg.type === 'int' ? 'number' : 'text'}
+        value={value}
+        onChange={(e) => {
+          setFieldValue(prefix, { ...values[prefix], [arg.name]: e.target.value });
+        }}
+        required={arg.required}
+        placeholder={arg.defaultValue || ''}
+      />
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -268,17 +308,16 @@ export const PromotionForm: React.FC = () => {
         </button>
         <div>
           <h1 className="text-2xl font-bold text-foreground">
-            {isEdit ? 'Modifier le Code Promo' : 'Nouveau Code Promo'}
+            {isEdit ? 'Modifier la Promotion' : 'Nouvelle Promotion'}
           </h1>
           <p className="text-muted-foreground">
-            {isEdit ? `Modification de ${promotion?.name}` : 'Créer un nouveau code promotionnel'}
+            {isEdit ? `Modification de ${promotion?.name}` : 'Créer une nouvelle promotion'}
           </p>
         </div>
       </div>
 
       <Formik
         initialValues={getInitialValues()}
-        validationSchema={validationSchema}
         onSubmit={handleSubmit}
         enableReinitialize
       >
@@ -296,7 +335,7 @@ export const PromotionForm: React.FC = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <Input
-                    label="Nom du code promo"
+                    label="Nom de la promotion"
                     name="name"
                     value={values.name}
                     onChange={handleChange}
@@ -318,11 +357,6 @@ export const PromotionForm: React.FC = () => {
                           setFieldValue('couponCode', e.target.value.toUpperCase())
                         }
                         onBlur={handleBlur}
-                        error={
-                          touched.couponCode && errors.couponCode
-                            ? String(errors.couponCode)
-                            : undefined
-                        }
                         placeholder="Ex: SUMMER24"
                         className="font-mono uppercase"
                       />
@@ -352,110 +386,141 @@ export const PromotionForm: React.FC = () => {
                 </CardContent>
               </Card>
 
-              {/* Discount Configuration */}
+              {/* Action Selection — Dynamic from Vendure */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-green-400" />
-                    Configuration de la réduction
+                    Action de réduction
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Type de réduction
-                    </label>
-                    <div className="grid grid-cols-2 gap-4">
-                      <button
-                        type="button"
-                        onClick={() => setFieldValue('discountType', 'percentage')}
-                        className={`p-4 rounded-xl border-2 transition-all flex items-center gap-3 ${
-                          values.discountType === 'percentage'
-                            ? 'border-primary bg-primary/10'
-                            : 'border-border hover:border-muted-foreground'
-                        }`}
-                      >
-                        <div
-                          className={`p-2 rounded-lg ${
-                            values.discountType === 'percentage'
-                              ? 'bg-primary/20'
-                              : 'bg-muted'
-                          }`}
-                        >
-                          <Percent
-                            className={`h-6 w-6 ${
-                              values.discountType === 'percentage'
-                                ? 'text-primary'
-                                : 'text-muted-foreground'
-                            }`}
-                          />
-                        </div>
-                        <div className="text-left">
-                          <p className="font-medium text-foreground">Pourcentage</p>
-                          <p className="text-sm text-muted-foreground">Ex: -20%</p>
-                        </div>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFieldValue('discountType', 'fixed')}
-                        className={`p-4 rounded-xl border-2 transition-all flex items-center gap-3 ${
-                          values.discountType === 'fixed'
-                            ? 'border-primary bg-primary/10'
-                            : 'border-border hover:border-muted-foreground'
-                        }`}
-                      >
-                        <div
-                          className={`p-2 rounded-lg ${
-                            values.discountType === 'fixed' ? 'bg-primary/20' : 'bg-muted'
-                          }`}
-                        >
-                          <DollarSign
-                            className={`h-6 w-6 ${
-                              values.discountType === 'fixed'
-                                ? 'text-primary'
-                                : 'text-muted-foreground'
-                            }`}
-                          />
-                        </div>
-                        <div className="text-left">
-                          <p className="font-medium text-foreground">Montant fixe</p>
-                          <p className="text-sm text-muted-foreground">Ex: -500 DA</p>
-                        </div>
-                      </button>
+                  {availableActions.length === 0 ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Spinner size="sm" />
+                      <span className="ml-2 text-muted-foreground">Chargement des actions...</span>
                     </div>
-                  </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-2 gap-3">
+                        {availableActions.map((action) => (
+                          <button
+                            key={action.code}
+                            type="button"
+                            onClick={() => {
+                              setFieldValue('selectedActionCode', action.code);
+                              // Reset args with defaults
+                              const defaults: Record<string, string> = {};
+                              action.args.forEach((a) => {
+                                defaults[a.name] = a.defaultValue || '';
+                              });
+                              setFieldValue('actionArgs', defaults);
+                            }}
+                            className={`p-3 rounded-xl border-2 transition-all flex items-center gap-3 text-left ${
+                              values.selectedActionCode === action.code
+                                ? 'border-primary bg-primary/10'
+                                : 'border-border hover:border-muted-foreground'
+                            }`}
+                          >
+                            <div
+                              className={`p-2 rounded-lg shrink-0 ${
+                                values.selectedActionCode === action.code
+                                  ? 'bg-primary/20 text-primary'
+                                  : 'bg-muted text-muted-foreground'
+                              }`}
+                            >
+                              {getActionIcon(action.code)}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium text-foreground text-sm truncate">
+                                {getActionLabel(action.code)}
+                              </p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {action.description}
+                              </p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
 
-                  <Input
-                    label={
-                      values.discountType === 'percentage'
-                        ? 'Pourcentage de réduction'
-                        : 'Montant de la réduction (DA)'
-                    }
-                    name="discountValue"
-                    type="number"
-                    value={values.discountValue}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={
-                      touched.discountValue && errors.discountValue
-                        ? String(errors.discountValue)
-                        : undefined
-                    }
-                    min={0}
-                    max={values.discountType === 'percentage' ? 100 : undefined}
-                    required
+                      {/* Action Arguments */}
+                      {values.selectedActionCode && (() => {
+                        const selectedAction = availableActions.find(
+                          (a) => a.code === values.selectedActionCode
+                        );
+                        if (!selectedAction || selectedAction.args.length === 0) {
+                          if (values.selectedActionCode === 'collection-percentage-discount') {
+                            return (
+                              <div className="bg-muted/50 rounded-xl p-4 border border-border">
+                                <p className="text-sm text-foreground font-medium mb-2">Remise automatique par collection</p>
+                                <p className="text-sm text-muted-foreground">
+                                  Le pourcentage est extrait du slug de la collection.
+                                  Format: <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">discount-XX</code> (ex: discount-30 pour -30%).
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }
+                        return (
+                          <div className="space-y-3 pt-2">
+                            {selectedAction.args.map((arg) =>
+                              renderArgInput(arg, values, setFieldValue, 'actionArgs')
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Condition Selection — Dynamic from Vendure */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ShoppingCart className="h-5 w-5 text-blue-400" />
+                    Condition (optionnel)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Select
+                    label="Condition d'application"
+                    name="selectedConditionCode"
+                    value={values.selectedConditionCode}
+                    onChange={(e) => {
+                      setFieldValue('selectedConditionCode', e.target.value);
+                      // Reset condition args
+                      const cond = availableConditions.find((c) => c.code === e.target.value);
+                      const defaults: Record<string, string> = {};
+                      cond?.args.forEach((a) => {
+                        defaults[a.name] = a.defaultValue || '';
+                      });
+                      setFieldValue('conditionArgs', defaults);
+                    }}
+                    options={[
+                      { value: '', label: 'Aucune condition (toujours active)' },
+                      ...availableConditions.map((c) => ({
+                        value: c.code,
+                        label: c.description || c.code,
+                      })),
+                    ]}
                   />
 
-                  <Input
-                    label="Montant minimum de commande (DA)"
-                    name="minOrderAmount"
-                    type="number"
-                    value={values.minOrderAmount || ''}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    placeholder="Laisser vide pour aucun minimum"
-                    min={0}
-                  />
+                  {/* Condition Arguments */}
+                  {values.selectedConditionCode && (() => {
+                    const selectedCond = availableConditions.find(
+                      (c) => c.code === values.selectedConditionCode
+                    );
+                    if (!selectedCond || selectedCond.args.length === 0) return null;
+                    return (
+                      <div className="space-y-3">
+                        {selectedCond.args.map((arg) =>
+                          renderArgInput(arg, values, setFieldValue, 'conditionArgs')
+                        )}
+                      </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
 
@@ -510,10 +575,10 @@ export const PromotionForm: React.FC = () => {
                       onChange={handleChange}
                       className="w-5 h-5 rounded border-border text-primary focus:ring-primary"
                     />
-                    <span className="text-foreground font-medium">Code promo actif</span>
+                    <span className="text-foreground font-medium">Promotion active</span>
                   </label>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Désactivez pour empêcher l'utilisation du code
+                    Désactivez pour suspendre la promotion
                   </p>
                 </CardContent>
               </Card>
@@ -561,7 +626,7 @@ export const PromotionForm: React.FC = () => {
                       loading={creating || updating}
                     >
                       <Save className="h-4 w-4 mr-2" />
-                      {isEdit ? 'Enregistrer' : 'Créer le code promo'}
+                      {isEdit ? 'Enregistrer' : 'Créer la promotion'}
                     </Button>
                     <Button
                       type="button"
@@ -590,14 +655,12 @@ export const PromotionForm: React.FC = () => {
                       ) : (
                         <p className="text-muted-foreground mb-2">Promotion automatique</p>
                       )}
-                      <p className="text-3xl font-bold text-green-400">
-                        {values.discountType === 'percentage'
-                          ? `-${values.discountValue}%`
-                          : `-${values.discountValue.toLocaleString('fr-DZ')} DA`}
+                      <p className="text-lg font-bold text-green-400">
+                        {getActionLabel(values.selectedActionCode)}
                       </p>
-                      {values.minOrderAmount && values.minOrderAmount > 0 && (
+                      {values.selectedConditionCode && (
                         <p className="text-sm text-muted-foreground mt-2">
-                          Min. {values.minOrderAmount.toLocaleString('fr-DZ')} DA
+                          Condition: {availableConditions.find((c) => c.code === values.selectedConditionCode)?.description || values.selectedConditionCode}
                         </p>
                       )}
                     </div>

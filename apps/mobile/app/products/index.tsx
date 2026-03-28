@@ -11,6 +11,7 @@ import { SimpleProduct } from '../../src/components/products/ProductCard';
 import { ProductGrid, SearchBar, FilterBar, SortOption } from '../../src/components/products';
 import { colors, spacing } from '../../src/theme';
 import { formatPrice } from '../../src/utils/vendureAdapters';
+import { parseProductDiscount } from '../../src/utils/discountParser';
 
 export default function ProductsScreen() {
   const { t } = useTranslation();
@@ -98,16 +99,17 @@ export default function ProductsScreen() {
     if (!selectedCategory && productsData?.products?.items) {
       return productsData.products.items.map((product: any) => {
         const defaultVariant = product.variants?.[0];
-        const customFields = defaultVariant?.customFields;
+        const priceInCents = defaultVariant?.priceWithTax ?? 0;
+        const discount = parseProductDiscount(product.collections, priceInCents);
         return {
           id: product.id,
           name: product.name,
           slug: product.slug,
           description: product.description,
           imageUrl: product.featuredAsset?.preview,
-          price: defaultVariant ? formatPrice(defaultVariant.priceWithTax) : 0,
-          originalPrice: customFields?.originalPrice ? formatPrice(customFields.originalPrice) : undefined,
-          discountPercent: customFields?.discountPercent ?? undefined,
+          price: formatPrice(discount.salePrice),
+          originalPrice: discount.hasDiscount ? formatPrice(discount.originalPrice) : undefined,
+          discountPercent: discount.hasDiscount ? discount.percentage : undefined,
           inStock: defaultVariant?.stockLevel !== 'OUT_OF_STOCK',
         };
       });

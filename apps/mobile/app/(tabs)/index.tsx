@@ -31,6 +31,7 @@ import type { FigmaProduct } from '@/src/components/home';
 import { LoadingSpinner, ErrorState } from '@/src/components/ui';
 import { colors, spacing } from '@/src/theme';
 import { formatPrice } from '@/src/utils/vendureAdapters';
+import { parseProductDiscount } from '@/src/utils/discountParser';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -135,15 +136,16 @@ export default function HomeScreen() {
   // Transform product items to FigmaProduct format
   const transformProductItem = (product: any): FigmaProduct => {
     const defaultVariant = product.variants?.[0];
-    const customFields = defaultVariant?.customFields;
+    const priceInCents = defaultVariant?.priceWithTax ?? 0;
+    const discount = parseProductDiscount(product.collections, priceInCents);
     return {
       id: product.id,
       name: product.name,
       slug: product.slug,
       imageUrl: product.featuredAsset?.preview,
-      price: defaultVariant ? formatPrice(defaultVariant.priceWithTax) : 0,
-      originalPrice: customFields?.originalPrice ? formatPrice(customFields.originalPrice) : null,
-      discountPercent: customFields?.discountPercent ?? null,
+      price: formatPrice(discount.salePrice),
+      originalPrice: discount.hasDiscount ? formatPrice(discount.originalPrice) : null,
+      discountPercent: discount.hasDiscount ? discount.percentage : null,
       inStock: defaultVariant?.stockLevel !== 'OUT_OF_STOCK',
       rating: 4,
       reviewCount: 2,
