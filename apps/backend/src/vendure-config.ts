@@ -16,6 +16,7 @@ import { OscarPlugin } from './plugins/oscar-plugin/oscar-plugin';
 import { cashOnDeliveryHandler } from './plugins/oscar-plugin/payment/cash-on-delivery-handler';
 import { cibPaymentHandler } from './plugins/oscar-plugin/payment/cib-payment-handler';
 import { baridimobPaymentHandler } from './plugins/oscar-plugin/payment/baridimob-payment-handler';
+import { collectionPercentageDiscount } from './plugins/oscar-plugin/promotion/collection-discount-action';
 
 const IS_DEV = process.env.NODE_ENV !== 'production';
 
@@ -100,6 +101,9 @@ export const config: VendureConfig = {
       cibPaymentHandler,
       baridimobPaymentHandler,
     ],
+  },
+  promotionOptions: {
+    promotionActions: [collectionPercentageDiscount],
   },
   // When adding or changing custom fields, remember to generate
   // a database migration. See https://docs.vendure.io/guides/developer-guide/migrations/
