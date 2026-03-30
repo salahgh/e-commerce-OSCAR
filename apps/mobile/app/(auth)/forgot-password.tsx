@@ -65,7 +65,7 @@ export default function ForgotPasswordScreen() {
       setSuccess(true);
     } catch (err: any) {
       console.error('Forgot password failed:', err);
-      setError(err.message || 'Failed to send reset email. Please try again.');
+      setError(err.message || t('auth.failedToSendReset'));
     }
   };
 
@@ -84,24 +84,23 @@ export default function ForgotPasswordScreen() {
           >
             <Ionicons name="mail-outline" size={64} color={colors.success} />
           </Animated.View>
-          <Text style={styles.successTitle}>Check your email</Text>
+          <Text style={styles.successTitle}>{t('auth.checkEmail')}</Text>
           <Text style={styles.successEmail}>{submittedEmail}</Text>
           <Text style={styles.successMessage}>
-            We've sent password reset instructions to your email address. Please check your inbox
-            and follow the link to reset your password.
+            {t('auth.resetEmailSent')}
           </Text>
           <Text style={styles.spamNote}>
-            Didn't receive the email? Check your spam folder.
+            {t('auth.checkSpam')}
           </Text>
           <Button
-            title="Back to Login"
+            title={t('auth.backToLogin')}
             onPress={() => router.replace('/(auth)/login')}
             variant="primary"
             fullWidth
             style={styles.backButton}
           />
           <Button
-            title="Resend Email"
+            title={t('auth.resendEmail')}
             onPress={() => {
               setSuccess(false);
               setError(null);
@@ -135,7 +134,7 @@ export default function ForgotPasswordScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>{t('auth.forgotPassword')}</Text>
           <Text style={styles.subtitle}>
-            Enter your email address and we'll send you instructions to reset your password
+            {t('auth.resetEmailSent')}
           </Text>
         </View>
 
@@ -164,7 +163,7 @@ export default function ForgotPasswordScreen() {
               />
 
               <Button
-                title="Send Reset Instructions"
+                title={t('auth.sendResetInstructions')}
                 onPress={handleSubmit}
                 loading={isSubmitting}
                 fullWidth
@@ -172,7 +171,7 @@ export default function ForgotPasswordScreen() {
               />
 
               <Button
-                title="Back to Login"
+                title={t('auth.backToLogin')}
                 onPress={() => router.back()}
                 variant="ghost"
                 fullWidth

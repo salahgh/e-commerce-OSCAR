@@ -302,7 +302,7 @@ export default function ProductDetailScreen() {
 
       {/* Bottom Actions */}
       {!isOutOfStock && (
-        <View style={styles.bottomActions}>
+        <View style={[styles.bottomActions, { paddingBottom: insets.bottom + spacing.lg }]}>
           <Button
             title={
               addToCartSuccess

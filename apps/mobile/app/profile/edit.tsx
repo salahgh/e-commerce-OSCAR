@@ -5,252 +5,317 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  TextInput,
   KeyboardAvoidingView,
   Platform,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Formik } from 'formik';
+import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Input, Button, LoadingSpinner, ErrorState } from '../../src/components/ui';
-import {
-  useActiveCustomerQuery,
-  useUpdateCustomerProfileMutation,
-} from '../../src/graphql/generated/graphql';
-import { updateProfileSchema } from '../../src/utils/validation';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAuth } from '../../src/contexts/AuthContext';
+import { useActiveCustomerQuery, useUpdateCustomerProfileMutation } from '../../src/graphql/generated/graphql';
 import { colors, spacing, typography } from '../../src/theme';
-
-interface EditProfileFormValues {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-}
+import { useAppFont } from '../../src/hooks/useAppFont';
+import { changeLanguage, getCurrentLanguage, Language } from '../../src/i18n';
 
 export default function EditProfileScreen() {
   const { t } = useTranslation();
-  const router = useRouter();
-  const [submitError, setSubmitError] = useState<string>('');
+  const insets = useSafeAreaInsets();
+  const { fontFamily } = useAppFont();
+  const { user, updateUser } = useAuth();
 
-  const { data, loading, error, refetch } = useActiveCustomerQuery({
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const [updateProfile, { loading: updating }] = useUpdateCustomerProfileMutation();
-
+  const { data } = useActiveCustomerQuery({ fetchPolicy: 'cache-and-network' });
   const customer = data?.activeCustomer;
 
-  const handleSubmit = async (values: EditProfileFormValues) => {
+  const [fullName, setFullName] = useState(
+    customer ? `${customer.firstName} ${customer.lastName}` : `${user?.firstName || ''} ${user?.lastName || ''}`
+  );
+  const [email] = useState(customer?.emailAddress || user?.email || '');
+  const [phone, setPhone] = useState(customer?.phoneNumber || '');
+  const [selectedLang, setSelectedLang] = useState<Language>(getCurrentLanguage());
+  const [saving, setSaving] = useState(false);
+
+  const [updateProfile] = useUpdateCustomerProfileMutation();
+
+  const handleSave = async () => {
+    setSaving(true);
     try {
-      setSubmitError('');
+      const [firstName, ...rest] = fullName.trim().split(' ');
+      const lastName = rest.join(' ') || firstName;
 
       await updateProfile({
         variables: {
           input: {
-            firstName: values.firstName.trim(),
-            lastName: values.lastName.trim(),
-            phoneNumber: values.phone.trim() || undefined,
+            firstName,
+            lastName,
+            phoneNumber: phone,
           },
         },
         refetchQueries: ['ActiveCustomer'],
       });
 
-      Alert.alert(
-        t('profile.updateSuccess', 'Profile Updated'),
-        t('profile.updateSuccessMessage', 'Your profile has been updated successfully'),
-        [
-          {
-            text: t('common.ok', 'OK'),
-            onPress: () => router.back(),
-          },
-        ]
-      );
+      if (selectedLang !== getCurrentLanguage()) {
+        await changeLanguage(selectedLang);
+      }
+
+      updateUser({
+        id: user?.id || '',
+        email,
+        firstName,
+        lastName,
+        phoneNumber: phone,
+      });
+
+      Alert.alert(t('common.success'), t('profile.updated'));
+      router.back();
     } catch (err: any) {
-      setSubmitError(err.message || t('profile.updateError', 'Failed to update profile'));
+      Alert.alert(t('common.error'), err.message || t('profile.updateError'));
+    } finally {
+      setSaving(false);
     }
   };
 
-  if (loading && !data) {
-    return (
-      <View style={styles.container}>
-        <LoadingSpinner />
-      </View>
-    );
-  }
-
-  if (error || !customer) {
-    return (
-      <View style={styles.container}>
-        <ErrorState
-          title={t('profile.errorTitle', 'Failed to Load Profile')}
-          message={error?.message || t('profile.errorMessage', 'Unable to load your profile')}
-          onRetry={() => refetch()}
-        />
-      </View>
-    );
-  }
-
-  const initialValues: EditProfileFormValues = {
-    firstName: customer.firstName || '',
-    lastName: customer.lastName || '',
-    email: customer.emailAddress,
-    phone: customer.phoneNumber || '',
-  };
-
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={100}
-    >
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('profile.editProfile', 'Edit Profile')}</Text>
-        <View style={styles.placeholder} />
+        <Text style={[styles.headerTitle, { fontFamily: fontFamily.medium }]}>
+          {t('profile.personalInfo')}
+        </Text>
+        <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <Formik
-          initialValues={initialValues}
-          validationSchema={updateProfileSchema}
-          onSubmit={handleSubmit}
-          enableReinitialize
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isValid }) => (
-            <View style={styles.form}>
-              <Input
-                label={t('auth.firstName', 'First Name')}
-                placeholder={t('auth.firstNamePlaceholder', 'John')}
-                value={values.firstName}
-                onChangeText={handleChange('firstName')}
-                onBlur={handleBlur('firstName')}
-                error={touched.firstName && errors.firstName ? errors.firstName : undefined}
-                autoCapitalize="words"
-                required
-              />
-
-              <Input
-                label={t('auth.lastName', 'Last Name')}
-                placeholder={t('auth.lastNamePlaceholder', 'Doe')}
-                value={values.lastName}
-                onChangeText={handleChange('lastName')}
-                onBlur={handleBlur('lastName')}
-                error={touched.lastName && errors.lastName ? errors.lastName : undefined}
-                autoCapitalize="words"
-                required
-              />
-
-              <Input
-                label={t('auth.email', 'Email')}
-                placeholder={t('auth.emailPlaceholder', 'john.doe@example.com')}
-                value={values.email}
-                onChangeText={handleChange('email')}
-                onBlur={handleBlur('email')}
-                error={touched.email && errors.email ? errors.email : undefined}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                required
-              />
-
-              <Input
-                label={t('auth.phone', 'Phone Number')}
-                placeholder="0612345678"
-                value={values.phone}
-                onChangeText={handleChange('phone')}
-                onBlur={handleBlur('phone')}
-                error={touched.phone && errors.phone ? errors.phone : undefined}
-                keyboardType="phone-pad"
-              />
-
-              {submitError ? (
-                <View style={styles.errorContainer}>
-                  <Ionicons name="alert-circle-outline" size={20} color={colors.error} />
-                  <Text style={styles.errorText}>{submitError}</Text>
-                </View>
-              ) : null}
-
-              <Button
-                title={t('profile.saveChanges', 'Save Changes')}
-                onPress={handleSubmit}
-                loading={updating}
-                disabled={updating || !isValid}
-                fullWidth
-                style={styles.submitButton}
-              />
-
-              <Button
-                title={t('common.cancel', 'Cancel')}
-                onPress={() => router.back()}
-                variant="outline"
-                fullWidth
-                disabled={updating}
-              />
+          {/* Avatar */}
+          <View style={styles.avatarSection}>
+            <View style={styles.avatarContainer}>
+              <View style={styles.avatar}>
+                <Ionicons name="person" size={48} color={colors.text.tertiary} />
+              </View>
+              <TouchableOpacity style={styles.cameraButton}>
+                <Ionicons name="camera" size={16} color={colors.text.secondary} />
+              </TouchableOpacity>
             </View>
-          )}
-        </Formik>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          </View>
+
+          {/* Full Name */}
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.fullName')}</Text>
+            <TextInput
+              style={[styles.input, { fontFamily: fontFamily.regular }]}
+              value={fullName}
+              onChangeText={setFullName}
+              placeholder={t('auth.enterFullName')}
+              placeholderTextColor={colors.text.tertiary}
+            />
+          </View>
+
+          {/* Email */}
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.addressEmail')}</Text>
+            <TextInput
+              style={[styles.input, styles.inputDisabled, { fontFamily: fontFamily.regular }]}
+              value={email}
+              editable={false}
+            />
+          </View>
+
+          {/* Phone */}
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.phoneNumber')}</Text>
+            <TextInput
+              style={[styles.input, { fontFamily: fontFamily.regular }]}
+              value={phone}
+              onChangeText={setPhone}
+              placeholder="+213 XXX XX XX XX"
+              placeholderTextColor={colors.text.tertiary}
+              keyboardType="phone-pad"
+            />
+          </View>
+
+          {/* Password */}
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.password')}</Text>
+            <TouchableOpacity
+              style={styles.passwordRow}
+              onPress={() => router.push('/profile/change-password')}
+            >
+              <Text style={[styles.passwordDots, { fontFamily: fontFamily.regular }]}>••••••••••</Text>
+              <Ionicons name="eye-off-outline" size={20} color={colors.text.tertiary} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Language */}
+          <View style={styles.langSection}>
+            <Text style={[styles.langTitle, { fontFamily: fontFamily.bold }]}>{t('profile.language')}</Text>
+
+            <TouchableOpacity
+              style={styles.langOption}
+              onPress={() => setSelectedLang('ar')}
+              activeOpacity={0.7}
+            >
+              <Ionicons
+                name={selectedLang === 'ar' ? 'radio-button-on' : 'radio-button-off'}
+                size={22}
+                color={selectedLang === 'ar' ? colors.primary : colors.border}
+              />
+              <Text style={[styles.langLabel, { fontFamily: fontFamily.medium }]}>(AR) العربية</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.langOption}
+              onPress={() => setSelectedLang('fr')}
+              activeOpacity={0.7}
+            >
+              <Ionicons
+                name={selectedLang === 'fr' ? 'radio-button-on' : 'radio-button-off'}
+                size={22}
+                color={selectedLang === 'fr' ? colors.primary : colors.border}
+              />
+              <Text style={[styles.langLabel, { fontFamily: fontFamily.medium }]}>Français (FR)</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Save Button */}
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={handleSave}
+            activeOpacity={0.8}
+            disabled={saving}
+          >
+            <Text style={[styles.saveButtonText, { fontFamily: fontFamily.medium }]}>
+              {saving ? t('common.saving') : t('common.save')}
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
   },
   header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+  },
+  headerTitle: {
+    fontSize: typography.fontSize.lg,
+    color: colors.text.primary,
+  },
+  scrollContent: {
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing['3xl'],
+  },
+  avatarSection: {
+    alignItems: 'center',
+    paddingVertical: spacing['2xl'],
+  },
+  avatarContainer: {
+    position: 'relative',
+  },
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#F0F0F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cameraButton: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+  },
+  fieldGroup: {
+    marginBottom: spacing.md,
+  },
+  fieldLabel: {
+    fontSize: 13,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
+  },
+  input: {
+    height: 48,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    fontSize: 14,
+    color: colors.text.primary,
+    paddingHorizontal: 0,
+  },
+  inputDisabled: {
+    color: colors.text.tertiary,
+  },
+  passwordRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
-    paddingTop: spacing.xl,
+    height: 48,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  headerTitle: {
-    ...typography.styles.h3,
+  passwordDots: {
+    fontSize: 14,
     color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
   },
-  placeholder: {
-    width: 40,
+  langSection: {
+    marginTop: spacing.xl,
+    marginBottom: spacing.xl,
   },
-  content: {
-    flex: 1,
+  langTitle: {
+    fontSize: 16,
+    color: colors.text.primary,
+    marginBottom: spacing.lg,
   },
-  form: {
-    padding: spacing.lg,
-    gap: spacing.md,
-  },
-  errorContainer: {
+  langOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.error + '15',
-    padding: spacing.md,
+    gap: spacing.md,
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  langLabel: {
+    fontSize: 15,
+    color: colors.text.primary,
+  },
+  saveButton: {
+    backgroundColor: colors.primary,
     borderRadius: 8,
+    paddingVertical: 16,
+    alignItems: 'center',
   },
-  errorText: {
-    ...typography.styles.bodySmall,
-    color: colors.error,
-    flex: 1,
-  },
-  submitButton: {
-    marginTop: spacing.md,
+  saveButtonText: {
+    fontSize: 16,
+    color: colors.text.inverse,
   },
 });

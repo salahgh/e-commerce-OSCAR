@@ -282,7 +282,7 @@ pm2 save
 # Set correct ownership
 # ============================================
 echo "Setting file ownership..."
-sudo chown -R oscar:oscar "$PROJECT_ROOT"
+sudo chown -R $(whoami):$(whoami) "$PROJECT_ROOT"
 
 # ============================================
 # Summary
