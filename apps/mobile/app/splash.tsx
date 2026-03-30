@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTranslation } from 'react-i18next';
 import { colors, spacing, typography } from '../src/theme';
 import Logo from '../assets/images/logooscarsvg1.svg';
 
@@ -15,6 +16,7 @@ const ONBOARDING_KEY = '@oscar_onboarding_complete';
 export default function SplashScreen() {
 
   const router = useRouter();
+  const { t } = useTranslation();
 
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const logoScale = useRef(new Animated.Value(0.8)).current;
@@ -99,7 +101,7 @@ export default function SplashScreen() {
 
         {/* Tagline */}
         <Animated.Text style={[styles.tagline, { opacity: taglineOpacity }]}>
-          Affordable Style for Everyone
+          {t('common.tagline')}
         </Animated.Text>
       </Animated.View>
     </View>

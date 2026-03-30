@@ -21,7 +21,19 @@
       "mcp__figma__get_design_context",
       "Bash(xargs grep:*)",
       "Bash(find /d/e-commerce-OSCAR/apps/backend/src -type f -name \"*.ts\" -exec grep -l \"Promotion\\\\|Adjustment\\\\|Discount\\\\|Price\" {})",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(find /d/e-commerce-OSCAR/apps/mobile -type f \\\\\\(-name index.tsx -o -name ProductCard*.tsx -o -name ProductGrid.tsx \\\\\\))",
+      "Bash(find D:/e-commerce-OSCAR/apps/backend/node_modules/@vendure/core/dist -name *promotion* -type f)",
+      "Bash(find D:/e-commerce-OSCAR/node_modules/@vendure/core -name *condition* -o -name *action*)",
+      "Bash(grep -r export.*Collection D:/e-commerce-OSCAR/node_modules/@vendure/core/dist/entity)",
+      "Bash(pnpm --filter @oscar/backend build)",
+      "Bash(find /d/e-commerce-OSCAR/apps/mobile/src -name *theme* -type f)",
+      "Bash(find /d/e-commerce-OSCAR/apps/mobile/src/components/ui -name *.tsx)",
+      "mcp__figma__get_screenshot",
+      "Bash(find D:/e-commerce-OSCAR/apps/backend/src -type f \\\\\\(-name *.graphql -o -name schema.graphql \\\\\\))",
+      "Bash(cp \"D:/e-commerce-OSCAR/packages/shared/src/constants/wilayas.ts\" \"D:/e-commerce-OSCAR/apps/mobile/src/data/wilayas.ts\")",
+      "WebSearch",
+      "Bash(grep -i \"[A-Za-zÀ-ÿ]\\\\{4,\\\\}\")"
     ]
   }
 }

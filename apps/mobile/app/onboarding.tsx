@@ -16,6 +16,7 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { colors, spacing, typography } from '../src/theme';
 import { Button } from '../src/components/ui';
 
@@ -31,44 +32,45 @@ interface OnboardingSlide {
   iconColor: string;
 }
 
-const slides: OnboardingSlide[] = [
-  {
-    id: '1',
-    title: 'Discover Fashion',
-    description: 'Explore the latest trends in fashion with our curated collection of premium clothing and accessories.',
-    icon: 'shirt-outline',
-    backgroundColor: colors.primary,
-    iconColor: colors.secondary,
-  },
-  {
-    id: '2',
-    title: 'Easy Shopping',
-    description: 'Browse thousands of products, compare prices, and add your favorites to cart with just a tap.',
-    icon: 'cart-outline',
-    backgroundColor: colors.accent,
-    iconColor: colors.primary,
-  },
-  {
-    id: '3',
-    title: 'Secure Checkout',
-    description: 'Multiple payment options including CIB and BaridiMob. Your transactions are always safe with us.',
-    icon: 'shield-checkmark-outline',
-    backgroundColor: '#2C3E50',
-    iconColor: colors.success,
-  },
-  {
-    id: '4',
-    title: 'Fast Delivery',
-    description: 'Get your orders delivered right to your doorstep across Algeria with real-time tracking.',
-    icon: 'rocket-outline',
-    backgroundColor: colors.primaryDark,
-    iconColor: colors.secondary,
-  },
-];
-
 export default function OnboardingScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+
+  const slides: OnboardingSlide[] = [
+    {
+      id: '1',
+      title: t('onboarding.discoverFashion'),
+      description: t('onboarding.discoverDesc'),
+      icon: 'shirt-outline',
+      backgroundColor: colors.primary,
+      iconColor: colors.secondary,
+    },
+    {
+      id: '2',
+      title: t('onboarding.easyShopping'),
+      description: t('onboarding.easyDesc'),
+      icon: 'cart-outline',
+      backgroundColor: colors.accent,
+      iconColor: colors.primary,
+    },
+    {
+      id: '3',
+      title: t('onboarding.secureCheckout'),
+      description: t('onboarding.secureDesc'),
+      icon: 'shield-checkmark-outline',
+      backgroundColor: '#2C3E50',
+      iconColor: colors.success,
+    },
+    {
+      id: '4',
+      title: t('onboarding.fastDelivery'),
+      description: t('onboarding.fastDesc'),
+      icon: 'rocket-outline',
+      backgroundColor: colors.primaryDark,
+      iconColor: colors.secondary,
+    },
+  ];
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -216,7 +218,7 @@ export default function OnboardingScreen() {
         onPress={handleSkip}
         activeOpacity={0.7}
       >
-        <Text style={styles.skipText}>Skip</Text>
+        <Text style={styles.skipText}>{t('onboarding.skip')}</Text>
       </TouchableOpacity>
 
       {/* Slides */}
@@ -246,7 +248,7 @@ export default function OnboardingScreen() {
         <View style={styles.buttonContainer}>
           {isLastSlide ? (
             <Button
-              title="Get Started"
+              title={t('onboarding.getStarted')}
               onPress={completeOnboarding}
               variant="secondary"
               fullWidth

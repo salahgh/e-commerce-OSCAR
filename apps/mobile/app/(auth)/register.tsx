@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  TextInput,
   Keyboard,
 } from 'react-native';
 import { Link, router } from 'expo-router';
@@ -15,46 +16,54 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../src/contexts/AuthContext';
-import { Input, Button, ErrorBanner, Checkbox } from '../../src/components/ui';
 import { colors, spacing, typography } from '../../src/theme';
+import { useAppFont } from '../../src/hooks/useAppFont';
 import { registerSchema } from '../../src/utils/validation';
+import Logo from '../../assets/images/logooscarsvg1.svg';
 
 interface RegisterFormValues {
-  firstName: string;
-  lastName: string;
+  fullName: string;
   email: string;
+  phone: string;
   password: string;
   confirmPassword: string;
 }
 
 export default function RegisterScreen() {
   const { t } = useTranslation();
-  const { register } = useAuth();
+  const { register, login } = useAuth();
   const insets = useSafeAreaInsets();
+  const { fontFamily } = useAppFont();
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleRegister = async (values: RegisterFormValues) => {
-    if (!acceptTerms) {
-      setError('Please accept the Terms & Conditions to continue.');
-      return;
-    }
     Keyboard.dismiss();
     try {
       setError(null);
-      await register({
-        email: values.email,
+      const [firstName, ...rest] = values.fullName.trim().split(' ');
+      const lastName = rest.join(' ') || firstName;
+      const result = await register({
+        emailAddress: values.email,
         password: values.password,
-        firstName: values.firstName,
-        lastName: values.lastName,
+        firstName,
+        lastName,
       });
-      // Navigation will be handled by auth state change
-      router.replace('/(tabs)');
+      if (!result.success) {
+        setError(result.message || t('errors.genericError'));
+        return;
+      }
+      // Auto-login after registration (requireVerification is false in dev)
+      try {
+        await login(values.email, values.password);
+        router.replace('/(auth)/register-success');
+      } catch {
+        // If auto-login fails (e.g., verification required), go to success screen anyway
+        router.replace('/(auth)/register-success');
+      }
     } catch (err: any) {
-      console.error('Registration failed:', err);
-      setError(err.message || 'Registration failed. Please try again.');
+      setError(err.message || t('errors.genericError'));
     }
   };
 
@@ -64,154 +73,162 @@ export default function RegisterScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + spacing.lg }]}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         {/* Logo */}
         <View style={styles.logoContainer}>
-          <View style={styles.logo}>
-            <Text style={styles.logoText}>O</Text>
-          </View>
+          <Logo width={120} height={92} />
         </View>
 
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.brandName}>OSCAR</Text>
-          <Text style={styles.brandTagline}>FASHION</Text>
-          <Text style={styles.title}>{t('auth.register')}</Text>
-          <Text style={styles.subtitle}>Create your OSCAR Fashion account</Text>
-        </View>
+        <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>
+          {t('auth.createNewAccount')}
+        </Text>
+        <Text style={[styles.subtitle, { fontFamily: fontFamily.regular }]}>
+          {t('auth.registerSubtitle')}
+        </Text>
 
-        {/* Error Banner */}
-        {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
+        {/* Error */}
+        {error && (
+          <View style={styles.errorBanner}>
+            <Ionicons name="alert-circle" size={16} color={colors.error} />
+            <Text style={[styles.errorText, { fontFamily: fontFamily.regular }]}>{error}</Text>
+          </View>
+        )}
 
-        {/* Register Form */}
+        {/* Form */}
         <Formik
-          initialValues={{
-            firstName: '',
-            lastName: '',
-            email: '',
-            password: '',
-            confirmPassword: '',
-          }}
-          validationSchema={registerSchema}
+          initialValues={{ fullName: '', email: '', phone: '', password: '', confirmPassword: '' }}
           onSubmit={handleRegister}
         >
-          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+          {({ values, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
             <View style={styles.form}>
-              {/* Name Fields */}
-              <View style={styles.nameRow}>
-                <Input
-                  label={t('auth.firstName')}
-                  placeholder="John"
-                  value={values.firstName}
-                  onChangeText={handleChange('firstName')}
-                  onBlur={handleBlur('firstName')}
-                  error={touched.firstName && errors.firstName ? errors.firstName : undefined}
+              {/* Full Name */}
+              <View style={styles.fieldGroup}>
+                <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.fullName')}</Text>
+                <TextInput
+                  style={[styles.input, { fontFamily: fontFamily.regular }]}
+                  placeholder={t('auth.enterFullName')}
+                  placeholderTextColor={colors.text.tertiary}
+                  value={values.fullName}
+                  onChangeText={handleChange('fullName')}
+                  onBlur={handleBlur('fullName')}
                   autoCapitalize="words"
-                  textContentType="givenName"
-                  containerStyle={styles.nameInput}
-                />
-
-                <Input
-                  label={t('auth.lastName')}
-                  placeholder="Doe"
-                  value={values.lastName}
-                  onChangeText={handleChange('lastName')}
-                  onBlur={handleBlur('lastName')}
-                  error={touched.lastName && errors.lastName ? errors.lastName : undefined}
-                  autoCapitalize="words"
-                  textContentType="familyName"
-                  containerStyle={styles.nameInput}
                 />
               </View>
 
-              <Input
-                label={t('auth.email')}
-                placeholder="example@email.com"
-                value={values.email}
-                onChangeText={handleChange('email')}
-                onBlur={handleBlur('email')}
-                error={touched.email && errors.email ? errors.email : undefined}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                textContentType="emailAddress"
-              />
+              {/* Email */}
+              <View style={styles.fieldGroup}>
+                <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.addressEmail')}</Text>
+                <TextInput
+                  style={[styles.input, { fontFamily: fontFamily.regular }]}
+                  placeholder={t('auth.enterAddressEmail')}
+                  placeholderTextColor={colors.text.tertiary}
+                  value={values.email}
+                  onChangeText={handleChange('email')}
+                  onBlur={handleBlur('email')}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                />
+              </View>
 
-              <Input
-                label={t('auth.password')}
-                placeholder="••••••••"
-                value={values.password}
-                onChangeText={handleChange('password')}
-                onBlur={handleBlur('password')}
-                error={touched.password && errors.password ? errors.password : undefined}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                textContentType="newPassword"
-                helperText="Minimum 6 characters"
-                rightIcon={
-                  <Ionicons
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={20}
-                    color={colors.text.tertiary}
+              {/* Phone */}
+              <View style={styles.fieldGroup}>
+                <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.phoneNumber')}</Text>
+                <View style={styles.phoneContainer}>
+                  <View style={styles.phonePrefix}>
+                    <Text style={[styles.phonePrefixFlag]}>🇩🇿</Text>
+                    <Text style={[styles.phonePrefixText, { fontFamily: fontFamily.medium }]}>+213</Text>
+                  </View>
+                  <View style={styles.phoneDivider} />
+                  <TextInput
+                    style={[styles.phoneInput, { fontFamily: fontFamily.regular }]}
+                    placeholder="XXX XX XX XX"
+                    placeholderTextColor={colors.text.tertiary}
+                    value={values.phone}
+                    onChangeText={(text) => {
+                      // Only allow digits and spaces, auto-format
+                      const digits = text.replace(/[^\d]/g, '').slice(0, 9);
+                      let formatted = '';
+                      for (let i = 0; i < digits.length; i++) {
+                        if (i === 3 || i === 5 || i === 7) formatted += ' ';
+                        formatted += digits[i];
+                      }
+                      handleChange('phone')(formatted);
+                    }}
+                    onBlur={handleBlur('phone')}
+                    keyboardType="phone-pad"
+                    maxLength={12}
                   />
-                }
-                onRightIconPress={() => setShowPassword(!showPassword)}
-              />
+                </View>
+              </View>
 
-              <Input
-                label={t('auth.confirmPassword')}
-                placeholder="••••••••"
-                value={values.confirmPassword}
-                onChangeText={handleChange('confirmPassword')}
-                onBlur={handleBlur('confirmPassword')}
-                error={
-                  touched.confirmPassword && errors.confirmPassword
-                    ? errors.confirmPassword
-                    : undefined
-                }
-                secureTextEntry={!showConfirmPassword}
-                autoCapitalize="none"
-                textContentType="newPassword"
-                rightIcon={
-                  <Ionicons
-                    name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={20}
-                    color={colors.text.tertiary}
+              {/* Password */}
+              <View style={styles.fieldGroup}>
+                <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.password')}</Text>
+                <View style={styles.passwordContainer}>
+                  <TextInput
+                    style={[styles.passwordInput, { fontFamily: fontFamily.regular }]}
+                    placeholder={t('auth.enterPasswordPlaceholder')}
+                    placeholderTextColor={colors.text.tertiary}
+                    value={values.password}
+                    onChangeText={handleChange('password')}
+                    onBlur={handleBlur('password')}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
                   />
-                }
-                onRightIconPress={() => setShowConfirmPassword(!showConfirmPassword)}
-              />
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                    <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.text.tertiary} />
+                  </TouchableOpacity>
+                </View>
+              </View>
 
-              {/* Terms and Conditions Checkbox */}
-              <Checkbox
-                checked={acceptTerms}
-                onChange={setAcceptTerms}
-                label="I accept the Terms & Conditions and Privacy Policy"
-                containerStyle={styles.termsCheckbox}
-              />
+              {/* Confirm Password */}
+              <View style={styles.fieldGroup}>
+                <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.confirmYourPassword')}</Text>
+                <View style={styles.passwordContainer}>
+                  <TextInput
+                    style={[styles.passwordInput, { fontFamily: fontFamily.regular }]}
+                    placeholder={t('auth.confirmYourPassword')}
+                    placeholderTextColor={colors.text.tertiary}
+                    value={values.confirmPassword}
+                    onChangeText={handleChange('confirmPassword')}
+                    onBlur={handleBlur('confirmPassword')}
+                    secureTextEntry={!showConfirm}
+                    autoCapitalize="none"
+                  />
+                  <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
+                    <Ionicons name={showConfirm ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.text.tertiary} />
+                  </TouchableOpacity>
+                </View>
+              </View>
 
-              {/* Register Button */}
-              <Button
-                title={t('auth.register')}
-                onPress={handleSubmit}
-                loading={isSubmitting}
-                fullWidth
-                style={styles.registerButton}
-                disabled={!acceptTerms}
-              />
+              {/* Submit */}
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={() => handleSubmit()}
+                activeOpacity={0.8}
+                disabled={isSubmitting}
+              >
+                <Text style={[styles.submitText, { fontFamily: fontFamily.medium }]}>
+                  {isSubmitting ? t('auth.creatingAccount') : t('auth.createAccountButton')}
+                </Text>
+              </TouchableOpacity>
             </View>
           )}
         </Formik>
 
         {/* Login Link */}
-        <View style={styles.loginContainer}>
-          <Text style={styles.loginText}>{t('auth.alreadyHaveAccount')} </Text>
+        <View style={[styles.loginContainer, { paddingBottom: insets.bottom + spacing.xl }]}>
+          <Text style={[styles.loginText, { fontFamily: fontFamily.regular }]}>
+            {t('auth.haveAccount')}{' '}
+          </Text>
           <Link href="/(auth)/login" asChild>
             <TouchableOpacity>
-              <Text style={styles.loginLink}>{t('auth.login')}</Text>
+              <Text style={[styles.loginLink, { fontFamily: fontFamily.medium }]}>{t('auth.signIn')}</Text>
             </TouchableOpacity>
           </Link>
         </View>
@@ -223,76 +240,125 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: spacing['2xl'],
+    paddingHorizontal: spacing.xl,
   },
   logoContainer: {
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  logo: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  logoText: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: colors.surface,
-  },
-  header: {
-    marginBottom: spacing['2xl'],
-    alignItems: 'center',
-  },
-  brandName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.primary,
-    letterSpacing: 6,
-  },
-  brandTagline: {
-    fontSize: 10,
-    color: colors.text.tertiary,
-    letterSpacing: 8,
-    marginBottom: spacing.lg,
+    alignItems: 'flex-start',
+    marginTop: spacing.xl,
+    marginBottom: spacing['3xl'],
   },
   title: {
-    ...typography.styles.h2,
+    fontSize: 26,
     color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    textAlign: 'center',
-  },
-  form: {
-    marginBottom: spacing.xl,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  nameInput: {
-    flex: 1,
-  },
-  termsCheckbox: {
-    marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
-  registerButton: {
-    marginTop: spacing.md,
+  subtitle: {
+    fontSize: 15,
+    color: '#6A7282',
+    marginBottom: spacing['2xl'],
+    lineHeight: 22,
+  },
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: '#FFE5E5',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: 8,
+    marginBottom: spacing.lg,
+  },
+  errorText: {
+    fontSize: 14,
+    color: colors.error,
+    flex: 1,
+  },
+  form: {
+    gap: spacing.md,
+  },
+  fieldGroup: {
+    gap: spacing.xs,
+  },
+  fieldLabel: {
+    fontSize: 13,
+    color: colors.text.primary,
+  },
+  input: {
+    height: 48,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    paddingHorizontal: spacing.lg,
+    fontSize: 14,
+    color: colors.text.primary,
+  },
+  phoneContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 48,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  phonePrefix: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: spacing.md,
+    backgroundColor: '#F9FAFB',
+    height: '100%',
+    justifyContent: 'center',
+  },
+  phonePrefixFlag: {
+    fontSize: 18,
+  },
+  phonePrefixText: {
+    fontSize: 14,
+    color: colors.text.primary,
+  },
+  phoneDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: colors.border,
+  },
+  phoneInput: {
+    flex: 1,
+    fontSize: 14,
+    color: colors.text.primary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 0,
+    height: '100%',
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 48,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    paddingHorizontal: spacing.lg,
+  },
+  passwordInput: {
+    flex: 1,
+    fontSize: 14,
+    color: colors.text.primary,
+    paddingVertical: 0,
+  },
+  submitButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: spacing.xl,
+  },
+  submitText: {
+    fontSize: 16,
+    color: colors.text.inverse,
   },
   loginContainer: {
     flexDirection: 'row',
@@ -301,12 +367,11 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
   },
   loginText: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
+    fontSize: 15,
+    color: colors.text.primary,
   },
   loginLink: {
-    ...typography.styles.body,
-    color: colors.primary,
-    fontWeight: typography.fontWeight.semiBold,
+    fontSize: 15,
+    color: '#183DE5',
   },
 });

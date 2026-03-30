@@ -1,10 +1,16 @@
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 // Secure storage for sensitive data (tokens, passwords)
+// Falls back to localStorage on web where expo-secure-store is unavailable
 export const SecureStorage = {
   async setItem(key: string, value: string): Promise<void> {
     try {
+      if (Platform.OS === 'web') {
+        localStorage.setItem(key, value);
+        return;
+      }
       await SecureStore.setItemAsync(key, value);
     } catch (error) {
       console.error(`Error storing ${key} in secure store:`, error);
@@ -14,6 +20,9 @@ export const SecureStorage = {
 
   async getItem(key: string): Promise<string | null> {
     try {
+      if (Platform.OS === 'web') {
+        return localStorage.getItem(key);
+      }
       return await SecureStore.getItemAsync(key);
     } catch (error) {
       console.error(`Error getting ${key} from secure store:`, error);
@@ -23,6 +32,10 @@ export const SecureStorage = {
 
   async removeItem(key: string): Promise<void> {
     try {
+      if (Platform.OS === 'web') {
+        localStorage.removeItem(key);
+        return;
+      }
       await SecureStore.deleteItemAsync(key);
     } catch (error) {
       console.error(`Error removing ${key} from secure store:`, error);

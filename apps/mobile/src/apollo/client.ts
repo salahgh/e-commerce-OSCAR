@@ -3,9 +3,27 @@ import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 import i18n from '../i18n';
 
 export const VENDURE_TOKEN_KEY = 'vendure_token';
+
+// Web fallback for expo-secure-store (not available on web)
+const tokenStorage = {
+  async getItem(key: string): Promise<string | null> {
+    if (Platform.OS === 'web') {
+      return localStorage.getItem(key);
+    }
+    return SecureStore.getItemAsync(key);
+  },
+  async setItem(key: string, value: string): Promise<void> {
+    if (Platform.OS === 'web') {
+      localStorage.setItem(key, value);
+      return;
+    }
+    return SecureStore.setItemAsync(key, value);
+  },
+};
 
 // HTTP Link
 const GRAPHQL_URI = process.env.EXPO_PUBLIC_GRAPHQL_URL || Constants.expoConfig?.extra?.graphqlUrl || 'http://leqta.com:8085/shop-api';
@@ -18,7 +36,7 @@ const httpLink = createHttpLink({
 // Auth Link - Add vendure-token header for session authentication
 const authLink = setContext(async (_, { headers }) => {
   try {
-    const token = await SecureStore.getItemAsync(VENDURE_TOKEN_KEY);
+    const token = await tokenStorage.getItem(VENDURE_TOKEN_KEY);
     return {
       headers: {
         ...headers,
@@ -61,7 +79,7 @@ const afterwareLink = new ApolloLink((operation, forward) => {
         if (responseHeaders) {
           const token = responseHeaders.get('vendure-token');
           if (token) {
-            SecureStore.setItemAsync(VENDURE_TOKEN_KEY, token).catch((err) => {
+            tokenStorage.setItem(VENDURE_TOKEN_KEY, token).catch((err) => {
               console.error('Error storing vendure token:', err);
             });
           }
