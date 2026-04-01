@@ -1,0 +1,13 @@
+node_modules
+.next
+dist
+.git
+.gitignore
+*.md
+.env*
+!.env.example
+.vscode
+.idea
+apps/mobile
+deploy
+.turbo
