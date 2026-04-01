@@ -13,13 +13,17 @@
     },
     "android": {
       "package": "com.oscar.fashion",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": true
+      "predictiveBackGestureEnabled": true,
+      "permissions": [
+        "INTERNET"
+      ]
     },
     "web": {
       "output": "static",
@@ -44,7 +48,10 @@
       "typedRoutes": true
     },
     "extra": {
-      "graphqlUrl": "http://leqta.com:8085/shop-api"
+      "graphqlUrl": "https://YOUR-RAILWAY-BACKEND.up.railway.app/shop-api",
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID"
+      }
     }
   }
 }

@@ -20,6 +20,21 @@ import { collectionPercentageDiscount } from './plugins/oscar-plugin/promotion/c
 
 const IS_DEV = process.env.NODE_ENV !== 'production';
 
+// Parse DATABASE_URL (provided by Railway, Render, etc.) into individual connection options
+const parseDatabaseUrl = () => {
+  const url = process.env.DATABASE_URL;
+  if (!url) return null;
+  const parsed = new URL(url);
+  return {
+    host: parsed.hostname,
+    port: Number(parsed.port) || 5432,
+    database: parsed.pathname.slice(1),
+    username: parsed.username,
+    password: parsed.password,
+    schema: parsed.searchParams.get('schema') || 'public',
+  };
+};
+
 // Parse CORS origins from environment variable
 const getCorsOrigins = (): string[] | boolean => {
   if (IS_DEV) {
@@ -82,18 +97,21 @@ export const config: VendureConfig = {
     },
     requireVerification: false, // Set to true in production
   },
-  dbConnectionOptions: {
-    type: 'postgres',
-    synchronize: true, // Set to false in production, use migrations instead
-    migrations: [path.join(__dirname, './migrations/*.+(js|ts)')],
-    logging: false,
-    database: process.env.DB_NAME!,
-    schema: process.env.DB_SCHEMA || 'public',
-    host: process.env.DB_HOST!,
-    port: +process.env.DB_PORT!,
-    username: process.env.DB_USERNAME!,
-    password: process.env.DB_PASSWORD!,
-  },
+  dbConnectionOptions: (() => {
+    const dbUrl = parseDatabaseUrl();
+    return {
+      type: 'postgres' as const,
+      synchronize: true, // Set to false in production, use migrations instead
+      migrations: [path.join(__dirname, './migrations/*.+(js|ts)')],
+      logging: false,
+      database: dbUrl?.database || process.env.DB_NAME!,
+      schema: dbUrl?.schema || process.env.DB_SCHEMA || 'public',
+      host: dbUrl?.host || process.env.DB_HOST!,
+      port: dbUrl?.port || +process.env.DB_PORT!,
+      username: dbUrl?.username || process.env.DB_USERNAME!,
+      password: dbUrl?.password || process.env.DB_PASSWORD!,
+    };
+  })(),
   paymentOptions: {
     paymentMethodHandlers: [
       dummyPaymentHandler,
