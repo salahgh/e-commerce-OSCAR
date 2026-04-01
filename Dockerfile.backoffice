@@ -1,0 +1,27 @@
+FROM node:20-slim AS base
+RUN corepack enable && corepack prepare pnpm@10.29.3 --activate
+WORKDIR /app
+
+# --- Install dependencies ---
+FROM base AS deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY apps/backend/package.json apps/backend/
+COPY apps/frontend/package.json apps/frontend/
+COPY apps/backoffice/package.json apps/backoffice/
+COPY packages/shared/package.json packages/shared/
+COPY packages/graphql-shop/package.json packages/graphql-shop/
+RUN pnpm install --frozen-lockfile
+
+# --- Build ---
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN pnpm --filter @oscar/backoffice build
+
+# --- Serve static files with nginx ---
+FROM nginx:alpine AS runner
+COPY --from=builder /app/apps/backoffice/dist /usr/share/nginx/html
+# SPA fallback: serve index.html for all routes
+RUN printf 'server {\n  listen 80;\n  location / {\n    root /usr/share/nginx/html;\n    try_files $uri $uri/ /index.html;\n  }\n}\n' > /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

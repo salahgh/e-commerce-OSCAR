@@ -1,0 +1,32 @@
+FROM node:20-slim AS base
+RUN corepack enable && corepack prepare pnpm@10.29.3 --activate
+WORKDIR /app
+
+# --- Install dependencies ---
+FROM base AS deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY apps/backend/package.json apps/backend/
+COPY apps/frontend/package.json apps/frontend/
+COPY apps/backoffice/package.json apps/backoffice/
+COPY packages/shared/package.json packages/shared/
+COPY packages/graphql-shop/package.json packages/graphql-shop/
+RUN pnpm install --frozen-lockfile
+
+# --- Build ---
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN pnpm --filter @oscar/backend build
+
+# --- Runtime ---
+FROM base AS runner
+ENV NODE_ENV=production
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/apps/backend/dist ./apps/backend/dist
+COPY --from=builder /app/apps/backend/static ./apps/backend/static
+COPY --from=builder /app/apps/backend/package.json ./apps/backend/
+WORKDIR /app/apps/backend
+EXPOSE 8085
+CMD ["node", "dist/index.js"]
