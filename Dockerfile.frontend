@@ -23,6 +23,7 @@ FROM node:20-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
 
 # Copy standalone server (monorepo structure preserved inside .next/standalone)
 COPY --from=builder /app/apps/frontend/.next/standalone ./
@@ -30,5 +31,8 @@ COPY --from=builder /app/apps/frontend/.next/standalone ./
 COPY --from=builder /app/apps/frontend/.next/static ./apps/frontend/.next/static
 COPY --from=builder /app/apps/frontend/public ./apps/frontend/public
 
+# Remove root package.json so Railway doesn't try to run pnpm
+RUN rm -f package.json
+
 EXPOSE 3000
-CMD ["node", "apps/frontend/server.js"]
+ENTRYPOINT ["node", "apps/frontend/server.js"]
