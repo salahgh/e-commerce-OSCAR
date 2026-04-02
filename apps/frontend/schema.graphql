@@ -228,6 +228,7 @@ type Collection implements Node {
     parent: Collection
     parentId: ID!
     position: Int!
+    productVariantCount: Int!
     productVariants(options: ProductVariantListOptions): ProductVariantList!
     slug: String!
     translations: [CollectionTranslation!]!
@@ -241,11 +242,7 @@ type CollectionBreadcrumb {
 }
 
 type CollectionCustomFields {
-    descriptionAr: String
-    descriptionFr: String
     displayOrder: Int
-    nameAr: String
-    nameFr: String
 }
 
 type CollectionList implements PaginatedList {
@@ -383,6 +380,7 @@ type Customer implements Node {
 }
 
 type CustomerCustomFields {
+    adminNotes: String
     city: String
     wilaya: String
 }
@@ -1175,7 +1173,7 @@ type Product implements Node {
     assets: [Asset!]!
     collections: [Collection!]!
     createdAt: DateTime!
-    customFields: ProductCustomFields
+    customFields: JSON
     description: String!
     enabled: Boolean!
     facetValues: [FacetValue!]!
@@ -1191,19 +1189,6 @@ type Product implements Node {
     variantList(options: ProductVariantListOptions): ProductVariantList!
     "Returns all ProductVariants"
     variants: [ProductVariant!]!
-}
-
-type ProductCustomFields {
-    availableColors: [String!]
-    availableSizes: [String!]
-    descriptionAr: String
-    descriptionFr: String
-    isFeatured: Boolean
-    nameAr: String
-    nameFr: String
-    salePrice: Int
-    viewCount: Int
-    weightKg: Float
 }
 
 type ProductList implements PaginatedList {
@@ -1286,7 +1271,9 @@ type ProductVariant implements Node {
 }
 
 type ProductVariantCustomFields {
+    discountPercent: Int
     minStockAlert: Int
+    originalPrice: Int
 }
 
 type ProductVariantList implements PaginatedList {
@@ -2820,16 +2807,13 @@ input CollectionFilterParameter {
     _or: [CollectionFilterParameter!]
     createdAt: DateOperators
     description: StringOperators
-    descriptionAr: StringOperators
-    descriptionFr: StringOperators
     displayOrder: NumberOperators
     id: IDOperators
     languageCode: StringOperators
     name: StringOperators
-    nameAr: StringOperators
-    nameFr: StringOperators
     parentId: IDOperators
     position: NumberOperators
+    productVariantCount: NumberOperators
     slug: StringOperators
     updatedAt: DateOperators
 }
@@ -2851,15 +2835,12 @@ input CollectionListOptions {
 input CollectionSortParameter {
     createdAt: SortOrder
     description: SortOrder
-    descriptionAr: SortOrder
-    descriptionFr: SortOrder
     displayOrder: SortOrder
     id: SortOrder
     name: SortOrder
-    nameAr: SortOrder
-    nameFr: SortOrder
     parentId: SortOrder
     position: SortOrder
+    productVariantCount: SortOrder
     slug: SortOrder
     updatedAt: SortOrder
 }
@@ -2899,6 +2880,7 @@ input CreateAddressInput {
 }
 
 input CreateCustomerCustomFieldsInput {
+    adminNotes: String
     city: String
     wilaya: String
 }
@@ -2915,6 +2897,7 @@ input CreateCustomerInput {
 input CustomerFilterParameter {
     _and: [CustomerFilterParameter!]
     _or: [CustomerFilterParameter!]
+    adminNotes: StringOperators
     city: StringOperators
     createdAt: DateOperators
     emailAddress: StringOperators
@@ -2941,6 +2924,7 @@ input CustomerListOptions {
 }
 
 input CustomerSortParameter {
+    adminNotes: SortOrder
     city: SortOrder
     createdAt: SortOrder
     emailAddress: SortOrder
@@ -3198,24 +3182,14 @@ input PaymentInput {
 input ProductFilterParameter {
     _and: [ProductFilterParameter!]
     _or: [ProductFilterParameter!]
-    availableColors: StringListOperators
-    availableSizes: StringListOperators
     createdAt: DateOperators
     description: StringOperators
-    descriptionAr: StringOperators
-    descriptionFr: StringOperators
     enabled: BooleanOperators
     id: IDOperators
-    isFeatured: BooleanOperators
     languageCode: StringOperators
     name: StringOperators
-    nameAr: StringOperators
-    nameFr: StringOperators
-    salePrice: NumberOperators
     slug: StringOperators
     updatedAt: DateOperators
-    viewCount: NumberOperators
-    weightKg: NumberOperators
 }
 
 input ProductListOptions {
@@ -3234,18 +3208,10 @@ input ProductListOptions {
 input ProductSortParameter {
     createdAt: SortOrder
     description: SortOrder
-    descriptionAr: SortOrder
-    descriptionFr: SortOrder
     id: SortOrder
-    isFeatured: SortOrder
     name: SortOrder
-    nameAr: SortOrder
-    nameFr: SortOrder
-    salePrice: SortOrder
     slug: SortOrder
     updatedAt: SortOrder
-    viewCount: SortOrder
-    weightKg: SortOrder
 }
 
 input ProductVariantFilterParameter {
@@ -3253,10 +3219,12 @@ input ProductVariantFilterParameter {
     _or: [ProductVariantFilterParameter!]
     createdAt: DateOperators
     currencyCode: StringOperators
+    discountPercent: NumberOperators
     id: IDOperators
     languageCode: StringOperators
     minStockAlert: NumberOperators
     name: StringOperators
+    originalPrice: NumberOperators
     price: NumberOperators
     priceWithTax: NumberOperators
     productId: IDOperators
@@ -3280,9 +3248,11 @@ input ProductVariantListOptions {
 
 input ProductVariantSortParameter {
     createdAt: SortOrder
+    discountPercent: SortOrder
     id: SortOrder
     minStockAlert: SortOrder
     name: SortOrder
+    originalPrice: SortOrder
     price: SortOrder
     priceWithTax: SortOrder
     productId: SortOrder
@@ -3292,6 +3262,7 @@ input ProductVariantSortParameter {
 }
 
 input RegisterCustomerCustomFieldsInput {
+    adminNotes: String
     city: String
     wilaya: String
 }
@@ -3365,6 +3336,7 @@ input UpdateAddressInput {
 }
 
 input UpdateCustomerCustomFieldsInput {
+    adminNotes: String
     city: String
     wilaya: String
 }

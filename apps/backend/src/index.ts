@@ -3,6 +3,8 @@ import { config } from './vendure-config';
 
 // Enable debug logging for job queue
 Logger.info('Starting OSCAR Vendure Server...', 'Bootstrap');
+Logger.info(`DATABASE_URL is ${process.env.DATABASE_URL ? 'SET' : 'NOT SET'}`, 'Bootstrap');
+Logger.info(`DB_HOST is ${process.env.DB_HOST || 'NOT SET'}`, 'Bootstrap');
 
 runMigrations(config)
   .then(() => bootstrap(config))
