@@ -16,7 +16,7 @@ RUN pnpm install --frozen-lockfile
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN pnpm --filter @oscar/backoffice build
+RUN cd apps/backoffice && npx vite build
 
 # --- Serve static files with nginx ---
 FROM nginx:alpine AS runner
