@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "start": "serve dist -s -l tcp://0.0.0.0:${PORT:-3000}",
     "preview": "vite preview",
     "codegen": "graphql-codegen",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\""
@@ -30,6 +31,7 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.9.5",
     "recharts": "^3.5.1",
+    "serve": "^14.2.6",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "yup": "^1.7.1"
