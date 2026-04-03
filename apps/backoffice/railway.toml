@@ -1,0 +1,5 @@
+[build]
+command = "pnpm install --frozen-lockfile && pnpm --filter @oscar/backoffice build"
+
+[deploy]
+startCommand = "pnpm --filter @oscar/backoffice start"
