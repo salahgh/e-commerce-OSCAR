@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
-import { Inter } from 'next/font/google';
+import { Inter, DM_Sans, IBM_Plex_Sans_Arabic } from 'next/font/google';
 import { ApolloWrapper } from '@/lib/apollo/apollo-wrapper';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
@@ -13,6 +13,20 @@ import '../globals.css';
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
+  variable: '--font-inter',
+});
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-dm-sans',
+});
+
+const ibmPlexArabic = IBM_Plex_Sans_Arabic({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['arabic'],
+  display: 'swap',
+  variable: '--font-ibm-arabic',
 });
 
 export default async function LocaleLayout({
@@ -60,7 +74,7 @@ export default async function LocaleLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8085'} />
       </head>
-      <body className={inter.className}>
+      <body className={`${dmSans.variable} ${inter.variable} ${ibmPlexArabic.variable} ${dmSans.className}`}>
         <ThemeProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <ApolloWrapper>

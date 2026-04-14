@@ -3,6 +3,39 @@
     "title": "مرحبا بكم في أوسكار فاشن",
     "subtitle": "الموضة والأناقة"
   },
+  "cart": {
+    "title": "سلة التسوق",
+    "emptyTitle": "سلة التسوق فارغة",
+    "emptyMessage": "أضف منتجات لبدء التسوق",
+    "continueShopping": "تصفح المنتجات",
+    "product": "المنتج",
+    "price": "السعر",
+    "quantityLabel": "الكمية",
+    "delete": "حذف",
+    "orderSummary": "ملخص الطلبية",
+    "totalItems": "المبلغ الإجمالي ({count} منتج)",
+    "totalAmount": "المبلغ الإجمالي",
+    "confirmOrder": "تأكيد الطلب"
+  },
+  "products": {
+    "all": "الكل",
+    "shopProducts": "تسوق المنتجات",
+    "noProducts": "لا توجد منتجات"
+  },
+  "product": {
+    "quantity": "الكمية",
+    "addToCart": "أضف إلى السلة",
+    "buyNow": "اشتري الآن",
+    "productDetails": "تفاصيل المنتج",
+    "youMayAlsoLike": "قد يعجبك أيضا",
+    "seeAll": "عرض الكل"
+  },
+  "home": {
+    "newArrivals": "وصل حديثًا",
+    "bestSellers": "الأكثر مبيعًا",
+    "pickedForYou": "اخترنا لك",
+    "seeAll": "عرض الكل"
+  },
   "Common": {
     "loading": "جاري التحميل...",
     "error": "حدث خطأ"
