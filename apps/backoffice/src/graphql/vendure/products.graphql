@@ -432,6 +432,15 @@ mutation DeleteProducts($ids: [ID!]!) {
   }
 }
 
+# Bulk import products from a CSV file
+mutation ImportProducts($csvFile: Upload!) {
+  importProducts(csvFile: $csvFile) {
+    imported
+    processed
+    errors
+  }
+}
+
 # ==================== PRODUCT VARIANT MUTATIONS ====================
 
 # Create product variants

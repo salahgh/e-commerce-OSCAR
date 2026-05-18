@@ -19,6 +19,7 @@ import {
   AdminProductsDocument,
   DeleteProductDocument,
   UpdateProductDocument,
+  ImportProductsDocument,
 } from '../../graphql/generated/graphql';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
@@ -51,6 +52,41 @@ export const BulkOperations: React.FC = () => {
   // Mutations
   const [updateProduct] = useMutation(UpdateProductDocument);
   const [deleteProduct] = useMutation(DeleteProductDocument);
+  const [importProducts, { loading: importing }] = useMutation(ImportProductsDocument);
+
+  const handleImport = async () => {
+    if (!importFile) return;
+    try {
+      const res = await importProducts({ variables: { csvFile: importFile } });
+      const info = res.data?.importProducts;
+      if (info) {
+        const errCount = info.errors?.length ?? 0;
+        dispatch(
+          addToast({
+            message: `Import terminé — ${info.imported}/${info.processed} produit(s) importé(s)${
+              errCount > 0 ? ` (${errCount} erreur(s))` : ''
+            }`,
+            type: errCount > 0 ? 'info' : 'success',
+          })
+        );
+        if (errCount > 0) {
+          // Log details for debugging; the toast can't carry a long list
+          // eslint-disable-next-line no-console
+          console.warn('Import errors:', info.errors);
+        }
+      }
+      setImportFile(null);
+      setImportPreview([]);
+      refetch();
+    } catch (err: any) {
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de l\'import',
+          type: 'error',
+        })
+      );
+    }
+  };
 
   const products = data?.products?.items || [];
 
@@ -381,14 +417,8 @@ export const BulkOperations: React.FC = () => {
                 </Button>
                 <Button
                   icon={<Upload className="h-4 w-4" />}
-                  onClick={() => {
-                    dispatch(
-                      addToast({
-                        message: 'Import via CSV disponible dans une prochaine version',
-                        type: 'info',
-                      })
-                    );
-                  }}
+                  onClick={handleImport}
+                  loading={importing}
                 >
                   Importer
                 </Button>
