@@ -1,0 +1,31 @@
+# ───────────────────────────────────────────────────────────────
+# OSCAR Fashion — Caddy reverse-proxy + auto-HTTPS
+#
+# Install on the VPS at  /etc/caddy/Caddyfile  (08-caddy-apply.sh).
+# Caddy obtains Let's Encrypt certs automatically the first time
+# each hostname is requested, then auto-renews.
+#
+# DNS prerequisite: all three hostnames must already resolve to
+# this VPS's public IP (A record), or Let's Encrypt will refuse.
+# ───────────────────────────────────────────────────────────────
+
+# ── Storefront (Next.js on :3000) ──────────────────────────────
+oscarfashion.dz, www.oscarfashion.dz {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:3000
+}
+
+# ── Vendure API (shop-api, admin-api, /assets, built-in admin) ─
+api.oscarfashion.dz {
+    encode zstd gzip
+    # WebSocket upgrades (Apollo subscriptions) work transparently
+    reverse_proxy 127.0.0.1:8085
+}
+
+# ── Custom back-office SPA (static files served directly) ──────
+admin.oscarfashion.dz {
+    encode zstd gzip
+    root * /var/www/oscar/apps/backoffice/dist
+    try_files {path} /index.html
+    file_server
+}

@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# ──────────────────────────────────────────────────────────────
+# deploy.sh — day-2 update script. Run as the `oscar` user.
+#
+#   bash deploy/scripts/deploy.sh           # pull main, build, migrate, reload
+#   BRANCH=feature/x bash deploy.sh         # deploy a different branch
+#   SKIP_MIGRATE=1 bash deploy.sh           # skip the migration step
+#
+# Refuses to run if the working tree has uncommitted changes.
+# ──────────────────────────────────────────────────────────────
+set -euo pipefail
+
+APP_DIR="${APP_DIR:-/var/www/oscar}"
+BRANCH="${BRANCH:-main}"
+ECO="$APP_DIR/deploy/scripts/ecosystem.config.cjs"
+
+cd "$APP_DIR"
+
+if [[ -n "$(git status --porcelain)" ]]; then
+  echo "❌  Working tree has uncommitted changes. Refusing to deploy." >&2
+  git status --short >&2
+  exit 1
+fi
+
+echo "▶  Fetching + fast-forwarding $BRANCH"
+git fetch --prune origin
+git checkout "$BRANCH"
+git pull --ff-only origin "$BRANCH"
+
+echo "▶  pnpm install --frozen-lockfile"
+export NODE_ENV=production
+export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=2048}"
+pnpm install --frozen-lockfile
+
+echo "▶  pnpm build"
+pnpm build
+
+if [[ "${SKIP_MIGRATE:-0}" != "1" ]]; then
+  echo "▶  Migrations"
+  pnpm --filter @oscar/backend migration:run
+fi
+
+echo "▶  Reloading PM2 (zero-downtime)"
+pm2 reload "$ECO" --update-env
+
+# The backoffice is served by Caddy from apps/backoffice/dist — the
+# fresh build is picked up instantly, no reload needed.
+
+echo
+echo "✅  Deployed @ $(git rev-parse --short HEAD)"
+pm2 status
