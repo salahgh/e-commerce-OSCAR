@@ -7,18 +7,19 @@
 # What it does (idempotent):
 #   1. Removes any stale oscarfashion.dz HTTP-redirect block from the
 #      existing oscar-fidelity file (the promostore block stays intact).
-#   2. Installs deploy/nginx/oscar-fashion.conf to
-#      /etc/nginx/sites-available/oscar-fashion (symlinked from sites-enabled).
+#   2. Installs an nginx site at /etc/nginx/sites-available/oscar-fashion.
+#      First-run version: phase-1 (HTTPS for shop using existing cert,
+#      HTTP-only for api+admin with a webroot for ACME). Final version:
+#      deploy/nginx/oscar-fashion.conf (full HTTPS for all 3).
 #   3. Issues Let's Encrypt certs for api.oscarfashion.dz and
-#      admin.oscarfashion.dz via certbot --nginx (skipped if certs exist).
-#   4. Reloads nginx after each successful step.
+#      admin.oscarfashion.dz via certbot certonly --webroot.
+#      (Bypasses --nginx, which had trouble with the existing site mix.)
+#   4. Switches to the canonical HTTPS-everywhere config and reloads.
 #
 # Prerequisites:
-#   • nginx + certbot already installed on the VPS (they are).
-#   • DNS A-records for api.oscarfashion.dz and admin.oscarfashion.dz
-#     pointing at this VPS (confirmed before running this script).
-#   • PM2 oscar-frontend listening on 127.0.0.1:3001.
-#   • PM2 oscar-backend listening on 127.0.0.1:8085.
+#   • nginx + certbot already installed on the VPS.
+#   • DNS A-records for api/admin pointing at this VPS.
+#   • PM2 oscar-frontend on 127.0.0.1:3001; oscar-backend on :8085.
 #   • apps/backoffice/dist exists (bash deploy/scripts/05-build.sh).
 # ──────────────────────────────────────────────────────────────
 set -euo pipefail
@@ -27,20 +28,26 @@ APP_DIR="${APP_DIR:-/var/www/oscar}"
 SRC="$APP_DIR/deploy/nginx/oscar-fashion.conf"
 DST_AVAIL=/etc/nginx/sites-available/oscar-fashion
 DST_ENAB=/etc/nginx/sites-enabled/oscar-fashion
+WEBROOT=/var/www/letsencrypt
 LE_EMAIL="${LE_EMAIL:-sonyexperiasola29@gmail.com}"
 
 [[ -f "$SRC" ]] || { echo "❌  $SRC not found" >&2; exit 1; }
 command -v certbot >/dev/null || { echo "❌  certbot is not installed" >&2; exit 1; }
 
-# ── 1. Strip the dead oscarfashion.dz HTTP-redirect from oscar-fidelity ──
+# ── 0. Webroot for ACME HTTP-01 challenges ────────────────────
+if [[ ! -d "$WEBROOT" ]]; then
+  echo "▶  Creating ACME webroot at $WEBROOT"
+  sudo mkdir -p "$WEBROOT/.well-known/acme-challenge"
+  sudo chown -R www-data:www-data "$WEBROOT"
+fi
+
+# ── 1. Strip dead oscarfashion.dz block from oscar-fidelity ───
 FIDELITY=/etc/nginx/sites-available/oscar-fidelity
-if [[ -f "$FIDELITY" ]] && grep -q 'server_name oscarfashion.dz www.oscarfashion.dz' "$FIDELITY"; then
+if [[ -f "$FIDELITY" ]] \
+   && grep -qE '^\s*server_name\s+oscarfashion\.dz\s+www\.oscarfashion\.dz\s*;' "$FIDELITY"; then
   echo "▶  Backing up oscar-fidelity → oscar-fidelity.bak.$(date +%s)"
   sudo cp -a "$FIDELITY" "$FIDELITY.bak.$(date +%s)"
 
-  # Drop the server block that handles oscarfashion.dz (and not promostore).
-  # Uses brace-counting so nested `if { … }` blocks inside the server block
-  # don't fool us.
   echo "▶  Removing dead oscarfashion.dz HTTP-redirect block from oscar-fidelity"
   sudo python3 - "$FIDELITY" <<'PY'
 import sys, re
@@ -48,9 +55,7 @@ p = sys.argv[1]
 with open(p) as f:
     lines = f.readlines()
 
-out = []
-i = 0
-removed = 0
+out, i, removed = [], 0, 0
 server_re = re.compile(r'^\s*server\s*\{')
 while i < len(lines):
     line = lines[i]
@@ -75,43 +80,46 @@ while i < len(lines):
         out.append(line)
         i += 1
 
-if removed == 0:
-    print("  (no matching block found — already clean)")
-else:
-    print(f"  Removed {removed} server block(s)")
-
+print(f"  Removed {removed} server block(s)" if removed else "  (no matching block — already clean)")
 with open(p, 'w') as f:
     f.writelines(out)
 PY
 fi
 
-# ── 2. Decide which version of our config to install ──────────
+# ── 2. Decide which config version to install ─────────────────
 HAS_API_CERT=0
 HAS_ADMIN_CERT=0
 [[ -f /etc/letsencrypt/live/api.oscarfashion.dz/fullchain.pem ]]   && HAS_API_CERT=1
 [[ -f /etc/letsencrypt/live/admin.oscarfashion.dz/fullchain.pem ]] && HAS_ADMIN_CERT=1
 
 install_full_config() {
-  echo "▶  Installing full HTTPS-aware config (all certs present)"
+  echo "▶  Installing full HTTPS-aware config"
   sudo install -m 644 "$SRC" "$DST_AVAIL"
   sudo ln -sf ../sites-available/oscar-fashion "$DST_ENAB"
 }
 
 install_phase1_config() {
-  echo "▶  Installing phase-1 config (HTTP-only for hosts without certs)"
-  # Storefront block keeps its existing HTTPS (cert exists already).
-  # api/admin get HTTP-only blocks so certbot can find them.
+  echo "▶  Installing phase-1 config (HTTPS for shop; HTTP+ACME webroot for api/admin)"
   TMP=$(mktemp)
   cat > "$TMP" <<EOF
 # Phase-1 OSCAR Fashion nginx config — installed by 08-nginx-apply.sh.
-# Replaced by deploy/nginx/oscar-fashion.conf once certbot issues certs
-# for api.oscarfashion.dz and admin.oscarfashion.dz.
+# Replaced by deploy/nginx/oscar-fashion.conf once certbot issues certs.
+
+# ── Shared ACME webroot snippet ───────────────────────────────
+# Every HTTP server block below mounts $WEBROOT for /.well-known/acme-challenge/.
 
 # Storefront (existing cert is valid)
 server {
     listen 80;
     server_name oscarfashion.dz www.oscarfashion.dz;
-    return 301 https://oscarfashion.dz\$request_uri;
+
+    location /.well-known/acme-challenge/ {
+        root $WEBROOT;
+        default_type "text/plain";
+    }
+    location / {
+        return 301 https://oscarfashion.dz\$request_uri;
+    }
 }
 
 server {
@@ -143,12 +151,17 @@ server {
     }
 }
 
-# API — HTTP-only so certbot --nginx can find the block
+# API — HTTP-only, ACME webroot, NO redirect (so HTTP-01 succeeds)
 server {
     listen 80;
     server_name api.oscarfashion.dz;
 
     client_max_body_size 50M;
+
+    location /.well-known/acme-challenge/ {
+        root $WEBROOT;
+        default_type "text/plain";
+    }
 
     location / {
         proxy_pass http://127.0.0.1:8085;
@@ -163,15 +176,19 @@ server {
     }
 }
 
-# Back-office SPA — HTTP-only so certbot --nginx can find the block
+# Back-office — HTTP-only, ACME webroot
 server {
     listen 80;
     server_name admin.oscarfashion.dz;
 
-    root /var/www/oscar/apps/backoffice/dist;
-    index index.html;
+    location /.well-known/acme-challenge/ {
+        root $WEBROOT;
+        default_type "text/plain";
+    }
 
     location / {
+        root /var/www/oscar/apps/backoffice/dist;
+        index index.html;
         try_files \$uri \$uri/ /index.html;
     }
 }
@@ -189,36 +206,33 @@ fi
 
 echo "▶  nginx -t"
 sudo nginx -t
-
 echo "▶  Reloading nginx"
 sudo systemctl reload nginx
 
-# ── 3. Run certbot for missing certs ──────────────────────────
-missing=()
-[[ $HAS_API_CERT   -eq 0 ]] && missing+=("api.oscarfashion.dz")
-[[ $HAS_ADMIN_CERT -eq 0 ]] && missing+=("admin.oscarfashion.dz")
+# ── 3. Issue certs via webroot challenge ──────────────────────
+issue_cert() {
+  local host=$1
+  echo "▶  Issuing cert for $host (webroot $WEBROOT)"
+  sudo certbot certonly \
+    --webroot -w "$WEBROOT" \
+    --non-interactive --agree-tos --email "$LE_EMAIL" \
+    -d "$host"
+}
 
-if [[ ${#missing[@]} -gt 0 ]]; then
-  echo "▶  Requesting Let's Encrypt certs for: ${missing[*]}"
-  args=(--nginx --non-interactive --agree-tos --redirect --email "$LE_EMAIL")
-  for h in "${missing[@]}"; do args+=(-d "$h"); done
-  sudo certbot "${args[@]}"
+[[ $HAS_API_CERT   -eq 0 ]] && issue_cert "api.oscarfashion.dz"
+[[ $HAS_ADMIN_CERT -eq 0 ]] && issue_cert "admin.oscarfashion.dz"
 
-  # Now that the certs exist, switch to the canonical full config so
-  # future deploys are not at the mercy of certbot's edits.
+# ── 4. Switch to full HTTPS-everywhere config ─────────────────
+if [[ $HAS_API_CERT -eq 0 || $HAS_ADMIN_CERT -eq 0 ]]; then
   echo "▶  Switching to canonical HTTPS config"
   install_full_config
-
   echo "▶  nginx -t"
   sudo nginx -t
-
   echo "▶  Reloading nginx"
   sudo systemctl reload nginx
-else
-  echo "✓  Certs already exist for api + admin — skipping certbot"
 fi
 
-# ── 4. Sanity check ───────────────────────────────────────────
+# ── 5. Summary ────────────────────────────────────────────────
 echo
 echo "─── Live status ───────────────────────────────────────"
 sudo systemctl is-active nginx
