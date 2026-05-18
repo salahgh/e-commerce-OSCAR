@@ -3,7 +3,7 @@ import { Trash2, GripVertical, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
-import { ColorPickerField } from './ColorPickerField';
+import { FacetCustomFieldsRenderer } from './FacetCustomFieldsRenderer';
 import { LanguageCode } from '../../graphql/generated/graphql';
 
 export interface FacetValueData {
@@ -101,12 +101,15 @@ export const FacetValueEditor: React.FC<FacetValueEditorProps> = ({
             />
           </div>
 
-          {/* Color picker for color facets */}
+          {/* Custom fields (currently only colorHex, but routed through the
+              generic renderer so future Vendure custom-field additions only
+              need a single source edit). */}
           {isColorFacet && (
-            <ColorPickerField
-              label="Couleur"
-              value={value.colorHex || ''}
-              onChange={(colorHex) => onChange({ ...value, colorHex })}
+            <FacetCustomFieldsRenderer
+              values={{ colorHex: value.colorHex || '' }}
+              onChange={(next) =>
+                onChange({ ...value, colorHex: (next.colorHex as string) || '' })
+              }
               disabled={disabled}
             />
           )}
