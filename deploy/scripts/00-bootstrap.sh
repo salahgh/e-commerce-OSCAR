@@ -21,6 +21,9 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # ── 1. App user ────────────────────────────────────────────────
+# Password can be overridden:  OSCAR_PASSWORD='…' sudo bash 00-bootstrap.sh
+OSCAR_PASSWORD="${OSCAR_PASSWORD:-majmajBS13..}"
+
 if ! id "$APP_USER" &>/dev/null; then
   echo "▶  Creating user $APP_USER"
   adduser --disabled-password --gecos "" "$APP_USER"
@@ -30,6 +33,9 @@ if ! id "$APP_USER" &>/dev/null; then
 else
   echo "✓  User $APP_USER already exists"
 fi
+
+echo "▶  Setting password for $APP_USER"
+echo "$APP_USER:$OSCAR_PASSWORD" | chpasswd
 
 # ── 2. SSH key handoff ─────────────────────────────────────────
 if [[ -f /root/.ssh/authorized_keys ]] && [[ ! -f "/home/$APP_USER/.ssh/authorized_keys" ]]; then
@@ -50,14 +56,7 @@ ufw allow 443/tcp >/dev/null
 ufw --force enable
 
 # ── 4. SSH hardening ───────────────────────────────────────────
-SSHD=/etc/ssh/sshd_config
-if grep -qE '^[#\s]*PasswordAuthentication' "$SSHD"; then
-  sed -i -E 's/^[#\s]*PasswordAuthentication.*/PasswordAuthentication no/' "$SSHD"
-else
-  echo "PasswordAuthentication no" >> "$SSHD"
-fi
-systemctl reload ssh || systemctl reload sshd || true
-echo "✓  SSH password auth disabled"
+# (SSH password login is intentionally left enabled.)
 
 # ── 5. Swap (only if RAM < 4 GiB) ──────────────────────────────
 MEM_KB=$(awk '/MemTotal/{print $2}' /proc/meminfo)
