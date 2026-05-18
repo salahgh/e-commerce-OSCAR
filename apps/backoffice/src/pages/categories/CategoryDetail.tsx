@@ -78,6 +78,7 @@ interface FormValues {
   descriptionAr: string;
   parentId: string;
   isPrivate: boolean;
+  inheritFilters: boolean;
   displayOrder: number;
 }
 
@@ -339,6 +340,7 @@ export const CategoryDetail: React.FC = () => {
           arguments: f.arguments,
         })),
         isPrivate: values.isPrivate,
+        inheritFilters: values.inheritFilters,
         featuredAssetId: featuredAssetId || null,
         customFields: {
           displayOrder: values.displayOrder,
@@ -432,6 +434,7 @@ export const CategoryDetail: React.FC = () => {
     descriptionAr: getTranslation(collection?.translations, 'ar', 'description'),
     parentId: collection?.parentId || '',
     isPrivate: collection?.isPrivate || false,
+    inheritFilters: collection?.inheritFilters ?? true,
     displayOrder: collection?.customFields?.displayOrder || 0,
   };
 
@@ -638,6 +641,33 @@ export const CategoryDetail: React.FC = () => {
                           className="sr-only peer"
                         />
                         <div className="w-11 h-6 bg-muted-foreground/30 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                      </label>
+                    </div>
+
+                    {/* Inherit Filters Toggle */}
+                    <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-500/20 rounded-lg">
+                          <Filter className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">
+                            Hériter les filtres du parent
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Les produits de la catégorie parente sont aussi inclus dans cette catégorie
+                          </p>
+                        </div>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="inheritFilters"
+                          checked={values.inheritFilters}
+                          onChange={handleChange}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-muted-foreground/30 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                       </label>
                     </div>
                   </div>
