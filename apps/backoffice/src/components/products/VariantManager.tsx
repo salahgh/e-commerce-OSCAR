@@ -254,7 +254,7 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
         variables: {
           input: {
             code,
-            translations: [{ languageCode: LanguageCode.En, name: newOptionGroupName.trim() }],
+            translations: [{ languageCode: LanguageCode.Fr, name: newOptionGroupName.trim() }],
             options: [],
           },
         },
@@ -358,7 +358,7 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
           input: {
             productOptionGroupId: groupId,
             code,
-            translations: [{ languageCode: LanguageCode.En, name: newOptionName.trim() }],
+            translations: [{ languageCode: LanguageCode.Fr, name: newOptionName.trim() }],
           },
         },
         refetchQueries: [
@@ -447,7 +447,7 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
         stockOnHand: baseStock,
         optionIds,
         translations: [{
-          languageCode: LanguageCode.En,
+          languageCode: LanguageCode.Fr,
           name: combination?.label || `Variant ${index + 1}`,
         }],
       };
