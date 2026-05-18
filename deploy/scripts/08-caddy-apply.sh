@@ -30,9 +30,21 @@ else
 fi
 
 sleep 1
-sudo systemctl status caddy --no-pager --lines=5 || true
+
+if ! systemctl is-active --quiet caddy; then
+  echo
+  echo "❌  Caddy failed to start. Recent logs:"
+  sudo journalctl -u caddy -n 20 --no-pager
+  echo
+  echo "   Most common cause: another process owns :80 or :443. Check with:"
+  echo "     sudo ss -tlnp '( sport = :80 or sport = :443 )'"
+  echo "     sudo lsof -i :443"
+  exit 1
+fi
+
+sudo systemctl status caddy --no-pager --lines=5
 
 echo
-echo "✅  Caddy reloaded."
+echo "✅  Caddy is active."
 echo "   First requests to each domain will trigger Let's Encrypt cert issuance."
 echo "   Watch live:  sudo journalctl -u caddy -f"
