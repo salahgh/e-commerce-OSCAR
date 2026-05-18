@@ -1,0 +1,120 @@
+{
+  "HomePage": {
+    "title": "Bienvenue chez OSCAR Fashion",
+    "subtitle": "Mode & Elegance"
+  },
+  "Common": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue"
+  },
+  "auth": {
+    "fields": {
+      "email": "Email",
+      "password": "Mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "firstName": "Prenom",
+      "lastName": "Nom",
+      "phone": "Telephone"
+    },
+    "placeholders": {
+      "email": "votre@email.com",
+      "password": "Entrez votre mot de passe",
+      "confirmPassword": "Confirmez votre mot de passe",
+      "firstName": "Votre prenom",
+      "lastName": "Votre nom",
+      "phone": "0555 00 00 00"
+    },
+    "labels": {
+      "emailOrPhone": "Email ou numéro de téléphone",
+      "optional": "Optionnel"
+    },
+    "login": {
+      "title": "Content de vous revoir",
+      "subtitle": "Connectez-vous pour continuer vos achats",
+      "noAccount": "Pas encore inscrit ?",
+      "signUp": "Créer un compte",
+      "rememberMe": "Se souvenir de moi",
+      "forgotPassword": "Mot de passe oublié ?",
+      "signIn": "Cliquez ici pour continuer",
+      "signingIn": "Connexion en cours...",
+      "termsNotice": "En continuant, vous acceptez nos",
+      "termsLink": "Conditions d'utilisation",
+      "resendVerification": "Renvoyer l'email de verification"
+    },
+    "register": {
+      "title": "Creer un compte",
+      "hasAccount": "Deja inscrit?",
+      "signIn": "Se connecter",
+      "createAccount": "Creer mon compte",
+      "creating": "Creation en cours...",
+      "termsNotice": "En creant un compte, vous acceptez nos",
+      "termsLink": "Conditions d'utilisation",
+      "success": "Compte cree avec succes!",
+      "checkEmail": "Verifiez votre email pour activer votre compte."
+    },
+    "forgotPassword": {
+      "title": "Mot de passe oublie",
+      "description": "Entrez votre email pour recevoir un lien de reinitialisation.",
+      "sendLink": "Envoyer le lien",
+      "sending": "Envoi en cours...",
+      "backToLogin": "Retour a la connexion",
+      "success": "Email envoye!",
+      "checkEmail": "Verifiez votre boite mail pour reinitialiser votre mot de passe."
+    },
+    "resetPassword": {
+      "title": "Nouveau mot de passe",
+      "description": "Entrez votre nouveau mot de passe.",
+      "reset": "Reinitialiser",
+      "resetting": "Reinitialisation...",
+      "success": "Mot de passe modifie!",
+      "redirecting": "Redirection vers la connexion..."
+    },
+    "verifyEmail": {
+      "title": "Verification de l'email",
+      "verifying": "Verification en cours...",
+      "success": "Email verifie avec succes!",
+      "redirecting": "Redirection..."
+    },
+    "verificationPending": {
+      "title": "Verifiez votre email",
+      "description": "Nous avons envoye un email de verification a",
+      "resend": "Renvoyer l'email",
+      "resending": "Envoi en cours...",
+      "resent": "Email renvoye!",
+      "checkSpam": "Verifiez egalement votre dossier spam."
+    },
+    "profile": {
+      "title": "Mon profil",
+      "personalInfo": "Informations personnelles",
+      "security": "Securite",
+      "addresses": "Adresses",
+      "updateProfile": "Mettre a jour",
+      "updating": "Mise a jour...",
+      "changePassword": "Changer le mot de passe",
+      "currentPassword": "Mot de passe actuel",
+      "newPassword": "Nouveau mot de passe",
+      "confirmNewPassword": "Confirmer le nouveau mot de passe",
+      "passwordChanged": "Mot de passe modifie avec succes!"
+    },
+    "errors": {
+      "loginFailed": "Identifiants incorrects",
+      "emailNotVerified": "Veuillez verifier votre email avant de vous connecter.",
+      "registrationFailed": "Echec de l'inscription",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "invalidToken": "Lien invalide ou expire",
+      "invalidEmail": "Email invalide",
+      "passwordTooShort": "Le mot de passe doit contenir au moins 8 caracteres",
+      "required": "Ce champ est requis"
+    },
+    "validation": {
+      "emailRequired": "L'email est requis",
+      "emailInvalid": "Email invalide",
+      "passwordRequired": "Le mot de passe est requis",
+      "passwordMin": "Le mot de passe doit contenir au moins 8 caracteres",
+      "firstNameRequired": "Le prenom est requis",
+      "lastNameRequired": "Le nom est requis",
+      "phoneInvalid": "Numero de telephone invalide",
+      "termsRequired": "Vous devez accepter les conditions"
+    }
+  }
+}

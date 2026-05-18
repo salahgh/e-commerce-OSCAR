@@ -187,6 +187,11 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
   const { data: taxCategoriesData } = useQuery(AdminTaxCategoriesDocument);
   const taxCategories = taxCategoriesData?.taxCategories?.items || [];
 
+  // Inventory bulk-edit
+  const [pendingTrackInventory, setPendingTrackInventory] = useState<string>('');
+  const [pendingOOSThreshold, setPendingOOSThreshold] = useState<string>('');
+  const [showInventoryBulk, setShowInventoryBulk] = useState(false);
+
   // Bulk delete state
   const [selectedForDelete, setSelectedForDelete] = useState<Set<string>>(new Set());
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
@@ -559,6 +564,45 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
       onRefetch();
     } catch (err: any) {
       dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+  };
+
+  const handleBulkSetInventory = async () => {
+    if (selectedForDelete.size === 0) return;
+    if (!pendingTrackInventory && pendingOOSThreshold === '') return;
+    try {
+      const ids = Array.from(selectedForDelete);
+      const input = ids.map((id) => {
+        const row: Record<string, unknown> = { id };
+        if (pendingTrackInventory) {
+          row.trackInventory = pendingTrackInventory as any;
+          // When explicit TRUE/FALSE, opt out of the global default
+          row.useGlobalOutOfStockThreshold = pendingTrackInventory === 'INHERIT';
+        }
+        if (pendingOOSThreshold !== '') {
+          row.outOfStockThreshold = parseInt(pendingOOSThreshold, 10) || 0;
+          row.useGlobalOutOfStockThreshold = false;
+        }
+        return row;
+      });
+      await updateVariants({ variables: { input: input as any } });
+      dispatch(
+        addToast({
+          message: `Inventaire mis à jour sur ${ids.length} variante(s)`,
+          type: 'success',
+        })
+      );
+      setPendingTrackInventory('');
+      setPendingOOSThreshold('');
+      setShowInventoryBulk(false);
+      onRefetch();
+    } catch (err: any) {
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de la mise à jour de l\'inventaire',
+          type: 'error',
+        })
+      );
     }
   };
 
@@ -1100,6 +1144,14 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
                     <Button
                       type="button"
                       size="sm"
+                      variant="ghost"
+                      onClick={() => setShowInventoryBulk((v) => !v)}
+                    >
+                      Inventaire
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
                       variant="danger"
                       onClick={() => setShowBulkDeleteConfirm(true)}
                       icon={<Trash2 className="h-3 w-3" />}
@@ -1122,6 +1174,48 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {showInventoryBulk && selectedForDelete.size > 0 && (
+            <div className="mb-4 p-4 bg-muted rounded-lg border border-border">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Suivi du stock
+                  </label>
+                  <select
+                    value={pendingTrackInventory}
+                    onChange={(e) => setPendingTrackInventory(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-sm outline-none"
+                  >
+                    <option value="">Inchangé</option>
+                    <option value="TRUE">Actif</option>
+                    <option value="FALSE">Désactivé</option>
+                    <option value="INHERIT">Hériter de la config globale</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Seuil de rupture (override global)
+                  </label>
+                  <Input
+                    type="number"
+                    value={pendingOOSThreshold}
+                    onChange={(e) => setPendingOOSThreshold(e.target.value)}
+                    min="0"
+                    placeholder="Inchangé"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="primary"
+                  disabled={!pendingTrackInventory && pendingOOSThreshold === ''}
+                  onClick={handleBulkSetInventory}
+                >
+                  Appliquer à {selectedForDelete.size} variante(s)
+                </Button>
+              </div>
+            </div>
+          )}
           {variants.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-border">
