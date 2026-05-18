@@ -50,6 +50,7 @@ query AdminCollection($id: ID!) {
     isPrivate
     position
     parentId
+    inheritFilters
     breadcrumbs {
       id
       name
@@ -104,6 +105,7 @@ mutation CreateCollection($input: CreateCollectionInput!) {
     isPrivate
     position
     parentId
+    inheritFilters
     translations {
       languageCode
       name
@@ -125,6 +127,7 @@ mutation UpdateCollection($input: UpdateCollectionInput!) {
     isPrivate
     position
     parentId
+    inheritFilters
     translations {
       languageCode
       name
