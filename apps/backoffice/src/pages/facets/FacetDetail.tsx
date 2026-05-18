@@ -80,6 +80,10 @@ export const FacetDetail: React.FC = () => {
   const [deletedValueIds, setDeletedValueIds] = useState<string[]>([]);
   const [codeManuallyEdited, setCodeManuallyEdited] = useState(false);
   const [deletingValue, setDeletingValue] = useState<{ index: number; name: string } | null>(null);
+  const [forceDeleteState, setForceDeleteState] = useState<{
+    ids: string[];
+    messages: string[];
+  } | null>(null);
 
   // Fetch current facet (if editing)
   const { data, loading, error } = useQuery(AdminFacetDocument, {
@@ -198,6 +202,26 @@ export const FacetDetail: React.FC = () => {
     setFacetValues(newValues);
   };
 
+  const handleForceDelete = async () => {
+    if (!forceDeleteState) return;
+    try {
+      await deleteFacetValues({
+        variables: { ids: forceDeleteState.ids, force: true },
+      });
+      dispatch(
+        addToast({
+          message: `${forceDeleteState.ids.length} valeur(s) supprimée(s) (forcé)`,
+          type: 'success',
+        })
+      );
+    } catch (err: any) {
+      dispatch(
+        addToast({ message: err.message || 'Erreur lors de la suppression forcée', type: 'error' })
+      );
+    }
+    setForceDeleteState(null);
+  };
+
   // Handle delete value
   const handleDeleteValue = (index: number) => {
     const value = facetValues[index];
@@ -266,14 +290,24 @@ export const FacetDetail: React.FC = () => {
           },
         });
 
-        // Handle deleted values
+        // Handle deleted values — if any are blocked (NOT_DELETED), surface
+        // a confirm dialog offering force delete instead of silently failing.
         if (deletedValueIds.length > 0) {
-          await deleteFacetValues({
-            variables: {
-              ids: deletedValueIds,
-              force: false,
-            },
+          const res = await deleteFacetValues({
+            variables: { ids: deletedValueIds, force: false },
           });
+          const blocked = (res.data?.deleteFacetValues || [])
+            .map((r, i) => ({ id: deletedValueIds[i], result: r.result, message: r.message || '' }))
+            .filter((r) => r.result === 'NOT_DELETED');
+          if (blocked.length > 0) {
+            setForceDeleteState({
+              ids: blocked.map((b) => b.id),
+              messages: blocked.map((b) => b.message),
+            });
+            // Bail out of the rest of the submit flow so the admin can decide
+            // whether to force the deletion.
+            return;
+          }
         }
 
         // Handle new values
@@ -812,6 +846,32 @@ export const FacetDetail: React.FC = () => {
         title="Supprimer la valeur"
         message={`Etes-vous sur de vouloir supprimer la valeur "${deletingValue?.name}"? Cette action est irreversible.`}
         confirmText="Supprimer"
+        variant="danger"
+      />
+
+      {/* Force-delete confirmation when values are still in use */}
+      <ConfirmDialog
+        isOpen={forceDeleteState !== null}
+        onClose={() => setForceDeleteState(null)}
+        onConfirm={handleForceDelete}
+        title="Valeur(s) utilisée(s)"
+        message={
+          <div>
+            <p>
+              {forceDeleteState?.ids.length} valeur(s) ne peuvent pas être supprimées car elles
+              sont encore utilisées.
+            </p>
+            {forceDeleteState?.messages.filter(Boolean).slice(0, 5).map((m, i) => (
+              <p key={i} className="mt-1 text-sm text-muted-foreground">
+                • {m}
+              </p>
+            ))}
+            <p className="mt-2 text-amber-600">
+              Forcer la suppression retirera ces valeurs de tous les produits / variantes concernés.
+            </p>
+          </div>
+        }
+        confirmText="Forcer la suppression"
         variant="danger"
       />
     </div>

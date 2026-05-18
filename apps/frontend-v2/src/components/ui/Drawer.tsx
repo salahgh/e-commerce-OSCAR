@@ -14,38 +14,40 @@ const sideMap = {
 export const Drawer = DialogPrimitive.Root;
 export const DrawerTrigger = DialogPrimitive.Trigger;
 export const DrawerClose = DialogPrimitive.Close;
-
-export const DrawerContent = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
-    side?: keyof typeof sideMap;
-    hideClose?: boolean;
-  }
->(({ className, side = 'right', children, hideClose, ...props }, ref) => (
-  <DialogPrimitive.Portal>
-    <DialogPrimitive.Overlay className="fixed inset-0 z-overlay bg-bg-overlay backdrop-blur-sm data-[state=open]:animate-fade-in" />
-    <DialogPrimitive.Content
-      ref={ref}
-      className={cn(
-        'fixed z-modal flex flex-col gap-4 bg-bg-elevated p-6 shadow-overlay focus:outline-none',
-        sideMap[side],
-        className,
-      )}
-      {...props}
-    >
-      {children}
-      {!hideClose && (
-        <DialogPrimitive.Close
-          aria-label="Fermer"
-          className="absolute end-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded text-content-muted transition-colors hover:bg-bg-muted hover:text-content-strong"
-        >
-          <X className="h-5 w-5" />
-        </DialogPrimitive.Close>
-      )}
-    </DialogPrimitive.Content>
-  </DialogPrimitive.Portal>
-));
-DrawerContent.displayName = 'DrawerContent';
-
 export const DrawerTitle = DialogPrimitive.Title;
 export const DrawerDescription = DialogPrimitive.Description;
+
+export function DrawerContent({
+  className,
+  children,
+  side = 'right',
+  hideClose,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Content> & {
+  side?: keyof typeof sideMap;
+  hideClose?: boolean;
+}) {
+  return (
+    <DialogPrimitive.Portal>
+      <DialogPrimitive.Overlay className="fixed inset-0 z-overlay bg-bg-overlay backdrop-blur-sm data-[state=open]:animate-fade-in" />
+      <DialogPrimitive.Content
+        className={cn(
+          'fixed z-modal flex flex-col gap-4 bg-bg-elevated p-6 shadow-overlay focus:outline-none',
+          sideMap[side],
+          className,
+        )}
+        {...props}
+      >
+        {children}
+        {!hideClose && (
+          <DialogPrimitive.Close
+            aria-label="Fermer"
+            className="absolute end-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded text-content-muted transition-colors hover:bg-bg-muted hover:text-content-strong"
+          >
+            <X className="h-5 w-5" />
+          </DialogPrimitive.Close>
+        )}
+      </DialogPrimitive.Content>
+    </DialogPrimitive.Portal>
+  );
+}
