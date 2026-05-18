@@ -6,6 +6,7 @@ import * as Yup from 'yup';
 import {
   ArrowLeft,
   Save,
+  Copy,
   FolderTree,
   Image as ImageIcon,
   Globe,
@@ -40,6 +41,8 @@ import {
   AssignCollectionsToChannelDocument,
   RemoveCollectionsFromChannelDocument,
   PreviewCollectionProductsDocument,
+  DuplicateEntityDocument,
+  EntityDuplicatorsDocument,
   LanguageCode,
 } from '../../graphql/generated/graphql';
 import { Button } from '../../components/ui/Button';
@@ -153,6 +156,45 @@ export const CategoryDetail: React.FC = () => {
   const [removeFromChannel, { loading: removingChannel }] = useMutation(
     RemoveCollectionsFromChannelDocument
   );
+
+  // Entity duplication (Collection)
+  const { data: duplicatorsData } = useQuery(EntityDuplicatorsDocument);
+  const [duplicateEntity, { loading: duplicating }] = useMutation(DuplicateEntityDocument);
+
+  const handleDuplicate = async () => {
+    if (!id || isNew) return;
+    const duplicator = (duplicatorsData?.entityDuplicators || []).find((d) =>
+      d.forEntities.includes('Collection')
+    );
+    if (!duplicator) {
+      dispatch(addToast({ message: 'Aucun duplicateur disponible', type: 'error' }));
+      return;
+    }
+    try {
+      const args = duplicator.args.map((a) => ({
+        name: a.name,
+        value: a.defaultValue ?? (a.type === 'boolean' ? 'false' : ''),
+      }));
+      const res = await duplicateEntity({
+        variables: {
+          input: {
+            entityName: 'Collection',
+            entityId: id,
+            duplicatorInput: { code: duplicator.code, arguments: args },
+          },
+        },
+      });
+      const data = res.data?.duplicateEntity;
+      if (data?.__typename === 'DuplicateEntitySuccess') {
+        dispatch(addToast({ message: 'Catégorie dupliquée', type: 'success' }));
+        navigate(`/categories/${data.newEntityId}`);
+      } else if (data?.__typename === 'DuplicateEntityError') {
+        dispatch(addToast({ message: data.message, type: 'error' }));
+      }
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur de duplication', type: 'error' }));
+    }
+  };
 
   // Live preview of products that match the configured filters
   const [runPreview, previewState] = useLazyQuery(PreviewCollectionProductsDocument);
@@ -496,6 +538,17 @@ export const CategoryDetail: React.FC = () => {
             </div>
           )}
         </div>
+        {!isNew && collection && (
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleDuplicate}
+            loading={duplicating}
+            icon={<Copy className="h-4 w-4" />}
+          >
+            Dupliquer
+          </Button>
+        )}
       </div>
 
       <Formik
