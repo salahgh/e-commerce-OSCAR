@@ -75,3 +75,19 @@ query GetJobQueues {
     running
   }
 }
+
+# List channels for multi-channel administration
+query AdminChannels($options: ChannelListOptions) {
+  channels(options: $options) {
+    items {
+      id
+      code
+      token
+      defaultLanguageCode
+      availableLanguageCodes
+      defaultCurrencyCode
+      pricesIncludeTax
+    }
+    totalItems
+  }
+}

@@ -23,16 +23,22 @@ import {
   AlertCircle,
   FolderOpen,
   Filter,
+  Radio,
+  Plus,
+  Minus,
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { addToast } from '../../store/slices/uiSlice';
 import {
   AdminCollectionDocument,
   AdminCollectionsDocument,
+  AdminChannelsDocument,
   CreateCollectionDocument,
   UpdateCollectionDocument,
   MoveCollectionDocument,
   CreateAssetsDocument,
+  AssignCollectionsToChannelDocument,
+  RemoveCollectionsFromChannelDocument,
   LanguageCode,
 } from '../../graphql/generated/graphql';
 import { Button } from '../../components/ui/Button';
@@ -130,6 +136,22 @@ export const CategoryDetail: React.FC = () => {
   const [moveCollection] = useMutation(MoveCollectionDocument);
   const [createAssets] = useMutation(CreateAssetsDocument);
 
+  // Channel administration (multi-channel) — Vendure scopes channel visibility
+  // via the `vendure-token` request header, so we cannot read which channels a
+  // collection currently belongs to. The UI is action-only: pick channels,
+  // assign or remove. Hidden when only the default channel exists.
+  const { data: channelsData } = useQuery(AdminChannelsDocument, {
+    variables: { options: { take: 100 } },
+  });
+  const channels = channelsData?.channels?.items || [];
+  const [selectedChannelIds, setSelectedChannelIds] = useState<string[]>([]);
+  const [assignToChannel, { loading: assigningChannel }] = useMutation(
+    AssignCollectionsToChannelDocument
+  );
+  const [removeFromChannel, { loading: removingChannel }] = useMutation(
+    RemoveCollectionsFromChannelDocument
+  );
+
   const collection = data?.collection;
   const allCollections = collectionsData?.collections?.items || [];
 
@@ -217,6 +239,41 @@ export const CategoryDetail: React.FC = () => {
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
+  };
+
+  const handleAssignToChannels = async (action: 'assign' | 'remove') => {
+    if (!id || isNew || selectedChannelIds.length === 0) return;
+    const mutate = action === 'assign' ? assignToChannel : removeFromChannel;
+    try {
+      for (const channelId of selectedChannelIds) {
+        await mutate({
+          variables: {
+            input: { channelId, collectionIds: [id] },
+          },
+        });
+      }
+      const channelNames = selectedChannelIds
+        .map((cid) => channels.find((c) => c.id === cid)?.code)
+        .filter(Boolean)
+        .join(', ');
+      dispatch(
+        addToast({
+          message:
+            action === 'assign'
+              ? `Catégorie assignée à ${channelNames}`
+              : `Catégorie retirée de ${channelNames}`,
+          type: 'success',
+        })
+      );
+      setSelectedChannelIds([]);
+    } catch (err: any) {
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de la mise à jour des canaux',
+          type: 'error',
+        })
+      );
+    }
   };
 
   const handleSubmit = async (values: FormValues) => {
@@ -922,6 +979,77 @@ export const CategoryDetail: React.FC = () => {
                           {collection.isPrivate ? 'Prive' : 'Public'}
                         </Badge>
                         <p className="text-sm text-muted-foreground mt-1">Visibilite</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Channels Card (only when editing and >1 channel exists) */}
+                {!isNew && collection && channels.length > 1 && (
+                  <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+                    <div className="px-6 py-4 border-b border-border bg-cyan-500/5">
+                      <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                        <Radio className="h-5 w-5 text-cyan-500" />
+                        Canaux
+                      </h2>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Assigner ou retirer cette categorie d'un canal de vente
+                      </p>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {channels.map((ch) => {
+                          const checked = selectedChannelIds.includes(ch.id);
+                          return (
+                            <label
+                              key={ch.id}
+                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => {
+                                  setSelectedChannelIds((ids) =>
+                                    checked
+                                      ? ids.filter((i) => i !== ch.id)
+                                      : [...ids, ch.id]
+                                  );
+                                }}
+                                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                              />
+                              <span className="text-sm font-medium text-foreground">
+                                {ch.code}
+                              </span>
+                              <span className="text-xs text-muted-foreground ml-auto">
+                                {ch.defaultLanguageCode} · {ch.defaultCurrencyCode}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          loading={assigningChannel}
+                          disabled={selectedChannelIds.length === 0}
+                          onClick={() => handleAssignToChannels('assign')}
+                          icon={<Plus className="h-4 w-4" />}
+                        >
+                          Assigner
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          loading={removingChannel}
+                          disabled={selectedChannelIds.length === 0}
+                          onClick={() => handleAssignToChannels('remove')}
+                          icon={<Minus className="h-4 w-4" />}
+                        >
+                          Retirer
+                        </Button>
                       </div>
                     </div>
                   </div>

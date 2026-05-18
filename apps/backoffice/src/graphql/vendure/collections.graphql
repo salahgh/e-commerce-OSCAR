@@ -154,6 +154,25 @@ mutation MoveCollection($input: MoveCollectionInput!) {
   }
 }
 
+# Assign collections to channels (multi-channel administration).
+# Collection has no `channels` field on the entity itself — Vendure scopes
+# channel visibility via the `vendure-token` request header, so this mutation
+# returns the bare identity only and the UI reflects assignment via toast.
+mutation AssignCollectionsToChannel($input: AssignCollectionsToChannelInput!) {
+  assignCollectionsToChannel(input: $input) {
+    id
+    name
+  }
+}
+
+# Remove collections from channels
+mutation RemoveCollectionsFromChannel($input: RemoveCollectionsFromChannelInput!) {
+  removeCollectionsFromChannel(input: $input) {
+    id
+    name
+  }
+}
+
 # Update collection filters (for assigning products to collections)
 mutation UpdateCollectionFilters($id: ID!, $filters: [ConfigurableOperationInput!]!) {
   updateCollection(input: { id: $id, filters: $filters }) {
