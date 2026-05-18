@@ -345,6 +345,7 @@ export function useUnifiedSearch(): UseUnifiedSearchReturn {
       name: facet.name,
       code: facet.code,
       displayType: detectFacetType(facet.code),
+      isPrivate: facet.isPrivate,
       values: facet.values.map((value) => ({
         id: value.id,
         name: value.name,
