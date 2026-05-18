@@ -115,3 +115,16 @@ export const AVAILABLE_COLORS = [
 ];
 
 export const ITEMS_PER_PAGE = 20;
+
+// Languages surfaced in admin translation editors. The primary language (fr)
+// always comes first. Adding a new language here requires adding fields to
+// the relevant Formik forms (e.g. FacetDetail, CategoryDetail, ProductEdit).
+// Channel-specific availableLanguageCodes can be used to filter this list
+// at render time when a channel only accepts a subset.
+export const SUPPORTED_LANGUAGES: Array<{ code: 'fr' | 'en' | 'ar'; label: string; dir?: 'rtl' }> = [
+  { code: 'fr', label: 'Français' },
+  { code: 'en', label: 'Anglais' },
+  { code: 'ar', label: 'Arabe', dir: 'rtl' },
+];
+
+export const SECONDARY_LANGUAGES = SUPPORTED_LANGUAGES.filter((l) => l.code !== 'fr');
