@@ -23,6 +23,8 @@ export interface FacetGroup {
   displayType: FacetDisplayType;
   values: FacetValueWithCount[];
   isExpanded?: boolean;
+  /** Private facets exist for admin tagging but should not appear in storefront-style filters. */
+  isPrivate?: boolean;
 }
 
 // Admin filter state

@@ -289,7 +289,7 @@ export const FacetedFilterPanel: React.FC<FacetedFilterPanelProps> = ({
             )}
 
             {/* Dynamic Facets */}
-            {facetGroups.map((facet) => {
+            {facetGroups.filter((f) => !f.isPrivate).map((facet) => {
               const selectedCount = getSelectedCountForFacet(facet);
               const isExpanded = expandedSections.has(facet.id);
               const Icon = FACET_ICONS[facet.displayType] || Tag;
