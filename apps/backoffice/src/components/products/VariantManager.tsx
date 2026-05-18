@@ -38,6 +38,9 @@ import {
   AdminProductDocument,
   AdminProductOptionGroupsDocument,
   AdminTaxCategoriesDocument,
+  AdminChannelsDocument,
+  AssignProductVariantsToChannelDocument,
+  RemoveProductVariantsFromChannelDocument,
   LanguageCode,
 } from '../../graphql/generated/graphql';
 
@@ -196,6 +199,21 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
   // Facets bulk-edit
   const [showFacetsBulk, setShowFacetsBulk] = useState(false);
   const [pendingFacetValueIds, setPendingFacetValueIds] = useState<string[]>([]);
+
+  // Per-variant channel assignment + per-channel pricing
+  const [showChannelsBulk, setShowChannelsBulk] = useState(false);
+  const [pendingChannelId, setPendingChannelId] = useState<string>('');
+  const [pendingPriceFactor, setPendingPriceFactor] = useState<string>('');
+  const { data: channelsData } = useQuery(AdminChannelsDocument, {
+    variables: { options: { take: 100 } },
+  });
+  const channels = channelsData?.channels?.items || [];
+  const [assignVariantsToChannel, { loading: assigningVariantChannel }] = useMutation(
+    AssignProductVariantsToChannelDocument
+  );
+  const [removeVariantsFromChannel, { loading: removingVariantChannel }] = useMutation(
+    RemoveProductVariantsFromChannelDocument
+  );
 
   // Bulk delete state
   const [selectedForDelete, setSelectedForDelete] = useState<Set<string>>(new Set());
@@ -569,6 +587,55 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
       onRefetch();
     } catch (err: any) {
       dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+  };
+
+  const handleVariantChannelAction = async (action: 'assign' | 'remove') => {
+    if (!pendingChannelId || selectedForDelete.size === 0) return;
+    const ids = Array.from(selectedForDelete);
+    try {
+      if (action === 'assign') {
+        const priceFactor = pendingPriceFactor ? parseFloat(pendingPriceFactor) : undefined;
+        await assignVariantsToChannel({
+          variables: {
+            input: {
+              channelId: pendingChannelId,
+              productVariantIds: ids,
+              priceFactor: Number.isFinite(priceFactor as number) ? priceFactor : undefined,
+            },
+          },
+        });
+      } else {
+        await removeVariantsFromChannel({
+          variables: {
+            input: {
+              channelId: pendingChannelId,
+              productVariantIds: ids,
+            },
+          },
+        });
+      }
+      const code = channels.find((c) => c.id === pendingChannelId)?.code;
+      dispatch(
+        addToast({
+          message:
+            action === 'assign'
+              ? `${ids.length} variante(s) assignée(s) au canal ${code}`
+              : `${ids.length} variante(s) retirée(s) du canal ${code}`,
+          type: 'success',
+        })
+      );
+      setShowChannelsBulk(false);
+      setPendingChannelId('');
+      setPendingPriceFactor('');
+      onRefetch();
+    } catch (err: any) {
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de la mise à jour des canaux',
+          type: 'error',
+        })
+      );
     }
   };
 
@@ -1187,6 +1254,16 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
                     >
                       Facettes
                     </Button>
+                    {channels.length > 1 && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setShowChannelsBulk((v) => !v)}
+                      >
+                        Canaux
+                      </Button>
+                    )}
                     <Button
                       type="button"
                       size="sm"
@@ -1212,6 +1289,67 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {showChannelsBulk && selectedForDelete.size > 0 && (
+            <div className="mb-4 p-4 bg-muted rounded-lg border border-border">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Canal
+                  </label>
+                  <select
+                    value={pendingChannelId}
+                    onChange={(e) => setPendingChannelId(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-sm outline-none"
+                  >
+                    <option value="">Sélectionner un canal...</option>
+                    {channels.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.code}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Facteur de prix (assigner)
+                  </label>
+                  <Input
+                    type="number"
+                    value={pendingPriceFactor}
+                    onChange={(e) => setPendingPriceFactor(e.target.value)}
+                    min="0"
+                    step="0.01"
+                    placeholder="1.0"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="primary"
+                    disabled={!pendingChannelId}
+                    loading={assigningVariantChannel}
+                    onClick={() => handleVariantChannelAction('assign')}
+                  >
+                    Assigner
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    disabled={!pendingChannelId}
+                    loading={removingVariantChannel}
+                    onClick={() => handleVariantChannelAction('remove')}
+                  >
+                    Retirer
+                  </Button>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Le facteur de prix multiplie le prix de la variante pour le canal cible (ex: 1.2 pour +20%).
+              </p>
+            </div>
+          )}
           {showFacetsBulk && selectedForDelete.size > 0 && (
             <div className="mb-4 p-4 bg-muted rounded-lg border border-border">
               <div className="flex items-center justify-between mb-3">
