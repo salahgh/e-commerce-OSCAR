@@ -91,7 +91,11 @@ export const FacetValueEditor: React.FC<FacetValueEditorProps> = ({
               value={value.code}
               onChange={(e) => handleCodeChange(e.target.value)}
               placeholder="Ex: rouge"
-              helperText={value.isNew ? 'Auto-généré depuis le nom' : undefined}
+              helperText={
+                value.isNew
+                  ? 'Auto-généré depuis le nom — choisissez bien, le code ne peut plus être modifié après création'
+                  : 'Le code est immuable après la création. Pour le modifier, créez une nouvelle valeur et migrez les références.'
+              }
               disabled={disabled || !value.isNew}
               className="font-mono"
             />
