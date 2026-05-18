@@ -6,6 +6,12 @@
 
 const path = require('path');
 const repoRoot = path.resolve(__dirname, '..', '..');
+const frontendDir = path.join(repoRoot, 'apps/frontend');
+
+// pnpm with node-linker=hoisted puts `next` at the workspace root, not under
+// apps/frontend/node_modules. Use Node's resolver so this works regardless of
+// where pnpm decided to drop the package.
+const nextBin = require.resolve('next/dist/bin/next', { paths: [frontendDir] });
 
 module.exports = {
   apps: [
@@ -23,11 +29,10 @@ module.exports = {
     },
     {
       name: 'oscar-frontend',
-      cwd: path.join(repoRoot, 'apps/frontend'),
-      // Calling the next binary directly avoids spawning a pnpm wrapper process.
-      script: path.join(repoRoot, 'apps/frontend/node_modules/next/dist/bin/next'),
+      cwd: frontendDir,
+      script: nextBin,
       args: 'start -p 3000',
-      env_file: path.join(repoRoot, 'apps/frontend/.env.production'),
+      env_file: path.join(frontendDir, '.env.production'),
       max_memory_restart: '1G',
       instances: 1,
       exec_mode: 'fork',
