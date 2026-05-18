@@ -52,6 +52,17 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const Comp = asChild ? Slot : 'button';
     const isDisabled = disabled || loading;
+    // When `asChild` is true, Slot expects exactly one React element child
+    // (e.g. a <Link>). The caller is responsible for arranging icons inside it.
+    const content = asChild ? (
+      children
+    ) : (
+      <>
+        {loading ? <Spinner /> : leadingIcon}
+        {children}
+        {!loading && trailingIcon}
+      </>
+    );
     return (
       <Comp
         ref={ref}
@@ -60,9 +71,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         aria-busy={loading || undefined}
         {...props}
       >
-        {loading ? <Spinner /> : leadingIcon}
-        {children}
-        {!loading && trailingIcon}
+        {content}
       </Comp>
     );
   },
