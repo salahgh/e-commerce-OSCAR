@@ -31,6 +31,8 @@ interface FacetedFilterPanelProps {
   isOpen: boolean;
   onClose: () => void;
   facetGroups: FacetGroup[];
+  /** Live counts from the Vendure Search API, keyed by facet value id */
+  facetValueCounts?: Map<string, number>;
   collections: Array<{ id: string; name: string; slug: string; parentId?: string }>;
   state: AdminFilterState;
   onToggleFacetValue: (id: string) => void;
@@ -65,6 +67,7 @@ export const FacetedFilterPanel: React.FC<FacetedFilterPanelProps> = ({
   isOpen,
   onClose,
   facetGroups,
+  facetValueCounts,
   collections,
   state,
   onToggleFacetValue,
@@ -308,6 +311,7 @@ export const FacetedFilterPanel: React.FC<FacetedFilterPanelProps> = ({
                       values={facet.values}
                       selectedIds={state.facetValueIds}
                       onToggle={onToggleFacetValue}
+                      counts={facetValueCounts}
                     />
                   )}
                   {facet.displayType === 'size-button' && (
@@ -315,6 +319,7 @@ export const FacetedFilterPanel: React.FC<FacetedFilterPanelProps> = ({
                       values={facet.values}
                       selectedIds={state.facetValueIds}
                       onToggle={onToggleFacetValue}
+                      counts={facetValueCounts}
                     />
                   )}
                   {facet.displayType === 'checkbox' && (
@@ -322,6 +327,7 @@ export const FacetedFilterPanel: React.FC<FacetedFilterPanelProps> = ({
                       values={facet.values}
                       selectedIds={state.facetValueIds}
                       onToggle={onToggleFacetValue}
+                      counts={facetValueCounts}
                     />
                   )}
                 </FilterSection>
@@ -649,24 +655,29 @@ interface ColorSwatchFilterProps {
   values: Array<{ id: string; name: string; code: string }>;
   selectedIds: string[];
   onToggle: (id: string) => void;
+  counts?: Map<string, number>;
 }
 
-function ColorSwatchFilter({ values, selectedIds, onToggle }: ColorSwatchFilterProps) {
+function ColorSwatchFilter({ values, selectedIds, onToggle, counts }: ColorSwatchFilterProps) {
   return (
     <div className="flex flex-wrap gap-2">
       {values.map((value) => {
         const isSelected = selectedIds.includes(value.id);
+        const count = counts?.get(value.id);
+        const disabled = count === 0 && !isSelected;
         return (
           <motion.button
             key={value.id}
             onClick={() => onToggle(value.id)}
+            disabled={disabled}
             className={cn(
               'relative p-1 rounded-lg transition-all',
-              isSelected && 'ring-2 ring-primary-500 ring-offset-2'
+              isSelected && 'ring-2 ring-primary-500 ring-offset-2',
+              disabled && 'opacity-40 cursor-not-allowed'
             )}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            title={value.name}
+            whileHover={!disabled ? { scale: 1.1 } : undefined}
+            whileTap={!disabled ? { scale: 0.9 } : undefined}
+            title={count !== undefined ? `${value.name} (${count})` : value.name}
           >
             <ColorSwatch color={value.code} size="md" selected={isSelected} />
           </motion.button>
@@ -681,9 +692,10 @@ interface SizeButtonFilterProps {
   values: Array<{ id: string; name: string; code: string }>;
   selectedIds: string[];
   onToggle: (id: string) => void;
+  counts?: Map<string, number>;
 }
 
-function SizeButtonFilter({ values, selectedIds, onToggle }: SizeButtonFilterProps) {
+function SizeButtonFilter({ values, selectedIds, onToggle, counts }: SizeButtonFilterProps) {
   const sortedValues = useMemo(() => {
     return [...values].sort((a, b) => {
       const orderedNames = sortSizes([a.name, b.name]);
@@ -695,20 +707,27 @@ function SizeButtonFilter({ values, selectedIds, onToggle }: SizeButtonFilterPro
     <div className="flex flex-wrap gap-2">
       {sortedValues.map((value) => {
         const isSelected = selectedIds.includes(value.id);
+        const count = counts?.get(value.id);
+        const disabled = count === 0 && !isSelected;
         return (
           <motion.button
             key={value.id}
             onClick={() => onToggle(value.id)}
+            disabled={disabled}
             className={cn(
               'px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all min-w-[44px]',
               isSelected
                 ? 'bg-primary-500 border-primary-500 text-white shadow-md'
-                : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
+                : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500',
+              disabled && 'opacity-40 cursor-not-allowed hover:border-gray-600'
             )}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={!disabled ? { scale: 1.05 } : undefined}
+            whileTap={!disabled ? { scale: 0.95 } : undefined}
           >
             {value.name}
+            {count !== undefined && (
+              <span className="ml-1 text-xs opacity-70">({count})</span>
+            )}
           </motion.button>
         );
       })}
@@ -721,9 +740,10 @@ interface CheckboxFilterProps {
   values: Array<{ id: string; name: string; code: string }>;
   selectedIds: string[];
   onToggle: (id: string) => void;
+  counts?: Map<string, number>;
 }
 
-function CheckboxFilter({ values, selectedIds, onToggle }: CheckboxFilterProps) {
+function CheckboxFilter({ values, selectedIds, onToggle, counts }: CheckboxFilterProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAll, setShowAll] = useState(false);
 
@@ -755,15 +775,19 @@ function CheckboxFilter({ values, selectedIds, onToggle }: CheckboxFilterProps) 
       <div className="space-y-1">
         {visibleValues.map((value) => {
           const isSelected = selectedIds.includes(value.id);
+          const count = counts?.get(value.id);
+          const disabled = count === 0 && !isSelected;
           return (
             <button
               key={value.id}
               onClick={() => onToggle(value.id)}
+              disabled={disabled}
               className={cn(
                 'w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-all',
                 isSelected
                   ? 'bg-primary-900/50 border border-primary-600'
-                  : 'hover:bg-gray-700 border border-transparent text-gray-300'
+                  : 'hover:bg-gray-700 border border-transparent text-gray-300',
+                disabled && 'opacity-40 cursor-not-allowed hover:bg-transparent'
               )}
             >
               <div
@@ -777,6 +801,11 @@ function CheckboxFilter({ values, selectedIds, onToggle }: CheckboxFilterProps) 
               <span className={cn('flex-1', isSelected && 'text-primary-400 font-medium')}>
                 {value.name}
               </span>
+              {count !== undefined && (
+                <span className="text-xs text-gray-500 tabular-nums">
+                  {count}
+                </span>
+              )}
             </button>
           );
         })}

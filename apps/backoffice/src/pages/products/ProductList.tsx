@@ -889,6 +889,7 @@ export const ProductList: React.FC = () => {
               perPage: search.state.perPage,
             }}
             facetGroups={search.facetGroups}
+            facetValueCounts={search.facetValueCounts}
             collections={search.collections.map(c => ({ ...c, parentId: undefined }))}
             loading={search.facetsLoading}
             onToggleFacetValue={search.toggleFacetValue}
