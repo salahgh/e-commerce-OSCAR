@@ -36,18 +36,21 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   GripVertical,
+  CheckSquare,
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { addToast } from '../../store/slices/uiSlice';
 import {
   AdminCollectionsDocument,
   DeleteCollectionDocument,
+  DeleteCollectionsDocument,
   UpdateCollectionDocument,
 } from '../../graphql/generated/graphql';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { Modal, ModalContent, ModalFooter } from '../../components/ui/Modal';
 import { cn } from '../../lib/utils';
 
 // Helper to get translation by language
@@ -433,6 +436,9 @@ export const CategoryList: React.FC = () => {
     return new Set();
   });
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkSelectedIds, setBulkSelectedIds] = useState<Set<string>>(new Set());
+  const [showBulkConfirm, setShowBulkConfirm] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [showOnlyPublic, setShowOnlyPublic] = useState(false);
   const [viewMode, setViewMode] = useState<'tree' | 'flat'>(() => {
@@ -471,6 +477,7 @@ export const CategoryList: React.FC = () => {
   });
 
   const [deleteCollection, { loading: deleting }] = useMutation(DeleteCollectionDocument);
+  const [deleteCollections, { loading: bulkDeleting }] = useMutation(DeleteCollectionsDocument);
   const [updateCollection] = useMutation(UpdateCollectionDocument);
 
   // Handle order change
@@ -688,6 +695,44 @@ export const CategoryList: React.FC = () => {
       );
     }
     setDeleteTarget(null);
+  };
+
+  const handleBulkDelete = async () => {
+    if (bulkSelectedIds.size === 0) return;
+
+    try {
+      const ids = Array.from(bulkSelectedIds);
+      const res = await deleteCollections({ variables: { ids } });
+      const failed = (res.data?.deleteCollections || []).filter(
+        (r: any) => r.result !== 'DELETED'
+      );
+      if (failed.length > 0) {
+        dispatch(
+          addToast({
+            message: `${ids.length - failed.length} suppression(s) réussie(s), ${failed.length} échec(s)`,
+            type: 'error',
+          })
+        );
+      } else {
+        dispatch(
+          addToast({
+            message: `${ids.length} catégorie(s) supprimée(s)`,
+            type: 'success',
+          })
+        );
+      }
+      refetch();
+    } catch (err) {
+      dispatch(
+        addToast({
+          message: 'Erreur lors de la suppression groupée',
+          type: 'error',
+        })
+      );
+    }
+    setShowBulkConfirm(false);
+    setShowBulkModal(false);
+    setBulkSelectedIds(new Set());
   };
 
   // Handle drag end - update displayOrder for reordering
@@ -995,9 +1040,22 @@ export const CategoryList: React.FC = () => {
             {totalItems} catégorie{totalItems > 1 ? 's' : ''}
           </p>
         </div>
-        <Link to="/categories/new">
-          <Button icon={<Plus className="h-4 w-4" />}>Nouvelle catégorie</Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            icon={<CheckSquare className="h-4 w-4" />}
+            onClick={() => {
+              setBulkSelectedIds(new Set());
+              setShowBulkModal(true);
+            }}
+            disabled={collections.length === 0}
+          >
+            Suppression groupée
+          </Button>
+          <Link to="/categories/new">
+            <Button icon={<Plus className="h-4 w-4" />}>Nouvelle catégorie</Button>
+          </Link>
+        </div>
       </div>
 
       {/* Enhanced Search & Filters */}
@@ -1242,6 +1300,111 @@ export const CategoryList: React.FC = () => {
         confirmText="Supprimer"
         variant="danger"
         loading={deleting}
+      />
+
+      {/* Bulk delete picker */}
+      <Modal
+        isOpen={showBulkModal}
+        onClose={() => setShowBulkModal(false)}
+        title="Suppression groupée de catégories"
+        size="lg"
+      >
+        <ModalContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Cochez les catégories à supprimer. Les sous-catégories liées seront également
+            supprimées.
+          </p>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">
+              {bulkSelectedIds.size} sur {collections.length} sélectionnée(s)
+            </span>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() =>
+                  setBulkSelectedIds(new Set(collections.map((c) => c.id)))
+                }
+                className="text-primary hover:underline"
+              >
+                Tout sélectionner
+              </button>
+              <button
+                type="button"
+                onClick={() => setBulkSelectedIds(new Set())}
+                className="text-muted-foreground hover:underline"
+              >
+                Tout désélectionner
+              </button>
+            </div>
+          </div>
+          <div className="max-h-96 overflow-y-auto border border-border rounded-lg divide-y divide-border">
+            {sortCollections(collections).map((c) => {
+              const checked = bulkSelectedIds.has(c.id);
+              const depth = c.breadcrumbs ? c.breadcrumbs.length - 1 : 0;
+              return (
+                <label
+                  key={c.id}
+                  className="flex items-center gap-3 p-3 hover:bg-accent cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => {
+                      setBulkSelectedIds((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(c.id)) next.delete(c.id);
+                        else next.add(c.id);
+                        return next;
+                      });
+                    }}
+                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                  />
+                  <span style={{ marginLeft: depth * 16 }} className="font-medium text-foreground">
+                    {c.name}
+                  </span>
+                  <Badge variant="default" className="ml-auto">
+                    {c.productVariants?.totalItems || 0} produits
+                  </Badge>
+                  {c.isPrivate && (
+                    <Badge variant="warning">
+                      <EyeOff className="h-3 w-3" />
+                    </Badge>
+                  )}
+                </label>
+              );
+            })}
+          </div>
+        </ModalContent>
+        <ModalFooter>
+          <Button variant="ghost" onClick={() => setShowBulkModal(false)}>
+            Annuler
+          </Button>
+          <Button
+            variant="danger"
+            disabled={bulkSelectedIds.size === 0}
+            icon={<Trash2 className="h-4 w-4" />}
+            onClick={() => setShowBulkConfirm(true)}
+          >
+            Supprimer {bulkSelectedIds.size > 0 ? `(${bulkSelectedIds.size})` : ''}
+          </Button>
+        </ModalFooter>
+      </Modal>
+
+      {/* Bulk delete confirmation */}
+      <ConfirmDialog
+        isOpen={showBulkConfirm}
+        onClose={() => setShowBulkConfirm(false)}
+        onConfirm={handleBulkDelete}
+        title="Confirmer la suppression"
+        message={
+          <p>
+            Confirmer la suppression de <strong>{bulkSelectedIds.size}</strong> catégorie(s) ?
+            Cette action est irréversible.
+          </p>
+        }
+        confirmText="Supprimer définitivement"
+        variant="danger"
+        loading={bulkDeleting}
       />
     </div>
   );
