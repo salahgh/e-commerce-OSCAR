@@ -32,7 +32,7 @@ the Let's Encrypt HTTP-01 challenge.
 ```caddy
 oscarfashion.dz, www.oscarfashion.dz {
     encode zstd gzip
-    reverse_proxy 127.0.0.1:3000        # Next.js storefront
+    reverse_proxy 127.0.0.1:3001        # Next.js storefront
 }
 
 api.oscarfashion.dz {

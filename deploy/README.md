@@ -16,7 +16,7 @@ No Docker, no Railway, no Vercel — just **Node 20 + pnpm + PostgreSQL + PM2 + 
 | Service | Path | Public URL | Local port | Process manager |
 |---|---|---|---|---|
 | Vendure API (shop-api, admin-api, /assets, built-in admin) | `apps/backend` | `https://api.oscarfashion.dz` | `127.0.0.1:8085` | PM2 (`oscar-backend`) |
-| Next.js storefront | `apps/frontend` | `https://oscarfashion.dz` | `127.0.0.1:3000` | PM2 (`oscar-frontend`) |
+| Next.js storefront | `apps/frontend` | `https://oscarfashion.dz` | `127.0.0.1:3001` | PM2 (`oscar-frontend`) |
 | Custom back-office (Vite SPA) | `apps/backoffice` | `https://admin.oscarfashion.dz` | n/a (static files) | Caddy file_server |
 
 ## Topology (single VPS)
@@ -24,7 +24,7 @@ No Docker, no Railway, no Vercel — just **Node 20 + pnpm + PostgreSQL + PM2 + 
 ```
                 ┌─────────────── Caddy (:80/:443, auto-HTTPS) ───────────────┐
                 │                                                            │
-oscarfashion.dz │  → reverse_proxy 127.0.0.1:3000   ───►  PM2 oscar-frontend │
+oscarfashion.dz │  → reverse_proxy 127.0.0.1:3001   ───►  PM2 oscar-frontend │
 api.oscarfashion.dz │ → reverse_proxy 127.0.0.1:8085 ───►  PM2 oscar-backend │
 admin.oscarfashion.dz │ → file_server /var/www/oscar/apps/backoffice/dist   │
                 └──────────────────────────────────┬─────────────────────────┘

@@ -86,7 +86,7 @@ data.
 bash deploy/scripts/07-pm2-start.sh
 pm2 status     # both apps should be online
 curl -s http://127.0.0.1:8085/health  # → "ok"
-curl -sI http://127.0.0.1:3000/       # → HTTP/1.1 200
+curl -sI http://127.0.0.1:3001/       # → HTTP/1.1 200
 ```
 
 ### 9. Apply Caddy reverse-proxy

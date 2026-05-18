@@ -31,7 +31,7 @@ module.exports = {
       name: 'oscar-frontend',
       cwd: frontendDir,
       script: nextBin,
-      args: 'start -p 3000',
+      args: 'start -p 3001',
       env_file: path.join(frontendDir, '.env.production'),
       max_memory_restart: '1G',
       instances: 1,

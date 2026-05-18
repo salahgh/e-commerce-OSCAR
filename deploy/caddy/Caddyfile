@@ -9,10 +9,10 @@
 # this VPS's public IP (A record), or Let's Encrypt will refuse.
 # ───────────────────────────────────────────────────────────────
 
-# ── Storefront (Next.js on :3000) ──────────────────────────────
+# ── Storefront (Next.js on :3001) ──────────────────────────────
 oscarfashion.dz, www.oscarfashion.dz {
     encode zstd gzip
-    reverse_proxy 127.0.0.1:3000
+    reverse_proxy 127.0.0.1:3001
 }
 
 # ── Vendure API (shop-api, admin-api, /assets, built-in admin) ─
