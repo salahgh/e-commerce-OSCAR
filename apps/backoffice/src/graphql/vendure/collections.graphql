@@ -61,6 +61,12 @@ query AdminCollection($id: ID!) {
       preview
       source
     }
+    assets {
+      id
+      name
+      preview
+      source
+    }
     productVariants {
       totalItems
     }

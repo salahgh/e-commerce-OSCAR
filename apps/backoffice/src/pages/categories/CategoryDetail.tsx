@@ -100,8 +100,10 @@ export const CategoryDetail: React.FC = () => {
   const isNew = !id || id === 'new';
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [featuredImage, setFeaturedImage] = useState<ImageFile | null>(null);
+  const [galleryAssets, setGalleryAssets] = useState<Array<{ id: string; preview: string }>>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [showAssetPicker, setShowAssetPicker] = useState(false);
+  const [showGalleryPicker, setShowGalleryPicker] = useState(false);
   const [collectionFilters, setCollectionFilters] = useState<Array<{
     code: string;
     arguments: Array<{ name: string; value: string }>;
@@ -126,6 +128,12 @@ export const CategoryDetail: React.FC = () => {
             code: f.code,
             arguments: f.args.map((a: any) => ({ name: a.name, value: a.value })),
           }))
+        );
+      }
+      // Initialize gallery assets
+      if (data?.collection?.assets) {
+        setGalleryAssets(
+          data.collection.assets.map((a) => ({ id: a.id, preview: a.preview }))
         );
       }
     },
@@ -411,6 +419,7 @@ export const CategoryDetail: React.FC = () => {
         isPrivate: values.isPrivate,
         inheritFilters: values.inheritFilters,
         featuredAssetId: featuredAssetId || null,
+        assetIds: galleryAssets.map((a) => a.id),
         customFields: {
           displayOrder: values.displayOrder,
         },
@@ -1102,6 +1111,54 @@ export const CategoryDetail: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Gallery Card */}
+                <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+                  <div className="px-6 py-4 border-b border-border bg-amber-500/5 flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                      <ImageIcon className="h-5 w-5 text-amber-500" />
+                      Galerie ({galleryAssets.length})
+                    </h2>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowGalleryPicker(true)}
+                      icon={<Plus className="h-4 w-4" />}
+                    >
+                      Ajouter
+                    </Button>
+                  </div>
+                  <div className="p-4">
+                    {galleryAssets.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        Aucune image dans la galerie
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-2">
+                        {galleryAssets.map((a) => (
+                          <div key={a.id} className="relative group aspect-square">
+                            <img
+                              src={a.preview}
+                              alt=""
+                              className="w-full h-full object-cover rounded-lg"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setGalleryAssets((prev) => prev.filter((g) => g.id !== a.id))
+                              }
+                              className="absolute top-1 right-1 p-1 bg-destructive rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                              title="Retirer"
+                            >
+                              <X className="h-3 w-3 text-white" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 {/* Quick Stats (only when editing) */}
                 {!isNew && collection && (
                   <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
@@ -1256,6 +1313,25 @@ export const CategoryDetail: React.FC = () => {
         multiple={false}
         selectedIds={featuredImage?.id ? [featuredImage.id] : []}
         title="Selectionner une image"
+      />
+
+      {/* Gallery Asset Picker (multi) */}
+      <AssetPickerModal
+        isOpen={showGalleryPicker}
+        onClose={() => setShowGalleryPicker(false)}
+        onSelect={(assets) => {
+          setGalleryAssets((prev) => {
+            const existing = new Set(prev.map((a) => a.id));
+            const additions = assets
+              .filter((a) => !existing.has(a.id))
+              .map((a) => ({ id: a.id, preview: a.preview }));
+            return [...prev, ...additions];
+          });
+          setShowGalleryPicker(false);
+        }}
+        multiple={true}
+        selectedIds={galleryAssets.map((a) => a.id)}
+        title="Selectionner des images pour la galerie"
       />
     </div>
   );
