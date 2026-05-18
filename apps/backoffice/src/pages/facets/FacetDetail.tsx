@@ -37,6 +37,7 @@ import { Badge } from '../../components/ui/Badge';
 import { FacetValueEditor } from '../../components/facets/FacetValueEditor';
 import type { FacetValueData } from '../../components/facets/FacetValueEditor';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { Modal, ModalContent, ModalFooter } from '../../components/ui/Modal';
 import { cn } from '../../lib/utils';
 
 // Helper to get translation by language
@@ -193,6 +194,55 @@ export const FacetDetail: React.FC = () => {
         isNew: true,
       },
     ]);
+  };
+
+  // Bulk import: parse pasted CSV/TSV text and append to facetValues
+  const [showBulkImport, setShowBulkImport] = useState(false);
+  const [bulkImportText, setBulkImportText] = useState('');
+
+  const handleBulkImport = () => {
+    const rows = bulkImportText
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean);
+    if (rows.length === 0) {
+      dispatch(addToast({ message: 'Aucune ligne à importer', type: 'error' }));
+      return;
+    }
+    const parsed: FacetValueData[] = [];
+    let lineNumber = 0;
+    for (const row of rows) {
+      lineNumber++;
+      // Support both comma and tab as separators
+      const cols = row.split(/\t|,/).map((c) => c.trim());
+      const [code, nameFr, nameEn, nameAr, colorHex] = cols;
+      if (!code || !nameFr) {
+        dispatch(
+          addToast({
+            message: `Ligne ${lineNumber}: code et nom français requis`,
+            type: 'error',
+          })
+        );
+        return;
+      }
+      parsed.push({
+        name: nameFr,
+        code,
+        nameEn: nameEn || '',
+        nameAr: nameAr || '',
+        colorHex: isColorFacet ? colorHex || '' : undefined,
+        isNew: true,
+      });
+    }
+    setFacetValues([...facetValues, ...parsed]);
+    setBulkImportText('');
+    setShowBulkImport(false);
+    dispatch(
+      addToast({
+        message: `${parsed.length} valeur(s) ajoutée(s). Cliquez Enregistrer pour confirmer.`,
+        type: 'success',
+      })
+    );
   };
 
   // Handle update value
@@ -637,15 +687,25 @@ export const FacetDetail: React.FC = () => {
                         <Tag className="h-5 w-5 text-blue-500" />
                         Valeurs ({facetValues.length})
                       </h2>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        icon={<Plus className="h-4 w-4" />}
-                        onClick={handleAddValue}
-                      >
-                        Ajouter une valeur
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowBulkImport(true)}
+                        >
+                          Importer
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          icon={<Plus className="h-4 w-4" />}
+                          onClick={handleAddValue}
+                        >
+                          Ajouter une valeur
+                        </Button>
+                      </div>
                     </div>
                   </div>
                   <div className="p-6 space-y-4">
@@ -848,6 +908,48 @@ export const FacetDetail: React.FC = () => {
         confirmText="Supprimer"
         variant="danger"
       />
+
+      {/* Bulk import modal */}
+      <Modal
+        isOpen={showBulkImport}
+        onClose={() => setShowBulkImport(false)}
+        title="Importer des valeurs"
+        size="md"
+      >
+        <ModalContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Une valeur par ligne. Colonnes séparées par <strong>virgule</strong> ou{' '}
+            <strong>tabulation</strong>:
+            <br />
+            <code className="text-xs bg-muted px-2 py-1 rounded mt-1 inline-block">
+              code, nom (FR), nom (EN), nom (AR){isColorFacet ? ', couleur hex (#000000)' : ''}
+            </code>
+          </p>
+          <textarea
+            value={bulkImportText}
+            onChange={(e) => setBulkImportText(e.target.value)}
+            rows={10}
+            placeholder={
+              isColorFacet
+                ? 'rouge, Rouge, Red, أحمر, #DC2626\nbleu, Bleu, Blue, أزرق, #2563EB'
+                : 's, S, Small, صغير\nm, M, Medium, متوسط'
+            }
+            className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground font-mono text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          />
+          <p className="text-xs text-muted-foreground">
+            Les valeurs apparaîtront en bas de la liste et seront créées au prochain
+            enregistrement de l'attribut.
+          </p>
+        </ModalContent>
+        <ModalFooter>
+          <Button variant="ghost" onClick={() => setShowBulkImport(false)}>
+            Annuler
+          </Button>
+          <Button variant="primary" onClick={handleBulkImport}>
+            Ajouter
+          </Button>
+        </ModalFooter>
+      </Modal>
 
       {/* Force-delete confirmation when values are still in use */}
       <ConfirmDialog
