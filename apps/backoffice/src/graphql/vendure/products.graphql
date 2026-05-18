@@ -683,6 +683,22 @@ mutation RemoveProductsFromChannel($input: RemoveProductsFromChannelInput!) {
   }
 }
 
+# Per-variant channel assignment with optional priceFactor for per-channel pricing
+mutation AssignProductVariantsToChannel($input: AssignProductVariantsToChannelInput!) {
+  assignProductVariantsToChannel(input: $input) {
+    id
+    sku
+    price
+  }
+}
+
+mutation RemoveProductVariantsFromChannel($input: RemoveProductVariantsFromChannelInput!) {
+  removeProductVariantsFromChannel(input: $input) {
+    id
+    sku
+  }
+}
+
 # ==================== FACET MUTATIONS ====================
 
 # Assign facet values to product
