@@ -16,9 +16,10 @@ What it does, in order:
 2. `git fetch && git checkout $BRANCH && git pull --ff-only`.
 3. `pnpm install --frozen-lockfile`.
 4. `pnpm build` (rebuilds backend, frontend, backoffice via Turbo).
-5. `pnpm --filter @oscar/backend migration:run` (no-op if no new migrations).
-6. `pm2 reload deploy/scripts/ecosystem.config.cjs --update-env` — zero-downtime
-   restart of `oscar-backend` and `oscar-frontend`.
+5. `pm2 reload deploy/scripts/ecosystem.config.cjs --update-env` — zero-downtime
+   restart of `oscar-backend` and `oscar-frontend`. **Vendure runs migrations
+   automatically on backend boot** (see `apps/backend/src/index.ts:9`), so any
+   new migrations apply during the reload.
 
 The backoffice doesn't need a "reload" — Caddy serves the freshly built
 `apps/backoffice/dist/` instantly.
@@ -28,7 +29,6 @@ The backoffice doesn't need a "reload" — Caddy serves the freshly built
 | Variable | Effect |
 |---|---|
 | `BRANCH=feature/foo` | Deploy a non-`main` branch (handy for staging on the same VPS). |
-| `SKIP_MIGRATE=1` | Skip migrations (use only if you know there are none). |
 
 ## What to do if a deploy fails
 
@@ -52,10 +52,13 @@ git fetch
 git checkout <previous-good-sha>
 pnpm install --frozen-lockfile
 pnpm build
-# If the bad deploy added a migration, you'll need to revert it:
-pnpm --filter @oscar/backend migration:revert
 pm2 reload deploy/scripts/ecosystem.config.cjs --update-env
 ```
+
+If the bad deploy added a migration, rolling back the code won't undo the
+schema change — the safest path is to **restore the previous DB dump**
+before reloading PM2. See
+[03 — Database](03-database.md#backups-recommended).
 
 > Vendure migrations are not always reversible. If a migration changes data,
 > the safest rollback is to **restore the previous DB dump** (see

@@ -35,12 +35,10 @@ pnpm install --frozen-lockfile
 echo "▶  pnpm build"
 pnpm build
 
-if [[ "${SKIP_MIGRATE:-0}" != "1" ]]; then
-  echo "▶  Migrations"
-  pnpm --filter @oscar/backend migration:run
-fi
+# Migrations run automatically when the backend boots — they apply on
+# the next `pm2 reload` below. See apps/backend/src/index.ts:9.
 
-echo "▶  Reloading PM2 (zero-downtime)"
+echo "▶  Reloading PM2 (zero-downtime — migrations apply on backend restart)"
 pm2 reload "$ECO" --update-env
 
 # The backoffice is served by Caddy from apps/backoffice/dist — the
