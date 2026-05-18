@@ -23,6 +23,7 @@ import {
   Radio,
   Plus,
   Minus,
+  Copy,
 } from 'lucide-react';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
@@ -40,6 +41,8 @@ import {
   AdminChannelsDocument,
   AssignProductsToChannelDocument,
   RemoveProductsFromChannelDocument,
+  DuplicateEntityDocument,
+  EntityDuplicatorsDocument,
   LanguageCode,
 } from '../../graphql/generated/graphql';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -144,6 +147,8 @@ export const ProductEdit: React.FC = () => {
   const [removeProductsFromChannel, { loading: removingChannel }] = useMutation(
     RemoveProductsFromChannelDocument
   );
+  const { data: duplicatorsData } = useQuery(EntityDuplicatorsDocument);
+  const [duplicateEntity, { loading: duplicating }] = useMutation(DuplicateEntityDocument);
 
   // Channels list
   const { data: channelsData } = useQuery(AdminChannelsDocument, {
@@ -986,6 +991,41 @@ export const ProductEdit: React.FC = () => {
     </div>
   );
 
+  const handleDuplicateProduct = async () => {
+    if (!product) return;
+    const duplicator = (duplicatorsData?.entityDuplicators || []).find((d) =>
+      d.forEntities.includes('Product')
+    );
+    if (!duplicator) {
+      dispatch(addToast({ message: 'Aucun duplicateur disponible', type: 'error' }));
+      return;
+    }
+    try {
+      const args = duplicator.args.map((a) => ({
+        name: a.name,
+        value: a.defaultValue ?? (a.type === 'boolean' ? 'false' : ''),
+      }));
+      const res = await duplicateEntity({
+        variables: {
+          input: {
+            entityName: 'Product',
+            entityId: product.id,
+            duplicatorInput: { code: duplicator.code, arguments: args },
+          },
+        },
+      });
+      const data = res.data?.duplicateEntity;
+      if (data?.__typename === 'DuplicateEntitySuccess') {
+        dispatch(addToast({ message: 'Produit dupliqué', type: 'success' }));
+        navigate(`/products/${data.newEntityId}`);
+      } else if (data?.__typename === 'DuplicateEntityError') {
+        dispatch(addToast({ message: data.message, type: 'error' }));
+      }
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur de duplication', type: 'error' }));
+    }
+  };
+
   const handleChannelAction = async (action: 'assign' | 'remove') => {
     if (!product || selectedChannelIds.length === 0) return;
     const mutate = action === 'assign' ? assignProductsToChannel : removeProductsFromChannel;
@@ -1168,6 +1208,14 @@ export const ProductEdit: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <Button
+            variant="secondary"
+            icon={<Copy className="h-4 w-4" />}
+            onClick={handleDuplicateProduct}
+            loading={duplicating}
+          >
+            Dupliquer
+          </Button>
           <Button
             variant="danger"
             icon={<Trash2 className="h-4 w-4" />}
