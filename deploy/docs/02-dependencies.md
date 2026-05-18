@@ -9,13 +9,36 @@ alone.
 
 ## Run
 
+At this stage you haven't cloned the repo to its final home yet
+(`/var/www/oscar`) — that happens in step 4. So run the script from wherever
+you have the repo on the VPS right now. Two common cases:
+
+**A. You cloned the repo to `/tmp/oscar` before running 00-bootstrap.sh:**
+
 ```bash
 ssh oscar@YOUR_VPS_IP
-bash /var/www/oscar/deploy/scripts/01-install-deps.sh
+bash /tmp/oscar/deploy/scripts/01-install-deps.sh
 ```
 
-(Or fetch the file directly if you haven't cloned the repo yet — see
-[05 — First deploy](05-first-deploy.md).)
+**B. You haven't cloned yet (you ran 00-bootstrap.sh via curl):** clone now,
+then run:
+
+```bash
+ssh oscar@YOUR_VPS_IP
+# Public repo:
+git clone https://github.com/<you>/e-commerce-OSCAR.git /tmp/oscar
+# Or private repo with a PAT:
+# git clone https://<user>:<PAT>@github.com/<you>/e-commerce-OSCAR.git /tmp/oscar
+
+bash /tmp/oscar/deploy/scripts/01-install-deps.sh
+```
+
+**C. Just want this one script** (no clone): grab it via curl:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/<you>/e-commerce-OSCAR/main/deploy/scripts/01-install-deps.sh -o /tmp/01.sh
+bash /tmp/01.sh
+```
 
 ## What the preflight looks like
 

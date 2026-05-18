@@ -2,13 +2,28 @@
 # ──────────────────────────────────────────────────────────────
 # 02-setup-postgres.sh — create the Vendure DB + role.
 #
-#   bash deploy/scripts/02-setup-postgres.sh
+#   bash deploy/scripts/02-setup-postgres.sh           # as `oscar`
 #
-# Idempotent: rerunning will NOT overwrite an existing password.
-# Writes the connection string to ~/.oscar-db-url (mode 600) so
-# the env-writing script can pick it up.
+# Do NOT prefix with `sudo` — the script `sudo`s internally only
+# for the Postgres bits, and running the whole thing as root makes
+# the credentials file land in /root/ instead of the app user's home.
+#
+# Idempotent: rerunning rotates the password (and the saved URL).
+# Writes the connection string to ~/.oscar-db-url (mode 600).
 # ──────────────────────────────────────────────────────────────
 set -euo pipefail
+
+# Refuse to run as root — see header comment.
+if [[ $EUID -eq 0 ]]; then
+  echo "❌  Don't run as root. Run as the app user (e.g. oscar) — without sudo." >&2
+  echo "    The script will use sudo internally where needed." >&2
+  exit 1
+fi
+
+# Run from /tmp so the postgres Unix user can chdir into our cwd
+# (otherwise `sudo -u postgres psql` prints harmless warnings about
+# /home/oscar being unreadable).
+cd /tmp
 
 DB_NAME="${DB_NAME:-oscar_fashion}"
 DB_USER="${DB_USER:-oscar}"
@@ -44,7 +59,11 @@ else
   echo "ℹ  Database $DB_NAME already exists"
 fi
 
-DATABASE_URL="postgres://$DB_USER:$DB_PASSWORD@127.0.0.1:5432/$DB_NAME?schema=public"
+# NOTE: no ?schema=public — psql rejects that query param. Vendure's
+# vendure-config.ts defaults the schema to "public" when the URL has no
+# query string (apps/backend/src/vendure-config.ts:34), so behaviour is
+# identical and the same URL works with psql for ad-hoc queries.
+DATABASE_URL="postgres://$DB_USER:$DB_PASSWORD@127.0.0.1:5432/$DB_NAME"
 
 umask 077
 echo "DATABASE_URL=$DATABASE_URL" > "$URL_FILE"

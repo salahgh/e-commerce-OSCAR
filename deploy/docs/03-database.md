@@ -20,8 +20,14 @@ The connection string format matches what
 `apps/backend/src/vendure-config.ts` expects:
 
 ```
-DATABASE_URL=postgres://oscar:<password>@127.0.0.1:5432/oscar_fashion?schema=public
+DATABASE_URL=postgres://oscar:<password>@127.0.0.1:5432/oscar_fashion
 ```
+
+> **No `?schema=public` query param** — `psql` rejects it as invalid, and
+> Vendure's config defaults the schema to `public` whenever the URL is
+> plain (apps/backend/src/vendure-config.ts:34). Behaviour is identical
+> to the Prisma-style URL, but this form also works with ad-hoc
+> `psql "$DATABASE_URL"` commands.
 
 ## Why TCP instead of the Unix socket?
 
