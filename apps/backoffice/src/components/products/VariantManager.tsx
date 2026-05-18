@@ -22,6 +22,7 @@ import { Badge } from '../ui/Badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { AssetPickerModal } from '../ui/AssetPickerModal';
+import { FacetSelector } from './FacetSelector';
 import { formatPrice } from '../../lib/utils';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
@@ -191,6 +192,10 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
   const [pendingTrackInventory, setPendingTrackInventory] = useState<string>('');
   const [pendingOOSThreshold, setPendingOOSThreshold] = useState<string>('');
   const [showInventoryBulk, setShowInventoryBulk] = useState(false);
+
+  // Facets bulk-edit
+  const [showFacetsBulk, setShowFacetsBulk] = useState(false);
+  const [pendingFacetValueIds, setPendingFacetValueIds] = useState<string[]>([]);
 
   // Bulk delete state
   const [selectedForDelete, setSelectedForDelete] = useState<Set<string>>(new Set());
@@ -564,6 +569,31 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
       onRefetch();
     } catch (err: any) {
       dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+  };
+
+  const handleBulkSetFacets = async () => {
+    if (selectedForDelete.size === 0) return;
+    try {
+      const ids = Array.from(selectedForDelete);
+      const input = ids.map((id) => ({ id, facetValueIds: pendingFacetValueIds }));
+      await updateVariants({ variables: { input } });
+      dispatch(
+        addToast({
+          message: `Facettes appliquées à ${ids.length} variante(s)`,
+          type: 'success',
+        })
+      );
+      setShowFacetsBulk(false);
+      setPendingFacetValueIds([]);
+      onRefetch();
+    } catch (err: any) {
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de la mise à jour des facettes',
+          type: 'error',
+        })
+      );
     }
   };
 
@@ -1152,6 +1182,14 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
                     <Button
                       type="button"
                       size="sm"
+                      variant="ghost"
+                      onClick={() => setShowFacetsBulk((v) => !v)}
+                    >
+                      Facettes
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
                       variant="danger"
                       onClick={() => setShowBulkDeleteConfirm(true)}
                       icon={<Trash2 className="h-3 w-3" />}
@@ -1174,6 +1212,30 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {showFacetsBulk && selectedForDelete.size > 0 && (
+            <div className="mb-4 p-4 bg-muted rounded-lg border border-border">
+              <div className="flex items-center justify-between mb-3">
+                <p className="font-medium text-foreground text-sm">
+                  Sélectionner les facettes à appliquer à {selectedForDelete.size} variante(s)
+                </p>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="primary"
+                  onClick={handleBulkSetFacets}
+                >
+                  Appliquer
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">
+                Note: ceci remplace les facettes existantes des variantes sélectionnées.
+              </p>
+              <FacetSelector
+                selectedIds={pendingFacetValueIds}
+                onChange={setPendingFacetValueIds}
+              />
+            </div>
+          )}
           {showInventoryBulk && selectedForDelete.size > 0 && (
             <div className="mb-4 p-4 bg-muted rounded-lg border border-border">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
