@@ -27,11 +27,14 @@ sudo bash /path/to/deploy/scripts/00-bootstrap.sh
 
 | Step | Effect |
 |---|---|
-| 1 | Creates the `oscar` Linux user and grants passwordless sudo. |
+| 1 | Creates the `oscar` Linux user, sets its password, grants passwordless sudo. |
 | 2 | Copies `root`'s `authorized_keys` to `oscar` so you can SSH in as `oscar`. |
 | 3 | Enables UFW with `OpenSSH`, `80`, `443` allowed (everything else denied). |
-| 4 | Disables SSH password auth (key-only login). |
-| 5 | Adds 4 GiB swap when total RAM is below 4 GiB. |
+| 4 | Adds 4 GiB swap when total RAM is below 4 GiB. |
+
+> SSH password authentication is **left enabled** so you can log in as `oscar`
+> with the password. The default password is `majmajBS13..` — override with
+> `OSCAR_PASSWORD='…' sudo bash 00-bootstrap.sh`.
 
 All steps are idempotent — re-running won't break anything.
 
@@ -56,6 +59,7 @@ Then proceed to [02 — Dependencies](02-dependencies.md).
 - **Locked out after enabling UFW.** Always run UFW on a console-attached session,
   or pre-allow `OpenSSH` first (the script does this, but if you've customised
   port 22 → another port, allow that port first).
-- **SSH still accepts passwords.** Check `/etc/ssh/sshd_config.d/*.conf` for an
-  override that re-enables `PasswordAuthentication`; cloud providers sometimes
-  drop one in.
+- **Want to disable SSH password auth later?** Set
+  `PasswordAuthentication no` in `/etc/ssh/sshd_config` (or in a file under
+  `/etc/ssh/sshd_config.d/`) and `sudo systemctl reload ssh`. Make sure you can
+  log in with your SSH key first.
