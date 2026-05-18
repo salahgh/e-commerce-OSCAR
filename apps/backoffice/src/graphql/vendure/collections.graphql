@@ -144,6 +144,14 @@ mutation DeleteCollection($id: ID!) {
   }
 }
 
+# Bulk delete multiple collections
+mutation DeleteCollections($ids: [ID!]!) {
+  deleteCollections(ids: $ids) {
+    result
+    message
+  }
+}
+
 mutation MoveCollection($input: MoveCollectionInput!) {
   moveCollection(input: $input) {
     id
