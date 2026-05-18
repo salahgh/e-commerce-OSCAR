@@ -159,3 +159,34 @@ mutation DeleteFacetValues($ids: [ID!]!, $force: Boolean) {
     message
   }
 }
+
+# Assign facets to channels (multi-channel administration).
+# Facet has no `channels` field on the entity itself — Vendure scopes
+# channel visibility via the `vendure-token` request header, so this
+# mutation returns the bare identity only.
+mutation AssignFacetsToChannel($input: AssignFacetsToChannelInput!) {
+  assignFacetsToChannel(input: $input) {
+    id
+    name
+    code
+  }
+}
+
+# Remove facets from a channel. Returns a union: success returns Facet,
+# failure returns FacetInUseError with usage counts.
+mutation RemoveFacetsFromChannel($input: RemoveFacetsFromChannelInput!) {
+  removeFacetsFromChannel(input: $input) {
+    ... on Facet {
+      id
+      name
+      code
+    }
+    ... on FacetInUseError {
+      errorCode
+      message
+      facetCode
+      productCount
+      variantCount
+    }
+  }
+}

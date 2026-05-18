@@ -26,6 +26,9 @@ import {
   CreateFacetValuesDocument,
   UpdateFacetValuesDocument,
   DeleteFacetValuesDocument,
+  AdminChannelsDocument,
+  AssignFacetsToChannelDocument,
+  RemoveFacetsFromChannelDocument,
   LanguageCode,
 } from '../../graphql/generated/graphql';
 import { Button } from '../../components/ui/Button';
@@ -106,6 +109,67 @@ export const FacetDetail: React.FC = () => {
   const [createFacetValues] = useMutation(CreateFacetValuesDocument);
   const [updateFacetValues] = useMutation(UpdateFacetValuesDocument);
   const [deleteFacetValues] = useMutation(DeleteFacetValuesDocument);
+
+  // Channels (multi-channel admin) — action-only; Facet has no channels field
+  const { data: channelsData } = useQuery(AdminChannelsDocument, {
+    variables: { options: { take: 100 } },
+  });
+  const channels = channelsData?.channels?.items || [];
+  const [selectedChannelIds, setSelectedChannelIds] = useState<string[]>([]);
+  const [assignFacetsToChannel, { loading: assigningChannel }] = useMutation(
+    AssignFacetsToChannelDocument
+  );
+  const [removeFacetsFromChannel, { loading: removingChannel }] = useMutation(
+    RemoveFacetsFromChannelDocument
+  );
+
+  const handleAssignFacetToChannels = async (action: 'assign' | 'remove') => {
+    if (!facet || isNew || selectedChannelIds.length === 0) return;
+    try {
+      for (const channelId of selectedChannelIds) {
+        if (action === 'assign') {
+          await assignFacetsToChannel({
+            variables: { input: { channelId, facetIds: [facet.id] } },
+          });
+        } else {
+          const res = await removeFacetsFromChannel({
+            variables: { input: { channelId, facetIds: [facet.id], force: false } },
+          });
+          const result = res.data?.removeFacetsFromChannel?.[0];
+          if (result?.__typename === 'FacetInUseError') {
+            dispatch(
+              addToast({
+                message: `Facet utilisée par ${result.productCount} produit(s) et ${result.variantCount} variante(s)`,
+                type: 'error',
+              })
+            );
+            return;
+          }
+        }
+      }
+      const names = selectedChannelIds
+        .map((cid) => channels.find((c) => c.id === cid)?.code)
+        .filter(Boolean)
+        .join(', ');
+      dispatch(
+        addToast({
+          message:
+            action === 'assign'
+              ? `Attribut assigné à ${names}`
+              : `Attribut retiré de ${names}`,
+          type: 'success',
+        })
+      );
+      setSelectedChannelIds([]);
+    } catch (err: any) {
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de la mise à jour des canaux',
+          type: 'error',
+        })
+      );
+    }
+  };
 
   const facet = data?.facet;
 
@@ -646,6 +710,69 @@ export const FacetDetail: React.FC = () => {
                           {facet.isPrivate ? 'Prive' : 'Public'}
                         </Badge>
                         <p className="text-sm text-muted-foreground mt-1">Visibilite</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Channels Card (only when editing and >1 channel) */}
+                {!isNew && facet && channels.length > 1 && (
+                  <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+                    <div className="px-6 py-4 border-b border-border bg-cyan-500/5">
+                      <h2 className="text-lg font-semibold text-foreground">Canaux</h2>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Assigner ou retirer cet attribut des canaux de vente
+                      </p>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {channels.map((ch) => {
+                          const checked = selectedChannelIds.includes(ch.id);
+                          return (
+                            <label
+                              key={ch.id}
+                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() =>
+                                  setSelectedChannelIds((prev) =>
+                                    checked
+                                      ? prev.filter((id) => id !== ch.id)
+                                      : [...prev, ch.id]
+                                  )
+                                }
+                                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                              />
+                              <span className="text-sm font-medium text-foreground">
+                                {ch.code}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          loading={assigningChannel}
+                          disabled={selectedChannelIds.length === 0}
+                          onClick={() => handleAssignFacetToChannels('assign')}
+                        >
+                          Assigner
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          loading={removingChannel}
+                          disabled={selectedChannelIds.length === 0}
+                          onClick={() => handleAssignFacetToChannels('remove')}
+                        >
+                          Retirer
+                        </Button>
                       </div>
                     </div>
                   </div>
