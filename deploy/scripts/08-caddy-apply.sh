@@ -21,8 +21,13 @@ caddy validate --config "$SRC" --adapter caddyfile
 echo "▶  Copying to $DST"
 sudo install -m 644 "$SRC" "$DST"
 
-echo "▶  Reloading Caddy"
-sudo systemctl reload caddy
+if systemctl is-active --quiet caddy; then
+  echo "▶  Reloading Caddy (zero-downtime)"
+  sudo systemctl reload caddy
+else
+  echo "▶  Caddy isn't running yet — starting + enabling on boot"
+  sudo systemctl enable --now caddy
+fi
 
 sleep 1
 sudo systemctl status caddy --no-pager --lines=5 || true
