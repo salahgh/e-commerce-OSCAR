@@ -195,6 +195,12 @@ query AdminProduct($id: ID!) {
         code
       }
     }
+    channels {
+      id
+      code
+      defaultLanguageCode
+      defaultCurrencyCode
+    }
   }
 }
 
