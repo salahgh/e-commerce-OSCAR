@@ -17,10 +17,8 @@ export const initialData: InitialData = {
     {
       name: 'Cash on delivery',
       handler: {
-        code: 'manual-payment',
-        arguments: [
-          { name: 'automaticSettle', value: 'false' },
-        ],
+        code: 'cash-on-delivery',
+        arguments: [{ name: 'codFee', value: '0' }],
       },
     },
   ],
