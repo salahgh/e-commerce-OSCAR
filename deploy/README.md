@@ -1,266 +1,90 @@
-# OSCAR Deployment Guide
+# OSCAR Fashion — Self-Hosted VPS Deployment
 
-Automated deployment scripts for OSCAR Fashion E-commerce on Linux VPS.
+Plain-bash deployment of the OSCAR Fashion monorepo to a single Ubuntu VPS.
+No Docker, no Railway, no Vercel — just **Node 20 + pnpm + PostgreSQL + PM2 + Caddy**.
 
-## Files
+> **Heads-up:** the old `setup-vps.sh`, `setup-vps-postgres.sh`, `maintenance.sh`,
+> `deploy.sh` (at `deploy/` root) and `vendure-config.production.ts` files in this
+> folder are **legacy** — they reference the pre-monorepo paths
+> (`01-BACKEND-VENDURE/`, `02-FRONTEND/`) which no longer exist. They are kept
+> around for reference but they will **not work**. Use the numbered scripts
+> under `deploy/scripts/` instead. Delete the legacy files once you're confident
+> the new flow works.
 
-| Script | Purpose |
-|--------|---------|
-| `setup-vps-postgres.sh` | Initial VPS setup with PostgreSQL (RECOMMENDED) |
-| `setup-vps.sh` | Initial VPS setup with MariaDB |
-| `deploy.sh` | Deploy/update application |
+## What gets deployed
 
-## Quick Start
+| Service | Path | Public URL | Local port | Process manager |
+|---|---|---|---|---|
+| Vendure API (shop-api, admin-api, /assets, built-in admin) | `apps/backend` | `https://api.oscarfashion.dz` | `127.0.0.1:8085` | PM2 (`oscar-backend`) |
+| Next.js storefront | `apps/frontend` | `https://oscarfashion.dz` | `127.0.0.1:3000` | PM2 (`oscar-frontend`) |
+| Custom back-office (Vite SPA) | `apps/backoffice` | `https://admin.oscarfashion.dz` | n/a (static files) | Caddy file_server |
 
-### 1. Initial VPS Setup (Run Once)
+## Topology (single VPS)
 
-SSH into your fresh VPS and run:
-
-```bash
-# Download the setup script (or upload manually)
-wget https://raw.githubusercontent.com/your-repo/oscar/main/deploy/setup-vps-postgres.sh
-
-# Make executable and run
-chmod +x setup-vps-postgres.sh
-sudo ./setup-vps-postgres.sh
+```
+                ┌─────────────── Caddy (:80/:443, auto-HTTPS) ───────────────┐
+                │                                                            │
+oscarfashion.dz │  → reverse_proxy 127.0.0.1:3000   ───►  PM2 oscar-frontend │
+api.oscarfashion.dz │ → reverse_proxy 127.0.0.1:8085 ───►  PM2 oscar-backend │
+admin.oscarfashion.dz │ → file_server /var/www/oscar/apps/backoffice/dist   │
+                └──────────────────────────────────┬─────────────────────────┘
+                                                   │
+                                            PostgreSQL :5432
+                                            (oscar_fashion DB on localhost)
 ```
 
-**What it does:**
-- Updates system packages
-- Installs Node.js 20 LTS
-- Installs PostgreSQL
-- Creates database and user
-- Installs Nginx with reverse proxy config
-- Configures firewall (UFW)
-- Creates project directories
-- Generates secure credentials
-- Creates environment files
+## Order of operations (first deploy)
 
-### 2. Upload Your Code
+| Step | Script | Run as | Notes |
+|---|---|---|---|
+| 1 | [`scripts/00-bootstrap.sh`](scripts/00-bootstrap.sh) | **root** | Optional but recommended — creates `oscar` user, UFW, swap. |
+| 2 | [`scripts/01-install-deps.sh`](scripts/01-install-deps.sh) | `oscar` | Node 20, pnpm, Postgres, Caddy, PM2. |
+| 3 | [`scripts/02-setup-postgres.sh`](scripts/02-setup-postgres.sh) | `oscar` | Creates role + db, writes `~/.oscar-db-url`. |
+| 4 | [`scripts/03-clone-repo.sh`](scripts/03-clone-repo.sh) | `oscar` | Clones into `/var/www/oscar`. |
+| 5 | [`scripts/04-write-env.sh`](scripts/04-write-env.sh) | `oscar` | Interactive — writes `.env` files for all 3 apps. |
+| 6 | [`scripts/05-build.sh`](scripts/05-build.sh) | `oscar` | `pnpm install` + `pnpm build`. |
+| 7 | [`scripts/06-migrate.sh --seed`](scripts/06-migrate.sh) | `oscar` | Migrations (+ seed demo data on **first run only**). |
+| 8 | [`scripts/07-pm2-start.sh`](scripts/07-pm2-start.sh) | `oscar` | PM2 starts backend + frontend, enables boot persistence. |
+| 9 | [`scripts/08-caddy-apply.sh`](scripts/08-caddy-apply.sh) | `oscar` | DNS A-records must already point at the VPS. |
 
-From your local machine:
+After step 9 the three subdomains should serve HTTPS.
 
-```bash
-# Upload Vendure backend
-scp -r 01-BACKEND-VENDURE/oscar-vendure/* root@YOUR_VPS_IP:/var/www/oscar/vendure/
-
-# Upload Next.js frontend
-scp -r 02-FRONTEND/oscar-frontend/* root@YOUR_VPS_IP:/var/www/oscar/frontend/
-
-# Upload deploy script
-scp deploy/deploy.sh root@YOUR_VPS_IP:/var/www/oscar/
-```
-
-Or clone from Git on the VPS:
+## Day-2 updates
 
 ```bash
-cd /var/www
-git clone https://github.com/your-username/e-commerce-OSCAR.git oscar-repo
-cp -r oscar-repo/01-BACKEND-VENDURE/oscar-vendure/* /var/www/oscar/vendure/
-cp -r oscar-repo/02-FRONTEND/oscar-frontend/* /var/www/oscar/frontend/
-```
-
-### 3. Deploy Application
-
-```bash
+ssh oscar@your-vps
 cd /var/www/oscar
-chmod +x deploy.sh
-./deploy.sh
+bash deploy/scripts/deploy.sh
 ```
 
-### 4. Setup SSL Certificate
+That single script pulls `main`, reinstalls, rebuilds, runs migrations, and
+reloads PM2 with zero downtime. See [`docs/07-updates.md`](docs/07-updates.md).
 
-After your DNS points to the VPS:
+## Defaults (override via env vars before running any script)
 
-```bash
-sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
-```
+| Var | Default | Purpose |
+|---|---|---|
+| `APP_DIR`  | `/var/www/oscar` | Where the repo lives on the VPS. |
+| `APP_USER` | `oscar`          | Linux user that runs the apps. |
+| `DB_NAME`  | `oscar_fashion`  | Postgres database name. |
+| `DB_USER`  | `oscar`          | Postgres role. |
+| `BRANCH`   | `main`           | Branch to deploy. |
 
-### 5. Populate Initial Data (Optional)
+## Where logs live
 
-```bash
-cd /var/www/oscar/vendure
-npm run populate
-```
+| Source | Command |
+|---|---|
+| Node apps | `pm2 logs`, `pm2 logs oscar-backend`, `pm2 logs oscar-frontend` |
+| Caddy / TLS | `sudo journalctl -u caddy -f` |
+| Postgres | `sudo journalctl -u postgresql -f` |
 
-## Directory Structure (on VPS)
+## Docs index
 
-```
-/var/www/oscar/
-├── vendure/           # Vendure backend
-│   ├── .env           # Environment variables
-│   ├── dist/          # Compiled code
-│   ├── static/        # Assets
-│   └── node_modules/
-├── frontend/          # Next.js frontend
-│   ├── .env.production
-│   ├── .next/         # Built app
-│   └── node_modules/
-├── logs/              # Application logs
-├── backups/           # Database backups
-├── deploy.sh          # Deployment script
-└── CREDENTIALS.txt    # Generated credentials (DELETE after saving!)
-```
-
-## Environment Variables
-
-### Vendure Backend (`/var/www/oscar/vendure/.env`)
-
-```env
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=oscar_vendure
-DB_SCHEMA=public
-DB_USERNAME=oscar
-DB_PASSWORD=your_password
-
-# Server
-PORT=8085
-NODE_ENV=production
-
-# Auth
-SUPERADMIN_USERNAME=superadmin
-SUPERADMIN_PASSWORD=your_password
-COOKIE_SECRET=your_secret
-
-# Payment Gateways
-CIB_MERCHANT_ID=
-CIB_TERMINAL_ID=
-CIB_SECRET_KEY=
-BARIDIMOB_MERCHANT_ACCOUNT=
-BARIDIMOB_API_KEY=
-BARIDIMOB_SECRET_KEY=
-```
-
-### Frontend (`/var/www/oscar/frontend/.env.production`)
-
-```env
-NEXT_PUBLIC_GRAPHQL_URL=https://yourdomain.com/shop-api
-NEXT_PUBLIC_GRAPHQL_WS_URL=wss://yourdomain.com/shop-api
-NEXT_PUBLIC_SITE_URL=https://yourdomain.com
-NEXT_PUBLIC_CDN_URL=https://yourdomain.com/assets
-```
-
-## Services & Ports
-
-| Service | Port | URL Path |
-|---------|------|----------|
-| Vendure API | 8085 | `/shop-api`, `/admin-api` |
-| Vendure Admin UI | 8086 | `/admin` |
-| Next.js Frontend | 3000 | `/` |
-| Nginx | 80/443 | Reverse proxy |
-
-## PM2 Commands
-
-```bash
-# View all services
-pm2 status
-
-# View logs
-pm2 logs vendure
-pm2 logs frontend
-
-# Restart services
-pm2 restart vendure
-pm2 restart frontend
-
-# Stop services
-pm2 stop all
-
-# View process details
-pm2 show vendure
-```
-
-## Updating the Application
-
-Simply run the deploy script again:
-
-```bash
-cd /var/www/oscar
-./deploy.sh
-```
-
-This will:
-1. Backup environment files
-2. Pull latest code (if using git)
-3. Restore environment files
-4. Rebuild and restart services
-
-## Database Backup
-
-Create a backup:
-
-```bash
-pg_dump -U oscar oscar_vendure > /var/www/oscar/backups/backup_$(date +%Y%m%d).sql
-```
-
-Restore from backup:
-
-```bash
-psql -U oscar oscar_vendure < /var/www/oscar/backups/backup_YYYYMMDD.sql
-```
-
-## Nginx SSL Configuration
-
-After running certbot, enable HTTPS redirect by editing:
-
-```bash
-sudo nano /etc/nginx/sites-available/oscar
-```
-
-Add at the beginning of the HTTP server block:
-
-```nginx
-return 301 https://$server_name$request_uri;
-```
-
-Then reload:
-
-```bash
-sudo nginx -t && sudo systemctl reload nginx
-```
-
-## Troubleshooting
-
-### Check service status
-```bash
-pm2 status
-systemctl status nginx
-systemctl status postgresql
-```
-
-### View logs
-```bash
-pm2 logs vendure --lines 100
-pm2 logs frontend --lines 100
-tail -f /var/log/nginx/oscar.error.log
-```
-
-### Test database connection
-```bash
-psql -U oscar -d oscar_vendure -h localhost
-```
-
-### Test API manually
-```bash
-curl http://localhost:8085/shop-api?query={__typename}
-curl http://localhost:3000
-```
-
-### Restart everything
-```bash
-pm2 restart all
-sudo systemctl restart nginx
-```
-
-## Security Checklist
-
-- [ ] Change default superadmin password
-- [ ] Delete CREDENTIALS.txt after saving credentials
-- [ ] Configure SMTP for emails
-- [ ] Configure payment gateway credentials
-- [ ] Enable HTTPS with certbot
-- [ ] Set up automated backups
-- [ ] Configure fail2ban rules
-- [ ] Review Nginx security headers
+- [01 — VPS bootstrap](docs/01-vps-bootstrap.md)
+- [02 — Dependencies](docs/02-dependencies.md)
+- [03 — Database](docs/03-database.md)
+- [04 — Env files](docs/04-env-files.md)
+- [05 — First deploy (happy path)](docs/05-first-deploy.md)
+- [06 — Caddy + DNS](docs/06-caddy-and-dns.md)
+- [07 — Updates / rollback](docs/07-updates.md)
+- [08 — Troubleshooting](docs/08-troubleshooting.md)
