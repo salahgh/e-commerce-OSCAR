@@ -1,0 +1,174 @@
+/*
+ * OSCAR Najar — Design Tokens (single source of truth)
+ *
+ * Source: Figma file SVomYJvoIIvYat5YNWNVM3, page "design system"
+ *
+ * Rule: every color, type size, spacing step, radius, shadow, and motion
+ * value in the codebase routes through one of the variables below.
+ * Tailwind utilities read these variables via tailwind.config.ts.
+ * Hex literals outside this file are blocked by ESLint.
+ */
+
+:root {
+  /* ---------- Raw color palette (from Figma variables) ---------- */
+  --color-main-1: #DFDFDF;
+  --color-main-2: #B7B7B7;
+  --color-main-5: #131313;
+  --color-main-6: #000000;
+  --color-main-brand1: #1E1E1E;
+
+  --color-gray-white: #FFFFFF;
+  --color-gray-1: #FAFBFF;
+  --color-gray-2: #EDEEF2;
+  --color-gray-3: #E1E2E5;
+  --color-gray-4: #D5D5D9;
+  --color-gray-5: #C8C9CC;
+  --color-gray-6: #646466;
+
+  --color-dark-text: #010B38;
+  --color-light-text: #FFFFFF;
+
+  --color-attention-1: #E5FBFF;
+  --color-attention-blue: #11CAEF;
+  --color-attention-6: #1298B2;
+
+  --color-error-1: #FFE5E5;
+  --color-error-red: #EB3E3E;
+  --color-error-6: #B22F2F;
+
+  --color-success-1: #E5FFEE;
+  --color-success-green: #2FD976;
+  --color-success-6: #2EA154;
+
+  --color-warning-1: #FFF7E5;
+  --color-warning-orange: #FFBC1F;
+  --color-warning-6: #B28416;
+
+  /* ---------- Semantic colors (what components use) ---------- */
+  --bg-base: var(--color-gray-white);
+  --bg-subtle: var(--color-gray-1);
+  --bg-muted: var(--color-gray-2);
+  --bg-elevated: var(--color-gray-white);
+  --bg-overlay: rgba(1, 11, 56, 0.5);
+
+  --content-strong: var(--color-dark-text);
+  --content-default: var(--color-dark-text);
+  --content-muted: rgba(1, 11, 56, 0.6);
+  --content-subtle: rgba(1, 11, 56, 0.4);
+  --content-inverse: var(--color-light-text);
+
+  --border-default: var(--color-gray-3);
+  --border-strong: var(--color-gray-5);
+  --border-input: var(--color-gray-5);
+  --border-focus: var(--color-main-brand1);
+
+  --accent-default: var(--color-main-brand1);
+  --accent-hover: var(--color-main-5);
+  --accent-pressed: var(--color-main-6);
+  --accent-content: var(--color-light-text);
+  --accent-disabled: var(--color-gray-4);
+
+  --state-info-bg: var(--color-attention-1);
+  --state-info-border: var(--color-attention-blue);
+  --state-info-content: var(--color-attention-6);
+
+  --state-danger-bg: var(--color-error-1);
+  --state-danger-border: var(--color-error-red);
+  --state-danger-content: var(--color-error-6);
+
+  --state-success-bg: var(--color-success-1);
+  --state-success-border: var(--color-success-green);
+  --state-success-content: var(--color-success-6);
+
+  --state-warning-bg: var(--color-warning-1);
+  --state-warning-border: var(--color-warning-orange);
+  --state-warning-content: var(--color-warning-6);
+
+  /* ---------- Typography ---------- */
+  --font-sans: 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+  --font-arabic: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+
+  --fs-12: 0.75rem;   /* 12px */
+  --fs-14: 0.875rem;  /* 14px */
+  --fs-16: 1rem;      /* 16px */
+  --fs-18: 1.125rem;  /* 18px */
+  --fs-24: 1.5rem;    /* 24px */
+  --fs-32: 2rem;      /* 32px */
+  --fs-36: 2.25rem;   /* 36px */
+  --fs-48: 3rem;      /* 48px */
+
+  --lh-16: 1rem;
+  --lh-24: 1.5rem;
+  --lh-32: 2rem;
+  --lh-48: 3rem;
+
+  --fw-medium: 500;
+  --fw-bold: 700;
+
+  /* ---------- Spacing — 4pt grid ---------- */
+  --space-0: 0;
+  --space-1: 0.25rem;  /* 4 */
+  --space-2: 0.5rem;   /* 8 */
+  --space-3: 0.75rem;  /* 12 */
+  --space-4: 1rem;     /* 16 */
+  --space-5: 1.25rem;  /* 20 */
+  --space-6: 1.5rem;   /* 24 */
+  --space-8: 2rem;     /* 32 */
+  --space-10: 2.5rem;  /* 40 */
+  --space-12: 3rem;    /* 48 */
+  --space-14: 3.5rem;  /* 56 */
+  --space-16: 4rem;    /* 64 */
+  --space-20: 5rem;    /* 80 */
+  --space-24: 6rem;    /* 96 */
+
+  /* ---------- Radius ---------- */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;     /* 8 — primary button/card/tag radius */
+  --radius-lg: 1rem;
+  --radius-full: 9999px;
+
+  /* ---------- Shadow ---------- */
+  --shadow-sm: 0 1px 2px 0 rgba(1, 11, 56, 0.04);
+  --shadow-card: 0 4px 32px 0 rgba(2, 12, 60, 0.07);
+  --shadow-elevated: 0 4px 64px -20px rgba(2, 12, 60, 0.07);
+  --shadow-overlay: 0 8px 24px rgba(1, 11, 56, 0.18);
+
+  /* ---------- Motion ---------- */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --easing-emphasized: cubic-bezier(0.3, 0, 0, 1);
+
+  /* ---------- Z-index ---------- */
+  --z-base: 0;
+  --z-dropdown: 50;
+  --z-overlay: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+}
+
+/* ---------- Dark mode ---------- */
+.dark {
+  --bg-base: var(--color-main-brand1);
+  --bg-subtle: var(--color-main-5);
+  --bg-muted: var(--color-main-5);
+  --bg-elevated: var(--color-main-5);
+
+  --content-strong: var(--color-gray-white);
+  --content-default: var(--color-gray-1);
+  --content-muted: rgba(255, 255, 255, 0.6);
+  --content-subtle: rgba(255, 255, 255, 0.4);
+  --content-inverse: var(--color-dark-text);
+
+  --border-default: var(--color-gray-6);
+  --border-strong: var(--color-gray-5);
+  --border-input: var(--color-gray-6);
+  --border-focus: var(--color-gray-white);
+
+  --accent-default: var(--color-gray-white);
+  --accent-hover: var(--color-gray-1);
+  --accent-pressed: var(--color-gray-2);
+  --accent-content: var(--color-main-brand1);
+}

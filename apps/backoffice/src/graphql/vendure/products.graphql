@@ -148,6 +148,8 @@ query AdminProduct($id: ID!) {
       stockAllocated
       enabled
       trackInventory
+      outOfStockThreshold
+      useGlobalOutOfStockThreshold
       featuredAsset {
         id
         preview
