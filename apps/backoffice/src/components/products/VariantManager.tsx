@@ -14,12 +14,14 @@ import {
   ChevronLeft,
   CheckSquare,
   Square,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Badge } from '../ui/Badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { AssetPickerModal } from '../ui/AssetPickerModal';
 import { formatPrice } from '../../lib/utils';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
@@ -58,6 +60,10 @@ interface ProductVariant {
     name: string;
     group?: { id: string; code: string; name: string };
   }>;
+  featuredAsset?: {
+    id: string;
+    preview: string;
+  } | null;
   customFields?: {
     minStockAlert?: number | null;
     originalPrice?: number | null;
@@ -171,6 +177,9 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
 
   // Delete confirmation
   const [deleteVariantId, setDeleteVariantId] = useState<string | null>(null);
+
+  // Variant asset picker
+  const [variantAssetPickerId, setVariantAssetPickerId] = useState<string | null>(null);
 
   // Bulk delete state
   const [selectedForDelete, setSelectedForDelete] = useState<Set<string>>(new Set());
@@ -545,6 +554,21 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
     } catch (err: any) {
       dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
     }
+  };
+
+  const handleSetVariantFeaturedAsset = async (variantId: string, assetId: string | null) => {
+    try {
+      await updateVariants({
+        variables: {
+          input: [{ id: variantId, featuredAssetId: assetId }],
+        },
+      });
+      dispatch(addToast({ message: 'Image de la variante mise à jour', type: 'success' }));
+      onRefetch();
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur lors de la mise à jour', type: 'error' }));
+    }
+    setVariantAssetPickerId(null);
   };
 
   const handleDeleteVariant = async (variantId: string) => {
@@ -1086,18 +1110,36 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
                         />
                       </td>
                       <td className="px-4 py-3">
-                        {editingVariant === variant.id ? (
-                          <Input
-                            value={variantEdits[variant.id]?.sku ?? variant.sku}
-                            onChange={(e) => setVariantEdits({
-                              ...variantEdits,
-                              [variant.id]: { ...variantEdits[variant.id], sku: e.target.value },
-                            })}
-                            className="w-40"
-                          />
-                        ) : (
-                          <span className="font-mono text-sm text-foreground">{variant.sku}</span>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setVariantAssetPickerId(variant.id)}
+                            title="Modifier l'image de la variante"
+                            className="h-10 w-10 rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center hover:border-primary transition-colors flex-shrink-0"
+                          >
+                            {variant.featuredAsset?.preview ? (
+                              <img
+                                src={variant.featuredAsset.preview}
+                                alt=""
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </button>
+                          {editingVariant === variant.id ? (
+                            <Input
+                              value={variantEdits[variant.id]?.sku ?? variant.sku}
+                              onChange={(e) => setVariantEdits({
+                                ...variantEdits,
+                                [variant.id]: { ...variantEdits[variant.id], sku: e.target.value },
+                              })}
+                              className="w-40"
+                            />
+                          ) : (
+                            <span className="font-mono text-sm text-foreground">{variant.sku}</span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1">
@@ -1288,6 +1330,30 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
         confirmText="Supprimer tout"
         variant="danger"
         loading={bulkDeleting}
+      />
+
+      {/* Variant featured-asset picker */}
+      <AssetPickerModal
+        isOpen={variantAssetPickerId !== null}
+        onClose={() => setVariantAssetPickerId(null)}
+        onSelect={(assets) => {
+          if (assets.length > 0 && variantAssetPickerId) {
+            handleSetVariantFeaturedAsset(variantAssetPickerId, assets[0].id);
+          } else if (variantAssetPickerId) {
+            // Allow clearing
+            handleSetVariantFeaturedAsset(variantAssetPickerId, null);
+          }
+        }}
+        multiple={false}
+        selectedIds={
+          variantAssetPickerId
+            ? (() => {
+                const v = variants.find((x) => x.id === variantAssetPickerId);
+                return v?.featuredAsset?.id ? [v.featuredAsset.id] : [];
+              })()
+            : []
+        }
+        title="Image de la variante"
       />
     </div>
   );
