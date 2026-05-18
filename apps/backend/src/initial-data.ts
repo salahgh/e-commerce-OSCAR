@@ -28,5 +28,4 @@ export const initialData: InitialData = {
     { name: 'Algeria', code: 'DZ', zone: 'Algeria' },
   ],
   collections: [],
-  collectionsFilters: [],
 };
