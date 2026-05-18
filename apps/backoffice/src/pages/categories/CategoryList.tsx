@@ -51,6 +51,7 @@ import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Modal, ModalContent, ModalFooter } from '../../components/ui/Modal';
+import { Pagination } from '../../components/ui/Pagination';
 import { cn } from '../../lib/utils';
 
 // Helper to get translation by language
@@ -420,6 +421,19 @@ const SortableTreeItem: React.FC<SortableTreeItemProps> = ({
 // Local storage keys
 const STORAGE_KEY_EXPANDED = 'oscar-categories-expanded';
 const STORAGE_KEY_VIEW_MODE = 'oscar-categories-view-mode';
+const STORAGE_KEY_SORT = 'oscar-categories-sort';
+const PAGE_SIZE = 50;
+
+type SortOption = 'position-asc' | 'position-desc' | 'name-asc' | 'name-desc' | 'created-desc' | 'created-asc';
+
+const SORT_OPTIONS: Array<{ value: SortOption; label: string; sort: Record<string, 'ASC' | 'DESC'> }> = [
+  { value: 'position-asc', label: 'Position (croissant)', sort: { position: 'ASC' } },
+  { value: 'position-desc', label: 'Position (decroissant)', sort: { position: 'DESC' } },
+  { value: 'name-asc', label: 'Nom (A-Z)', sort: { name: 'ASC' } },
+  { value: 'name-desc', label: 'Nom (Z-A)', sort: { name: 'DESC' } },
+  { value: 'created-desc', label: 'Plus recentes', sort: { createdAt: 'DESC' } },
+  { value: 'created-asc', label: 'Plus anciennes', sort: { createdAt: 'ASC' } },
+];
 
 export const CategoryList: React.FC = () => {
   const dispatch = useDispatch();
@@ -451,6 +465,15 @@ export const CategoryList: React.FC = () => {
     } catch {}
     return 'tree';
   });
+  const [sortOption, setSortOption] = useState<SortOption>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_SORT);
+      const match = SORT_OPTIONS.find((o) => o.value === saved);
+      if (match) return match.value;
+    } catch {}
+    return 'position-asc';
+  });
+  const [page, setPage] = useState(1);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Persist expanded state to localStorage
@@ -467,11 +490,26 @@ export const CategoryList: React.FC = () => {
     } catch {}
   }, [viewMode]);
 
+  // Persist sort to localStorage; reset to page 1 when sort changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_SORT, sortOption);
+    } catch {}
+    setPage(1);
+  }, [sortOption]);
+
+  const sortConfig =
+    SORT_OPTIONS.find((o) => o.value === sortOption)?.sort ?? { position: 'ASC' };
+
+  // Tree view needs the entire dataset to build hierarchy; flat view paginates.
+  const isPaginated = viewMode === 'flat';
+
   const { data, loading, error, refetch } = useQuery(AdminCollectionsDocument, {
     variables: {
       options: {
-        take: 100,
-        sort: { position: 'ASC' as any },
+        take: isPaginated ? PAGE_SIZE : 500,
+        skip: isPaginated ? (page - 1) * PAGE_SIZE : 0,
+        sort: sortConfig as any,
       },
     },
   });
@@ -1102,6 +1140,20 @@ export const CategoryList: React.FC = () => {
 
           {/* Filter Buttons */}
           <div className="flex items-center gap-2">
+            {/* Sort dropdown */}
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value as SortOption)}
+              className="px-3 py-2.5 rounded-xl border border-border bg-card text-sm text-foreground hover:bg-accent transition-colors outline-none"
+              title="Trier par"
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+
             {/* Visibility Filter */}
             <button
               onClick={() => setShowOnlyPublic(!showOnlyPublic)}
@@ -1279,6 +1331,17 @@ export const CategoryList: React.FC = () => {
               </SortableContext>
             </div>
           </DndContext>
+        )}
+
+        {/* Pagination — only in flat view, only when there are more items than fit on one page */}
+        {viewMode === 'flat' && !searchTerm && totalItems > PAGE_SIZE && (
+          <div className="mt-6">
+            <Pagination
+              currentPage={page}
+              totalPages={Math.ceil(totalItems / PAGE_SIZE)}
+              onPageChange={(p) => setPage(p)}
+            />
+          </div>
         )}
       </div>
 
