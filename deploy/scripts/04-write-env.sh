@@ -13,6 +13,12 @@
 # ──────────────────────────────────────────────────────────────
 set -euo pipefail
 
+# Refuse to run as root — see 02-setup-postgres.sh header for why.
+if [[ $EUID -eq 0 ]]; then
+  echo "❌  Don't run as root. Run as the app user (e.g. oscar) — without sudo." >&2
+  exit 1
+fi
+
 APP_DIR="${APP_DIR:-/var/www/oscar}"
 URL_FILE="$HOME/.oscar-db-url"
 TPL_DIR="$APP_DIR/deploy/env-templates"

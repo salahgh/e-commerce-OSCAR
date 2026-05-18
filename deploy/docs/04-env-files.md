@@ -26,7 +26,7 @@ NODE_ENV=production
 PORT=8085
 CORS_ORIGINS=https://oscarfashion.dz,https://www.oscarfashion.dz,https://admin.oscarfashion.dz
 
-DATABASE_URL=postgres://oscar:<random>@127.0.0.1:5432/oscar_fashion?schema=public
+DATABASE_URL=postgres://oscar:<random>@127.0.0.1:5432/oscar_fashion
 
 SUPERADMIN_USERNAME=superadmin
 SUPERADMIN_PASSWORD=<your strong password>
