@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useMutation } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import {
   Plus,
   Trash2,
@@ -36,6 +36,7 @@ import {
   DeleteProductOptionDocument,
   AdminProductDocument,
   AdminProductOptionGroupsDocument,
+  AdminTaxCategoriesDocument,
   LanguageCode,
 } from '../../graphql/generated/graphql';
 
@@ -180,6 +181,11 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
 
   // Variant asset picker
   const [variantAssetPickerId, setVariantAssetPickerId] = useState<string | null>(null);
+
+  // Tax category bulk-assign
+  const [pendingTaxCategoryId, setPendingTaxCategoryId] = useState<string>('');
+  const { data: taxCategoriesData } = useQuery(AdminTaxCategoriesDocument);
+  const taxCategories = taxCategoriesData?.taxCategories?.items || [];
 
   // Bulk delete state
   const [selectedForDelete, setSelectedForDelete] = useState<Set<string>>(new Set());
@@ -553,6 +559,33 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
       onRefetch();
     } catch (err: any) {
       dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+  };
+
+  const handleBulkSetTaxCategory = async () => {
+    if (!pendingTaxCategoryId || selectedForDelete.size === 0) return;
+    try {
+      const input = Array.from(selectedForDelete).map((id) => ({
+        id,
+        taxCategoryId: pendingTaxCategoryId,
+      }));
+      await updateVariants({ variables: { input } });
+      const taxName = taxCategories.find((t) => t.id === pendingTaxCategoryId)?.name;
+      dispatch(
+        addToast({
+          message: `Catégorie fiscale "${taxName}" appliquée à ${selectedForDelete.size} variante(s)`,
+          type: 'success',
+        })
+      );
+      setPendingTaxCategoryId('');
+      onRefetch();
+    } catch (err: any) {
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de l\'application de la catégorie fiscale',
+          type: 'error',
+        })
+      );
     }
   };
 
@@ -1038,6 +1071,32 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
                     <span className="text-sm text-muted-foreground">
                       {selectedForDelete.size} sélectionnée(s)
                     </span>
+                    {taxCategories.length > 0 && (
+                      <>
+                        <select
+                          value={pendingTaxCategoryId}
+                          onChange={(e) => setPendingTaxCategoryId(e.target.value)}
+                          className="px-3 py-1.5 rounded-lg border border-border bg-card text-sm text-foreground outline-none"
+                        >
+                          <option value="">Catégorie fiscale...</option>
+                          {taxCategories.map((tc) => (
+                            <option key={tc.id} value={tc.id}>
+                              {tc.name}
+                              {tc.isDefault ? ' (défaut)' : ''}
+                            </option>
+                          ))}
+                        </select>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          disabled={!pendingTaxCategoryId}
+                          onClick={handleBulkSetTaxCategory}
+                        >
+                          Appliquer
+                        </Button>
+                      </>
+                    )}
                     <Button
                       type="button"
                       size="sm"
