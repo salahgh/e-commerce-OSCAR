@@ -3,13 +3,13 @@
 Plain-bash deployment of the OSCAR Fashion monorepo to a single Ubuntu VPS.
 No Docker, no Railway, no Vercel — just **Node 20 + pnpm + PostgreSQL + PM2 + Caddy**.
 
-> **Heads-up:** the old `setup-vps.sh`, `setup-vps-postgres.sh`, `maintenance.sh`,
-> `deploy.sh` (at `deploy/` root) and `vendure-config.production.ts` files in this
-> folder are **legacy** — they reference the pre-monorepo paths
-> (`01-BACKEND-VENDURE/`, `02-FRONTEND/`) which no longer exist. They are kept
-> around for reference but they will **not work**. Use the numbered scripts
-> under `deploy/scripts/` instead. Delete the legacy files once you're confident
-> the new flow works.
+> **Heads-up:** the old `maintenance.sh`, `deploy.sh` (at `deploy/` root) and
+> `vendure-config.production.ts` files in this folder are **legacy** — they
+> reference the pre-monorepo paths (`01-BACKEND-VENDURE/`, `02-FRONTEND/`) which
+> no longer exist. They are kept around for reference but they will **not work**.
+> Use the numbered scripts under `deploy/scripts/` instead. Delete the legacy
+> files once you're confident the new flow works.
+> (`setup-vps.sh` and `setup-vps-postgres.sh` have already been pruned.)
 
 ## What gets deployed
 

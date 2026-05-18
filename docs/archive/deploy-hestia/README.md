@@ -1,4 +1,6 @@
-# OSCAR Deployment - Existing VPS with HestiaCP
+# OSCAR Deployment - Existing VPS with HestiaCP (ARCHIVED)
+
+> **Archived.** This HestiaCP deployment path was explored but not adopted as canonical. Its scripts and README still reference pre-monorepo paths (e.g. `01-BACKEND-VENDURE/`, `02-FRONTEND/`) that no longer exist in the repository, so this content will not run as-is. The canonical deployment path is [/deploy](../../../deploy/) (Caddy + PM2 on a single VPS). This folder is preserved for reference only.
 
 Deployment scripts for OSCAR Fashion on a VPS with HestiaCP already installed.
 

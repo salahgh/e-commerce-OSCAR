@@ -67,7 +67,7 @@ Développement d'une **solution e-commerce complète** pour la marque OSCAR Fash
 - Reporting (Jasper Reports)
 - Synchronisation ERP/WMS
 
-**Voir détails**: [01-BACKEND/](01-BACKEND/)
+**Voir détails**: [Backend (apps/backend)](../../apps/backend/README.md)
 
 ---
 
@@ -88,7 +88,7 @@ Développement d'une **solution e-commerce complète** pour la marque OSCAR Fash
 - SEO optimisé
 - PWA
 
-**Voir détails**: [02-FRONTEND/](02-FRONTEND/)
+**Voir détails**: [Spécification Frontend](../specs/frontend-spec.md)
 
 ---
 
@@ -108,7 +108,7 @@ Développement d'une **solution e-commerce complète** pour la marque OSCAR Fash
 - Gestion utilisateurs admin
 - Configuration système
 
-**Voir détails**: [03-BACKOFFICE/](03-BACKOFFICE/)
+**Voir détails**: [Spécification Back-Office](../specs/backoffice-spec.md)
 
 ---
 
@@ -128,7 +128,7 @@ Développement d'une **solution e-commerce complète** pour la marque OSCAR Fash
 - Support multilingue avec RTL
 - Mode offline (cache)
 
-**Voir détails**: [04-MOBILE/](04-MOBILE/)
+**Voir détails**: [Spécification Mobile](../specs/mobile-spec.md)
 
 ---
 
@@ -691,22 +691,20 @@ Inclus:
 ### 15.1 Documents de Référence
 
 1. **Spécifications Détaillées**:
-   - [Backend - SPECIFICATION.md](01-BACKEND/SPECIFICATION.md)
-   - [Frontend - SPECIFICATION.md](02-FRONTEND/SPECIFICATION.md)
-   - [Back-Office - SPECIFICATION.md](03-BACKOFFICE/SPECIFICATION.md)
-   - [Mobile - SPECIFICATION.md](04-MOBILE/SPECIFICATION.md)
+   - [Spec technique globale (V2)](../specs/technical-spec.md)
+   - [Frontend - frontend-spec.md](../specs/frontend-spec.md)
+   - [Back-Office - backoffice-spec.md](../specs/backoffice-spec.md)
+   - [Mobile - mobile-spec.md](../specs/mobile-spec.md)
 
 2. **Calendriers Détaillés**:
-   - [Backend - CALENDAR.md](01-BACKEND/CALENDAR.md)
-   - [Frontend - CALENDAR.md](02-FRONTEND/CALENDAR.md)
-   - [Back-Office - CALENDAR.md](03-BACKOFFICE/CALENDAR.md)
-   - [Mobile - CALENDAR.md](04-MOBILE/CALENDAR.md)
+   - [Frontend - frontend-calendar.md](../planning/frontend-calendar.md)
+   - [Back-Office - backoffice-calendar.md](../planning/backoffice-calendar.md)
+   - [Mobile - mobile-calendar.md](../planning/mobile-calendar.md)
 
 3. **Budgets Détaillés**:
-   - [Backend - BUDGET.md](01-BACKEND/BUDGET.md)
-   - [Frontend - BUDGET.md](02-FRONTEND/BUDGET.md)
-   - [Back-Office - BUDGET.md](03-BACKOFFICE/BUDGET.md)
-   - [Mobile - BUDGET.md](04-MOBILE/BUDGET.md)
+   - [Frontend - frontend-budget.md](../planning/frontend-budget.md)
+   - [Back-Office - backoffice-budget.md](../planning/backoffice-budget.md)
+   - [Mobile - mobile-budget.md](../planning/mobile-budget.md)
 
 ### 15.2 Glossaire
 
