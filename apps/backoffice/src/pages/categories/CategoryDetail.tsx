@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery, useMutation, useLazyQuery } from '@apollo/client';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import {
@@ -39,6 +39,7 @@ import {
   CreateAssetsDocument,
   AssignCollectionsToChannelDocument,
   RemoveCollectionsFromChannelDocument,
+  PreviewCollectionProductsDocument,
   LanguageCode,
 } from '../../graphql/generated/graphql';
 import { Button } from '../../components/ui/Button';
@@ -153,6 +154,11 @@ export const CategoryDetail: React.FC = () => {
     RemoveCollectionsFromChannelDocument
   );
 
+  // Live preview of products that match the configured filters
+  const [runPreview, previewState] = useLazyQuery(PreviewCollectionProductsDocument);
+  const previewCount = previewState.data?.previewCollectionVariants?.totalItems;
+  const previewItems = previewState.data?.previewCollectionVariants?.items ?? [];
+
   const collection = data?.collection;
   const allCollections = collectionsData?.collections?.items || [];
 
@@ -241,6 +247,27 @@ export const CategoryDetail: React.FC = () => {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
   };
+
+  const triggerPreview = useCallback(
+    (
+      filters: Array<{ code: string; arguments: Array<{ name: string; value: string }> }>,
+      parentId: string,
+      inheritFilters: boolean
+    ) => {
+      if (filters.length === 0) return;
+      runPreview({
+        variables: {
+          input: {
+            filters: filters.map((f) => ({ code: f.code, arguments: f.arguments })),
+            inheritFilters,
+            parentId: parentId || undefined,
+          },
+          options: { take: 24 },
+        },
+      });
+    },
+    [runPreview]
+  );
 
   const handleAssignToChannels = async (action: 'assign' | 'remove') => {
     if (!id || isNew || selectedChannelIds.length === 0) return;
@@ -775,7 +802,54 @@ export const CategoryDetail: React.FC = () => {
                     <CollectionFilterBuilder
                       filters={collectionFilters}
                       onChange={setCollectionFilters}
+                      previewCount={previewCount}
+                      onPreview={() =>
+                        triggerPreview(
+                          collectionFilters,
+                          values.parentId,
+                          values.inheritFilters
+                        )
+                      }
                     />
+                    {previewItems.length > 0 && (
+                      <div className="mt-6 border-t border-border pt-6">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-medium text-foreground">
+                            Aperçu ({previewCount ?? previewItems.length} variantes)
+                          </h3>
+                          {previewState.loading && <Spinner size="sm" />}
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-h-96 overflow-y-auto">
+                          {previewItems.map((v: any) => (
+                            <div
+                              key={v.id}
+                              className="bg-muted rounded-lg p-3 flex flex-col items-center text-center"
+                            >
+                              {v.product?.featuredAsset?.preview ? (
+                                <img
+                                  src={v.product.featuredAsset.preview}
+                                  alt={v.name}
+                                  className="w-full aspect-square object-cover rounded-lg mb-2"
+                                />
+                              ) : (
+                                <div className="w-full aspect-square bg-card rounded-lg mb-2 flex items-center justify-center">
+                                  <Package className="h-8 w-8 text-muted-foreground" />
+                                </div>
+                              )}
+                              <p className="text-sm font-medium text-foreground truncate w-full">
+                                {v.product?.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground truncate w-full">
+                                {v.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground font-mono mt-0.5">
+                                {v.sku}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
