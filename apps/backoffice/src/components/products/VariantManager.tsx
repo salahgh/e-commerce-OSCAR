@@ -183,6 +183,10 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
   // Delete confirmation
   const [deleteVariantId, setDeleteVariantId] = useState<string | null>(null);
 
+  // Confirmation for destructive option/option-group changes
+  const [pendingRemoveOptionGroup, setPendingRemoveOptionGroup] = useState<OptionGroup | null>(null);
+  const [pendingDeleteOption, setPendingDeleteOption] = useState<{ id: string; name: string } | null>(null);
+
   // Variant asset picker
   const [variantAssetPickerId, setVariantAssetPickerId] = useState<string | null>(null);
 
@@ -942,7 +946,7 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
                         type="button"
                         size="sm"
                         variant="danger"
-                        onClick={() => handleRemoveOptionGroup(group.id)}
+                        onClick={() => setPendingRemoveOptionGroup(group)}
                         loading={removingOptionGroup}
                         icon={<Trash2 className="h-3 w-3" />}
                       />
@@ -1003,7 +1007,7 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
                               <span className="text-xs text-muted-foreground">({option.code})</span>
                               <button
                                 type="button"
-                                onClick={() => handleDeleteOption(option.id)}
+                                onClick={() => setPendingDeleteOption({ id: option.id, name: option.name })}
                                 className="ml-1 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
                               >
                                 <X className="h-3 w-3" />
@@ -1683,6 +1687,57 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
         confirmText="Supprimer tout"
         variant="danger"
         loading={bulkDeleting}
+      />
+
+      {/* Confirm: remove an option group from this product */}
+      <ConfirmDialog
+        isOpen={pendingRemoveOptionGroup !== null}
+        onClose={() => setPendingRemoveOptionGroup(null)}
+        onConfirm={async () => {
+          if (pendingRemoveOptionGroup) {
+            await handleRemoveOptionGroup(pendingRemoveOptionGroup.id);
+            setPendingRemoveOptionGroup(null);
+          }
+        }}
+        title="Retirer le groupe d'options"
+        message={
+          <div>
+            <p>
+              Retirer le groupe <strong>{pendingRemoveOptionGroup?.name}</strong> du produit ?
+            </p>
+            <p className="mt-2 text-amber-600 text-sm">
+              Si des variantes utilisent ces options, le serveur refusera l'opération.
+            </p>
+          </div>
+        }
+        confirmText="Retirer"
+        variant="danger"
+      />
+
+      {/* Confirm: delete an option permanently */}
+      <ConfirmDialog
+        isOpen={pendingDeleteOption !== null}
+        onClose={() => setPendingDeleteOption(null)}
+        onConfirm={async () => {
+          if (pendingDeleteOption) {
+            await handleDeleteOption(pendingDeleteOption.id);
+            setPendingDeleteOption(null);
+          }
+        }}
+        title="Supprimer l'option"
+        message={
+          <div>
+            <p>
+              Supprimer l'option <strong>{pendingDeleteOption?.name}</strong> ?
+            </p>
+            <p className="mt-2 text-amber-600 text-sm">
+              Cette suppression est définitive et affectera toutes les variantes existantes
+              qui l'utilisent.
+            </p>
+          </div>
+        }
+        confirmText="Supprimer"
+        variant="danger"
       />
 
       {/* Variant featured-asset picker */}
