@@ -24,7 +24,7 @@ Out of scope: design-system showcase page (`/design-system`), checkout/payment f
 
 These are linked from existing UI but pages don't exist yet. Each gets its own row in section **M**.
 
-Still missing (footer / static content): `/shipping` · `/returns` · `/size-guide` · `/faq` · `/about` · `/careers` · `/contact` · `/legal/terms` · `/legal/privacy`
+Still missing: _(none — every linked route now resolves)_
 
 ~~Now implemented~~: ~~`/forgot-password`~~ · ~~`/reset-password`~~ · ~~`/verification-pending`~~ · ~~`/verify`~~ · ~~`/user/profile`~~ · ~~`/user/orders`~~ · ~~`/user/orders/[code]`~~ · ~~`/user/wishlist`~~ · ~~`/categories`~~ · ~~`/categories/[slug]`~~ · ~~`/search`~~ · ~~`/checkout`~~ · ~~`/checkout/confirmation/[code]`~~
 
@@ -310,16 +310,16 @@ For each standard storefront capability: ✅ Implemented · 🟡 Partial · ❌ 
 
 | ID | Feature | State | Notes |
 |---|---|---|---|
-| P-56 | Terms of service page | ❌ | footer link exists, no page |
-| P-57 | Privacy policy page | ❌ | footer link exists, no page |
+| P-56 | Terms of service page | 🟡 | `/legal/terms` built with placeholder copy (real legal text pending) |
+| P-57 | Privacy policy page | 🟡 | `/legal/privacy` built with placeholder copy (real legal text pending) |
 | P-58 | Cookie consent banner | ❌ | not implemented |
 | P-59 | Newsletter signup form | ❌ | not implemented |
-| P-60 | Contact page with form | ❌ | not implemented |
-| P-61 | About / careers static pages | ❌ | footer links exist, no pages |
-| P-62 | FAQ page | ❌ | footer link exists, no page |
-| P-63 | Size guide page or modal | ❌ | not implemented |
-| P-64 | Shipping policy page | ❌ | not implemented |
-| P-65 | Returns policy page | ❌ | not implemented |
+| P-60 | Contact page with form | 🟡 | `/contact` built with address/phone/email cards + form placeholder Alert |
+| P-61 | About / careers static pages | ✅ | `/about` + `/careers` built |
+| P-62 | FAQ page | ✅ | `/faq` built with Accordion (5 Q&As) |
+| P-63 | Size guide page or modal | ✅ | both — `SizeGuideDialog` on PDP + `/size-guide` page |
+| P-64 | Shipping policy page | ✅ | `/shipping` built with real zone data |
+| P-65 | Returns policy page | ✅ | `/returns` built with policy stub |
 
 ### SEO & analytics
 

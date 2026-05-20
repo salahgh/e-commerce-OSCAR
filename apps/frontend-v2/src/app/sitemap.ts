@@ -11,6 +11,15 @@ const STATIC_PATHS = [
   '/login',
   '/register',
   '/forgot-password',
+  '/shipping',
+  '/returns',
+  '/size-guide',
+  '/faq',
+  '/about',
+  '/careers',
+  '/contact',
+  '/legal/terms',
+  '/legal/privacy',
 ];
 
 function localeUrl(locale: string, path: string): string {
