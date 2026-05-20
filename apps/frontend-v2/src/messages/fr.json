@@ -32,7 +32,8 @@
     "error": "Une erreur est survenue",
     "errorEyebrow": "Erreur",
     "retry": "Réessayer",
-    "remove": "Retirer"
+    "remove": "Retirer",
+    "close": "Fermer"
   },
   "NotFoundPage": {
     "code": "404",
@@ -54,7 +55,7 @@
     "header": {
       "openMenu": "Ouvrir le menu",
       "wishlistAria": "Mes favoris",
-      "cartAria": "Panier ({count} articles)",
+      "cartAria": "{count, plural, one {Panier (# article)} other {Panier (# articles)}}",
       "searchPlaceholder": "Rechercher dans la boutique…",
       "searchAria": "Recherche"
     },
@@ -90,6 +91,14 @@
       "toggle": "Changer le thème",
       "switchToDark": "Passer au mode sombre",
       "switchToLight": "Passer au mode clair"
+    },
+    "breadcrumb": {
+      "ariaLabel": "Fil d'Ariane"
+    },
+    "pagination": {
+      "ariaLabel": "Pagination",
+      "previous": "Précédent",
+      "next": "Suivant"
     }
   },
   "CheckoutPage": {
@@ -101,6 +110,8 @@
     "stepShipping": "2. Mode de livraison",
     "stepPayment": "3. Paiement",
     "address": {
+      "email": "Email",
+      "emailHint": "Pour la confirmation de commande",
       "fullName": "Nom complet",
       "streetLine1": "Adresse",
       "streetLine2": "Complément d'adresse (optionnel)",
@@ -114,7 +125,11 @@
     "shipping": {
       "loading": "Chargement des options de livraison...",
       "empty": "Aucune option de livraison disponible. Vérifiez l'adresse.",
-      "deliveryEstimate": "Délai estimé : {delay}"
+      "deliveryEstimate": "Délai estimé : {delay}",
+      "delayZone1": "1-2 jours ouvrés",
+      "delayZone2": "2-4 jours ouvrés",
+      "delayZone3": "3-5 jours ouvrés",
+      "delayZone4": "5-7 jours ouvrés"
     },
     "payment": {
       "loading": "Chargement des modes de paiement...",
@@ -130,6 +145,8 @@
       "total": "Total",
       "placeOrder": "Passer la commande",
       "placing": "Validation en cours...",
+      "continue": "Continuer",
+      "saving": "Enregistrement...",
       "termsNotice": "En passant commande, vous acceptez nos conditions de vente."
     },
     "errors": {
@@ -232,6 +249,11 @@
   "ProductCard": {
     "favoriteAdd": "Ajouter aux favoris",
     "favoriteRemove": "Retirer des favoris"
+  },
+  "StockIndicator": {
+    "inStock": "En stock",
+    "outOfStock": "Rupture de stock",
+    "lowStock": "Plus que {count} en stock"
   },
   "QuantityStepper": {
     "label": "Quantité",

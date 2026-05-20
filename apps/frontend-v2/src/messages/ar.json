@@ -32,7 +32,8 @@
     "error": "حدث خطأ",
     "errorEyebrow": "خطأ",
     "retry": "إعادة المحاولة",
-    "remove": "إزالة"
+    "remove": "إزالة",
+    "close": "إغلاق"
   },
   "NotFoundPage": {
     "code": "404",
@@ -54,7 +55,7 @@
     "header": {
       "openMenu": "فتح القائمة",
       "wishlistAria": "المفضلة",
-      "cartAria": "السلة ({count} عناصر)",
+      "cartAria": "{count, plural, other {السلة (# عنصر)}}",
       "searchPlaceholder": "ابحث في المتجر…",
       "searchAria": "بحث"
     },
@@ -90,6 +91,14 @@
       "toggle": "تبديل السمة",
       "switchToDark": "التبديل إلى الوضع الداكن",
       "switchToLight": "التبديل إلى الوضع الفاتح"
+    },
+    "breadcrumb": {
+      "ariaLabel": "مسار التنقل"
+    },
+    "pagination": {
+      "ariaLabel": "ترقيم الصفحات",
+      "previous": "السابق",
+      "next": "التالي"
     }
   },
   "CheckoutPage": {
@@ -101,6 +110,8 @@
     "stepShipping": "2. طريقة التوصيل",
     "stepPayment": "3. الدفع",
     "address": {
+      "email": "البريد الإلكتروني",
+      "emailHint": "لتأكيد الطلب",
       "fullName": "الاسم الكامل",
       "streetLine1": "العنوان",
       "streetLine2": "تفاصيل إضافية (اختياري)",
@@ -114,7 +125,11 @@
     "shipping": {
       "loading": "جاري تحميل خيارات التوصيل...",
       "empty": "لا توجد خيارات توصيل. تحقّق من العنوان.",
-      "deliveryEstimate": "المدة المقدّرة: {delay}"
+      "deliveryEstimate": "المدة المقدّرة: {delay}",
+      "delayZone1": "1-2 يوم عمل",
+      "delayZone2": "2-4 أيام عمل",
+      "delayZone3": "3-5 أيام عمل",
+      "delayZone4": "5-7 أيام عمل"
     },
     "payment": {
       "loading": "جاري تحميل طرق الدفع...",
@@ -130,6 +145,8 @@
       "total": "الإجمالي",
       "placeOrder": "تأكيد الطلب",
       "placing": "جاري التأكيد...",
+      "continue": "متابعة",
+      "saving": "جاري الحفظ...",
       "termsNotice": "بتأكيد الطلب، أنت توافق على شروط البيع."
     },
     "errors": {
@@ -232,6 +249,11 @@
   "ProductCard": {
     "favoriteAdd": "إضافة إلى المفضلة",
     "favoriteRemove": "إزالة من المفضلة"
+  },
+  "StockIndicator": {
+    "inStock": "متوفّر",
+    "outOfStock": "نفد المخزون",
+    "lowStock": "تبقّى {count} فقط"
   },
   "QuantityStepper": {
     "label": "الكمية",

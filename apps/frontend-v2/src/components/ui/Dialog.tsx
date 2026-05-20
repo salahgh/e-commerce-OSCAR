@@ -3,6 +3,7 @@
 import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils/cn';
 
 type DivProps = React.ComponentPropsWithoutRef<'div'>;
@@ -37,6 +38,7 @@ export function DialogContent({
   hideClose,
   ...props
 }: RadixContentProps & DivProps & { hideClose?: boolean }) {
+  const t = useTranslations('Common');
   return (
     <DialogPrimitive.Portal>
       <DialogOverlay />
@@ -50,7 +52,7 @@ export function DialogContent({
         {children}
         {!hideClose && (
           <DialogPrimitive.Close
-            aria-label="Fermer"
+            aria-label={t('close')}
             className="absolute end-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded text-content-muted transition-colors hover:bg-bg-muted hover:text-content-strong"
           >
             <X className="h-5 w-5" />

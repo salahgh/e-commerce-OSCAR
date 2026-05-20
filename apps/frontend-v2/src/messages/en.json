@@ -32,7 +32,8 @@
     "error": "An error occurred",
     "errorEyebrow": "Error",
     "retry": "Try again",
-    "remove": "Remove"
+    "remove": "Remove",
+    "close": "Close"
   },
   "NotFoundPage": {
     "code": "404",
@@ -54,7 +55,7 @@
     "header": {
       "openMenu": "Open menu",
       "wishlistAria": "My wishlist",
-      "cartAria": "Cart ({count} items)",
+      "cartAria": "{count, plural, one {Cart (# item)} other {Cart (# items)}}",
       "searchPlaceholder": "Search the store…",
       "searchAria": "Search"
     },
@@ -90,6 +91,14 @@
       "toggle": "Toggle theme",
       "switchToDark": "Switch to dark mode",
       "switchToLight": "Switch to light mode"
+    },
+    "breadcrumb": {
+      "ariaLabel": "Breadcrumb"
+    },
+    "pagination": {
+      "ariaLabel": "Pagination",
+      "previous": "Previous",
+      "next": "Next"
     }
   },
   "CheckoutPage": {
@@ -101,6 +110,8 @@
     "stepShipping": "2. Shipping method",
     "stepPayment": "3. Payment",
     "address": {
+      "email": "Email",
+      "emailHint": "For order confirmation",
       "fullName": "Full name",
       "streetLine1": "Street address",
       "streetLine2": "Address complement (optional)",
@@ -114,7 +125,11 @@
     "shipping": {
       "loading": "Loading shipping options...",
       "empty": "No shipping option available. Check the address.",
-      "deliveryEstimate": "Estimated delivery: {delay}"
+      "deliveryEstimate": "Estimated delivery: {delay}",
+      "delayZone1": "1-2 business days",
+      "delayZone2": "2-4 business days",
+      "delayZone3": "3-5 business days",
+      "delayZone4": "5-7 business days"
     },
     "payment": {
       "loading": "Loading payment methods...",
@@ -130,6 +145,8 @@
       "total": "Total",
       "placeOrder": "Place order",
       "placing": "Placing order...",
+      "continue": "Continue",
+      "saving": "Saving...",
       "termsNotice": "By placing the order you accept our terms of sale."
     },
     "errors": {
@@ -232,6 +249,11 @@
   "ProductCard": {
     "favoriteAdd": "Add to favorites",
     "favoriteRemove": "Remove from favorites"
+  },
+  "StockIndicator": {
+    "inStock": "In stock",
+    "outOfStock": "Out of stock",
+    "lowStock": "Only {count} left"
   },
   "QuantityStepper": {
     "label": "Quantity",

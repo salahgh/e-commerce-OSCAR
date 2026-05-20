@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils/cn';
 
 type ToastIntent = 'info' | 'success' | 'danger';
@@ -32,6 +33,7 @@ const intentStyles: Record<ToastIntent, { bg: string; border: string; icon: Reac
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const tCommon = useTranslations('Common');
   const [toasts, setToasts] = React.useState<ToastItem[]>([]);
 
   const dismiss = React.useCallback((id: number) => {
@@ -80,7 +82,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               </div>
               <button
                 type="button"
-                aria-label="Fermer"
+                aria-label={tCommon('close')}
                 onClick={() => dismiss(t.id)}
                 className="-m-1 inline-flex h-6 w-6 items-center justify-center rounded text-content-muted transition hover:bg-bg-muted/40 hover:text-content-strong"
               >

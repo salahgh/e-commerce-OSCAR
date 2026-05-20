@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils/cn';
 import { Button } from './Button';
 
@@ -24,14 +25,15 @@ function pageList(page: number, count: number): Array<number | 'gap'> {
 }
 
 export function Pagination({ page, pageCount, onPageChange, className }: PaginationProps) {
+  const t = useTranslations('Layout.pagination');
   if (pageCount <= 1) return null;
   const items = pageList(page, pageCount);
   return (
-    <nav className={cn('flex items-center justify-center gap-1', className)} aria-label="Pagination">
+    <nav className={cn('flex items-center justify-center gap-1', className)} aria-label={t('ariaLabel')}>
       <Button
         intent="ghost"
         size="icon-md"
-        aria-label="Précédent"
+        aria-label={t('previous')}
         disabled={page === 1}
         onClick={() => onPageChange(page - 1)}
       >
@@ -58,7 +60,7 @@ export function Pagination({ page, pageCount, onPageChange, className }: Paginat
       <Button
         intent="ghost"
         size="icon-md"
-        aria-label="Suivant"
+        aria-label={t('next')}
         disabled={page === pageCount}
         onClick={() => onPageChange(page + 1)}
       >
