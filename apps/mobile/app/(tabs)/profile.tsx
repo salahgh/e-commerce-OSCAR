@@ -100,6 +100,21 @@ export default function ProfileScreen() {
       onPress: () => router.push('/(tabs)/orders' as any),
     },
     {
+      icon: 'heart-outline',
+      label: t('wishlist.title'),
+      onPress: () => router.push('/profile/wishlist' as any),
+    },
+    {
+      icon: 'settings-outline',
+      label: t('profile.settings'),
+      onPress: () => router.push('/profile/settings'),
+    },
+    {
+      icon: 'information-circle-outline',
+      label: t('info.indexTitle'),
+      onPress: () => router.push('/info' as any),
+    },
+    {
       icon: 'help-circle-outline',
       label: t('profile.helpSupport'),
       onPress: () => router.push('/profile/support' as any),

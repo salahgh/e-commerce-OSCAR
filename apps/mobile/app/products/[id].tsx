@@ -15,9 +15,10 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGetProductQuery } from '../../src/graphql/generated/graphql';
 import { Button, LoadingSpinner, ErrorState, Badge, Chip } from '../../src/components/ui';
-import { ImageCarousel } from '../../src/components/products';
+import { ImageCarousel, SizeGuideModal, RelatedProducts } from '../../src/components/products';
 import { colors, spacing, typography } from '../../src/theme';
 import { useCart } from '../../src/contexts/CartContext';
+import { useWishlist } from '../../src/contexts/WishlistContext';
 import { formatPrice } from '../../src/utils/vendureAdapters';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -32,7 +33,9 @@ export default function ProductDetailScreen() {
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const [addToCartSuccess, setAddToCartSuccess] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
+  const wishlist = useWishlist();
+  const isFavorite = !!data?.product && wishlist.has(data.product.id);
 
   const { data, loading, error, refetch } = useGetProductQuery({
     variables: { id },
@@ -102,8 +105,16 @@ export default function ProductDetailScreen() {
   }, [product, selectedVariant]);
 
   const handleToggleFavorite = useCallback(() => {
-    setIsFavorite((prev) => !prev);
-  }, []);
+    if (!product) return;
+    wishlist.toggle({
+      productId: product.id,
+      slug: product.slug,
+      name: product.name,
+      imageUrl: product.featuredAsset?.preview ?? null,
+      price: selectedVariant ? formatPrice(selectedVariant.priceWithTax) : undefined,
+      currencyCode: selectedVariant?.currencyCode ?? undefined,
+    });
+  }, [wishlist, product, selectedVariant]);
 
   const handleGoBack = useCallback(() => {
     if (router.canGoBack()) {
@@ -252,24 +263,35 @@ export default function ProductDetailScreen() {
           )}
 
           {/* Option Selection (Size, Color, etc.) */}
-          {optionGroups.map((group) => (
-            <View key={group.name} style={styles.section}>
-              <Text style={styles.sectionTitle}>
-                {t(`products.select${group.name}`, `Select ${group.name}`)}
-              </Text>
-              <View style={styles.optionsRow}>
-                {group.values.map((value) => (
-                  <Chip
-                    key={value}
-                    label={value}
-                    selected={selectedOptions[group.name] === value}
-                    onPress={() => handleOptionSelect(group.name, value)}
-                    style={styles.optionChip}
-                  />
-                ))}
+          {optionGroups.map((group) => {
+            const isSize = /size|taille|مقاس/i.test(group.name);
+            return (
+              <View key={group.name} style={styles.section}>
+                <View style={styles.sectionHeaderRow}>
+                  <Text style={styles.sectionTitle}>
+                    {t(`products.select${group.name}`, `Select ${group.name}`)}
+                  </Text>
+                  {isSize && (
+                    <TouchableOpacity onPress={() => setSizeGuideOpen(true)}>
+                      <Text style={styles.sizeGuideLink}>{t('sizeGuide.openLink')}</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+                <View style={styles.optionsRow}>
+                  {group.values.map((value) => (
+                    <Chip
+                      key={value}
+                      label={value}
+                      selected={selectedOptions[group.name] === value}
+                      onPress={() => handleOptionSelect(group.name, value)}
+                      style={styles.optionChip}
+                    />
+                  ))}
+                </View>
               </View>
-            </View>
-          ))}
+            );
+          })}
+          <SizeGuideModal visible={sizeGuideOpen} onClose={() => setSizeGuideOpen(false)} />
 
           {/* Quantity Selector */}
           {!isOutOfStock && (
@@ -298,6 +320,12 @@ export default function ProductDetailScreen() {
             </View>
           )}
         </View>
+
+        {/* Related products */}
+        <RelatedProducts
+          currentProductId={product.id}
+          collectionSlug={product.collections?.[0]?.slug ?? null}
+        />
       </ScrollView>
 
       {/* Bottom Actions */}
@@ -413,6 +441,17 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontWeight: typography.fontWeight.semiBold,
     marginBottom: spacing.md,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
+  sizeGuideLink: {
+    ...typography.styles.bodySmall,
+    color: colors.text.secondary,
+    textDecorationLine: 'underline',
   },
   description: {
     ...typography.styles.body,

@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useEffect } from 'react';
+import React, { createContext, useCallback, useEffect, useState } from 'react';
 import {
   useGetActiveOrderQuery,
   useAddItemToOrderMutation,
@@ -37,6 +37,10 @@ interface CartContextValue {
   removeFromCart: (orderLineId: string) => Promise<void>;
   clearCart: () => Promise<void>;
   refetchCart: () => void;
+  /** Mini-cart bottom-sheet open state, controlled from the Header/CartButton or auto-opened on add-to-cart. */
+  isMiniCartOpen: boolean;
+  openMiniCart: () => void;
+  closeMiniCart: () => void;
 }
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
@@ -56,6 +60,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [removeLineMutation, { loading: removeLoading }] = useRemoveOrderLineMutation();
   const [removeAllLinesMutation, { loading: clearLoading }] = useRemoveAllOrderLinesMutation();
 
+  const [isMiniCartOpen, setMiniCartOpen] = useState(false);
+
   const addToCart = useCallback(
     async (productVariantId: string, quantity: number) => {
       try {
@@ -70,6 +76,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const errorResult = result as { errorCode: string; message: string };
             throw new Error(errorResult.message || 'Failed to add item to cart');
           }
+          // Auto-open the mini-cart sheet so the user sees the new line
+          // without leaving the PDP. Closed by the user or by navigating away.
+          setMiniCartOpen(true);
         }
       } catch (error) {
         console.error('Add to cart error:', error);
@@ -179,6 +188,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     removeFromCart,
     clearCart,
     refetchCart,
+    isMiniCartOpen,
+    openMiniCart: () => setMiniCartOpen(true),
+    closeMiniCart: () => setMiniCartOpen(false),
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

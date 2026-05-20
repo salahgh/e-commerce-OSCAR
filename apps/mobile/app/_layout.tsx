@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ApolloProvider } from '@apollo/client/react';
@@ -21,11 +21,13 @@ import {
 } from '@expo-google-fonts/ibm-plex-sans-arabic';
 import { useFonts } from 'expo-font';
 
-import { useColorScheme } from 'react-native';
 import { apolloClient } from '@/src/apollo/client';
 import { AuthProvider, useAuth } from '@/src/contexts/AuthContext';
 import { CartProvider } from '@/src/contexts/CartContext';
+import { WishlistProvider } from '@/src/contexts/WishlistContext';
+import { ThemeProvider, useThemeMode } from '@/src/contexts/ThemeContext';
 import { ToastProvider , LoadingSpinner } from '@/src/components/ui';
+import { MiniCartSheet } from '@/src/components/cart';
 
 export const unstable_settings = {
   initialRouteName: 'splash',
@@ -79,8 +81,16 @@ function RootNavigator() {
   );
 }
 
+function NavigationThemeBridge({ children }: { children: React.ReactNode }) {
+  const { resolved } = useThemeMode();
+  return (
+    <NavigationThemeProvider value={resolved === 'dark' ? DarkTheme : DefaultTheme}>
+      {children}
+    </NavigationThemeProvider>
+  );
+}
+
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [languageLoaded, setLanguageLoaded] = useState(false);
 
   const [fontsLoaded] = useFonts({
@@ -110,12 +120,17 @@ export default function RootLayout() {
         <ApolloProvider client={apolloClient}>
           <AuthProvider>
             <CartProvider>
-              <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <ToastProvider>
-                  <RootNavigator />
-                  <StatusBar style="auto" />
-                </ToastProvider>
-              </ThemeProvider>
+              <WishlistProvider>
+                <ThemeProvider>
+                  <NavigationThemeBridge>
+                    <ToastProvider>
+                      <RootNavigator />
+                      <MiniCartSheet />
+                      <StatusBar style="auto" />
+                    </ToastProvider>
+                  </NavigationThemeBridge>
+                </ThemeProvider>
+              </WishlistProvider>
             </CartProvider>
           </AuthProvider>
         </ApolloProvider>
