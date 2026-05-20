@@ -24,7 +24,9 @@ Out of scope: design-system showcase page (`/design-system`), checkout/payment f
 
 These are linked from existing UI but pages don't exist yet. Each gets its own row in section **M**.
 
-`/forgot-password` · `/verification-pending` · `/user/profile` · `/user/orders` · `/user/wishlist` · `/categories` · `/categories/[slug]` · `/search` · `/checkout` · `/shipping` · `/returns` · `/size-guide` · `/faq` · `/about` · `/careers` · `/contact` · `/legal/terms` · `/legal/privacy`
+Still missing (footer / static content): `/shipping` · `/returns` · `/size-guide` · `/faq` · `/about` · `/careers` · `/contact` · `/legal/terms` · `/legal/privacy`
+
+~~Now implemented~~: ~~`/forgot-password`~~ · ~~`/reset-password`~~ · ~~`/verification-pending`~~ · ~~`/verify`~~ · ~~`/user/profile`~~ · ~~`/user/orders`~~ · ~~`/user/orders/[code]`~~ · ~~`/user/wishlist`~~ · ~~`/categories`~~ · ~~`/categories/[slug]`~~ · ~~`/search`~~ · ~~`/checkout`~~ · ~~`/checkout/confirmation/[code]`~~
 
 ---
 
@@ -230,9 +232,9 @@ For each standard storefront capability: ✅ Implemented · 🟡 Partial · ❌ 
 |---|---|---|---|
 | P-01 | Product listing with sort | ✅ | `/products` — verify in G-03/G-04 |
 | P-02 | Pagination | ✅ | verify in G-05/G-06 |
-| P-03 | Faceted filters (size, color, price, brand) | ❌ | no UI; backend has facet system, `@oscar/shared/facet-utils` exists for this |
-| P-04 | Category browsing | ❌ | links exist but `/categories` and `/categories/[slug]` not built |
-| P-05 | Full-text search | ❌ | search bar submits to `/search?q=` but page doesn't exist |
+| P-03 | Faceted filters (size, color, price, brand) | ✅ | `FacetFilters` pattern wired into `/search`; URL-serialized via `@oscar/shared/facet-utils` |
+| P-04 | Category browsing | ✅ | `/categories` + `/categories/[slug]` built (`GetRootCollections`, `GetCollectionWithProducts`) |
+| P-05 | Full-text search | ✅ | `/search` built with `SearchProductsWithFacets` + URL state |
 | P-06 | Search autocomplete / suggestions | ❌ | not implemented |
 | P-07 | Recently viewed products | ❌ | no localStorage hook or component |
 | P-08 | Related / recommended products on PDP | ❌ | PDP has no recommendation section |
@@ -267,14 +269,14 @@ For each standard storefront capability: ✅ Implemented · 🟡 Partial · ❌ 
 | P-27 | Apply / remove coupon code | ✅ | I-07..I-10 |
 | P-28 | Mini-cart drawer (hover/click cart icon) | ❌ | `CartButton` navigates to `/cart` only |
 | P-29 | Cart upsell / cross-sell | ❌ | not implemented |
-| P-30 | Checkout flow (cart → address → shipping → payment → confirm) | ❌ | `/checkout` not built |
-| P-31 | Guest checkout | ❌ | depends on P-30 |
-| P-32 | Multiple shipping addresses | ❌ | depends on P-30 |
-| P-33 | Wilaya-based shipping calculator | ❌ | `@oscar/shared/constants/wilayas.ts` data exists, no UI |
-| P-34 | Cash-on-delivery option | ❌ | depends on P-30 — Vendure has payment handler for COD |
-| P-35 | CIB / Baridimob payment | ❌ | backend payment handlers exist; no frontend integration |
+| P-30 | Checkout flow (cart → address → shipping → payment → confirm) | ✅ | `/checkout` 3-stage page wires Vendure setShipping/Billing/ShippingMethod/transition/addPayment |
+| P-31 | Guest checkout | 🟡 | infrastructure works (mutations don't require login); needs explicit guest-customer step UI |
+| P-32 | Multiple shipping addresses | ❌ | depends on customer address book |
+| P-33 | Wilaya-based shipping calculator | ✅ | wilaya `<Select>` + `getShippingDelay()` hint surfaced |
+| P-34 | Cash-on-delivery option | ✅ | `eligiblePaymentMethods` rendered via radio list — any backend handler shows up |
+| P-35 | CIB / Baridimob payment | 🟡 | radio list shows them when backend marks eligible; full off-site handoff not yet wired |
 | P-36 | Gift cards | ❌ | not in scope |
-| P-37 | Order confirmation page | ❌ | depends on P-30 |
+| P-37 | Order confirmation page | ✅ | `/checkout/confirmation/[code]` via `GetOrderByCode` |
 | P-38 | Order tracking | ❌ | not implemented |
 
 ### Customer account
@@ -284,12 +286,12 @@ For each standard storefront capability: ✅ Implemented · 🟡 Partial · ❌ 
 | P-39 | Sign up / sign in | ✅ | verify D-01..D-04, E-01..E-07 |
 | P-40 | Email verification flow | ✅ | `/verify` + `/verification-pending` built — SSR verified |
 | P-41 | Forgot / reset password | ✅ | `/forgot-password` + `/reset-password` built — SSR verified |
-| P-42 | Profile page (view + edit) | 🟡 | `AuthContext.updateProfile` exists, `/user/profile` page doesn't |
-| P-43 | Change password | 🟡 | `AuthContext.changePassword` exists, no page |
-| P-44 | Order history list | ❌ | no `/user/orders` page or query |
-| P-45 | Order detail view | ❌ | not implemented |
-| P-46 | Address book CRUD | ❌ | not implemented |
-| P-47 | Wishlist (add/remove/list) | 🟡 | `ProductCard` accepts `isFavorited` + `onToggleFavorite` but no provider, persistence, or `/user/wishlist` page |
+| P-42 | Profile page (view + edit) | ✅ | `/user/profile` (form + AuthContext.updateProfile) |
+| P-43 | Change password | ✅ | `/user/profile` (lower section, AuthContext.changePassword) |
+| P-44 | Order history list | ✅ | `/user/orders` with `GetMyOrders` |
+| P-45 | Order detail view | ✅ | `/user/orders/[code]` with `GetOrderByCode` |
+| P-46 | Address book CRUD | ❌ | deferred — needs new GraphQL ops |
+| P-47 | Wishlist (add/remove/list) | ✅ | `WishlistProvider` (localStorage) + `/user/wishlist`; ProductCard heart toggles via context |
 | P-48 | Compare products | ❌ | not implemented |
 | P-49 | Newsletter subscription | ❌ | not implemented |
 
@@ -323,15 +325,15 @@ For each standard storefront capability: ✅ Implemented · 🟡 Partial · ❌ 
 
 | ID | Feature | State | Notes |
 |---|---|---|---|
-| P-66 | Per-page metadata (`title`/`description`) | 🟡 | root `app/layout.tsx` only — pages don't export `metadata` |
-| P-67 | Open Graph / Twitter cards | ❌ | not configured |
+| P-66 | Per-page metadata (`title`/`description`) | 🟡 | locale layout wires title + OG; per-page titles still default-only |
+| P-67 | Open Graph / Twitter cards | ✅ | wired in `[locale]/layout.tsx` `generateMetadata` |
 | P-68 | Structured data (Product / Breadcrumb JSON-LD) | ❌ | not implemented |
-| P-69 | `sitemap.ts` | ❌ | v1 has one, v2 doesn't |
-| P-70 | `robots.ts` | ❌ | v1 has one, v2 doesn't |
-| P-71 | `next-sitemap` integration | ❌ | — |
+| P-69 | `sitemap.ts` | ✅ | static routes × locales with `<xhtml:link rel="alternate">` |
+| P-70 | `robots.ts` | ✅ | sitemap + private path disallow |
+| P-71 | `next-sitemap` integration | ❌ | not needed — using Next built-in MetadataRoute.Sitemap |
 | P-72 | Google Analytics tag | 🟡 | env vars exist (`NEXT_PUBLIC_GA_MEASUREMENT_ID`), no script |
 | P-73 | Facebook Pixel | 🟡 | env vars exist, no script |
-| P-74 | Canonical URLs per locale + `hreflang` | ❌ | not configured |
+| P-74 | Canonical URLs per locale + `hreflang` | ✅ | canonical + `<link rel="alternate" hreflang>` per locale + x-default |
 
 ### Performance & resilience
 
@@ -359,16 +361,27 @@ For each standard storefront capability: ✅ Implemented · 🟡 Partial · ❌ 
 
 ## Recommended next builds (prioritized)
 
-Based on the gaps above, suggested in order of customer impact:
+Completed in the current sprint:
+- ✅ `/checkout` flow incl. confirmation (P-30, P-33, P-34, P-37; P-31/P-35 partial)
+- ✅ Auth completion: `/forgot-password`, `/reset-password`, `/verification-pending`, `/verify` (P-40, P-41)
+- ✅ User account: `/user/profile`, `/user/orders`, `/user/orders/[code]`, `/user/wishlist` (P-42, P-43, P-44, P-45, P-47)
+- ✅ Category browsing: `/categories`, `/categories/[slug]` (P-04)
+- ✅ Search with faceted filters (P-03, P-05)
+- ✅ SEO basics: sitemap.ts, robots.ts, hreflang, OG, canonical (P-66, P-67, P-69, P-70, P-74)
+- ✅ Dark mode toggle (P-53)
 
-1. **`/checkout` flow** (P-30..P-37) — cart-to-confirmation including COD, CIB, Baridimob. Largest revenue blocker.
-2. **`/forgot-password` + `/reset-password` + `/verification-pending` + `/verify`** (P-40, P-41) — auth completeness. Logic is already in `AuthContext`; only pages missing.
-3. **`/user/*` pages** (P-42..P-47) — profile, orders, wishlist, addresses. Repeat-customer retention.
-4. **`/categories` + `/categories/[slug]`** (P-04) — primary browsing path.
-5. **`/search` page + filters** (P-03, P-05) — discovery.
-6. **Static content pages** (P-56..P-65) — legal + trust requirement before going live.
-7. **SEO basics** (P-66..P-74) — required for organic traffic; sitemap + per-page metadata.
-8. **Dark mode toggle** (P-53) — styling already supports it; just need a switch.
+Still missing (in rough priority order):
+1. Static content pages (P-56..P-65) — needs copy from team
+2. Address book CRUD (P-46) — needs additional Vendure mutations
+3. CIB / Baridimob off-site handoff (P-35) — wire payment redirect once backend exposes redirect URL
+4. JSON-LD structured data on PDP/category (P-68)
+5. GA + Pixel scripts (P-72, P-73)
+6. Mini-cart drawer (P-28)
+7. Related products on PDP (P-08), recently viewed (P-07)
+8. Image zoom on PDP (P-15), size guide modal (P-22)
+9. Reviews & ratings (P-17, P-18) — requires schema work
+10. Cookie consent banner (P-58), newsletter signup (P-59)
+11. Skip-to-content link (P-84), reduced-motion (P-85)
 
 ## Execution log
 

@@ -4,6 +4,7 @@ import * as React from 'react';
 import Image from 'next/image';
 import { Heart, Star } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useWishlist } from '@/contexts/WishlistContext';
 import { Link } from '@/i18n/routing';
 import { Badge, PriceDisplay } from '@/components/ui';
 import { cn } from '@/lib/utils/cn';
@@ -23,13 +24,16 @@ export interface ProductCardData {
 
 interface ProductCardProps {
   product: ProductCardData;
-  onToggleFavorite?: (slug: string) => void;
+  /** When true, suppress the wishlist heart (e.g. inside the wishlist page itself). */
+  hideWishlist?: boolean;
   className?: string;
 }
 
-export function ProductCard({ product, onToggleFavorite, className }: ProductCardProps) {
+export function ProductCard({ product, hideWishlist, className }: ProductCardProps) {
   const t = useTranslations('ProductCard');
-  const { slug, name, imageUrl, price, originalPrice, currencyCode, rating, reviewCount, discountPercent, isFavorited } = product;
+  const wishlist = useWishlist();
+  const { slug, name, imageUrl, price, originalPrice, currencyCode, rating, reviewCount, discountPercent } = product;
+  const isFavorited = wishlist.has(slug);
   return (
     <article
       className={cn(
@@ -54,12 +58,14 @@ export function ProductCard({ product, onToggleFavorite, className }: ProductCar
         )}
       </Link>
 
-      {onToggleFavorite && (
+      {!hideWishlist && (
         <button
           type="button"
           aria-label={isFavorited ? t('favoriteRemove') : t('favoriteAdd')}
           aria-pressed={isFavorited}
-          onClick={() => onToggleFavorite(slug)}
+          onClick={() =>
+            wishlist.toggle({ slug, name, imageUrl, price, currencyCode })
+          }
           className={cn(
             'absolute end-5 top-5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-bg-elevated/90 text-content-strong shadow-sm transition-colors hover:bg-bg-elevated',
             isFavorited && 'text-state-danger-border',

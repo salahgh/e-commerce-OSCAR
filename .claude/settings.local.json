@@ -178,7 +178,11 @@
       "Bash(npx next *)",
       "mcp__plugin_chrome-devtools-mcp_chrome-devtools__new_page",
       "PowerShell(Test-Path *)",
-      "PowerShell($chrome = \"C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\"; $out = & $chrome --headless=new --dump-dom --disable-gpu --user-data-dir=\"$env:TEMP\\\\oscar-i18n-verify\" \"http://localhost:3001/forgot-password\" 2>$null; $out.Substring\\(0, [Math]::Min\\(2000, $out.Length\\)\\))"
+      "PowerShell($chrome = \"C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\"; $out = & $chrome --headless=new --dump-dom --disable-gpu --user-data-dir=\"$env:TEMP\\\\oscar-i18n-verify\" \"http://localhost:3001/forgot-password\" 2>$null; $out.Substring\\(0, [Math]::Min\\(2000, $out.Length\\)\\))",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_snapshot",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_console_messages",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__click"
     ],
     "deny": [],
     "ask": []

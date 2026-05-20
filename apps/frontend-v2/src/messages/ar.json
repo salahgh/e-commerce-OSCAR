@@ -92,6 +92,125 @@
       "switchToLight": "التبديل إلى الوضع الفاتح"
     }
   },
+  "CheckoutPage": {
+    "title": "إتمام الطلب",
+    "subtitle": "خطوات بسيطة لإنهاء عملية الشراء.",
+    "emptyCart": "سلتك فارغة. أضف منتجات قبل المتابعة.",
+    "browse": "تصفّح المنتجات",
+    "stepAddress": "1. عنوان التوصيل",
+    "stepShipping": "2. طريقة التوصيل",
+    "stepPayment": "3. الدفع",
+    "address": {
+      "fullName": "الاسم الكامل",
+      "streetLine1": "العنوان",
+      "streetLine2": "تفاصيل إضافية (اختياري)",
+      "city": "البلدية",
+      "wilaya": "الولاية",
+      "postalCode": "الرمز البريدي",
+      "phone": "الهاتف",
+      "selectWilaya": "اختر ولاية",
+      "useShippingForBilling": "استخدم هذا العنوان للفوترة"
+    },
+    "shipping": {
+      "loading": "جاري تحميل خيارات التوصيل...",
+      "empty": "لا توجد خيارات توصيل. تحقّق من العنوان.",
+      "deliveryEstimate": "المدة المقدّرة: {delay}"
+    },
+    "payment": {
+      "loading": "جاري تحميل طرق الدفع...",
+      "empty": "لا توجد طرق دفع متاحة.",
+      "ineligible": "غير متوفّر"
+    },
+    "summary": {
+      "title": "الملخص",
+      "items": "العناصر",
+      "subtotal": "المجموع الفرعي",
+      "shipping": "التوصيل",
+      "shippingTbd": "سيتم احتسابه",
+      "total": "الإجمالي",
+      "placeOrder": "تأكيد الطلب",
+      "placing": "جاري التأكيد...",
+      "termsNotice": "بتأكيد الطلب، أنت توافق على شروط البيع."
+    },
+    "errors": {
+      "addressFailed": "تعذّر حفظ العنوان.",
+      "shippingFailed": "تعذّر تعيين طريقة التوصيل.",
+      "paymentFailed": "فشل الدفع.",
+      "transitionFailed": "تعذّر إتمام الطلب.",
+      "generic": "حدث خطأ."
+    }
+  },
+  "CheckoutConfirmationPage": {
+    "title": "شكرا لك على طلبك!",
+    "subtitle": "تم تسجيل طلبك {code} بنجاح.",
+    "trackingHint": "ستصلك رسالة إلكترونية تأكيد مع تفاصيل التتبع.",
+    "viewOrder": "عرض الطلب",
+    "continueShopping": "متابعة التسوّق",
+    "errorTitle": "الطلب غير موجود",
+    "errorBody": "رمز الطلب غير صالح."
+  },
+  "UserLayout": {
+    "title": "حسابي",
+    "nav": {
+      "profile": "ملفي الشخصي",
+      "orders": "طلباتي",
+      "wishlist": "المفضلة",
+      "logout": "تسجيل الخروج"
+    },
+    "loginRequired": "يرجى تسجيل الدخول للوصول إلى حسابك."
+  },
+  "OrdersPage": {
+    "title": "طلباتي",
+    "subtitle": "سجل مشترياتك.",
+    "empty": "لم تقم بأي طلب بعد.",
+    "shopCta": "تصفّح المتجر",
+    "tableCode": "الرقم",
+    "tableDate": "التاريخ",
+    "tableState": "الحالة",
+    "tableTotal": "الإجمالي",
+    "tableActions": "التفاصيل",
+    "view": "عرض",
+    "items": "{count, plural, other {# عنصر}}",
+    "errorTitle": "فشل التحميل"
+  },
+  "OrderPage": {
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbOrders": "طلباتي",
+    "title": "الطلب {code}",
+    "placedOn": "تاريخ الطلب",
+    "state": "الحالة",
+    "items": "العناصر",
+    "totals": "ملخص",
+    "subtotal": "المجموع الفرعي",
+    "shipping": "التوصيل",
+    "total": "الإجمالي",
+    "shippingAddress": "عنوان التوصيل",
+    "billingAddress": "عنوان الفوترة",
+    "payment": "الدفع",
+    "fulfillments": "التتبع",
+    "tracking": "رمز التتبع",
+    "errorTitle": "الطلب غير موجود",
+    "errorBody": "هذا الطلب غير موجود أو لا يخصّك."
+  },
+  "WishlistPage": {
+    "title": "المفضلة",
+    "subtitle": "المنتجات التي حفظتها للاحقا.",
+    "empty": "قائمة المفضلة فارغة.",
+    "shopCta": "تصفّح المنتجات",
+    "remove": "إزالة من المفضلة"
+  },
+  "ProfilePage": {
+    "title": "ملفي الشخصي",
+    "subtitle": "إدارة معلوماتك الشخصية.",
+    "save": "حفظ",
+    "saving": "جاري الحفظ...",
+    "saved": "تم تحديث الملف الشخصي.",
+    "passwordCardTitle": "تغيير كلمة المرور",
+    "changePassword": "تغيير كلمة المرور",
+    "changing": "جاري التحديث...",
+    "passwordChanged": "تم تغيير كلمة المرور.",
+    "errorTitle": "خطأ"
+  },
   "Cart": {
     "errors": {
       "insufficientStock": "المخزون غير كافٍ. المتوفّر: {available}",
@@ -136,6 +255,20 @@
     "errorTitle": "الفئة غير موجودة",
     "errorBody": "هذه الفئة غير موجودة أو لم تعد متوفّرة.",
     "count": "{count, plural, other {# منتج}}"
+  },
+  "SearchPage": {
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbSearch": "البحث",
+    "title": "نتائج البحث",
+    "noQuery": "أدخل كلمة في شريط البحث.",
+    "results": "{count, plural, other {# نتيجة}} عن \"{query}\"",
+    "empty": "لا توجد نتائج عن \"{query}\".",
+    "emptyHint": "جرّب كلمات أخرى أو تصفّح فئاتنا.",
+    "errorTitle": "فشل البحث",
+    "filtersTitle": "الفلاتر",
+    "clearFilters": "مسح الفلاتر",
+    "showFilters": "إظهار الفلاتر",
+    "hideFilters": "إخفاء الفلاتر"
   },
   "ProductsPage": {
     "breadcrumbHome": "الرئيسية",

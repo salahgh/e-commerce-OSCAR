@@ -92,6 +92,125 @@
       "switchToLight": "Passer au mode clair"
     }
   },
+  "CheckoutPage": {
+    "title": "Validation de la commande",
+    "subtitle": "Quelques étapes pour finaliser votre achat.",
+    "emptyCart": "Votre panier est vide. Ajoutez des articles avant de passer la commande.",
+    "browse": "Voir les produits",
+    "stepAddress": "1. Adresse de livraison",
+    "stepShipping": "2. Mode de livraison",
+    "stepPayment": "3. Paiement",
+    "address": {
+      "fullName": "Nom complet",
+      "streetLine1": "Adresse",
+      "streetLine2": "Complément d'adresse (optionnel)",
+      "city": "Commune",
+      "wilaya": "Wilaya",
+      "postalCode": "Code postal",
+      "phone": "Téléphone",
+      "selectWilaya": "Sélectionnez une wilaya",
+      "useShippingForBilling": "Utiliser cette adresse pour la facturation"
+    },
+    "shipping": {
+      "loading": "Chargement des options de livraison...",
+      "empty": "Aucune option de livraison disponible. Vérifiez l'adresse.",
+      "deliveryEstimate": "Délai estimé : {delay}"
+    },
+    "payment": {
+      "loading": "Chargement des modes de paiement...",
+      "empty": "Aucun mode de paiement disponible.",
+      "ineligible": "Indisponible"
+    },
+    "summary": {
+      "title": "Résumé",
+      "items": "Articles",
+      "subtotal": "Sous-total",
+      "shipping": "Livraison",
+      "shippingTbd": "À calculer",
+      "total": "Total",
+      "placeOrder": "Passer la commande",
+      "placing": "Validation en cours...",
+      "termsNotice": "En passant commande, vous acceptez nos conditions de vente."
+    },
+    "errors": {
+      "addressFailed": "Impossible d'enregistrer l'adresse.",
+      "shippingFailed": "Impossible d'enregistrer le mode de livraison.",
+      "paymentFailed": "Le paiement a échoué.",
+      "transitionFailed": "Impossible de finaliser la commande.",
+      "generic": "Une erreur est survenue."
+    }
+  },
+  "CheckoutConfirmationPage": {
+    "title": "Merci pour votre commande !",
+    "subtitle": "Votre commande {code} a bien été enregistrée.",
+    "trackingHint": "Vous recevrez un email de confirmation avec le suivi.",
+    "viewOrder": "Voir ma commande",
+    "continueShopping": "Continuer mes achats",
+    "errorTitle": "Commande introuvable",
+    "errorBody": "Le code de commande est invalide."
+  },
+  "UserLayout": {
+    "title": "Mon compte",
+    "nav": {
+      "profile": "Mon profil",
+      "orders": "Mes commandes",
+      "wishlist": "Mes favoris",
+      "logout": "Déconnexion"
+    },
+    "loginRequired": "Veuillez vous connecter pour accéder à votre compte."
+  },
+  "OrdersPage": {
+    "title": "Mes commandes",
+    "subtitle": "Historique de vos achats.",
+    "empty": "Vous n'avez pas encore passé de commande.",
+    "shopCta": "Découvrir la boutique",
+    "tableCode": "Référence",
+    "tableDate": "Date",
+    "tableState": "Statut",
+    "tableTotal": "Total",
+    "tableActions": "Détails",
+    "view": "Voir",
+    "items": "{count, plural, one {# article} other {# articles}}",
+    "errorTitle": "Erreur de chargement"
+  },
+  "OrderPage": {
+    "breadcrumbHome": "Accueil",
+    "breadcrumbOrders": "Mes commandes",
+    "title": "Commande {code}",
+    "placedOn": "Passée le",
+    "state": "Statut",
+    "items": "Articles",
+    "totals": "Récapitulatif",
+    "subtotal": "Sous-total",
+    "shipping": "Livraison",
+    "total": "Total",
+    "shippingAddress": "Adresse de livraison",
+    "billingAddress": "Adresse de facturation",
+    "payment": "Paiement",
+    "fulfillments": "Suivi",
+    "tracking": "Code de suivi",
+    "errorTitle": "Commande introuvable",
+    "errorBody": "Cette commande n'existe pas ou ne vous appartient pas."
+  },
+  "WishlistPage": {
+    "title": "Mes favoris",
+    "subtitle": "Vos produits enregistrés pour plus tard.",
+    "empty": "Votre liste de favoris est vide.",
+    "shopCta": "Voir les produits",
+    "remove": "Retirer des favoris"
+  },
+  "ProfilePage": {
+    "title": "Mon profil",
+    "subtitle": "Gérez vos informations personnelles.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "saved": "Profil mis à jour.",
+    "passwordCardTitle": "Changer le mot de passe",
+    "changePassword": "Changer le mot de passe",
+    "changing": "Modification...",
+    "passwordChanged": "Mot de passe modifié.",
+    "errorTitle": "Erreur"
+  },
   "Cart": {
     "errors": {
       "insufficientStock": "Stock insuffisant. Disponible : {available}",
@@ -136,6 +255,20 @@
     "errorTitle": "Catégorie introuvable",
     "errorBody": "Cette catégorie n'existe pas ou n'est plus disponible.",
     "count": "{count, plural, one {# produit} other {# produits}}"
+  },
+  "SearchPage": {
+    "breadcrumbHome": "Accueil",
+    "breadcrumbSearch": "Recherche",
+    "title": "Résultats de recherche",
+    "noQuery": "Saisissez un terme dans la barre de recherche.",
+    "results": "{count, plural, one {# résultat} other {# résultats}} pour \"{query}\"",
+    "empty": "Aucun résultat pour \"{query}\".",
+    "emptyHint": "Essayez avec d'autres mots-clés ou parcourez nos catégories.",
+    "errorTitle": "Erreur de recherche",
+    "filtersTitle": "Filtres",
+    "clearFilters": "Effacer les filtres",
+    "showFilters": "Afficher les filtres",
+    "hideFilters": "Masquer les filtres"
   },
   "ProductsPage": {
     "breadcrumbHome": "Accueil",
