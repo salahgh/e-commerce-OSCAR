@@ -16,9 +16,11 @@ ECO="$APP_DIR/deploy/scripts/ecosystem.config.cjs"
 
 cd "$APP_DIR"
 
-if [[ -n "$(git status --porcelain)" ]]; then
+# Server-local overrides to apps/*/.env.production are expected (real URLs /
+# secrets differ from what's committed) — exclude them from the dirty check.
+if [[ -n "$(git status --porcelain -- ':(exclude)apps/*/.env.production')" ]]; then
   echo "❌  Working tree has uncommitted changes. Refusing to deploy." >&2
-  git status --short >&2
+  git status --short -- ':(exclude)apps/*/.env.production' >&2
   exit 1
 fi
 
