@@ -325,7 +325,16 @@
       "shipping": "Shipping"
     },
     "reference": "Reference",
-    "shippingBody": "48-72h delivery across every wilaya. Cash on delivery, CIB or Baridimob."
+    "shippingBody": "48-72h delivery across every wilaya. Cash on delivery, CIB or Baridimob.",
+    "related": "You may also like"
+  },
+  "MiniCart": {
+    "title": "Your cart",
+    "empty": "Your cart is empty.",
+    "browse": "Browse products",
+    "subtotal": "Subtotal",
+    "viewCart": "View cart",
+    "checkout": "Checkout"
   },
   "CartPage": {
     "title": "Your cart",
