@@ -41,7 +41,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={dir} className={plexArabic.variable} suppressHydrationWarning>
       <body className="bg-bg-base text-content font-sans antialiased">
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <ApolloWrapper>
             <NextIntlClientProvider locale={locale} messages={messages}>
               <ToastProvider>
