@@ -339,6 +339,106 @@
     "sizeGuideHeaderHip": "Hanches",
     "sizeGuideFootnote": "Astuce : mesurez un vêtement qui vous va bien et comparez."
   },
+  "InfoPage": {
+    "breadcrumbHome": "Accueil",
+    "helpHeading": "Besoin d'aide ?",
+    "helpCta": "Contactez-nous →"
+  },
+  "ShippingPage": {
+    "title": "Livraison",
+    "intro": "Nous livrons dans les 48 wilayas d'Algérie. Les délais et coûts varient selon la zone.",
+    "zonesTitle": "Délais par zone",
+    "zone1": "Zone 1 (Alger et proches) — 1 à 2 jours ouvrés",
+    "zone2": "Zone 2 (villes côtières) — 2 à 4 jours ouvrés",
+    "zone3": "Zone 3 (hauts plateaux) — 3 à 5 jours ouvrés",
+    "zone4": "Zone 4 (sud) — 5 à 7 jours ouvrés",
+    "costTitle": "Frais de port",
+    "costBody": "Les frais de port sont calculés automatiquement au moment du paiement en fonction de votre wilaya.",
+    "trackingTitle": "Suivi de commande",
+    "trackingBody": "Un code de suivi vous est envoyé par email dès l'expédition. Vous pouvez aussi consulter vos commandes depuis votre compte."
+  },
+  "ReturnsPage": {
+    "title": "Retours",
+    "intro": "Vous avez 14 jours après réception pour retourner un article qui ne vous convient pas.",
+    "conditionsTitle": "Conditions",
+    "cond1": "L'article doit être neuf, non porté, avec ses étiquettes d'origine.",
+    "cond2": "L'emballage d'origine doit être conservé.",
+    "cond3": "Les articles soldés et accessoires en contact direct (sous-vêtements, bijoux) ne sont pas repris.",
+    "howTitle": "Comment retourner",
+    "howBody": "Contactez notre service client avec votre numéro de commande. Nous organisons le retour et le remboursement sous 7 jours après réception."
+  },
+  "SizeGuidePage": {
+    "title": "Guide des tailles",
+    "intro": "Trouvez la taille qui vous correspond. Mesures en centimètres.",
+    "howTitle": "Comment mesurer",
+    "how1": "Poitrine : passez le mètre sous les bras, à l'endroit le plus fort.",
+    "how2": "Taille : à l'endroit le plus fin, au-dessus du nombril.",
+    "how3": "Hanches : à l'endroit le plus fort, généralement 20 cm sous la taille.",
+    "footnote": "Astuce : mesurez un vêtement qui vous va bien et comparez aux mesures du tableau."
+  },
+  "FaqPage": {
+    "title": "Questions fréquentes",
+    "intro": "Tout ce qu'il faut savoir pour commander sur OSCAR Najar.",
+    "q1": "Comment passer une commande ?",
+    "a1": "Ajoutez vos articles au panier, validez le panier, renseignez votre adresse et choisissez votre mode de paiement (CIB, Baridimob ou paiement à la livraison).",
+    "q2": "Quels sont les modes de paiement ?",
+    "a2": "Nous acceptons CIB, Baridimob et le paiement à la livraison dans toute l'Algérie.",
+    "q3": "Combien de temps pour la livraison ?",
+    "a3": "De 1 à 7 jours ouvrés selon votre wilaya. Voir notre page Livraison pour les détails par zone.",
+    "q4": "Comment retourner un article ?",
+    "a4": "Vous avez 14 jours après réception. Voir notre page Retours pour les conditions.",
+    "q5": "Mes données sont-elles sécurisées ?",
+    "a5": "Oui. Nous ne stockons jamais vos données de paiement et utilisons HTTPS sur toutes les pages."
+  },
+  "AboutPage": {
+    "title": "À propos d'OSCAR Najar",
+    "intro": "La mode élégante au cœur de l'Algérie.",
+    "storyTitle": "Notre histoire",
+    "storyBody": "OSCAR Najar est née de la conviction que l'élégance algérienne mérite une vitrine moderne. Nous travaillons avec des artisans locaux pour proposer des collections qui respectent à la fois la tradition et le rythme contemporain.",
+    "valuesTitle": "Nos valeurs",
+    "v1": "Qualité — chaque pièce passe par un contrôle avant expédition.",
+    "v2": "Proximité — service client en français et en arabe.",
+    "v3": "Couverture — livraison dans les 48 wilayas, paiement à la livraison."
+  },
+  "CareersPage": {
+    "title": "Carrières",
+    "intro": "Rejoignez l'équipe OSCAR Najar.",
+    "openingsTitle": "Postes ouverts",
+    "noOpenings": "Aucun poste n'est ouvert pour le moment. Vous pouvez nous écrire à recrutement@oscarnajar.dz pour une candidature spontanée.",
+    "cultureTitle": "Pourquoi nous",
+    "c1": "Une équipe jeune, basée à Alger.",
+    "c2": "Des projets concrets pour le marché algérien.",
+    "c3": "De vraies responsabilités dès le premier jour."
+  },
+  "ContactPage": {
+    "title": "Contact",
+    "intro": "Nous répondons sous 24 heures ouvrées.",
+    "addressTitle": "Adresse",
+    "addressLine1": "OSCAR Najar",
+    "addressLine2": "Alger, Algérie",
+    "emailTitle": "Email",
+    "emailValue": "contact@oscarnajar.dz",
+    "phoneTitle": "Téléphone",
+    "phoneValue": "+213 555 000 000",
+    "hoursTitle": "Horaires",
+    "hoursValue": "Dimanche à jeudi, 9h–17h",
+    "formTitle": "Écrivez-nous",
+    "formName": "Votre nom",
+    "formEmail": "Votre email",
+    "formMessage": "Votre message",
+    "formSubmit": "Envoyer",
+    "formNotice": "Le formulaire de contact sera disponible prochainement. En attendant, écrivez-nous directement par email."
+  },
+  "TermsPage": {
+    "title": "Conditions générales de vente",
+    "intro": "Dernière mise à jour : à compléter par l'équipe juridique.",
+    "placeholder": "Le texte définitif des conditions générales sera publié ici. Si vous avez une question urgente, contactez notre service client."
+  },
+  "PrivacyPage": {
+    "title": "Politique de confidentialité",
+    "intro": "Dernière mise à jour : à compléter par l'équipe juridique.",
+    "placeholder": "Le texte définitif de la politique de confidentialité sera publié ici. En résumé : nous ne vendons jamais vos données, nous ne les utilisons que pour traiter votre commande et améliorer le service."
+  },
   "MiniCart": {
     "title": "Votre panier",
     "empty": "Votre panier est vide.",

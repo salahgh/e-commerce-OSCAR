@@ -339,6 +339,106 @@
     "sizeGuideHeaderHip": "Hip",
     "sizeGuideFootnote": "Tip: measure a garment that fits you well and compare."
   },
+  "InfoPage": {
+    "breadcrumbHome": "Home",
+    "helpHeading": "Need help?",
+    "helpCta": "Contact us →"
+  },
+  "ShippingPage": {
+    "title": "Shipping",
+    "intro": "We deliver to all 48 wilayas of Algeria. Delays and costs depend on the zone.",
+    "zonesTitle": "Delays by zone",
+    "zone1": "Zone 1 (Algiers and nearby) — 1 to 2 business days",
+    "zone2": "Zone 2 (coastal cities) — 2 to 4 business days",
+    "zone3": "Zone 3 (high plateaus) — 3 to 5 business days",
+    "zone4": "Zone 4 (south) — 5 to 7 business days",
+    "costTitle": "Shipping fees",
+    "costBody": "Shipping fees are calculated automatically at checkout based on your wilaya.",
+    "trackingTitle": "Order tracking",
+    "trackingBody": "A tracking code is emailed when your order ships. You can also see all your orders from your account."
+  },
+  "ReturnsPage": {
+    "title": "Returns",
+    "intro": "You have 14 days from receipt to return an item that doesn't suit you.",
+    "conditionsTitle": "Conditions",
+    "cond1": "The item must be new, unworn, with original tags.",
+    "cond2": "Original packaging must be kept.",
+    "cond3": "Sale items and accessories in direct contact (underwear, jewellery) are non-returnable.",
+    "howTitle": "How to return",
+    "howBody": "Contact customer service with your order number. We arrange the return and the refund within 7 days of receipt."
+  },
+  "SizeGuidePage": {
+    "title": "Size guide",
+    "intro": "Find the size that fits you. Measurements in centimetres.",
+    "howTitle": "How to measure",
+    "how1": "Chest: tape under the arms at the widest point.",
+    "how2": "Waist: at the narrowest point, just above the navel.",
+    "how3": "Hip: at the widest point, usually 20 cm below the waist.",
+    "footnote": "Tip: measure a garment that fits you well and compare with the chart."
+  },
+  "FaqPage": {
+    "title": "Frequently asked questions",
+    "intro": "Everything you need to know to shop on OSCAR Najar.",
+    "q1": "How do I place an order?",
+    "a1": "Add items to your cart, go to the cart, fill in your address and pick a payment method (CIB, Baridimob, or cash on delivery).",
+    "q2": "What payment methods do you accept?",
+    "a2": "CIB, Baridimob, and cash on delivery across all of Algeria.",
+    "q3": "How long does shipping take?",
+    "a3": "1 to 7 business days depending on your wilaya. See the Shipping page for details.",
+    "q4": "How do I return an item?",
+    "a4": "You have 14 days after receipt. See the Returns page for the conditions.",
+    "q5": "Is my data safe?",
+    "a5": "Yes. We never store your payment data and we serve every page over HTTPS."
+  },
+  "AboutPage": {
+    "title": "About OSCAR Najar",
+    "intro": "Elegant fashion at the heart of Algeria.",
+    "storyTitle": "Our story",
+    "storyBody": "OSCAR Najar was born from the belief that Algerian elegance deserves a modern showcase. We work with local artisans to ship collections that respect both tradition and the contemporary rhythm.",
+    "valuesTitle": "Our values",
+    "v1": "Quality — every piece is checked before shipping.",
+    "v2": "Closeness — customer service in French and Arabic.",
+    "v3": "Reach — delivery to all 48 wilayas, cash on delivery available."
+  },
+  "CareersPage": {
+    "title": "Careers",
+    "intro": "Join the OSCAR Najar team.",
+    "openingsTitle": "Open roles",
+    "noOpenings": "No open roles at the moment. You can write to recruitement@oscarnajar.dz with a spontaneous application.",
+    "cultureTitle": "Why us",
+    "c1": "A young team based in Algiers.",
+    "c2": "Real projects for the Algerian market.",
+    "c3": "Real responsibility from day one."
+  },
+  "ContactPage": {
+    "title": "Contact",
+    "intro": "We reply within 24 business hours.",
+    "addressTitle": "Address",
+    "addressLine1": "OSCAR Najar",
+    "addressLine2": "Algiers, Algeria",
+    "emailTitle": "Email",
+    "emailValue": "contact@oscarnajar.dz",
+    "phoneTitle": "Phone",
+    "phoneValue": "+213 555 000 000",
+    "hoursTitle": "Hours",
+    "hoursValue": "Sunday to Thursday, 9am–5pm",
+    "formTitle": "Write to us",
+    "formName": "Your name",
+    "formEmail": "Your email",
+    "formMessage": "Your message",
+    "formSubmit": "Send",
+    "formNotice": "The contact form is coming soon. For now, please write to us by email."
+  },
+  "TermsPage": {
+    "title": "Terms of Service",
+    "intro": "Last updated: to be completed by the legal team.",
+    "placeholder": "The full terms of service will be published here. For urgent questions, contact customer service."
+  },
+  "PrivacyPage": {
+    "title": "Privacy Policy",
+    "intro": "Last updated: to be completed by the legal team.",
+    "placeholder": "The full privacy policy will be published here. In short: we never sell your data, we only use it to process your order and improve the service."
+  },
   "MiniCart": {
     "title": "Your cart",
     "empty": "Your cart is empty.",

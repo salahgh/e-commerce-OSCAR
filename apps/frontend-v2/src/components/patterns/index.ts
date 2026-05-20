@@ -2,3 +2,4 @@ export { ProductCard, ProductCardSkeleton, type ProductCardData } from './Produc
 export { ProductGrid } from './ProductGrid';
 export { FacetFilters } from './FacetFilters';
 export { SizeGuideDialog } from './SizeGuideDialog';
+export { InfoPageLayout } from './InfoPageLayout';
