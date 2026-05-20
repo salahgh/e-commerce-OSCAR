@@ -12,6 +12,9 @@ import {
   DollarSign,
   BarChart3,
   RefreshCw,
+  Layers,
+  Boxes,
+  ImageOff,
 } from 'lucide-react';
 import { formatPrice, formatDateTime } from '../lib/utils';
 import {
@@ -19,6 +22,8 @@ import {
   SalesLineChart,
   CategoryPieChart,
   TopProductsBarChart,
+  CollectionsBarChart,
+  RecentProductsList,
 } from '../components/dashboard';
 import { useDashboardData, type DateRange } from '../hooks/useDashboardData';
 
@@ -57,10 +62,16 @@ export const Dashboard: React.FC = () => {
     topProducts,
     recentOrders,
     lowStockAlerts,
+    catalogStats,
+    productsByCollection,
+    recentProducts,
     chartsLoading,
     kpisLoading,
     recentOrdersLoading,
     lowStockLoading,
+    catalogStatsLoading,
+    productsByCollectionLoading,
+    recentProductsLoading,
     refetch,
   } = useDashboardData(dateRange);
 
@@ -153,6 +164,51 @@ export const Dashboard: React.FC = () => {
         />
       </div>
 
+      {/* Catalog KPI Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <KPICard
+          title="Produits totaux"
+          value={catalogStats.totalProducts}
+          icon={<Package className="h-6 w-6" />}
+          iconBgColor="bg-blue-500/20"
+          iconColor="text-blue-400"
+          subtitle={`${catalogStats.enabledProducts} actifs / ${catalogStats.disabledProducts} désactivés`}
+          loading={catalogStatsLoading}
+        />
+        <KPICard
+          title="Variantes"
+          value={catalogStats.totalVariants}
+          icon={<Layers className="h-6 w-6" />}
+          iconBgColor="bg-purple-500/20"
+          iconColor="text-purple-400"
+          subtitle={
+            catalogStats.productsWithoutImages > 0
+              ? `${catalogStats.productsWithoutImages} produits sans image`
+              : 'Tous les produits ont une image'
+          }
+          loading={catalogStatsLoading}
+        />
+        <KPICard
+          title="Stock épuisé"
+          value={catalogStats.outOfStockVariants}
+          icon={<AlertTriangle className="h-6 w-6" />}
+          iconBgColor="bg-red-500/20"
+          iconColor="text-red-400"
+          subtitle={`${catalogStats.lowStockVariants} variantes en stock bas`}
+          loading={catalogStatsLoading}
+        />
+        <KPICard
+          title="Valeur stock"
+          value={catalogStats.totalInventoryValue / 100}
+          icon={<Boxes className="h-6 w-6" />}
+          iconBgColor="bg-green-500/20"
+          iconColor="text-green-400"
+          subtitle={`Prix moyen: ${formatPrice(catalogStats.averageProductPrice / 100)}`}
+          isCurrency
+          loading={catalogStatsLoading}
+        />
+      </div>
+
       {/* Sales Evolution Chart - Full Width */}
       <SalesLineChart data={salesData} loading={chartsLoading} />
 
@@ -160,6 +216,66 @@ export const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <CategoryPieChart data={categoryData} loading={chartsLoading} />
         <TopProductsBarChart data={topProducts} loading={chartsLoading} metric="revenue" />
+      </div>
+
+      {/* Inventaire Catalogue */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <CollectionsBarChart
+            data={productsByCollection}
+            loading={productsByCollectionLoading}
+          />
+        </div>
+        <RecentProductsList products={recentProducts} loading={recentProductsLoading} />
+      </div>
+
+      {/* Catalog Highlights */}
+      <div className="bg-card rounded-xl border border-border p-6">
+        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+          <Package className="h-5 w-5 text-blue-400" />
+          Inventaire Catalogue
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="flex flex-col p-4 bg-blue-500/10 rounded-xl border border-blue-500/20">
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">
+              Nouveaux ce mois
+            </span>
+            <span className="text-2xl font-bold text-foreground mt-1">
+              {catalogStats.newProductsThisMonth}
+            </span>
+            <span className="text-xs text-muted-foreground mt-1">produits ajoutés</span>
+          </div>
+          <div className="flex flex-col p-4 bg-purple-500/10 rounded-xl border border-purple-500/20">
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">
+              Variantes par produit
+            </span>
+            <span className="text-2xl font-bold text-foreground mt-1">
+              {catalogStats.totalProducts > 0
+                ? (catalogStats.totalVariants / catalogStats.totalProducts).toFixed(1)
+                : '0'}
+            </span>
+            <span className="text-xs text-muted-foreground mt-1">en moyenne</span>
+          </div>
+          <div className="flex flex-col p-4 bg-orange-500/10 rounded-xl border border-orange-500/20">
+            <span className="text-xs uppercase tracking-wide text-muted-foreground flex items-center gap-1">
+              <ImageOff className="h-3 w-3" />
+              Sans image
+            </span>
+            <span className="text-2xl font-bold text-foreground mt-1">
+              {catalogStats.productsWithoutImages}
+            </span>
+            <span className="text-xs text-muted-foreground mt-1">à compléter</span>
+          </div>
+          <div className="flex flex-col p-4 bg-red-500/10 rounded-xl border border-red-500/20">
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">
+              Désactivés
+            </span>
+            <span className="text-2xl font-bold text-foreground mt-1">
+              {catalogStats.disabledProducts}
+            </span>
+            <span className="text-xs text-muted-foreground mt-1">non visibles</span>
+          </div>
+        </div>
       </div>
 
       {/* Recent Orders & Low Stock */}
