@@ -92,6 +92,125 @@
       "switchToLight": "Switch to light mode"
     }
   },
+  "CheckoutPage": {
+    "title": "Checkout",
+    "subtitle": "A few steps to finalize your purchase.",
+    "emptyCart": "Your cart is empty. Add items before checking out.",
+    "browse": "Browse products",
+    "stepAddress": "1. Shipping address",
+    "stepShipping": "2. Shipping method",
+    "stepPayment": "3. Payment",
+    "address": {
+      "fullName": "Full name",
+      "streetLine1": "Street address",
+      "streetLine2": "Address complement (optional)",
+      "city": "City / commune",
+      "wilaya": "Wilaya",
+      "postalCode": "Postal code",
+      "phone": "Phone",
+      "selectWilaya": "Select a wilaya",
+      "useShippingForBilling": "Use this address for billing"
+    },
+    "shipping": {
+      "loading": "Loading shipping options...",
+      "empty": "No shipping option available. Check the address.",
+      "deliveryEstimate": "Estimated delivery: {delay}"
+    },
+    "payment": {
+      "loading": "Loading payment methods...",
+      "empty": "No payment method available.",
+      "ineligible": "Unavailable"
+    },
+    "summary": {
+      "title": "Summary",
+      "items": "Items",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "shippingTbd": "To be calculated",
+      "total": "Total",
+      "placeOrder": "Place order",
+      "placing": "Placing order...",
+      "termsNotice": "By placing the order you accept our terms of sale."
+    },
+    "errors": {
+      "addressFailed": "Could not save the address.",
+      "shippingFailed": "Could not set the shipping method.",
+      "paymentFailed": "Payment failed.",
+      "transitionFailed": "Could not finalize the order.",
+      "generic": "An error occurred."
+    }
+  },
+  "CheckoutConfirmationPage": {
+    "title": "Thank you for your order!",
+    "subtitle": "Your order {code} has been recorded.",
+    "trackingHint": "You'll receive a confirmation email with tracking details.",
+    "viewOrder": "View my order",
+    "continueShopping": "Continue shopping",
+    "errorTitle": "Order not found",
+    "errorBody": "The order code is invalid."
+  },
+  "UserLayout": {
+    "title": "My account",
+    "nav": {
+      "profile": "My profile",
+      "orders": "My orders",
+      "wishlist": "My wishlist",
+      "logout": "Sign out"
+    },
+    "loginRequired": "Please sign in to access your account."
+  },
+  "OrdersPage": {
+    "title": "My orders",
+    "subtitle": "Your purchase history.",
+    "empty": "You haven't placed any orders yet.",
+    "shopCta": "Browse the store",
+    "tableCode": "Reference",
+    "tableDate": "Date",
+    "tableState": "Status",
+    "tableTotal": "Total",
+    "tableActions": "Details",
+    "view": "View",
+    "items": "{count, plural, one {# item} other {# items}}",
+    "errorTitle": "Failed to load"
+  },
+  "OrderPage": {
+    "breadcrumbHome": "Home",
+    "breadcrumbOrders": "My orders",
+    "title": "Order {code}",
+    "placedOn": "Placed on",
+    "state": "Status",
+    "items": "Items",
+    "totals": "Summary",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total",
+    "shippingAddress": "Shipping address",
+    "billingAddress": "Billing address",
+    "payment": "Payment",
+    "fulfillments": "Tracking",
+    "tracking": "Tracking code",
+    "errorTitle": "Order not found",
+    "errorBody": "This order doesn't exist or doesn't belong to you."
+  },
+  "WishlistPage": {
+    "title": "My wishlist",
+    "subtitle": "Products you've saved for later.",
+    "empty": "Your wishlist is empty.",
+    "shopCta": "Browse products",
+    "remove": "Remove from wishlist"
+  },
+  "ProfilePage": {
+    "title": "My profile",
+    "subtitle": "Manage your personal information.",
+    "save": "Save",
+    "saving": "Saving...",
+    "saved": "Profile updated.",
+    "passwordCardTitle": "Change password",
+    "changePassword": "Change password",
+    "changing": "Updating...",
+    "passwordChanged": "Password changed.",
+    "errorTitle": "Error"
+  },
   "Cart": {
     "errors": {
       "insufficientStock": "Insufficient stock. Available: {available}",
@@ -136,6 +255,20 @@
     "errorTitle": "Category not found",
     "errorBody": "This category doesn't exist or is no longer available.",
     "count": "{count, plural, one {# product} other {# products}}"
+  },
+  "SearchPage": {
+    "breadcrumbHome": "Home",
+    "breadcrumbSearch": "Search",
+    "title": "Search results",
+    "noQuery": "Enter a term in the search bar.",
+    "results": "{count, plural, one {# result} other {# results}} for \"{query}\"",
+    "empty": "No results for \"{query}\".",
+    "emptyHint": "Try different keywords or browse our categories.",
+    "errorTitle": "Search failed",
+    "filtersTitle": "Filters",
+    "clearFilters": "Clear filters",
+    "showFilters": "Show filters",
+    "hideFilters": "Hide filters"
   },
   "ProductsPage": {
     "breadcrumbHome": "Home",
