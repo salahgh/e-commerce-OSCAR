@@ -325,7 +325,16 @@
       "shipping": "Livraison"
     },
     "reference": "Référence",
-    "shippingBody": "Livraison sous 48-72h à travers toutes les wilayas. Paiement à la livraison, CIB ou Baridimob."
+    "shippingBody": "Livraison sous 48-72h à travers toutes les wilayas. Paiement à la livraison, CIB ou Baridimob.",
+    "related": "Vous aimerez aussi"
+  },
+  "MiniCart": {
+    "title": "Votre panier",
+    "empty": "Votre panier est vide.",
+    "browse": "Voir les produits",
+    "subtotal": "Sous-total",
+    "viewCart": "Voir le panier",
+    "checkout": "Passer la commande"
   },
   "CartPage": {
     "title": "Votre panier",

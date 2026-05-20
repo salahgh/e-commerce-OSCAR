@@ -4,7 +4,11 @@ import * as React from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ShoppingBag, Heart, Share2 } from 'lucide-react';
-import { useGetProductBySlugQuery } from '@oscar/graphql-shop/generated';
+import {
+  useGetProductBySlugQuery,
+  useGetCollectionWithProductsQuery,
+  useGetProductsQuery,
+} from '@oscar/graphql-shop/generated';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/components/ui/Toast';
 import {
@@ -23,6 +27,12 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui';
+import {
+  ProductCard,
+  ProductCardSkeleton,
+  ProductGrid,
+  type ProductCardData,
+} from '@/components/patterns';
 
 export default function ProductPage() {
   const t = useTranslations('ProductPage');
@@ -33,6 +43,18 @@ export default function ProductPage() {
   const { data, loading, error } = useGetProductBySlugQuery({
     variables: { slug },
     skip: !slug,
+  });
+
+  // Related: products from this product's first collection if any, otherwise
+  // fall back to "recently added" (seed data has no collections assigned).
+  const collectionSlug = data?.product?.collections?.[0]?.slug ?? '';
+  const { data: collectionRelated } = useGetCollectionWithProductsQuery({
+    variables: { slug: collectionSlug, take: 12, skip: 0 },
+    skip: !collectionSlug,
+  });
+  const { data: recentRelated } = useGetProductsQuery({
+    variables: { options: { take: 12 } },
+    skip: !!collectionSlug,
   });
 
   const { addToCart } = useCart();
@@ -85,6 +107,22 @@ export default function ProductPage() {
 
   const stockLevel = selectedVariant?.stockLevel;
   const stockNumeric = stockLevel === 'IN_STOCK' ? 99 : stockLevel === 'OUT_OF_STOCK' ? 0 : stockLevel === 'LOW_STOCK' ? 3 : null;
+
+  // Related products: prefer collection siblings, fall back to recent.
+  // Dedupe by product id, drop current product, cap at 4.
+  const relatedSource = collectionSlug
+    ? (collectionRelated?.collection?.productVariants.items ?? []).flatMap((v) =>
+        v.product ? [v.product] : [],
+      )
+    : recentRelated?.products.items ?? [];
+  const relatedSeen = new Set<string>([product.id]);
+  const relatedProducts = relatedSource
+    .filter((p) => {
+      if (relatedSeen.has(p.id)) return false;
+      relatedSeen.add(p.id);
+      return true;
+    })
+    .slice(0, 4);
 
   async function handleAddToCart() {
     if (!selectedVariant) return;
@@ -230,6 +268,24 @@ export default function ProductPage() {
           </Tabs>
         </div>
       </div>
+
+      {relatedProducts.length > 0 && (
+        <section className="mt-8 border-t border-border pt-8">
+          <h2 className="mb-4 text-20 font-bold text-content-strong">{t('related')}</h2>
+          <ProductGrid columns={4}>
+            {relatedProducts.map((p) => {
+              const card: ProductCardData = {
+                slug: p.slug,
+                name: p.name,
+                imageUrl: p.featuredAsset?.preview ?? null,
+                price: p.variants[0]?.priceWithTax ?? 0,
+                currencyCode: p.variants[0]?.currencyCode ?? 'DZD',
+              };
+              return <ProductCard key={p.id} product={card} />;
+            })}
+          </ProductGrid>
+        </section>
+      )}
     </div>
   );
 }

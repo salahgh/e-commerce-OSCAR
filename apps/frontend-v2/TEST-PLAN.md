@@ -237,7 +237,7 @@ For each standard storefront capability: ✅ Implemented · 🟡 Partial · ❌ 
 | P-05 | Full-text search | ✅ | `/search` built with `SearchProductsWithFacets` + URL state |
 | P-06 | Search autocomplete / suggestions | ❌ | not implemented |
 | P-07 | Recently viewed products | ❌ | no localStorage hook or component |
-| P-08 | Related / recommended products on PDP | ❌ | PDP has no recommendation section |
+| P-08 | Related / recommended products on PDP | ✅ | "You may also like" on PDP — siblings from first collection, falls back to recent products when product has no collection assigned |
 | P-09 | Trending / new arrivals carousel on home | 🟡 | home has "featured products" via `useGetProductsQuery({take: 8})` — not actually a "trending" query |
 | P-10 | Collections landing page | 🟡 | home shows collections grid but no dedicated landing |
 | P-11 | Breadcrumbs on PDP and products list | ✅ | verify in G-01, H-03 |
@@ -267,7 +267,7 @@ For each standard storefront capability: ✅ Implemented · 🟡 Partial · ❌ 
 | P-25 | Quantity adjust in cart | ✅ | I-04 |
 | P-26 | Remove from cart | ✅ | I-05/I-06 |
 | P-27 | Apply / remove coupon code | ✅ | I-07..I-10 |
-| P-28 | Mini-cart drawer (hover/click cart icon) | ❌ | `CartButton` navigates to `/cart` only |
+| P-28 | Mini-cart drawer (hover/click cart icon) | ✅ | `MiniCart` opens from `CartButton`, auto-opens on add-to-cart; line items + qty stepper + remove + subtotal + Checkout / View cart |
 | P-29 | Cart upsell / cross-sell | ❌ | not implemented |
 | P-30 | Checkout flow (cart → address → shipping → payment → confirm) | ✅ | `/checkout` 3-stage page wires Vendure setShipping/Billing/ShippingMethod/transition/addPayment |
 | P-31 | Guest checkout | 🟡 | infrastructure works (mutations don't require login); needs explicit guest-customer step UI |

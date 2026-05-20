@@ -61,6 +61,10 @@ interface CartContextType {
   removeCoupon: (couponCode: string) => Promise<void>;
   itemCount: number;
   refetchCart: () => Promise<void>;
+  /** Mini-cart drawer open state (Header controls this). */
+  isMiniCartOpen: boolean;
+  openMiniCart: () => void;
+  closeMiniCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -105,6 +109,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const tToasts = useTranslations('Cart.toasts');
   const toast = useToast();
   const [cart, setCart] = useState<Cart | null>(null);
+  const [isMiniCartOpen, setMiniCartOpen] = useState(false);
 
   const { data, loading, refetch } = useGetActiveOrderQuery({ fetchPolicy: 'cache-and-network' });
 
@@ -139,6 +144,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if ('id' in response) {
         setCart(mapOrderToCart(response as OrderFieldsFragment));
         toast.success(tToasts('added'));
+        // Auto-open the mini-cart so the user sees the new item — feels
+        // more like adding to a real cart than a toast that vanishes.
+        setMiniCartOpen(true);
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : tErrors('addFailed'));
@@ -241,6 +249,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         removeCoupon,
         itemCount: cart?.totalQuantity ?? 0,
         refetchCart,
+        isMiniCartOpen,
+        openMiniCart: () => setMiniCartOpen(true),
+        closeMiniCart: () => setMiniCartOpen(false),
       }}
     >
       {children}

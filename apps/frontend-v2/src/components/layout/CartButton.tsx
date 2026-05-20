@@ -3,15 +3,15 @@
 import { ShoppingBag } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCart } from '@/contexts/CartContext';
-import { Link } from '@/i18n/routing';
 import { Badge } from '@/components/ui';
 
 export function CartButton() {
   const t = useTranslations('Layout.header');
-  const { itemCount } = useCart();
+  const { itemCount, openMiniCart } = useCart();
   return (
-    <Link
-      href="/cart"
+    <button
+      type="button"
+      onClick={openMiniCart}
       aria-label={t('cartAria', { count: itemCount })}
       className="relative inline-flex h-10 w-10 items-center justify-center rounded text-content transition-colors hover:bg-bg-subtle"
     >
@@ -24,6 +24,6 @@ export function CartButton() {
           {itemCount > 99 ? '99+' : itemCount}
         </Badge>
       )}
-    </Link>
+    </button>
   );
 }
