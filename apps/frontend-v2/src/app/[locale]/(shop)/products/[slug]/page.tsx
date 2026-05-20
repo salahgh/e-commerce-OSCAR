@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { ShoppingBag, Heart, Share2 } from 'lucide-react';
+import { ShoppingBag, Heart, Share2, ZoomIn } from 'lucide-react';
 import {
   useGetProductBySlugQuery,
   useGetCollectionWithProductsQuery,
@@ -16,6 +16,10 @@ import {
   Breadcrumb,
   Button,
   ColorSwatchGroup,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
   IconButton,
   PriceDisplay,
   QuantityStepper,
@@ -31,6 +35,7 @@ import {
   ProductCard,
   ProductCardSkeleton,
   ProductGrid,
+  SizeGuideDialog,
   type ProductCardData,
 } from '@/components/patterns';
 
@@ -150,16 +155,41 @@ export default function ProductPage() {
       <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
         {/* Gallery */}
         <div className="flex flex-col gap-4 lg:flex-row-reverse">
-          <div className="relative aspect-square overflow-hidden rounded border border-border bg-bg-muted lg:flex-1">
-            {images[activeImage] && (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={images[activeImage].preview}
-                alt={product.name}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            )}
-          </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <button
+                type="button"
+                aria-label={t('zoomAria')}
+                className="group relative aspect-square w-full overflow-hidden rounded border border-border bg-bg-muted lg:flex-1"
+              >
+                {images[activeImage] && (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={images[activeImage].preview}
+                    alt={product.name}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                )}
+                <span className="absolute end-3 bottom-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-bg-elevated/90 text-content-strong opacity-0 transition-opacity group-hover:opacity-100">
+                  <ZoomIn className="h-5 w-5" />
+                </span>
+              </button>
+            </DialogTrigger>
+            <DialogContent
+              className="flex max-w-5xl items-center justify-center bg-transparent p-2 shadow-none"
+              hideClose
+            >
+              <DialogTitle className="sr-only">{t('zoomAria')}</DialogTitle>
+              {images[activeImage] && (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={images[activeImage].preview}
+                  alt={product.name}
+                  className="max-h-[85vh] w-auto object-contain"
+                />
+              )}
+            </DialogContent>
+          </Dialog>
           {images.length > 1 && (
             <ul className="flex gap-3 lg:flex-col">
               {images.map((img, i) => (
@@ -210,7 +240,10 @@ export default function ProductPage() {
 
           {sizeGroup && (
             <div className="flex flex-col gap-2">
-              <p className="text-14 font-medium text-content-strong">{t('size')}</p>
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-14 font-medium text-content-strong">{t('size')}</p>
+                <SizeGuideDialog />
+              </div>
               <SizeButtonGroup
                 value={selectedSize}
                 onValueChange={setSelectedSize}

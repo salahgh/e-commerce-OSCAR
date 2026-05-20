@@ -10,3 +10,4 @@ export { LocaleSwitcher } from './LocaleSwitcher';
 export { PageHeader } from './PageHeader';
 export { ThemeToggle } from './ThemeToggle';
 export { MiniCart } from './MiniCart';
+export { SkipToContent } from './SkipToContent';

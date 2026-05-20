@@ -8,7 +8,7 @@ import { ApolloWrapper } from '@/lib/apollo/apollo-wrapper';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { WishlistProvider } from '@/contexts/WishlistContext';
-import { MiniCart } from '@/components/layout';
+import { MiniCart, SkipToContent } from '@/components/layout';
 import { ToastProvider } from '@/components/ui/Toast';
 import { routing } from '@/i18n/routing';
 import { localeDirection, type Locale } from '@/i18n/config';
@@ -90,6 +90,7 @@ export default async function LocaleLayout({
                 <AuthProvider>
                   <CartProvider>
                     <WishlistProvider>
+                      <SkipToContent />
                       {children}
                       <MiniCart />
                     </WishlistProvider>

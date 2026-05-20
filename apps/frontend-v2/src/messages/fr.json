@@ -99,7 +99,8 @@
       "ariaLabel": "Pagination",
       "previous": "Précédent",
       "next": "Suivant"
-    }
+    },
+    "skipToContent": "Aller au contenu principal"
   },
   "CheckoutPage": {
     "title": "Validation de la commande",
@@ -326,7 +327,17 @@
     },
     "reference": "Référence",
     "shippingBody": "Livraison sous 48-72h à travers toutes les wilayas. Paiement à la livraison, CIB ou Baridimob.",
-    "related": "Vous aimerez aussi"
+    "related": "Vous aimerez aussi",
+    "zoomAria": "Agrandir l'image",
+    "zoomClose": "Fermer la vue agrandie",
+    "sizeGuide": "Guide des tailles",
+    "sizeGuideTitle": "Guide des tailles",
+    "sizeGuideIntro": "Choisissez la taille qui vous correspond. Mesures en centimètres.",
+    "sizeGuideHeaderSize": "Taille",
+    "sizeGuideHeaderChest": "Poitrine",
+    "sizeGuideHeaderWaist": "Tour de taille",
+    "sizeGuideHeaderHip": "Hanches",
+    "sizeGuideFootnote": "Astuce : mesurez un vêtement qui vous va bien et comparez."
   },
   "MiniCart": {
     "title": "Votre panier",

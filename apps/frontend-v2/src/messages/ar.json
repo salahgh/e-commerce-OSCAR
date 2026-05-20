@@ -99,7 +99,8 @@
       "ariaLabel": "ترقيم الصفحات",
       "previous": "السابق",
       "next": "التالي"
-    }
+    },
+    "skipToContent": "تخطي إلى المحتوى الرئيسي"
   },
   "CheckoutPage": {
     "title": "إتمام الطلب",
@@ -326,7 +327,17 @@
     },
     "reference": "المرجع",
     "shippingBody": "التوصيل خلال 48-72 ساعة إلى جميع الولايات. الدفع عند الاستلام، CIB أو Baridimob.",
-    "related": "قد يعجبك أيضا"
+    "related": "قد يعجبك أيضا",
+    "zoomAria": "تكبير الصورة",
+    "zoomClose": "إغلاق العرض المكبّر",
+    "sizeGuide": "دليل المقاسات",
+    "sizeGuideTitle": "دليل المقاسات",
+    "sizeGuideIntro": "اختر المقاس المناسب لك. القياسات بالسنتيمتر.",
+    "sizeGuideHeaderSize": "المقاس",
+    "sizeGuideHeaderChest": "الصدر",
+    "sizeGuideHeaderWaist": "الخصر",
+    "sizeGuideHeaderHip": "الورك",
+    "sizeGuideFootnote": "نصيحة: قس قطعة تناسبك جيدا وقارنها."
   },
   "MiniCart": {
     "title": "سلة التسوق",
