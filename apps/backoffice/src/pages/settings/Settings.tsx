@@ -56,7 +56,11 @@ import {
   JobState,
   RunPendingSearchIndexUpdatesDocument,
   CancelJobDocument,
+  DeletePaymentMethodDocument,
+  DeleteShippingMethodDocument,
 } from '../../graphql/generated/graphql';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { Trash2 } from 'lucide-react';
 import { Tabs } from '../../components/ui/Tabs';
 import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
@@ -87,6 +91,54 @@ export const Settings: React.FC = () => {
   const [editingShipping, setEditingShipping] = useState<string | null>(null);
   const [testEmailAddress, setTestEmailAddress] = useState('');
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  const [deletingPaymentId, setDeletingPaymentId] = useState<string | null>(null);
+  const [deletingShippingId, setDeletingShippingId] = useState<string | null>(null);
+  const [deletePaymentMethod, { loading: deletingPayment }] = useMutation(
+    DeletePaymentMethodDocument
+  );
+  const [deleteShippingMethod, { loading: deletingShipping }] = useMutation(
+    DeleteShippingMethodDocument
+  );
+
+  const handleDeletePaymentMethod = async () => {
+    if (!deletingPaymentId) return;
+    try {
+      const r = await deletePaymentMethod({
+        variables: { id: deletingPaymentId, force: false },
+      });
+      const result = r.data?.deletePaymentMethod;
+      if (result?.result === 'DELETED') {
+        dispatch(addToast({ message: 'Méthode supprimée', type: 'success' }));
+        refetchPayment();
+      } else {
+        dispatch(
+          addToast({ message: result?.message || 'Impossible de supprimer', type: 'error' })
+        );
+      }
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+    setDeletingPaymentId(null);
+  };
+
+  const handleDeleteShippingMethod = async () => {
+    if (!deletingShippingId) return;
+    try {
+      const r = await deleteShippingMethod({ variables: { id: deletingShippingId } });
+      const result = r.data?.deleteShippingMethod;
+      if (result?.result === 'DELETED') {
+        dispatch(addToast({ message: 'Méthode supprimée', type: 'success' }));
+        refetchShipping();
+      } else {
+        dispatch(
+          addToast({ message: result?.message || 'Impossible de supprimer', type: 'error' })
+        );
+      }
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+    setDeletingShippingId(null);
+  };
 
   // Queries
   const { data: channelData, loading: channelLoading } = useQuery(ActiveChannelDocument);
@@ -625,6 +677,14 @@ export const Settings: React.FC = () => {
                             >
                               <Edit2 className="h-4 w-4" />
                             </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDeletingShippingId(method.id)}
+                              title="Supprimer"
+                            >
+                              <Trash2 className="h-4 w-4 text-red-400" />
+                            </Button>
                           </>
                         )}
                       </div>
@@ -719,6 +779,14 @@ export const Settings: React.FC = () => {
                               <Check className="h-4 w-4 mr-1" /> Activer
                             </>
                           )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeletingPaymentId(method.id)}
+                          title="Supprimer"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-400" />
                         </Button>
                       </div>
                     </div>
@@ -1241,6 +1309,28 @@ export const Settings: React.FC = () => {
       <div className="bg-card rounded-lg shadow">
         <Tabs tabs={tabs} defaultTab="store" />
       </div>
+
+      <ConfirmDialog
+        isOpen={!!deletingPaymentId}
+        onClose={() => setDeletingPaymentId(null)}
+        onConfirm={handleDeletePaymentMethod}
+        title="Supprimer cette méthode de paiement"
+        message="Si la méthode est utilisée par des commandes existantes, la suppression peut échouer."
+        confirmText="Supprimer"
+        variant="danger"
+        loading={deletingPayment}
+      />
+
+      <ConfirmDialog
+        isOpen={!!deletingShippingId}
+        onClose={() => setDeletingShippingId(null)}
+        onConfirm={handleDeleteShippingMethod}
+        title="Supprimer cette méthode de livraison"
+        message="Si la méthode est utilisée par des commandes existantes, la suppression peut échouer."
+        confirmText="Supprimer"
+        variant="danger"
+        loading={deletingShipping}
+      />
     </div>
   );
 };

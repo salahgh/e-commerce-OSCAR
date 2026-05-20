@@ -1,16 +1,18 @@
 'use client';
 
 import { ShoppingBag } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useCart } from '@/contexts/CartContext';
 import { Link } from '@/i18n/routing';
 import { Badge } from '@/components/ui';
 
 export function CartButton() {
+  const t = useTranslations('Layout.header');
   const { itemCount } = useCart();
   return (
     <Link
       href="/cart"
-      aria-label={`Panier (${itemCount} articles)`}
+      aria-label={t('cartAria', { count: itemCount })}
       className="relative inline-flex h-10 w-10 items-center justify-center rounded text-content transition-colors hover:bg-bg-subtle"
     >
       <ShoppingBag className="h-5 w-5" />

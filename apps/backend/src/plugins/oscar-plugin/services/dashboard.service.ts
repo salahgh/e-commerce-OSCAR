@@ -403,9 +403,14 @@ export class DashboardService {
 
   /**
    * Get revenue by category for the pie chart. Joins order lines through the
-   * variant and the collection many-to-many table, sums linePriceWithTax across
-   * completed orders, groups by collection. Names are hydrated via
+   * variant and the collection many-to-many table, sums (listPrice * quantity)
+   * across completed orders, groups by collection. Names are hydrated via
    * CollectionService so translations resolve under ctx.languageCode.
+   *
+   * Note: `linePriceWithTax` is a TypeScript getter on OrderLine (computed
+   * from listPrice/taxLines/adjustments) and does NOT exist as a DB column,
+   * so we use `listPrice * quantity` as the per-line revenue. Close enough
+   * for a category-share visualization.
    */
   async getRevenueByCategory(ctx: RequestContext): Promise<RevenueByCategoryDataPoint[]> {
     const completedStates = [
@@ -427,7 +432,7 @@ export class DashboardService {
       )
       .where('o.state IN (:...states)', { states: completedStates })
       .select('cpv."collectionId"', 'collectionId')
-      .addSelect('SUM(line."linePriceWithTax")', 'revenue')
+      .addSelect('SUM(line."listPrice" * line."quantity")', 'revenue')
       .groupBy('cpv."collectionId"')
       .getRawMany<{ collectionId: string; revenue: string }>();
 

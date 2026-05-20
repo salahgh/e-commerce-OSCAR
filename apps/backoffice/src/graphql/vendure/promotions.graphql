@@ -150,3 +150,19 @@ mutation DeletePromotions($ids: [ID!]!) {
     message
   }
 }
+
+# Channel scoping (no-op in single-channel deployments; available for future
+# multi-channel rollouts).
+mutation AssignPromotionsToChannel($input: AssignPromotionsToChannelInput!) {
+  assignPromotionsToChannel(input: $input) {
+    id
+    name
+  }
+}
+
+mutation RemovePromotionsFromChannel($input: RemovePromotionsFromChannelInput!) {
+  removePromotionsFromChannel(input: $input) {
+    id
+    name
+  }
+}

@@ -1,6 +1,9 @@
+'use client';
+
 import * as React from 'react';
 import { X } from 'lucide-react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils/cn';
 
 const tagVariants = cva(
@@ -29,17 +32,19 @@ export interface TagProps
     VariantProps<typeof tagVariants> {
   leadingIcon?: React.ReactNode;
   onClose?: () => void;
+  closeLabel?: string;
   children: React.ReactNode;
 }
 
-export function Tag({ className, intent, size, leadingIcon, onClose, children, ...props }: TagProps) {
+export function Tag({ className, intent, size, leadingIcon, onClose, closeLabel, children, ...props }: TagProps) {
+  const t = useTranslations('Common');
   return (
     <span className={cn(tagVariants({ intent, size }), className)} {...props}>
       {onClose && (
         <button
           type="button"
           onClick={onClose}
-          aria-label="Retirer"
+          aria-label={closeLabel ?? t('remove')}
           className="-mx-1 inline-flex items-center justify-center rounded hover:bg-bg-muted/40"
         >
           <X />

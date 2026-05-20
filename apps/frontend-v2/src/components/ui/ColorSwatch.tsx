@@ -21,7 +21,7 @@ export const ColorSwatch = React.forwardRef<HTMLButtonElement, ColorSwatchProps>
         ref={ref}
         type="button"
         aria-pressed={selected}
-        aria-label={`Couleur ${hex}`}
+        aria-label={hex}
         className={cn(
           'relative inline-flex items-center justify-center rounded-full border-2 transition-all duration-fast',
           selected ? 'border-accent ring-2 ring-accent ring-offset-2 ring-offset-bg-base' : 'border-border hover:border-border-strong',
@@ -59,6 +59,7 @@ export function ColorSwatchGroup({ options, value, onValueChange, size, classNam
           selected={value === opt.value}
           onClick={() => onValueChange?.(opt.value)}
           title={opt.name}
+          aria-label={opt.name}
         />
       ))}
     </div>

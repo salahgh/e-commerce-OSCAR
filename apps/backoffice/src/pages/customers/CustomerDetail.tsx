@@ -53,7 +53,11 @@ import {
   AdminCustomerDocument,
   UpdateCustomerDocument,
   DeleteCustomerDocument,
+  DeleteCustomerAddressDocument,
+  AddNoteToCustomerDocument,
+  DeleteCustomerNoteDocument,
 } from '../../graphql/generated/graphql';
+import { AddressDialog, type AddressFormValues } from './CustomerDialogs';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
@@ -279,7 +283,16 @@ export const CustomerDetail: React.FC = () => {
   const dispatch = useDispatch();
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'addresses'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'addresses' | 'notes'>(
+    'overview'
+  );
+  const [showAddressDialog, setShowAddressDialog] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<AddressFormValues | undefined>(undefined);
+  const [deletingAddressId, setDeletingAddressId] = useState<string | null>(null);
+  const [newNote, setNewNote] = useState('');
+  const [deleteAddress, { loading: deletingAddress }] = useMutation(DeleteCustomerAddressDocument);
+  const [addNoteToCustomer, { loading: addingNote }] = useMutation(AddNoteToCustomerDocument);
+  const [deleteCustomerNote, { loading: deletingNote }] = useMutation(DeleteCustomerNoteDocument);
 
   const { data, loading, error, refetch } = useQuery(AdminCustomerDocument, {
     variables: { id: id! },
@@ -413,6 +426,55 @@ export const CustomerDetail: React.FC = () => {
     if (customer?.emailAddress) {
       navigator.clipboard.writeText(customer.emailAddress);
       dispatch(addToast({ message: 'Email copié', type: 'success' }));
+    }
+  };
+
+  const handleDeleteAddress = async () => {
+    if (!deletingAddressId) return;
+    try {
+      const r = await deleteAddress({ variables: { id: deletingAddressId } });
+      if (r.data?.deleteCustomerAddress?.success) {
+        dispatch(addToast({ message: 'Adresse supprimée', type: 'success' }));
+        refetch();
+      } else {
+        dispatch(addToast({ message: "Échec de la suppression", type: 'error' }));
+      }
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+    setDeletingAddressId(null);
+  };
+
+  const handleAddNote = async () => {
+    if (!newNote.trim()) return;
+    try {
+      await addNoteToCustomer({
+        variables: { input: { id: id!, note: newNote.trim(), isPublic: false } },
+      });
+      dispatch(addToast({ message: 'Note ajoutée', type: 'success' }));
+      setNewNote('');
+      refetch();
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    try {
+      const r = await deleteCustomerNote({ variables: { id: noteId } });
+      if (r.data?.deleteCustomerNote?.result === 'DELETED') {
+        dispatch(addToast({ message: 'Note supprimée', type: 'success' }));
+        refetch();
+      } else {
+        dispatch(
+          addToast({
+            message: r.data?.deleteCustomerNote?.message || 'Échec de la suppression',
+            type: 'error',
+          })
+        );
+      }
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
     }
   };
 
@@ -782,6 +844,11 @@ export const CustomerDetail: React.FC = () => {
             id: 'addresses' as const,
             label: `Adresses (${addresses.length})`,
             icon: <Home className="h-4 w-4" />,
+          },
+          {
+            id: 'notes' as const,
+            label: `Notes (${customer.history?.totalItems || 0})`,
+            icon: <MessageSquare className="h-4 w-4" />,
           },
         ].map((tab) => (
           <button
@@ -1160,6 +1227,18 @@ export const CustomerDetail: React.FC = () => {
         {/* Addresses Tab */}
         {activeTab === 'addresses' && (
           <div className="bg-card rounded-xl border border-border overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h3 className="text-lg font-semibold text-foreground">Adresses ({addresses.length})</h3>
+              <Button
+                onClick={() => {
+                  setEditingAddress(undefined);
+                  setShowAddressDialog(true);
+                }}
+              >
+                <Home className="h-4 w-4 mr-2" />
+                Ajouter
+              </Button>
+            </div>
             {addresses.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20">
                 <div className="p-4 bg-muted/30 rounded-full mb-4">
@@ -1223,13 +1302,125 @@ export const CustomerDetail: React.FC = () => {
                         </p>
                       )}
                     </div>
+                    <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-border">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setEditingAddress({
+                            id: address.id,
+                            fullName: address.fullName,
+                            streetLine1: address.streetLine1,
+                            streetLine2: address.streetLine2,
+                            city: address.city,
+                            postalCode: address.postalCode,
+                            province: address.province,
+                            countryCode: address.country?.code,
+                            phoneNumber: address.phoneNumber,
+                            defaultShippingAddress: address.defaultShippingAddress,
+                            defaultBillingAddress: address.defaultBillingAddress,
+                          });
+                          setShowAddressDialog(true);
+                        }}
+                      >
+                        <Edit2 className="h-4 w-4 mr-1" />
+                        Modifier
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setDeletingAddressId(address.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
           </div>
         )}
+
+        {/* Notes Tab */}
+        {activeTab === 'notes' && (
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
+            <div className="p-6 border-b border-border space-y-3">
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                Notes administratives
+              </h3>
+              <TextArea
+                value={newNote}
+                onChange={(e) => setNewNote(e.target.value)}
+                rows={3}
+                placeholder="Écrire une note interne à propos de ce client..."
+                className="bg-background border-border"
+              />
+              <div className="flex justify-end">
+                <Button onClick={handleAddNote} loading={addingNote} disabled={!newNote.trim()}>
+                  Ajouter la note
+                </Button>
+              </div>
+            </div>
+            {(customer.history?.items || []).length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <MessageSquare className="h-12 w-12 text-muted-foreground/40 mb-3" />
+                <p className="text-muted-foreground text-sm">Aucune note pour ce client</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-border">
+                {(customer.history?.items || []).map((entry) => {
+                  const data = entry.data as Record<string, any> | null;
+                  return (
+                    <div key={entry.id} className="p-4 flex items-start gap-3">
+                      <div className="flex-1">
+                        <p className="text-sm text-foreground whitespace-pre-wrap">
+                          {data?.note || '(note vide)'}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {entry.administrator
+                            ? `${entry.administrator.firstName} ${entry.administrator.lastName} • `
+                            : ''}
+                          {formatDateTime(entry.createdAt)}
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeleteNote(entry.id)}
+                        loading={deletingNote}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Address dialog */}
+      <AddressDialog
+        isOpen={showAddressDialog}
+        onClose={() => setShowAddressDialog(false)}
+        customerId={id!}
+        initial={editingAddress}
+        onSuccess={() => refetch()}
+      />
+
+      {/* Address delete confirmation */}
+      <ConfirmDialog
+        isOpen={!!deletingAddressId}
+        onClose={() => setDeletingAddressId(null)}
+        onConfirm={handleDeleteAddress}
+        title="Supprimer l'adresse"
+        message="Cette action est irréversible."
+        confirmText="Supprimer"
+        variant="danger"
+        loading={deletingAddress}
+      />
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Minus, Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils/cn';
 
 interface QuantityStepperProps {
@@ -28,16 +29,21 @@ export function QuantityStepper({
   size = 'md',
   disabled,
   className,
-  ariaLabel = 'Quantité',
+  ariaLabel,
 }: QuantityStepperProps) {
+  const t = useTranslations('QuantityStepper');
   const sz = sizeMap[size];
   const dec = () => onChange(Math.max(min, value - 1));
   const inc = () => onChange(Math.min(max, value + 1));
   return (
-    <div className={cn('inline-flex items-center rounded border border-border-input bg-bg-base', sz.wrap, className)} role="group" aria-label={ariaLabel}>
+    <div
+      className={cn('inline-flex items-center rounded border border-border-input bg-bg-base', sz.wrap, className)}
+      role="group"
+      aria-label={ariaLabel ?? t('label')}
+    >
       <button
         type="button"
-        aria-label="Diminuer"
+        aria-label={t('decrease')}
         onClick={dec}
         disabled={disabled || value <= min}
         className={cn('inline-flex items-center justify-center text-content transition-colors hover:bg-bg-subtle disabled:opacity-30 disabled:cursor-not-allowed', sz.btn)}
@@ -62,7 +68,7 @@ export function QuantityStepper({
       />
       <button
         type="button"
-        aria-label="Augmenter"
+        aria-label={t('increase')}
         onClick={inc}
         disabled={disabled || value >= max}
         className={cn('inline-flex items-center justify-center text-content transition-colors hover:bg-bg-subtle disabled:opacity-30 disabled:cursor-not-allowed', sz.btn)}

@@ -1,11 +1,196 @@
 {
   "HomePage": {
     "title": "Welcome to OSCAR Fashion",
-    "subtitle": "Fashion & Elegance"
+    "subtitle": "Fashion & Elegance",
+    "hero": {
+      "eyebrow": "Collection 2026",
+      "title": "Welcome to OSCAR NAJAR",
+      "subtitle": "Discover the collection: Algerian elegance, artisan quality, 48-hour delivery to every wilaya.",
+      "ctaShop": "Shop now",
+      "ctaCategories": "All categories"
+    },
+    "featured": {
+      "eyebrow": "Selection",
+      "title": "Featured products",
+      "viewAll": "View all",
+      "loadErrorTitle": "Failed to load",
+      "loadErrorBody": "Could not fetch products. Make sure the Vendure server is running."
+    },
+    "collections": {
+      "eyebrow": "Categories",
+      "title": "Shop by category"
+    },
+    "brandBelt": {
+      "eyebrow": "Delivery · Cash on delivery",
+      "title": "Every wilaya, in 48-72h",
+      "body": "CIB, Baridimob, or cash on delivery. Pick what works for you.",
+      "cta": "Learn more"
+    }
   },
   "Common": {
     "loading": "Loading...",
-    "error": "An error occurred"
+    "error": "An error occurred",
+    "errorEyebrow": "Error",
+    "retry": "Try again",
+    "remove": "Remove"
+  },
+  "NotFoundPage": {
+    "code": "404",
+    "title": "Page not found",
+    "body": "The content you're looking for doesn't exist or has moved."
+  },
+  "TopBar": {
+    "promo": "Enjoy the sale — items from 12,000 DZD"
+  },
+  "Layout": {
+    "nav": {
+      "home": "Home",
+      "shop": "Shop",
+      "categories": "Categories",
+      "about": "About",
+      "contact": "Contact",
+      "ariaLabel": "Main navigation"
+    },
+    "header": {
+      "openMenu": "Open menu",
+      "wishlistAria": "My wishlist",
+      "cartAria": "Cart ({count} items)",
+      "searchPlaceholder": "Search the store…",
+      "searchAria": "Search"
+    },
+    "account": {
+      "signIn": "Sign in",
+      "profile": "My profile",
+      "orders": "My orders",
+      "wishlist": "My wishlist",
+      "logout": "Sign out"
+    },
+    "footer": {
+      "tagline": "Elegant fashion at the heart of Algeria. Delivery across every wilaya.",
+      "contact": "Contact",
+      "address": "Algiers, Algeria",
+      "help": "Help",
+      "shipping": "Shipping",
+      "returns": "Returns",
+      "sizeGuide": "Size guide",
+      "faq": "FAQ",
+      "company": "Company",
+      "about": "About",
+      "careers": "Careers",
+      "contactLink": "Contact",
+      "terms": "Terms of service",
+      "privacy": "Privacy policy",
+      "copyright": "© {year} OSCAR Najar — All rights reserved."
+    },
+    "authLayout": {
+      "backToShop": "Back to shop"
+    },
+    "logoAria": "OSCAR Najar — Home",
+    "theme": {
+      "toggle": "Toggle theme",
+      "switchToDark": "Switch to dark mode",
+      "switchToLight": "Switch to light mode"
+    }
+  },
+  "Cart": {
+    "errors": {
+      "insufficientStock": "Insufficient stock. Available: {available}",
+      "addFailed": "Failed to add to cart",
+      "updateFailed": "Failed to update",
+      "removeFailed": "Failed to remove",
+      "clearFailed": "Failed to clear cart",
+      "couponInvalid": "Invalid promo code",
+      "couponExpired": "Promo code expired",
+      "couponLimit": "Promo code exhausted",
+      "couponFailed": "Failed to apply promo code",
+      "couponRemoveFailed": "Failed to remove promo code"
+    },
+    "toasts": {
+      "added": "Product added to cart",
+      "couponApplied": "Promo code applied"
+    }
+  },
+  "ProductCard": {
+    "favoriteAdd": "Add to favorites",
+    "favoriteRemove": "Remove from favorites"
+  },
+  "QuantityStepper": {
+    "label": "Quantity",
+    "decrease": "Decrease",
+    "increase": "Increase"
+  },
+  "CategoriesPage": {
+    "breadcrumbHome": "Home",
+    "breadcrumbAll": "Categories",
+    "title": "All categories",
+    "subtitle": "Explore our collections.",
+    "empty": "No categories available.",
+    "errorTitle": "Failed to load"
+  },
+  "CategoryPage": {
+    "breadcrumbHome": "Home",
+    "breadcrumbCategories": "Categories",
+    "subcategories": "Subcategories",
+    "products": "Products",
+    "empty": "No products in this category.",
+    "errorTitle": "Category not found",
+    "errorBody": "This category doesn't exist or is no longer available.",
+    "count": "{count, plural, one {# product} other {# products}}"
+  },
+  "ProductsPage": {
+    "breadcrumbHome": "Home",
+    "breadcrumbAll": "All products",
+    "title": "All products",
+    "count": "{count, plural, one {# product} other {# products}}",
+    "sortNameAsc": "Name (A → Z)",
+    "sortNameDesc": "Name (Z → A)",
+    "errorTitle": "Failed to load",
+    "empty": "No products found."
+  },
+  "ProductPage": {
+    "errorTitle": "Product not found",
+    "errorBody": "This product doesn't exist or is no longer available.",
+    "breadcrumbHome": "Home",
+    "breadcrumbProducts": "Products",
+    "color": "Color",
+    "size": "Size",
+    "quantity": "Quantity",
+    "addToCart": "Add to cart",
+    "wishlistAria": "Add to wishlist",
+    "shareAria": "Share",
+    "viewLabel": "View {n}",
+    "selectColor": "Please select a color.",
+    "selectSize": "Please select a size.",
+    "tabs": {
+      "description": "Description",
+      "details": "Details",
+      "shipping": "Shipping"
+    },
+    "reference": "Reference",
+    "shippingBody": "48-72h delivery across every wilaya. Cash on delivery, CIB or Baridimob."
+  },
+  "CartPage": {
+    "title": "Your cart",
+    "titleWithCount": "Your cart ({count})",
+    "empty": {
+      "title": "Your cart is empty",
+      "body": "Browse our collection and add your favorite products.",
+      "cta": "Browse products"
+    },
+    "removeItemAria": "Remove this item",
+    "summary": {
+      "title": "Order summary",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "shippingTbd": "To be calculated",
+      "total": "Total",
+      "checkout": "Checkout"
+    },
+    "promo": {
+      "placeholder": "Promo code",
+      "apply": "Apply",
+      "remove": "Remove"
+    }
   },
   "auth": {
     "fields": {
@@ -17,8 +202,8 @@
       "phone": "Phone"
     },
     "placeholders": {
-      "email": "your@email.com",
-      "password": "Enter your password",
+      "email": "you@example.com",
+      "password": "••••••••",
       "confirmPassword": "Confirm your password",
       "firstName": "Your first name",
       "lastName": "Your last name",
@@ -29,31 +214,38 @@
       "optional": "Optional"
     },
     "login": {
-      "title": "Welcome back",
-      "subtitle": "Sign in to continue shopping",
-      "noAccount": "Not registered?",
+      "title": "Sign in",
+      "subtitle": "Access your OSCAR Najar account.",
+      "noAccount": "Don't have an account yet?",
       "signUp": "Create an account",
       "rememberMe": "Remember me",
       "forgotPassword": "Forgot password?",
-      "signIn": "Click here to continue",
+      "signIn": "Sign in",
       "signingIn": "Signing in...",
       "termsNotice": "By continuing, you agree to our",
       "termsLink": "Terms of Service",
-      "resendVerification": "Resend verification email"
+      "resendVerification": "Resend verification email",
+      "welcomeToast": "Welcome!",
+      "failed": "Sign in failed."
     },
     "register": {
-      "title": "Create Account",
+      "title": "Create account",
+      "subtitle": "Join OSCAR Najar.",
       "hasAccount": "Already have an account?",
       "signIn": "Sign in",
-      "createAccount": "Create account",
+      "createAccount": "Create my account",
       "creating": "Creating...",
       "termsNotice": "By creating an account, you agree to our",
       "termsLink": "Terms of Service",
+      "passwordHint": "At least 8 characters",
       "success": "Account created successfully!",
-      "checkEmail": "Check your email to verify your account."
+      "checkEmail": "Check your email to verify your account.",
+      "verifyToastTitle": "Registration successful",
+      "verifyToastBody": "Check your email to confirm your account.",
+      "failed": "Registration failed."
     },
     "forgotPassword": {
-      "title": "Forgot Password",
+      "title": "Forgot password",
       "description": "Enter your email to receive a reset link.",
       "sendLink": "Send reset link",
       "sending": "Sending...",
@@ -62,7 +254,7 @@
       "checkEmail": "Check your inbox to reset your password."
     },
     "resetPassword": {
-      "title": "New Password",
+      "title": "New password",
       "description": "Enter your new password.",
       "reset": "Reset password",
       "resetting": "Resetting...",
@@ -70,13 +262,13 @@
       "redirecting": "Redirecting to login..."
     },
     "verifyEmail": {
-      "title": "Email Verification",
+      "title": "Email verification",
       "verifying": "Verifying...",
       "success": "Email verified successfully!",
       "redirecting": "Redirecting..."
     },
     "verificationPending": {
-      "title": "Verify Your Email",
+      "title": "Verify your email",
       "description": "We sent a verification email to",
       "resend": "Resend email",
       "resending": "Sending...",
@@ -84,13 +276,13 @@
       "checkSpam": "Check your spam folder too."
     },
     "profile": {
-      "title": "My Profile",
-      "personalInfo": "Personal Information",
+      "title": "My profile",
+      "personalInfo": "Personal information",
       "security": "Security",
       "addresses": "Addresses",
       "updateProfile": "Update",
       "updating": "Updating...",
-      "changePassword": "Change Password",
+      "changePassword": "Change password",
       "currentPassword": "Current password",
       "newPassword": "New password",
       "confirmNewPassword": "Confirm new password",

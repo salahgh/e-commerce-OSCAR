@@ -1,12 +1,17 @@
 'use client';
 
 import { Trash2, ShoppingBag, ArrowRight, ArrowLeft } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { formatPrice } from '@oscar/shared';
 import { useCart } from '@/contexts/CartContext';
 import { Link } from '@/i18n/routing';
 import { Alert, Button, Card, IconButton, QuantityStepper, Skeleton } from '@/components/ui';
 
 export default function CartPage() {
+  const t = useTranslations('CartPage');
+  const tSummary = useTranslations('CartPage.summary');
+  const tEmpty = useTranslations('CartPage.empty');
+  const tPromo = useTranslations('CartPage.promo');
   const { cart, loading, updateQuantity, removeItem, applyCoupon, removeCoupon } = useCart();
 
   if (loading && !cart) {
@@ -28,14 +33,12 @@ export default function CartPage() {
         <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-bg-muted">
           <ShoppingBag className="h-10 w-10 text-content-muted" />
         </div>
-        <h1 className="text-32 font-bold text-content-strong">Votre panier est vide</h1>
-        <p className="text-16 text-content-muted">
-          Découvrez notre collection et ajoutez vos produits préférés.
-        </p>
+        <h1 className="text-32 font-bold text-content-strong">{tEmpty('title')}</h1>
+        <p className="text-16 text-content-muted">{tEmpty('body')}</p>
         <Button asChild size="lg">
           <Link href="/products">
             <span className="inline-flex items-center gap-2">
-              <span>Voir les produits</span>
+              <span>{tEmpty('cta')}</span>
               <ArrowRight className="h-5 w-5 ltr:inline rtl:hidden" />
               <ArrowLeft className="h-5 w-5 ltr:hidden rtl:inline" />
             </span>
@@ -50,7 +53,7 @@ export default function CartPage() {
       {/* Line items */}
       <section aria-labelledby="cart-title" className="flex flex-col gap-4">
         <h1 id="cart-title" className="text-32 font-bold text-content-strong">
-          سلة التسوق · Votre panier ({cart.totalQuantity})
+          {t('titleWithCount', { count: cart.totalQuantity })}
         </h1>
         <ul className="flex flex-col gap-3">
           {cart.items.map((item) => (
@@ -84,7 +87,7 @@ export default function CartPage() {
                       {formatPrice(item.linePrice * 100, cart.currencyCode)}
                     </span>
                     <IconButton
-                      aria-label="Supprimer cet article"
+                      aria-label={t('removeItemAria')}
                       intent="ghost"
                       size="sm"
                       onClick={() => removeItem(item.id)}
@@ -102,19 +105,29 @@ export default function CartPage() {
       {/* Order summary */}
       <aside className="sticky top-24 flex h-fit flex-col gap-4">
         <Card padding="lg" className="flex flex-col gap-4">
-          <h2 className="text-24 font-bold text-content-strong">ملخص الطلبية</h2>
+          <h2 className="text-24 font-bold text-content-strong">{tSummary('title')}</h2>
 
-          <CouponField currentCodes={cart.couponCodes} onApply={applyCoupon} onRemove={removeCoupon} />
+          <CouponField
+            currentCodes={cart.couponCodes}
+            onApply={applyCoupon}
+            onRemove={removeCoupon}
+            placeholder={tPromo('placeholder')}
+            applyLabel={tPromo('apply')}
+            removeLabel={tPromo('remove')}
+          />
 
           <dl className="flex flex-col gap-2 border-t border-border pt-4 text-14">
-            <Row label="Sous-total" value={formatPrice(cart.subTotal * 100, cart.currencyCode)} />
-            <Row label="Livraison" value={cart.shipping > 0 ? formatPrice(cart.shipping * 100, cart.currencyCode) : 'À calculer'} />
+            <Row label={tSummary('subtotal')} value={formatPrice(cart.subTotal * 100, cart.currencyCode)} />
+            <Row
+              label={tSummary('shipping')}
+              value={cart.shipping > 0 ? formatPrice(cart.shipping * 100, cart.currencyCode) : tSummary('shippingTbd')}
+            />
             {cart.discounts.map((d, i) => (
               <Row key={i} label={d.description} value={`- ${formatPrice(Math.abs(d.amountWithTax) * 100, cart.currencyCode)}`} />
             ))}
           </dl>
           <div className="flex items-baseline justify-between border-t border-border pt-4">
-            <span className="text-16 font-medium text-content-strong">Total</span>
+            <span className="text-16 font-medium text-content-strong">{tSummary('total')}</span>
             <span className="text-24 font-bold text-content-strong">
               {formatPrice(cart.total * 100, cart.currencyCode)}
             </span>
@@ -122,7 +135,7 @@ export default function CartPage() {
           <Button asChild size="lg" fullWidth>
             <Link href="/checkout">
               <span className="inline-flex items-center gap-2">
-                <span>تأكيد الطلب</span>
+                <span>{tSummary('checkout')}</span>
                 <ArrowRight className="h-5 w-5 ltr:inline rtl:hidden" />
                 <ArrowLeft className="h-5 w-5 ltr:hidden rtl:inline" />
               </span>
@@ -147,10 +160,16 @@ function CouponField({
   currentCodes,
   onApply,
   onRemove,
+  placeholder,
+  applyLabel,
+  removeLabel,
 }: {
   currentCodes: string[];
   onApply: (code: string) => Promise<boolean>;
   onRemove: (code: string) => Promise<void>;
+  placeholder: string;
+  applyLabel: string;
+  removeLabel: string;
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -168,10 +187,10 @@ function CouponField({
       >
         <input
           name="coupon"
-          placeholder="Code promo"
+          placeholder={placeholder}
           className="flex-1 rounded border border-border-input bg-bg-base px-3 text-14 focus:border-border-focus focus:outline-none"
         />
-        <Button intent="secondary" type="submit">Appliquer</Button>
+        <Button intent="secondary" type="submit">{applyLabel}</Button>
       </form>
       {currentCodes.map((code) => (
         <div key={code} className="flex items-center justify-between rounded bg-bg-subtle px-3 py-2 text-12">
@@ -181,7 +200,7 @@ function CouponField({
             onClick={() => onRemove(code)}
             className="text-state-danger-content hover:underline"
           >
-            Retirer
+            {removeLabel}
           </button>
         </div>
       ))}

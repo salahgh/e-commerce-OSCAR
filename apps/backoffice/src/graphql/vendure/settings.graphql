@@ -315,3 +315,264 @@ mutation UpdateGlobalSettings($input: UpdateGlobalSettingsInput!) {
     }
   }
 }
+
+# ──────────────────────────────────────────────────────────────────────────
+# Phase 4 — Settings CRUD
+# ──────────────────────────────────────────────────────────────────────────
+
+# Payment methods — create / delete (update already exists above)
+mutation CreatePaymentMethod($input: CreatePaymentMethodInput!) {
+  createPaymentMethod(input: $input) {
+    id
+    code
+    name
+    enabled
+  }
+}
+
+mutation DeletePaymentMethod($id: ID!, $force: Boolean) {
+  deletePaymentMethod(id: $id, force: $force) {
+    result
+    message
+  }
+}
+
+# Shipping methods — create / delete (update already exists above)
+mutation CreateShippingMethod($input: CreateShippingMethodInput!) {
+  createShippingMethod(input: $input) {
+    id
+    code
+    name
+    description
+  }
+}
+
+mutation DeleteShippingMethod($id: ID!) {
+  deleteShippingMethod(id: $id) {
+    result
+    message
+  }
+}
+
+# Channels — create / delete (update already exists above)
+mutation CreateChannel($input: CreateChannelInput!) {
+  createChannel(input: $input) {
+    ... on Channel {
+      id
+      code
+      token
+    }
+    ... on LanguageNotAvailableError {
+      errorCode
+      message
+    }
+  }
+}
+
+mutation DeleteChannel($id: ID!) {
+  deleteChannel(id: $id) {
+    result
+    message
+  }
+}
+
+# Tax categories — full CRUD
+query TaxCategories {
+  taxCategories {
+    items {
+      id
+      name
+      isDefault
+    }
+    totalItems
+  }
+}
+
+mutation CreateTaxCategory($input: CreateTaxCategoryInput!) {
+  createTaxCategory(input: $input) {
+    id
+    name
+    isDefault
+  }
+}
+
+mutation UpdateTaxCategory($input: UpdateTaxCategoryInput!) {
+  updateTaxCategory(input: $input) {
+    id
+    name
+    isDefault
+  }
+}
+
+mutation DeleteTaxCategory($id: ID!) {
+  deleteTaxCategory(id: $id) {
+    result
+    message
+  }
+}
+
+# Tax rates — full CRUD (list query exists above)
+mutation CreateTaxRate($input: CreateTaxRateInput!) {
+  createTaxRate(input: $input) {
+    id
+    name
+    value
+    enabled
+  }
+}
+
+mutation UpdateTaxRate($input: UpdateTaxRateInput!) {
+  updateTaxRate(input: $input) {
+    id
+    name
+    value
+    enabled
+  }
+}
+
+mutation DeleteTaxRate($id: ID!) {
+  deleteTaxRate(id: $id) {
+    result
+    message
+  }
+}
+
+# Zones — full CRUD + member management
+mutation CreateZone($input: CreateZoneInput!) {
+  createZone(input: $input) {
+    id
+    name
+  }
+}
+
+mutation UpdateZone($input: UpdateZoneInput!) {
+  updateZone(input: $input) {
+    id
+    name
+  }
+}
+
+mutation DeleteZone($id: ID!) {
+  deleteZone(id: $id) {
+    result
+    message
+  }
+}
+
+mutation AddMembersToZone($zoneId: ID!, $memberIds: [ID!]!) {
+  addMembersToZone(zoneId: $zoneId, memberIds: $memberIds) {
+    id
+    name
+    members {
+      id
+      name
+      code
+    }
+  }
+}
+
+mutation RemoveMembersFromZone($zoneId: ID!, $memberIds: [ID!]!) {
+  removeMembersFromZone(zoneId: $zoneId, memberIds: $memberIds) {
+    id
+    name
+    members {
+      id
+      name
+      code
+    }
+  }
+}
+
+# Countries — read only (for zone member picker)
+query AdminCountries($options: CountryListOptions) {
+  countries(options: $options) {
+    items {
+      id
+      name
+      code
+      enabled
+    }
+    totalItems
+  }
+}
+
+# Available configurable operations (for form pickers)
+query PaymentMethodHandlers {
+  paymentMethodHandlers {
+    code
+    description
+    args {
+      name
+      type
+      required
+      defaultValue
+      list
+      ui
+      label
+    }
+  }
+}
+
+query PaymentMethodCheckers {
+  paymentMethodEligibilityCheckers {
+    code
+    description
+    args {
+      name
+      type
+      required
+      defaultValue
+      list
+      ui
+      label
+    }
+  }
+}
+
+query ShippingEligibilityCheckers {
+  shippingEligibilityCheckers {
+    code
+    description
+    args {
+      name
+      type
+      required
+      defaultValue
+      list
+      ui
+      label
+    }
+  }
+}
+
+query ShippingCalculators {
+  shippingCalculators {
+    code
+    description
+    args {
+      name
+      type
+      required
+      defaultValue
+      list
+      ui
+      label
+    }
+  }
+}
+
+query FulfillmentHandlers {
+  fulfillmentHandlers {
+    code
+    description
+    args {
+      name
+      type
+      required
+      defaultValue
+      list
+      ui
+      label
+    }
+  }
+}

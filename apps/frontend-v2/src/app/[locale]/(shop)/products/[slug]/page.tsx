@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ShoppingBag, Heart, Share2 } from 'lucide-react';
 import { useGetProductBySlugQuery } from '@oscar/graphql-shop/generated';
 import { useCart } from '@/contexts/CartContext';
@@ -24,6 +25,8 @@ import {
 } from '@/components/ui';
 
 export default function ProductPage() {
+  const t = useTranslations('ProductPage');
+  const tTabs = useTranslations('ProductPage.tabs');
   const params = useParams<{ slug: string; locale: string }>();
   const slug = params?.slug as string;
 
@@ -47,8 +50,8 @@ export default function ProductPage() {
   if (error || !data?.product) {
     return (
       <div className="mx-auto max-w-2xl px-6 py-24">
-        <Alert intent="danger" title="Produit introuvable">
-          {error?.message ?? "Ce produit n'existe pas ou n'est plus disponible."}
+        <Alert intent="danger" title={t('errorTitle')}>
+          {error?.message ?? t('errorBody')}
         </Alert>
       </div>
     );
@@ -86,11 +89,11 @@ export default function ProductPage() {
   async function handleAddToCart() {
     if (!selectedVariant) return;
     if (colorGroup && !selectedColor) {
-      toast.error('Veuillez sélectionner une couleur.');
+      toast.error(t('selectColor'));
       return;
     }
     if (sizeGroup && !selectedSize) {
-      toast.error('Veuillez sélectionner une taille.');
+      toast.error(t('selectSize'));
       return;
     }
     await addToCart(selectedVariant.id, quantity);
@@ -100,8 +103,8 @@ export default function ProductPage() {
     <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-8">
       <Breadcrumb
         items={[
-          { label: 'Accueil', href: '/' },
-          { label: 'Produits', href: '/products' },
+          { label: t('breadcrumbHome'), href: '/' },
+          { label: t('breadcrumbProducts'), href: '/products' },
           { label: product.name },
         ]}
       />
@@ -126,7 +129,7 @@ export default function ProductPage() {
                   <button
                     type="button"
                     onClick={() => setActiveImage(i)}
-                    aria-label={`Vue ${i + 1}`}
+                    aria-label={t('viewLabel', { n: i + 1 })}
                     className={`relative h-20 w-20 overflow-hidden rounded border-2 ${
                       i === activeImage ? 'border-accent' : 'border-border hover:border-border-strong'
                     }`}
@@ -154,7 +157,7 @@ export default function ProductPage() {
 
           {colorGroup && (
             <div className="flex flex-col gap-2">
-              <p className="text-14 font-medium text-content-strong">{colorGroup.name}</p>
+              <p className="text-14 font-medium text-content-strong">{t('color')}</p>
               <ColorSwatchGroup
                 value={selectedColor}
                 onValueChange={setSelectedColor}
@@ -169,7 +172,7 @@ export default function ProductPage() {
 
           {sizeGroup && (
             <div className="flex flex-col gap-2">
-              <p className="text-14 font-medium text-content-strong">{sizeGroup.name}</p>
+              <p className="text-14 font-medium text-content-strong">{t('size')}</p>
               <SizeButtonGroup
                 value={selectedSize}
                 onValueChange={setSelectedSize}
@@ -182,27 +185,27 @@ export default function ProductPage() {
           )}
 
           <div className="flex flex-col gap-2">
-            <p className="text-14 font-medium text-content-strong">Quantité</p>
+            <p className="text-14 font-medium text-content-strong">{t('quantity')}</p>
             <QuantityStepper value={quantity} onChange={setQuantity} min={1} max={10} />
           </div>
 
           <div className="flex flex-wrap items-center gap-3 pt-4">
             <Button size="lg" onClick={handleAddToCart} leadingIcon={<ShoppingBag className="h-5 w-5" />}>
-              Ajouter au panier
+              {t('addToCart')}
             </Button>
-            <IconButton aria-label="Ajouter aux favoris" intent="secondary" size="lg">
+            <IconButton aria-label={t('wishlistAria')} intent="secondary" size="lg">
               <Heart className="h-5 w-5" />
             </IconButton>
-            <IconButton aria-label="Partager" intent="ghost" size="lg">
+            <IconButton aria-label={t('shareAria')} intent="ghost" size="lg">
               <Share2 className="h-5 w-5" />
             </IconButton>
           </div>
 
           <Tabs defaultValue="description" className="mt-4">
             <TabsList>
-              <TabsTrigger value="description">Description</TabsTrigger>
-              <TabsTrigger value="details">Détails</TabsTrigger>
-              <TabsTrigger value="shipping">Livraison</TabsTrigger>
+              <TabsTrigger value="description">{tTabs('description')}</TabsTrigger>
+              <TabsTrigger value="details">{tTabs('details')}</TabsTrigger>
+              <TabsTrigger value="shipping">{tTabs('shipping')}</TabsTrigger>
             </TabsList>
             <TabsContent value="description">
               <p className="text-14 text-content-muted">{product.description}</p>
@@ -210,7 +213,7 @@ export default function ProductPage() {
             <TabsContent value="details">
               <ul className="grid grid-cols-1 gap-2 text-14 md:grid-cols-2">
                 <li className="flex justify-between border-b border-border py-2">
-                  <span className="text-content-muted">Référence</span>
+                  <span className="text-content-muted">{t('reference')}</span>
                   <span className="font-medium text-content">{selectedVariant?.sku ?? '—'}</span>
                 </li>
                 {product.facetValues.slice(0, 4).map((f) => (
@@ -222,10 +225,7 @@ export default function ProductPage() {
               </ul>
             </TabsContent>
             <TabsContent value="shipping">
-              <p className="text-14 text-content-muted">
-                Livraison sous 48-72h à travers toutes les wilayas. Paiement à la livraison,
-                CIB ou Baridimob.
-              </p>
+              <p className="text-14 text-content-muted">{t('shippingBody')}</p>
             </TabsContent>
           </Tabs>
         </div>
