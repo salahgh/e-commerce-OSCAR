@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { formatPrice } from '@oscar/shared';
 import { useGetOrderByCodeQuery } from '@oscar/graphql-shop/generated';
+import { useAuth } from '@/contexts/AuthContext';
 import { Link } from '@/i18n/routing';
 import { Alert, Badge, Breadcrumb, Card, Skeleton } from '@/components/ui';
 
@@ -17,6 +18,7 @@ function dateFmt(iso: string, locale = 'fr-DZ') {
 
 export default function OrderDetailPage() {
   const t = useTranslations('OrderPage');
+  const { isAuthenticated } = useAuth();
   const params = useParams<{ code: string; locale: string }>();
   const code = params?.code ?? '';
 
@@ -28,10 +30,10 @@ export default function OrderDetailPage() {
 
   if (loading && !data) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="mx-auto max-w-5xl px-6 py-10">
         <Skeleton className="h-8 w-1/2" />
-        <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-32 w-full" />
+        <Skeleton className="mt-4 h-40 w-full" />
+        <Skeleton className="mt-4 h-32 w-full" />
       </div>
     );
   }
@@ -39,21 +41,29 @@ export default function OrderDetailPage() {
   const order = data?.orderByCode;
   if (error || !order) {
     return (
-      <Alert intent="danger" title={t('errorTitle')}>
-        {error?.message ?? t('errorBody')}
-      </Alert>
+      <div className="mx-auto max-w-2xl px-6 py-24">
+        <Alert intent="danger" title={t('errorTitle')}>
+          {error?.message ?? t('errorBody')}
+        </Alert>
+      </div>
     );
   }
 
+  // Authenticated users get a path back to their orders list; guests don't.
+  const breadcrumbs = isAuthenticated
+    ? [
+        { label: t('breadcrumbHome'), href: '/' },
+        { label: t('breadcrumbOrders'), href: '/user/orders' },
+        { label: order.code },
+      ]
+    : [
+        { label: t('breadcrumbHome'), href: '/' },
+        { label: order.code },
+      ];
+
   return (
-    <div className="flex flex-col gap-6">
-      <Breadcrumb
-        items={[
-          { label: t('breadcrumbHome'), href: '/' },
-          { label: t('breadcrumbOrders'), href: '/user/orders' },
-          { label: order.code },
-        ]}
-      />
+    <div className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-10">
+      <Breadcrumb items={breadcrumbs} />
 
       <header className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>

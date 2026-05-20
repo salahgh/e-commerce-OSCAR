@@ -90,7 +90,7 @@ export default function OrdersPage() {
                   </td>
                   <td className="px-4 py-3 text-end">
                     <Link
-                      href={`/user/orders/${o.code}`}
+                      href={`/orders/${o.code}`}
                       className="text-content-strong hover:underline"
                     >
                       {t('view')}

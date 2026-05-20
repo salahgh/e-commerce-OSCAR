@@ -154,7 +154,10 @@
       "shippingFailed": "Could not set the shipping method.",
       "paymentFailed": "Payment failed.",
       "transitionFailed": "Could not finalize the order.",
-      "generic": "An error occurred."
+      "generic": "An error occurred.",
+      "staleSessionTitle": "Session expired",
+      "staleSessionBody": "Your session is no longer valid. Please restart your cart to place an order.",
+      "staleSessionReset": "Reset session"
     }
   },
   "CheckoutConfirmationPage": {
