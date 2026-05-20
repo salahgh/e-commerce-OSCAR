@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { useGetProductsQuery, SortOrder } from '@oscar/graphql-shop/generated';
 import { Alert, Pagination, Select, Field } from '@/components/ui';
 import { PageHeader } from '@/components/layout';
@@ -25,6 +26,7 @@ function toCardData(p: {
 }
 
 export default function ProductsPage() {
+  const t = useTranslations('ProductsPage');
   const [page, setPage] = React.useState(1);
   const [sort, setSort] = React.useState<'name-asc' | 'name-desc'>('name-asc');
 
@@ -45,14 +47,14 @@ export default function ProductsPage() {
   return (
     <div className="flex flex-col">
       <PageHeader
-        breadcrumbs={[{ label: 'Accueil', href: '/' }, { label: 'Tous les produits' }]}
-        title="Tous les produits"
-        description={total > 0 ? `${total} produit${total > 1 ? 's' : ''}` : undefined}
+        breadcrumbs={[{ label: t('breadcrumbHome'), href: '/' }, { label: t('breadcrumbAll') }]}
+        title={t('title')}
+        description={total > 0 ? t('count', { count: total }) : undefined}
         actions={
           <Field label="">
             <Select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)}>
-              <option value="name-asc">Nom (A → Z)</option>
-              <option value="name-desc">Nom (Z → A)</option>
+              <option value="name-asc">{t('sortNameAsc')}</option>
+              <option value="name-desc">{t('sortNameDesc')}</option>
             </Select>
           </Field>
         }
@@ -60,7 +62,7 @@ export default function ProductsPage() {
 
       <div className="mx-auto w-full max-w-7xl px-6 py-8">
         {error && (
-          <Alert intent="danger" title="Erreur de chargement" className="mb-6">
+          <Alert intent="danger" title={t('errorTitle')} className="mb-6">
             {error.message}
           </Alert>
         )}
@@ -72,7 +74,7 @@ export default function ProductsPage() {
         </ProductGrid>
 
         {!loading && items.length === 0 && (
-          <p className="py-12 text-center text-content-muted">Aucun produit trouvé.</p>
+          <p className="py-12 text-center text-content-muted">{t('empty')}</p>
         )}
 
         {pageCount > 1 && (

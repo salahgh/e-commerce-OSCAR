@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils/cn';
 import { Link } from '@/i18n/routing';
 
@@ -14,11 +15,12 @@ const sizeMap = {
 } as const;
 
 export function Logo({ size = 'md', inverted, className }: LogoProps) {
+  const t = useTranslations('Layout');
   const sx = sizeMap[size];
   return (
     <Link
       href="/"
-      aria-label="OSCAR Najar — Accueil"
+      aria-label={t('logoAria')}
       className={cn(
         'inline-flex items-center justify-center font-bold leading-none tracking-wider transition-opacity hover:opacity-80',
         sx.box,

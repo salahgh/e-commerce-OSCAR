@@ -1,11 +1,196 @@
 {
   "HomePage": {
     "title": "مرحبا بكم في أوسكار فاشن",
-    "subtitle": "الموضة والأناقة"
+    "subtitle": "الموضة والأناقة",
+    "hero": {
+      "eyebrow": "تشكيلة 2026",
+      "title": "مرحباً بك في OSCAR NAJAR",
+      "subtitle": "اكتشف تشكيلتنا: أناقة جزائرية، جودة حرفية، وتوصيل خلال 48 ساعة إلى جميع الولايات.",
+      "ctaShop": "تسوّق الآن",
+      "ctaCategories": "كل الفئات"
+    },
+    "featured": {
+      "eyebrow": "المنتجات المميّزة",
+      "title": "منتجات مختارة",
+      "viewAll": "عرض الكل",
+      "loadErrorTitle": "خطأ في التحميل",
+      "loadErrorBody": "تعذّر استرجاع المنتجات. تأكّد من تشغيل خادم Vendure."
+    },
+    "collections": {
+      "eyebrow": "الفئات",
+      "title": "استكشف حسب الفئة"
+    },
+    "brandBelt": {
+      "eyebrow": "التوصيل · الدفع عند الاستلام",
+      "title": "كل الولايات، خلال 48-72 ساعة",
+      "body": "CIB أو Baridimob أو الدفع عند الاستلام. اختر ما يناسبك.",
+      "cta": "اعرف المزيد"
+    }
   },
   "Common": {
     "loading": "جاري التحميل...",
-    "error": "حدث خطأ"
+    "error": "حدث خطأ",
+    "errorEyebrow": "خطأ",
+    "retry": "إعادة المحاولة",
+    "remove": "إزالة"
+  },
+  "NotFoundPage": {
+    "code": "404",
+    "title": "الصفحة غير موجودة",
+    "body": "المحتوى الذي تبحث عنه غير موجود أو تم نقله."
+  },
+  "TopBar": {
+    "promo": "خصم شامل التخفيضات التي تبدأ من 12000 دينار جزائري"
+  },
+  "Layout": {
+    "nav": {
+      "home": "الرئيسية",
+      "shop": "المتجر",
+      "categories": "الفئات",
+      "about": "من نحن",
+      "contact": "اتصل بنا",
+      "ariaLabel": "التنقل الرئيسي"
+    },
+    "header": {
+      "openMenu": "فتح القائمة",
+      "wishlistAria": "المفضلة",
+      "cartAria": "السلة ({count} عناصر)",
+      "searchPlaceholder": "ابحث في المتجر…",
+      "searchAria": "بحث"
+    },
+    "account": {
+      "signIn": "تسجيل الدخول",
+      "profile": "ملفي الشخصي",
+      "orders": "طلباتي",
+      "wishlist": "المفضلة",
+      "logout": "تسجيل الخروج"
+    },
+    "footer": {
+      "tagline": "الموضة الأنيقة في قلب الجزائر. توصيل إلى جميع الولايات.",
+      "contact": "اتصل بنا",
+      "address": "الجزائر العاصمة، الجزائر",
+      "help": "المساعدة",
+      "shipping": "التوصيل",
+      "returns": "الإرجاع",
+      "sizeGuide": "دليل المقاسات",
+      "faq": "الأسئلة الشائعة",
+      "company": "الشركة",
+      "about": "من نحن",
+      "careers": "الوظائف",
+      "contactLink": "اتصل بنا",
+      "terms": "الشروط والأحكام",
+      "privacy": "سياسة الخصوصية",
+      "copyright": "© {year} OSCAR Najar — جميع الحقوق محفوظة."
+    },
+    "authLayout": {
+      "backToShop": "العودة إلى المتجر"
+    },
+    "logoAria": "OSCAR Najar — الرئيسية",
+    "theme": {
+      "toggle": "تبديل السمة",
+      "switchToDark": "التبديل إلى الوضع الداكن",
+      "switchToLight": "التبديل إلى الوضع الفاتح"
+    }
+  },
+  "Cart": {
+    "errors": {
+      "insufficientStock": "المخزون غير كافٍ. المتوفّر: {available}",
+      "addFailed": "تعذّر إضافة المنتج إلى السلة",
+      "updateFailed": "تعذّرت عملية التحديث",
+      "removeFailed": "تعذّر حذف العنصر",
+      "clearFailed": "تعذّر إفراغ السلة",
+      "couponInvalid": "رمز خصم غير صالح",
+      "couponExpired": "انتهت صلاحية رمز الخصم",
+      "couponLimit": "تم استنفاد رمز الخصم",
+      "couponFailed": "تعذّر تطبيق رمز الخصم",
+      "couponRemoveFailed": "تعذّر إزالة رمز الخصم"
+    },
+    "toasts": {
+      "added": "تم إضافة المنتج إلى السلة",
+      "couponApplied": "تم تطبيق رمز الخصم"
+    }
+  },
+  "ProductCard": {
+    "favoriteAdd": "إضافة إلى المفضلة",
+    "favoriteRemove": "إزالة من المفضلة"
+  },
+  "QuantityStepper": {
+    "label": "الكمية",
+    "decrease": "إنقاص",
+    "increase": "زيادة"
+  },
+  "CategoriesPage": {
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbAll": "الفئات",
+    "title": "كل الفئات",
+    "subtitle": "استكشف تشكيلاتنا.",
+    "empty": "لا توجد فئات متاحة.",
+    "errorTitle": "فشل التحميل"
+  },
+  "CategoryPage": {
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbCategories": "الفئات",
+    "subcategories": "الفئات الفرعية",
+    "products": "المنتجات",
+    "empty": "لا توجد منتجات في هذه الفئة.",
+    "errorTitle": "الفئة غير موجودة",
+    "errorBody": "هذه الفئة غير موجودة أو لم تعد متوفّرة.",
+    "count": "{count, plural, other {# منتج}}"
+  },
+  "ProductsPage": {
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbAll": "كل المنتجات",
+    "title": "كل المنتجات",
+    "count": "{count, plural, other {# منتج}}",
+    "sortNameAsc": "الاسم (أ → ي)",
+    "sortNameDesc": "الاسم (ي → أ)",
+    "errorTitle": "خطأ في التحميل",
+    "empty": "لا توجد منتجات."
+  },
+  "ProductPage": {
+    "errorTitle": "المنتج غير موجود",
+    "errorBody": "هذا المنتج غير موجود أو لم يعد متوفّرًا.",
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbProducts": "المنتجات",
+    "color": "اللون",
+    "size": "المقاس",
+    "quantity": "الكمية",
+    "addToCart": "أضف إلى السلة",
+    "wishlistAria": "إضافة إلى المفضلة",
+    "shareAria": "مشاركة",
+    "viewLabel": "صورة {n}",
+    "selectColor": "يرجى اختيار اللون.",
+    "selectSize": "يرجى اختيار المقاس.",
+    "tabs": {
+      "description": "الوصف",
+      "details": "التفاصيل",
+      "shipping": "التوصيل"
+    },
+    "reference": "المرجع",
+    "shippingBody": "التوصيل خلال 48-72 ساعة إلى جميع الولايات. الدفع عند الاستلام، CIB أو Baridimob."
+  },
+  "CartPage": {
+    "title": "سلة التسوق",
+    "titleWithCount": "سلة التسوق ({count})",
+    "empty": {
+      "title": "سلتك فارغة",
+      "body": "اكتشف تشكيلتنا وأضف المنتجات المفضّلة لديك.",
+      "cta": "عرض المنتجات"
+    },
+    "removeItemAria": "حذف هذا العنصر",
+    "summary": {
+      "title": "ملخص الطلبية",
+      "subtotal": "المجموع الفرعي",
+      "shipping": "التوصيل",
+      "shippingTbd": "سيتم احتسابه",
+      "total": "الإجمالي",
+      "checkout": "تأكيد الطلب"
+    },
+    "promo": {
+      "placeholder": "رمز الخصم",
+      "apply": "تطبيق",
+      "remove": "إزالة"
+    }
   },
   "auth": {
     "fields": {
@@ -18,39 +203,46 @@
     },
     "placeholders": {
       "email": "بريدك@example.com",
-      "password": "أدخل كلمة المرور",
+      "password": "••••••••",
       "confirmPassword": "أكد كلمة المرور",
       "firstName": "اسمك الأول",
       "lastName": "اسم عائلتك",
       "phone": "0555 00 00 00"
     },
     "labels": {
-      "emailOrPhone": "البريد الالكتروني أو رقم الهاتف",
+      "emailOrPhone": "البريد الإلكتروني أو رقم الهاتف",
       "optional": "اختياري"
     },
     "login": {
-      "title": "سعداء بعودتك",
-      "subtitle": "سجّل الدخول لمتابعة التسوق",
-      "noAccount": "غير مسجل ؟",
+      "title": "تسجيل الدخول",
+      "subtitle": "ادخل إلى حسابك على OSCAR Najar.",
+      "noAccount": "ليس لديك حساب؟",
       "signUp": "أنشئ حسابًا",
-      "rememberMe": "تذكرني",
+      "rememberMe": "تذكّرني",
       "forgotPassword": "نسيت كلمة المرور؟",
-      "signIn": "انقر هنا للاستمرار",
+      "signIn": "تسجيل الدخول",
       "signingIn": "جاري الدخول...",
       "termsNotice": "بالمتابعة، أنت توافق على",
       "termsLink": "شروط الاستخدام",
-      "resendVerification": "إعادة إرسال بريد التحقق"
+      "resendVerification": "إعادة إرسال بريد التحقق",
+      "welcomeToast": "أهلاً بك !",
+      "failed": "فشل تسجيل الدخول."
     },
     "register": {
       "title": "إنشاء حساب",
+      "subtitle": "انضم إلى OSCAR Najar.",
       "hasAccount": "لديك حساب بالفعل؟",
       "signIn": "تسجيل الدخول",
-      "createAccount": "إنشاء حساب",
+      "createAccount": "إنشاء حسابي",
       "creating": "جاري الإنشاء...",
       "termsNotice": "بإنشاء حساب، أنت توافق على",
       "termsLink": "شروط الاستخدام",
+      "passwordHint": "8 أحرف على الأقل",
       "success": "تم إنشاء الحساب بنجاح!",
-      "checkEmail": "تحقق من بريدك الإلكتروني لتفعيل حسابك."
+      "checkEmail": "تحقق من بريدك الإلكتروني لتفعيل حسابك.",
+      "verifyToastTitle": "تم التسجيل بنجاح",
+      "verifyToastBody": "تحقق من بريدك الإلكتروني لتأكيد حسابك.",
+      "failed": "فشل التسجيل."
     },
     "forgotPassword": {
       "title": "نسيت كلمة المرور",

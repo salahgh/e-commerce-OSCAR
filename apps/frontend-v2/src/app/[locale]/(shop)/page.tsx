@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useGetProductsQuery, useGetRootCollectionsQuery } from '@oscar/graphql-shop/generated';
 import { Link } from '@/i18n/routing';
 import { Alert, Button } from '@/components/ui';
@@ -23,6 +24,11 @@ function toCardData(p: {
 }
 
 export default function HomePage() {
+  const tHero = useTranslations('HomePage.hero');
+  const tFeatured = useTranslations('HomePage.featured');
+  const tCollections = useTranslations('HomePage.collections');
+  const tBelt = useTranslations('HomePage.brandBelt');
+
   const { data: productsData, loading: productsLoading, error: productsError } = useGetProductsQuery({
     variables: { options: { take: 8 } },
   });
@@ -37,26 +43,23 @@ export default function HomePage() {
       <section className="relative overflow-hidden border-b border-border bg-bg-subtle">
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-20 md:grid-cols-2">
           <div className="flex flex-col gap-6">
-            <p className="text-12 uppercase tracking-wide text-content-muted">Collection 2026</p>
+            <p className="text-12 uppercase tracking-wide text-content-muted">{tHero('eyebrow')}</p>
             <h1 className="text-36 font-bold leading-tight text-content-strong md:text-[3.5rem] md:leading-[1.1]">
-              مرحباً بك في OSCAR NAJAR
+              {tHero('title')}
             </h1>
-            <p className="text-18 text-content-muted">
-              Découvrez la collection : élégance algérienne, qualité artisanale, livraison sous 48h
-              dans toutes les wilayas.
-            </p>
+            <p className="text-18 text-content-muted">{tHero('subtitle')}</p>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg">
                 <Link href="/products">
                   <span className="inline-flex items-center gap-2">
-                    <span>تسوّق الآن</span>
+                    <span>{tHero('ctaShop')}</span>
                     <ArrowRight className="h-5 w-5 ltr:inline rtl:hidden" />
                     <ArrowLeft className="h-5 w-5 ltr:hidden rtl:inline" />
                   </span>
                 </Link>
               </Button>
               <Button asChild intent="secondary" size="lg">
-                <Link href="/categories">Toutes les catégories</Link>
+                <Link href="/categories">{tHero('ctaCategories')}</Link>
               </Button>
             </div>
           </div>
@@ -80,22 +83,22 @@ export default function HomePage() {
       <section className="mx-auto w-full max-w-7xl px-6">
         <header className="flex items-end justify-between gap-4 pb-6">
           <div className="flex flex-col gap-1">
-            <p className="text-12 uppercase tracking-wide text-content-muted">المنتجات المميّزة</p>
-            <h2 className="text-24 font-bold text-content-strong">Produits en vedette</h2>
+            <p className="text-12 uppercase tracking-wide text-content-muted">{tFeatured('eyebrow')}</p>
+            <h2 className="text-24 font-bold text-content-strong">{tFeatured('title')}</h2>
           </div>
           <Link
             href="/products"
             className="inline-flex items-center gap-2 text-14 font-medium text-content-strong hover:underline"
           >
-            Voir tout
+            {tFeatured('viewAll')}
             <ArrowRight className="h-4 w-4 ltr:inline rtl:hidden" />
             <ArrowLeft className="h-4 w-4 ltr:hidden rtl:inline" />
           </Link>
         </header>
 
         {productsError && (
-          <Alert intent="danger" title="Erreur de chargement">
-            Impossible de récupérer les produits. Vérifiez que le serveur Vendure est démarré.
+          <Alert intent="danger" title={tFeatured('loadErrorTitle')}>
+            {tFeatured('loadErrorBody')}
           </Alert>
         )}
 
@@ -111,8 +114,8 @@ export default function HomePage() {
         <section className="mx-auto w-full max-w-7xl px-6">
           <header className="flex items-end justify-between gap-4 pb-6">
             <div className="flex flex-col gap-1">
-              <p className="text-12 uppercase tracking-wide text-content-muted">الفئات</p>
-              <h2 className="text-24 font-bold text-content-strong">Explorer par catégorie</h2>
+              <p className="text-12 uppercase tracking-wide text-content-muted">{tCollections('eyebrow')}</p>
+              <h2 className="text-24 font-bold text-content-strong">{tCollections('title')}</h2>
             </div>
           </header>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -145,16 +148,12 @@ export default function HomePage() {
         <div className="overflow-hidden rounded bg-accent">
           <div className="grid items-center gap-6 px-8 py-12 md:grid-cols-[1fr_auto]">
             <div className="flex flex-col gap-2 text-accent-content">
-              <p className="text-12 uppercase tracking-wide opacity-70">Livraison · Paiement à la livraison</p>
-              <h2 className="text-32 font-bold leading-tight">
-                Toutes les wilayas, sous 48-72h
-              </h2>
-              <p className="text-16 opacity-80">
-                CIB, Baridimob, ou paiement à la livraison. Vous choisissez ce qui vous convient.
-              </p>
+              <p className="text-12 uppercase tracking-wide opacity-70">{tBelt('eyebrow')}</p>
+              <h2 className="text-32 font-bold leading-tight">{tBelt('title')}</h2>
+              <p className="text-16 opacity-80">{tBelt('body')}</p>
             </div>
             <Button asChild intent="secondary" size="lg">
-              <Link href="/shipping">En savoir plus</Link>
+              <Link href="/shipping">{tBelt('cta')}</Link>
             </Button>
           </div>
         </div>

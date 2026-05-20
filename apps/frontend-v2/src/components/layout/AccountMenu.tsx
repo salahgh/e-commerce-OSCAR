@@ -2,11 +2,13 @@
 
 import * as React from 'react';
 import { User, LogOut, Package, Heart, Settings } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from '@/i18n/routing';
 import { cn } from '@/lib/utils/cn';
 
 export function AccountMenu() {
+  const t = useTranslations('Layout.account');
   const { customer, isAuthenticated, logout, loading } = useAuth();
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
@@ -30,7 +32,7 @@ export function AccountMenu() {
         className="inline-flex h-10 items-center gap-2 rounded px-3 text-14 font-medium text-content transition-colors hover:bg-bg-subtle"
       >
         <User className="h-4 w-4" />
-        <span className="hidden sm:inline">Se connecter</span>
+        <span className="hidden sm:inline">{t('signIn')}</span>
       </Link>
     );
   }
@@ -62,9 +64,9 @@ export function AccountMenu() {
             </p>
             <p className="truncate text-12 text-content-muted">{customer?.emailAddress}</p>
           </div>
-          <MenuLink href="/user/profile" icon={<Settings className="h-4 w-4" />}>Mon profil</MenuLink>
-          <MenuLink href="/user/orders" icon={<Package className="h-4 w-4" />}>Mes commandes</MenuLink>
-          <MenuLink href="/user/wishlist" icon={<Heart className="h-4 w-4" />}>Mes favoris</MenuLink>
+          <MenuLink href="/user/profile" icon={<Settings className="h-4 w-4" />}>{t('profile')}</MenuLink>
+          <MenuLink href="/user/orders" icon={<Package className="h-4 w-4" />}>{t('orders')}</MenuLink>
+          <MenuLink href="/user/wishlist" icon={<Heart className="h-4 w-4" />}>{t('wishlist')}</MenuLink>
           <button
             type="button"
             onClick={async () => {
@@ -75,7 +77,7 @@ export function AccountMenu() {
               'flex w-full items-center gap-3 rounded px-3 py-2 text-start text-14 text-state-danger-content transition-colors hover:bg-bg-subtle',
             )}
           >
-            <LogOut className="h-4 w-4" /> Déconnexion
+            <LogOut className="h-4 w-4" /> {t('logout')}
           </button>
         </div>
       )}

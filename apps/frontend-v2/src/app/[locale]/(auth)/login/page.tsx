@@ -1,12 +1,16 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/Toast';
 import { useRouter, Link } from '@/i18n/routing';
 import { Alert, Button, Card, Checkbox, Field, Input } from '@/components/ui';
 
 export default function LoginPage() {
+  const tFields = useTranslations('auth.fields');
+  const tPlaceholders = useTranslations('auth.placeholders');
+  const tLogin = useTranslations('auth.login');
   const { login } = useAuth();
   const router = useRouter();
   const toast = useToast();
@@ -23,10 +27,10 @@ export default function LoginPage() {
     setError(null);
     try {
       await login(email, password, remember);
-      toast.success('Bienvenue !');
+      toast.success(tLogin('welcomeToast'));
       router.push('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Échec de la connexion.');
+      setError(err instanceof Error ? err.message : tLogin('failed'));
     } finally {
       setSubmitting(false);
     }
@@ -35,29 +39,29 @@ export default function LoginPage() {
   return (
     <Card padding="lg" className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-32 font-bold text-content-strong">Connexion</h1>
-        <p className="text-14 text-content-muted">Accédez à votre compte OSCAR Najar.</p>
+        <h1 className="text-32 font-bold text-content-strong">{tLogin('title')}</h1>
+        <p className="text-14 text-content-muted">{tLogin('subtitle')}</p>
       </header>
 
       {error && <Alert intent="danger">{error}</Alert>}
 
       <form className="flex flex-col gap-4" onSubmit={onSubmit}>
-        <Field label="Email" required>
+        <Field label={tFields('email')} required>
           <Input
             type="email"
             required
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="vous@exemple.com"
+            placeholder={tPlaceholders('email')}
           />
         </Field>
         <Field
-          label="Mot de passe"
+          label={tFields('password')}
           required
           hint={
             <Link href="/forgot-password" className="text-content-strong hover:underline">
-              Mot de passe oublié ?
+              {tLogin('forgotPassword')}
             </Link>
           }
         >
@@ -67,19 +71,23 @@ export default function LoginPage() {
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
+            placeholder={tPlaceholders('password')}
           />
         </Field>
-        <Checkbox label="Se souvenir de moi" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+        <Checkbox
+          label={tLogin('rememberMe')}
+          checked={remember}
+          onChange={(e) => setRemember(e.target.checked)}
+        />
         <Button type="submit" size="lg" fullWidth loading={submitting}>
-          Se connecter
+          {tLogin('signIn')}
         </Button>
       </form>
 
       <p className="text-center text-14 text-content-muted">
-        Pas encore de compte ?{' '}
+        {tLogin('noAccount')}{' '}
         <Link href="/register" className="font-medium text-content-strong hover:underline">
-          Créer un compte
+          {tLogin('signUp')}
         </Link>
       </p>
     </Card>

@@ -58,6 +58,9 @@ query SalesReportOrders($options: OrderListOptions) {
 }
 
 # Get top selling products
+# Note: Product.customFields was emptied by the RemoveProductCustomFields
+# migration, so it's now `JSON` in the schema and can't be selected with
+# subfields. Don't select customFields here.
 query TopSellingProducts($options: ProductListOptions) {
   products(options: $options) {
     items {
@@ -75,11 +78,6 @@ query TopSellingProducts($options: ProductListOptions) {
         price
         stockOnHand
         stockAllocated
-      }
-      customFields {
-        nameFr
-        viewCount
-        isFeatured
       }
     }
     totalItems

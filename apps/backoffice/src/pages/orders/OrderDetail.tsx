@@ -39,7 +39,11 @@ import {
   UpdateOrderCustomFieldsDocument,
   AddNoteToOrderDocument,
   CancelOrderDocument,
+  SettlePaymentDocument,
+  CancelPaymentDocument,
+  SettleRefundDocument,
 } from '../../graphql/generated/graphql';
+import { RefundDialog, ManualPaymentDialog, ModifyOrderDialog } from './OrderActionDialogs';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
@@ -172,6 +176,10 @@ export const OrderDetail: React.FC = () => {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
   const [activeTab, setActiveTab] = useState<'items' | 'history' | 'notes'>('items');
+  const [showRefundDialog, setShowRefundDialog] = useState(false);
+  const [refundDefaultPaymentId, setRefundDefaultPaymentId] = useState<string | null>(null);
+  const [showManualPaymentDialog, setShowManualPaymentDialog] = useState(false);
+  const [showModifyDialog, setShowModifyDialog] = useState(false);
 
   // Fetch order data
   const { data, loading, error, refetch } = useQuery(AdminOrderDocument, {
@@ -192,6 +200,44 @@ export const OrderDetail: React.FC = () => {
   );
   const [addNote, { loading: addingNote }] = useMutation(AddNoteToOrderDocument);
   const [cancelOrder, { loading: cancelling }] = useMutation(CancelOrderDocument);
+  const [settlePayment, { loading: settlingPayment }] = useMutation(SettlePaymentDocument);
+  const [cancelPayment, { loading: cancellingPayment }] = useMutation(CancelPaymentDocument);
+  const [settleRefund, { loading: settlingRefund }] = useMutation(SettleRefundDocument);
+
+  // Payment row actions
+  const handleSettlePayment = async (paymentId: string) => {
+    try {
+      const result = await settlePayment({ variables: { id: paymentId } });
+      const response = result.data?.settlePayment;
+      if (response && '__typename' in response && response.__typename !== 'Payment') {
+        dispatch(
+          addToast({ message: (response as any).message || 'Échec du règlement', type: 'error' })
+        );
+        return;
+      }
+      dispatch(addToast({ message: 'Paiement réglé', type: 'success' }));
+      refetch();
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+  };
+
+  const handleCancelPayment = async (paymentId: string) => {
+    try {
+      const result = await cancelPayment({ variables: { id: paymentId } });
+      const response = result.data?.cancelPayment;
+      if (response && '__typename' in response && response.__typename !== 'Payment') {
+        dispatch(
+          addToast({ message: (response as any).message || 'Échec de l’annulation', type: 'error' })
+        );
+        return;
+      }
+      dispatch(addToast({ message: 'Paiement annulé', type: 'success' }));
+      refetch();
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+  };
 
   const order = data?.order;
 
@@ -528,6 +574,18 @@ export const OrderDetail: React.FC = () => {
                   >
                     <Ban className="h-4 w-4 mr-1" />
                     Annuler
+                  </Button>
+                )}
+                {/* Modify order — available before the order is fully shipped/delivered */}
+                {!['Cancelled', 'Delivered'].includes(order.state) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowModifyDialog(true)}
+                    className="ml-2"
+                  >
+                    <Edit2 className="h-4 w-4 mr-1" />
+                    Modifier
                   </Button>
                 )}
               </div>
@@ -1009,24 +1067,48 @@ export const OrderDetail: React.FC = () => {
 
           {/* Payment Info */}
           <div className="bg-card rounded-xl p-6 border border-border">
-            <h3 className="text-foreground font-semibold mb-4 flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-purple-400" />
-              Paiement
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-foreground font-semibold flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-purple-400" />
+                Paiement
+              </h3>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setShowManualPaymentDialog(true)}
+                  title="Enregistrer un paiement manuel"
+                >
+                  + Paiement
+                </Button>
+                {order.payments && order.payments.some((p) => p.state === 'Settled') && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setRefundDefaultPaymentId(null);
+                      setShowRefundDialog(true);
+                    }}
+                  >
+                    Rembourser
+                  </Button>
+                )}
+              </div>
+            </div>
             {order.payments && order.payments.length > 0 ? (
               <div className="space-y-3">
                 {order.payments.map((payment) => (
                   <div
                     key={payment.id}
-                    className="flex items-center justify-between p-3 bg-background/50 rounded-lg"
+                    className="flex items-center justify-between gap-3 p-3 bg-background/50 rounded-lg"
                   >
-                    <div>
-                      <p className="text-foreground font-medium">{payment.method}</p>
+                    <div className="min-w-0">
+                      <p className="text-foreground font-medium truncate">{payment.method}</p>
                       <Badge
                         variant={
                           payment.state === 'Settled'
                             ? 'success'
-                            : payment.state === 'Declined'
+                            : payment.state === 'Declined' || payment.state === 'Cancelled'
                               ? 'danger'
                               : 'default'
                         }
@@ -1035,7 +1117,46 @@ export const OrderDetail: React.FC = () => {
                         {payment.state}
                       </Badge>
                     </div>
-                    <p className="text-foreground font-bold">{formatPrice(payment.amount / 100)}</p>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <p className="text-foreground font-bold">
+                        {formatPrice(payment.amount / 100)}
+                      </p>
+                      {payment.state === 'Authorized' && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleSettlePayment(payment.id)}
+                            loading={settlingPayment}
+                            title="Régler ce paiement"
+                          >
+                            Régler
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleCancelPayment(payment.id)}
+                            loading={cancellingPayment}
+                            title="Annuler ce paiement"
+                          >
+                            <Ban className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                      {payment.state === 'Settled' && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setRefundDefaultPaymentId(payment.id);
+                            setShowRefundDialog(true);
+                          }}
+                          title="Rembourser ce paiement"
+                        >
+                          Rembourser
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1139,6 +1260,28 @@ export const OrderDetail: React.FC = () => {
         confirmText="Annuler la commande"
         variant="danger"
         loading={cancelling}
+      />
+
+      {/* New action dialogs */}
+      <RefundDialog
+        isOpen={showRefundDialog}
+        onClose={() => setShowRefundDialog(false)}
+        payments={order.payments || []}
+        defaultPaymentId={refundDefaultPaymentId}
+        onSuccess={refetch}
+      />
+      <ManualPaymentDialog
+        isOpen={showManualPaymentDialog}
+        onClose={() => setShowManualPaymentDialog(false)}
+        orderId={id!}
+        onSuccess={refetch}
+      />
+      <ModifyOrderDialog
+        isOpen={showModifyDialog}
+        onClose={() => setShowModifyDialog(false)}
+        orderId={id!}
+        lines={order.lines || []}
+        onSuccess={refetch}
       />
     </div>
   );

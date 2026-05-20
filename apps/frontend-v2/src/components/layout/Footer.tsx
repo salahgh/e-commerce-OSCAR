@@ -1,21 +1,21 @@
 import { Mail, Phone, MapPin, Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Logo } from './Logo';
 
 export function Footer() {
+  const t = useTranslations('Layout.footer');
   const year = new Date().getFullYear();
   return (
     <footer className="border-t border-border bg-bg-elevated">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-6 py-12 md:grid-cols-4">
         <div className="flex flex-col gap-4">
           <Logo size="lg" />
-          <p className="text-14 text-content-muted">
-            La mode élégante au cœur de l&apos;Algérie. Livraison à travers toutes les wilayas.
-          </p>
+          <p className="text-14 text-content-muted">{t('tagline')}</p>
         </div>
 
         <div className="flex flex-col gap-3">
-          <p className="text-14 font-bold text-content-strong">Contact</p>
+          <p className="text-14 font-bold text-content-strong">{t('contact')}</p>
           <ul className="flex flex-col gap-2 text-14 text-content-muted">
             <li className="inline-flex items-center gap-2">
               <Mail className="h-4 w-4" />
@@ -31,38 +31,36 @@ export function Footer() {
             </li>
             <li className="inline-flex items-start gap-2">
               <MapPin className="mt-1 h-4 w-4" />
-              <span>Alger, Algérie</span>
+              <span>{t('address')}</span>
             </li>
           </ul>
         </div>
 
         <div className="flex flex-col gap-3">
-          <p className="text-14 font-bold text-content-strong">Aide</p>
+          <p className="text-14 font-bold text-content-strong">{t('help')}</p>
           <ul className="flex flex-col gap-2 text-14">
-            <FooterLink href="/shipping">Livraison</FooterLink>
-            <FooterLink href="/returns">Retours</FooterLink>
-            <FooterLink href="/size-guide">Guide des tailles</FooterLink>
-            <FooterLink href="/faq">FAQ</FooterLink>
+            <FooterLink href="/shipping">{t('shipping')}</FooterLink>
+            <FooterLink href="/returns">{t('returns')}</FooterLink>
+            <FooterLink href="/size-guide">{t('sizeGuide')}</FooterLink>
+            <FooterLink href="/faq">{t('faq')}</FooterLink>
           </ul>
         </div>
 
         <div className="flex flex-col gap-3">
-          <p className="text-14 font-bold text-content-strong">Entreprise</p>
+          <p className="text-14 font-bold text-content-strong">{t('company')}</p>
           <ul className="flex flex-col gap-2 text-14">
-            <FooterLink href="/about">À propos</FooterLink>
-            <FooterLink href="/careers">Carrières</FooterLink>
-            <FooterLink href="/contact">Contact</FooterLink>
-            <FooterLink href="/legal/terms">Conditions générales</FooterLink>
-            <FooterLink href="/legal/privacy">Confidentialité</FooterLink>
+            <FooterLink href="/about">{t('about')}</FooterLink>
+            <FooterLink href="/careers">{t('careers')}</FooterLink>
+            <FooterLink href="/contact">{t('contactLink')}</FooterLink>
+            <FooterLink href="/legal/terms">{t('terms')}</FooterLink>
+            <FooterLink href="/legal/privacy">{t('privacy')}</FooterLink>
           </ul>
         </div>
       </div>
 
       <div className="border-t border-border">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-6 md:flex-row">
-          <p className="text-12 text-content-muted">
-            © {year} OSCAR Najar — Tous droits réservés.
-          </p>
+          <p className="text-12 text-content-muted">{t('copyright', { year })}</p>
           <ul className="flex items-center gap-3 text-content-muted">
             <SocialIcon href="https://facebook.com" label="Facebook"><Facebook className="h-5 w-5" /></SocialIcon>
             <SocialIcon href="https://instagram.com" label="Instagram"><Instagram className="h-5 w-5" /></SocialIcon>

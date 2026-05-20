@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useQuery } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 import { Link } from 'react-router-dom';
 import {
   Users,
@@ -14,11 +14,21 @@ import {
   XCircle,
   ShoppingCart,
   DollarSign,
+  UserPlus,
+  Trash2,
 } from 'lucide-react';
-import { AdminCustomersDocument } from '../../graphql/generated/graphql';
+import {
+  AdminCustomersDocument,
+  DeleteCustomerDocument,
+} from '../../graphql/generated/graphql';
 import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
+import { Button } from '../../components/ui/Button';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { formatDateTime, formatPrice } from '../../lib/utils';
+import { useAppDispatch } from '../../hooks/useAppDispatch';
+import { addToast } from '../../store/slices/uiSlice';
+import { CreateCustomerDialog } from './CustomerDialogs';
 
 const WILAYAS = [
   'Adrar',
@@ -82,10 +92,15 @@ const WILAYAS = [
 ];
 
 export const CustomerList: React.FC = () => {
+  const dispatch = useAppDispatch();
   const [searchTerm, setSearchTerm] = useState('');
   const [wilayaFilter, setWilayaFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
   const pageSize = 10;
+  const [deleteCustomer, { loading: deleting }] = useMutation(DeleteCustomerDocument);
 
   // Build filter based on search term (searches email, firstName, or lastName)
   const buildFilter = () => {
@@ -99,7 +114,7 @@ export const CustomerList: React.FC = () => {
     };
   };
 
-  const { data, loading, error } = useQuery(AdminCustomersDocument, {
+  const { data, loading, error, refetch } = useQuery(AdminCustomersDocument, {
     variables: {
       options: {
         skip: currentPage * pageSize,
@@ -109,6 +124,42 @@ export const CustomerList: React.FC = () => {
       },
     },
   });
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    let succeeded = 0;
+    let failed = 0;
+    for (const id of ids) {
+      try {
+        const r = await deleteCustomer({ variables: { id } });
+        if (r.data?.deleteCustomer?.result === 'DELETED') succeeded++;
+        else failed++;
+      } catch {
+        failed++;
+      }
+    }
+    dispatch(
+      addToast({
+        message:
+          failed === 0
+            ? `${succeeded} client${succeeded > 1 ? 's' : ''} supprimé${succeeded > 1 ? 's' : ''}`
+            : `${succeeded} supprimé(s), ${failed} échec(s)`,
+        type: failed === 0 ? 'success' : 'error',
+      })
+    );
+    setSelectedIds(new Set());
+    setShowBulkDeleteDialog(false);
+    refetch();
+  };
 
   const customers = data?.customers?.items || [];
   const totalItems = data?.customers?.totalItems || 0;
@@ -157,6 +208,22 @@ export const CustomerList: React.FC = () => {
           <p className="text-muted-foreground mt-1">
             {totalItems} client{totalItems > 1 ? 's' : ''} enregistré{totalItems > 1 ? 's' : ''}
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {selectedIds.size > 0 && (
+            <Button
+              variant="danger"
+              onClick={() => setShowBulkDeleteDialog(true)}
+              loading={deleting}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Supprimer ({selectedIds.size})
+            </Button>
+          )}
+          <Button onClick={() => setShowCreateDialog(true)}>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Nouveau client
+          </Button>
         </div>
       </div>
 
@@ -221,6 +288,26 @@ export const CustomerList: React.FC = () => {
             <table className="min-w-full divide-y divide-border">
               <thead className="bg-card/50">
                 <tr>
+                  <th className="px-4 py-3 w-10">
+                    <input
+                      type="checkbox"
+                      checked={
+                        filteredCustomers.length > 0 &&
+                        filteredCustomers.every((c) => selectedIds.has(c.id))
+                      }
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedIds(
+                            new Set(filteredCustomers.map((c) => c.id))
+                          );
+                        } else {
+                          setSelectedIds(new Set());
+                        }
+                      }}
+                      className="rounded border-border"
+                      aria-label="Tout sélectionner"
+                    />
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Client
                   </th>
@@ -250,6 +337,15 @@ export const CustomerList: React.FC = () => {
               <tbody className="bg-card divide-y divide-border">
                 {filteredCustomers.map((customer) => (
                   <tr key={customer.id} className="hover:bg-accent">
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(customer.id)}
+                        onChange={() => toggleSelect(customer.id)}
+                        className="rounded border-border"
+                        aria-label={`Sélectionner ${customer.firstName} ${customer.lastName}`}
+                      />
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
@@ -364,6 +460,22 @@ export const CustomerList: React.FC = () => {
           </>
         )}
       </div>
+
+      <CreateCustomerDialog
+        isOpen={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+        onSuccess={() => refetch()}
+      />
+      <ConfirmDialog
+        isOpen={showBulkDeleteDialog}
+        onClose={() => setShowBulkDeleteDialog(false)}
+        onConfirm={handleBulkDelete}
+        title={`Supprimer ${selectedIds.size} client${selectedIds.size > 1 ? 's' : ''} ?`}
+        message="Cette action est irréversible. Les commandes existantes seront conservées mais ne seront plus liées à un client actif."
+        confirmText="Supprimer"
+        variant="danger"
+        loading={deleting}
+      />
     </div>
   );
 };

@@ -160,13 +160,13 @@ export const Reports: React.FC = () => {
     },
   });
 
+  // stockOnHand lives on StockLevel, not ProductVariant, so it can't be used
+  // as a ProductVariantFilterParameter. Fetch a generous slice and filter
+  // client-side (the low-stock computation below already does this).
   const { data: lowStockData, loading: lowStockLoading } = useQuery(LowStockVariantsDocument, {
     variables: {
       options: {
-        take: 50,
-        filter: {
-          stockOnHand: { lt: 10 },
-        },
+        take: 200,
       },
     },
   });

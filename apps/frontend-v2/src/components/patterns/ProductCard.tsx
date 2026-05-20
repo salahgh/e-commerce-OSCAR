@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Image from 'next/image';
 import { Heart, Star } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Badge, PriceDisplay } from '@/components/ui';
 import { cn } from '@/lib/utils/cn';
@@ -27,6 +28,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onToggleFavorite, className }: ProductCardProps) {
+  const t = useTranslations('ProductCard');
   const { slug, name, imageUrl, price, originalPrice, currencyCode, rating, reviewCount, discountPercent, isFavorited } = product;
   return (
     <article
@@ -55,7 +57,7 @@ export function ProductCard({ product, onToggleFavorite, className }: ProductCar
       {onToggleFavorite && (
         <button
           type="button"
-          aria-label={isFavorited ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          aria-label={isFavorited ? t('favoriteRemove') : t('favoriteAdd')}
           aria-pressed={isFavorited}
           onClick={() => onToggleFavorite(slug)}
           className={cn(

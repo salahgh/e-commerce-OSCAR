@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { useAuth } from './AuthContext';
 import { useToast } from '@/components/ui/Toast';
 import {
@@ -100,6 +101,8 @@ function mapOrderToCart(order: OrderFieldsFragment): Cart {
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   useAuth();
+  const tErrors = useTranslations('Cart.errors');
+  const tToasts = useTranslations('Cart.toasts');
   const toast = useToast();
   const [cart, setCart] = useState<Cart | null>(null);
 
@@ -127,18 +130,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (!response) return;
       if ('errorCode' in response) {
         if (response.errorCode === 'INSUFFICIENT_STOCK_ERROR') {
-          toast.error(`Stock insuffisant. Disponible: ${(response as { quantityAvailable?: number }).quantityAvailable ?? 0}`);
+          toast.error(tErrors('insufficientStock', { available: (response as { quantityAvailable?: number }).quantityAvailable ?? 0 }));
         } else {
-          toast.error((response as { message?: string }).message ?? 'Erreur ajout panier');
+          toast.error((response as { message?: string }).message ?? tErrors('addFailed'));
         }
         return;
       }
       if ('id' in response) {
         setCart(mapOrderToCart(response as OrderFieldsFragment));
-        toast.success('Produit ajouté au panier');
+        toast.success(tToasts('added'));
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erreur ajout panier');
+      toast.error(error instanceof Error ? error.message : tErrors('addFailed'));
     }
   };
 
@@ -149,12 +152,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const response = result?.adjustOrderLine;
       if (!response) return;
       if ('errorCode' in response) {
-        toast.error((response as { message?: string }).message ?? 'Erreur mise à jour');
+        toast.error((response as { message?: string }).message ?? tErrors('updateFailed'));
         return;
       }
       if ('id' in response) setCart(mapOrderToCart(response as OrderFieldsFragment));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erreur mise à jour');
+      toast.error(error instanceof Error ? error.message : tErrors('updateFailed'));
     }
   };
 
@@ -164,12 +167,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const response = result?.removeOrderLine;
       if (!response) return;
       if ('errorCode' in response) {
-        toast.error((response as { message?: string }).message ?? 'Erreur suppression');
+        toast.error((response as { message?: string }).message ?? tErrors('removeFailed'));
         return;
       }
       if ('id' in response) setCart(mapOrderToCart(response as OrderFieldsFragment));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erreur suppression');
+      toast.error(error instanceof Error ? error.message : tErrors('removeFailed'));
     }
   };
 
@@ -179,12 +182,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const response = result?.removeAllOrderLines;
       if (!response) return;
       if ('errorCode' in response) {
-        toast.error((response as { message?: string }).message ?? 'Erreur vidage panier');
+        toast.error((response as { message?: string }).message ?? tErrors('clearFailed'));
         return;
       }
       if ('id' in response) setCart(mapOrderToCart(response as OrderFieldsFragment));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erreur vidage panier');
+      toast.error(error instanceof Error ? error.message : tErrors('clearFailed'));
     }
   };
 
@@ -195,21 +198,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (!response) return false;
       if ('errorCode' in response) {
         const messages: Record<string, string> = {
-          COUPON_CODE_INVALID_ERROR: 'Code promo invalide',
-          COUPON_CODE_EXPIRED_ERROR: 'Code promo expiré',
-          COUPON_CODE_LIMIT_ERROR: "Code promo épuisé",
+          COUPON_CODE_INVALID_ERROR: tErrors('couponInvalid'),
+          COUPON_CODE_EXPIRED_ERROR: tErrors('couponExpired'),
+          COUPON_CODE_LIMIT_ERROR: tErrors('couponLimit'),
         };
-        toast.error(messages[response.errorCode] ?? (response as { message?: string }).message ?? 'Code promo invalide');
+        toast.error(messages[response.errorCode] ?? (response as { message?: string }).message ?? tErrors('couponInvalid'));
         return false;
       }
       if ('id' in response) {
         setCart(mapOrderToCart(response as OrderFieldsFragment));
-        toast.success('Code promo appliqué');
+        toast.success(tToasts('couponApplied'));
         return true;
       }
       return false;
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erreur code promo');
+      toast.error(error instanceof Error ? error.message : tErrors('couponFailed'));
       return false;
     }
   };
@@ -221,7 +224,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setCart(mapOrderToCart(result.removeCouponCode as OrderFieldsFragment));
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erreur suppression code');
+      toast.error(error instanceof Error ? error.message : tErrors('couponRemoveFailed'));
     }
   };
 

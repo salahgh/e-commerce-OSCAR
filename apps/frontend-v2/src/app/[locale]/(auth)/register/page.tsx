@@ -1,12 +1,16 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/Toast';
 import { useRouter, Link } from '@/i18n/routing';
 import { Alert, Button, Card, Field, Input } from '@/components/ui';
 
 export default function RegisterPage() {
+  const tFields = useTranslations('auth.fields');
+  const tPlaceholders = useTranslations('auth.placeholders');
+  const tRegister = useTranslations('auth.register');
   const { register } = useAuth();
   const router = useRouter();
   const toast = useToast();
@@ -32,13 +36,13 @@ export default function RegisterPage() {
         password: form.password,
       });
       if (result.requiresVerification) {
-        toast.info('Vérifiez votre email pour confirmer votre compte.', { title: 'Inscription réussie' });
-        router.push('/verification-pending');
+        toast.info(tRegister('verifyToastBody'), { title: tRegister('verifyToastTitle') });
+        router.push(`/verification-pending?email=${encodeURIComponent(form.email)}`);
       } else {
         router.push('/');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Échec de l'inscription.");
+      setError(err instanceof Error ? err.message : tRegister('failed'));
     } finally {
       setSubmitting(false);
     }
@@ -47,15 +51,15 @@ export default function RegisterPage() {
   return (
     <Card padding="lg" className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-32 font-bold text-content-strong">Créer un compte</h1>
-        <p className="text-14 text-content-muted">Rejoignez OSCAR Najar.</p>
+        <h1 className="text-32 font-bold text-content-strong">{tRegister('title')}</h1>
+        <p className="text-14 text-content-muted">{tRegister('subtitle')}</p>
       </header>
 
       {error && <Alert intent="danger">{error}</Alert>}
 
       <form className="flex flex-col gap-4" onSubmit={onSubmit}>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Prénom" required>
+          <Field label={tFields('firstName')} required>
             <Input
               required
               autoComplete="given-name"
@@ -63,7 +67,7 @@ export default function RegisterPage() {
               onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
             />
           </Field>
-          <Field label="Nom" required>
+          <Field label={tFields('lastName')} required>
             <Input
               required
               autoComplete="family-name"
@@ -72,35 +76,35 @@ export default function RegisterPage() {
             />
           </Field>
         </div>
-        <Field label="Email" required>
+        <Field label={tFields('email')} required>
           <Input
             type="email"
             required
             autoComplete="email"
             value={form.email}
             onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-            placeholder="vous@exemple.com"
+            placeholder={tPlaceholders('email')}
           />
         </Field>
-        <Field label="Mot de passe" required hint="Au moins 8 caractères">
+        <Field label={tFields('password')} required hint={tRegister('passwordHint')}>
           <Input
             type="password"
             required
             autoComplete="new-password"
             value={form.password}
             onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-            placeholder="••••••••"
+            placeholder={tPlaceholders('password')}
           />
         </Field>
         <Button type="submit" size="lg" fullWidth loading={submitting}>
-          Créer mon compte
+          {tRegister('createAccount')}
         </Button>
       </form>
 
       <p className="text-center text-14 text-content-muted">
-        Vous avez déjà un compte ?{' '}
+        {tRegister('hasAccount')}{' '}
         <Link href="/login" className="font-medium text-content-strong hover:underline">
-          Se connecter
+          {tRegister('signIn')}
         </Link>
       </p>
     </Card>

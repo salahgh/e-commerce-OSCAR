@@ -20,6 +20,22 @@ const nextConfig = {
     NEXT_PUBLIC_GRAPHQL_URL: process.env.NEXT_PUBLIC_GRAPHQL_URL,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   },
+  // In local dev we proxy /shop-api and /assets to the VPS so the browser
+  // sees same-origin requests (no CORS), while the API stays remote.
+  // Enabled when NEXT_PUBLIC_API_PROXY_TARGET is set in .env.local.
+  async rewrites() {
+    const proxyTarget = process.env.NEXT_PUBLIC_API_PROXY_TARGET;
+    if (!proxyTarget) return [];
+    return {
+      beforeFiles: [
+        { source: '/shop-api/:path*', destination: `${proxyTarget}/shop-api/:path*` },
+        { source: '/shop-api', destination: `${proxyTarget}/shop-api` },
+        { source: '/assets/:path*', destination: `${proxyTarget}/assets/:path*` },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
 };
 
 module.exports = withNextIntl(nextConfig);

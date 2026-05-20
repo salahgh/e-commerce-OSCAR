@@ -168,7 +168,17 @@
       "Bash(mkdir -p \"C:/Users/B_TAS_SDRH/Documents/GitHub/e-commerce-OSCAR/apps/frontend-v2/src/app/[locale]/\\(shop\\)\")",
       "Bash(mv \"C:/Users/B_TAS_SDRH/Documents/GitHub/e-commerce-OSCAR/apps/frontend-v2/src/app/[locale]/page.tsx\" \"C:/Users/B_TAS_SDRH/Documents/GitHub/e-commerce-OSCAR/apps/frontend-v2/src/app/[locale]/\\(shop\\)/page.tsx\")",
       "Bash(mv \"C:/Users/B_TAS_SDRH/Documents/GitHub/e-commerce-OSCAR/apps/frontend-v2/src/app/[locale]/design-system\" \"C:/Users/B_TAS_SDRH/Documents/GitHub/e-commerce-OSCAR/apps/frontend-v2/src/app/[locale]/\\(shop\\)/design-system\")",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(Get-ChildItem -Path \"src\\\\pages\" -Recurse -Filter \"*.tsx\")",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_pages",
+      "Bash(tasklist *)",
+      "PowerShell(Get-Process *)",
+      "Bash(npx next *)",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__new_page",
+      "PowerShell(Test-Path *)",
+      "PowerShell($chrome = \"C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\"; $out = & $chrome --headless=new --dump-dom --disable-gpu --user-data-dir=\"$env:TEMP\\\\oscar-i18n-verify\" \"http://localhost:3001/forgot-password\" 2>$null; $out.Substring\\(0, [Math]::Min\\(2000, $out.Length\\)\\))"
     ],
     "deny": [],
     "ask": []
