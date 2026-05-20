@@ -22,6 +22,9 @@ import {
   RecentOrder,
   LowStockAlert,
   TopSellingProduct,
+  CatalogStats,
+  ProductsByCollectionPoint,
+  RecentProductItem,
 } from '../services/dashboard.service';
 
 @Resolver()
@@ -94,6 +97,30 @@ export class OscarAdminResolver {
     @Args() args: { limit?: number },
   ): Promise<TopSellingProduct[]> {
     return this.dashboardService.getTopSellingProducts(ctx, args.limit ?? 10);
+  }
+
+  @Query()
+  @Allow(Permission.ReadCatalog)
+  async dashboardCatalogStats(@Ctx() ctx: RequestContext): Promise<CatalogStats> {
+    return this.dashboardService.getCatalogStats(ctx);
+  }
+
+  @Query()
+  @Allow(Permission.ReadCatalog)
+  async dashboardProductsByCollection(
+    @Ctx() ctx: RequestContext,
+    @Args() args: { limit?: number },
+  ): Promise<ProductsByCollectionPoint[]> {
+    return this.dashboardService.getProductsByCollection(ctx, args.limit ?? 8);
+  }
+
+  @Query()
+  @Allow(Permission.ReadCatalog)
+  async dashboardRecentProducts(
+    @Ctx() ctx: RequestContext,
+    @Args() args: { limit?: number },
+  ): Promise<RecentProductItem[]> {
+    return this.dashboardService.getRecentProducts(ctx, args.limit ?? 5);
   }
 
   // ==================== LEGACY QUERIES (kept for compatibility) ====================

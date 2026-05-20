@@ -178,6 +178,48 @@ export const adminApiExtensions = gql`
     imageUrl: String
   }
 
+  # ==================== CATALOG STATS ====================
+
+  """
+  Point-in-time catalog metrics for the dashboard
+  """
+  type CatalogStats {
+    totalProducts: Int!
+    enabledProducts: Int!
+    disabledProducts: Int!
+    totalVariants: Int!
+    outOfStockVariants: Int!
+    lowStockVariants: Int!
+    productsWithoutImages: Int!
+    newProductsThisMonth: Int!
+    "Total inventory value in minor units (cents). Returned as string because the value can exceed Int32."
+    totalInventoryValue: String!
+    "Average variant price in minor units (cents) across the active channel/currency."
+    averageProductPrice: Int!
+  }
+
+  """
+  Product count grouped by collection
+  """
+  type ProductsByCollectionPoint {
+    collectionId: ID!
+    collectionName: String!
+    productCount: Int!
+  }
+
+  """
+  Recently created product summary
+  """
+  type RecentProductItem {
+    id: ID!
+    name: String!
+    slug: String!
+    featuredAssetPreview: String
+    createdAt: DateTime!
+    enabled: Boolean!
+    variantCount: Int!
+  }
+
   # ==================== LEGACY TYPES (kept for compatibility) ====================
 
   type LowStockProduct {
@@ -232,6 +274,21 @@ export const adminApiExtensions = gql`
     Get top selling products
     """
     dashboardTopSellingProducts(limit: Int): [TopSellingProduct!]!
+
+    """
+    Point-in-time catalog metrics: products, variants, stock health, inventory value.
+    """
+    dashboardCatalogStats: CatalogStats!
+
+    """
+    Top N collections by distinct product count, sorted descending.
+    """
+    dashboardProductsByCollection(limit: Int): [ProductsByCollectionPoint!]!
+
+    """
+    Most recently created products, sorted by createdAt descending.
+    """
+    dashboardRecentProducts(limit: Int): [RecentProductItem!]!
 
     """
     Get products with low stock (legacy - for admin alerts)
