@@ -17,6 +17,9 @@ import {
   RequestPasswordResetMutation,
   RequestPasswordResetMutationVariables,
   RequestPasswordResetDocument,
+  useResetPasswordMutation,
+  useVerifyCustomerAccountMutation,
+  useRefreshVerificationMutation,
 } from '../graphql/generated/graphql';
 
 interface User {
@@ -39,6 +42,12 @@ interface AuthContextValue extends AuthState {
   logout: () => Promise<void>;
   updateUser: (user: User) => void;
   requestPasswordReset: (email: string) => Promise<{ success: boolean; message?: string }>;
+  /** Consume a password-reset token + new password to set a new credential. */
+  resetPassword: (token: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  /** Verify a customer account from an email link (`?token=` deep link). */
+  verifyEmail: (token: string, password?: string) => Promise<{ success: boolean; message?: string }>;
+  /** Resend the verification email after a user typo'd or the link expired. */
+  resendVerification: (email: string) => Promise<{ success: boolean; message?: string }>;
   refetchUser: () => Promise<void>;
 }
 
@@ -69,6 +78,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     RequestPasswordResetMutation,
     RequestPasswordResetMutationVariables
   >(RequestPasswordResetDocument);
+  const [resetPasswordMutation] = useResetPasswordMutation();
+  const [verifyAccountMutation] = useVerifyCustomerAccountMutation();
+  const [refreshVerificationMutation] = useRefreshVerificationMutation();
 
   const [fetchActiveCustomer] = useLazyQuery<ActiveCustomerQuery>(ActiveCustomerDocument, {
     fetchPolicy: 'network-only',
@@ -264,6 +276,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [requestResetMutation]
   );
 
+  const resetPassword = useCallback(
+    async (token: string, password: string): Promise<{ success: boolean; message?: string }> => {
+      try {
+        const { data } = await resetPasswordMutation({ variables: { token, password } });
+        const result = data?.resetPassword as any;
+        if (!result) return { success: false, message: 'Password reset failed' };
+        if (result.__typename === 'CurrentUser') {
+          await refetchUser();
+          return { success: true };
+        }
+        return { success: false, message: result.message ?? 'Invalid or expired link' };
+      } catch (err) {
+        return { success: false, message: err instanceof Error ? err.message : 'Password reset failed' };
+      }
+    },
+    [resetPasswordMutation],
+  );
+
+  const verifyEmail = useCallback(
+    async (token: string, password?: string): Promise<{ success: boolean; message?: string }> => {
+      try {
+        const { data } = await verifyAccountMutation({ variables: { token, password } });
+        const result = data?.verifyCustomerAccount as any;
+        if (!result) return { success: false, message: 'Verification failed' };
+        if (result.__typename === 'CurrentUser') {
+          await refetchUser();
+          return { success: true };
+        }
+        return { success: false, message: result.message ?? 'Invalid or expired link' };
+      } catch (err) {
+        return { success: false, message: err instanceof Error ? err.message : 'Verification failed' };
+      }
+    },
+    [verifyAccountMutation],
+  );
+
+  const resendVerification = useCallback(
+    async (email: string): Promise<{ success: boolean; message?: string }> => {
+      try {
+        const { data } = await refreshVerificationMutation({ variables: { emailAddress: email } });
+        const result = data?.refreshCustomerVerification as any;
+        if (!result) return { success: false, message: 'Failed to resend' };
+        if (result.__typename === 'Success') return { success: true };
+        return { success: false, message: result.message ?? 'Failed to resend' };
+      } catch (err) {
+        return { success: false, message: err instanceof Error ? err.message : 'Failed to resend' };
+      }
+    },
+    [refreshVerificationMutation],
+  );
+
   const updateUser = useCallback((user: User) => {
     setAuthState((prev) => ({ ...prev, user }));
     Storage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
@@ -295,6 +358,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     updateUser,
     requestPasswordReset,
+    resetPassword,
+    verifyEmail,
+    resendVerification,
     refetchUser,
   };
 

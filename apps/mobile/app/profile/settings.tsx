@@ -4,11 +4,18 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { SettingsItem } from '../../src/components/profile';
+import { useThemeMode, ThemeMode } from '../../src/contexts/ThemeContext';
 import { colors, spacing, typography } from '../../src/theme';
 
 export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
+  const { mode: themeMode, setMode: setThemeMode } = useThemeMode();
+  const themeOptions: Array<{ value: ThemeMode; labelKey: string }> = [
+    { value: 'system', labelKey: 'theme.system' },
+    { value: 'light', labelKey: 'theme.light' },
+    { value: 'dark', labelKey: 'theme.dark' },
+  ];
 
   const languages = [
     { code: 'fr', name: 'Français', flag: '🇫🇷' },
@@ -103,19 +110,42 @@ export default function SettingsScreen() {
           />
         </View>
 
-        {/* Display Section */}
+        {/* Appearance Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('profile.display', 'Display')}</Text>
-          <SettingsItem
-            icon="moon-outline"
-            label={t('profile.darkMode', 'Dark Mode')}
-            value={t('profile.darkModeDesc', 'Switch to dark theme')}
-            showSwitch
-            switchValue={false}
-            onSwitchChange={(value) => {
-              // TODO: Implement dark mode
-            }}
-          />
+          <Text style={styles.sectionTitle}>{t('theme.title')}</Text>
+          <Text style={styles.sectionSubtitle}>{t('theme.subtitle')}</Text>
+          <View style={styles.languageList}>
+            {themeOptions.map((opt) => {
+              const isSelected = themeMode === opt.value;
+              return (
+                <TouchableOpacity
+                  key={opt.value}
+                  style={[styles.languageItem, isSelected && styles.languageItemSelected]}
+                  onPress={() => setThemeMode(opt.value)}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons
+                    name={
+                      opt.value === 'system'
+                        ? 'phone-portrait-outline'
+                        : opt.value === 'light'
+                          ? 'sunny-outline'
+                          : 'moon-outline'
+                    }
+                    size={24}
+                    color={isSelected ? colors.primary : colors.text.secondary}
+                    style={{ marginRight: spacing.md }}
+                  />
+                  <Text style={[styles.languageName, isSelected && styles.languageNameSelected]}>
+                    {t(opt.labelKey)}
+                  </Text>
+                  {isSelected && (
+                    <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         </View>
       </ScrollView>
     </View>

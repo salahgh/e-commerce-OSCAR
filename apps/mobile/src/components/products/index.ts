@@ -15,3 +15,7 @@ export { PriceSheet } from './PriceSheet';
 export { SizeSheet } from './SizeSheet';
 export type { SortValue } from './SortSheet';
 export type { PriceRange } from './PriceSheet';
+export { SizeGuideModal } from './SizeGuideModal';
+export { RelatedProducts } from './RelatedProducts';
+export { FilterBottomSheet } from './FilterBottomSheet';
+export type { ColorFacetOption, FilterOptions } from './FilterBottomSheet';
