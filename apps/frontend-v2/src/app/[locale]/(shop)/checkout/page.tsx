@@ -2,8 +2,9 @@
 
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
-import { formatPrice, wilayas, getShippingDelay } from '@oscar/shared';
+import { formatPrice, wilayas, getShippingZone } from '@oscar/shared';
 import {
+  useSetCustomerForOrderMutation,
   useSetOrderShippingAddressMutation,
   useSetOrderBillingAddressMutation,
   useGetEligibleShippingMethodsQuery,
@@ -12,6 +13,7 @@ import {
   useTransitionOrderToStateMutation,
   useAddPaymentToOrderMutation,
 } from '@oscar/graphql-shop/generated';
+import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useRouter, Link } from '@/i18n/routing';
 import {
@@ -38,7 +40,9 @@ export default function CheckoutPage() {
   const router = useRouter();
 
   const { cart, refetchCart } = useCart();
+  const { customer, isAuthenticated } = useAuth();
 
+  const [setCustomer] = useSetCustomerForOrderMutation();
   const [setShipping] = useSetOrderShippingAddressMutation();
   const [setBilling] = useSetOrderBillingAddressMutation();
   const [setShippingMethod] = useSetOrderShippingMethodMutation();
@@ -50,6 +54,7 @@ export default function CheckoutPage() {
   const [error, setError] = React.useState<string | null>(null);
 
   const [addr, setAddr] = React.useState({
+    email: '',
     fullName: '',
     streetLine1: '',
     streetLine2: '',
@@ -58,6 +63,18 @@ export default function CheckoutPage() {
     postalCode: '',
     phoneNumber: '',
   });
+
+  // Prefill known fields from the logged-in customer.
+  React.useEffect(() => {
+    if (customer) {
+      setAddr((a) => ({
+        ...a,
+        email: a.email || customer.emailAddress,
+        fullName: a.fullName || `${customer.firstName} ${customer.lastName}`.trim(),
+        phoneNumber: a.phoneNumber || customer.phoneNumber || '',
+      }));
+    }
+  }, [customer]);
   const [billingSameAsShipping, setBillingSameAsShipping] = React.useState(true);
 
   const [selectedShipping, setSelectedShipping] = React.useState<string>('');
@@ -91,6 +108,35 @@ export default function CheckoutPage() {
     setError(null);
     setSubmitting(true);
     try {
+      // For guest checkout, attach the customer to the order first.
+      if (!isAuthenticated) {
+        const trimmed = addr.fullName.trim();
+        const spaceIdx = trimmed.indexOf(' ');
+        const firstName = spaceIdx === -1 ? trimmed : trimmed.slice(0, spaceIdx);
+        const lastName = spaceIdx === -1 ? trimmed : trimmed.slice(spaceIdx + 1);
+        const { data: customerData } = await setCustomer({
+          variables: {
+            input: {
+              emailAddress: addr.email,
+              firstName,
+              lastName,
+              phoneNumber: addr.phoneNumber || undefined,
+            },
+          },
+        });
+        const customerResp = customerData?.setCustomerForOrder;
+        // AlreadyLoggedInError happens when the order already has a customer
+        // (e.g. after a previous attempt). Treat that as a no-op and proceed.
+        if (
+          customerResp &&
+          customerResp.__typename !== 'Order' &&
+          customerResp.__typename !== 'AlreadyLoggedInError' &&
+          'message' in customerResp
+        ) {
+          throw new Error(customerResp.message);
+        }
+      }
+
       const input = {
         fullName: addr.fullName,
         streetLine1: addr.streetLine1,
@@ -183,6 +229,17 @@ export default function CheckoutPage() {
           <h2 className="text-16 font-bold text-content-strong">{t('stepAddress')}</h2>
           {stage === 'address' ? (
             <form className="flex flex-col gap-4" onSubmit={submitAddress}>
+              {!isAuthenticated && (
+                <Field label={tAddr('email')} required hint={tAddr('emailHint')}>
+                  <Input
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={addr.email}
+                    onChange={(e) => setAddr((a) => ({ ...a, email: e.target.value }))}
+                  />
+                </Field>
+              )}
               <Field label={tAddr('fullName')} required>
                 <Input
                   required
@@ -249,7 +306,7 @@ export default function CheckoutPage() {
                 onChange={(e) => setBillingSameAsShipping(e.target.checked)}
               />
               <Button type="submit" loading={submitting}>
-                {tSummary('placing')}
+                {submitting ? tSummary('saving') : tSummary('continue')}
               </Button>
             </form>
           ) : (
@@ -293,7 +350,9 @@ export default function CheckoutPage() {
                             )}
                             {addr.wilayaCode && (
                               <p className="text-12 text-content-muted">
-                                {tShip('deliveryEstimate', { delay: getShippingDelay(addr.wilayaCode) })}
+                                {tShip('deliveryEstimate', {
+                                  delay: tShip(`delayZone${getShippingZone(addr.wilayaCode)}` as 'delayZone1' | 'delayZone2' | 'delayZone3' | 'delayZone4'),
+                                })}
                               </p>
                             )}
                           </div>
@@ -306,7 +365,7 @@ export default function CheckoutPage() {
                   ))}
                 </ul>
                 <Button onClick={chooseShipping} disabled={!selectedShipping} loading={submitting}>
-                  {tSummary('placeOrder')}
+                  {submitting ? tSummary('saving') : tSummary('continue')}
                 </Button>
               </>
             ) : (

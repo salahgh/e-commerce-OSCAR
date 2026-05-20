@@ -603,6 +603,16 @@ export function getShippingDelay(wilayaCode: string): string {
   return wilaya ? shippingZoneDelays[wilaya.shippingZone] : '3-5 jours ouvrés';
 }
 
+/**
+ * Locale-agnostic counterpart to {@link getShippingDelay}. Returns the
+ * shipping zone (1-4) so the caller can pick the right localized delay text.
+ * Use this from i18n-aware UI rather than the French-only {@link getShippingDelay}.
+ */
+export function getShippingZone(wilayaCode: string): 1 | 2 | 3 | 4 {
+  const wilaya = getWilayaByCode(wilayaCode);
+  return wilaya?.shippingZone ?? 3;
+}
+
 export function formatWilayaName(wilaya: Wilaya): string {
   return `${wilaya.code} - ${wilaya.name}`;
 }

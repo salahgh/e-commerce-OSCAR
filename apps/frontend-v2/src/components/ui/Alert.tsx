@@ -1,6 +1,9 @@
+'use client';
+
 import * as React from 'react';
 import { Info, AlertCircle, CheckCircle2, AlertTriangle, X } from 'lucide-react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils/cn';
 
 const alertVariants = cva('flex items-start gap-4 rounded border p-4 transition-colors duration-fast', {
@@ -37,6 +40,7 @@ export interface AlertProps
 }
 
 export function Alert({ className, intent = 'info', title, children, onClose, ...props }: AlertProps) {
+  const t = useTranslations('Common');
   const Icon = iconMap[intent ?? 'info'];
   return (
     <div role="alert" className={cn(alertVariants({ intent }), className)} {...props}>
@@ -49,7 +53,7 @@ export function Alert({ className, intent = 'info', title, children, onClose, ..
         <button
           type="button"
           onClick={onClose}
-          aria-label="Fermer"
+          aria-label={t('close')}
           className="-m-1 inline-flex h-6 w-6 items-center justify-center rounded text-content-muted hover:bg-bg-muted/40"
         >
           <X className="h-5 w-5" />

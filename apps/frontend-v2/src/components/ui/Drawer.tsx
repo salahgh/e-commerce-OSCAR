@@ -3,6 +3,7 @@
 import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils/cn';
 
 const sideMap = {
@@ -27,6 +28,7 @@ export function DrawerContent({
   side?: keyof typeof sideMap;
   hideClose?: boolean;
 }) {
+  const t = useTranslations('Common');
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay className="fixed inset-0 z-overlay bg-bg-overlay backdrop-blur-sm data-[state=open]:animate-fade-in" />
@@ -41,7 +43,7 @@ export function DrawerContent({
         {children}
         {!hideClose && (
           <DialogPrimitive.Close
-            aria-label="Fermer"
+            aria-label={t('close')}
             className="absolute end-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded text-content-muted transition-colors hover:bg-bg-muted hover:text-content-strong"
           >
             <X className="h-5 w-5" />

@@ -383,11 +383,45 @@ Still missing (in rough priority order):
 10. Cookie consent banner (P-58), newsletter signup (P-59)
 11. Skip-to-content link (P-84), reduced-motion (P-85)
 
-## Execution log
+## Execution log — 2026-05-20 E2E run via Chrome DevTools MCP
 
-Use this section to log failures with timestamp + screenshot path. Example:
+### Passes
+- **A/B/C/F (home + header + footer)** — all elements render, 0 console errors, correct locale switching.
+- **J (i18n)** — `/`, `/en`, `/ar` all correct lang/dir; LocaleSwitcher works.
+- **L (theme)** — Dark mode toggle: `<html class="dark">` set, body bg changes, toggles back.
+- **D/E (auth pages)** — login, register, forgot-password, reset-password (with/without token), verification-pending (echoes email), verify (handles bad token) — all render correctly.
+- **categories list + detail** — `/categories` grid + `/categories/[slug]` show subcategories.
+- **G (search)** — `/search?q=shirt` → 29 results, faceted filters (Size + Color with counts), clicking color → URL `f_color=9` and 8 results, Clear filters restores.
+- **H (PDP)** — title, price, stock indicator, qty stepper, Add to cart works, badge increments, tabs translated.
+- **I (cart)** — line item rendered, qty change updates total + badge, summary correct.
+- **Checkout step 1 → 2 → 3** — address form with wilaya picker, shipping method, payment method all advance correctly.
 
-```
-2026-05-20 14:32 — H-12 FAIL — Add-to-cart without color shows generic Apollo error, not the
-                   "Veuillez sélectionner une couleur." toast. Screenshot: docs/test-shots/H-12.png
-```
+### Bugs fixed during the run
+- **F-1** Breadcrumb aria-label was hardcoded French "Fil d'Ariane" → translated via `Layout.breadcrumb.ariaLabel`.
+- **F-2** Breadcrumb anchors used raw `<a>` losing locale prefix → switched to `@/i18n/routing` `Link`.
+- **F-3** Pagination "Précédent"/"Suivant" hardcoded → translated via `Layout.pagination.{previous,next,ariaLabel}`.
+- **F-4** `StockIndicator` had French strings ("En stock"/"Rupture"/"Plus que N en stock") → new `StockIndicator` namespace with `inStock`/`outOfStock`/`lowStock` (ICU plural).
+- **F-5** Cart badge aria-label "Cart (1 items)" — added ICU plural to `Layout.header.cartAria`.
+- **F-6** Checkout step 1 submit button always said "Placing order…" → new `continue`/`saving` keys; per-step button labels.
+- **F-7** Guest checkout failed with `Could not transition state` because no customer was set → added email field + `setCustomerForOrder` call when not authenticated; tolerated `AlreadyLoggedInError` for retries.
+
+### Open bugs (logged for later)
+- **B-USD** Prices show `3 290 $US` — backend Vendure channel returns USD currency. Backend/seed-data issue, defer to backend session.
+- **B-SHIPPING-DELAY** `getShippingDelay()` in `@oscar/shared` returns French strings ("1-2 jours ouvrés"); shown on PDP shipping section + checkout shipping methods. Refactor to return a code + translate frontend-side, OR add per-locale arrays in shared.
+- **B-VENDURE-LOCALE** Backend Vendure error messages bypass i18n (French regardless of frontend locale). E.g. `Le jeton de vérification n'est pas reconnu` on `/en/verify`, `Impossible de changer l'état…` on checkout. Either map error codes client-side or pass Accept-Language and ensure backend locales loaded.
+- **B-CATEGORY-PARENT** Direct products on parent collection "Men" return 0 items (only subcategories visible). Vendure default behavior. Either query products recursively or update UI to communicate (e.g. hide "Products" section when empty).
+
+### Sections not driven via MCP this round
+- **K (a11y deep checks)** — partial via `take_snapshot` (a11y tree); no Lighthouse/contrast run.
+- **M (stub routes)** — `/shipping`, `/returns`, `/size-guide`, `/faq`, `/about`, `/careers`, `/contact`, `/legal/terms`, `/legal/privacy` still 404 (no static pages built).
+- **N (resilience)** — backend was up the whole time; "backend-down" path untested.
+
+### Final round results
+- **Checkout end-to-end** ✅ — Order `6S3AAY5TQV6YW535` placed successfully (3 295 $US, COD). Confirmation page renders with code, total, view-order/continue-shopping links. Required clearing the browser session first because earlier test attempts left the Vendure session in a `AlreadyLoggedInError` state.
+- **Registration** ✅ — Submitted `e2e.tester@example.com` → redirected to `/verification-pending?email=…` with email echoed and "Registration successful" toast (Close button localized).
+- **Auth guard** ✅ — Logged-out user clicking `/user/orders/[code]` redirects to `/login`.
+
+### Bugs discovered late
+- **B-CART-BADGE-STALE** After successful order placement, header cart badge still says "Cart (1 item)" — CartContext doesn't get invalidated when the order transitions out of `AddingItems`. Need to call `refetchCart` (or clear cart state) after `addPayment` succeeds, BEFORE the navigation.
+- **B-CHECKOUT-STALE-SESSION** If `setCustomerForOrder` is called against a session that already has an `activeUserId` but no real customer (e.g. after a prior failed attempt), it returns `AlreadyLoggedInError`. The order can never be transitioned. Workaround tested: clearing cookies + restarting cart. Long-term fix: detect this case and either force-logout or persist a flag that the order needs explicit customer rebinding.
+- **B-GUEST-ORDER-VIEW** Confirmation's "View my order" link goes to `/user/orders/[code]` which is auth-guarded. Guest orders should be viewable without login (Vendure's `orderByCode` supports it). Either drop the guard for `[code]` pages or store the order code in localStorage and surface a public order-tracking page.

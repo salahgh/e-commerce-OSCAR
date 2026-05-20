@@ -1,5 +1,9 @@
+'use client';
+
 import * as React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/routing';
 import { cn } from '@/lib/utils/cn';
 
 interface Crumb {
@@ -13,16 +17,17 @@ interface BreadcrumbProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 export function Breadcrumb({ items, className, separator, ...props }: BreadcrumbProps) {
+  const t = useTranslations('Layout.breadcrumb');
   return (
-    <nav aria-label="Fil d'Ariane" className={cn('flex items-center gap-2 text-14', className)} {...props}>
+    <nav aria-label={t('ariaLabel')} className={cn('flex items-center gap-2 text-14', className)} {...props}>
       {items.map((item, idx) => {
         const isLast = idx === items.length - 1;
         return (
           <React.Fragment key={idx}>
             {item.href && !isLast ? (
-              <a href={item.href} className="text-content-muted transition-colors hover:text-content-strong">
+              <Link href={item.href} className="text-content-muted transition-colors hover:text-content-strong">
                 {item.label}
-              </a>
+              </Link>
             ) : (
               <span className={isLast ? 'text-content-strong font-medium' : 'text-content-muted'} aria-current={isLast ? 'page' : undefined}>
                 {item.label}
