@@ -154,7 +154,10 @@
       "shippingFailed": "تعذّر تعيين طريقة التوصيل.",
       "paymentFailed": "فشل الدفع.",
       "transitionFailed": "تعذّر إتمام الطلب.",
-      "generic": "حدث خطأ."
+      "generic": "حدث خطأ.",
+      "staleSessionTitle": "انتهت الجلسة",
+      "staleSessionBody": "جلستك لم تعد صالحة. يرجى إعادة إنشاء السلة لمتابعة الطلب.",
+      "staleSessionReset": "إعادة تعيين الجلسة"
     }
   },
   "CheckoutConfirmationPage": {

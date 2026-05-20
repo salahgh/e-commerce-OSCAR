@@ -40,7 +40,7 @@ export default function CheckoutPage() {
   const router = useRouter();
 
   const { cart, refetchCart } = useCart();
-  const { customer, isAuthenticated } = useAuth();
+  const { customer, isAuthenticated, logout } = useAuth();
 
   const [setCustomer] = useSetCustomerForOrderMutation();
   const [setShipping] = useSetOrderShippingAddressMutation();
@@ -52,6 +52,11 @@ export default function CheckoutPage() {
   const [stage, setStage] = React.useState<Stage>('address');
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  // True when the Vendure session reports "already logged in" but the
+  // frontend has no active customer — leftover state from an earlier failed
+  // attempt that left the session bound to a nonexistent user. Recovery
+  // requires logging out (which also clears the cart).
+  const [staleSession, setStaleSession] = React.useState(false);
 
   const [addr, setAddr] = React.useState({
     email: '',
@@ -125,12 +130,17 @@ export default function CheckoutPage() {
           },
         });
         const customerResp = customerData?.setCustomerForOrder;
-        // AlreadyLoggedInError happens when the order already has a customer
-        // (e.g. after a previous attempt). Treat that as a no-op and proceed.
+        if (customerResp && customerResp.__typename === 'AlreadyLoggedInError') {
+          // Frontend says we're not logged in, but the Vendure session
+          // disagrees. The order will never gain a customer and the state
+          // transition will fail. Surface a recoverable error.
+          setStaleSession(true);
+          setSubmitting(false);
+          return;
+        }
         if (
           customerResp &&
           customerResp.__typename !== 'Order' &&
-          customerResp.__typename !== 'AlreadyLoggedInError' &&
           'message' in customerResp
         ) {
           throw new Error(customerResp.message);
@@ -199,6 +209,10 @@ export default function CheckoutPage() {
       const resp = data?.addPaymentToOrder;
       if (!resp) throw new Error(tErrors('paymentFailed'));
       if (resp.__typename === 'Order') {
+        // Order has moved out of AddingItems → activeOrder query returns null.
+        // Refresh the cart context so the header badge stops showing stale
+        // line items from the completed order.
+        await refetchCart();
         router.push(`/checkout/confirmation/${resp.code}`);
         return;
       }
@@ -223,6 +237,25 @@ export default function CheckoutPage() {
         </header>
 
         {error && <Alert intent="danger">{error}</Alert>}
+
+        {staleSession && (
+          <Alert intent="warning" title={tErrors('staleSessionTitle')}>
+            <div className="flex flex-col gap-3">
+              <p>{tErrors('staleSessionBody')}</p>
+              <div>
+                <Button
+                  intent="secondary"
+                  onClick={async () => {
+                    await logout();
+                    router.push('/products');
+                  }}
+                >
+                  {tErrors('staleSessionReset')}
+                </Button>
+              </div>
+            </div>
+          </Alert>
+        )}
 
         {/* Address */}
         <Card padding="lg" className="flex flex-col gap-4">

@@ -63,7 +63,7 @@ export default function ConfirmationPage() {
 
       <div className="flex flex-wrap justify-center gap-3">
         <Button asChild>
-          <Link href={`/user/orders/${order.code}`}>{t('viewOrder')}</Link>
+          <Link href={`/orders/${order.code}`}>{t('viewOrder')}</Link>
         </Button>
         <Button asChild intent="secondary">
           <Link href="/products">{t('continueShopping')}</Link>

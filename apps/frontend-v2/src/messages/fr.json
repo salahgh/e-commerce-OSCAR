@@ -154,7 +154,10 @@
       "shippingFailed": "Impossible d'enregistrer le mode de livraison.",
       "paymentFailed": "Le paiement a échoué.",
       "transitionFailed": "Impossible de finaliser la commande.",
-      "generic": "Une erreur est survenue."
+      "generic": "Une erreur est survenue.",
+      "staleSessionTitle": "Session expirée",
+      "staleSessionBody": "Votre session n'est plus valide. Veuillez recommencer le panier pour passer commande.",
+      "staleSessionReset": "Réinitialiser la session"
     }
   },
   "CheckoutConfirmationPage": {
