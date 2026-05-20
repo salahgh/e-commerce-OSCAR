@@ -6,11 +6,11 @@
 
 const path = require('path');
 const repoRoot = path.resolve(__dirname, '..', '..');
-const frontendDir = path.join(repoRoot, 'apps/frontend');
+const frontendDir = path.join(repoRoot, 'apps/frontend-v2');
 
 // pnpm with node-linker=hoisted puts `next` at the workspace root, not under
-// apps/frontend/node_modules. Use Node's resolver so this works regardless of
-// where pnpm decided to drop the package.
+// apps/frontend-v2/node_modules. Use Node's resolver so this works regardless
+// of where pnpm decided to drop the package.
 const nextBin = require.resolve('next/dist/bin/next', { paths: [frontendDir] });
 
 module.exports = {

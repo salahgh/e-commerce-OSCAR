@@ -34,8 +34,9 @@ export NODE_ENV=production
 export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=2048}"
 pnpm install --frozen-lockfile
 
-echo "▶  pnpm build"
-pnpm build
+echo "▶  pnpm build (backend + frontend-v2 + backoffice)"
+# v1 frontend (@oscar/frontend) is intentionally skipped — PM2 runs v2.
+pnpm build --filter=@oscar/backend --filter=@oscar/frontend-v2 --filter=@oscar/backoffice
 
 # Migrations run automatically when the backend boots — they apply on
 # the next `pm2 reload` below. See apps/backend/src/index.ts:9.
