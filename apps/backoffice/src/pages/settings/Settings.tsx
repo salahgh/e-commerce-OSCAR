@@ -38,6 +38,7 @@ import {
   XCircle,
   Loader2,
   PlayCircle,
+  Percent,
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { addToast } from '../../store/slices/uiSlice';
@@ -68,6 +69,7 @@ import { Spinner } from '../../components/ui/Spinner';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { formatPrice } from '../../lib/utils';
+import { TaxSettings } from './sections/TaxSettings';
 
 // Store settings form schema
 const StoreSettingsSchema = Yup.object().shape({
@@ -930,6 +932,12 @@ export const Settings: React.FC = () => {
           </div>
         </div>
       ),
+    },
+    {
+      id: 'taxes',
+      label: 'Taxes',
+      icon: <Percent className="h-4 w-4" />,
+      content: <TaxSettings />,
     },
     {
       id: 'email',
