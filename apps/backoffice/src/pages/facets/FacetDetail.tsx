@@ -26,6 +26,9 @@ import {
   CreateFacetValuesDocument,
   UpdateFacetValuesDocument,
   DeleteFacetValuesDocument,
+  AdminChannelsDocument,
+  AssignFacetsToChannelDocument,
+  RemoveFacetsFromChannelDocument,
   LanguageCode,
 } from '../../graphql/generated/graphql';
 import { Button } from '../../components/ui/Button';
@@ -34,6 +37,7 @@ import { Badge } from '../../components/ui/Badge';
 import { FacetValueEditor } from '../../components/facets/FacetValueEditor';
 import type { FacetValueData } from '../../components/facets/FacetValueEditor';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { Modal, ModalContent, ModalFooter } from '../../components/ui/Modal';
 import { cn } from '../../lib/utils';
 
 // Helper to get translation by language
@@ -77,6 +81,10 @@ export const FacetDetail: React.FC = () => {
   const [deletedValueIds, setDeletedValueIds] = useState<string[]>([]);
   const [codeManuallyEdited, setCodeManuallyEdited] = useState(false);
   const [deletingValue, setDeletingValue] = useState<{ index: number; name: string } | null>(null);
+  const [forceDeleteState, setForceDeleteState] = useState<{
+    ids: string[];
+    messages: string[];
+  } | null>(null);
 
   // Fetch current facet (if editing)
   const { data, loading, error } = useQuery(AdminFacetDocument, {
@@ -107,6 +115,67 @@ export const FacetDetail: React.FC = () => {
   const [updateFacetValues] = useMutation(UpdateFacetValuesDocument);
   const [deleteFacetValues] = useMutation(DeleteFacetValuesDocument);
 
+  // Channels (multi-channel admin) — action-only; Facet has no channels field
+  const { data: channelsData } = useQuery(AdminChannelsDocument, {
+    variables: { options: { take: 100 } },
+  });
+  const channels = channelsData?.channels?.items || [];
+  const [selectedChannelIds, setSelectedChannelIds] = useState<string[]>([]);
+  const [assignFacetsToChannel, { loading: assigningChannel }] = useMutation(
+    AssignFacetsToChannelDocument
+  );
+  const [removeFacetsFromChannel, { loading: removingChannel }] = useMutation(
+    RemoveFacetsFromChannelDocument
+  );
+
+  const handleAssignFacetToChannels = async (action: 'assign' | 'remove') => {
+    if (!facet || isNew || selectedChannelIds.length === 0) return;
+    try {
+      for (const channelId of selectedChannelIds) {
+        if (action === 'assign') {
+          await assignFacetsToChannel({
+            variables: { input: { channelId, facetIds: [facet.id] } },
+          });
+        } else {
+          const res = await removeFacetsFromChannel({
+            variables: { input: { channelId, facetIds: [facet.id], force: false } },
+          });
+          const result = res.data?.removeFacetsFromChannel?.[0];
+          if (result?.__typename === 'FacetInUseError') {
+            dispatch(
+              addToast({
+                message: `Facet utilisée par ${result.productCount} produit(s) et ${result.variantCount} variante(s)`,
+                type: 'error',
+              })
+            );
+            return;
+          }
+        }
+      }
+      const names = selectedChannelIds
+        .map((cid) => channels.find((c) => c.id === cid)?.code)
+        .filter(Boolean)
+        .join(', ');
+      dispatch(
+        addToast({
+          message:
+            action === 'assign'
+              ? `Attribut assigné à ${names}`
+              : `Attribut retiré de ${names}`,
+          type: 'success',
+        })
+      );
+      setSelectedChannelIds([]);
+    } catch (err: any) {
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de la mise à jour des canaux',
+          type: 'error',
+        })
+      );
+    }
+  };
+
   const facet = data?.facet;
 
   // Determine if this is a color facet
@@ -127,11 +196,80 @@ export const FacetDetail: React.FC = () => {
     ]);
   };
 
+  // Bulk import: parse pasted CSV/TSV text and append to facetValues
+  const [showBulkImport, setShowBulkImport] = useState(false);
+  const [bulkImportText, setBulkImportText] = useState('');
+
+  const handleBulkImport = () => {
+    const rows = bulkImportText
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean);
+    if (rows.length === 0) {
+      dispatch(addToast({ message: 'Aucune ligne à importer', type: 'error' }));
+      return;
+    }
+    const parsed: FacetValueData[] = [];
+    let lineNumber = 0;
+    for (const row of rows) {
+      lineNumber++;
+      // Support both comma and tab as separators
+      const cols = row.split(/\t|,/).map((c) => c.trim());
+      const [code, nameFr, nameEn, nameAr, colorHex] = cols;
+      if (!code || !nameFr) {
+        dispatch(
+          addToast({
+            message: `Ligne ${lineNumber}: code et nom français requis`,
+            type: 'error',
+          })
+        );
+        return;
+      }
+      parsed.push({
+        name: nameFr,
+        code,
+        nameEn: nameEn || '',
+        nameAr: nameAr || '',
+        colorHex: isColorFacet ? colorHex || '' : undefined,
+        isNew: true,
+      });
+    }
+    setFacetValues([...facetValues, ...parsed]);
+    setBulkImportText('');
+    setShowBulkImport(false);
+    dispatch(
+      addToast({
+        message: `${parsed.length} valeur(s) ajoutée(s). Cliquez Enregistrer pour confirmer.`,
+        type: 'success',
+      })
+    );
+  };
+
   // Handle update value
   const handleUpdateValue = (index: number, value: FacetValueData) => {
     const newValues = [...facetValues];
     newValues[index] = value;
     setFacetValues(newValues);
+  };
+
+  const handleForceDelete = async () => {
+    if (!forceDeleteState) return;
+    try {
+      await deleteFacetValues({
+        variables: { ids: forceDeleteState.ids, force: true },
+      });
+      dispatch(
+        addToast({
+          message: `${forceDeleteState.ids.length} valeur(s) supprimée(s) (forcé)`,
+          type: 'success',
+        })
+      );
+    } catch (err: any) {
+      dispatch(
+        addToast({ message: err.message || 'Erreur lors de la suppression forcée', type: 'error' })
+      );
+    }
+    setForceDeleteState(null);
   };
 
   // Handle delete value
@@ -202,14 +340,24 @@ export const FacetDetail: React.FC = () => {
           },
         });
 
-        // Handle deleted values
+        // Handle deleted values — if any are blocked (NOT_DELETED), surface
+        // a confirm dialog offering force delete instead of silently failing.
         if (deletedValueIds.length > 0) {
-          await deleteFacetValues({
-            variables: {
-              ids: deletedValueIds,
-              force: false,
-            },
+          const res = await deleteFacetValues({
+            variables: { ids: deletedValueIds, force: false },
           });
+          const blocked = (res.data?.deleteFacetValues || [])
+            .map((r, i) => ({ id: deletedValueIds[i], result: r.result, message: r.message || '' }))
+            .filter((r) => r.result === 'NOT_DELETED');
+          if (blocked.length > 0) {
+            setForceDeleteState({
+              ids: blocked.map((b) => b.id),
+              messages: blocked.map((b) => b.message),
+            });
+            // Bail out of the rest of the submit flow so the admin can decide
+            // whether to force the deletion.
+            return;
+          }
         }
 
         // Handle new values
@@ -539,15 +687,25 @@ export const FacetDetail: React.FC = () => {
                         <Tag className="h-5 w-5 text-blue-500" />
                         Valeurs ({facetValues.length})
                       </h2>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        icon={<Plus className="h-4 w-4" />}
-                        onClick={handleAddValue}
-                      >
-                        Ajouter une valeur
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowBulkImport(true)}
+                        >
+                          Importer
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          icon={<Plus className="h-4 w-4" />}
+                          onClick={handleAddValue}
+                        >
+                          Ajouter une valeur
+                        </Button>
+                      </div>
                     </div>
                   </div>
                   <div className="p-6 space-y-4">
@@ -651,6 +809,69 @@ export const FacetDetail: React.FC = () => {
                   </div>
                 )}
 
+                {/* Channels Card (only when editing and >1 channel) */}
+                {!isNew && facet && channels.length > 1 && (
+                  <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+                    <div className="px-6 py-4 border-b border-border bg-cyan-500/5">
+                      <h2 className="text-lg font-semibold text-foreground">Canaux</h2>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Assigner ou retirer cet attribut des canaux de vente
+                      </p>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {channels.map((ch) => {
+                          const checked = selectedChannelIds.includes(ch.id);
+                          return (
+                            <label
+                              key={ch.id}
+                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() =>
+                                  setSelectedChannelIds((prev) =>
+                                    checked
+                                      ? prev.filter((id) => id !== ch.id)
+                                      : [...prev, ch.id]
+                                  )
+                                }
+                                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                              />
+                              <span className="text-sm font-medium text-foreground">
+                                {ch.code}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          loading={assigningChannel}
+                          disabled={selectedChannelIds.length === 0}
+                          onClick={() => handleAssignFacetToChannels('assign')}
+                        >
+                          Assigner
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          loading={removingChannel}
+                          disabled={selectedChannelIds.length === 0}
+                          onClick={() => handleAssignFacetToChannels('remove')}
+                        >
+                          Retirer
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Action Buttons */}
                 <div className="bg-card rounded-xl shadow-sm border border-border p-4 space-y-3 sticky top-4">
                   <Button
@@ -685,6 +906,74 @@ export const FacetDetail: React.FC = () => {
         title="Supprimer la valeur"
         message={`Etes-vous sur de vouloir supprimer la valeur "${deletingValue?.name}"? Cette action est irreversible.`}
         confirmText="Supprimer"
+        variant="danger"
+      />
+
+      {/* Bulk import modal */}
+      <Modal
+        isOpen={showBulkImport}
+        onClose={() => setShowBulkImport(false)}
+        title="Importer des valeurs"
+        size="md"
+      >
+        <ModalContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Une valeur par ligne. Colonnes séparées par <strong>virgule</strong> ou{' '}
+            <strong>tabulation</strong>:
+            <br />
+            <code className="text-xs bg-muted px-2 py-1 rounded mt-1 inline-block">
+              code, nom (FR), nom (EN), nom (AR){isColorFacet ? ', couleur hex (#000000)' : ''}
+            </code>
+          </p>
+          <textarea
+            value={bulkImportText}
+            onChange={(e) => setBulkImportText(e.target.value)}
+            rows={10}
+            placeholder={
+              isColorFacet
+                ? 'rouge, Rouge, Red, أحمر, #DC2626\nbleu, Bleu, Blue, أزرق, #2563EB'
+                : 's, S, Small, صغير\nm, M, Medium, متوسط'
+            }
+            className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground font-mono text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          />
+          <p className="text-xs text-muted-foreground">
+            Les valeurs apparaîtront en bas de la liste et seront créées au prochain
+            enregistrement de l'attribut.
+          </p>
+        </ModalContent>
+        <ModalFooter>
+          <Button variant="ghost" onClick={() => setShowBulkImport(false)}>
+            Annuler
+          </Button>
+          <Button variant="primary" onClick={handleBulkImport}>
+            Ajouter
+          </Button>
+        </ModalFooter>
+      </Modal>
+
+      {/* Force-delete confirmation when values are still in use */}
+      <ConfirmDialog
+        isOpen={forceDeleteState !== null}
+        onClose={() => setForceDeleteState(null)}
+        onConfirm={handleForceDelete}
+        title="Valeur(s) utilisée(s)"
+        message={
+          <div>
+            <p>
+              {forceDeleteState?.ids.length} valeur(s) ne peuvent pas être supprimées car elles
+              sont encore utilisées.
+            </p>
+            {forceDeleteState?.messages.filter(Boolean).slice(0, 5).map((m, i) => (
+              <p key={i} className="mt-1 text-sm text-muted-foreground">
+                • {m}
+              </p>
+            ))}
+            <p className="mt-2 text-amber-600">
+              Forcer la suppression retirera ces valeurs de tous les produits / variantes concernés.
+            </p>
+          </div>
+        }
+        confirmText="Forcer la suppression"
         variant="danger"
       />
     </div>

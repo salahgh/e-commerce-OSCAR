@@ -20,6 +20,10 @@ import {
   GripVertical,
   RefreshCw,
   ImagePlus,
+  Radio,
+  Plus,
+  Minus,
+  Copy,
 } from 'lucide-react';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
@@ -34,6 +38,11 @@ import {
   AddAssetsToProductDocument,
   AdminProductOptionGroupsDocument,
   UpdateProductFacetsDocument,
+  AdminChannelsDocument,
+  AssignProductsToChannelDocument,
+  RemoveProductsFromChannelDocument,
+  DuplicateEntityDocument,
+  EntityDuplicatorsDocument,
   LanguageCode,
 } from '../../graphql/generated/graphql';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -56,6 +65,7 @@ const STEPS = [
   { id: 'variants', label: 'Variantes', icon: Layers },
   { id: 'facets', label: 'Attributs', icon: Tag },
   { id: 'categories', label: 'Catégories', icon: FolderTree },
+  { id: 'channels', label: 'Canaux', icon: Radio },
 ];
 
 // Helper to get translation value from product translations array
@@ -105,6 +115,9 @@ export const ProductEdit: React.FC = () => {
   const [selectedFacetValueIds, setSelectedFacetValueIds] = useState<string[]>([]);
   const [savingFacets, setSavingFacets] = useState(false);
 
+  // Channels state
+  const [selectedChannelIds, setSelectedChannelIds] = useState<string[]>([]);
+
   // Fetch product data
   const { data, loading, error, refetch } = useQuery(AdminProductDocument, {
     variables: { id: id! },
@@ -128,6 +141,20 @@ export const ProductEdit: React.FC = () => {
   const [createAssets] = useMutation(CreateAssetsDocument);
   const [addAssetsToProduct] = useMutation(AddAssetsToProductDocument);
   const [updateProductFacets] = useMutation(UpdateProductFacetsDocument);
+  const [assignProductsToChannel, { loading: assigningChannel }] = useMutation(
+    AssignProductsToChannelDocument
+  );
+  const [removeProductsFromChannel, { loading: removingChannel }] = useMutation(
+    RemoveProductsFromChannelDocument
+  );
+  const { data: duplicatorsData } = useQuery(EntityDuplicatorsDocument);
+  const [duplicateEntity, { loading: duplicating }] = useMutation(DuplicateEntityDocument);
+
+  // Channels list
+  const { data: channelsData } = useQuery(AdminChannelsDocument, {
+    variables: { options: { take: 100 } },
+  });
+  const channels = channelsData?.channels?.items || [];
 
   const product = data?.product;
   const allCollections = collectionsData?.collections?.items || [];
@@ -964,6 +991,169 @@ export const ProductEdit: React.FC = () => {
     </div>
   );
 
+  const handleDuplicateProduct = async () => {
+    if (!product) return;
+    const duplicator = (duplicatorsData?.entityDuplicators || []).find((d) =>
+      d.forEntities.includes('Product')
+    );
+    if (!duplicator) {
+      dispatch(addToast({ message: 'Aucun duplicateur disponible', type: 'error' }));
+      return;
+    }
+    try {
+      const args = duplicator.args.map((a) => ({
+        name: a.name,
+        value: a.defaultValue ?? (a.type === 'boolean' ? 'false' : ''),
+      }));
+      const res = await duplicateEntity({
+        variables: {
+          input: {
+            entityName: 'Product',
+            entityId: product.id,
+            duplicatorInput: { code: duplicator.code, arguments: args },
+          },
+        },
+      });
+      const data = res.data?.duplicateEntity;
+      if (data?.__typename === 'DuplicateEntitySuccess') {
+        dispatch(addToast({ message: 'Produit dupliqué', type: 'success' }));
+        navigate(`/products/${data.newEntityId}`);
+      } else if (data?.__typename === 'DuplicateEntityError') {
+        dispatch(addToast({ message: data.message, type: 'error' }));
+      }
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur de duplication', type: 'error' }));
+    }
+  };
+
+  const handleChannelAction = async (action: 'assign' | 'remove') => {
+    if (!product || selectedChannelIds.length === 0) return;
+    const mutate = action === 'assign' ? assignProductsToChannel : removeProductsFromChannel;
+    try {
+      for (const channelId of selectedChannelIds) {
+        await mutate({
+          variables: {
+            input: { channelId, productIds: [product.id] },
+          },
+        });
+      }
+      const names = selectedChannelIds
+        .map((cid) => channels.find((c) => c.id === cid)?.code)
+        .filter(Boolean)
+        .join(', ');
+      dispatch(
+        addToast({
+          message:
+            action === 'assign'
+              ? `Produit assigné à ${names}`
+              : `Produit retiré de ${names}`,
+          type: 'success',
+        })
+      );
+      setSelectedChannelIds([]);
+      refetch();
+    } catch (err: any) {
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de la mise à jour des canaux',
+          type: 'error',
+        })
+      );
+    }
+  };
+
+  const productChannelIds = new Set((product?.channels || []).map((c) => c.id));
+
+  const ChannelsTab = (
+    <div className="space-y-6">
+      <div className="bg-cyan-900/30 border border-cyan-700 rounded-lg p-4">
+        <p className="text-sm text-cyan-300">
+          <Radio className="inline h-4 w-4 mr-2" />
+          Gérer la disponibilité de ce produit sur chacun de vos canaux de vente.
+        </p>
+      </div>
+
+      {channels.length === 0 ? (
+        <div className="bg-muted/50 border border-border rounded-lg p-8 text-center text-muted-foreground">
+          Aucun canal disponible
+        </div>
+      ) : (
+        <>
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium text-foreground">Canaux actuels</h3>
+            <div className="flex flex-wrap gap-2">
+              {(product?.channels || []).map((c) => (
+                <Badge key={c.id} variant="success">{c.code}</Badge>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium text-foreground">Sélectionner des canaux</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {channels.map((ch) => {
+                const checked = selectedChannelIds.includes(ch.id);
+                const assigned = productChannelIds.has(ch.id);
+                return (
+                  <label
+                    key={ch.id}
+                    className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
+                      checked
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border hover:border-muted-foreground'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() =>
+                        setSelectedChannelIds((prev) =>
+                          checked ? prev.filter((id) => id !== ch.id) : [...prev, ch.id]
+                        )
+                      }
+                      className="h-5 w-5 text-primary border-border rounded bg-card"
+                    />
+                    <div className="flex-1">
+                      <p className="font-medium text-foreground">
+                        {ch.code}
+                        {assigned && (
+                          <Badge variant="success" className="ml-2">Assigné</Badge>
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {ch.defaultLanguageCode} · {ch.defaultCurrencyCode}
+                      </p>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button
+                variant="primary"
+                icon={<Plus className="h-4 w-4" />}
+                disabled={selectedChannelIds.length === 0}
+                loading={assigningChannel}
+                onClick={() => handleChannelAction('assign')}
+              >
+                Assigner aux canaux sélectionnés
+              </Button>
+              <Button
+                variant="secondary"
+                icon={<Minus className="h-4 w-4" />}
+                disabled={selectedChannelIds.length === 0}
+                loading={removingChannel}
+                onClick={() => handleChannelAction('remove')}
+              >
+                Retirer des canaux
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
   // Step navigation
   const goToStep = (step: number) => {
     if (step >= 0 && step < STEPS.length) {
@@ -986,6 +1176,8 @@ export const ProductEdit: React.FC = () => {
         return FacetsTab;
       case 5:
         return CategoriesTab;
+      case 6:
+        return ChannelsTab;
       default:
         return null;
     }
@@ -1016,6 +1208,14 @@ export const ProductEdit: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <Button
+            variant="secondary"
+            icon={<Copy className="h-4 w-4" />}
+            onClick={handleDuplicateProduct}
+            loading={duplicating}
+          >
+            Dupliquer
+          </Button>
           <Button
             variant="danger"
             icon={<Trash2 className="h-4 w-4" />}

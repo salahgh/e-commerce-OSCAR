@@ -345,10 +345,14 @@ export function useUnifiedSearch(): UseUnifiedSearchReturn {
       name: facet.name,
       code: facet.code,
       displayType: detectFacetType(facet.code),
+      isPrivate: facet.isPrivate,
       values: facet.values.map((value) => ({
         id: value.id,
         name: value.name,
         code: value.code,
+        // count is populated separately via the facetValueCounts map exposed
+        // from this hook — kept at 0 here to avoid a dependency cycle with
+        // the search query (which itself depends on facetGroups).
         count: 0,
       })),
       isExpanded: true,

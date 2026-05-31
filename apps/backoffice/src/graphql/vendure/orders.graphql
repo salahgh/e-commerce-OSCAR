@@ -274,3 +274,267 @@ mutation CreateFulfillment($input: FulfillOrderInput!) {
     }
   }
 }
+
+# Record a manual payment (e.g. cash on delivery collected, bank transfer
+# confirmed). Fully pays the outstanding amount via the chosen method.
+mutation AddManualPaymentToOrder($input: ManualPaymentInput!) {
+  addManualPaymentToOrder(input: $input) {
+    ... on Order {
+      id
+      state
+      payments {
+        id
+        method
+        state
+        amount
+      }
+    }
+    ... on ManualPaymentStateError {
+      errorCode
+      message
+    }
+  }
+}
+
+# Settle (collect) an authorized payment.
+mutation SettlePayment($id: ID!) {
+  settlePayment(id: $id) {
+    ... on Payment {
+      id
+      state
+      transactionId
+    }
+    ... on SettlePaymentError {
+      errorCode
+      message
+      paymentErrorMessage
+    }
+    ... on PaymentStateTransitionError {
+      errorCode
+      message
+      transitionError
+      fromState
+      toState
+    }
+    ... on OrderStateTransitionError {
+      errorCode
+      message
+      transitionError
+      fromState
+      toState
+    }
+  }
+}
+
+# Cancel an authorized (uncollected) payment.
+mutation CancelPayment($id: ID!) {
+  cancelPayment(id: $id) {
+    ... on Payment {
+      id
+      state
+    }
+    ... on CancelPaymentError {
+      errorCode
+      message
+      paymentErrorMessage
+    }
+    ... on PaymentStateTransitionError {
+      errorCode
+      message
+      transitionError
+      fromState
+      toState
+    }
+  }
+}
+
+# Issue a refund against a specific payment for a given amount (in cents).
+mutation RefundOrder($input: RefundOrderInput!) {
+  refundOrder(input: $input) {
+    ... on Refund {
+      id
+      state
+      total
+      reason
+      transactionId
+    }
+    ... on QuantityTooGreatError {
+      errorCode
+      message
+    }
+    ... on NothingToRefundError {
+      errorCode
+      message
+    }
+    ... on OrderStateTransitionError {
+      errorCode
+      message
+      transitionError
+      fromState
+      toState
+    }
+    ... on MultipleOrderError {
+      errorCode
+      message
+    }
+    ... on PaymentOrderMismatchError {
+      errorCode
+      message
+    }
+    ... on RefundOrderStateError {
+      errorCode
+      message
+      orderState
+    }
+    ... on AlreadyRefundedError {
+      errorCode
+      message
+      refundId
+    }
+    ... on RefundStateTransitionError {
+      errorCode
+      message
+      transitionError
+      fromState
+      toState
+    }
+    ... on RefundAmountError {
+      errorCode
+      message
+      maximumRefundable
+    }
+  }
+}
+
+# Mark a pending refund as settled (manual confirmation that the refund
+# was processed externally — e.g. wire transfer back to customer).
+mutation SettleRefund($input: SettleRefundInput!) {
+  settleRefund(input: $input) {
+    ... on Refund {
+      id
+      state
+      transactionId
+    }
+    ... on RefundStateTransitionError {
+      errorCode
+      message
+      transitionError
+      fromState
+      toState
+    }
+  }
+}
+
+# Force-advance a payment state (admin override).
+mutation TransitionPaymentToState($id: ID!, $state: String!) {
+  transitionPaymentToState(id: $id, state: $state) {
+    ... on Payment {
+      id
+      state
+    }
+    ... on PaymentStateTransitionError {
+      errorCode
+      message
+      transitionError
+      fromState
+      toState
+    }
+  }
+}
+
+# Advance a fulfillment to the next valid state (e.g. Pending → Shipped).
+mutation TransitionFulfillmentToState($id: ID!, $state: String!) {
+  transitionFulfillmentToState(id: $id, state: $state) {
+    ... on Fulfillment {
+      id
+      state
+    }
+    ... on FulfillmentStateTransitionError {
+      errorCode
+      message
+      transitionError
+      fromState
+      toState
+    }
+  }
+}
+
+# Apply changes to an order (adjust line quantities, add surcharges, etc.).
+# Use `dryRun: true` to preview the impact without persisting.
+mutation ModifyOrder($input: ModifyOrderInput!) {
+  modifyOrder(input: $input) {
+    ... on Order {
+      id
+      state
+      total
+      totalWithTax
+      lines {
+        id
+        quantity
+        linePrice
+        linePriceWithTax
+      }
+    }
+    ... on NoChangesSpecifiedError {
+      errorCode
+      message
+    }
+    ... on OrderModificationStateError {
+      errorCode
+      message
+    }
+    ... on PaymentMethodMissingError {
+      errorCode
+      message
+    }
+    ... on RefundPaymentIdMissingError {
+      errorCode
+      message
+    }
+    ... on OrderLimitError {
+      errorCode
+      message
+      maxItems
+    }
+    ... on NegativeQuantityError {
+      errorCode
+      message
+    }
+    ... on InsufficientStockError {
+      errorCode
+      message
+    }
+    ... on CouponCodeExpiredError {
+      errorCode
+      message
+      couponCode
+    }
+    ... on CouponCodeInvalidError {
+      errorCode
+      message
+      couponCode
+    }
+    ... on CouponCodeLimitError {
+      errorCode
+      message
+      couponCode
+      limit
+    }
+    ... on IneligibleShippingMethodError {
+      errorCode
+      message
+    }
+  }
+}
+
+# Query: list available payment methods (for the manual-payment selector).
+query AdminPaymentMethodsForOrder {
+  paymentMethods(options: { take: 100, filter: { enabled: { eq: true } } }) {
+    items {
+      id
+      code
+      name
+      enabled
+    }
+  }
+}

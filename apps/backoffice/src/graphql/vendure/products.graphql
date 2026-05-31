@@ -148,6 +148,8 @@ query AdminProduct($id: ID!) {
       stockAllocated
       enabled
       trackInventory
+      outOfStockThreshold
+      useGlobalOutOfStockThreshold
       featuredAsset {
         id
         preview
@@ -194,6 +196,12 @@ query AdminProduct($id: ID!) {
         name
         code
       }
+    }
+    channels {
+      id
+      code
+      defaultLanguageCode
+      defaultCurrencyCode
     }
   }
 }
@@ -421,6 +429,15 @@ mutation DeleteProducts($ids: [ID!]!) {
   deleteProducts(ids: $ids) {
     result
     message
+  }
+}
+
+# Bulk import products from a CSV file
+mutation ImportProducts($csvFile: Upload!) {
+  importProducts(csvFile: $csvFile) {
+    imported
+    processed
+    errors
   }
 }
 
@@ -663,6 +680,22 @@ mutation AssignProductsToChannel($input: AssignProductsToChannelInput!) {
 mutation RemoveProductsFromChannel($input: RemoveProductsFromChannelInput!) {
   removeProductsFromChannel(input: $input) {
     id
+  }
+}
+
+# Per-variant channel assignment with optional priceFactor for per-channel pricing
+mutation AssignProductVariantsToChannel($input: AssignProductVariantsToChannelInput!) {
+  assignProductVariantsToChannel(input: $input) {
+    id
+    sku
+    price
+  }
+}
+
+mutation RemoveProductVariantsFromChannel($input: RemoveProductVariantsFromChannelInput!) {
+  removeProductVariantsFromChannel(input: $input) {
+    id
+    sku
   }
 }
 

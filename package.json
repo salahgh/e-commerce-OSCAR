@@ -7,6 +7,7 @@
     "dev": "turbo run dev",
     "dev:backend": "turbo run dev --filter=@oscar/backend",
     "dev:frontend": "turbo run dev --filter=@oscar/frontend",
+    "dev:frontend-v2": "turbo run dev --filter=@oscar/frontend-v2",
     "dev:backoffice": "turbo run dev --filter=@oscar/backoffice",
     "build": "turbo run build",
     "codegen": "turbo run codegen",
@@ -17,7 +18,9 @@
   "pnpm": {
     "overrides": {
       "react": "19.2.0",
-      "react-dom": "19.2.0"
+      "react-dom": "19.2.0",
+      "@types/react": "^19.2.0",
+      "@types/react-dom": "^19.2.0"
     },
     "onlyBuiltDependencies": [
       "@apollo/protobufjs",

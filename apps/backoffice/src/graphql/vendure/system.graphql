@@ -75,3 +75,51 @@ query GetJobQueues {
     running
   }
 }
+
+# List available entity duplicators (used by Collection / Product / Facet duplicate UI)
+query EntityDuplicators {
+  entityDuplicators {
+    code
+    description
+    forEntities
+    requiresPermission
+    args {
+      name
+      type
+      label
+      description
+      defaultValue
+      ui
+    }
+  }
+}
+
+# Generic duplicate entity mutation — reused across collections, products, facets
+mutation DuplicateEntity($input: DuplicateEntityInput!) {
+  duplicateEntity(input: $input) {
+    ... on DuplicateEntitySuccess {
+      newEntityId
+    }
+    ... on DuplicateEntityError {
+      errorCode
+      message
+      duplicationError
+    }
+  }
+}
+
+# List channels for multi-channel administration
+query AdminChannels($options: ChannelListOptions) {
+  channels(options: $options) {
+    items {
+      id
+      code
+      token
+      defaultLanguageCode
+      availableLanguageCodes
+      defaultCurrencyCode
+      pricesIncludeTax
+    }
+    totalItems
+  }
+}

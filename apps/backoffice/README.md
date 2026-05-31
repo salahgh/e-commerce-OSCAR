@@ -540,8 +540,8 @@ npm run build
 
 For questions or issues:
 1. Check the main project [README.md](../../README.md)
-2. Review [SPECIFICATION.md](./SPECIFICATION.md)
-3. See [TECHNICAL-CHANGES-SUMMARY.md](../../TECHNICAL-CHANGES-SUMMARY.md)
+2. Review [backoffice-spec.md](../../docs/specs/backoffice-spec.md)
+3. See [technical-changes-summary.md](../../docs/guides/technical-changes-summary.md)
 
 ---
 

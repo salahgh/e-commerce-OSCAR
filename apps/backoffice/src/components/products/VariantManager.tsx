@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useMutation } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import {
   Plus,
   Trash2,
@@ -14,12 +14,15 @@ import {
   ChevronLeft,
   CheckSquare,
   Square,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Badge } from '../ui/Badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { AssetPickerModal } from '../ui/AssetPickerModal';
+import { FacetSelector } from './FacetSelector';
 import { formatPrice } from '../../lib/utils';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
@@ -34,6 +37,10 @@ import {
   DeleteProductOptionDocument,
   AdminProductDocument,
   AdminProductOptionGroupsDocument,
+  AdminTaxCategoriesDocument,
+  AdminChannelsDocument,
+  AssignProductVariantsToChannelDocument,
+  RemoveProductVariantsFromChannelDocument,
   LanguageCode,
 } from '../../graphql/generated/graphql';
 
@@ -58,6 +65,10 @@ interface ProductVariant {
     name: string;
     group?: { id: string; code: string; name: string };
   }>;
+  featuredAsset?: {
+    id: string;
+    preview: string;
+  } | null;
   customFields?: {
     minStockAlert?: number | null;
     originalPrice?: number | null;
@@ -172,6 +183,42 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
   // Delete confirmation
   const [deleteVariantId, setDeleteVariantId] = useState<string | null>(null);
 
+  // Confirmation for destructive option/option-group changes
+  const [pendingRemoveOptionGroup, setPendingRemoveOptionGroup] = useState<OptionGroup | null>(null);
+  const [pendingDeleteOption, setPendingDeleteOption] = useState<{ id: string; name: string } | null>(null);
+
+  // Variant asset picker
+  const [variantAssetPickerId, setVariantAssetPickerId] = useState<string | null>(null);
+
+  // Tax category bulk-assign
+  const [pendingTaxCategoryId, setPendingTaxCategoryId] = useState<string>('');
+  const { data: taxCategoriesData } = useQuery(AdminTaxCategoriesDocument);
+  const taxCategories = taxCategoriesData?.taxCategories?.items || [];
+
+  // Inventory bulk-edit
+  const [pendingTrackInventory, setPendingTrackInventory] = useState<string>('');
+  const [pendingOOSThreshold, setPendingOOSThreshold] = useState<string>('');
+  const [showInventoryBulk, setShowInventoryBulk] = useState(false);
+
+  // Facets bulk-edit
+  const [showFacetsBulk, setShowFacetsBulk] = useState(false);
+  const [pendingFacetValueIds, setPendingFacetValueIds] = useState<string[]>([]);
+
+  // Per-variant channel assignment + per-channel pricing
+  const [showChannelsBulk, setShowChannelsBulk] = useState(false);
+  const [pendingChannelId, setPendingChannelId] = useState<string>('');
+  const [pendingPriceFactor, setPendingPriceFactor] = useState<string>('');
+  const { data: channelsData } = useQuery(AdminChannelsDocument, {
+    variables: { options: { take: 100 } },
+  });
+  const channels = channelsData?.channels?.items || [];
+  const [assignVariantsToChannel, { loading: assigningVariantChannel }] = useMutation(
+    AssignProductVariantsToChannelDocument
+  );
+  const [removeVariantsFromChannel, { loading: removingVariantChannel }] = useMutation(
+    RemoveProductVariantsFromChannelDocument
+  );
+
   // Bulk delete state
   const [selectedForDelete, setSelectedForDelete] = useState<Set<string>>(new Set());
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
@@ -245,7 +292,7 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
         variables: {
           input: {
             code,
-            translations: [{ languageCode: LanguageCode.En, name: newOptionGroupName.trim() }],
+            translations: [{ languageCode: LanguageCode.Fr, name: newOptionGroupName.trim() }],
             options: [],
           },
         },
@@ -349,7 +396,7 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
           input: {
             productOptionGroupId: groupId,
             code,
-            translations: [{ languageCode: LanguageCode.En, name: newOptionName.trim() }],
+            translations: [{ languageCode: LanguageCode.Fr, name: newOptionName.trim() }],
           },
         },
         refetchQueries: [
@@ -438,7 +485,7 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
         stockOnHand: baseStock,
         optionIds,
         translations: [{
-          languageCode: LanguageCode.En,
+          languageCode: LanguageCode.Fr,
           name: combination?.label || `Variant ${index + 1}`,
         }],
       };
@@ -545,6 +592,161 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
     } catch (err: any) {
       dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
     }
+  };
+
+  const handleVariantChannelAction = async (action: 'assign' | 'remove') => {
+    if (!pendingChannelId || selectedForDelete.size === 0) return;
+    const ids = Array.from(selectedForDelete);
+    try {
+      if (action === 'assign') {
+        const priceFactor = pendingPriceFactor ? parseFloat(pendingPriceFactor) : undefined;
+        await assignVariantsToChannel({
+          variables: {
+            input: {
+              channelId: pendingChannelId,
+              productVariantIds: ids,
+              priceFactor: Number.isFinite(priceFactor as number) ? priceFactor : undefined,
+            },
+          },
+        });
+      } else {
+        await removeVariantsFromChannel({
+          variables: {
+            input: {
+              channelId: pendingChannelId,
+              productVariantIds: ids,
+            },
+          },
+        });
+      }
+      const code = channels.find((c) => c.id === pendingChannelId)?.code;
+      dispatch(
+        addToast({
+          message:
+            action === 'assign'
+              ? `${ids.length} variante(s) assignée(s) au canal ${code}`
+              : `${ids.length} variante(s) retirée(s) du canal ${code}`,
+          type: 'success',
+        })
+      );
+      setShowChannelsBulk(false);
+      setPendingChannelId('');
+      setPendingPriceFactor('');
+      onRefetch();
+    } catch (err: any) {
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de la mise à jour des canaux',
+          type: 'error',
+        })
+      );
+    }
+  };
+
+  const handleBulkSetFacets = async () => {
+    if (selectedForDelete.size === 0) return;
+    try {
+      const ids = Array.from(selectedForDelete);
+      const input = ids.map((id) => ({ id, facetValueIds: pendingFacetValueIds }));
+      await updateVariants({ variables: { input } });
+      dispatch(
+        addToast({
+          message: `Facettes appliquées à ${ids.length} variante(s)`,
+          type: 'success',
+        })
+      );
+      setShowFacetsBulk(false);
+      setPendingFacetValueIds([]);
+      onRefetch();
+    } catch (err: any) {
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de la mise à jour des facettes',
+          type: 'error',
+        })
+      );
+    }
+  };
+
+  const handleBulkSetInventory = async () => {
+    if (selectedForDelete.size === 0) return;
+    if (!pendingTrackInventory && pendingOOSThreshold === '') return;
+    try {
+      const ids = Array.from(selectedForDelete);
+      const input = ids.map((id) => {
+        const row: Record<string, unknown> = { id };
+        if (pendingTrackInventory) {
+          row.trackInventory = pendingTrackInventory as any;
+          // When explicit TRUE/FALSE, opt out of the global default
+          row.useGlobalOutOfStockThreshold = pendingTrackInventory === 'INHERIT';
+        }
+        if (pendingOOSThreshold !== '') {
+          row.outOfStockThreshold = parseInt(pendingOOSThreshold, 10) || 0;
+          row.useGlobalOutOfStockThreshold = false;
+        }
+        return row;
+      });
+      await updateVariants({ variables: { input: input as any } });
+      dispatch(
+        addToast({
+          message: `Inventaire mis à jour sur ${ids.length} variante(s)`,
+          type: 'success',
+        })
+      );
+      setPendingTrackInventory('');
+      setPendingOOSThreshold('');
+      setShowInventoryBulk(false);
+      onRefetch();
+    } catch (err: any) {
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de la mise à jour de l\'inventaire',
+          type: 'error',
+        })
+      );
+    }
+  };
+
+  const handleBulkSetTaxCategory = async () => {
+    if (!pendingTaxCategoryId || selectedForDelete.size === 0) return;
+    try {
+      const input = Array.from(selectedForDelete).map((id) => ({
+        id,
+        taxCategoryId: pendingTaxCategoryId,
+      }));
+      await updateVariants({ variables: { input } });
+      const taxName = taxCategories.find((t) => t.id === pendingTaxCategoryId)?.name;
+      dispatch(
+        addToast({
+          message: `Catégorie fiscale "${taxName}" appliquée à ${selectedForDelete.size} variante(s)`,
+          type: 'success',
+        })
+      );
+      setPendingTaxCategoryId('');
+      onRefetch();
+    } catch (err: any) {
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de l\'application de la catégorie fiscale',
+          type: 'error',
+        })
+      );
+    }
+  };
+
+  const handleSetVariantFeaturedAsset = async (variantId: string, assetId: string | null) => {
+    try {
+      await updateVariants({
+        variables: {
+          input: [{ id: variantId, featuredAssetId: assetId }],
+        },
+      });
+      dispatch(addToast({ message: 'Image de la variante mise à jour', type: 'success' }));
+      onRefetch();
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur lors de la mise à jour', type: 'error' }));
+    }
+    setVariantAssetPickerId(null);
   };
 
   const handleDeleteVariant = async (variantId: string) => {
@@ -744,7 +946,7 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
                         type="button"
                         size="sm"
                         variant="danger"
-                        onClick={() => handleRemoveOptionGroup(group.id)}
+                        onClick={() => setPendingRemoveOptionGroup(group)}
                         loading={removingOptionGroup}
                         icon={<Trash2 className="h-3 w-3" />}
                       />
@@ -805,7 +1007,7 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
                               <span className="text-xs text-muted-foreground">({option.code})</span>
                               <button
                                 type="button"
-                                onClick={() => handleDeleteOption(option.id)}
+                                onClick={() => setPendingDeleteOption({ id: option.id, name: option.name })}
                                 className="ml-1 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
                               >
                                 <X className="h-3 w-3" />
@@ -1014,6 +1216,58 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
                     <span className="text-sm text-muted-foreground">
                       {selectedForDelete.size} sélectionnée(s)
                     </span>
+                    {taxCategories.length > 0 && (
+                      <>
+                        <select
+                          value={pendingTaxCategoryId}
+                          onChange={(e) => setPendingTaxCategoryId(e.target.value)}
+                          className="px-3 py-1.5 rounded-lg border border-border bg-card text-sm text-foreground outline-none"
+                        >
+                          <option value="">Catégorie fiscale...</option>
+                          {taxCategories.map((tc) => (
+                            <option key={tc.id} value={tc.id}>
+                              {tc.name}
+                              {tc.isDefault ? ' (défaut)' : ''}
+                            </option>
+                          ))}
+                        </select>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          disabled={!pendingTaxCategoryId}
+                          onClick={handleBulkSetTaxCategory}
+                        >
+                          Appliquer
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setShowInventoryBulk((v) => !v)}
+                    >
+                      Inventaire
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setShowFacetsBulk((v) => !v)}
+                    >
+                      Facettes
+                    </Button>
+                    {channels.length > 1 && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setShowChannelsBulk((v) => !v)}
+                      >
+                        Canaux
+                      </Button>
+                    )}
                     <Button
                       type="button"
                       size="sm"
@@ -1039,6 +1293,133 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {showChannelsBulk && selectedForDelete.size > 0 && (
+            <div className="mb-4 p-4 bg-muted rounded-lg border border-border">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Canal
+                  </label>
+                  <select
+                    value={pendingChannelId}
+                    onChange={(e) => setPendingChannelId(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-sm outline-none"
+                  >
+                    <option value="">Sélectionner un canal...</option>
+                    {channels.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.code}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Facteur de prix (assigner)
+                  </label>
+                  <Input
+                    type="number"
+                    value={pendingPriceFactor}
+                    onChange={(e) => setPendingPriceFactor(e.target.value)}
+                    min="0"
+                    step="0.01"
+                    placeholder="1.0"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="primary"
+                    disabled={!pendingChannelId}
+                    loading={assigningVariantChannel}
+                    onClick={() => handleVariantChannelAction('assign')}
+                  >
+                    Assigner
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    disabled={!pendingChannelId}
+                    loading={removingVariantChannel}
+                    onClick={() => handleVariantChannelAction('remove')}
+                  >
+                    Retirer
+                  </Button>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Le facteur de prix multiplie le prix de la variante pour le canal cible (ex: 1.2 pour +20%).
+              </p>
+            </div>
+          )}
+          {showFacetsBulk && selectedForDelete.size > 0 && (
+            <div className="mb-4 p-4 bg-muted rounded-lg border border-border">
+              <div className="flex items-center justify-between mb-3">
+                <p className="font-medium text-foreground text-sm">
+                  Sélectionner les facettes à appliquer à {selectedForDelete.size} variante(s)
+                </p>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="primary"
+                  onClick={handleBulkSetFacets}
+                >
+                  Appliquer
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">
+                Note: ceci remplace les facettes existantes des variantes sélectionnées.
+              </p>
+              <FacetSelector
+                selectedIds={pendingFacetValueIds}
+                onChange={setPendingFacetValueIds}
+              />
+            </div>
+          )}
+          {showInventoryBulk && selectedForDelete.size > 0 && (
+            <div className="mb-4 p-4 bg-muted rounded-lg border border-border">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Suivi du stock
+                  </label>
+                  <select
+                    value={pendingTrackInventory}
+                    onChange={(e) => setPendingTrackInventory(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-sm outline-none"
+                  >
+                    <option value="">Inchangé</option>
+                    <option value="TRUE">Actif</option>
+                    <option value="FALSE">Désactivé</option>
+                    <option value="INHERIT">Hériter de la config globale</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Seuil de rupture (override global)
+                  </label>
+                  <Input
+                    type="number"
+                    value={pendingOOSThreshold}
+                    onChange={(e) => setPendingOOSThreshold(e.target.value)}
+                    min="0"
+                    placeholder="Inchangé"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="primary"
+                  disabled={!pendingTrackInventory && pendingOOSThreshold === ''}
+                  onClick={handleBulkSetInventory}
+                >
+                  Appliquer à {selectedForDelete.size} variante(s)
+                </Button>
+              </div>
+            </div>
+          )}
           {variants.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-border">
@@ -1086,18 +1467,36 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
                         />
                       </td>
                       <td className="px-4 py-3">
-                        {editingVariant === variant.id ? (
-                          <Input
-                            value={variantEdits[variant.id]?.sku ?? variant.sku}
-                            onChange={(e) => setVariantEdits({
-                              ...variantEdits,
-                              [variant.id]: { ...variantEdits[variant.id], sku: e.target.value },
-                            })}
-                            className="w-40"
-                          />
-                        ) : (
-                          <span className="font-mono text-sm text-foreground">{variant.sku}</span>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setVariantAssetPickerId(variant.id)}
+                            title="Modifier l'image de la variante"
+                            className="h-10 w-10 rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center hover:border-primary transition-colors flex-shrink-0"
+                          >
+                            {variant.featuredAsset?.preview ? (
+                              <img
+                                src={variant.featuredAsset.preview}
+                                alt=""
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </button>
+                          {editingVariant === variant.id ? (
+                            <Input
+                              value={variantEdits[variant.id]?.sku ?? variant.sku}
+                              onChange={(e) => setVariantEdits({
+                                ...variantEdits,
+                                [variant.id]: { ...variantEdits[variant.id], sku: e.target.value },
+                              })}
+                              className="w-40"
+                            />
+                          ) : (
+                            <span className="font-mono text-sm text-foreground">{variant.sku}</span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1">
@@ -1288,6 +1687,81 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
         confirmText="Supprimer tout"
         variant="danger"
         loading={bulkDeleting}
+      />
+
+      {/* Confirm: remove an option group from this product */}
+      <ConfirmDialog
+        isOpen={pendingRemoveOptionGroup !== null}
+        onClose={() => setPendingRemoveOptionGroup(null)}
+        onConfirm={async () => {
+          if (pendingRemoveOptionGroup) {
+            await handleRemoveOptionGroup(pendingRemoveOptionGroup.id);
+            setPendingRemoveOptionGroup(null);
+          }
+        }}
+        title="Retirer le groupe d'options"
+        message={
+          <div>
+            <p>
+              Retirer le groupe <strong>{pendingRemoveOptionGroup?.name}</strong> du produit ?
+            </p>
+            <p className="mt-2 text-amber-600 text-sm">
+              Si des variantes utilisent ces options, le serveur refusera l'opération.
+            </p>
+          </div>
+        }
+        confirmText="Retirer"
+        variant="danger"
+      />
+
+      {/* Confirm: delete an option permanently */}
+      <ConfirmDialog
+        isOpen={pendingDeleteOption !== null}
+        onClose={() => setPendingDeleteOption(null)}
+        onConfirm={async () => {
+          if (pendingDeleteOption) {
+            await handleDeleteOption(pendingDeleteOption.id);
+            setPendingDeleteOption(null);
+          }
+        }}
+        title="Supprimer l'option"
+        message={
+          <div>
+            <p>
+              Supprimer l'option <strong>{pendingDeleteOption?.name}</strong> ?
+            </p>
+            <p className="mt-2 text-amber-600 text-sm">
+              Cette suppression est définitive et affectera toutes les variantes existantes
+              qui l'utilisent.
+            </p>
+          </div>
+        }
+        confirmText="Supprimer"
+        variant="danger"
+      />
+
+      {/* Variant featured-asset picker */}
+      <AssetPickerModal
+        isOpen={variantAssetPickerId !== null}
+        onClose={() => setVariantAssetPickerId(null)}
+        onSelect={(assets) => {
+          if (assets.length > 0 && variantAssetPickerId) {
+            handleSetVariantFeaturedAsset(variantAssetPickerId, assets[0].id);
+          } else if (variantAssetPickerId) {
+            // Allow clearing
+            handleSetVariantFeaturedAsset(variantAssetPickerId, null);
+          }
+        }}
+        multiple={false}
+        selectedIds={
+          variantAssetPickerId
+            ? (() => {
+                const v = variants.find((x) => x.id === variantAssetPickerId);
+                return v?.featuredAsset?.id ? [v.featuredAsset.id] : [];
+              })()
+            : []
+        }
+        title="Image de la variante"
       />
     </div>
   );

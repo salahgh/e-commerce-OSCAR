@@ -33,6 +33,12 @@ export interface FilterOptions {
   sortBy?: string;
 }
 
+/** Real Vendure facet value with usage count, supplied by SearchProductsQuery. */
+export interface ColorFacetOption {
+  label: string;
+  count: number;
+}
+
 interface FilterBottomSheetProps {
   visible: boolean;
   onClose: () => void;
@@ -41,6 +47,13 @@ interface FilterBottomSheetProps {
   availableCategories?: { id: string; name: string }[];
   availableSizes?: string[];
   availableColors?: string[];
+  /**
+   * Optional: real color facet values (label + count) pulled from the
+   * SearchProductsQuery response. When provided, overrides `availableColors`
+   * and shows counts next to each chip. Selection still travels through
+   * `filters.colors` (by label) so existing callers keep working.
+   */
+  colorFacets?: ColorFacetOption[];
 }
 
 const sortOptions = [
@@ -68,7 +81,17 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
   availableCategories = [],
   availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
   availableColors = ['Black', 'White', 'Blue', 'Red', 'Green', 'Yellow', 'Pink', 'Gray'],
+  colorFacets,
 }) => {
+  /**
+   * Render either real Vendure facet values (label + count) when present,
+   * or the static fallback. Keeps selection in `filters.colors` for
+   * backward compatibility.
+   */
+  const colorEntries: ColorFacetOption[] =
+    colorFacets && colorFacets.length > 0
+      ? colorFacets
+      : availableColors.map((label) => ({ label, count: 0 }));
   const insets = useSafeAreaInsets();
   const translateY = useSharedValue(0);
 
@@ -261,12 +284,12 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Color</Text>
                 <View style={styles.chipContainer}>
-                  {availableColors.map((color) => (
+                  {colorEntries.map((c) => (
                     <Chip
-                      key={color}
-                      label={color}
-                      selected={filters.colors?.includes(color)}
-                      onPress={() => handleColorToggle(color)}
+                      key={c.label}
+                      label={c.count > 0 ? `${c.label} (${c.count})` : c.label}
+                      selected={filters.colors?.includes(c.label)}
+                      onPress={() => handleColorToggle(c.label)}
                     />
                   ))}
                 </View>

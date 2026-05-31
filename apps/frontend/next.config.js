@@ -144,8 +144,19 @@ const nextConfig = {
 
   // Redirects for performance
   async rewrites() {
+    // In local dev we proxy /shop-api and /assets to the VPS so the browser
+    // sees same-origin requests (no CORS), while the API itself stays remote.
+    // Triggered when NEXT_PUBLIC_API_PROXY_TARGET is set in .env.local.
+    const proxyTarget = process.env.NEXT_PUBLIC_API_PROXY_TARGET;
+    const proxyRewrites = proxyTarget
+      ? [
+          { source: '/shop-api/:path*', destination: `${proxyTarget}/shop-api/:path*` },
+          { source: '/shop-api', destination: `${proxyTarget}/shop-api` },
+          { source: '/assets/:path*', destination: `${proxyTarget}/assets/:path*` },
+        ]
+      : [];
     return {
-      beforeFiles: [],
+      beforeFiles: proxyRewrites,
       afterFiles: [],
       fallback: [],
     };

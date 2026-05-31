@@ -1,0 +1,18 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "Literal[value=/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
+        "message": "Hex color literals are forbidden outside src/styles/tokens.css. Use design tokens via Tailwind utilities (bg-bg-base, text-content-strong, etc.)."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/styles/**/*"],
+      "rules": { "no-restricted-syntax": "off" }
+    }
+  ]
+}

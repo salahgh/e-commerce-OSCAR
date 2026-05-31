@@ -13,9 +13,14 @@ const authRoutes = ['/login', '/register'];
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // Check if it's an API route or static file
+  // Check if it's an API route or static file. /shop-api and /assets are
+  // proxied to the Vendure backend via next.config.js rewrites — don't run
+  // them through next-intl or they get rewritten to a locale-prefixed path
+  // that 404s.
   if (
     pathname.startsWith('/api') ||
+    pathname.startsWith('/shop-api') ||
+    pathname.startsWith('/assets') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/static') ||
     pathname.includes('.')
@@ -55,5 +60,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!api|shop-api|assets|_next/static|_next/image|favicon.ico).*)'],
 };

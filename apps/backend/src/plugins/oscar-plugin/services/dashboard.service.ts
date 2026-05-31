@@ -6,14 +6,17 @@ import {
   CustomerService,
   ProductService,
   ProductVariantService,
+  CollectionService,
   Order,
   Customer,
   Product,
   ProductVariant,
+  ProductVariantPrice,
   OrderLine,
   Collection,
+  StockLevel,
 } from '@vendure/core';
-import { MoreThanOrEqual, Between, In } from 'typeorm';
+import { MoreThanOrEqual, Between, In, IsNull } from 'typeorm';
 
 export interface KpiMetrics {
   // Revenue metrics
@@ -105,6 +108,41 @@ export interface TopSellingProduct {
   imageUrl: string | null;
 }
 
+export interface CatalogStats {
+  totalProducts: number;
+  enabledProducts: number;
+  disabledProducts: number;
+  totalVariants: number;
+  outOfStockVariants: number;
+  lowStockVariants: number;
+  productsWithoutImages: number;
+  newProductsThisMonth: number;
+  totalInventoryValue: string;
+  averageProductPrice: number;
+}
+
+export interface ProductsByCollectionPoint {
+  collectionId: string;
+  collectionName: string;
+  productCount: number;
+}
+
+export interface RecentProductItem {
+  id: string;
+  name: string;
+  slug: string;
+  featuredAssetPreview: string | null;
+  createdAt: Date;
+  enabled: boolean;
+  variantCount: number;
+}
+
+interface VariantStockRow {
+  variantId: string;
+  productId: string;
+  available: string;
+}
+
 @Injectable()
 export class DashboardService {
   constructor(
@@ -113,7 +151,27 @@ export class DashboardService {
     private customerService: CustomerService,
     private productService: ProductService,
     private productVariantService: ProductVariantService,
+    private collectionService: CollectionService,
   ) {}
+
+  /**
+   * Returns one row per non-deleted product variant with the summed available
+   * stock across all stock locations: SUM(stockOnHand - stockAllocated).
+   * Variants without any StockLevel rows yield available=0.
+   */
+  private async getVariantStockRows(ctx: RequestContext): Promise<VariantStockRow[]> {
+    return this.connection
+      .getRepository(ctx, ProductVariant)
+      .createQueryBuilder('variant')
+      .leftJoin(StockLevel, 'sl', 'sl."productVariantId" = variant.id')
+      .where('variant.deletedAt IS NULL')
+      .select('variant.id', 'variantId')
+      .addSelect('variant.productId', 'productId')
+      .addSelect('COALESCE(SUM(sl."stockOnHand" - sl."stockAllocated"), 0)', 'available')
+      .groupBy('variant.id')
+      .addGroupBy('variant.productId')
+      .getRawMany<VariantStockRow>();
+  }
 
   /**
    * Get comprehensive KPI metrics for the dashboard
@@ -201,9 +259,22 @@ export class DashboardService {
       where: { enabled: true },
     });
 
-    // Low stock and out of stock (simplified)
-    const lowStockProducts = 0; // Will implement properly
-    const outOfStockProducts = 0; // Will implement properly
+    // Low stock and out of stock — aggregate over StockLevel entries per variant,
+    // then count DISTINCT products. Threshold default 10.
+    const lowStockThreshold = 10;
+    const stockRows = await this.getVariantStockRows(ctx);
+    const outOfStockProductIds = new Set<string>();
+    const lowStockProductIds = new Set<string>();
+    for (const row of stockRows) {
+      const available = Number(row.available);
+      if (available <= 0) {
+        outOfStockProductIds.add(row.productId);
+      } else if (available <= lowStockThreshold) {
+        lowStockProductIds.add(row.productId);
+      }
+    }
+    const lowStockProducts = lowStockProductIds.size;
+    const outOfStockProducts = outOfStockProductIds.size;
 
     // Average order value
     const averageOrderValue = ordersThisMonth > 0 ? revenueThisMonth / ordersThisMonth : 0;
@@ -331,12 +402,212 @@ export class DashboardService {
   }
 
   /**
-   * Get revenue by category for pie chart (simplified version)
+   * Get revenue by category for the pie chart. Joins order lines through the
+   * variant and the collection many-to-many table, sums (listPrice * quantity)
+   * across completed orders, groups by collection. Names are hydrated via
+   * CollectionService so translations resolve under ctx.languageCode.
+   *
+   * Note: `linePriceWithTax` is a TypeScript getter on OrderLine (computed
+   * from listPrice/taxLines/adjustments) and does NOT exist as a DB column,
+   * so we use `listPrice * quantity` as the per-line revenue. Close enough
+   * for a category-share visualization.
    */
   async getRevenueByCategory(ctx: RequestContext): Promise<RevenueByCategoryDataPoint[]> {
-    // Return empty for now - category revenue requires complex join queries
-    // that need proper Vendure relationship handling
-    return [];
+    const completedStates = [
+      'PaymentSettled',
+      'Shipped',
+      'Delivered',
+      'PartiallyShipped',
+      'PartiallyDelivered',
+    ];
+
+    const rows = await this.connection
+      .getRepository(ctx, OrderLine)
+      .createQueryBuilder('line')
+      .innerJoin('order', 'o', 'o.id = line."orderId"')
+      .innerJoin(
+        'collection_product_variants_product_variant',
+        'cpv',
+        'cpv."productVariantId" = line."productVariantId"',
+      )
+      .where('o.state IN (:...states)', { states: completedStates })
+      .select('cpv."collectionId"', 'collectionId')
+      .addSelect('SUM(line."listPrice" * line."quantity")', 'revenue')
+      .groupBy('cpv."collectionId"')
+      .getRawMany<{ collectionId: string; revenue: string }>();
+
+    if (rows.length === 0) return [];
+
+    const collections = await Promise.all(
+      rows.map(r => this.collectionService.findOne(ctx, r.collectionId)),
+    );
+    const nameById = new Map<string, string>();
+    for (const c of collections) {
+      if (c) nameById.set(c.id.toString(), c.name);
+    }
+
+    const totalRevenue = rows.reduce((sum, r) => sum + Number(r.revenue || 0), 0);
+
+    return rows
+      .map(row => {
+        const revenue = Number(row.revenue || 0);
+        return {
+          categoryId: row.collectionId.toString(),
+          categoryName: nameById.get(row.collectionId.toString()) || 'Unknown',
+          revenue,
+          percentage: totalRevenue > 0 ? (revenue / totalRevenue) * 100 : 0,
+        };
+      })
+      .sort((a, b) => b.revenue - a.revenue);
+  }
+
+  /**
+   * Catalog-wide KPIs covering total products, variants, stock health,
+   * products without images, recently added products, and inventory value.
+   */
+  async getCatalogStats(ctx: RequestContext): Promise<CatalogStats> {
+    const productRepo = this.connection.getRepository(ctx, Product);
+    const variantRepo = this.connection.getRepository(ctx, ProductVariant);
+
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lowStockThreshold = 10;
+
+    const totalProducts = await productRepo.count({ where: { deletedAt: IsNull() } as any });
+    const enabledProducts = await productRepo.count({
+      where: { enabled: true, deletedAt: IsNull() } as any,
+    });
+    const disabledProducts = totalProducts - enabledProducts;
+
+    const totalVariants = await variantRepo.count({
+      where: { deletedAt: IsNull() } as any,
+    });
+
+    const productsWithoutImages = await productRepo.count({
+      where: { featuredAssetId: IsNull(), deletedAt: IsNull() } as any,
+    });
+
+    const newProductsThisMonth = await productRepo.count({
+      where: { createdAt: MoreThanOrEqual(monthStart), deletedAt: IsNull() } as any,
+    });
+
+    // Stock health — reuse the per-variant aggregate.
+    const stockRows = await this.getVariantStockRows(ctx);
+    let outOfStockVariants = 0;
+    let lowStockVariants = 0;
+    for (const row of stockRows) {
+      const available = Number(row.available);
+      if (available <= 0) outOfStockVariants++;
+      else if (available <= lowStockThreshold) lowStockVariants++;
+    }
+
+    // Inventory value: SUM(stockOnHand * variantPrice) for the active channel/currency.
+    const currencyCode = ctx.channel.defaultCurrencyCode;
+    const channelId = ctx.channelId;
+    const inventoryRow = await this.connection
+      .getRepository(ctx, StockLevel)
+      .createQueryBuilder('sl')
+      .innerJoin(
+        ProductVariantPrice,
+        'pvp',
+        'pvp."variantId" = sl."productVariantId" AND pvp."channelId" = :channelId AND pvp."currencyCode" = :currency',
+        { channelId, currency: currencyCode },
+      )
+      .select('COALESCE(SUM(sl."stockOnHand" * pvp."price"), 0)::text', 'inventoryValue')
+      .getRawOne<{ inventoryValue: string }>();
+
+    const averagePriceRow = await this.connection
+      .getRepository(ctx, ProductVariantPrice)
+      .createQueryBuilder('pvp')
+      .where('pvp."channelId" = :channelId', { channelId })
+      .andWhere('pvp."currencyCode" = :currency', { currency: currencyCode })
+      .select('COALESCE(ROUND(AVG(pvp."price")), 0)', 'avgPrice')
+      .getRawOne<{ avgPrice: string }>();
+
+    return {
+      totalProducts,
+      enabledProducts,
+      disabledProducts,
+      totalVariants,
+      outOfStockVariants,
+      lowStockVariants,
+      productsWithoutImages,
+      newProductsThisMonth,
+      totalInventoryValue: inventoryRow?.inventoryValue || '0',
+      averageProductPrice: Number(averagePriceRow?.avgPrice || 0),
+    };
+  }
+
+  /**
+   * Top N collections by distinct product count, sorted DESC.
+   * Names are hydrated via CollectionService for ctx.languageCode.
+   */
+  async getProductsByCollection(
+    ctx: RequestContext,
+    limit: number = 8,
+  ): Promise<ProductsByCollectionPoint[]> {
+    const rows = await this.connection
+      .getRepository(ctx, ProductVariant)
+      .createQueryBuilder('variant')
+      .innerJoin(
+        'collection_product_variants_product_variant',
+        'cpv',
+        'cpv."productVariantId" = variant.id',
+      )
+      .where('variant.deletedAt IS NULL')
+      .select('cpv."collectionId"', 'collectionId')
+      .addSelect('COUNT(DISTINCT variant.productId)', 'productCount')
+      .groupBy('cpv."collectionId"')
+      .orderBy('"productCount"', 'DESC')
+      .limit(limit)
+      .getRawMany<{ collectionId: string; productCount: string }>();
+
+    if (rows.length === 0) return [];
+
+    const collections = await Promise.all(
+      rows.map(r => this.collectionService.findOne(ctx, r.collectionId)),
+    );
+    const byId = new Map<string, Collection>();
+    for (const c of collections) {
+      if (c) byId.set(c.id.toString(), c);
+    }
+
+    return rows.map(row => {
+      const collection = byId.get(row.collectionId.toString());
+      return {
+        collectionId: row.collectionId.toString(),
+        collectionName: collection?.name || 'Unknown',
+        productCount: Number(row.productCount),
+      };
+    });
+  }
+
+  /**
+   * Most recently created products, with translated name + variant count.
+   */
+  async getRecentProducts(
+    ctx: RequestContext,
+    limit: number = 5,
+  ): Promise<RecentProductItem[]> {
+    const { items } = await this.productService.findAll(ctx, {
+      take: limit,
+      sort: { createdAt: 'DESC' as any },
+    });
+
+    return Promise.all(
+      items.map(async product => {
+        const variants = await this.productVariantService.getVariantsByProductId(ctx, product.id);
+        return {
+          id: product.id.toString(),
+          name: product.name,
+          slug: product.slug,
+          featuredAssetPreview: product.featuredAsset?.preview || null,
+          createdAt: product.createdAt,
+          enabled: product.enabled,
+          variantCount: variants.totalItems,
+        };
+      }),
+    );
   }
 
   /**
@@ -363,45 +634,49 @@ export class DashboardService {
   }
 
   /**
-   * Get low stock alerts (simplified)
-   * Note: In Vendure 3.x, stock is managed via StockLevel entities
-   * This simplified version uses direct entity access
+   * Get low stock alerts. Aggregates summed `stockOnHand - stockAllocated` across
+   * all StockLevel rows per variant. Includes variants with currentStock <= 0
+   * (so the alert panel surfaces out-of-stock items too) up to the threshold.
    */
   async getLowStockAlerts(ctx: RequestContext, threshold: number = 10): Promise<LowStockAlert[]> {
-    const variantRepo = this.connection.getRepository(ctx, ProductVariant);
+    const rows = await this.connection
+      .getRepository(ctx, ProductVariant)
+      .createQueryBuilder('variant')
+      .leftJoin(StockLevel, 'sl', 'sl."productVariantId" = variant.id')
+      .where('variant.deletedAt IS NULL')
+      .select('variant.id', 'variantId')
+      .addSelect('variant.productId', 'productId')
+      .addSelect('variant.sku', 'sku')
+      .addSelect('COALESCE(SUM(sl."stockOnHand" - sl."stockAllocated"), 0)', 'available')
+      .groupBy('variant.id')
+      .addGroupBy('variant.productId')
+      .addGroupBy('variant.sku')
+      .having('COALESCE(SUM(sl."stockOnHand" - sl."stockAllocated"), 0) <= :threshold', { threshold })
+      .orderBy('available', 'ASC')
+      .limit(50)
+      .getRawMany<{ variantId: string; productId: string; sku: string; available: string }>();
 
-    // Get variants with their stock levels
-    const variants = await variantRepo.find({
-      take: 100,
-      relations: ['product'],
-    });
+    if (rows.length === 0) return [];
 
-    const alerts: LowStockAlert[] = [];
-
-    for (const variant of variants) {
-      // Access stockOnHand from the raw entity (not translated)
-      const stockOnHand = (variant as any).stockOnHand ?? 0;
-      const customThreshold = (variant.customFields as any)?.minStockAlert || threshold;
-
-      if (stockOnHand <= customThreshold && stockOnHand > 0) {
-        const productName = (variant as any).product?.name || 'Unknown';
-
-        alerts.push({
-          productId: variant.productId.toString(),
-          productName,
-          variantId: variant.id.toString(),
-          variantName: variant.sku || `Variant ${variant.id}`,
-          sku: variant.sku,
-          currentStock: stockOnHand,
-          threshold: customThreshold,
-        });
-      }
+    // Hydrate product names via the service so translations resolve.
+    const productIds = Array.from(new Set(rows.map(r => r.productId)));
+    const products = await Promise.all(
+      productIds.map(id => this.productService.findOne(ctx, id)),
+    );
+    const productNameById = new Map<string, string>();
+    for (const product of products) {
+      if (product) productNameById.set(product.id.toString(), product.name);
     }
 
-    // Sort by stock level ascending
-    alerts.sort((a, b) => a.currentStock - b.currentStock);
-
-    return alerts.slice(0, 20);
+    return rows.map(row => ({
+      productId: row.productId.toString(),
+      productName: productNameById.get(row.productId.toString()) || 'Unknown',
+      variantId: row.variantId.toString(),
+      variantName: row.sku || `Variant ${row.variantId}`,
+      sku: row.sku,
+      currentStock: Number(row.available),
+      threshold,
+    }));
   }
 
   /**

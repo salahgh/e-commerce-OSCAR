@@ -1,11 +1,12 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery, useMutation, useLazyQuery } from '@apollo/client';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import {
   ArrowLeft,
   Save,
+  Copy,
   FolderTree,
   Image as ImageIcon,
   Globe,
@@ -23,16 +24,25 @@ import {
   AlertCircle,
   FolderOpen,
   Filter,
+  Radio,
+  Plus,
+  Minus,
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { addToast } from '../../store/slices/uiSlice';
 import {
   AdminCollectionDocument,
   AdminCollectionsDocument,
+  AdminChannelsDocument,
   CreateCollectionDocument,
   UpdateCollectionDocument,
   MoveCollectionDocument,
   CreateAssetsDocument,
+  AssignCollectionsToChannelDocument,
+  RemoveCollectionsFromChannelDocument,
+  PreviewCollectionProductsDocument,
+  DuplicateEntityDocument,
+  EntityDuplicatorsDocument,
   LanguageCode,
 } from '../../graphql/generated/graphql';
 import { Button } from '../../components/ui/Button';
@@ -72,6 +82,7 @@ interface FormValues {
   descriptionAr: string;
   parentId: string;
   isPrivate: boolean;
+  inheritFilters: boolean;
   displayOrder: number;
 }
 
@@ -89,8 +100,10 @@ export const CategoryDetail: React.FC = () => {
   const isNew = !id || id === 'new';
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [featuredImage, setFeaturedImage] = useState<ImageFile | null>(null);
+  const [galleryAssets, setGalleryAssets] = useState<Array<{ id: string; preview: string }>>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [showAssetPicker, setShowAssetPicker] = useState(false);
+  const [showGalleryPicker, setShowGalleryPicker] = useState(false);
   const [collectionFilters, setCollectionFilters] = useState<Array<{
     code: string;
     arguments: Array<{ name: string; value: string }>;
@@ -117,6 +130,12 @@ export const CategoryDetail: React.FC = () => {
           }))
         );
       }
+      // Initialize gallery assets
+      if (data?.collection?.assets) {
+        setGalleryAssets(
+          data.collection.assets.map((a) => ({ id: a.id, preview: a.preview }))
+        );
+      }
     },
   });
 
@@ -129,6 +148,66 @@ export const CategoryDetail: React.FC = () => {
   const [updateCollection, { loading: updating }] = useMutation(UpdateCollectionDocument);
   const [moveCollection] = useMutation(MoveCollectionDocument);
   const [createAssets] = useMutation(CreateAssetsDocument);
+
+  // Channel administration (multi-channel) — Vendure scopes channel visibility
+  // via the `vendure-token` request header, so we cannot read which channels a
+  // collection currently belongs to. The UI is action-only: pick channels,
+  // assign or remove. Hidden when only the default channel exists.
+  const { data: channelsData } = useQuery(AdminChannelsDocument, {
+    variables: { options: { take: 100 } },
+  });
+  const channels = channelsData?.channels?.items || [];
+  const [selectedChannelIds, setSelectedChannelIds] = useState<string[]>([]);
+  const [assignToChannel, { loading: assigningChannel }] = useMutation(
+    AssignCollectionsToChannelDocument
+  );
+  const [removeFromChannel, { loading: removingChannel }] = useMutation(
+    RemoveCollectionsFromChannelDocument
+  );
+
+  // Entity duplication (Collection)
+  const { data: duplicatorsData } = useQuery(EntityDuplicatorsDocument);
+  const [duplicateEntity, { loading: duplicating }] = useMutation(DuplicateEntityDocument);
+
+  const handleDuplicate = async () => {
+    if (!id || isNew) return;
+    const duplicator = (duplicatorsData?.entityDuplicators || []).find((d) =>
+      d.forEntities.includes('Collection')
+    );
+    if (!duplicator) {
+      dispatch(addToast({ message: 'Aucun duplicateur disponible', type: 'error' }));
+      return;
+    }
+    try {
+      const args = duplicator.args.map((a) => ({
+        name: a.name,
+        value: a.defaultValue ?? (a.type === 'boolean' ? 'false' : ''),
+      }));
+      const res = await duplicateEntity({
+        variables: {
+          input: {
+            entityName: 'Collection',
+            entityId: id,
+            duplicatorInput: { code: duplicator.code, arguments: args },
+          },
+        },
+      });
+      const data = res.data?.duplicateEntity;
+      if (data?.__typename === 'DuplicateEntitySuccess') {
+        dispatch(addToast({ message: 'Catégorie dupliquée', type: 'success' }));
+        navigate(`/categories/${data.newEntityId}`);
+      } else if (data?.__typename === 'DuplicateEntityError') {
+        dispatch(addToast({ message: data.message, type: 'error' }));
+      }
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur de duplication', type: 'error' }));
+    }
+  };
+
+  // Live preview of products that match the configured filters
+  const [runPreview, previewState] = useLazyQuery(PreviewCollectionProductsDocument);
+  const previewCount = previewState.data?.previewCollectionVariants?.totalItems;
+  const previewItems = previewState.data?.previewCollectionVariants?.items ?? [];
 
   const collection = data?.collection;
   const allCollections = collectionsData?.collections?.items || [];
@@ -219,6 +298,62 @@ export const CategoryDetail: React.FC = () => {
       .replace(/^-+|-+$/g, '');
   };
 
+  const triggerPreview = useCallback(
+    (
+      filters: Array<{ code: string; arguments: Array<{ name: string; value: string }> }>,
+      parentId: string,
+      inheritFilters: boolean
+    ) => {
+      if (filters.length === 0) return;
+      runPreview({
+        variables: {
+          input: {
+            filters: filters.map((f) => ({ code: f.code, arguments: f.arguments })),
+            inheritFilters,
+            parentId: parentId || undefined,
+          },
+          options: { take: 24 },
+        },
+      });
+    },
+    [runPreview]
+  );
+
+  const handleAssignToChannels = async (action: 'assign' | 'remove') => {
+    if (!id || isNew || selectedChannelIds.length === 0) return;
+    const mutate = action === 'assign' ? assignToChannel : removeFromChannel;
+    try {
+      for (const channelId of selectedChannelIds) {
+        await mutate({
+          variables: {
+            input: { channelId, collectionIds: [id] },
+          },
+        });
+      }
+      const channelNames = selectedChannelIds
+        .map((cid) => channels.find((c) => c.id === cid)?.code)
+        .filter(Boolean)
+        .join(', ');
+      dispatch(
+        addToast({
+          message:
+            action === 'assign'
+              ? `Catégorie assignée à ${channelNames}`
+              : `Catégorie retirée de ${channelNames}`,
+          type: 'success',
+        })
+      );
+      setSelectedChannelIds([]);
+    } catch (err: any) {
+      dispatch(
+        addToast({
+          message: err.message || 'Erreur lors de la mise à jour des canaux',
+          type: 'error',
+        })
+      );
+    }
+  };
+
   const handleSubmit = async (values: FormValues) => {
     try {
       // Handle image upload if there's a new image
@@ -282,7 +417,9 @@ export const CategoryDetail: React.FC = () => {
           arguments: f.arguments,
         })),
         isPrivate: values.isPrivate,
+        inheritFilters: values.inheritFilters,
         featuredAssetId: featuredAssetId || null,
+        assetIds: galleryAssets.map((a) => a.id),
         customFields: {
           displayOrder: values.displayOrder,
         },
@@ -375,6 +512,7 @@ export const CategoryDetail: React.FC = () => {
     descriptionAr: getTranslation(collection?.translations, 'ar', 'description'),
     parentId: collection?.parentId || '',
     isPrivate: collection?.isPrivate || false,
+    inheritFilters: collection?.inheritFilters ?? true,
     displayOrder: collection?.customFields?.displayOrder || 0,
   };
 
@@ -409,6 +547,17 @@ export const CategoryDetail: React.FC = () => {
             </div>
           )}
         </div>
+        {!isNew && collection && (
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleDuplicate}
+            loading={duplicating}
+            icon={<Copy className="h-4 w-4" />}
+          >
+            Dupliquer
+          </Button>
+        )}
       </div>
 
       <Formik
@@ -583,6 +732,33 @@ export const CategoryDetail: React.FC = () => {
                         <div className="w-11 h-6 bg-muted-foreground/30 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
                       </label>
                     </div>
+
+                    {/* Inherit Filters Toggle */}
+                    <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-500/20 rounded-lg">
+                          <Filter className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">
+                            Hériter les filtres du parent
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Les produits de la catégorie parente sont aussi inclus dans cette catégorie
+                          </p>
+                        </div>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="inheritFilters"
+                          checked={values.inheritFilters}
+                          onChange={handleChange}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-muted-foreground/30 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                      </label>
+                    </div>
                   </div>
                 </div>
 
@@ -688,7 +864,54 @@ export const CategoryDetail: React.FC = () => {
                     <CollectionFilterBuilder
                       filters={collectionFilters}
                       onChange={setCollectionFilters}
+                      previewCount={previewCount}
+                      onPreview={() =>
+                        triggerPreview(
+                          collectionFilters,
+                          values.parentId,
+                          values.inheritFilters
+                        )
+                      }
                     />
+                    {previewItems.length > 0 && (
+                      <div className="mt-6 border-t border-border pt-6">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-medium text-foreground">
+                            Aperçu ({previewCount ?? previewItems.length} variantes)
+                          </h3>
+                          {previewState.loading && <Spinner size="sm" />}
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-h-96 overflow-y-auto">
+                          {previewItems.map((v: any) => (
+                            <div
+                              key={v.id}
+                              className="bg-muted rounded-lg p-3 flex flex-col items-center text-center"
+                            >
+                              {v.product?.featuredAsset?.preview ? (
+                                <img
+                                  src={v.product.featuredAsset.preview}
+                                  alt={v.name}
+                                  className="w-full aspect-square object-cover rounded-lg mb-2"
+                                />
+                              ) : (
+                                <div className="w-full aspect-square bg-card rounded-lg mb-2 flex items-center justify-center">
+                                  <Package className="h-8 w-8 text-muted-foreground" />
+                                </div>
+                              )}
+                              <p className="text-sm font-medium text-foreground truncate w-full">
+                                {v.product?.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground truncate w-full">
+                                {v.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground font-mono mt-0.5">
+                                {v.sku}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -888,6 +1111,54 @@ export const CategoryDetail: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Gallery Card */}
+                <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+                  <div className="px-6 py-4 border-b border-border bg-amber-500/5 flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                      <ImageIcon className="h-5 w-5 text-amber-500" />
+                      Galerie ({galleryAssets.length})
+                    </h2>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowGalleryPicker(true)}
+                      icon={<Plus className="h-4 w-4" />}
+                    >
+                      Ajouter
+                    </Button>
+                  </div>
+                  <div className="p-4">
+                    {galleryAssets.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        Aucune image dans la galerie
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-2">
+                        {galleryAssets.map((a) => (
+                          <div key={a.id} className="relative group aspect-square">
+                            <img
+                              src={a.preview}
+                              alt=""
+                              className="w-full h-full object-cover rounded-lg"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setGalleryAssets((prev) => prev.filter((g) => g.id !== a.id))
+                              }
+                              className="absolute top-1 right-1 p-1 bg-destructive rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                              title="Retirer"
+                            >
+                              <X className="h-3 w-3 text-white" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 {/* Quick Stats (only when editing) */}
                 {!isNew && collection && (
                   <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
@@ -922,6 +1193,77 @@ export const CategoryDetail: React.FC = () => {
                           {collection.isPrivate ? 'Prive' : 'Public'}
                         </Badge>
                         <p className="text-sm text-muted-foreground mt-1">Visibilite</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Channels Card (only when editing and >1 channel exists) */}
+                {!isNew && collection && channels.length > 1 && (
+                  <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+                    <div className="px-6 py-4 border-b border-border bg-cyan-500/5">
+                      <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                        <Radio className="h-5 w-5 text-cyan-500" />
+                        Canaux
+                      </h2>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Assigner ou retirer cette categorie d'un canal de vente
+                      </p>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {channels.map((ch) => {
+                          const checked = selectedChannelIds.includes(ch.id);
+                          return (
+                            <label
+                              key={ch.id}
+                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => {
+                                  setSelectedChannelIds((ids) =>
+                                    checked
+                                      ? ids.filter((i) => i !== ch.id)
+                                      : [...ids, ch.id]
+                                  );
+                                }}
+                                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                              />
+                              <span className="text-sm font-medium text-foreground">
+                                {ch.code}
+                              </span>
+                              <span className="text-xs text-muted-foreground ml-auto">
+                                {ch.defaultLanguageCode} · {ch.defaultCurrencyCode}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          loading={assigningChannel}
+                          disabled={selectedChannelIds.length === 0}
+                          onClick={() => handleAssignToChannels('assign')}
+                          icon={<Plus className="h-4 w-4" />}
+                        >
+                          Assigner
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          loading={removingChannel}
+                          disabled={selectedChannelIds.length === 0}
+                          onClick={() => handleAssignToChannels('remove')}
+                          icon={<Minus className="h-4 w-4" />}
+                        >
+                          Retirer
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -971,6 +1313,25 @@ export const CategoryDetail: React.FC = () => {
         multiple={false}
         selectedIds={featuredImage?.id ? [featuredImage.id] : []}
         title="Selectionner une image"
+      />
+
+      {/* Gallery Asset Picker (multi) */}
+      <AssetPickerModal
+        isOpen={showGalleryPicker}
+        onClose={() => setShowGalleryPicker(false)}
+        onSelect={(assets) => {
+          setGalleryAssets((prev) => {
+            const existing = new Set(prev.map((a) => a.id));
+            const additions = assets
+              .filter((a) => !existing.has(a.id))
+              .map((a) => ({ id: a.id, preview: a.preview }));
+            return [...prev, ...additions];
+          });
+          setShowGalleryPicker(false);
+        }}
+        multiple={true}
+        selectedIds={galleryAssets.map((a) => a.id)}
+        title="Selectionner des images pour la galerie"
       />
     </div>
   );

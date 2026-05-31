@@ -1,366 +1,127 @@
 # OSCAR Fashion E-commerce Platform
-## Project Documentation - Version 2.0 (Updated Stack)
+
+E-commerce platform for the Algerian fashion market. **pnpm + Turborepo** monorepo with a Vendure backend, a Next.js storefront, a React back-office, and a React Native (Expo) mobile app.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 e-commerce-OSCAR/
-├── 01-BACKEND/                 # Spring Boot + GraphQL API
-│   ├── SPECIFICATION.md        ✅ UPDATED - GraphQL + SPQR + iText
-│   ├── CALENDAR.md             # 14-16 weeks timeline
-│   └── BUDGET.md               # ~2.4M DZD
-│
-├── 02-FRONTEND/                # Next.js Web Application
-│   ├── SPECIFICATION.md        ✅ UPDATED - Next.js + Tailwind + GraphQL
-│   ├── CALENDAR.md             # 12-14 weeks timeline
-│   └── BUDGET.md               # ~1.8M DZD
-│
-├── 03-BACKOFFICE/              # React Admin Panel
-│   ├── SPECIFICATION.md        # React + Apollo + Tailwind + Redux
-│   ├── CALENDAR.md             # 8 weeks timeline
-│   └── BUDGET.md               # ~1.1M DZD
-│
-├── 04-MOBILE/                  # React Native (Expo) App
-│   ├── SPECIFICATION.md        # Expo + GraphQL
-│   ├── CALENDAR.md             # 9-10 weeks timeline
-│   └── BUDGET.md               # ~1.4M DZD
-│
-├── MASTER-PROJECT-PLAN.md      # Consolidated project plan
-├── TECHNICAL-CHANGES-SUMMARY.md ✅ NEW - All tech stack changes
-└── README.md                   # This file
+├── apps/
+│   ├── backend/          Vendure 3.5 (NestJS) + TypeORM + PostgreSQL   :8085
+│   ├── frontend/         Next.js 16 + React 19 + Apollo + Tailwind     :3000
+│   ├── backoffice/       React 19 + Vite 7 + Apollo + Redux Toolkit    :5173
+│   └── mobile/           Expo / React Native (standalone, not in workspace)
+├── packages/
+│   ├── shared/           Pure-TS: colors, constants (wilayas, sizes, payment), formatters
+│   └── graphql-shop/     Shared shop-api codegen — TypeScript types + Apollo hooks
+├── deploy/               Canonical deploy scripts (Caddy + PM2, single VPS)
+├── docs/                 All cross-cutting documentation (see docs/README.md)
+├── CLAUDE.md             Guidance for Claude Code
+└── README.md             This file
 ```
 
----
-
-## 🚀 Technology Stack (Version 2.0)
-
-### Backend
-- **Framework**: Spring Boot 3.x (Java 17+)
-- **API**: **GraphQL** with **SPQR library**
-- **Database**: PostgreSQL
-- **PDF Generation**: **iText 7** (instead of Jasper Reports)
-- **Documentation**: GraphQL Playground + Voyager
-- **No Redis** (DataLoader for caching)
-
-### Frontend Web
-- **Framework**: **Next.js 14+** (App Router)
-- **Build**: Vite
-- **Language**: TypeScript
-- **UI**: **Tailwind CSS** (not Material-UI)
-- **Data**: **GraphQL** with Apollo Client + Code Generation
-- **Forms**: **Formik + Yup**
-- **Dates**: date-fns
-- **i18n**: next-intl
-- **Icons**: Lucide Icons / Heroicons
-
-### Back-Office
-- **Framework**: React.js
-- **UI**: **Tailwind CSS** (except MUI X Charts for analytics)
-- **Data**: **GraphQL** with Apollo Client
-- **State**: **Redux Toolkit**
-- **Forms**: **Formik + Yup**
-- **Charts**: MUI X Charts (kept)
-
-### Mobile
-- **Framework**: React Native with **Expo**
-- **Data**: **GraphQL** with Apollo Client + Code Generation
-- **No Firebase** (no push notifications for now)
-- **No Offline Mode**
+> The mobile app is a standalone Expo project, not part of the pnpm workspace. Run it independently with `cd apps/mobile && npx expo start`.
 
 ---
 
-## 🔄 Major Changes from V1.0
+## Technology Stack
 
-### ✅ What Changed
+### Backend — `apps/backend`
+- **Vendure 3.5** on NestJS, TypeORM, PostgreSQL
+- GraphQL **Shop API** (`/shop-api`) and **Admin API** (`/admin-api`)
+- Algerian payment handlers: **CIB**, **Baridimob**, **Cash on Delivery**
+- Custom plugin in `src/plugins/oscar-plugin/`
 
-| Component | V1.0 | V2.0 |
-|-----------|------|------|
-| Backend API | REST | **GraphQL (SPQR)** |
-| Backend PDF | Jasper Reports | **iText 7** |
-| Backend Cache | Redis | **Removed** |
-| Frontend Framework | React (CRA) | **Next.js 14** |
-| Frontend UI | Material-UI | **Tailwind CSS** |
-| Frontend Data | REST + React Query | **GraphQL + Apollo** |
-| Frontend Forms | React Hook Form | **Formik + Yup** |
-| BackOffice UI | Material-UI | **Tailwind** (+ MUI Charts) |
-| Mobile Setup | RN CLI | **Expo** |
-| Mobile Offline | Yes | **No** (removed) |
-| Mobile Push | Firebase | **Removed** |
+### Frontend Web — `apps/frontend`
+- **Next.js 16** App Router + **React 19**
+- **Apollo Client** with code-generated types (via `@oscar/graphql-shop`)
+- **Tailwind CSS** + **shadcn/ui**
+- **next-intl** for i18n (Arabic with RTL, French, English)
 
-### ❌ Removed (For Now)
+### Back-Office — `apps/backoffice`
+- **React 19** + **Vite 7**
+- Apollo Client (Admin API codegen) + Redux Toolkit
+- Tailwind CSS, role-based access control
 
-- Testing (Jest, Cypress, Detox)
-- ESLint (Prettier only)
-- Git Hooks (Husky)
-- CI/CD (local development)
-- Storybook
-- Redis cache
-- Firebase (mobile)
+### Mobile — `apps/mobile`
+- **Expo / React Native** + Apollo Client
+- Multi-language with RTL support
 
 ---
 
-## 📊 Project Overview
+## Common Commands
 
-### Budget Total: **~6.7M DZD**
-
-| Component | Duration | Hours | Estimated Cost |
-|-----------|----------|-------|----------------|
-| Backend | 14-16 weeks | 1,680-1,920h | ~2.4M DZD |
-| Frontend | 12-14 weeks | 1,440-1,680h | ~1.8M DZD |
-| Back-Office | 8 weeks | 960h | ~1.1M DZD |
-| Mobile | 9-10 weeks | 1,080-1,200h | ~1.4M DZD |
-
-### Timeline: **~26 weeks** (6.5 months)
-
-### Team: **~12 professionals**
-- Backend developers (Spring Boot + GraphQL)
-- Frontend developers (Next.js + React)
-- Mobile developers (React Native + Expo)
-- UI/UX developer
-- QA engineers
-- DevOps engineer
-- Architect/Tech Lead
-
----
-
-## 🎯 Key Features
-
-### E-commerce Core
-✅ Product catalog with categories
-✅ Advanced search & filtering
-✅ Shopping cart
-✅ Multi-step checkout
-✅ Order management
-✅ User authentication & profiles
-
-### Payments
-✅ CIB (Algerian bank cards)
-✅ Baridimob (mobile payment)
-✅ Cash on Delivery
-
-### Multi-platform
-✅ Web (Next.js - Desktop & Mobile responsive)
-✅ iOS App (React Native Expo)
-✅ Android App (React Native Expo)
-✅ Admin Panel (React)
-
-### Multi-language
-✅ Arabic (with RTL support)
-✅ French
-✅ English
-
-### Admin Features
-✅ Dashboard with analytics (MUI X Charts)
-✅ Product management (CRUD)
-✅ Order management
-✅ Customer management
-✅ Reporting & statistics
-✅ PDF invoice generation (iText)
-
-### Integrations
-✅ ERP/WMS synchronization
-✅ Email notifications
-✅ SMS notifications
-
----
-
-## 🛠️ Development Setup
-
-### Backend
+### Root (Turborepo)
 ```bash
-cd 01-BACKEND
-./mvnw spring-boot:run
-# GraphQL Playground: http://localhost:8080/graphql
+pnpm install               # Install all workspaces
+pnpm dev                   # Run dev for all apps
+pnpm dev:backend           # Backend only
+pnpm dev:frontend          # Frontend only
+pnpm dev:backoffice        # Back-office only
+pnpm build                 # Build all apps
+pnpm codegen               # GraphQL codegen across all apps
+pnpm type-check            # TypeScript check
 ```
 
-### Frontend
+### Per-app
 ```bash
-cd 02-FRONTEND
-npm install
-npm run codegen    # Generate GraphQL types
-npm run dev       # http://localhost:3000
+pnpm --filter @oscar/backend dev          # Vendure → :8085
+pnpm --filter @oscar/backend populate     # Seed database
+pnpm --filter @oscar/frontend dev         # Next.js → :3000
+pnpm --filter @oscar/frontend storybook   # Stories → :6006
+pnpm --filter @oscar/backoffice dev       # Vite → :5173
 ```
 
-### Back-Office
+### GraphQL codegen (backend must be running)
 ```bash
-cd 03-BACKOFFICE
-npm install
-npm run codegen    # Generate GraphQL types
-npm run dev
+pnpm --filter @oscar/graphql-shop codegen   # Shared shop-api types
+pnpm --filter @oscar/backoffice codegen     # Admin API types
 ```
 
-### Mobile
+### Database migrations
 ```bash
-cd 04-MOBILE
-npm install
-npm run codegen    # Generate GraphQL types
-npx expo start
+pnpm --filter @oscar/backend migration:generate
+pnpm --filter @oscar/backend migration:run
+pnpm --filter @oscar/backend migration:revert
+pnpm --filter @oscar/backend reindex
 ```
 
 ---
 
-## 📖 Documentation
+## Documentation
 
-### Main Documents
-1. **[MASTER-PROJECT-PLAN.md](MASTER-PROJECT-PLAN.md)** - Complete project overview
-2. **[TECHNICAL-CHANGES-SUMMARY.md](TECHNICAL-CHANGES-SUMMARY.md)** - All tech stack changes
+All cross-cutting documentation lives in [`docs/`](./docs/README.md). Quick index:
 
-### Component Documentation
-- **Backend**: [01-BACKEND/SPECIFICATION.md](01-BACKEND/SPECIFICATION.md)
-- **Frontend**: [02-FRONTEND/SPECIFICATION.md](02-FRONTEND/SPECIFICATION.md)
-- **Back-Office**: [03-BACKOFFICE/SPECIFICATION.md](03-BACKOFFICE/SPECIFICATION.md)
-- **Mobile**: [04-MOBILE/SPECIFICATION.md](04-MOBILE/SPECIFICATION.md)
+- **[docs/README.md](./docs/README.md)** — full table of contents
+- **Business & planning**: [master project plan](./docs/business/master-project-plan.md), [tasks checklist](./docs/planning/tasks-checklist.md), [commercial proposal](./docs/business/commercial-proposal.md)
+- **Specifications**: [technical-spec](./docs/specs/technical-spec.md), [frontend](./docs/specs/frontend-spec.md), [backoffice](./docs/specs/backoffice-spec.md), [mobile](./docs/specs/mobile-spec.md)
+- **Guides**: [authentication](./docs/guides/authentication.md), [Railway deployment](./docs/guides/railway-deployment.md), [POS integration](./docs/guides/pos-integration-challenges.md), [technical changes summary](./docs/guides/technical-changes-summary.md)
+- **App-level READMEs**: [backend](./apps/backend/README.md) · [back-office](./apps/backoffice/README.md) · [mobile](./apps/mobile/README.md)
 
 ---
 
-## 🔍 GraphQL Code Generation
+## Deployment
 
-All frontend components use GraphQL Code Generator for type-safe API calls.
+Canonical path: a single VPS with **Caddy + PM2** (Ubuntu). See [`deploy/README.md`](./deploy/README.md) and [`deploy/docs/`](./deploy/docs/) for the step-by-step bootstrap → first-deploy → day-2 update guide.
 
-**Workflow**:
-1. Backend exposes GraphQL schema
-2. Run `npm run codegen` in frontend projects
-3. Auto-generated TypeScript types
-4. Use typed queries/mutations
+Alternative (managed): [Railway deployment guide](./docs/guides/railway-deployment.md).
 
-**Example**:
-```typescript
-// Auto-generated types
-import { useQuery } from '@apollo/client';
-import { GetProductsQuery, GetProductsQueryVariables } from './graphql/generated';
-
-const { data } = useQuery<GetProductsQuery, GetProductsQueryVariables>(GET_PRODUCTS, {
-  variables: { page: 1, size: 20 }
-});
-```
+A HestiaCP exploration is preserved at [`docs/archive/deploy-hestia/`](./docs/archive/deploy-hestia/) for reference only — it is not maintained.
 
 ---
 
-## 🎨 Design System
+## Key Features
 
-### Colors (Tailwind Config)
-- **Primary**: #2C3E50 (Blue marine)
-- **Secondary**: #E8D5C4 (Beige/cream)
-- **Accent**: #C9A992 (Terracotta)
-
-### Typography
-- **Font**: Inter (web), System fonts (mobile)
-
-### Components
-- Built with **Tailwind CSS**
-- Responsive design (mobile-first)
-- RTL support for Arabic
+- **E-commerce core**: catalog, search & filters, cart, multi-step checkout, order management
+- **Algerian payments**: CIB, Baridimob, Cash on Delivery
+- **Multi-platform**: web (Next.js), iOS + Android (Expo), admin panel
+- **Multi-language**: Arabic (RTL), French (default), English
+- **Admin**: dashboard, product/order/customer management, role-based access
 
 ---
 
-## ⚙️ Environment Variables
+## License
 
-### Backend
-```
-DATABASE_URL=
-DATABASE_USERNAME=
-DATABASE_PASSWORD=
-JWT_SECRET=
-CIB_MERCHANT_ID=
-BARIDIMOB_MERCHANT_ID=
-SMTP_HOST=
-SMS_API_KEY=
-```
-
-### Frontend/Back-Office/Mobile
-```
-NEXT_PUBLIC_GRAPHQL_URL=http://localhost:8080/graphql
-```
-
----
-
-## 📅 Project Phases
-
-### Phase 1: Setup & Architecture (Weeks 1-4)
-- Project initialization
-- Database schema design
-- GraphQL schema design
-- UI/UX design finalization
-
-### Phase 2: Backend Development (Weeks 5-16)
-- GraphQL API with SPQR
-- Authentication & users
-- Products & catalog
-- Orders & payments (CIB, Baridimob)
-- Notifications
-- PDF reports (iText)
-- ERP synchronization
-
-### Phase 3: Frontend Development (Weeks 5-16)
-- Next.js setup with App Router
-- GraphQL integration
-- Product catalog with Tailwind UI
-- Cart & checkout flow
-- User authentication & profile
-- Multi-language support (next-intl)
-
-### Phase 4: Mobile Development (Weeks 7-16)
-- Expo setup
-- GraphQL integration
-- Core shopping features
-- Payment integration
-- Notifications
-
-### Phase 5: Back-Office (Weeks 9-16)
-- Dashboard with MUI X Charts
-- Product management
-- Order management
-- Customer management
-- Reports & analytics
-
-### Phase 6: Testing & Deployment (Weeks 17-26)
-- Manual testing
-- Bug fixes
-- Performance optimization
-- Production deployment
-- Training
-
----
-
-## 🚀 Deployment
-
-### Backend
-- Docker container
-- PostgreSQL database
-- Java 17+ runtime
-
-### Frontend (Next.js)
-- Vercel (recommended) or custom hosting
-- SSR/SSG support
-
-### Mobile
-- iOS: App Store submission
-- Android: Google Play submission
-- Expo EAS Build
-
-### Back-Office
-- Static hosting or Vercel
-
----
-
-## 📞 Support & Contact
-
-For questions about the project:
-- See [MASTER-PROJECT-PLAN.md](MASTER-PROJECT-PLAN.md)
-- Check component-specific SPECIFICATION.md files
-- Review [TECHNICAL-CHANGES-SUMMARY.md](TECHNICAL-CHANGES-SUMMARY.md) for tech details
-
----
-
-## 📜 License
-
-Proprietary - OSCAR Fashion
-All rights reserved.
-
----
-
-**Version**: 2.0 (Updated Technology Stack)
-**Last Updated**: Novembre 2025
-**Status**: Planning & Specification Phase
+Proprietary — OSCAR Fashion. All rights reserved.

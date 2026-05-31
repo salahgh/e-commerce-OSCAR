@@ -72,6 +72,24 @@ query AdminCustomer($id: ID!) {
       }
       totalItems
     }
+    history(options: {
+      take: 50
+      sort: { createdAt: DESC }
+      filter: { type: { eq: "CUSTOMER_NOTE" } }
+    }) {
+      items {
+        id
+        createdAt
+        type
+        data
+        administrator {
+          id
+          firstName
+          lastName
+        }
+      }
+      totalItems
+    }
     customFields {
       wilaya
       city
@@ -105,6 +123,84 @@ mutation UpdateCustomer($input: UpdateCustomerInput!) {
 # Delete customer
 mutation DeleteCustomer($id: ID!) {
   deleteCustomer(id: $id) {
+    result
+    message
+  }
+}
+
+# Create a customer from the admin panel. Optional password — if omitted the
+# customer is created without a user account (password reset flow handles it).
+mutation CreateCustomer($input: CreateCustomerInput!, $password: String) {
+  createCustomer(input: $input, password: $password) {
+    ... on Customer {
+      id
+      firstName
+      lastName
+      emailAddress
+    }
+    ... on EmailAddressConflictError {
+      errorCode
+      message
+    }
+  }
+}
+
+# Bulk delete (uses individual deleteCustomer under the hood on the client).
+# Vendure doesn't expose a single bulk-delete mutation, so we delete one-by-one.
+
+# Address CRUD ──────────────────────────────────────────────────────────────
+
+mutation CreateCustomerAddress($customerId: ID!, $input: CreateAddressInput!) {
+  createCustomerAddress(customerId: $customerId, input: $input) {
+    id
+    fullName
+    streetLine1
+    streetLine2
+    city
+    postalCode
+    country {
+      code
+      name
+    }
+    phoneNumber
+    defaultShippingAddress
+    defaultBillingAddress
+  }
+}
+
+mutation UpdateCustomerAddress($input: UpdateAddressInput!) {
+  updateCustomerAddress(input: $input) {
+    id
+    fullName
+    streetLine1
+    streetLine2
+    city
+    postalCode
+    country {
+      code
+      name
+    }
+    phoneNumber
+    defaultShippingAddress
+    defaultBillingAddress
+  }
+}
+
+mutation DeleteCustomerAddress($id: ID!) {
+  deleteCustomerAddress(id: $id) {
+    success
+  }
+}
+
+# Notes — addNoteToCustomer pushes a CUSTOMER_NOTE history entry.
+mutation AddNoteToCustomer($input: AddNoteToCustomerInput!) {
+  addNoteToCustomer(input: $input) {
+    id
+  }
+}
+
+mutation DeleteCustomerNote($id: ID!) {
+  deleteCustomerNote(id: $id) {
     result
     message
   }

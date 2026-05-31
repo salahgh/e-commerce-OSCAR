@@ -1,0 +1,106 @@
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { hasLocale, NextIntlClientProvider } from 'next-intl';
+import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
+import { IBM_Plex_Sans_Arabic } from 'next/font/google';
+import { ThemeProvider } from 'next-themes';
+import { ApolloWrapper } from '@/lib/apollo/apollo-wrapper';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { CartProvider } from '@/contexts/CartContext';
+import { WishlistProvider } from '@/contexts/WishlistContext';
+import { MiniCart, SkipToContent } from '@/components/layout';
+import { ToastProvider } from '@/components/ui/Toast';
+import { routing } from '@/i18n/routing';
+import { localeDirection, type Locale } from '@/i18n/config';
+
+const plexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ['arabic', 'latin'],
+  weight: ['400', '500', '700'],
+  display: 'swap',
+  variable: '--font-plex-arabic',
+});
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://oscarfashion.dz';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) return {};
+
+  const t = await getTranslations({ locale, namespace: 'HomePage' });
+  const title = t('title');
+  const description = t('subtitle');
+  const isDefault = locale === routing.defaultLocale;
+  const path = isDefault ? '/' : `/${locale}`;
+
+  const languages: Record<string, string> = {};
+  for (const l of routing.locales) {
+    languages[l] = l === routing.defaultLocale ? SITE_URL : `${SITE_URL}/${l}`;
+  }
+  languages['x-default'] = SITE_URL;
+
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: { default: title, template: '%s · OSCAR Najar' },
+    description,
+    alternates: { canonical: `${SITE_URL}${path === '/' ? '' : path}`, languages },
+    openGraph: {
+      title,
+      description,
+      url: `${SITE_URL}${path === '/' ? '' : path}`,
+      siteName: 'OSCAR Najar',
+      locale,
+      type: 'website',
+    },
+    twitter: { card: 'summary_large_image', title, description },
+  };
+}
+
+export default async function LocaleLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+
+  setRequestLocale(locale);
+  const messages = await getMessages();
+  const dir = localeDirection[locale as Locale];
+
+  return (
+    <html lang={locale} dir={dir} className={plexArabic.variable} suppressHydrationWarning>
+      <body className="bg-bg-base text-content font-sans antialiased">
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+          <ApolloWrapper>
+            <NextIntlClientProvider locale={locale} messages={messages}>
+              <ToastProvider>
+                <AuthProvider>
+                  <CartProvider>
+                    <WishlistProvider>
+                      <SkipToContent />
+                      {children}
+                      <MiniCart />
+                    </WishlistProvider>
+                  </CartProvider>
+                </AuthProvider>
+              </ToastProvider>
+            </NextIntlClientProvider>
+          </ApolloWrapper>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}

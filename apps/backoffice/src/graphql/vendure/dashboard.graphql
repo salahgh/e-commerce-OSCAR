@@ -111,6 +111,43 @@ query DashboardTopSellingProducts($limit: Int) {
   }
 }
 
+# ==================== CATALOG STATS ====================
+
+query DashboardCatalogStats {
+  dashboardCatalogStats {
+    totalProducts
+    enabledProducts
+    disabledProducts
+    totalVariants
+    outOfStockVariants
+    lowStockVariants
+    productsWithoutImages
+    newProductsThisMonth
+    totalInventoryValue
+    averageProductPrice
+  }
+}
+
+query DashboardProductsByCollection($limit: Int) {
+  dashboardProductsByCollection(limit: $limit) {
+    collectionId
+    collectionName
+    productCount
+  }
+}
+
+query DashboardRecentProducts($limit: Int) {
+  dashboardRecentProducts(limit: $limit) {
+    id
+    name
+    slug
+    featuredAssetPreview
+    createdAt
+    enabled
+    variantCount
+  }
+}
+
 # ==================== LEGACY QUERIES (kept for compatibility) ====================
 
 query OscarDashboardStats {

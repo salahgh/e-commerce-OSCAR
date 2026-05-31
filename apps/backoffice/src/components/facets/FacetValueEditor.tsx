@@ -3,7 +3,7 @@ import { Trash2, GripVertical, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
-import { ColorPickerField } from './ColorPickerField';
+import { FacetCustomFieldsRenderer } from './FacetCustomFieldsRenderer';
 import { LanguageCode } from '../../graphql/generated/graphql';
 
 export interface FacetValueData {
@@ -91,18 +91,25 @@ export const FacetValueEditor: React.FC<FacetValueEditorProps> = ({
               value={value.code}
               onChange={(e) => handleCodeChange(e.target.value)}
               placeholder="Ex: rouge"
-              helperText={value.isNew ? 'Auto-généré depuis le nom' : undefined}
+              helperText={
+                value.isNew
+                  ? 'Auto-généré depuis le nom — choisissez bien, le code ne peut plus être modifié après création'
+                  : 'Le code est immuable après la création. Pour le modifier, créez une nouvelle valeur et migrez les références.'
+              }
               disabled={disabled || !value.isNew}
               className="font-mono"
             />
           </div>
 
-          {/* Color picker for color facets */}
+          {/* Custom fields (currently only colorHex, but routed through the
+              generic renderer so future Vendure custom-field additions only
+              need a single source edit). */}
           {isColorFacet && (
-            <ColorPickerField
-              label="Couleur"
-              value={value.colorHex || ''}
-              onChange={(colorHex) => onChange({ ...value, colorHex })}
+            <FacetCustomFieldsRenderer
+              values={{ colorHex: value.colorHex || '' }}
+              onChange={(next) =>
+                onChange({ ...value, colorHex: (next.colorHex as string) || '' })
+              }
               disabled={disabled}
             />
           )}

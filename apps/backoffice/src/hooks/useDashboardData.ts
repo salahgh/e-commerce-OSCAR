@@ -113,6 +113,47 @@ const DASHBOARD_TOP_SELLING_PRODUCTS = gql`
   }
 `;
 
+const DASHBOARD_CATALOG_STATS = gql`
+  query DashboardCatalogStats {
+    dashboardCatalogStats {
+      totalProducts
+      enabledProducts
+      disabledProducts
+      totalVariants
+      outOfStockVariants
+      lowStockVariants
+      productsWithoutImages
+      newProductsThisMonth
+      totalInventoryValue
+      averageProductPrice
+    }
+  }
+`;
+
+const DASHBOARD_PRODUCTS_BY_COLLECTION = gql`
+  query DashboardProductsByCollection($limit: Int) {
+    dashboardProductsByCollection(limit: $limit) {
+      collectionId
+      collectionName
+      productCount
+    }
+  }
+`;
+
+const DASHBOARD_RECENT_PRODUCTS = gql`
+  query DashboardRecentProducts($limit: Int) {
+    dashboardRecentProducts(limit: $limit) {
+      id
+      name
+      slug
+      featuredAssetPreview
+      createdAt
+      enabled
+      variantCount
+    }
+  }
+`;
+
 // ==================== Types ====================
 
 export type DateRange = '7d' | '30d' | '90d';
@@ -204,6 +245,37 @@ export interface TopSellingProduct {
   quantitySold: number;
   revenue: number;
   imageUrl?: string;
+}
+
+export interface CatalogStats {
+  totalProducts: number;
+  enabledProducts: number;
+  disabledProducts: number;
+  totalVariants: number;
+  outOfStockVariants: number;
+  lowStockVariants: number;
+  productsWithoutImages: number;
+  newProductsThisMonth: number;
+  // Cents; can exceed Int32 — backend returns string, we parse to number.
+  totalInventoryValue: number;
+  averageProductPrice: number;
+}
+
+export interface ProductsByCollectionPoint {
+  collectionId: string;
+  collectionName: string;
+  productCount: number;
+  [key: string]: string | number;
+}
+
+export interface RecentProductItem {
+  id: string;
+  name: string;
+  slug: string;
+  featuredAssetPreview: string | null;
+  createdAt: string;
+  enabled: boolean;
+  variantCount: number;
 }
 
 // ==================== Helper Functions ====================
@@ -309,6 +381,39 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     error: topProductsError,
   } = useQuery(DASHBOARD_TOP_SELLING_PRODUCTS, {
     variables: { limit: 10 },
+    errorPolicy: 'all',
+    fetchPolicy: 'cache-and-network',
+  });
+
+  // Fetch catalog stats (point-in-time, no date range)
+  const {
+    data: catalogStatsData,
+    loading: catalogStatsLoading,
+    error: catalogStatsError,
+    refetch: refetchCatalogStats,
+  } = useQuery(DASHBOARD_CATALOG_STATS, {
+    errorPolicy: 'all',
+    fetchPolicy: 'cache-and-network',
+  });
+
+  // Fetch products grouped by collection
+  const {
+    data: productsByCollectionData,
+    loading: productsByCollectionLoading,
+    error: productsByCollectionError,
+  } = useQuery(DASHBOARD_PRODUCTS_BY_COLLECTION, {
+    variables: { limit: 8 },
+    errorPolicy: 'all',
+    fetchPolicy: 'cache-and-network',
+  });
+
+  // Fetch recently added products
+  const {
+    data: recentProductsData,
+    loading: recentProductsLoading,
+    error: recentProductsError,
+  } = useQuery(DASHBOARD_RECENT_PRODUCTS, {
+    variables: { limit: 5 },
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
   });
@@ -440,13 +545,40 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     );
   }, [topProductsData]);
 
-  // Combined loading states
-  const loading = kpiLoading || recentOrdersLoading || lowStockLoading;
-  const chartsLoading = salesTrendLoading || ordersByStatusLoading || categoryLoading || topProductsLoading;
+  // Process catalog stats — parse totalInventoryValue from string (bigint) → number.
+  const catalogStats: CatalogStats = useMemo(() => {
+    const stats = catalogStatsData?.dashboardCatalogStats;
+    return {
+      totalProducts: stats?.totalProducts ?? 0,
+      enabledProducts: stats?.enabledProducts ?? 0,
+      disabledProducts: stats?.disabledProducts ?? 0,
+      totalVariants: stats?.totalVariants ?? 0,
+      outOfStockVariants: stats?.outOfStockVariants ?? 0,
+      lowStockVariants: stats?.lowStockVariants ?? 0,
+      productsWithoutImages: stats?.productsWithoutImages ?? 0,
+      newProductsThisMonth: stats?.newProductsThisMonth ?? 0,
+      totalInventoryValue: Number(stats?.totalInventoryValue ?? '0'),
+      averageProductPrice: stats?.averageProductPrice ?? 0,
+    };
+  }, [catalogStatsData]);
 
-  // Refetch function
+  const productsByCollection: ProductsByCollectionPoint[] = useMemo(() => {
+    return productsByCollectionData?.dashboardProductsByCollection || [];
+  }, [productsByCollectionData]);
+
+  const recentProducts: RecentProductItem[] = useMemo(() => {
+    return recentProductsData?.dashboardRecentProducts || [];
+  }, [recentProductsData]);
+
+  // Combined loading states
+  const loading = kpiLoading || recentOrdersLoading || lowStockLoading || catalogStatsLoading;
+  const chartsLoading = salesTrendLoading || ordersByStatusLoading || categoryLoading || topProductsLoading;
+  const catalogLoading = catalogStatsLoading || productsByCollectionLoading || recentProductsLoading;
+
+  // Refetch function — kicks off all critical queries; the rest follow via cache-and-network.
   const refetch = () => {
     refetchKpi();
+    refetchCatalogStats();
   };
 
   return {
@@ -463,9 +595,15 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     recentOrders,
     lowStockAlerts,
 
+    // Catalog Data
+    catalogStats,
+    productsByCollection,
+    recentProducts,
+
     // Loading States
     loading,
     chartsLoading,
+    catalogLoading,
     kpisLoading: kpiLoading,
     salesTrendLoading,
     ordersByStatusLoading,
@@ -473,6 +611,9 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     recentOrdersLoading,
     lowStockLoading,
     topProductsLoading,
+    catalogStatsLoading,
+    productsByCollectionLoading,
+    recentProductsLoading,
 
     // Error handling
     hasError:
@@ -482,7 +623,10 @@ export function useDashboardData(dateRange: DateRange = '30d') {
       !!categoryError ||
       !!recentOrdersError ||
       !!lowStockError ||
-      !!topProductsError,
+      !!topProductsError ||
+      !!catalogStatsError ||
+      !!productsByCollectionError ||
+      !!recentProductsError,
     errors: {
       kpi: kpiError,
       salesTrend: salesTrendError,
@@ -491,6 +635,9 @@ export function useDashboardData(dateRange: DateRange = '30d') {
       recentOrders: recentOrdersError,
       lowStock: lowStockError,
       topProducts: topProductsError,
+      catalogStats: catalogStatsError,
+      productsByCollection: productsByCollectionError,
+      recentProducts: recentProductsError,
     },
 
     // Actions

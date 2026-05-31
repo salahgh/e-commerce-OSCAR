@@ -50,6 +50,7 @@ query AdminCollection($id: ID!) {
     isPrivate
     position
     parentId
+    inheritFilters
     breadcrumbs {
       id
       name
@@ -57,6 +58,12 @@ query AdminCollection($id: ID!) {
     }
     featuredAsset {
       id
+      preview
+      source
+    }
+    assets {
+      id
+      name
       preview
       source
     }
@@ -104,6 +111,7 @@ mutation CreateCollection($input: CreateCollectionInput!) {
     isPrivate
     position
     parentId
+    inheritFilters
     translations {
       languageCode
       name
@@ -125,6 +133,7 @@ mutation UpdateCollection($input: UpdateCollectionInput!) {
     isPrivate
     position
     parentId
+    inheritFilters
     translations {
       languageCode
       name
@@ -144,6 +153,14 @@ mutation DeleteCollection($id: ID!) {
   }
 }
 
+# Bulk delete multiple collections
+mutation DeleteCollections($ids: [ID!]!) {
+  deleteCollections(ids: $ids) {
+    result
+    message
+  }
+}
+
 mutation MoveCollection($input: MoveCollectionInput!) {
   moveCollection(input: $input) {
     id
@@ -151,6 +168,25 @@ mutation MoveCollection($input: MoveCollectionInput!) {
     slug
     position
     parentId
+  }
+}
+
+# Assign collections to channels (multi-channel administration).
+# Collection has no `channels` field on the entity itself — Vendure scopes
+# channel visibility via the `vendure-token` request header, so this mutation
+# returns the bare identity only and the UI reflects assignment via toast.
+mutation AssignCollectionsToChannel($input: AssignCollectionsToChannelInput!) {
+  assignCollectionsToChannel(input: $input) {
+    id
+    name
+  }
+}
+
+# Remove collections from channels
+mutation RemoveCollectionsFromChannel($input: RemoveCollectionsFromChannelInput!) {
+  removeCollectionsFromChannel(input: $input) {
+    id
+    name
   }
 }
 

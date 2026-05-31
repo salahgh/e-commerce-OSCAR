@@ -1,0 +1,590 @@
+{
+  "HomePage": {
+    "title": "مرحبا بكم في أوسكار فاشن",
+    "subtitle": "الموضة والأناقة",
+    "hero": {
+      "eyebrow": "تشكيلة 2026",
+      "title": "مرحباً بك في OSCAR NAJAR",
+      "subtitle": "اكتشف تشكيلتنا: أناقة جزائرية، جودة حرفية، وتوصيل خلال 48 ساعة إلى جميع الولايات.",
+      "ctaShop": "تسوّق الآن",
+      "ctaCategories": "كل الفئات"
+    },
+    "featured": {
+      "eyebrow": "المنتجات المميّزة",
+      "title": "منتجات مختارة",
+      "viewAll": "عرض الكل",
+      "loadErrorTitle": "خطأ في التحميل",
+      "loadErrorBody": "تعذّر استرجاع المنتجات. تأكّد من تشغيل خادم Vendure."
+    },
+    "collections": {
+      "eyebrow": "الفئات",
+      "title": "استكشف حسب الفئة"
+    },
+    "brandBelt": {
+      "eyebrow": "التوصيل · الدفع عند الاستلام",
+      "title": "كل الولايات، خلال 48-72 ساعة",
+      "body": "CIB أو Baridimob أو الدفع عند الاستلام. اختر ما يناسبك.",
+      "cta": "اعرف المزيد"
+    }
+  },
+  "Common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "errorEyebrow": "خطأ",
+    "retry": "إعادة المحاولة",
+    "remove": "إزالة",
+    "close": "إغلاق"
+  },
+  "NotFoundPage": {
+    "code": "404",
+    "title": "الصفحة غير موجودة",
+    "body": "المحتوى الذي تبحث عنه غير موجود أو تم نقله."
+  },
+  "TopBar": {
+    "promo": "خصم شامل التخفيضات التي تبدأ من 12000 دينار جزائري"
+  },
+  "Layout": {
+    "nav": {
+      "home": "الرئيسية",
+      "shop": "المتجر",
+      "categories": "الفئات",
+      "about": "من نحن",
+      "contact": "اتصل بنا",
+      "ariaLabel": "التنقل الرئيسي"
+    },
+    "header": {
+      "openMenu": "فتح القائمة",
+      "wishlistAria": "المفضلة",
+      "cartAria": "{count, plural, other {السلة (# عنصر)}}",
+      "searchPlaceholder": "ابحث في المتجر…",
+      "searchAria": "بحث"
+    },
+    "account": {
+      "signIn": "تسجيل الدخول",
+      "profile": "ملفي الشخصي",
+      "orders": "طلباتي",
+      "wishlist": "المفضلة",
+      "logout": "تسجيل الخروج"
+    },
+    "footer": {
+      "tagline": "الموضة الأنيقة في قلب الجزائر. توصيل إلى جميع الولايات.",
+      "contact": "اتصل بنا",
+      "address": "الجزائر العاصمة، الجزائر",
+      "help": "المساعدة",
+      "shipping": "التوصيل",
+      "returns": "الإرجاع",
+      "sizeGuide": "دليل المقاسات",
+      "faq": "الأسئلة الشائعة",
+      "company": "الشركة",
+      "about": "من نحن",
+      "careers": "الوظائف",
+      "contactLink": "اتصل بنا",
+      "terms": "الشروط والأحكام",
+      "privacy": "سياسة الخصوصية",
+      "copyright": "© {year} OSCAR Najar — جميع الحقوق محفوظة."
+    },
+    "authLayout": {
+      "backToShop": "العودة إلى المتجر"
+    },
+    "logoAria": "OSCAR Najar — الرئيسية",
+    "theme": {
+      "toggle": "تبديل السمة",
+      "switchToDark": "التبديل إلى الوضع الداكن",
+      "switchToLight": "التبديل إلى الوضع الفاتح"
+    },
+    "breadcrumb": {
+      "ariaLabel": "مسار التنقل"
+    },
+    "pagination": {
+      "ariaLabel": "ترقيم الصفحات",
+      "previous": "السابق",
+      "next": "التالي"
+    },
+    "skipToContent": "تخطي إلى المحتوى الرئيسي"
+  },
+  "CheckoutPage": {
+    "title": "إتمام الطلب",
+    "subtitle": "خطوات بسيطة لإنهاء عملية الشراء.",
+    "emptyCart": "سلتك فارغة. أضف منتجات قبل المتابعة.",
+    "browse": "تصفّح المنتجات",
+    "stepAddress": "1. عنوان التوصيل",
+    "stepShipping": "2. طريقة التوصيل",
+    "stepPayment": "3. الدفع",
+    "address": {
+      "email": "البريد الإلكتروني",
+      "emailHint": "لتأكيد الطلب",
+      "fullName": "الاسم الكامل",
+      "streetLine1": "العنوان",
+      "streetLine2": "تفاصيل إضافية (اختياري)",
+      "city": "البلدية",
+      "wilaya": "الولاية",
+      "postalCode": "الرمز البريدي",
+      "phone": "الهاتف",
+      "selectWilaya": "اختر ولاية",
+      "useShippingForBilling": "استخدم هذا العنوان للفوترة"
+    },
+    "shipping": {
+      "loading": "جاري تحميل خيارات التوصيل...",
+      "empty": "لا توجد خيارات توصيل. تحقّق من العنوان.",
+      "deliveryEstimate": "المدة المقدّرة: {delay}",
+      "delayZone1": "1-2 يوم عمل",
+      "delayZone2": "2-4 أيام عمل",
+      "delayZone3": "3-5 أيام عمل",
+      "delayZone4": "5-7 أيام عمل"
+    },
+    "payment": {
+      "loading": "جاري تحميل طرق الدفع...",
+      "empty": "لا توجد طرق دفع متاحة.",
+      "ineligible": "غير متوفّر"
+    },
+    "summary": {
+      "title": "الملخص",
+      "items": "العناصر",
+      "subtotal": "المجموع الفرعي",
+      "shipping": "التوصيل",
+      "shippingTbd": "سيتم احتسابه",
+      "total": "الإجمالي",
+      "placeOrder": "تأكيد الطلب",
+      "placing": "جاري التأكيد...",
+      "continue": "متابعة",
+      "saving": "جاري الحفظ...",
+      "termsNotice": "بتأكيد الطلب، أنت توافق على شروط البيع."
+    },
+    "errors": {
+      "addressFailed": "تعذّر حفظ العنوان.",
+      "shippingFailed": "تعذّر تعيين طريقة التوصيل.",
+      "paymentFailed": "فشل الدفع.",
+      "transitionFailed": "تعذّر إتمام الطلب.",
+      "generic": "حدث خطأ.",
+      "staleSessionTitle": "انتهت الجلسة",
+      "staleSessionBody": "جلستك لم تعد صالحة. يرجى إعادة إنشاء السلة لمتابعة الطلب.",
+      "staleSessionReset": "إعادة تعيين الجلسة"
+    }
+  },
+  "CheckoutConfirmationPage": {
+    "title": "شكرا لك على طلبك!",
+    "subtitle": "تم تسجيل طلبك {code} بنجاح.",
+    "trackingHint": "ستصلك رسالة إلكترونية تأكيد مع تفاصيل التتبع.",
+    "viewOrder": "عرض الطلب",
+    "continueShopping": "متابعة التسوّق",
+    "errorTitle": "الطلب غير موجود",
+    "errorBody": "رمز الطلب غير صالح."
+  },
+  "UserLayout": {
+    "title": "حسابي",
+    "nav": {
+      "profile": "ملفي الشخصي",
+      "orders": "طلباتي",
+      "wishlist": "المفضلة",
+      "logout": "تسجيل الخروج"
+    },
+    "loginRequired": "يرجى تسجيل الدخول للوصول إلى حسابك."
+  },
+  "OrdersPage": {
+    "title": "طلباتي",
+    "subtitle": "سجل مشترياتك.",
+    "empty": "لم تقم بأي طلب بعد.",
+    "shopCta": "تصفّح المتجر",
+    "tableCode": "الرقم",
+    "tableDate": "التاريخ",
+    "tableState": "الحالة",
+    "tableTotal": "الإجمالي",
+    "tableActions": "التفاصيل",
+    "view": "عرض",
+    "items": "{count, plural, other {# عنصر}}",
+    "errorTitle": "فشل التحميل"
+  },
+  "OrderPage": {
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbOrders": "طلباتي",
+    "title": "الطلب {code}",
+    "placedOn": "تاريخ الطلب",
+    "state": "الحالة",
+    "items": "العناصر",
+    "totals": "ملخص",
+    "subtotal": "المجموع الفرعي",
+    "shipping": "التوصيل",
+    "total": "الإجمالي",
+    "shippingAddress": "عنوان التوصيل",
+    "billingAddress": "عنوان الفوترة",
+    "payment": "الدفع",
+    "fulfillments": "التتبع",
+    "tracking": "رمز التتبع",
+    "errorTitle": "الطلب غير موجود",
+    "errorBody": "هذا الطلب غير موجود أو لا يخصّك."
+  },
+  "WishlistPage": {
+    "title": "المفضلة",
+    "subtitle": "المنتجات التي حفظتها للاحقا.",
+    "empty": "قائمة المفضلة فارغة.",
+    "shopCta": "تصفّح المنتجات",
+    "remove": "إزالة من المفضلة"
+  },
+  "ProfilePage": {
+    "title": "ملفي الشخصي",
+    "subtitle": "إدارة معلوماتك الشخصية.",
+    "save": "حفظ",
+    "saving": "جاري الحفظ...",
+    "saved": "تم تحديث الملف الشخصي.",
+    "passwordCardTitle": "تغيير كلمة المرور",
+    "changePassword": "تغيير كلمة المرور",
+    "changing": "جاري التحديث...",
+    "passwordChanged": "تم تغيير كلمة المرور.",
+    "errorTitle": "خطأ"
+  },
+  "Cart": {
+    "errors": {
+      "insufficientStock": "المخزون غير كافٍ. المتوفّر: {available}",
+      "addFailed": "تعذّر إضافة المنتج إلى السلة",
+      "updateFailed": "تعذّرت عملية التحديث",
+      "removeFailed": "تعذّر حذف العنصر",
+      "clearFailed": "تعذّر إفراغ السلة",
+      "couponInvalid": "رمز خصم غير صالح",
+      "couponExpired": "انتهت صلاحية رمز الخصم",
+      "couponLimit": "تم استنفاد رمز الخصم",
+      "couponFailed": "تعذّر تطبيق رمز الخصم",
+      "couponRemoveFailed": "تعذّر إزالة رمز الخصم"
+    },
+    "toasts": {
+      "added": "تم إضافة المنتج إلى السلة",
+      "couponApplied": "تم تطبيق رمز الخصم"
+    }
+  },
+  "ProductCard": {
+    "favoriteAdd": "إضافة إلى المفضلة",
+    "favoriteRemove": "إزالة من المفضلة"
+  },
+  "StockIndicator": {
+    "inStock": "متوفّر",
+    "outOfStock": "نفد المخزون",
+    "lowStock": "تبقّى {count} فقط"
+  },
+  "QuantityStepper": {
+    "label": "الكمية",
+    "decrease": "إنقاص",
+    "increase": "زيادة"
+  },
+  "CategoriesPage": {
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbAll": "الفئات",
+    "title": "كل الفئات",
+    "subtitle": "استكشف تشكيلاتنا.",
+    "empty": "لا توجد فئات متاحة.",
+    "errorTitle": "فشل التحميل"
+  },
+  "CategoryPage": {
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbCategories": "الفئات",
+    "subcategories": "الفئات الفرعية",
+    "products": "المنتجات",
+    "empty": "لا توجد منتجات في هذه الفئة.",
+    "errorTitle": "الفئة غير موجودة",
+    "errorBody": "هذه الفئة غير موجودة أو لم تعد متوفّرة.",
+    "count": "{count, plural, other {# منتج}}"
+  },
+  "SearchPage": {
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbSearch": "البحث",
+    "title": "نتائج البحث",
+    "noQuery": "أدخل كلمة في شريط البحث.",
+    "results": "{count, plural, other {# نتيجة}} عن \"{query}\"",
+    "empty": "لا توجد نتائج عن \"{query}\".",
+    "emptyHint": "جرّب كلمات أخرى أو تصفّح فئاتنا.",
+    "errorTitle": "فشل البحث",
+    "filtersTitle": "الفلاتر",
+    "clearFilters": "مسح الفلاتر",
+    "showFilters": "إظهار الفلاتر",
+    "hideFilters": "إخفاء الفلاتر"
+  },
+  "ProductsPage": {
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbAll": "كل المنتجات",
+    "title": "كل المنتجات",
+    "count": "{count, plural, other {# منتج}}",
+    "sortNameAsc": "الاسم (أ → ي)",
+    "sortNameDesc": "الاسم (ي → أ)",
+    "errorTitle": "خطأ في التحميل",
+    "empty": "لا توجد منتجات."
+  },
+  "ProductPage": {
+    "errorTitle": "المنتج غير موجود",
+    "errorBody": "هذا المنتج غير موجود أو لم يعد متوفّرًا.",
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbProducts": "المنتجات",
+    "color": "اللون",
+    "size": "المقاس",
+    "quantity": "الكمية",
+    "addToCart": "أضف إلى السلة",
+    "wishlistAria": "إضافة إلى المفضلة",
+    "shareAria": "مشاركة",
+    "viewLabel": "صورة {n}",
+    "selectColor": "يرجى اختيار اللون.",
+    "selectSize": "يرجى اختيار المقاس.",
+    "tabs": {
+      "description": "الوصف",
+      "details": "التفاصيل",
+      "shipping": "التوصيل"
+    },
+    "reference": "المرجع",
+    "shippingBody": "التوصيل خلال 48-72 ساعة إلى جميع الولايات. الدفع عند الاستلام، CIB أو Baridimob.",
+    "related": "قد يعجبك أيضا",
+    "zoomAria": "تكبير الصورة",
+    "zoomClose": "إغلاق العرض المكبّر",
+    "sizeGuide": "دليل المقاسات",
+    "sizeGuideTitle": "دليل المقاسات",
+    "sizeGuideIntro": "اختر المقاس المناسب لك. القياسات بالسنتيمتر.",
+    "sizeGuideHeaderSize": "المقاس",
+    "sizeGuideHeaderChest": "الصدر",
+    "sizeGuideHeaderWaist": "الخصر",
+    "sizeGuideHeaderHip": "الورك",
+    "sizeGuideFootnote": "نصيحة: قس قطعة تناسبك جيدا وقارنها."
+  },
+  "InfoPage": {
+    "breadcrumbHome": "الرئيسية",
+    "helpHeading": "تحتاج إلى مساعدة ؟",
+    "helpCta": "اتصل بنا ←"
+  },
+  "ShippingPage": {
+    "title": "التوصيل",
+    "intro": "نقوم بالتوصيل إلى جميع الولايات الـ 48 في الجزائر. تختلف المهلة والتكلفة حسب المنطقة.",
+    "zonesTitle": "المهل حسب المنطقة",
+    "zone1": "المنطقة 1 (الجزائر العاصمة ومحيطها) — 1 إلى 2 يوم عمل",
+    "zone2": "المنطقة 2 (المدن الساحلية) — 2 إلى 4 أيام عمل",
+    "zone3": "المنطقة 3 (الهضاب العليا) — 3 إلى 5 أيام عمل",
+    "zone4": "المنطقة 4 (الجنوب) — 5 إلى 7 أيام عمل",
+    "costTitle": "رسوم التوصيل",
+    "costBody": "تُحتسب رسوم التوصيل تلقائيا عند إتمام الطلب بناء على ولايتك.",
+    "trackingTitle": "تتبع الطلب",
+    "trackingBody": "يُرسل لك رمز التتبع عبر البريد الإلكتروني عند إرسال الطلب. يمكنك أيضا متابعة طلباتك من حسابك."
+  },
+  "ReturnsPage": {
+    "title": "الإرجاع",
+    "intro": "لديك 14 يوما بعد الاستلام لإرجاع المنتج الذي لا يناسبك.",
+    "conditionsTitle": "الشروط",
+    "cond1": "يجب أن يكون المنتج جديدا، لم يُستعمل، مع علاماته الأصلية.",
+    "cond2": "يجب الاحتفاظ بالتغليف الأصلي.",
+    "cond3": "المنتجات المخفّضة والإكسسوارات بتلامس مباشر (ملابس داخلية، مجوهرات) غير قابلة للإرجاع.",
+    "howTitle": "كيفية الإرجاع",
+    "howBody": "اتصل بخدمة العملاء مع رقم الطلب. ننظّم الإرجاع والاسترداد خلال 7 أيام بعد الاستلام."
+  },
+  "SizeGuidePage": {
+    "title": "دليل المقاسات",
+    "intro": "ابحث عن المقاس المناسب. القياسات بالسنتيمتر.",
+    "howTitle": "كيفية القياس",
+    "how1": "الصدر : مرّر الشريط تحت الذراعين عند أعرض نقطة.",
+    "how2": "الخصر : عند أضيق نقطة، فوق السرة مباشرة.",
+    "how3": "الورك : عند أعرض نقطة، عادة 20 سم تحت الخصر.",
+    "footnote": "نصيحة : قس قطعة تناسبك جيدا وقارن بالجدول."
+  },
+  "FaqPage": {
+    "title": "الأسئلة الشائعة",
+    "intro": "كل ما تحتاج معرفته للشراء من OSCAR Najar.",
+    "q1": "كيف أقوم بطلب ؟",
+    "a1": "أضف المنتجات إلى السلة، اذهب إلى السلة، أدخل عنوانك واختر طريقة الدفع (CIB أو Baridimob أو الدفع عند الاستلام).",
+    "q2": "ما هي طرق الدفع المتاحة ؟",
+    "a2": "CIB و Baridimob والدفع عند الاستلام في جميع أنحاء الجزائر.",
+    "q3": "كم تستغرق مدة التوصيل ؟",
+    "a3": "من 1 إلى 7 أيام عمل حسب الولاية. راجع صفحة التوصيل للتفاصيل.",
+    "q4": "كيف أُرجع منتجا ؟",
+    "a4": "لديك 14 يوما بعد الاستلام. راجع صفحة الإرجاع للشروط.",
+    "q5": "هل بياناتي آمنة ؟",
+    "a5": "نعم. لا نخزّن بيانات الدفع أبدا، ونستعمل HTTPS في كل الصفحات."
+  },
+  "AboutPage": {
+    "title": "عن OSCAR Najar",
+    "intro": "الموضة الأنيقة في قلب الجزائر.",
+    "storyTitle": "قصّتنا",
+    "storyBody": "وُلدت OSCAR Najar من قناعة بأن الأناقة الجزائرية تستحق واجهة حديثة. نتعاون مع حرفيين محليين لتقديم تشكيلات تحترم التقاليد والإيقاع المعاصر معا.",
+    "valuesTitle": "قيمنا",
+    "v1": "الجودة — كل قطعة تمرّ بفحص قبل الإرسال.",
+    "v2": "القرب — خدمة عملاء بالعربية والفرنسية.",
+    "v3": "التغطية — توصيل إلى جميع الولايات الـ 48، الدفع عند الاستلام متاح."
+  },
+  "CareersPage": {
+    "title": "الوظائف",
+    "intro": "انضم إلى فريق OSCAR Najar.",
+    "openingsTitle": "المناصب المتاحة",
+    "noOpenings": "لا توجد مناصب متاحة حاليا. يمكنك الكتابة إلى recrutement@oscarnajar.dz لتقديم ترشّح تلقائي.",
+    "cultureTitle": "لماذا نحن",
+    "c1": "فريق شاب مقرّه الجزائر العاصمة.",
+    "c2": "مشاريع واقعية للسوق الجزائرية.",
+    "c3": "مسؤوليات حقيقية منذ اليوم الأول."
+  },
+  "ContactPage": {
+    "title": "اتصل بنا",
+    "intro": "نردّ خلال 24 ساعة عمل.",
+    "addressTitle": "العنوان",
+    "addressLine1": "OSCAR Najar",
+    "addressLine2": "الجزائر العاصمة، الجزائر",
+    "emailTitle": "البريد الإلكتروني",
+    "emailValue": "contact@oscarnajar.dz",
+    "phoneTitle": "الهاتف",
+    "phoneValue": "+213 555 000 000",
+    "hoursTitle": "ساعات العمل",
+    "hoursValue": "الأحد إلى الخميس، 9 صباحا – 5 مساء",
+    "formTitle": "اكتب لنا",
+    "formName": "اسمك",
+    "formEmail": "بريدك الإلكتروني",
+    "formMessage": "رسالتك",
+    "formSubmit": "إرسال",
+    "formNotice": "نموذج الاتصال سيكون متاحا قريبا. في انتظار ذلك، اكتب لنا مباشرة عبر البريد الإلكتروني."
+  },
+  "TermsPage": {
+    "title": "الشروط والأحكام",
+    "intro": "آخر تحديث : سيُكمَل من قِبل الفريق القانوني.",
+    "placeholder": "سيتم نشر النص الكامل للشروط والأحكام هنا. لأي سؤال عاجل، اتصل بخدمة العملاء."
+  },
+  "PrivacyPage": {
+    "title": "سياسة الخصوصية",
+    "intro": "آخر تحديث : سيُكمَل من قِبل الفريق القانوني.",
+    "placeholder": "سيتم نشر النص الكامل لسياسة الخصوصية هنا. باختصار : لا نبيع بياناتك أبدا، نستعملها فقط لمعالجة طلبك وتحسين الخدمة."
+  },
+  "MiniCart": {
+    "title": "سلة التسوق",
+    "empty": "سلتك فارغة.",
+    "browse": "تصفّح المنتجات",
+    "subtotal": "المجموع الفرعي",
+    "viewCart": "عرض السلة",
+    "checkout": "تأكيد الطلب"
+  },
+  "CartPage": {
+    "title": "سلة التسوق",
+    "titleWithCount": "سلة التسوق ({count})",
+    "empty": {
+      "title": "سلتك فارغة",
+      "body": "اكتشف تشكيلتنا وأضف المنتجات المفضّلة لديك.",
+      "cta": "عرض المنتجات"
+    },
+    "removeItemAria": "حذف هذا العنصر",
+    "summary": {
+      "title": "ملخص الطلبية",
+      "subtotal": "المجموع الفرعي",
+      "shipping": "التوصيل",
+      "shippingTbd": "سيتم احتسابه",
+      "total": "الإجمالي",
+      "checkout": "تأكيد الطلب"
+    },
+    "promo": {
+      "placeholder": "رمز الخصم",
+      "apply": "تطبيق",
+      "remove": "إزالة"
+    }
+  },
+  "auth": {
+    "fields": {
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "phone": "رقم الهاتف"
+    },
+    "placeholders": {
+      "email": "بريدك@example.com",
+      "password": "••••••••",
+      "confirmPassword": "أكد كلمة المرور",
+      "firstName": "اسمك الأول",
+      "lastName": "اسم عائلتك",
+      "phone": "0555 00 00 00"
+    },
+    "labels": {
+      "emailOrPhone": "البريد الإلكتروني أو رقم الهاتف",
+      "optional": "اختياري"
+    },
+    "login": {
+      "title": "تسجيل الدخول",
+      "subtitle": "ادخل إلى حسابك على OSCAR Najar.",
+      "noAccount": "ليس لديك حساب؟",
+      "signUp": "أنشئ حسابًا",
+      "rememberMe": "تذكّرني",
+      "forgotPassword": "نسيت كلمة المرور؟",
+      "signIn": "تسجيل الدخول",
+      "signingIn": "جاري الدخول...",
+      "termsNotice": "بالمتابعة، أنت توافق على",
+      "termsLink": "شروط الاستخدام",
+      "resendVerification": "إعادة إرسال بريد التحقق",
+      "welcomeToast": "أهلاً بك !",
+      "failed": "فشل تسجيل الدخول."
+    },
+    "register": {
+      "title": "إنشاء حساب",
+      "subtitle": "انضم إلى OSCAR Najar.",
+      "hasAccount": "لديك حساب بالفعل؟",
+      "signIn": "تسجيل الدخول",
+      "createAccount": "إنشاء حسابي",
+      "creating": "جاري الإنشاء...",
+      "termsNotice": "بإنشاء حساب، أنت توافق على",
+      "termsLink": "شروط الاستخدام",
+      "passwordHint": "8 أحرف على الأقل",
+      "success": "تم إنشاء الحساب بنجاح!",
+      "checkEmail": "تحقق من بريدك الإلكتروني لتفعيل حسابك.",
+      "verifyToastTitle": "تم التسجيل بنجاح",
+      "verifyToastBody": "تحقق من بريدك الإلكتروني لتأكيد حسابك.",
+      "failed": "فشل التسجيل."
+    },
+    "forgotPassword": {
+      "title": "نسيت كلمة المرور",
+      "description": "أدخل بريدك الإلكتروني لاستلام رابط إعادة التعيين.",
+      "sendLink": "إرسال الرابط",
+      "sending": "جاري الإرسال...",
+      "backToLogin": "العودة لتسجيل الدخول",
+      "success": "تم الإرسال!",
+      "checkEmail": "تحقق من بريدك لإعادة تعيين كلمة المرور."
+    },
+    "resetPassword": {
+      "title": "كلمة مرور جديدة",
+      "description": "أدخل كلمة المرور الجديدة.",
+      "reset": "إعادة التعيين",
+      "resetting": "جاري إعادة التعيين...",
+      "success": "تم تغيير كلمة المرور!",
+      "redirecting": "جاري التوجيه..."
+    },
+    "verifyEmail": {
+      "title": "التحقق من البريد",
+      "verifying": "جاري التحقق...",
+      "success": "تم التحقق بنجاح!",
+      "redirecting": "جاري التوجيه..."
+    },
+    "verificationPending": {
+      "title": "تحقق من بريدك",
+      "description": "أرسلنا بريد تحقق إلى",
+      "resend": "إعادة الإرسال",
+      "resending": "جاري الإرسال...",
+      "resent": "تم الإرسال!",
+      "checkSpam": "تحقق أيضا من مجلد الرسائل غير المرغوبة."
+    },
+    "profile": {
+      "title": "ملفي الشخصي",
+      "personalInfo": "المعلومات الشخصية",
+      "security": "الأمان",
+      "addresses": "العناوين",
+      "updateProfile": "تحديث",
+      "updating": "جاري التحديث...",
+      "changePassword": "تغيير كلمة المرور",
+      "currentPassword": "كلمة المرور الحالية",
+      "newPassword": "كلمة المرور الجديدة",
+      "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
+      "passwordChanged": "تم تغيير كلمة المرور بنجاح!"
+    },
+    "errors": {
+      "loginFailed": "بيانات الدخول غير صحيحة",
+      "emailNotVerified": "يرجى التحقق من بريدك قبل تسجيل الدخول.",
+      "registrationFailed": "فشل التسجيل",
+      "passwordMismatch": "كلمات المرور غير متطابقة",
+      "invalidToken": "رابط غير صالح أو منتهي الصلاحية",
+      "invalidEmail": "بريد إلكتروني غير صالح",
+      "passwordTooShort": "يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل",
+      "required": "هذا الحقل مطلوب"
+    },
+    "validation": {
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "بريد إلكتروني غير صالح",
+      "passwordRequired": "كلمة المرور مطلوبة",
+      "passwordMin": "يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل",
+      "firstNameRequired": "الاسم الأول مطلوب",
+      "lastNameRequired": "اسم العائلة مطلوب",
+      "phoneInvalid": "رقم هاتف غير صالح",
+      "termsRequired": "يجب قبول الشروط"
+    }
+  }
+}

@@ -25,22 +25,44 @@ import { ColorSwatch } from '../../components/ui/ColorSwatch';
 
 const PAGE_SIZE = 20;
 
+type SortOption = 'name-asc' | 'name-desc' | 'code-asc' | 'code-desc' | 'created-desc' | 'created-asc';
+
+const SORT_OPTIONS: Array<{ value: SortOption; label: string; sort: Record<string, 'ASC' | 'DESC'> }> = [
+  { value: 'name-asc', label: 'Nom (A-Z)', sort: { name: 'ASC' } },
+  { value: 'name-desc', label: 'Nom (Z-A)', sort: { name: 'DESC' } },
+  { value: 'code-asc', label: 'Code (A-Z)', sort: { code: 'ASC' } },
+  { value: 'code-desc', label: 'Code (Z-A)', sort: { code: 'DESC' } },
+  { value: 'created-desc', label: 'Plus récents', sort: { createdAt: 'DESC' } },
+  { value: 'created-asc', label: 'Plus anciens', sort: { createdAt: 'ASC' } },
+];
+
+type VisibilityFilter = 'all' | 'public' | 'private';
+
 export const FacetList: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [deletingFacet, setDeletingFacet] = useState<{ id: string; name: string } | null>(null);
+  const [sortOption, setSortOption] = useState<SortOption>('name-asc');
+  const [visibilityFilter, setVisibilityFilter] = useState<VisibilityFilter>('all');
 
-  // Build filter based on search
+  // Build filter based on search and visibility
   const buildFilter = () => {
+    const filter: Record<string, any> = {};
     if (searchTerm) {
-      return {
-        name: { contains: searchTerm },
-      };
+      filter.name = { contains: searchTerm };
     }
-    return undefined;
+    if (visibilityFilter === 'private') {
+      filter.isPrivate = { eq: true };
+    } else if (visibilityFilter === 'public') {
+      filter.isPrivate = { eq: false };
+    }
+    return Object.keys(filter).length > 0 ? filter : undefined;
   };
+
+  const sortConfig =
+    SORT_OPTIONS.find((o) => o.value === sortOption)?.sort ?? { name: 'ASC' };
 
   // Query facets
   const { data, loading, error, refetch } = useQuery(AdminFacetListDocument, {
@@ -49,7 +71,7 @@ export const FacetList: React.FC = () => {
         take: PAGE_SIZE,
         skip: (page - 1) * PAGE_SIZE,
         filter: buildFilter(),
-        sort: { name: 'ASC' as any },
+        sort: sortConfig as any,
       },
     },
     fetchPolicy: 'cache-and-network',
@@ -154,8 +176,8 @@ export const FacetList: React.FC = () => {
         </PermissionGate>
       </div>
 
-      {/* Search */}
-      <div className="bg-card rounded-lg shadow p-4">
+      {/* Search + filters */}
+      <div className="bg-card rounded-lg shadow p-4 space-y-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <input
@@ -168,6 +190,39 @@ export const FacetList: React.FC = () => {
             }}
             className="w-full pl-10 pr-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none"
           />
+        </div>
+        <div className="flex flex-wrap gap-3 items-center">
+          <select
+            value={sortOption}
+            onChange={(e) => {
+              setSortOption(e.target.value as SortOption);
+              setPage(1);
+            }}
+            className="px-3 py-2 border border-border rounded-lg bg-background text-foreground text-sm outline-none"
+            title="Trier"
+          >
+            {SORT_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={visibilityFilter}
+            onChange={(e) => {
+              setVisibilityFilter(e.target.value as VisibilityFilter);
+              setPage(1);
+            }}
+            className="px-3 py-2 border border-border rounded-lg bg-background text-foreground text-sm outline-none"
+            title="Visibilité"
+          >
+            <option value="all">Toutes les visibilités</option>
+            <option value="public">Public uniquement</option>
+            <option value="private">Privé uniquement</option>
+          </select>
+          <span className="text-xs text-muted-foreground ml-auto">
+            {totalItems} attribut(s)
+          </span>
         </div>
       </div>
 
