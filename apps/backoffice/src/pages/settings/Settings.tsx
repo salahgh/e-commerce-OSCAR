@@ -47,6 +47,7 @@ import {
   ShippingMethodsDocument,
   UpdatePaymentMethodDocument,
   GlobalSettingsDocument,
+  UpdateGlobalSettingsDocument,
   ShippingZonesDocument,
   AdminUsersDocument,
   UpdateShippingMethodDocument,
@@ -65,6 +66,7 @@ import { Tabs } from '../../components/ui/Tabs';
 import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
 import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
 import { formatPrice } from '../../lib/utils';
 
 // Store settings form schema
@@ -93,6 +95,8 @@ export const Settings: React.FC = () => {
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [deletingPaymentId, setDeletingPaymentId] = useState<string | null>(null);
   const [deletingShippingId, setDeletingShippingId] = useState<string | null>(null);
+  const [trackInventory, setTrackInventory] = useState(false);
+  const [outOfStockThreshold, setOutOfStockThreshold] = useState(0);
   const [deletePaymentMethod, { loading: deletingPayment }] = useMutation(
     DeletePaymentMethodDocument
   );
@@ -183,6 +187,34 @@ export const Settings: React.FC = () => {
   const [runPendingUpdates, { loading: runningPending }] = useMutation(RunPendingSearchIndexUpdatesDocument);
   const [cancelJob] = useMutation(CancelJobDocument);
   const [cancellingJobs, setCancellingJobs] = useState(false);
+  const [updateGlobalSettings, { loading: savingGlobal }] = useMutation(
+    UpdateGlobalSettingsDocument,
+    { refetchQueries: [{ query: GlobalSettingsDocument }] }
+  );
+
+  // Seed inventory defaults from loaded global settings
+  useEffect(() => {
+    if (globalData?.globalSettings) {
+      setTrackInventory(globalData.globalSettings.trackInventory ?? false);
+      setOutOfStockThreshold(globalData.globalSettings.outOfStockThreshold ?? 0);
+    }
+  }, [globalData]);
+
+  const handleSaveInventorySettings = async () => {
+    try {
+      await updateGlobalSettings({
+        variables: {
+          input: {
+            trackInventory,
+            outOfStockThreshold: Number(outOfStockThreshold ?? 0),
+          },
+        },
+      });
+      dispatch(addToast({ message: "Paramètres d'inventaire enregistrés", type: 'success' }));
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+  };
 
   // Handle cancel all pending jobs
   const handleCancelPendingJobs = async () => {
@@ -486,6 +518,47 @@ export const Settings: React.FC = () => {
                     </Form>
                   )}
                 </Formik>
+              </div>
+
+              {/* Inventory Settings */}
+              <div className="bg-muted/50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Database className="h-5 w-5 text-amber-500" />
+                  Paramètres d'inventaire
+                </h3>
+                <div className="space-y-4">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={trackInventory}
+                      onChange={(e) => setTrackInventory(e.target.checked)}
+                      className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                    />
+                    <span className="text-sm font-medium text-foreground">
+                      Suivre les stocks
+                    </span>
+                  </label>
+                  <div className="max-w-xs">
+                    <Input
+                      type="number"
+                      label="Seuil de rupture de stock"
+                      value={outOfStockThreshold}
+                      onChange={(e) => setOutOfStockThreshold(Number(e.target.value))}
+                      helperText="Quantité en dessous de laquelle un produit est considéré en rupture"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    onClick={handleSaveInventorySettings}
+                    loading={savingGlobal}
+                    disabled={savingGlobal}
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    Enregistrer
+                  </Button>
+                </div>
               </div>
 
               {/* Logo Upload */}
