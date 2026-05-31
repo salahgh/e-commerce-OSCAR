@@ -74,6 +74,7 @@ import { TaxSettings } from './sections/TaxSettings';
 import { ZoneSettings } from './sections/ZoneSettings';
 import { ChannelSettings } from './sections/ChannelSettings';
 import { ShippingMethodCreateModal } from './sections/ShippingMethodCreateModal';
+import { PaymentMethodCreateModal } from './sections/PaymentMethodCreateModal';
 
 // Store settings form schema
 const StoreSettingsSchema = Yup.object().shape({
@@ -102,6 +103,7 @@ export const Settings: React.FC = () => {
   const [deletingPaymentId, setDeletingPaymentId] = useState<string | null>(null);
   const [deletingShippingId, setDeletingShippingId] = useState<string | null>(null);
   const [shippingModalOpen, setShippingModalOpen] = useState(false);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [trackInventory, setTrackInventory] = useState(false);
   const [outOfStockThreshold, setOutOfStockThreshold] = useState(0);
   const [deletePaymentMethod, { loading: deletingPayment }] = useMutation(
@@ -812,7 +814,17 @@ export const Settings: React.FC = () => {
                 Activez ou désactivez les méthodes de paiement disponibles
               </p>
             </div>
+            <Button variant="primary" size="sm" onClick={() => setPaymentModalOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nouvelle méthode
+            </Button>
           </div>
+
+          <PaymentMethodCreateModal
+            isOpen={paymentModalOpen}
+            onClose={() => setPaymentModalOpen(false)}
+            onCreated={() => refetchPayment()}
+          />
 
           {paymentLoading ? (
             <div className="flex justify-center py-8">
