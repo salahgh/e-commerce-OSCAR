@@ -3,7 +3,7 @@
 import React from 'react';
 import { Button, Card } from '@/components/ui';
 import { formatPrice } from '@/lib/utils/formatters';
-import { MapPin, Truck, Banknote, Edit2 } from 'lucide-react';
+import { MapPin, FileText, Truck, Banknote, Edit2 } from 'lucide-react';
 import Image from 'next/image';
 
 interface OrderReviewProps {
@@ -18,6 +18,15 @@ interface OrderReviewProps {
     postalCode: string;
     notes?: string;
   };
+  billingAddress?: {
+    firstName: string;
+    lastName: string;
+    address: string;
+    city: string;
+    wilaya: string;
+    postalCode: string;
+    phone: string;
+  } | null;
   shippingMethod: {
     id: string;
     name: string;
@@ -51,6 +60,7 @@ interface OrderReviewProps {
 
 export default function OrderReview({
   shippingAddress,
+  billingAddress,
   shippingMethod,
   paymentMethod,
   cartItems,
@@ -100,6 +110,40 @@ export default function OrderReview({
               </p>
             )}
           </div>
+        </Card.Content>
+      </Card>
+
+      {/* Billing Address */}
+      <Card>
+        <Card.Header>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-muted-foreground" />
+              <h3 className="font-semibold">Adresse de facturation</h3>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => onEdit(2)}>
+              <Edit2 className="h-4 w-4 mr-1" />
+              Modifier
+            </Button>
+          </div>
+        </Card.Header>
+        <Card.Content>
+          {billingAddress ? (
+            <div className="text-sm space-y-1">
+              <p className="font-medium">
+                {billingAddress.firstName} {billingAddress.lastName}
+              </p>
+              <p className="text-muted-foreground">{billingAddress.address}</p>
+              <p className="text-muted-foreground">
+                {billingAddress.city}, {billingAddress.wilaya} {billingAddress.postalCode}
+              </p>
+              <p className="text-muted-foreground">{billingAddress.phone}</p>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Identique à l'adresse de livraison
+            </p>
+          )}
         </Card.Content>
       </Card>
 

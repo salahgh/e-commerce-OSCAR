@@ -360,6 +360,26 @@ export default function CheckoutPage() {
 
   const displayAddress = getAddressDisplayInfo();
 
+  // Resolve the billing address for review (null = same as shipping).
+  const getBillingDisplayInfo = () => {
+    if (!billingAddress) return null;
+    const wilaya = wilayas.find((w) => w.code === billingAddress.wilaya);
+    const commune = getCommunesByWilayaCode(billingAddress.wilaya).find(
+      (c) => c.code === billingAddress.commune
+    );
+    return {
+      firstName: billingAddress.firstName,
+      lastName: billingAddress.lastName,
+      address: billingAddress.address,
+      city: commune?.name || billingAddress.commune,
+      wilaya: wilaya?.name || billingAddress.wilaya,
+      postalCode: billingAddress.postalCode,
+      phone: billingAddress.phone,
+    };
+  };
+
+  const displayBillingAddress = getBillingDisplayInfo();
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
@@ -469,6 +489,7 @@ export default function CheckoutPage() {
                       city: displayAddress.communeName,
                       wilaya: displayAddress.wilayaName,
                     }}
+                    billingAddress={displayBillingAddress}
                     shippingMethod={selectedShipping}
                     paymentMethod={selectedPayment}
                     cartItems={cart.items}
