@@ -71,6 +71,7 @@ import { Input } from '../../components/ui/Input';
 import { formatPrice } from '../../lib/utils';
 import { TaxSettings } from './sections/TaxSettings';
 import { ZoneSettings } from './sections/ZoneSettings';
+import { ChannelSettings } from './sections/ChannelSettings';
 
 // Store settings form schema
 const StoreSettingsSchema = Yup.object().shape({
@@ -945,6 +946,12 @@ export const Settings: React.FC = () => {
       label: 'Zones',
       icon: <Globe className="h-4 w-4" />,
       content: <ZoneSettings />,
+    },
+    {
+      id: 'channels',
+      label: 'Canaux',
+      icon: <Building className="h-4 w-4" />,
+      content: <ChannelSettings />,
     },
     {
       id: 'email',
