@@ -16,11 +16,11 @@ Each task = implement → spec-compliance review → code-quality review → com
 | T3 | Tax Rates CRUD (extends `TaxSettings.tsx`) | ✅ done + reviewed | `d979496` |
 | T4 | Zone CRUD + member management (`sections/ZoneSettings.tsx`, `zones` tab) | ✅ done + reviewed | `d34e4dc` |
 | T5 | Channel CRUD (`sections/ChannelSettings.tsx`, `channels` tab) | ✅ done + reviewed | `d2df2f0` |
-| T6 | Create shipping method flow (`sections/ShippingMethodCreateModal.tsx`) | ⬜ TODO (next) | — |
-| T7 | Create payment method flow (`sections/PaymentMethodCreateModal.tsx`) | ⬜ TODO | — |
+| T6 | Create shipping method flow (`sections/ShippingMethodCreateModal.tsx`) | ✅ done + reviewed | `bd15e9d` |
+| T7 | Create payment method flow (`sections/PaymentMethodCreateModal.tsx`) | ⬜ TODO (next) | — |
 | T8 | Final type-check/build + runtime checklist doc | ⬜ TODO | — |
 
-**Resume at: Task 6.**
+**Resume at: Task 7.**
 
 ## Verified conventions (apply to all remaining tasks)
 
