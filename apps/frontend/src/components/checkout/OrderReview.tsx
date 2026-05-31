@@ -111,7 +111,7 @@ export default function OrderReview({
               <Truck className="h-5 w-5 text-muted-foreground" />
               <h3 className="font-semibold">Méthode de livraison</h3>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => onEdit(2)}>
+            <Button variant="ghost" size="sm" onClick={() => onEdit(3)}>
               <Edit2 className="h-4 w-4 mr-1" />
               Modifier
             </Button>
@@ -140,7 +140,7 @@ export default function OrderReview({
               <Banknote className="h-5 w-5 text-muted-foreground" />
               <h3 className="font-semibold">Mode de paiement</h3>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => onEdit(3)}>
+            <Button variant="ghost" size="sm" onClick={() => onEdit(4)}>
               <Edit2 className="h-4 w-4 mr-1" />
               Modifier
             </Button>
@@ -219,7 +219,7 @@ export default function OrderReview({
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-6 border-t">
-        <Button variant="outline" onClick={() => onEdit(3)} className="flex-1">
+        <Button variant="outline" onClick={() => onEdit(4)} className="flex-1">
           Retour
         </Button>
         <Button onClick={onSubmit} loading={isSubmitting} className="flex-1">
