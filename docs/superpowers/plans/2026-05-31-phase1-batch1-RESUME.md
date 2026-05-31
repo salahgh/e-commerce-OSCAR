@@ -18,9 +18,9 @@ Each task = implement → spec-compliance review → code-quality review → com
 | T5 | Channel CRUD (`sections/ChannelSettings.tsx`, `channels` tab) | ✅ done + reviewed | `d2df2f0` |
 | T6 | Create shipping method flow (`sections/ShippingMethodCreateModal.tsx`) | ✅ done + reviewed | `bd15e9d` |
 | T7 | Create payment method flow (`sections/PaymentMethodCreateModal.tsx`) | ✅ done + reviewed | `0e3ef1e` |
-| T8 | Final type-check/build + runtime checklist doc | ⬜ TODO (next) | — |
+| T8 | Final type-check/build + runtime checklist doc | ✅ done | `df304e7` |
 
-**Resume at: Task 8.**
+**Status: Phase 1 Batch 1 COMPLETE (T1–T8 done).** Runtime verification pending — see `2026-05-31-phase1-batch1-runtime-checklist.md` (run with the backend up).
 
 ## Verified conventions (apply to all remaining tasks)
 
