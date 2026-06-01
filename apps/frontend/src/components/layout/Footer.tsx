@@ -11,11 +11,11 @@ export default function Footer() {
 
   const footerLinks = {
     shop: [
-      { name: 'Nouveautés', href: `/${locale}/new-arrivals` },
-      { name: 'Hommes', href: `/${locale}/men` },
-      { name: 'Femmes', href: `/${locale}/women` },
-      { name: 'Accessoires', href: `/${locale}/accessories` },
-      { name: 'Promotions', href: `/${locale}/promotions` },
+      { name: 'Nouveautés', href: `/${locale}/products` },
+      { name: 'Hommes', href: `/${locale}/categories` },
+      { name: 'Femmes', href: `/${locale}/categories` },
+      { name: 'Accessoires', href: `/${locale}/categories` },
+      { name: 'Tous les produits', href: `/${locale}/products` },
     ],
     help: [
       { name: 'FAQ', href: `/${locale}/faq` },
@@ -27,13 +27,10 @@ export default function Footer() {
     about: [
       { name: 'Notre histoire', href: `/${locale}/about` },
       { name: 'Carrières', href: `/${locale}/careers` },
-      { name: 'Blog', href: `/${locale}/blog` },
-      { name: 'Magasins', href: `/${locale}/stores` },
     ],
     legal: [
-      { name: 'Conditions générales', href: `/${locale}/terms` },
-      { name: 'Politique de confidentialité', href: `/${locale}/privacy` },
-      { name: 'Politique de cookies', href: `/${locale}/cookies` },
+      { name: 'Conditions générales', href: `/${locale}/legal/terms` },
+      { name: 'Politique de confidentialité', href: `/${locale}/legal/privacy` },
     ],
   };
 

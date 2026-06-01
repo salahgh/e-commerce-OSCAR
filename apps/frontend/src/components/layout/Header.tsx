@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { Menu, Search, ShoppingCart, User, Heart, X, LogIn, LogOut, UserCircle } from 'lucide-react';
+import { Menu, Search, ShoppingCart, User, X, LogIn, LogOut, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -27,7 +27,7 @@ export default function Header() {
   const handleSearch = (e: FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      router.push(`/${locale}/products?q=${encodeURIComponent(searchTerm.trim())}`);
+      router.push(`/${locale}/search?q=${encodeURIComponent(searchTerm.trim())}`);
       setSearchOpen(false);
       setSearchTerm('');
     }
@@ -37,7 +37,6 @@ export default function Header() {
     { name: 'Accueil', href: `/${locale}` },
     { name: 'Catégories', href: `/${locale}/categories` },
     { name: 'Produits', href: `/${locale}/products` },
-    { name: 'Promotions', href: `/${locale}/promotions` },
     { name: 'À propos', href: `/${locale}/about` },
   ];
 
@@ -49,7 +48,7 @@ export default function Header() {
           <div className="flex justify-between items-center text-sm">
             <p>Livraison gratuite pour les commandes de plus de 5000 DA</p>
             <div className="hidden md:flex items-center gap-4">
-              <Link href={`/${locale}/help`} className="hover:underline">
+              <Link href={`/${locale}/faq`} className="hover:underline">
                 Aide
               </Link>
               <span>|</span>
@@ -105,12 +104,6 @@ export default function Header() {
               aria-label="Search"
             >
               <Search className="h-5 w-5" />
-            </Button>
-
-            <Button variant="ghost" size="icon" asChild>
-              <Link href={`/${locale}/wishlist`} aria-label="Wishlist">
-                <Heart className="h-5 w-5" />
-              </Link>
             </Button>
 
             <Button variant="ghost" size="icon" className="relative" asChild>
