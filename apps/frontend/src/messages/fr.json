@@ -3,6 +3,39 @@
     "title": "Bienvenue chez OSCAR Fashion",
     "subtitle": "Mode & Elegance"
   },
+  "cart": {
+    "title": "Panier",
+    "emptyTitle": "Votre panier est vide",
+    "emptyMessage": "Ajoutez des articles pour commencer vos achats",
+    "continueShopping": "Découvrir les Produits",
+    "product": "Produit",
+    "price": "Prix",
+    "quantityLabel": "Quantité",
+    "delete": "Supprimer",
+    "orderSummary": "Résumé de la commande",
+    "totalItems": "Total ({count} articles)",
+    "totalAmount": "Montant total",
+    "confirmOrder": "Confirmer la commande"
+  },
+  "products": {
+    "all": "Tout",
+    "shopProducts": "Nos Produits",
+    "noProducts": "Aucun produit trouvé"
+  },
+  "product": {
+    "quantity": "Quantité",
+    "addToCart": "Ajouter au panier",
+    "buyNow": "Acheter maintenant",
+    "productDetails": "Détails du produit",
+    "youMayAlsoLike": "Vous aimerez aussi",
+    "seeAll": "Voir tout"
+  },
+  "home": {
+    "newArrivals": "Nouveautés",
+    "bestSellers": "Meilleures ventes",
+    "pickedForYou": "Sélectionné pour vous",
+    "seeAll": "Voir tout"
+  },
   "Common": {
     "loading": "Chargement...",
     "error": "Une erreur est survenue"

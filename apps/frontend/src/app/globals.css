@@ -4,46 +4,47 @@
 
 @layer base {
   :root {
-    /* OSCAR Fashion - Black & White Theme */
-    /* Light mode */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 5%;
+    /* OSCAR Fashion — Figma Design System */
 
-    /* Primary - Pure Black */
-    --primary: 0 0% 0%;
+    /* Core surfaces */
+    --background: 0 0% 100%;
+    --foreground: 228 96% 11%; /* #010B38 dark-text */
+
+    /* Primary — Brand Black #1E1E1E */
+    --primary: 0 0% 12%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Light Gray */
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 10%;
+    /* Secondary — Golden Yellow #FFD500 */
+    --secondary: 49 100% 50%;
+    --secondary-foreground: 0 0% 5%;
 
-    /* Accent - Medium Gray */
-    --accent: 0 0% 92%;
-    --accent-foreground: 0 0% 10%;
+    /* Accent */
+    --accent: 220 14% 96%; /* #F2F3F5 */
+    --accent-foreground: 228 96% 11%;
 
-    /* Muted backgrounds */
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    /* Muted */
+    --muted: 220 14% 96%;
+    --muted-foreground: 218 10% 41%; /* #6A7282 gray-500 */
 
     /* Cards & Popovers */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 5%;
+    --card-foreground: 228 96% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 5%;
+    --popover-foreground: 228 96% 11%;
 
-    /* Borders & Inputs */
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 0%;
+    /* Borders & Inputs — gray-200 #E5E7EB */
+    --border: 216 12% 91%;
+    --input: 216 12% 91%;
+    --ring: 0 0% 12%;
 
-    /* Status Colors */
-    --destructive: 0 84% 60%;
+    /* Destructive — error red #EB3E3E */
+    --destructive: 0 82% 58%;
     --destructive-foreground: 0 0% 100%;
 
     /* Border Radius */
-    --radius: 0.5rem;
+    --radius: 0.75rem; /* 12px — Figma card radius */
 
-    /* Chart colors - grayscale */
+    /* Chart colors */
     --chart-1: 0 0% 0%;
     --chart-2: 0 0% 30%;
     --chart-3: 0 0% 50%;
@@ -52,59 +53,50 @@
 
     /* Sidebar */
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 5%;
-    --sidebar-primary: 0 0% 0%;
+    --sidebar-foreground: 228 96% 11%;
+    --sidebar-primary: 0 0% 12%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 92%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 0 0% 90%;
-    --sidebar-ring: 0 0% 0%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 228 96% 11%;
+    --sidebar-border: 216 12% 91%;
+    --sidebar-ring: 0 0% 12%;
   }
 
   .dark {
-    /* OSCAR Fashion - Dark Mode (Black & White) */
+    /* OSCAR Fashion — Dark Mode */
     --background: 0 0% 5%;
     --foreground: 0 0% 98%;
 
-    /* Primary - White in dark mode */
     --primary: 0 0% 100%;
     --primary-foreground: 0 0% 5%;
 
-    /* Secondary - Dark Gray */
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 49 100% 50%;
+    --secondary-foreground: 0 0% 5%;
 
-    /* Accent - Medium Dark Gray */
-    --accent: 0 0% 20%;
+    --accent: 0 0% 15%;
     --accent-foreground: 0 0% 98%;
 
-    /* Muted */
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 60%;
 
-    /* Cards & Popovers */
     --card: 0 0% 8%;
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 8%;
     --popover-foreground: 0 0% 98%;
 
-    /* Borders & Inputs */
     --border: 0 0% 20%;
     --input: 0 0% 20%;
     --ring: 0 0% 100%;
 
-    /* Status Colors */
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Chart colors - dark mode grayscale */
     --chart-1: 0 0% 100%;
     --chart-2: 0 0% 75%;
     --chart-3: 0 0% 55%;
     --chart-4: 0 0% 40%;
     --chart-5: 0 0% 25%;
 
-    /* Sidebar - dark mode */
     --sidebar-background: 0 0% 3%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 0 0% 100%;
@@ -124,47 +116,46 @@
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
 
-  /* RTL Support */
+  /* RTL Support — IBM Plex Sans Arabic for Arabic locale */
   [dir='rtl'] {
-    font-family: var(--font-noto-arabic), var(--font-inter), sans-serif;
+    font-family: var(--font-ibm-arabic), var(--font-dm-sans), var(--font-inter), sans-serif;
   }
 
-  /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
   }
 
   /* Custom scrollbar */
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-muted;
+    @apply bg-transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/40 rounded-full;
+    @apply bg-muted-foreground/20 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/60;
+    @apply bg-muted-foreground/40;
   }
 }
 
 @layer components {
-  /* Button variants */
+  /* ——— Buttons ——— */
   .btn {
-    @apply inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
   }
 
   .btn-primary {
-    @apply btn bg-primary text-primary-foreground hover:bg-primary-dark;
+    @apply btn bg-brand text-white hover:bg-brand/90;
   }
 
   .btn-secondary {
-    @apply btn bg-secondary text-secondary-foreground hover:bg-secondary-dark;
+    @apply btn bg-secondary text-secondary-foreground hover:bg-secondary/90;
   }
 
   .btn-outline {
@@ -179,7 +170,6 @@
     @apply btn underline-offset-4 hover:underline text-primary;
   }
 
-  /* Size variants */
   .btn-sm {
     @apply h-9 px-3 text-sm;
   }
@@ -189,30 +179,53 @@
   }
 
   .btn-lg {
-    @apply h-11 px-8 text-lg;
+    @apply h-12 px-8 text-lg;
   }
 
-  /* Card */
+  /* ——— Card ——— */
   .card {
-    @apply rounded-lg border bg-card text-card-foreground shadow-sm;
+    @apply rounded-xl border bg-card text-card-foreground shadow-sm;
   }
 
-  /* Input */
+  /* ——— Input ——— */
   .input {
-    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply flex h-12 w-full rounded-lg border border-input bg-background px-4 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
-  /* Container */
+  /* ——— Container ——— */
   .container-custom {
     @apply container mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  /* Skeleton loading */
+  /* ——— Pill selector (variant/size/color) ——— */
+  .pill {
+    @apply inline-flex items-center justify-center min-w-[131px] px-6 py-2 rounded-lg border text-sm font-medium transition-colors cursor-pointer;
+  }
+
+  .pill-default {
+    @apply pill border-figma-gray-200 bg-card text-foreground hover:border-figma-gray-400;
+  }
+
+  .pill-active {
+    @apply pill border-brand bg-brand text-white;
+  }
+
+  /* ——— Product card ——— */
+  .product-card {
+    @apply flex flex-col bg-card border border-border rounded-xl p-3 hover:shadow-lg transition-shadow;
+  }
+
+  /* ——— Discount badge ——— */
+  .discount-badge {
+    @apply bg-error-1 border border-error text-error-6 text-sm font-medium rounded-lg px-2 py-1;
+  }
+
+  /* ——— Skeleton ——— */
   .skeleton {
     @apply animate-pulse bg-muted rounded;
   }
 
-  /* Badge */
+  /* ——— Badge ——— */
   .badge {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
   }
@@ -237,7 +250,7 @@
     @apply badge bg-error text-white;
   }
 
-  /* Animations */
+  /* ——— Animations ——— */
   .animate-fade-in {
     animation: fade-in 0.5s ease-out;
   }
@@ -246,33 +259,31 @@
     animation: slide-up 0.3s ease-out;
   }
 
-  /* Utility classes */
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  .no-scrollbar::-webkit-scrollbar {
+  /* ——— Scrollbar hide ——— */
+  .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
 
-  .no-scrollbar {
+  .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* ——— Text balance ——— */
+  .text-balance {
+    text-wrap: balance;
   }
 }
 
 @layer utilities {
-  /* Text selection */
   .text-selection {
     @apply selection:bg-primary selection:text-primary-foreground;
   }
 
-  /* Focus styles */
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
   }
 
-  /* Truncate text */
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;

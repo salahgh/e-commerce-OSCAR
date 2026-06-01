@@ -17,16 +17,25 @@ const config: Config = {
       },
     },
     extend: {
+      /* ——— Colors: Figma Design System ——— */
       colors: {
-        // shadcn/ui semantic colors (CSS variables)
+        /* shadcn/ui semantic tokens (CSS variables) */
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
-        // OSCAR Figma Design System Colors
-        primary: {
+
+        /* Brand */
+        brand: {
           DEFAULT: '#1E1E1E',
+          light: '#4D4D4D',
+          dark: '#000000',
+        },
+
+        /* Primary palette — Brand Black */
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
           1: '#DFDFDF',
           2: '#B7B7B7',
@@ -35,8 +44,10 @@ const config: Config = {
           5: '#131313',
           6: '#000000',
         },
+
+        /* Secondary palette — Golden Yellow */
         secondary: {
-          DEFAULT: '#FFD500',
+          DEFAULT: 'hsl(var(--secondary))',
           foreground: 'hsl(var(--secondary-foreground))',
           1: '#FFFDF5',
           2: '#FEF9E2',
@@ -45,6 +56,8 @@ const config: Config = {
           5: '#D8B506',
           6: '#6E5C03',
         },
+
+        /* Text colors */
         'dark-text': {
           DEFAULT: '#010B38',
           1: 'rgba(1, 11, 56, 0.2)',
@@ -63,6 +76,8 @@ const config: Config = {
           5: 'rgba(255, 255, 255, 0.6)',
           6: 'rgba(255, 255, 255, 0.8)',
         },
+
+        /* Semantic surfaces */
         accent: {
           DEFAULT: 'hsl(var(--accent))',
           foreground: 'hsl(var(--accent-foreground))',
@@ -83,7 +98,22 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        // OSCAR Figma Status Colors
+
+        /* Figma gray scale — exact Figma tokens */
+        'figma-gray': {
+          50: '#F9FAFB',
+          100: '#F3F4F6',
+          200: '#E5E7EB',
+          300: '#D1D5DC',
+          400: '#9CA3AF',
+          500: '#6A7282',
+          600: '#4A5565',
+          700: '#364153',
+          800: '#1E2939',
+          900: '#111928',
+        },
+
+        /* OSCAR neutral grays */
         gray: {
           DEFAULT: '#FFFFFF',
           1: '#FAFBFF',
@@ -93,6 +123,8 @@ const config: Config = {
           5: '#C8C9CC',
           6: '#646466',
         },
+
+        /* Status colors — exact Figma palette */
         success: {
           DEFAULT: '#2FD976',
           1: '#E5FFEE',
@@ -129,7 +161,11 @@ const config: Config = {
           5: '#29B1CC',
           6: '#1298B2',
         },
-        // Chart colors for data visualization
+
+        /* Special purpose */
+        star: '#F2C94C',
+
+        /* Chart */
         chart: {
           '1': 'hsl(var(--chart-1))',
           '2': 'hsl(var(--chart-2))',
@@ -137,7 +173,8 @@ const config: Config = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
-        // Sidebar colors
+
+        /* Sidebar */
         sidebar: {
           DEFAULT: 'hsl(var(--sidebar-background))',
           foreground: 'hsl(var(--sidebar-foreground))',
@@ -149,18 +186,49 @@ const config: Config = {
           ring: 'hsl(var(--sidebar-ring))',
         },
       },
+
+      /* ——— Border Radius: Figma tokens ——— */
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        xl: 'var(--radius)',         /* 12px — cards */
+        lg: 'calc(var(--radius) - 4px)', /* 8px  — buttons, inputs, pills */
+        md: 'calc(var(--radius) - 6px)', /* 6px  — badges */
+        sm: 'calc(var(--radius) - 8px)', /* 4px  — small elements */
       },
+
+      /* ——— Typography ——— */
       fontFamily: {
-        sans: ['var(--font-inter)', ...fontFamily.sans],
-        arabic: ['var(--font-noto-arabic)', ...fontFamily.sans],
+        sans: ['var(--font-dm-sans)', 'var(--font-inter)', ...fontFamily.sans],
+        arabic: ['var(--font-ibm-arabic)', ...fontFamily.sans],
+        heading: ['var(--font-dm-sans)', ...fontFamily.sans],
       },
       fontSize: {
         '2xs': ['0.625rem', { lineHeight: '0.75rem' }],
+        /* Figma product card sizes */
+        'card-name': ['0.9375rem', { lineHeight: '1.35' }],    /* ~15px */
+        'card-price': ['1.125rem', { lineHeight: '1.5' }],     /* 18px */
+        /* Figma PDP sizes */
+        'pdp-name': ['2.25rem', { lineHeight: '1.35' }],       /* 36px */
+        'pdp-price': ['2.25rem', { lineHeight: '1.5' }],       /* 36px */
+        /* Figma section header */
+        'section': ['1.5rem', { lineHeight: '1.5' }],          /* 24px */
       },
+
+      /* ——— Spacing ——— */
+      spacing: {
+        '4.5': '1.125rem', /* 18px */
+        '13': '3.25rem',
+        '15': '3.75rem',
+        '18': '4.5rem',
+        '22': '5.5rem',
+      },
+
+      /* ——— Max Width ——— */
+      maxWidth: {
+        'page': '1440px',
+        'content': '1344px',
+      },
+
+      /* ——— Animations ——— */
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',

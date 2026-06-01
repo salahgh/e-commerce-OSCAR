@@ -33,7 +33,9 @@
       "Bash(find D:/e-commerce-OSCAR/apps/backend/src -type f \\\\\\(-name *.graphql -o -name schema.graphql \\\\\\))",
       "Bash(cp \"D:/e-commerce-OSCAR/packages/shared/src/constants/wilayas.ts\" \"D:/e-commerce-OSCAR/apps/mobile/src/data/wilayas.ts\")",
       "WebSearch",
-      "Bash(grep -i \"[A-Za-zÀ-ÿ]\\\\{4,\\\\}\")"
+      "Bash(grep -i \"[A-Za-zÀ-ÿ]\\\\{4,\\\\}\")",
+      "Bash(eas init *)",
+      "Bash(eas build *)"
     ]
   }
 }

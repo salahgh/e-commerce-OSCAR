@@ -49,9 +49,11 @@
     },
     "extra": {
       "graphqlUrl": "https://YOUR-RAILWAY-BACKEND.up.railway.app/shop-api",
+      "router": {},
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
+        "projectId": "d1a1d5e3-7361-4b7f-9388-ce1a3419706f"
       }
-    }
+    },
+    "owner": "salah_43"
   }
 }

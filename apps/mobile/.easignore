@@ -1,0 +1,61 @@
+# Dependencies — EAS installs them fresh on the build server
+node_modules/
+**/node_modules/
+
+# Native folders — EAS runs `expo prebuild` itself; local android/ios
+# can be multi-GB of Gradle/Xcode caches and must not be uploaded
+android/
+ios/
+
+# Expo / Metro build outputs
+.expo/
+.expo-shared/
+dist/
+web-build/
+.metro-health-check*
+
+# Bundler & framework caches
+.turbo/
+.next/
+.cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE / editor
+.idea/
+.vscode/
+.kotlin/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs & debug
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Env files (kept local; use EAS env vars instead)
+.env
+.env.local
+.env.*.local
+
+# Secrets / signing
+google-service-account.json
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# Large docs not needed for the build
+APP_STORE_DEPLOYMENT_GUIDE.md
+PLAY_STORE_DEPLOYMENT_GUIDE.md
+GOOGLE_PLAY_DEPLOY.md
+docs/
+
+# Codegen / schema artifacts (regenerated if needed)
+schema.graphql
