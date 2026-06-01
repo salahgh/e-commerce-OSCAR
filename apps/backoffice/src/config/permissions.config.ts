@@ -125,9 +125,11 @@ export type Permission =
  * Uses "anyOf" logic - user needs at least one of the listed permissions
  */
 export const PAGE_PERMISSIONS: Record<string, Permission[]> = {
+  '/': ['ReadCatalog', 'ReadOrder', 'ReadCustomer'],
   '/dashboard': ['ReadCatalog', 'ReadOrder', 'ReadCustomer'],
   '/products': ['ReadCatalog'],
   '/products/new': ['CreateCatalog'],
+  '/products/bulk': ['UpdateCatalog'],
   '/products/:id': ['ReadCatalog'],
   '/products/:id/edit': ['UpdateCatalog'],
   '/orders': ['ReadOrder'],
@@ -136,6 +138,16 @@ export const PAGE_PERMISSIONS: Record<string, Permission[]> = {
   '/customers/new': ['CreateCustomer'],
   '/customers/:id': ['ReadCustomer'],
   '/customers/:id/edit': ['UpdateCustomer'],
+  '/categories': ['ReadCollection'],
+  '/categories/new': ['CreateCollection'],
+  '/categories/:id': ['ReadCollection'],
+  '/facets': ['ReadFacet'],
+  '/facets/new': ['CreateFacet'],
+  '/facets/:id': ['ReadFacet'],
+  '/assets': ['ReadAsset'],
+  '/promotions': ['ReadPromotion'],
+  '/promotions/new': ['CreatePromotion'],
+  '/promotions/:id': ['ReadPromotion'],
   '/users': ['ReadAdministrator'],
   '/users/new': ['CreateAdministrator'],
   '/users/:id': ['ReadAdministrator'],

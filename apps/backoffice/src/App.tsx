@@ -55,7 +55,9 @@ function App() {
                 <Route
                   path="/"
                   element={
-                    <ProtectedRoute>
+                    /* autoDetect gates every child route by its PAGE_PERMISSIONS entry,
+                       re-evaluated on each navigation (ProtectedRoute uses useLocation). */
+                    <ProtectedRoute autoDetect>
                       <MainLayout />
                     </ProtectedRoute>
                   }
