@@ -63,6 +63,17 @@ Run the checklist in `2026-05-31-phase1-batch3-checkout-billing.md` /
 step, "billing same as shipping" toggle, validation, `setOrderBillingAddress` wiring, and billing
 display in the order review.
 
+## 4b. Batch 2 — order fulfillment (back-office)
+
+On an order in `PaymentSettled` (back-office `:5173` → Orders → open one):
+1. "Créer une expédition" opens the dialog; lines show remaining qty (= ordered − fulfilled).
+2. Fulfill a SUBSET (lower one line's qty) + method + tracking → order becomes `PartiallyShipped`,
+   a fulfillment appears with state `Pending/Created`, tracking + method shown.
+3. Create a second fulfillment for the rest → order becomes `Shipped`.
+4. On a fulfillment, "Marquer expédié" → `Shipped`, then "Marquer livré" → `Delivered`;
+   order reaches `Delivered`. Toasts show on success; union errors show as error toasts.
+5. The legacy tracking-number field still displays for older orders (unchanged).
+
 ## 5. Smoke the integrated frontend refactor (from the main merge)
 
 The recent `origin/main` merge brought a design-system refactor (new fonts, component-based home,
