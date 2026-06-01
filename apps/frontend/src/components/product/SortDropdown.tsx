@@ -7,12 +7,12 @@ import { cn } from '@/lib/utils';
 export interface SortOption {
   value: string;
   label: string;
-  sortBy: 'name' | 'price' | 'relevance';
+  sortBy: 'name' | 'price' | 'createdAt';
   sortOrder: 'ASC' | 'DESC';
 }
 
 const SORT_OPTIONS: SortOption[] = [
-  { value: 'relevance', label: 'Pertinence', sortBy: 'relevance', sortOrder: 'DESC' },
+  { value: 'newest', label: 'Plus recents', sortBy: 'createdAt', sortOrder: 'DESC' },
   { value: 'price-asc', label: 'Prix croissant', sortBy: 'price', sortOrder: 'ASC' },
   { value: 'price-desc', label: 'Prix decroissant', sortBy: 'price', sortOrder: 'DESC' },
   { value: 'name-asc', label: 'Nom (A-Z)', sortBy: 'name', sortOrder: 'ASC' },
@@ -22,7 +22,7 @@ const SORT_OPTIONS: SortOption[] = [
 interface SortDropdownProps {
   currentSortBy: string;
   currentSortOrder: string;
-  onSortChange: (sortBy: 'name' | 'price' | 'relevance', sortOrder: 'ASC' | 'DESC') => void;
+  onSortChange: (sortBy: 'name' | 'price' | 'createdAt', sortOrder: 'ASC' | 'DESC') => void;
   className?: string;
 }
 

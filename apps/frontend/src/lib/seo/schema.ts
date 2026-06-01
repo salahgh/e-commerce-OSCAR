@@ -98,7 +98,10 @@ export function generateProductSchema(product: ProductSchemaInput): ProductSchem
   const productUrl = `${siteConfig.url}/fr/products/${product.slug}`;
 
   // Determine availability
-  let availability: ProductSchema['offers']['availability'] = 'https://schema.org/InStock';
+  let availability:
+    | 'https://schema.org/InStock'
+    | 'https://schema.org/OutOfStock'
+    | 'https://schema.org/LimitedAvailability' = 'https://schema.org/InStock';
   if (!product.inStock) {
     availability = 'https://schema.org/OutOfStock';
   } else if (product.stockLevel !== undefined && product.stockLevel < 5) {

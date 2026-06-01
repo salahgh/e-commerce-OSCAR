@@ -21,6 +21,8 @@ export * from './radio';
 export * from './QuantitySelector';
 export * from './PriceDisplay';
 export * from './StockIndicator';
-export * from './OptimizedImage';
+// Re-export OptimizedImage members except AvatarImage, which collides with the
+// shadcn avatar's AvatarImage (exported above via './avatar').
+export { OptimizedImage, ProductImage, HeroImage, ThumbnailImage } from './OptimizedImage';
 // Note: sonner exports Toaster which conflicts with toaster, use direct import if needed
 // export * from './sonner';
