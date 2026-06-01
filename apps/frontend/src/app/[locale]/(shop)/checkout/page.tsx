@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   CheckoutSteps,
   ShippingAddressForm,
+  BillingAddressForm,
   ShippingMethodForm,
   PaymentMethodForm,
   OrderReview,
@@ -31,6 +32,7 @@ import {
   useGetEligibleShippingMethodsQuery,
   useGetEligiblePaymentMethodsQuery,
   useSetOrderShippingAddressMutation,
+  useSetOrderBillingAddressMutation,
   useSetOrderShippingMethodMutation,
   useTransitionOrderToStateMutation,
   useAddPaymentToOrderMutation,
@@ -39,10 +41,28 @@ import {
 
 const steps = [
   { number: 1, label: 'Adresse', description: 'Livraison' },
-  { number: 2, label: 'Méthode', description: 'Expédition' },
-  { number: 3, label: 'Paiement', description: 'Mode' },
-  { number: 4, label: 'Confirmation', description: 'Commande' },
+  { number: 2, label: 'Facturation', description: 'Adresse' },
+  { number: 3, label: 'Méthode', description: 'Expédition' },
+  { number: 4, label: 'Paiement', description: 'Mode' },
+  { number: 5, label: 'Confirmation', description: 'Commande' },
 ];
+
+// Maps a checkout form's values (wilaya/commune codes) to a Vendure
+// CreateAddressInput. Shared by the shipping and billing submit handlers.
+const buildAddressInput = (values: any) => {
+  const wilaya = wilayas.find((w) => w.code === values.wilaya);
+  const commune = getCommunesByWilayaCode(values.wilaya).find((c) => c.code === values.commune);
+  return {
+    fullName: `${values.firstName} ${values.lastName}`,
+    streetLine1: values.address,
+    streetLine2: values.notes || '',
+    city: commune?.name || values.commune,
+    province: wilaya?.name || values.wilaya,
+    postalCode: values.postalCode || '',
+    countryCode: 'DZ',
+    phoneNumber: values.phone,
+  };
+};
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -56,21 +76,23 @@ export default function CheckoutPage() {
 
   // Checkout data
   const [shippingAddress, setShippingAddress] = useState<any>(null);
+  const [billingAddress, setBillingAddress] = useState<any>(null); // null = same as shipping
   const [selectedShippingMethodId, setSelectedShippingMethodId] = useState<string>('');
   const [selectedPaymentMethodCode, setSelectedPaymentMethodCode] = useState<string>('');
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   // GraphQL queries
   const { data: shippingMethodsData, loading: shippingLoading } = useGetEligibleShippingMethodsQuery({
-    skip: currentStep < 2,
+    skip: currentStep < 3,
   });
 
   const { data: paymentMethodsData, loading: paymentLoading } = useGetEligiblePaymentMethodsQuery({
-    skip: currentStep < 3,
+    skip: currentStep < 4,
   });
 
   // GraphQL mutations
   const [setShippingAddressMutation] = useSetOrderShippingAddressMutation();
+  const [setBillingAddressMutation] = useSetOrderBillingAddressMutation();
   const [setShippingMethodMutation] = useSetOrderShippingMethodMutation();
   const [setCustomerMutation] = useSetCustomerForOrderMutation();
   const [transitionOrderMutation] = useTransitionOrderToStateMutation();
@@ -148,25 +170,9 @@ export default function CheckoutPage() {
         }
       }
 
-      // Get wilaya and commune names
-      const wilaya = wilayas.find((w) => w.code === values.wilaya);
-      const communes = getCommunesByWilayaCode(values.wilaya);
-      const commune = communes.find((c) => c.code === values.commune);
-
       // Set shipping address
       const result = await setShippingAddressMutation({
-        variables: {
-          input: {
-            fullName: `${values.firstName} ${values.lastName}`,
-            streetLine1: values.address,
-            streetLine2: values.notes || '',
-            city: commune?.name || values.commune,
-            province: wilaya?.name || values.wilaya,
-            postalCode: values.postalCode || '',
-            countryCode: 'DZ',
-            phoneNumber: values.phone,
-          },
-        },
+        variables: { input: buildAddressInput(values) },
       });
 
       if (result.data?.setOrderShippingAddress) {
@@ -184,6 +190,37 @@ export default function CheckoutPage() {
       }
     } catch (error: any) {
       toast.error(error.message || 'Erreur lors de la définition de l\'adresse');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // billingValues === null  =>  bill to the shipping address.
+  const handleBillingAddressSubmit = async (billingValues: any | null) => {
+    setIsSubmitting(true);
+    try {
+      const source = billingValues ?? shippingAddress;
+      const result = await setBillingAddressMutation({
+        variables: { input: buildAddressInput(source) },
+      });
+
+      if (result.data?.setOrderBillingAddress) {
+        const response = result.data.setOrderBillingAddress;
+        if ('errorCode' in response) {
+          toast.error(
+            (response as any).message || 'Erreur lors de la définition de l\'adresse de facturation'
+          );
+          setIsSubmitting(false);
+          return;
+        }
+
+        setBillingAddress(billingValues);
+        await refetchCart();
+        setCurrentStep(3);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Erreur lors de la définition de l\'adresse de facturation');
     } finally {
       setIsSubmitting(false);
     }
@@ -208,7 +245,7 @@ export default function CheckoutPage() {
 
         setSelectedShippingMethodId(methodId);
         await refetchCart();
-        setCurrentStep(3);
+        setCurrentStep(4);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (error: any) {
@@ -221,7 +258,7 @@ export default function CheckoutPage() {
   const handlePaymentMethodSubmit = (methodCode: string, accepted: boolean) => {
     setSelectedPaymentMethodCode(methodCode);
     setTermsAccepted(accepted);
-    setCurrentStep(4);
+    setCurrentStep(5);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -323,6 +360,26 @@ export default function CheckoutPage() {
 
   const displayAddress = getAddressDisplayInfo();
 
+  // Resolve the billing address for review (null = same as shipping).
+  const getBillingDisplayInfo = () => {
+    if (!billingAddress) return null;
+    const wilaya = wilayas.find((w) => w.code === billingAddress.wilaya);
+    const commune = getCommunesByWilayaCode(billingAddress.wilaya).find(
+      (c) => c.code === billingAddress.commune
+    );
+    return {
+      firstName: billingAddress.firstName,
+      lastName: billingAddress.lastName,
+      address: billingAddress.address,
+      city: commune?.name || billingAddress.commune,
+      wilaya: wilaya?.name || billingAddress.wilaya,
+      postalCode: billingAddress.postalCode,
+      phone: billingAddress.phone,
+    };
+  };
+
+  const displayBillingAddress = getBillingDisplayInfo();
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
@@ -397,31 +454,42 @@ export default function CheckoutPage() {
                 )}
 
                 {currentStep === 2 && (
-                  <ShippingMethodForm
-                    shippingMethods={shippingMethods}
-                    initialMethod={selectedShippingMethodId}
-                    onSubmit={handleShippingMethodSubmit}
+                  <BillingAddressForm
+                    shippingValues={shippingAddress}
+                    initialValues={shippingAddress}
+                    onSubmit={handleBillingAddressSubmit}
                     onBack={() => handleEditStep(1)}
-                  />
-                )}
-
-                {currentStep === 3 && (
-                  <PaymentMethodForm
-                    paymentMethods={paymentMethods.length > 0 ? paymentMethods : undefined}
-                    initialMethod={selectedPaymentMethodCode}
-                    onSubmit={handlePaymentMethodSubmit}
-                    onBack={() => handleEditStep(2)}
                     isSubmitting={isSubmitting}
                   />
                 )}
 
-                {currentStep === 4 && displayAddress && selectedShipping && selectedPayment && (
+                {currentStep === 3 && (
+                  <ShippingMethodForm
+                    shippingMethods={shippingMethods}
+                    initialMethod={selectedShippingMethodId}
+                    onSubmit={handleShippingMethodSubmit}
+                    onBack={() => handleEditStep(2)}
+                  />
+                )}
+
+                {currentStep === 4 && (
+                  <PaymentMethodForm
+                    paymentMethods={paymentMethods.length > 0 ? paymentMethods : undefined}
+                    initialMethod={selectedPaymentMethodCode}
+                    onSubmit={handlePaymentMethodSubmit}
+                    onBack={() => handleEditStep(3)}
+                    isSubmitting={isSubmitting}
+                  />
+                )}
+
+                {currentStep === 5 && displayAddress && selectedShipping && selectedPayment && (
                   <OrderReview
                     shippingAddress={{
                       ...displayAddress,
                       city: displayAddress.communeName,
                       wilaya: displayAddress.wilayaName,
                     }}
+                    billingAddress={displayBillingAddress}
                     shippingMethod={selectedShipping}
                     paymentMethod={selectedPayment}
                     cartItems={cart.items}
