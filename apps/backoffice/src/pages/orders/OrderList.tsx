@@ -440,7 +440,7 @@ export const OrderList: React.FC = () => {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                  Valeur totale
+                  Valeur totale (page)
                 </p>
                 <p className="text-lg font-bold text-foreground">
                   {formatPrice(stats.totalValue / 100)}
@@ -455,7 +455,7 @@ export const OrderList: React.FC = () => {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                  Panier moyen
+                  Panier moyen (page)
                 </p>
                 <p className="text-lg font-bold text-foreground">
                   {formatPrice(stats.avgValue / 100)}
@@ -469,7 +469,7 @@ export const OrderList: React.FC = () => {
                 <Clock className="h-5 w-5 text-yellow-400" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">En attente</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">En attente (page)</p>
                 <p className="text-lg font-bold text-foreground">
                   {(stats.byStatus['PaymentSettled'] || 0) +
                     (stats.byStatus['ArrangingPayment'] || 0)}
@@ -483,7 +483,7 @@ export const OrderList: React.FC = () => {
                 <Truck className="h-5 w-5 text-purple-400" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Expédiées</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Expédiées (page)</p>
                 <p className="text-lg font-bold text-foreground">
                   {(stats.byStatus['Shipped'] || 0) + (stats.byStatus['Delivered'] || 0)}
                 </p>
