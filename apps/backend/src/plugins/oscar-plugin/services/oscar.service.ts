@@ -90,12 +90,15 @@ export class OscarService {
    * Get featured products
    */
   async getFeaturedProducts(ctx: RequestContext, take: number = 10): Promise<Product[]> {
+    // The `isFeatured` custom field was removed (see RemoveProductCustomFields migration);
+    // "featured" now means a product that has a featured image. Return the most recent such products.
     const qb = this.connection
       .getRepository(ctx, Product)
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.featuredAsset', 'featuredAsset')
-      .where('product.customFieldsIsfeatured = :isFeatured', { isFeatured: true })
-      .andWhere('product.enabled = :enabled', { enabled: true })
+      .where('product.enabled = :enabled', { enabled: true })
+      .andWhere('product.featuredAssetId IS NOT NULL')
+      .orderBy('product.createdAt', 'DESC')
       .take(take);
 
     return qb.getMany();
@@ -124,12 +127,14 @@ export class OscarService {
    * Get popular products (by view count)
    */
   async getPopularProducts(ctx: RequestContext, take: number = 10): Promise<Product[]> {
+    // The `viewCount` custom field was removed, so there is no popularity signal to sort by.
+    // Fall back to the most recently created enabled products until view tracking is reinstated.
     const qb = this.connection
       .getRepository(ctx, Product)
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.featuredAsset', 'featuredAsset')
       .where('product.enabled = :enabled', { enabled: true })
-      .orderBy('product.customFieldsViewcount', 'DESC')
+      .orderBy('product.createdAt', 'DESC')
       .take(take);
 
     return qb.getMany();
@@ -138,15 +143,9 @@ export class OscarService {
   /**
    * Increment product view count
    */
-  async incrementViewCount(ctx: RequestContext, productId: ID): Promise<boolean> {
-    await this.connection
-      .getRepository(ctx, Product)
-      .createQueryBuilder()
-      .update(Product)
-      .set({ customFields: () => '"customFieldsViewcount" + 1' } as any)
-      .where('id = :id', { id: productId })
-      .execute();
-
+  async incrementViewCount(_ctx: RequestContext, _productId: ID): Promise<boolean> {
+    // The `viewCount` custom field was removed, so there is no column to increment.
+    // Keep the trackProductView mutation functional as a no-op until view tracking is reinstated.
     return true;
   }
 
@@ -161,20 +160,24 @@ export class OscarService {
   ): Promise<{ items: Product[]; totalItems: number }> {
     const searchTerm = `%${keyword}%`;
 
+    // Product name/description are native Vendure translations (the *fr/*ar custom fields were
+    // removed). Match the term against any translation (fr/ar/en) via the product_translation table.
     const qb = this.connection
       .getRepository(ctx, Product)
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.featuredAsset', 'featuredAsset')
       .where('product.enabled = :enabled', { enabled: true })
-      .andWhere(
-        '(LOWER(product.name) LIKE LOWER(:term) OR ' +
-        'LOWER(product.customFieldsNamefr) LIKE LOWER(:term) OR ' +
-        'LOWER(product.customFieldsNamear) LIKE LOWER(:term) OR ' +
-        'LOWER(product.description) LIKE LOWER(:term) OR ' +
-        'LOWER(product.customFieldsDescriptionfr) LIKE LOWER(:term) OR ' +
-        'LOWER(product.customFieldsDescriptionar) LIKE LOWER(:term))',
-        { term: searchTerm },
-      );
+      .andWhere((sub) => {
+        const subQuery = sub
+          .subQuery()
+          .select('translation.baseId')
+          .from('product_translation', 'translation')
+          .where('LOWER(translation.name) LIKE LOWER(:term)')
+          .orWhere('LOWER(translation.description) LIKE LOWER(:term)')
+          .getQuery();
+        return `product.id IN ${subQuery}`;
+      })
+      .setParameter('term', searchTerm);
 
     const [items, totalItems] = await qb
       .skip(skip)
