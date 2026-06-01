@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { apolloClient } from '@/lib/apollo/apollo-client';
+import { useApolloClient } from '@apollo/client';
 import {
   useActiveCustomerQuery,
   useShopLoginMutation,
@@ -59,6 +59,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  // The provider's Apollo client (the one the hooks below run through). Clearing THIS
+  // on logout is what actually evicts the user's cached data — clearing a separate
+  // standalone client (the previous bug) left the cache intact across sessions.
+  const apollo = useApolloClient();
   const [customer, setCustomer] = useState<CustomerFieldsFragment | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -153,8 +157,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await shopLogout();
       setCustomer(null);
-      // Clear Apollo cache
-      await apolloClient.clearStore();
+      // Clear the provider's Apollo cache so no data leaks into the next session.
+      await apollo.clearStore();
       router.push('/');
     } catch (error) {
       console.error('Logout error:', error);

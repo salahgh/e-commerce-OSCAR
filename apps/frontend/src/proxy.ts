@@ -6,10 +6,6 @@ import { routing } from './i18n/routing';
 // Create the internationalization middleware
 const intlMiddleware = createMiddleware(routing);
 
-// Protected routes that require authentication
-const protectedRoutes = ['/profile', '/orders', '/checkout', '/wishlist'];
-const authRoutes = ['/login', '/register'];
-
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
@@ -28,35 +24,12 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Apply internationalization middleware
-  const response = intlMiddleware(request);
-
-  // Extract locale from the URL
-  const pathnameHasLocale = routing.locales.some(
-    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-  );
-
-  const locale = pathnameHasLocale ? pathname.split('/')[1] : routing.defaultLocale;
-
-  // Remove locale from pathname for route checking
-  const pathWithoutLocale = pathnameHasLocale ? pathname.replace(`/${locale}`, '') : pathname;
-
-  // Check authentication for protected routes
-  const token = request.cookies.get('token');
-  const isProtectedRoute = protectedRoutes.some((route) => pathWithoutLocale.startsWith(route));
-  const isAuthRoute = authRoutes.some((route) => pathWithoutLocale.startsWith(route));
-
-  if (isProtectedRoute && !token) {
-    const redirectUrl = new URL(`/${locale}/login`, request.url);
-    redirectUrl.searchParams.set('from', pathname);
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  if (isAuthRoute && token) {
-    return NextResponse.redirect(new URL(`/${locale}`, request.url));
-  }
-
-  return response;
+  // Auth is client-side: the session token lives in localStorage (see lib/auth/session.ts)
+  // and the Shop API enforces auth on every request, so server middleware cannot see it.
+  // Route protection therefore lives in the client (e.g. (user)/layout.tsx). Do NOT gate
+  // here — the previous cookies.get('token') check never matched any cookie, so it bounced
+  // authenticated users to /login and would have blocked guest checkout.
+  return intlMiddleware(request);
 }
 
 export const config = {
