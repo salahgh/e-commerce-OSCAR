@@ -101,7 +101,10 @@ export function generateMetadata(options: GenerateMetadataOptions): Metadata {
       url: openGraph?.url || canonicalUrl || siteConfig.url,
       siteName: siteConfig.name,
       locale: localeConfig[locale]?.locale || 'fr_DZ',
-      type: openGraph?.type || 'website',
+      // Next's Metadata.openGraph object type only accepts article|website|profile here;
+      // 'product' has no plain-object representation, so fall back to 'website' for the OG tag
+      // (product data is emitted separately via JSON-LD).
+      type: (openGraph?.type === 'product' ? 'website' : openGraph?.type) || 'website',
       images: ogImages,
     },
 
