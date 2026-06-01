@@ -20,7 +20,13 @@ const CACHE_TTL = {
   customer: 60 * 1000, // 1 minute
 };
 
-function makeClient() {
+// Derive the next-intl locale from the URL on the client. French (default) has no prefix.
+function localeFromPath(pathname: string): string {
+  const seg = pathname.split('/')[1];
+  return seg === 'ar' || seg === 'en' ? seg : 'fr';
+}
+
+function makeClient(ssrLocale: string = 'fr') {
   const httpLink = new HttpLink({
     uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8085/shop-api',
     credentials: 'include',
@@ -33,14 +39,19 @@ function makeClient() {
   // Auth link for token handling
   const authLink = setContext((_, { headers }) => {
     let token = null;
+    // On the client, read the current locale from the URL (robust to locale switches);
+    // on the server, use the locale passed into makeClient from the layout.
+    let locale = ssrLocale;
     if (typeof window !== 'undefined') {
       token = localStorage.getItem('token');
+      locale = localeFromPath(window.location.pathname);
     }
 
     return {
       headers: {
         ...headers,
         authorization: token ? `Bearer ${token}` : '',
+        'Accept-Language': locale,
       },
     };
   });
@@ -218,9 +229,12 @@ function makeClient() {
   });
 }
 
-export function ApolloWrapper({ children }: React.PropsWithChildren) {
+export function ApolloWrapper({
+  children,
+  locale = 'fr',
+}: React.PropsWithChildren<{ locale?: string }>) {
   return (
-    <ApolloNextAppProvider makeClient={makeClient}>
+    <ApolloNextAppProvider makeClient={() => makeClient(locale)}>
       {children}
     </ApolloNextAppProvider>
   );

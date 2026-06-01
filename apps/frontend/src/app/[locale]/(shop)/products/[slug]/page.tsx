@@ -99,11 +99,12 @@ interface ProductData {
   }>;
 }
 
-async function getProduct(slug: string): Promise<ProductData | null> {
+async function getProduct(slug: string, locale: string): Promise<ProductData | null> {
   try {
     const response = await fetch(GRAPHQL_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      // Forward the active locale so Vendure returns localized product name/description.
+      headers: { 'Content-Type': 'application/json', 'Accept-Language': locale },
       body: JSON.stringify({
         query: GET_PRODUCT_QUERY,
         variables: { slug },
@@ -131,7 +132,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const product = await getProduct(slug);
+  const product = await getProduct(slug, locale);
 
   if (!product) {
     return {
@@ -169,7 +170,7 @@ export default async function ProductDetailPage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
-  const product = await getProduct(slug);
+  const product = await getProduct(slug, locale);
 
   if (!product) {
     notFound();

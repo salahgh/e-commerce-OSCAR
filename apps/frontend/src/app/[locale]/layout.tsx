@@ -77,7 +77,7 @@ export default async function LocaleLayout({
       <body className={`${dmSans.variable} ${inter.variable} ${ibmPlexArabic.variable} ${dmSans.className}`}>
         <ThemeProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>
-            <ApolloWrapper>
+            <ApolloWrapper locale={locale}>
               <AuthProvider>
                 <CartProvider>
                   {/* Offline indicator */}
