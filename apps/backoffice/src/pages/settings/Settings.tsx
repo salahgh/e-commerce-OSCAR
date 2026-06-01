@@ -38,6 +38,8 @@ import {
   XCircle,
   Loader2,
   PlayCircle,
+  Percent,
+  Plus,
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { addToast } from '../../store/slices/uiSlice';
@@ -47,6 +49,7 @@ import {
   ShippingMethodsDocument,
   UpdatePaymentMethodDocument,
   GlobalSettingsDocument,
+  UpdateGlobalSettingsDocument,
   ShippingZonesDocument,
   AdminUsersDocument,
   UpdateShippingMethodDocument,
@@ -65,7 +68,13 @@ import { Tabs } from '../../components/ui/Tabs';
 import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
 import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
 import { formatPrice } from '../../lib/utils';
+import { TaxSettings } from './sections/TaxSettings';
+import { ZoneSettings } from './sections/ZoneSettings';
+import { ChannelSettings } from './sections/ChannelSettings';
+import { ShippingMethodCreateModal } from './sections/ShippingMethodCreateModal';
+import { PaymentMethodCreateModal } from './sections/PaymentMethodCreateModal';
 
 // Store settings form schema
 const StoreSettingsSchema = Yup.object().shape({
@@ -93,6 +102,10 @@ export const Settings: React.FC = () => {
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [deletingPaymentId, setDeletingPaymentId] = useState<string | null>(null);
   const [deletingShippingId, setDeletingShippingId] = useState<string | null>(null);
+  const [shippingModalOpen, setShippingModalOpen] = useState(false);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [trackInventory, setTrackInventory] = useState(false);
+  const [outOfStockThreshold, setOutOfStockThreshold] = useState(0);
   const [deletePaymentMethod, { loading: deletingPayment }] = useMutation(
     DeletePaymentMethodDocument
   );
@@ -183,6 +196,34 @@ export const Settings: React.FC = () => {
   const [runPendingUpdates, { loading: runningPending }] = useMutation(RunPendingSearchIndexUpdatesDocument);
   const [cancelJob] = useMutation(CancelJobDocument);
   const [cancellingJobs, setCancellingJobs] = useState(false);
+  const [updateGlobalSettings, { loading: savingGlobal }] = useMutation(
+    UpdateGlobalSettingsDocument,
+    { refetchQueries: [{ query: GlobalSettingsDocument }] }
+  );
+
+  // Seed inventory defaults from loaded global settings
+  useEffect(() => {
+    if (globalData?.globalSettings) {
+      setTrackInventory(globalData.globalSettings.trackInventory ?? false);
+      setOutOfStockThreshold(globalData.globalSettings.outOfStockThreshold ?? 0);
+    }
+  }, [globalData]);
+
+  const handleSaveInventorySettings = async () => {
+    try {
+      await updateGlobalSettings({
+        variables: {
+          input: {
+            trackInventory,
+            outOfStockThreshold: Number(outOfStockThreshold ?? 0),
+          },
+        },
+      });
+      dispatch(addToast({ message: "Paramètres d'inventaire enregistrés", type: 'success' }));
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+  };
 
   // Handle cancel all pending jobs
   const handleCancelPendingJobs = async () => {
@@ -488,6 +529,47 @@ export const Settings: React.FC = () => {
                 </Formik>
               </div>
 
+              {/* Inventory Settings */}
+              <div className="bg-muted/50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Database className="h-5 w-5 text-amber-500" />
+                  Paramètres d'inventaire
+                </h3>
+                <div className="space-y-4">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={trackInventory}
+                      onChange={(e) => setTrackInventory(e.target.checked)}
+                      className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                    />
+                    <span className="text-sm font-medium text-foreground">
+                      Suivre les stocks
+                    </span>
+                  </label>
+                  <div className="max-w-xs">
+                    <Input
+                      type="number"
+                      label="Seuil de rupture de stock"
+                      value={outOfStockThreshold}
+                      onChange={(e) => setOutOfStockThreshold(Number(e.target.value))}
+                      helperText="Quantité en dessous de laquelle un produit est considéré en rupture"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    onClick={handleSaveInventorySettings}
+                    loading={savingGlobal}
+                    disabled={savingGlobal}
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    Enregistrer
+                  </Button>
+                </div>
+              </div>
+
               {/* Logo Upload */}
               <div className="bg-muted/50 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
@@ -607,10 +689,21 @@ export const Settings: React.FC = () => {
 
           {/* Shipping Methods */}
           <div className="bg-muted/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Truck className="h-5 w-5 text-blue-500" />
-              Méthodes de Livraison
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <Truck className="h-5 w-5 text-blue-500" />
+                Méthodes de Livraison
+              </h3>
+              <Button variant="primary" size="sm" onClick={() => setShippingModalOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Nouvelle méthode
+              </Button>
+            </div>
+            <ShippingMethodCreateModal
+              isOpen={shippingModalOpen}
+              onClose={() => setShippingModalOpen(false)}
+              onCreated={() => refetchShipping()}
+            />
             {shippingLoading ? (
               <Spinner size="md" />
             ) : shippingMethods.length === 0 ? (
@@ -721,7 +814,17 @@ export const Settings: React.FC = () => {
                 Activez ou désactivez les méthodes de paiement disponibles
               </p>
             </div>
+            <Button variant="primary" size="sm" onClick={() => setPaymentModalOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nouvelle méthode
+            </Button>
           </div>
+
+          <PaymentMethodCreateModal
+            isOpen={paymentModalOpen}
+            onClose={() => setPaymentModalOpen(false)}
+            onCreated={() => refetchPayment()}
+          />
 
           {paymentLoading ? (
             <div className="flex justify-center py-8">
@@ -857,6 +960,24 @@ export const Settings: React.FC = () => {
           </div>
         </div>
       ),
+    },
+    {
+      id: 'taxes',
+      label: 'Taxes',
+      icon: <Percent className="h-4 w-4" />,
+      content: <TaxSettings />,
+    },
+    {
+      id: 'zones',
+      label: 'Zones',
+      icon: <Globe className="h-4 w-4" />,
+      content: <ZoneSettings />,
+    },
+    {
+      id: 'channels',
+      label: 'Canaux',
+      icon: <Building className="h-4 w-4" />,
+      content: <ChannelSettings />,
     },
     {
       id: 'email',
