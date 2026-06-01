@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, FormEvent } from 'react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname, useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui';
@@ -11,6 +12,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Header() {
+  const t = useTranslations('nav');
   const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
@@ -34,10 +36,10 @@ export default function Header() {
   };
 
   const navigation = [
-    { name: 'Accueil', href: `/${locale}` },
-    { name: 'Catégories', href: `/${locale}/categories` },
-    { name: 'Produits', href: `/${locale}/products` },
-    { name: 'À propos', href: `/${locale}/about` },
+    { name: t('home'), href: `/${locale}` },
+    { name: t('categories'), href: `/${locale}/categories` },
+    { name: t('products'), href: `/${locale}/products` },
+    { name: t('about'), href: `/${locale}/about` },
   ];
 
   return (
@@ -46,14 +48,14 @@ export default function Header() {
       <div className="bg-primary text-primary-foreground">
         <div className="container-custom py-2">
           <div className="flex justify-between items-center text-sm">
-            <p>Livraison gratuite pour les commandes de plus de 5000 DA</p>
+            <p>{t('freeShippingBanner')}</p>
             <div className="hidden md:flex items-center gap-4">
               <Link href={`/${locale}/faq`} className="hover:underline">
-                Aide
+                {t('help')}
               </Link>
               <span>|</span>
               <Link href={`/${locale}/contact`} className="hover:underline">
-                Contact
+                {t('contact')}
               </Link>
             </div>
           </div>
@@ -129,7 +131,7 @@ export default function Header() {
                   size="icon"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="relative"
-                  aria-label="Menu utilisateur"
+                  aria-label={t('userMenu')}
                 >
                   <UserCircle className="h-5 w-5" />
                 </Button>
@@ -155,7 +157,7 @@ export default function Header() {
                           onClick={() => setUserMenuOpen(false)}
                         >
                           <User className="h-4 w-4" />
-                          Mon Profil
+                          {t('myProfile')}
                         </Link>
                         <Link
                           href={`/${locale}/user/orders`}
@@ -163,7 +165,7 @@ export default function Header() {
                           onClick={() => setUserMenuOpen(false)}
                         >
                           <ShoppingCart className="h-4 w-4" />
-                          Mes Commandes
+                          {t('myOrders')}
                         </Link>
                         <button
                           onClick={() => {
@@ -173,7 +175,7 @@ export default function Header() {
                           className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md hover:bg-destructive/10 text-destructive transition-colors"
                         >
                           <LogOut className="h-4 w-4" />
-                          Déconnexion
+                          {t('logout')}
                         </button>
                       </div>
                     </div>
@@ -185,16 +187,16 @@ export default function Header() {
                 <Button variant="ghost" size="sm" asChild className="hidden sm:flex">
                   <Link href={`/${locale}/login`}>
                     <LogIn className="h-4 w-4 mr-1" />
-                    Connexion
+                    {t('login')}
                   </Link>
                 </Button>
                 <Button variant="default" size="sm" asChild className="hidden sm:flex">
                   <Link href={`/${locale}/register`}>
-                    S'inscrire
+                    {t('register')}
                   </Link>
                 </Button>
                 <Button variant="ghost" size="icon" asChild className="sm:hidden">
-                  <Link href={`/${locale}/login`} aria-label="Connexion">
+                  <Link href={`/${locale}/login`} aria-label={t('login')}>
                     <LogIn className="h-5 w-5" />
                   </Link>
                 </Button>
@@ -214,7 +216,7 @@ export default function Header() {
                 type="search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Rechercher des produits..."
+                placeholder={t('searchPlaceholder')}
                 className="w-full pl-10 pr-12 py-2 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 autoFocus
               />
@@ -222,7 +224,7 @@ export default function Header() {
                 type="submit"
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-primary text-primary-foreground rounded text-sm font-medium hover:bg-primary/90 transition-colors"
               >
-                Rechercher
+                {t('searchButton')}
               </button>
             </form>
           </div>
@@ -267,7 +269,7 @@ export default function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <User className="h-4 w-4" />
-                    Mon Profil
+                    {t('myProfile')}
                   </Link>
                   <Link
                     href={`/${locale}/user/orders`}
@@ -275,7 +277,7 @@ export default function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <ShoppingCart className="h-4 w-4" />
-                    Mes Commandes
+                    {t('myOrders')}
                   </Link>
                   <button
                     onClick={() => {
@@ -285,7 +287,7 @@ export default function Header() {
                     className="flex items-center gap-2 w-full px-4 py-2 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
                   >
                     <LogOut className="h-4 w-4" />
-                    Déconnexion
+                    {t('logout')}
                   </button>
                 </>
               ) : (
@@ -296,7 +298,7 @@ export default function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <LogIn className="h-4 w-4" />
-                    Connexion
+                    {t('login')}
                   </Link>
                   <Link
                     href={`/${locale}/register`}
@@ -304,7 +306,7 @@ export default function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <User className="h-4 w-4" />
-                    S'inscrire
+                    {t('register')}
                   </Link>
                 </>
               )}

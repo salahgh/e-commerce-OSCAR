@@ -25,6 +25,7 @@ const storeInfo = {
 };
 
 export default function ContactPage() {
+  const t = useTranslations('contact');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -57,9 +58,9 @@ export default function ContactPage() {
       <section className="bg-gradient-to-br from-primary to-primary-dark text-white py-16">
         <div className="container-custom">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Contactez-nous</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('heroTitle')}</h1>
             <p className="text-xl text-gray-100">
-              Une question ? Une suggestion ? N'hésitez pas à nous contacter. Notre équipe est là pour vous aider.
+              {t('heroSubtitle')}
             </p>
           </div>
         </div>
@@ -70,25 +71,25 @@ export default function ContactPage() {
           {/* Contact Form */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold mb-6">Envoyez-nous un message</h2>
+              <h2 className="text-2xl font-bold mb-6">{t('formTitle')}</h2>
 
               {submitted ? (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Send className="h-8 w-8 text-green-600" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Message envoyé !</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('successTitle')}</h3>
                   <p className="text-gray-600 mb-6">
-                    Merci de nous avoir contactés. Nous vous répondrons dans les plus brefs délais.
+                    {t('successMessage')}
                   </p>
-                  <Button onClick={() => setSubmitted(false)}>Envoyer un autre message</Button>
+                  <Button onClick={() => setSubmitted(false)}>{t('sendAnotherButton')}</Button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                        Nom complet *
+                        {t('nameLabel')}
                       </label>
                       <input
                         type="text"
@@ -98,12 +99,12 @@ export default function ContactPage() {
                         value={formData.name}
                         onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                        placeholder="Votre nom"
+                        placeholder={t('namePlaceholder')}
                       />
                     </div>
                     <div>
                       <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                        Email *
+                        {t('emailLabel')}
                       </label>
                       <input
                         type="email"
@@ -121,7 +122,7 @@ export default function ContactPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                        Téléphone
+                        {t('phoneLabel')}
                       </label>
                       <input
                         type="tel"
@@ -135,7 +136,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                        Sujet *
+                        {t('subjectLabel')}
                       </label>
                       <select
                         id="subject"
@@ -145,19 +146,19 @@ export default function ContactPage() {
                         onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                       >
-                        <option value="">Sélectionnez un sujet</option>
-                        <option value="order">Question sur une commande</option>
-                        <option value="product">Information produit</option>
-                        <option value="return">Retour / Échange</option>
-                        <option value="partnership">Partenariat</option>
-                        <option value="other">Autre</option>
+                        <option value="">{t('subjectPlaceholder')}</option>
+                        <option value="order">{t('subjectOrder')}</option>
+                        <option value="product">{t('subjectProduct')}</option>
+                        <option value="return">{t('subjectReturn')}</option>
+                        <option value="partnership">{t('subjectPartnership')}</option>
+                        <option value="other">{t('subjectOther')}</option>
                       </select>
                     </div>
                   </div>
 
                   <div>
                     <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                      Message *
+                      {t('messageLabel')}
                     </label>
                     <textarea
                       id="message"
@@ -167,7 +168,7 @@ export default function ContactPage() {
                       value={formData.message}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-none"
-                      placeholder="Décrivez votre demande..."
+                      placeholder={t('messagePlaceholder')}
                     />
                   </div>
 
@@ -175,12 +176,12 @@ export default function ContactPage() {
                     {isSubmitting ? (
                       <>
                         <span className="animate-spin mr-2">⏳</span>
-                        Envoi en cours...
+                        {t('submitting')}
                       </>
                     ) : (
                       <>
                         <Send className="h-5 w-5 mr-2" />
-                        Envoyer le message
+                        {t('submitButton')}
                       </>
                     )}
                   </Button>
@@ -193,7 +194,7 @@ export default function ContactPage() {
           <div className="space-y-6">
             {/* Store Info Card */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-xl font-bold mb-6">Informations de contact</h2>
+              <h2 className="text-xl font-bold mb-6">{t('contactInfoTitle')}</h2>
 
               <div className="space-y-4">
                 <div className="flex items-start gap-4">
@@ -201,7 +202,7 @@ export default function ContactPage() {
                     <MapPin className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Adresse</h3>
+                    <h3 className="font-semibold text-gray-900">{t('addressLabel')}</h3>
                     <p className="text-gray-600 text-sm">{storeInfo.address}</p>
                   </div>
                 </div>
@@ -211,7 +212,7 @@ export default function ContactPage() {
                     <Phone className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Téléphone</h3>
+                    <h3 className="font-semibold text-gray-900">{t('phoneInfoLabel')}</h3>
                     <a href={`tel:${storeInfo.phone}`} className="text-primary hover:underline text-sm">
                       {storeInfo.phone}
                     </a>
@@ -223,7 +224,7 @@ export default function ContactPage() {
                     <Mail className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Email</h3>
+                    <h3 className="font-semibold text-gray-900">{t('emailInfoLabel')}</h3>
                     <a href={`mailto:${storeInfo.email}`} className="text-primary hover:underline text-sm">
                       {storeInfo.email}
                     </a>
@@ -235,11 +236,11 @@ export default function ContactPage() {
                     <Clock className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Horaires</h3>
+                    <h3 className="font-semibold text-gray-900">{t('hoursLabel')}</h3>
                     <div className="text-sm text-gray-600 space-y-1">
-                      <p>Lun - Ven: {storeInfo.hours.weekdays}</p>
-                      <p>Samedi: {storeInfo.hours.saturday}</p>
-                      <p>Dimanche: {storeInfo.hours.sunday}</p>
+                      <p>{t('hoursWeekdays', { hours: storeInfo.hours.weekdays })}</p>
+                      <p>{t('hoursSaturday', { hours: storeInfo.hours.saturday })}</p>
+                      <p>{t('hoursSunday', { hours: storeInfo.hours.sunday })}</p>
                     </div>
                   </div>
                 </div>
@@ -248,9 +249,9 @@ export default function ContactPage() {
 
             {/* Social Media Card */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-xl font-bold mb-4">Suivez-nous</h2>
+              <h2 className="text-xl font-bold mb-4">{t('followTitle')}</h2>
               <p className="text-gray-600 text-sm mb-4">
-                Restez connectés pour découvrir nos nouveautés et promotions exclusives.
+                {t('followSubtitle')}
               </p>
               <div className="flex gap-3">
                 <a
@@ -290,12 +291,12 @@ export default function ContactPage() {
 
             {/* Quick Help */}
             <div className="bg-gradient-to-br from-primary to-primary-dark rounded-2xl shadow-lg p-6 text-white">
-              <h2 className="text-xl font-bold mb-2">Besoin d'aide rapide ?</h2>
+              <h2 className="text-xl font-bold mb-2">{t('quickHelpTitle')}</h2>
               <p className="text-gray-100 text-sm mb-4">
-                Consultez notre FAQ pour trouver des réponses à vos questions les plus fréquentes.
+                {t('quickHelpSubtitle')}
               </p>
               <Button variant="secondary" size="sm" asChild>
-                <a href="/faq">Voir la FAQ</a>
+                <a href="/faq">{t('viewFaqButton')}</a>
               </Button>
             </div>
           </div>
@@ -305,8 +306,8 @@ export default function ContactPage() {
         <div className="mt-12">
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div className="p-6 border-b">
-              <h2 className="text-xl font-bold">Notre emplacement</h2>
-              <p className="text-gray-600 text-sm">Venez nous rendre visite dans notre boutique</p>
+              <h2 className="text-xl font-bold">{t('mapTitle')}</h2>
+              <p className="text-gray-600 text-sm">{t('mapSubtitle')}</p>
             </div>
             <div className="aspect-[21/9] w-full">
               <iframe

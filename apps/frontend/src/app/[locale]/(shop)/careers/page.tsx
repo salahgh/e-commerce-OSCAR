@@ -1,104 +1,105 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Briefcase, MapPin, Clock, Users, Heart, Zap, Target, Coffee, ChevronDown, ChevronUp, Mail, Send } from 'lucide-react';
 import { Button } from '@/components/ui';
 
 interface JobPosition {
   id: string;
-  title: string;
-  department: string;
-  location: string;
-  type: string;
-  description: string;
-  requirements: string[];
-  benefits: string[];
+  titleKey: string;
+  departmentKey: string;
+  locationKey: string;
+  typeKey: string;
+  descriptionKey: string;
+  requirementKeys: string[];
+  benefitKeys: string[];
 }
 
 const jobPositions: JobPosition[] = [
   {
     id: 'dev-fullstack',
-    title: 'Développeur Full Stack',
-    department: 'Technologie',
-    location: 'Alger',
-    type: 'CDI - Temps plein',
-    description: 'Rejoignez notre équipe technique pour développer et améliorer notre plateforme e-commerce. Vous travaillerez sur des projets variés utilisant les dernières technologies.',
-    requirements: [
-      '3+ ans d\'expérience en développement web',
-      'Maîtrise de React, Node.js et TypeScript',
-      'Expérience avec les bases de données SQL et NoSQL',
-      'Connaissance des principes DevOps est un plus',
-      'Bonne communication et esprit d\'équipe',
+    titleKey: 'jobDevFullstackTitle',
+    departmentKey: 'jobDevFullstackDepartment',
+    locationKey: 'jobDevFullstackLocation',
+    typeKey: 'jobDevFullstackType',
+    descriptionKey: 'jobDevFullstackDescription',
+    requirementKeys: [
+      'jobDevFullstackRequirement1',
+      'jobDevFullstackRequirement2',
+      'jobDevFullstackRequirement3',
+      'jobDevFullstackRequirement4',
+      'jobDevFullstackRequirement5',
     ],
-    benefits: [
-      'Salaire compétitif',
-      'Horaires flexibles',
-      'Formation continue',
-      'Équipement de travail fourni',
+    benefitKeys: [
+      'jobDevFullstackBenefit1',
+      'jobDevFullstackBenefit2',
+      'jobDevFullstackBenefit3',
+      'jobDevFullstackBenefit4',
     ],
   },
   {
     id: 'marketing-digital',
-    title: 'Responsable Marketing Digital',
-    department: 'Marketing',
-    location: 'Alger',
-    type: 'CDI - Temps plein',
-    description: 'Nous recherchons un(e) responsable marketing digital pour piloter nos campagnes d\'acquisition et de fidélisation clients sur tous les canaux digitaux.',
-    requirements: [
-      '5+ ans d\'expérience en marketing digital',
-      'Expertise en SEO, SEA et réseaux sociaux',
-      'Maîtrise des outils d\'analytics (Google Analytics, etc.)',
-      'Expérience en e-commerce appréciée',
-      'Créativité et capacité d\'analyse',
+    titleKey: 'jobMarketingDigitalTitle',
+    departmentKey: 'jobMarketingDigitalDepartment',
+    locationKey: 'jobMarketingDigitalLocation',
+    typeKey: 'jobMarketingDigitalType',
+    descriptionKey: 'jobMarketingDigitalDescription',
+    requirementKeys: [
+      'jobMarketingDigitalRequirement1',
+      'jobMarketingDigitalRequirement2',
+      'jobMarketingDigitalRequirement3',
+      'jobMarketingDigitalRequirement4',
+      'jobMarketingDigitalRequirement5',
     ],
-    benefits: [
-      'Salaire compétitif + bonus',
-      'Budget formation',
-      'Télétravail partiel possible',
-      'Environnement dynamique',
+    benefitKeys: [
+      'jobMarketingDigitalBenefit1',
+      'jobMarketingDigitalBenefit2',
+      'jobMarketingDigitalBenefit3',
+      'jobMarketingDigitalBenefit4',
     ],
   },
   {
     id: 'service-client',
-    title: 'Chargé(e) de Service Client',
-    department: 'Service Client',
-    location: 'Alger',
-    type: 'CDI - Temps plein',
-    description: 'Vous serez le premier point de contact de nos clients. Votre mission : offrir une expérience client exceptionnelle et résoudre les problèmes avec empathie.',
-    requirements: [
-      '1+ an d\'expérience en service client',
-      'Excellentes compétences en communication',
-      'Maîtrise du français et de l\'arabe',
-      'Patience et sens de l\'écoute',
-      'À l\'aise avec les outils informatiques',
+    titleKey: 'jobServiceClientTitle',
+    departmentKey: 'jobServiceClientDepartment',
+    locationKey: 'jobServiceClientLocation',
+    typeKey: 'jobServiceClientType',
+    descriptionKey: 'jobServiceClientDescription',
+    requirementKeys: [
+      'jobServiceClientRequirement1',
+      'jobServiceClientRequirement2',
+      'jobServiceClientRequirement3',
+      'jobServiceClientRequirement4',
+      'jobServiceClientRequirement5',
     ],
-    benefits: [
-      'Salaire attractif',
-      'Primes sur objectifs',
-      'Formation complète assurée',
-      'Évolution possible vers le management',
+    benefitKeys: [
+      'jobServiceClientBenefit1',
+      'jobServiceClientBenefit2',
+      'jobServiceClientBenefit3',
+      'jobServiceClientBenefit4',
     ],
   },
   {
     id: 'logistique',
-    title: 'Responsable Logistique',
-    department: 'Opérations',
-    location: 'Alger',
-    type: 'CDI - Temps plein',
-    description: 'Gérez notre entrepôt et optimisez notre chaîne logistique pour garantir des livraisons rapides et fiables à travers tout le pays.',
-    requirements: [
-      '3+ ans d\'expérience en logistique',
-      'Expérience en gestion d\'entrepôt',
-      'Connaissance des transporteurs algériens',
-      'Capacité à gérer une équipe',
-      'Sens de l\'organisation',
+    titleKey: 'jobLogistiqueTitle',
+    departmentKey: 'jobLogistiqueDepartment',
+    locationKey: 'jobLogistiqueLocation',
+    typeKey: 'jobLogistiqueType',
+    descriptionKey: 'jobLogistiqueDescription',
+    requirementKeys: [
+      'jobLogistiqueRequirement1',
+      'jobLogistiqueRequirement2',
+      'jobLogistiqueRequirement3',
+      'jobLogistiqueRequirement4',
+      'jobLogistiqueRequirement5',
     ],
-    benefits: [
-      'Salaire compétitif',
-      'Véhicule de fonction',
-      'Téléphone professionnel',
-      'Assurance santé',
+    benefitKeys: [
+      'jobLogistiqueBenefit1',
+      'jobLogistiqueBenefit2',
+      'jobLogistiqueBenefit3',
+      'jobLogistiqueBenefit4',
     ],
   },
 ];
@@ -106,38 +107,40 @@ const jobPositions: JobPosition[] = [
 const companyValues = [
   {
     icon: Heart,
-    title: 'Passion',
-    description: 'Nous aimons ce que nous faisons et cela se reflète dans notre travail quotidien.',
+    titleKey: 'valuePassionTitle',
+    descriptionKey: 'valuePassionDescription',
   },
   {
     icon: Users,
-    title: 'Collaboration',
-    description: 'Nous croyons au pouvoir du travail d\'équipe et de l\'entraide.',
+    titleKey: 'valueCollaborationTitle',
+    descriptionKey: 'valueCollaborationDescription',
   },
   {
     icon: Zap,
-    title: 'Innovation',
-    description: 'Nous cherchons constamment à nous améliorer et à innover.',
+    titleKey: 'valueInnovationTitle',
+    descriptionKey: 'valueInnovationDescription',
   },
   {
     icon: Target,
-    title: 'Excellence',
-    description: 'Nous visons l\'excellence dans tout ce que nous entreprenons.',
+    titleKey: 'valueExcellenceTitle',
+    descriptionKey: 'valueExcellenceDescription',
   },
 ];
 
-const perks = [
-  'Salaire compétitif',
-  'Horaires flexibles',
-  'Formation continue',
-  'Environnement moderne',
-  'Équipe dynamique',
-  'Évolution de carrière',
-  'Café et snacks gratuits',
-  'Événements d\'équipe',
+const perkKeys = [
+  'perkCompetitiveSalary',
+  'perkFlexibleHours',
+  'perkContinuousTraining',
+  'perkModernEnvironment',
+  'perkDynamicTeam',
+  'perkCareerGrowth',
+  'perkFreeCoffeeSnacks',
+  'perkTeamEvents',
 ];
 
 function JobCard({ job, isOpen, onToggle }: { job: JobPosition; isOpen: boolean; onToggle: () => void }) {
+  const t = useTranslations('careers');
+
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
       <button
@@ -146,19 +149,19 @@ function JobCard({ job, isOpen, onToggle }: { job: JobPosition; isOpen: boolean;
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{job.title}</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t(job.titleKey)}</h3>
             <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600">
               <span className="flex items-center gap-1">
                 <Briefcase className="h-4 w-4" />
-                {job.department}
+                {t(job.departmentKey)}
               </span>
               <span className="flex items-center gap-1">
                 <MapPin className="h-4 w-4" />
-                {job.location}
+                {t(job.locationKey)}
               </span>
               <span className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />
-                {job.type}
+                {t(job.typeKey)}
               </span>
             </div>
           </div>
@@ -174,29 +177,29 @@ function JobCard({ job, isOpen, onToggle }: { job: JobPosition; isOpen: boolean;
         <div className="px-6 pb-6 border-t">
           <div className="pt-6 space-y-6">
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Description du poste</h4>
-              <p className="text-gray-600">{job.description}</p>
+              <h4 className="font-semibold text-gray-900 mb-2">{t('jobDescriptionHeading')}</h4>
+              <p className="text-gray-600">{t(job.descriptionKey)}</p>
             </div>
 
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Profil recherché</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">{t('jobRequirementsHeading')}</h4>
               <ul className="space-y-2">
-                {job.requirements.map((req, index) => (
-                  <li key={index} className="flex items-start gap-2 text-gray-600">
+                {job.requirementKeys.map((reqKey) => (
+                  <li key={reqKey} className="flex items-start gap-2 text-gray-600">
                     <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
-                    {req}
+                    {t(reqKey)}
                   </li>
                 ))}
               </ul>
             </div>
 
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Ce que nous offrons</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">{t('jobBenefitsHeading')}</h4>
               <ul className="space-y-2">
-                {job.benefits.map((benefit, index) => (
-                  <li key={index} className="flex items-start gap-2 text-gray-600">
+                {job.benefitKeys.map((benefitKey) => (
+                  <li key={benefitKey} className="flex items-start gap-2 text-gray-600">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0" />
-                    {benefit}
+                    {t(benefitKey)}
                   </li>
                 ))}
               </ul>
@@ -204,7 +207,7 @@ function JobCard({ job, isOpen, onToggle }: { job: JobPosition; isOpen: boolean;
 
             <Button size="lg" className="w-full md:w-auto">
               <Send className="h-5 w-5 mr-2" />
-              Postuler maintenant
+              {t('applyNowButton')}
             </Button>
           </div>
         </div>
@@ -214,6 +217,7 @@ function JobCard({ job, isOpen, onToggle }: { job: JobPosition; isOpen: boolean;
 }
 
 export default function CareersPage() {
+  const t = useTranslations('careers');
   const [openJob, setOpenJob] = useState<string | null>(null);
 
   const toggleJob = (jobId: string) => {
@@ -229,22 +233,22 @@ export default function CareersPage() {
             <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
               <Briefcase className="h-8 w-8" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Rejoignez l'aventure Oscar</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('heroTitle')}</h1>
             <p className="text-xl text-gray-100 mb-8">
-              Construisez votre carrière avec nous et participez à la transformation du e-commerce en Algérie
+              {t('heroSubtitle')}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <div className="bg-white/10 rounded-lg px-4 py-2">
                 <span className="text-2xl font-bold">{jobPositions.length}</span>
-                <span className="text-sm ml-2">postes ouverts</span>
+                <span className="text-sm ml-2">{t('statsOpenPositions')}</span>
               </div>
               <div className="bg-white/10 rounded-lg px-4 py-2">
                 <span className="text-2xl font-bold">50+</span>
-                <span className="text-sm ml-2">collaborateurs</span>
+                <span className="text-sm ml-2">{t('statsEmployees')}</span>
               </div>
               <div className="bg-white/10 rounded-lg px-4 py-2">
                 <span className="text-2xl font-bold">2018</span>
-                <span className="text-sm ml-2">année de création</span>
+                <span className="text-sm ml-2">{t('statsFoundedYear')}</span>
               </div>
             </div>
           </div>
@@ -255,19 +259,19 @@ export default function CareersPage() {
         {/* Values Section */}
         <section className="mb-16">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Nos Valeurs</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('valuesHeading')}</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Ce qui nous anime au quotidien et guide toutes nos décisions
+              {t('valuesSubtitle')}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {companyValues.map((value, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-lg p-6 text-center">
+            {companyValues.map((value) => (
+              <div key={value.titleKey} className="bg-white rounded-xl shadow-lg p-6 text-center">
                 <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <value.icon className="h-7 w-7 text-primary" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">{value.title}</h3>
-                <p className="text-sm text-gray-600">{value.description}</p>
+                <h3 className="font-semibold text-gray-900 mb-2">{t(value.titleKey)}</h3>
+                <p className="text-sm text-gray-600">{t(value.descriptionKey)}</p>
               </div>
             ))}
           </div>
@@ -278,13 +282,13 @@ export default function CareersPage() {
           <div className="bg-white rounded-xl shadow-lg p-8">
             <div className="flex items-center gap-3 mb-6">
               <Coffee className="h-6 w-6 text-primary" />
-              <h2 className="text-2xl font-bold text-gray-900">Pourquoi nous rejoindre ?</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{t('perksHeading')}</h2>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {perks.map((perk, index) => (
-                <div key={index} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+              {perkKeys.map((perkKey) => (
+                <div key={perkKey} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                   <span className="w-2 h-2 bg-green-500 rounded-full" />
-                  <span className="text-sm text-gray-700">{perk}</span>
+                  <span className="text-sm text-gray-700">{t(perkKey)}</span>
                 </div>
               ))}
             </div>
@@ -294,9 +298,9 @@ export default function CareersPage() {
         {/* Job Listings */}
         <section className="mb-16">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Postes Ouverts</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('openPositionsHeading')}</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Découvrez nos opportunités actuelles et trouvez le poste qui vous correspond
+              {t('openPositionsSubtitle')}
             </p>
           </div>
           <div className="space-y-4">
@@ -319,15 +323,15 @@ export default function CareersPage() {
                 <Mail className="h-8 w-8" />
               </div>
               <div className="flex-1 text-center md:text-left">
-                <h3 className="text-xl font-bold mb-2">Candidature spontanée</h3>
+                <h3 className="text-xl font-bold mb-2">{t('spontaneousApplicationTitle')}</h3>
                 <p className="text-gray-300">
-                  Vous ne trouvez pas le poste idéal ? Envoyez-nous votre CV, nous sommes toujours à la recherche de talents !
+                  {t('spontaneousApplicationDescription')}
                 </p>
               </div>
               <Button variant="secondary" size="lg" asChild>
                 <a href="mailto:careers@oscarfashion.dz">
                   <Send className="h-5 w-5 mr-2" />
-                  Envoyer mon CV
+                  {t('sendCvButton')}
                 </a>
               </Button>
             </div>
@@ -337,9 +341,9 @@ export default function CareersPage() {
         {/* Process Section */}
         <section>
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Notre processus de recrutement</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('processHeading')}</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Un processus simple et transparent en 4 étapes
+              {t('processSubtitle')}
             </p>
           </div>
           <div className="bg-white rounded-xl shadow-lg p-8">
@@ -348,9 +352,9 @@ export default function CareersPage() {
                 <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
                   1
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Candidature</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">{t('processStep1Title')}</h3>
                 <p className="text-sm text-gray-600">
-                  Envoyez votre CV et lettre de motivation via notre formulaire
+                  {t('processStep1Description')}
                 </p>
                 <div className="hidden md:block absolute top-6 left-[60%] w-[80%] h-0.5 bg-gray-200" />
               </div>
@@ -358,9 +362,9 @@ export default function CareersPage() {
                 <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
                   2
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Entretien RH</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">{t('processStep2Title')}</h3>
                 <p className="text-sm text-gray-600">
-                  Premier échange pour mieux vous connaître et présenter Oscar
+                  {t('processStep2Description')}
                 </p>
                 <div className="hidden md:block absolute top-6 left-[60%] w-[80%] h-0.5 bg-gray-200" />
               </div>
@@ -368,9 +372,9 @@ export default function CareersPage() {
                 <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
                   3
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Entretien technique</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">{t('processStep3Title')}</h3>
                 <p className="text-sm text-gray-600">
-                  Évaluation de vos compétences avec votre futur manager
+                  {t('processStep3Description')}
                 </p>
                 <div className="hidden md:block absolute top-6 left-[60%] w-[80%] h-0.5 bg-gray-200" />
               </div>
@@ -378,9 +382,9 @@ export default function CareersPage() {
                 <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
                   4
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Offre</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">{t('processStep4Title')}</h3>
                 <p className="text-sm text-gray-600">
-                  Proposition et intégration dans l'équipe Oscar
+                  {t('processStep4Description')}
                 </p>
               </div>
             </div>

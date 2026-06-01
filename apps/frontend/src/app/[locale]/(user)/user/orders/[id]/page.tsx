@@ -16,29 +16,29 @@ import {
   Clock,
 } from 'lucide-react';
 import { useGetOrderByCodeQuery } from '@/graphql/generated/graphql';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 // Vendure order states mapped to display config
-const statusConfig: Record<string, { label: string; variant: 'warning' | 'info' | 'default' | 'success' | 'destructive' }> = {
-  AddingItems: { label: 'En cours', variant: 'info' },
-  ArrangingPayment: { label: 'En attente de paiement', variant: 'warning' },
-  PaymentAuthorized: { label: 'Paiement autorisé', variant: 'info' },
-  PaymentSettled: { label: 'Payée', variant: 'success' },
-  PartiallyShipped: { label: 'Partiellement expédiée', variant: 'info' },
-  Shipped: { label: 'Expédiée', variant: 'default' },
-  PartiallyDelivered: { label: 'Partiellement livrée', variant: 'info' },
-  Delivered: { label: 'Livrée', variant: 'success' },
-  Cancelled: { label: 'Annulée', variant: 'destructive' },
+const statusConfig: Record<string, { labelKey: string; variant: 'warning' | 'info' | 'default' | 'success' | 'destructive' }> = {
+  AddingItems: { labelKey: 'statusAddingItems', variant: 'info' },
+  ArrangingPayment: { labelKey: 'statusArrangingPayment', variant: 'warning' },
+  PaymentAuthorized: { labelKey: 'statusPaymentAuthorized', variant: 'info' },
+  PaymentSettled: { labelKey: 'statusPaymentSettled', variant: 'success' },
+  PartiallyShipped: { labelKey: 'statusPartiallyShipped', variant: 'info' },
+  Shipped: { labelKey: 'statusShipped', variant: 'default' },
+  PartiallyDelivered: { labelKey: 'statusPartiallyDelivered', variant: 'info' },
+  Delivered: { labelKey: 'statusDelivered', variant: 'success' },
+  Cancelled: { labelKey: 'statusCancelled', variant: 'destructive' },
 };
 
 // Timeline steps based on order state
 const getTimeline = (state: string, createdAt: string) => {
   const steps = [
-    { status: 'Commande passée', icon: CheckCircle2, completed: true, date: createdAt },
-    { status: 'Paiement confirmé', icon: CreditCard, completed: ['PaymentSettled', 'PartiallyShipped', 'Shipped', 'PartiallyDelivered', 'Delivered'].includes(state) },
-    { status: 'En préparation', icon: Package, completed: ['PartiallyShipped', 'Shipped', 'PartiallyDelivered', 'Delivered'].includes(state) },
-    { status: 'Expédiée', icon: Truck, completed: ['Shipped', 'PartiallyDelivered', 'Delivered'].includes(state) },
-    { status: 'Livrée', icon: CheckCircle2, completed: state === 'Delivered' },
+    { statusKey: 'timelineOrderPlaced', icon: CheckCircle2, completed: true, date: createdAt },
+    { statusKey: 'timelinePaymentConfirmed', icon: CreditCard, completed: ['PaymentSettled', 'PartiallyShipped', 'Shipped', 'PartiallyDelivered', 'Delivered'].includes(state) },
+    { statusKey: 'timelinePreparing', icon: Package, completed: ['PartiallyShipped', 'Shipped', 'PartiallyDelivered', 'Delivered'].includes(state) },
+    { statusKey: 'timelineShipped', icon: Truck, completed: ['Shipped', 'PartiallyDelivered', 'Delivered'].includes(state) },
+    { statusKey: 'timelineDelivered', icon: CheckCircle2, completed: state === 'Delivered' },
   ];
   return steps;
 };
@@ -47,6 +47,7 @@ export default function OrderDetailPage() {
   const params = useParams();
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('orderDetail');
   const orderCode = params?.id as string;
 
   // Fetch order using Vendure query by code
@@ -79,7 +80,7 @@ export default function OrderDetailPage() {
 
   // Format address
   const formatAddress = (address: any) => {
-    if (!address) return 'Non spécifiée';
+    if (!address) return t('addressNotSpecified');
     const parts = [
       address.fullName,
       address.streetLine1,
@@ -104,16 +105,16 @@ export default function OrderDetailPage() {
       <div className="space-y-6">
         <Button variant="ghost" size="sm" className="mb-4" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Retour aux commandes
+          {t('backToOrders')}
         </Button>
         <Card>
           <div className="p-12 text-center">
-            <h1 className="text-2xl font-bold mb-4">Commande non trouvée</h1>
+            <h1 className="text-2xl font-bold mb-4">{t('orderNotFound')}</h1>
             <p className="text-muted-foreground mb-6">
-              {error ? error.message : "La commande que vous recherchez n'existe pas."}
+              {error ? error.message : t('orderNotFoundDescription')}
             </p>
             <Button asChild>
-              <Link href={`/${locale}/user/orders`}>Retour aux commandes</Link>
+              <Link href={`/${locale}/user/orders`}>{t('backToOrders')}</Link>
             </Button>
           </div>
         </Card>
@@ -121,7 +122,11 @@ export default function OrderDetailPage() {
     );
   }
 
-  const status = statusConfig[order.state] || { label: order.state, variant: 'default' as const };
+  const statusEntry = statusConfig[order.state];
+  const status = {
+    label: statusEntry ? t(statusEntry.labelKey) : order.state,
+    variant: statusEntry?.variant ?? ('default' as const),
+  };
   const timeline = getTimeline(order.state, order.createdAt);
 
   return (
@@ -130,12 +135,12 @@ export default function OrderDetailPage() {
       <div>
         <Button variant="ghost" size="sm" className="mb-4" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Retour aux commandes
+          {t('backToOrders')}
         </Button>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold">#{order.code}</h1>
-            <p className="text-muted-foreground mt-1">Commandé le {formatDate(order.createdAt)}</p>
+            <p className="text-muted-foreground mt-1">{t('orderedOn', { date: formatDate(order.createdAt) })}</p>
           </div>
           <Badge variant={status.variant} className="text-base px-4 py-2">
             {status.label}
@@ -149,7 +154,7 @@ export default function OrderDetailPage() {
           {/* Order Timeline */}
           <Card>
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-6">Suivi de commande</h2>
+              <h2 className="text-xl font-semibold mb-6">{t('orderTracking')}</h2>
               <div className="relative">
                 {timeline.map((item, index) => {
                   const Icon = item.icon;
@@ -180,7 +185,7 @@ export default function OrderDetailPage() {
                             item.completed ? 'text-foreground' : 'text-muted-foreground'
                           }`}
                         >
-                          {item.status}
+                          {t(item.statusKey)}
                         </p>
                         {item.completed && item.date && (
                           <p className="text-sm text-muted-foreground">{formatDate(item.date)}</p>
@@ -196,7 +201,7 @@ export default function OrderDetailPage() {
           {/* Order Items */}
           <Card>
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Articles commandés</h2>
+              <h2 className="text-xl font-semibold mb-4">{t('orderedItems')}</h2>
               <div className="space-y-4">
                 {order.lines.map((line) => {
                   const imageUrl = line.featuredAsset?.preview || line.productVariant?.product?.featuredAsset?.preview;
@@ -221,7 +226,7 @@ export default function OrderDetailPage() {
                           {line.productVariant?.name}
                         </p>
                         <p className="text-sm text-muted-foreground mt-1">
-                          Quantité: {line.quantity}
+                          {t('quantityLabel', { quantity: line.quantity })}
                         </p>
                       </div>
                       <div className="text-right flex-shrink-0">
@@ -230,7 +235,7 @@ export default function OrderDetailPage() {
                         </p>
                         {line.quantity > 1 && (
                           <p className="text-xs text-muted-foreground mt-1">
-                            {formatPrice(line.unitPriceWithTax, order.currencyCode)} / unité
+                            {t('pricePerUnit', { price: formatPrice(line.unitPriceWithTax, order.currencyCode) })}
                           </p>
                         )}
                       </div>
@@ -245,7 +250,7 @@ export default function OrderDetailPage() {
           {order.fulfillments && order.fulfillments.length > 0 && (
             <Card>
               <div className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Expéditions</h2>
+                <h2 className="text-xl font-semibold mb-4">{t('shipments')}</h2>
                 <div className="space-y-4">
                   {order.fulfillments.map((fulfillment) => (
                     <div key={fulfillment.id} className="border rounded-lg p-4">
@@ -260,11 +265,11 @@ export default function OrderDetailPage() {
                       </div>
                       {fulfillment.trackingCode && (
                         <p className="text-sm text-muted-foreground">
-                          N° de suivi: <span className="font-mono">{fulfillment.trackingCode}</span>
+                          {t('trackingNumberLabel')} <span className="font-mono">{fulfillment.trackingCode}</span>
                         </p>
                       )}
                       <p className="text-sm text-muted-foreground">
-                        Créé le {formatDate(fulfillment.createdAt)}
+                        {t('createdOn', { date: formatDate(fulfillment.createdAt) })}
                       </p>
                     </div>
                   ))}
@@ -279,22 +284,22 @@ export default function OrderDetailPage() {
           {/* Order Summary */}
           <Card>
             <div className="p-6">
-              <h3 className="font-semibold mb-4">Résumé de la commande</h3>
+              <h3 className="font-semibold mb-4">{t('orderSummary')}</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Sous-total</span>
+                  <span className="text-muted-foreground">{t('subtotal')}</span>
                   <span>{formatPrice(order.subTotalWithTax, order.currencyCode)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Livraison</span>
+                  <span className="text-muted-foreground">{t('shipping')}</span>
                   <span>
                     {order.shippingWithTax === 0
-                      ? 'Gratuite'
+                      ? t('free')
                       : formatPrice(order.shippingWithTax, order.currencyCode)}
                   </span>
                 </div>
                 <div className="pt-2 border-t flex justify-between items-center">
-                  <span className="font-bold">Total</span>
+                  <span className="font-bold">{t('total')}</span>
                   <span className="text-xl font-bold text-primary">
                     {formatPrice(order.totalWithTax, order.currencyCode)}
                   </span>
@@ -308,14 +313,14 @@ export default function OrderDetailPage() {
             <div className="p-6">
               <div className="flex items-center gap-2 mb-4">
                 <MapPin className="h-5 w-5 text-muted-foreground" />
-                <h3 className="font-semibold">Adresse de livraison</h3>
+                <h3 className="font-semibold">{t('shippingAddress')}</h3>
               </div>
               <div className="text-sm whitespace-pre-line text-muted-foreground">
                 {formatAddress(order.shippingAddress)}
               </div>
               {order.shippingAddress?.phoneNumber && (
                 <p className="text-sm text-muted-foreground mt-2">
-                  Tél: {order.shippingAddress.phoneNumber}
+                  {t('phoneLabel', { phone: order.shippingAddress.phoneNumber })}
                 </p>
               )}
             </div>
@@ -327,7 +332,7 @@ export default function OrderDetailPage() {
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <CreditCard className="h-5 w-5 text-muted-foreground" />
-                  <h3 className="font-semibold">Adresse de facturation</h3>
+                  <h3 className="font-semibold">{t('billingAddress')}</h3>
                 </div>
                 <div className="text-sm whitespace-pre-line text-muted-foreground">
                   {formatAddress(order.billingAddress)}
@@ -342,7 +347,7 @@ export default function OrderDetailPage() {
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <CreditCard className="h-5 w-5 text-muted-foreground" />
-                  <h3 className="font-semibold">Paiement</h3>
+                  <h3 className="font-semibold">{t('payment')}</h3>
                 </div>
                 {order.payments.map((payment) => (
                   <div key={payment.id} className="text-sm">
@@ -366,16 +371,16 @@ export default function OrderDetailPage() {
           <div className="space-y-2">
             <Button variant="outline" className="w-full">
               <Download className="h-4 w-4 mr-2" />
-              Télécharger la facture
+              {t('downloadInvoice')}
             </Button>
             <Button variant="outline" className="w-full">
               <MessageSquare className="h-4 w-4 mr-2" />
-              Contacter le support
+              {t('contactSupport')}
             </Button>
             {order.state === 'Delivered' && (
               <Button className="w-full">
                 <Package className="h-4 w-4 mr-2" />
-                Racheter
+                {t('reorder')}
               </Button>
             )}
           </div>

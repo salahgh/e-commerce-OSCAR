@@ -108,7 +108,7 @@ const emptyAddressForm: AddressFormData = {
 };
 
 export default function ProfilePage() {
-  const t = useTranslations('auth');
+  const t = useTranslations('accountProfile');
   const params = useParams();
   const locale = params?.locale as string;
   const isRtl = locale === 'ar';
@@ -179,7 +179,7 @@ export default function ProfilePage() {
       setIsEditingProfile(false);
       setTimeout(() => setProfileSuccess(false), 3000);
     } catch (err: any) {
-      setProfileError(err.message || 'Erreur lors de la mise à jour');
+      setProfileError(err.message || t('errorUpdate'));
     } finally {
       setIsUpdatingProfile(false);
     }
@@ -191,19 +191,19 @@ export default function ProfilePage() {
     setPasswordSuccess(false);
 
     if (!passwordData.currentPassword) {
-      setPasswordError('Le mot de passe actuel est requis');
+      setPasswordError(t('errorCurrentPasswordRequired'));
       return;
     }
     if (!passwordData.newPassword) {
-      setPasswordError('Le nouveau mot de passe est requis');
+      setPasswordError(t('errorNewPasswordRequired'));
       return;
     }
     if (passwordData.newPassword.length < 8) {
-      setPasswordError('Le mot de passe doit contenir au moins 8 caractères');
+      setPasswordError(t('errorPasswordMinLength'));
       return;
     }
     if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-      setPasswordError('Les mots de passe ne correspondent pas');
+      setPasswordError(t('errorPasswordsMismatch'));
       return;
     }
 
@@ -223,10 +223,10 @@ export default function ProfilePage() {
         });
         setTimeout(() => setPasswordSuccess(false), 3000);
       } else {
-        setPasswordError(result.error?.message || 'Erreur lors du changement de mot de passe');
+        setPasswordError(result.error?.message || t('errorPasswordChange'));
       }
     } catch (err: any) {
-      setPasswordError(err.message || 'Erreur lors du changement de mot de passe');
+      setPasswordError(err.message || t('errorPasswordChange'));
     } finally {
       setIsChangingPassword(false);
     }
@@ -263,7 +263,7 @@ export default function ProfilePage() {
     setAddressError(null);
 
     if (!addressForm.fullName || !addressForm.streetLine1 || !addressForm.city || !addressForm.province) {
-      setAddressError('Veuillez remplir tous les champs obligatoires');
+      setAddressError(t('errorRequiredFields'));
       return;
     }
 
@@ -303,14 +303,14 @@ export default function ProfilePage() {
       await refetchCustomer();
       setIsAddressModalOpen(false);
     } catch (err: any) {
-      setAddressError(err.message || 'Erreur lors de l\'enregistrement de l\'adresse');
+      setAddressError(err.message || t('errorSaveAddress'));
     } finally {
       setIsSavingAddress(false);
     }
   };
 
   const handleDeleteAddress = async (addressId: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?')) {
+    if (!confirm(t('confirmDeleteAddress'))) {
       return;
     }
 
@@ -322,7 +322,7 @@ export default function ProfilePage() {
       });
       await refetchCustomer();
     } catch (err: any) {
-      alert(err.message || 'Erreur lors de la suppression');
+      alert(err.message || t('errorDelete'));
     } finally {
       setDeletingAddressId(null);
     }
@@ -347,12 +347,12 @@ export default function ProfilePage() {
           <CardContent className="pt-6">
             <div className="text-center py-8">
               <AlertCircle className="mx-auto h-12 w-12 text-destructive mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Non connecté</h2>
+              <h2 className="text-xl font-semibold mb-2">{t('notConnectedTitle')}</h2>
               <p className="text-muted-foreground mb-4">
-                Vous devez être connecté pour accéder à cette page.
+                {t('notConnectedDescription')}
               </p>
               <Button asChild>
-                <Link href={`/${locale}/login`}>Se connecter</Link>
+                <Link href={`/${locale}/login`}>{t('loginButton')}</Link>
               </Button>
             </div>
           </CardContent>
@@ -381,14 +381,14 @@ export default function ProfilePage() {
                 </span>
                 <span className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
-                  Membre depuis {formatDate(customer.createdAt)}
+                  {t('memberSince', { date: formatDate(customer.createdAt) })}
                 </span>
               </div>
             </div>
             <Link href={`/${locale}/user/orders`}>
               <Button variant="outline" className="gap-2">
                 <ShoppingBag className="h-4 w-4" />
-                Mes commandes
+                {t('myOrders')}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -401,15 +401,15 @@ export default function ProfilePage() {
         <TabsList className="grid w-full grid-cols-3 mb-6">
           <TabsTrigger value="personal" className="flex items-center gap-2">
             <User className="h-4 w-4" />
-            <span className="hidden sm:inline">Informations</span>
+            <span className="hidden sm:inline">{t('tabInformation')}</span>
           </TabsTrigger>
           <TabsTrigger value="security" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
-            <span className="hidden sm:inline">Sécurité</span>
+            <span className="hidden sm:inline">{t('tabSecurity')}</span>
           </TabsTrigger>
           <TabsTrigger value="addresses" className="flex items-center gap-2">
             <MapPin className="h-4 w-4" />
-            <span className="hidden sm:inline">Adresses</span>
+            <span className="hidden sm:inline">{t('tabAddresses')}</span>
           </TabsTrigger>
         </TabsList>
 
@@ -419,9 +419,9 @@ export default function ProfilePage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Informations personnelles</CardTitle>
+                  <CardTitle>{t('personalInfoTitle')}</CardTitle>
                   <CardDescription>
-                    Gérez vos informations de profil
+                    {t('personalInfoDescription')}
                   </CardDescription>
                 </div>
                 {!isEditingProfile && (
@@ -430,7 +430,7 @@ export default function ProfilePage() {
                     onClick={() => setIsEditingProfile(true)}
                   >
                     <Pencil className="h-4 w-4 mr-2" />
-                    Modifier
+                    {t('editButton')}
                   </Button>
                 )}
               </div>
@@ -446,20 +446,20 @@ export default function ProfilePage() {
               {profileSuccess && (
                 <Alert className="mb-4 border-green-500 bg-green-50 text-green-800">
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <AlertDescription>Profil mis à jour avec succès</AlertDescription>
+                  <AlertDescription>{t('profileUpdateSuccess')}</AlertDescription>
                 </Alert>
               )}
 
               <form onSubmit={handleProfileSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">Prénom</Label>
+                    <Label htmlFor="firstName">{t('firstNameLabel')}</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="firstName"
                         type="text"
-                        placeholder="Votre prénom"
+                        placeholder={t('firstNamePlaceholder')}
                         className="pl-10"
                         value={isEditingProfile ? profileData.firstName : customer.firstName || ''}
                         onChange={(e) =>
@@ -471,13 +471,13 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Nom</Label>
+                    <Label htmlFor="lastName">{t('lastNameLabel')}</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="lastName"
                         type="text"
-                        placeholder="Votre nom"
+                        placeholder={t('lastNamePlaceholder')}
                         className="pl-10"
                         value={isEditingProfile ? profileData.lastName : customer.lastName || ''}
                         onChange={(e) =>
@@ -490,7 +490,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Numéro de téléphone</Label>
+                  <Label htmlFor="phone">{t('phoneLabel')}</Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     {isEditingProfile ? (
@@ -538,7 +538,7 @@ export default function ProfilePage() {
                       }}
                       className="flex-1"
                     >
-                      Annuler
+                      {t('cancelButton')}
                     </Button>
                     <Button
                       type="submit"
@@ -548,12 +548,12 @@ export default function ProfilePage() {
                       {isUpdatingProfile ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Enregistrement...
+                          {t('savingButton')}
                         </>
                       ) : (
                         <>
                           <Save className="mr-2 h-4 w-4" />
-                          Enregistrer
+                          {t('saveButton')}
                         </>
                       )}
                     </Button>
@@ -568,9 +568,9 @@ export default function ProfilePage() {
         <TabsContent value="security">
           <Card>
             <CardHeader>
-              <CardTitle>Changer le mot de passe</CardTitle>
+              <CardTitle>{t('changePasswordTitle')}</CardTitle>
               <CardDescription>
-                Assurez-vous d'utiliser un mot de passe fort
+                {t('changePasswordDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -584,19 +584,19 @@ export default function ProfilePage() {
               {passwordSuccess && (
                 <Alert className="mb-4 border-green-500 bg-green-50 text-green-800">
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <AlertDescription>Mot de passe changé avec succès</AlertDescription>
+                  <AlertDescription>{t('passwordChangeSuccess')}</AlertDescription>
                 </Alert>
               )}
 
               <form onSubmit={handlePasswordSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="currentPassword">Mot de passe actuel</Label>
+                  <Label htmlFor="currentPassword">{t('currentPasswordLabel')}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="currentPassword"
                       type={showCurrentPassword ? 'text' : 'password'}
-                      placeholder="Entrez votre mot de passe actuel"
+                      placeholder={t('currentPasswordPlaceholder')}
                       className="pl-10 pr-10"
                       value={passwordData.currentPassword}
                       onChange={(e) =>
@@ -617,13 +617,13 @@ export default function ProfilePage() {
                 <Separator />
 
                 <div className="space-y-2">
-                  <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+                  <Label htmlFor="newPassword">{t('newPasswordLabel')}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="newPassword"
                       type={showNewPassword ? 'text' : 'password'}
-                      placeholder="Entrez le nouveau mot de passe"
+                      placeholder={t('newPasswordPlaceholder')}
                       className="pl-10 pr-10"
                       value={passwordData.newPassword}
                       onChange={(e) =>
@@ -640,18 +640,18 @@ export default function ProfilePage() {
                     </button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Minimum 8 caractères
+                    {t('passwordMinLengthHint')}
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmNewPassword">Confirmer le nouveau mot de passe</Label>
+                  <Label htmlFor="confirmNewPassword">{t('confirmNewPasswordLabel')}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="confirmNewPassword"
                       type={showConfirmPassword ? 'text' : 'password'}
-                      placeholder="Confirmez le nouveau mot de passe"
+                      placeholder={t('confirmNewPasswordPlaceholder')}
                       className="pl-10 pr-10"
                       value={passwordData.confirmNewPassword}
                       onChange={(e) =>
@@ -677,10 +677,10 @@ export default function ProfilePage() {
                   {isChangingPassword ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Changement en cours...
+                      {t('changingPasswordButton')}
                     </>
                   ) : (
-                    'Changer le mot de passe'
+                    t('changePasswordButton')
                   )}
                 </Button>
               </form>
@@ -694,14 +694,14 @@ export default function ProfilePage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Mes adresses</CardTitle>
+                  <CardTitle>{t('addressesTitle')}</CardTitle>
                   <CardDescription>
-                    Gérez vos adresses de livraison et de facturation
+                    {t('addressesDescription')}
                   </CardDescription>
                 </div>
                 <Button onClick={() => openAddressModal()}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Ajouter
+                  {t('addButton')}
                 </Button>
               </div>
             </CardHeader>
@@ -720,12 +720,12 @@ export default function ProfilePage() {
                             <div className="flex gap-1">
                               {address.defaultShippingAddress && (
                                 <Badge variant="secondary" className="text-xs">
-                                  Livraison
+                                  {t('shippingBadge')}
                                 </Badge>
                               )}
                               {address.defaultBillingAddress && (
                                 <Badge variant="outline" className="text-xs">
-                                  Facturation
+                                  {t('billingBadge')}
                                 </Badge>
                               )}
                             </div>
@@ -773,13 +773,13 @@ export default function ProfilePage() {
               ) : (
                 <div className="text-center py-12">
                   <MapPin className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
-                  <p className="font-medium mb-1">Aucune adresse enregistrée</p>
+                  <p className="font-medium mb-1">{t('noAddressTitle')}</p>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Ajoutez une adresse pour accélérer vos commandes
+                    {t('noAddressDescription')}
                   </p>
                   <Button onClick={() => openAddressModal()}>
                     <Plus className="mr-2 h-4 w-4" />
-                    Ajouter une adresse
+                    {t('addAddressButton')}
                   </Button>
                 </div>
               )}
@@ -798,7 +798,7 @@ export default function ProfilePage() {
           <div className="relative bg-card border rounded-lg shadow-lg w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-card border-b px-6 py-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">
-                {editingAddressId ? 'Modifier l\'adresse' : 'Nouvelle adresse'}
+                {editingAddressId ? t('editAddressTitle') : t('newAddressTitle')}
               </h2>
               <button
                 onClick={() => setIsAddressModalOpen(false)}
@@ -817,51 +817,51 @@ export default function ProfilePage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="fullName">Nom complet *</Label>
+                <Label htmlFor="fullName">{t('fullNameLabel')}</Label>
                 <Input
                   id="fullName"
                   value={addressForm.fullName}
                   onChange={(e) => setAddressForm({ ...addressForm, fullName: e.target.value })}
-                  placeholder="Nom et prénom"
+                  placeholder={t('fullNamePlaceholder')}
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="streetLine1">Adresse *</Label>
+                <Label htmlFor="streetLine1">{t('streetLine1Label')}</Label>
                 <Input
                   id="streetLine1"
                   value={addressForm.streetLine1}
                   onChange={(e) => setAddressForm({ ...addressForm, streetLine1: e.target.value })}
-                  placeholder="Rue, numéro, quartier"
+                  placeholder={t('streetLine1Placeholder')}
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="streetLine2">Complément d'adresse</Label>
+                <Label htmlFor="streetLine2">{t('streetLine2Label')}</Label>
                 <Input
                   id="streetLine2"
                   value={addressForm.streetLine2}
                   onChange={(e) => setAddressForm({ ...addressForm, streetLine2: e.target.value })}
-                  placeholder="Appartement, étage, etc."
+                  placeholder={t('streetLine2Placeholder')}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="city">Ville *</Label>
+                  <Label htmlFor="city">{t('cityLabel')}</Label>
                   <Input
                     id="city"
                     value={addressForm.city}
                     onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
-                    placeholder="Ville"
+                    placeholder={t('cityPlaceholder')}
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="postalCode">Code postal</Label>
+                  <Label htmlFor="postalCode">{t('postalCodeLabel')}</Label>
                   <Input
                     id="postalCode"
                     value={addressForm.postalCode}
@@ -872,7 +872,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="province">Wilaya *</Label>
+                <Label htmlFor="province">{t('provinceLabel')}</Label>
                 <select
                   id="province"
                   value={addressForm.province}
@@ -880,7 +880,7 @@ export default function ProfilePage() {
                   className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
                   required
                 >
-                  <option value="">Sélectionnez une wilaya</option>
+                  <option value="">{t('provincePlaceholder')}</option>
                   {WILAYAS.map((wilaya, index) => (
                     <option key={wilaya} value={wilaya}>
                       {String(index + 1).padStart(2, '0')} - {wilaya}
@@ -890,7 +890,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="addressPhone">Téléphone</Label>
+                <Label htmlFor="addressPhone">{t('addressPhoneLabel')}</Label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium border-r pr-2">
                     +213
@@ -920,7 +920,7 @@ export default function ProfilePage() {
                     onChange={(e) => setAddressForm({ ...addressForm, defaultShippingAddress: e.target.checked })}
                     className="h-4 w-4 rounded border-input"
                   />
-                  <span className="text-sm">Définir comme adresse de livraison par défaut</span>
+                  <span className="text-sm">{t('setDefaultShipping')}</span>
                 </label>
 
                 <label className="flex items-center gap-3 cursor-pointer">
@@ -930,7 +930,7 @@ export default function ProfilePage() {
                     onChange={(e) => setAddressForm({ ...addressForm, defaultBillingAddress: e.target.checked })}
                     className="h-4 w-4 rounded border-input"
                   />
-                  <span className="text-sm">Définir comme adresse de facturation par défaut</span>
+                  <span className="text-sm">{t('setDefaultBilling')}</span>
                 </label>
               </div>
 
@@ -941,18 +941,18 @@ export default function ProfilePage() {
                   onClick={() => setIsAddressModalOpen(false)}
                   className="flex-1"
                 >
-                  Annuler
+                  {t('cancelButton')}
                 </Button>
                 <Button type="submit" disabled={isSavingAddress} className="flex-1">
                   {isSavingAddress ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Enregistrement...
+                      {t('savingButton')}
                     </>
                   ) : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
-                      Enregistrer
+                      {t('saveButton')}
                     </>
                   )}
                 </Button>

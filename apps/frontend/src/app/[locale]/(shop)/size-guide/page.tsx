@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Ruler, User, Shirt, Footprints, HelpCircle, Info, Mail } from 'lucide-react';
 import { Button } from '@/components/ui';
 
@@ -52,34 +53,35 @@ const shoeSizes: SizeData[] = [
 
 const measurementTips = [
   {
-    title: 'Tour de poitrine',
-    description: 'Mesurez horizontalement à l\'endroit le plus fort de la poitrine, sous les aisselles.',
+    titleKey: 'tipChestTitle',
+    descriptionKey: 'tipChestDescription',
     icon: Shirt,
   },
   {
-    title: 'Tour de taille',
-    description: 'Mesurez à l\'endroit le plus étroit du torse, généralement au niveau du nombril.',
+    titleKey: 'tipWaistTitle',
+    descriptionKey: 'tipWaistDescription',
     icon: Ruler,
   },
   {
-    title: 'Tour de hanches',
-    description: 'Mesurez à l\'endroit le plus large des hanches, environ 20 cm sous la taille.',
+    titleKey: 'tipHipsTitle',
+    descriptionKey: 'tipHipsDescription',
     icon: User,
   },
   {
-    title: 'Longueur du pied',
-    description: 'Posez votre pied sur une feuille et tracez le contour. Mesurez du talon au gros orteil.',
+    titleKey: 'tipFootTitle',
+    descriptionKey: 'tipFootDescription',
     icon: Footprints,
   },
-];
+] as const;
 
 export default function SizeGuidePage() {
+  const t = useTranslations('sizeGuide');
   const [activeCategory, setActiveCategory] = useState<Category>('women');
 
   const categories = [
-    { id: 'women' as Category, label: 'Femme', icon: User },
-    { id: 'men' as Category, label: 'Homme', icon: User },
-    { id: 'shoes' as Category, label: 'Chaussures', icon: Footprints },
+    { id: 'women' as Category, label: t('categoryWomen'), icon: User },
+    { id: 'men' as Category, label: t('categoryMen'), icon: User },
+    { id: 'shoes' as Category, label: t('categoryShoes'), icon: Footprints },
   ];
 
   const getSizeData = () => {
@@ -97,9 +99,9 @@ export default function SizeGuidePage() {
 
   const getTableHeaders = () => {
     if (activeCategory === 'shoes') {
-      return ['Taille', 'EU', 'US', 'UK', 'Longueur pied (cm)'];
+      return [t('headerSize'), 'EU', 'US', 'UK', t('headerFootLength')];
     }
-    return ['Taille', 'EU', 'US', 'UK', 'Poitrine (cm)', 'Taille (cm)', 'Hanches (cm)'];
+    return [t('headerSize'), 'EU', 'US', 'UK', t('headerChest'), t('headerWaist'), t('headerHips')];
   };
 
   const getRowData = (item: SizeData) => {
@@ -118,9 +120,9 @@ export default function SizeGuidePage() {
             <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
               <Ruler className="h-8 w-8" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Guide des Tailles</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('heroTitle')}</h1>
             <p className="text-xl text-gray-100">
-              Trouvez la taille parfaite pour chacun de vos achats
+              {t('heroSubtitle')}
             </p>
           </div>
         </div>
@@ -187,15 +189,15 @@ export default function SizeGuidePage() {
 
         {/* How to Measure */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Comment prendre vos mesures ?</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('howToMeasureTitle')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {measurementTips.map((tip, index) => (
               <div key={index} className="bg-white rounded-xl shadow-lg p-6">
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                   <tip.icon className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">{tip.title}</h3>
-                <p className="text-sm text-gray-600">{tip.description}</p>
+                <h3 className="font-semibold text-gray-900 mb-2">{t(tip.titleKey)}</h3>
+                <p className="text-sm text-gray-600">{t(tip.descriptionKey)}</p>
               </div>
             ))}
           </div>
@@ -209,9 +211,9 @@ export default function SizeGuidePage() {
                 <Info className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Conseils pour bien choisir</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">{t('adviceTitle')}</h3>
                 <p className="text-gray-600">
-                  Suivez ces conseils pour trouver la taille qui vous convient le mieux.
+                  {t('adviceSubtitle')}
                 </p>
               </div>
             </div>
@@ -222,9 +224,9 @@ export default function SizeGuidePage() {
                     <span className="text-green-600 text-sm font-bold">1</span>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Utilisez un mètre ruban souple</h4>
+                    <h4 className="font-medium text-gray-900">{t('adviceSoftTapeTitle')}</h4>
                     <p className="text-sm text-gray-600">
-                      Ne serrez pas trop le mètre ruban contre votre corps pour des mesures précises.
+                      {t('adviceSoftTapeDescription')}
                     </p>
                   </div>
                 </div>
@@ -233,9 +235,9 @@ export default function SizeGuidePage() {
                     <span className="text-green-600 text-sm font-bold">2</span>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Mesurez-vous en sous-vêtements</h4>
+                    <h4 className="font-medium text-gray-900">{t('adviceUnderwearTitle')}</h4>
                     <p className="text-sm text-gray-600">
-                      Pour des mesures précises, portez le minimum de vêtements.
+                      {t('adviceUnderwearDescription')}
                     </p>
                   </div>
                 </div>
@@ -244,9 +246,9 @@ export default function SizeGuidePage() {
                     <span className="text-green-600 text-sm font-bold">3</span>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Faites-vous aider si possible</h4>
+                    <h4 className="font-medium text-gray-900">{t('adviceHelpTitle')}</h4>
                     <p className="text-sm text-gray-600">
-                      Demandez à quelqu'un de vous aider pour des mesures plus exactes.
+                      {t('adviceHelpDescription')}
                     </p>
                   </div>
                 </div>
@@ -257,9 +259,9 @@ export default function SizeGuidePage() {
                     <span className="text-blue-600 text-sm font-bold">!</span>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Entre deux tailles ?</h4>
+                    <h4 className="font-medium text-gray-900">{t('adviceBetweenSizesTitle')}</h4>
                     <p className="text-sm text-gray-600">
-                      Si vos mesures sont entre deux tailles, choisissez la taille supérieure pour plus de confort.
+                      {t('adviceBetweenSizesDescription')}
                     </p>
                   </div>
                 </div>
@@ -268,9 +270,9 @@ export default function SizeGuidePage() {
                     <span className="text-blue-600 text-sm font-bold">!</span>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Consultez les avis</h4>
+                    <h4 className="font-medium text-gray-900">{t('adviceReviewsTitle')}</h4>
                     <p className="text-sm text-gray-600">
-                      Les avis clients mentionnent souvent si un article taille grand ou petit.
+                      {t('adviceReviewsDescription')}
                     </p>
                   </div>
                 </div>
@@ -279,9 +281,9 @@ export default function SizeGuidePage() {
                     <span className="text-blue-600 text-sm font-bold">!</span>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Échanges possibles</h4>
+                    <h4 className="font-medium text-gray-900">{t('adviceExchangeTitle')}</h4>
                     <p className="text-sm text-gray-600">
-                      N'oubliez pas que vous pouvez échanger si la taille ne convient pas.
+                      {t('adviceExchangeDescription')}
                     </p>
                   </div>
                 </div>
@@ -295,31 +297,31 @@ export default function SizeGuidePage() {
           <div className="bg-gray-100 rounded-xl p-8">
             <div className="flex items-center gap-3 mb-6">
               <HelpCircle className="h-6 w-6 text-primary" />
-              <h3 className="text-lg font-semibold text-gray-900">Questions fréquentes</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t('faqTitle')}</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Les tailles sont-elles standards ?</h4>
+                <h4 className="font-medium text-gray-900 mb-2">{t('faqStandardQuestion')}</h4>
                 <p className="text-sm text-gray-600">
-                  Nos tailles suivent les standards européens. Consultez toujours notre tableau pour chaque article.
+                  {t('faqStandardAnswer')}
                 </p>
               </div>
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Comment savoir si un article taille grand/petit ?</h4>
+                <h4 className="font-medium text-gray-900 mb-2">{t('faqFitQuestion')}</h4>
                 <p className="text-sm text-gray-600">
-                  Chaque fiche produit indique si l'article taille normalement, grand ou petit.
+                  {t('faqFitAnswer')}
                 </p>
               </div>
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Puis-je échanger si la taille ne va pas ?</h4>
+                <h4 className="font-medium text-gray-900 mb-2">{t('faqExchangeQuestion')}</h4>
                 <p className="text-sm text-gray-600">
-                  Oui, les échanges de taille sont gratuits sous réserve de disponibilité.
+                  {t('faqExchangeAnswer')}
                 </p>
               </div>
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Comment mesurer mon pied correctement ?</h4>
+                <h4 className="font-medium text-gray-900 mb-2">{t('faqFootQuestion')}</h4>
                 <p className="text-sm text-gray-600">
-                  Mesurez votre pied en fin de journée quand il est légèrement gonflé, pour plus de précision.
+                  {t('faqFootAnswer')}
                 </p>
               </div>
             </div>
@@ -333,13 +335,13 @@ export default function SizeGuidePage() {
               <Mail className="h-8 w-8" />
             </div>
             <div className="flex-1 text-center md:text-left">
-              <h3 className="text-xl font-bold mb-2">Besoin d'aide pour choisir votre taille ?</h3>
+              <h3 className="text-xl font-bold mb-2">{t('contactTitle')}</h3>
               <p className="text-gray-100">
-                Notre équipe est là pour vous conseiller et vous aider à trouver la taille parfaite.
+                {t('contactSubtitle')}
               </p>
             </div>
             <Button variant="secondary" size="lg" asChild>
-              <Link href="/contact">Nous contacter</Link>
+              <Link href="/contact">{t('contactButton')}</Link>
             </Button>
           </div>
         </div>

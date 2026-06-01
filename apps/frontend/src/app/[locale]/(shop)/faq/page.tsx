@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { generateMetadata as genMeta, pageMeta } from '@/lib/seo';
 import { FAQJsonLd, BreadcrumbJsonLd } from '@/components/seo';
 import FAQClient, { faqCategories } from './FAQClient';
@@ -34,6 +35,7 @@ export default async function FAQPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const t = await getTranslations('faq');
 
   // Flatten all FAQs for structured data
   const allFaqs = faqCategories.flatMap((cat) =>
@@ -45,8 +47,8 @@ export default async function FAQPage({
 
   // Breadcrumb items
   const breadcrumbItems = [
-    { name: 'Accueil', url: `/${locale}` },
-    { name: 'FAQ' },
+    { name: t('breadcrumbHome'), url: `/${locale}` },
+    { name: t('breadcrumbFaq') },
   ];
 
   return (

@@ -3,34 +3,36 @@
 import React from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 
 export default function Footer() {
   const params = useParams();
   const locale = (params.locale as string) || 'fr';
+  const t = useTranslations('footer');
 
   const footerLinks = {
     shop: [
-      { name: 'Nouveautés', href: `/${locale}/products` },
-      { name: 'Hommes', href: `/${locale}/categories` },
-      { name: 'Femmes', href: `/${locale}/categories` },
-      { name: 'Accessoires', href: `/${locale}/categories` },
-      { name: 'Tous les produits', href: `/${locale}/products` },
+      { name: t('linkNew'), href: `/${locale}/products` },
+      { name: t('linkMen'), href: `/${locale}/categories` },
+      { name: t('linkWomen'), href: `/${locale}/categories` },
+      { name: t('linkAccessories'), href: `/${locale}/categories` },
+      { name: t('linkAllProducts'), href: `/${locale}/products` },
     ],
     help: [
-      { name: 'FAQ', href: `/${locale}/faq` },
-      { name: 'Livraison', href: `/${locale}/shipping` },
-      { name: 'Retours', href: `/${locale}/returns` },
-      { name: 'Guide des tailles', href: `/${locale}/size-guide` },
-      { name: 'Nous contacter', href: `/${locale}/contact` },
+      { name: t('linkFaq'), href: `/${locale}/faq` },
+      { name: t('linkShipping'), href: `/${locale}/shipping` },
+      { name: t('linkReturns'), href: `/${locale}/returns` },
+      { name: t('linkSizeGuide'), href: `/${locale}/size-guide` },
+      { name: t('linkContactUs'), href: `/${locale}/contact` },
     ],
     about: [
-      { name: 'Notre histoire', href: `/${locale}/about` },
-      { name: 'Carrières', href: `/${locale}/careers` },
+      { name: t('linkOurStory'), href: `/${locale}/about` },
+      { name: t('linkCareers'), href: `/${locale}/careers` },
     ],
     legal: [
-      { name: 'Conditions générales', href: `/${locale}/legal/terms` },
-      { name: 'Politique de confidentialité', href: `/${locale}/legal/privacy` },
+      { name: t('linkTerms'), href: `/${locale}/legal/terms` },
+      { name: t('linkPrivacy'), href: `/${locale}/legal/privacy` },
     ],
   };
 
@@ -40,16 +42,16 @@ export default function Footer() {
       <div className="bg-primary text-primary-foreground py-12">
         <div className="container-custom">
           <div className="max-w-2xl mx-auto text-center">
-            <h3 className="text-2xl font-bold mb-2">Restez informé</h3>
-            <p className="mb-6">Inscrivez-vous à notre newsletter pour recevoir les dernières nouveautés</p>
+            <h3 className="text-2xl font-bold mb-2">{t('newsletterTitle')}</h3>
+            <p className="mb-6">{t('newsletterSubtitle')}</p>
             <div className="flex gap-2 max-w-md mx-auto">
               <input
                 type="email"
-                placeholder="Votre email"
+                placeholder={t('emailPlaceholder')}
                 className="flex-1 px-4 py-2 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-secondary"
               />
               <button className="px-6 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary-dark transition-colors font-medium">
-                S'inscrire
+                {t('subscribeButton')}
               </button>
             </div>
           </div>
@@ -66,12 +68,12 @@ export default function Footer() {
               <span className="text-2xl font-light text-secondary ml-1">Fashion</span>
             </Link>
             <p className="text-muted-foreground mb-4">
-              Découvrez l'élégance et le style avec OSCAR Fashion. Votre destination pour la mode en Algérie.
+              {t('brandDescription')}
             </p>
             <div className="space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                <span>Alger, Algérie</span>
+                <span>{t('addressCity')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
@@ -86,7 +88,7 @@ export default function Footer() {
 
           {/* Shop */}
           <div>
-            <h4 className="font-semibold text-foreground mb-4">Boutique</h4>
+            <h4 className="font-semibold text-foreground mb-4">{t('columnShop')}</h4>
             <ul className="space-y-2">
               {footerLinks.shop.map((link) => (
                 <li key={link.name}>
@@ -100,7 +102,7 @@ export default function Footer() {
 
           {/* Help */}
           <div>
-            <h4 className="font-semibold text-foreground mb-4">Aide</h4>
+            <h4 className="font-semibold text-foreground mb-4">{t('columnHelp')}</h4>
             <ul className="space-y-2">
               {footerLinks.help.map((link) => (
                 <li key={link.name}>
@@ -114,7 +116,7 @@ export default function Footer() {
 
           {/* About */}
           <div>
-            <h4 className="font-semibold text-foreground mb-4">À propos</h4>
+            <h4 className="font-semibold text-foreground mb-4">{t('columnAbout')}</h4>
             <ul className="space-y-2 mb-6">
               {footerLinks.about.map((link) => (
                 <li key={link.name}>
@@ -163,7 +165,7 @@ export default function Footer() {
       <div className="border-t border-border py-6">
         <div className="container-custom">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-            <p>© 2024 OSCAR Fashion. Tous droits réservés.</p>
+            <p>{t('copyright')}</p>
             <div className="flex gap-6">
               {footerLinks.legal.map((link) => (
                 <Link key={link.name} href={link.href} className="hover:text-primary transition-colors">
