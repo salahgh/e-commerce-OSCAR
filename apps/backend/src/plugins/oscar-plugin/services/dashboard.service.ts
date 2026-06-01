@@ -315,27 +315,29 @@ export class DashboardService {
    */
   async getSalesTrend(ctx: RequestContext, days: number = 30): Promise<SalesTrendDataPoint[]> {
     const completedStates = ['PaymentSettled', 'Shipped', 'Delivered', 'PartiallyShipped', 'PartiallyDelivered'];
-    const result: SalesTrendDataPoint[] = [];
     const now = new Date();
 
+    // Build the day buckets (oldest -> newest) up front, then fetch all of them
+    // concurrently instead of serially (was 2 queries * `days`, awaited one by one).
+    const ranges: { dayStart: Date; dayEnd: Date }[] = [];
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(now);
       date.setDate(date.getDate() - i);
       const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       const dayEnd = new Date(dayStart);
       dayEnd.setDate(dayEnd.getDate() + 1);
-
-      const revenue = await this.calculateRevenue(ctx, dayStart, dayEnd, completedStates);
-      const orderCount = await this.countOrdersInRange(ctx, dayStart, dayEnd, completedStates);
-
-      result.push({
-        date: dayStart.toISOString().split('T')[0],
-        revenue,
-        orders: orderCount,
-      });
+      ranges.push({ dayStart, dayEnd });
     }
 
-    return result;
+    return Promise.all(
+      ranges.map(async ({ dayStart, dayEnd }) => {
+        const [revenue, orders] = await Promise.all([
+          this.calculateRevenue(ctx, dayStart, dayEnd, completedStates),
+          this.countOrdersInRange(ctx, dayStart, dayEnd, completedStates),
+        ]);
+        return { date: dayStart.toISOString().split('T')[0], revenue, orders };
+      }),
+    );
   }
 
   /**
@@ -343,62 +345,41 @@ export class DashboardService {
    */
   async getOrdersByStatus(ctx: RequestContext, days: number = 7): Promise<OrdersChartDataPoint[]> {
     const orderRepo = this.connection.getRepository(ctx, Order);
-    const result: OrdersChartDataPoint[] = [];
     const now = new Date();
 
+    const ranges: { dayStart: Date; dayEnd: Date }[] = [];
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(now);
       date.setDate(date.getDate() - i);
       const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       const dayEnd = new Date(dayStart);
       dayEnd.setDate(dayEnd.getDate() + 1);
-
-      const pending = await orderRepo.count({
-        where: {
-          createdAt: Between(dayStart, dayEnd),
-          state: 'PaymentAuthorized' as any,
-        },
-      });
-
-      const processing = await orderRepo.count({
-        where: {
-          createdAt: Between(dayStart, dayEnd),
-          state: 'PaymentSettled' as any,
-        },
-      });
-
-      const shipped = await orderRepo.count({
-        where: {
-          createdAt: Between(dayStart, dayEnd),
-          state: 'Shipped' as any,
-        },
-      });
-
-      const delivered = await orderRepo.count({
-        where: {
-          createdAt: Between(dayStart, dayEnd),
-          state: 'Delivered' as any,
-        },
-      });
-
-      const cancelled = await orderRepo.count({
-        where: {
-          createdAt: Between(dayStart, dayEnd),
-          state: 'Cancelled' as any,
-        },
-      });
-
-      result.push({
-        date: dayStart.toISOString().split('T')[0],
-        pending,
-        processing,
-        shipped,
-        delivered,
-        cancelled,
-      });
+      ranges.push({ dayStart, dayEnd });
     }
 
-    return result;
+    const countFor = (dayStart: Date, dayEnd: Date, state: string) =>
+      orderRepo.count({ where: { createdAt: Between(dayStart, dayEnd), state: state as any } });
+
+    // Fetch every (day, state) count concurrently instead of 5 * `days` serial counts.
+    return Promise.all(
+      ranges.map(async ({ dayStart, dayEnd }) => {
+        const [pending, processing, shipped, delivered, cancelled] = await Promise.all([
+          countFor(dayStart, dayEnd, 'PaymentAuthorized'),
+          countFor(dayStart, dayEnd, 'PaymentSettled'),
+          countFor(dayStart, dayEnd, 'Shipped'),
+          countFor(dayStart, dayEnd, 'Delivered'),
+          countFor(dayStart, dayEnd, 'Cancelled'),
+        ]);
+        return {
+          date: dayStart.toISOString().split('T')[0],
+          pending,
+          processing,
+          shipped,
+          delivered,
+          cancelled,
+        };
+      }),
+    );
   }
 
   /**
@@ -614,10 +595,16 @@ export class DashboardService {
    * Get recent orders for the activity feed
    */
   async getRecentOrders(ctx: RequestContext, limit: number = 10): Promise<RecentOrder[]> {
-    const { items } = await this.orderService.findAll(ctx, {
-      take: limit,
-      sort: { createdAt: 'DESC' as any },
-    });
+    // Load `lines` (for itemCount) and `customer` (for name/email) — without these
+    // relations `order.lines` is undefined and itemCount was always 0.
+    const { items } = await this.orderService.findAll(
+      ctx,
+      {
+        take: limit,
+        sort: { createdAt: 'DESC' as any },
+      },
+      ['lines', 'customer'],
+    );
 
     return items.map(order => ({
       id: order.id.toString(),
