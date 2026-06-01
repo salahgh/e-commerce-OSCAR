@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { Button, Spinner } from '@/components/ui';
 import { Heart, Minus, Plus, ChevronDown, ImageOff } from 'lucide-react';
@@ -11,6 +11,8 @@ import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/utils/formatters';
 import { parseProductDiscount } from '@/lib/utils/discountParser';
 import { ProductRow, SectionHeader, type HomeProduct } from '@/components/home';
+import { RecentlyViewed, useRecentlyViewed } from '@/components/product/RecentlyViewed';
+import { SocialShare } from '@/components/product/SocialShare';
 
 interface ProductAsset {
   id: string;
@@ -95,6 +97,20 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   const selectedVariant = product.variants.find((v) => v.id === selectedVariantId);
+
+  // Record this product in the client-side "recently viewed" history (localStorage).
+  const { addProduct: addRecentlyViewed } = useRecentlyViewed();
+  useEffect(() => {
+    addRecentlyViewed({
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      imageUrl: product.featuredAsset?.preview,
+      price: selectedVariant?.priceWithTax ?? product.variants[0]?.priceWithTax ?? 0,
+      currency: 'DZD',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id]);
 
   // Deduplicated images
   const allImages = useMemo(() => {
@@ -348,6 +364,14 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           )}
         </div>
 
+        {/* Share */}
+        <div className="mt-10">
+          <SocialShare
+            url={typeof window !== 'undefined' ? window.location.href : ''}
+            title={product.name}
+          />
+        </div>
+
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div className="mt-12">
@@ -358,6 +382,12 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             <ProductRow products={relatedProducts} />
           </div>
         )}
+
+        <RecentlyViewed
+          currentProductId={product.id}
+          title={t('recentlyViewed')}
+          className="mt-12"
+        />
       </div>
     </div>
   );
