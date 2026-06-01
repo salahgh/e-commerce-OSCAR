@@ -129,7 +129,10 @@ export class OscarService {
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.featuredAsset', 'featuredAsset')
       .where('product.enabled = :enabled', { enabled: true })
-      .orderBy('product.customFieldsViewcount', 'DESC')
+      // Use the custom-field property path (customFields.viewCount), not the raw
+      // DB column alias. TypeORM resolves column metadata from the property path when
+      // combining orderBy with take()+join; the raw alias has no metadata and throws.
+      .orderBy('product.customFields.viewCount', 'DESC')
       .take(take);
 
     return qb.getMany();
