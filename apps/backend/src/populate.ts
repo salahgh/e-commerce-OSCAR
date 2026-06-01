@@ -619,16 +619,12 @@ async function seed() {
         { languageCode: LanguageCode.ar, name: productDef.nameAr, slug: productDef.slug, description: productDef.descriptionAr },
       ],
       facetValueIds: [],
+      // Only the restored/backed Product custom fields are written. The previously
+      // removed fields (nameFr/nameAr/descriptionFr/descriptionAr/weightKg/availableSizes/
+      // availableColors) have no DB column — FR/AR names+descriptions flow through translations[].
       customFields: {
-        nameFr: productDef.nameFr,
-        nameAr: productDef.nameAr,
-        descriptionFr: productDef.descriptionFr,
-        descriptionAr: productDef.descriptionAr,
         isFeatured: productDef.isFeatured || false,
-        weightKg: productDef.weightKg || 0.3,
         viewCount: Math.floor(Math.random() * 500),
-        availableSizes: productDef.sizes,
-        availableColors: productDef.colors,
       },
     });
 
