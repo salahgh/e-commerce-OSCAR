@@ -44,6 +44,8 @@ import {
   SettleRefundDocument,
 } from '../../graphql/generated/graphql';
 import { RefundDialog, ManualPaymentDialog, ModifyOrderDialog } from './OrderActionDialogs';
+import { FulfillmentDialog } from './FulfillmentDialog';
+import { TransitionFulfillmentToStateDocument } from '../../graphql/generated/graphql';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
@@ -162,6 +164,14 @@ const ORDER_STATUS: Record<
 // Order flow steps for progress visualization
 const ORDER_FLOW = ['AddingItems', 'ArrangingPayment', 'PaymentSettled', 'Shipped', 'Delivered'];
 
+// Vendure's default fulfillment process. Used to render transition buttons without
+// selecting Fulfillment.nextStates in the order fragment.
+const FULFILLMENT_NEXT_STATES: Record<string, string[]> = {
+  Created: ['Shipped'],
+  Pending: ['Shipped'],
+  Shipped: ['Delivered'],
+};
+
 export const OrderDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -180,6 +190,7 @@ export const OrderDetail: React.FC = () => {
   const [refundDefaultPaymentId, setRefundDefaultPaymentId] = useState<string | null>(null);
   const [showManualPaymentDialog, setShowManualPaymentDialog] = useState(false);
   const [showModifyDialog, setShowModifyDialog] = useState(false);
+  const [showFulfillmentDialog, setShowFulfillmentDialog] = useState(false);
 
   // Fetch order data
   const { data, loading, error, refetch } = useQuery(AdminOrderDocument, {
@@ -195,6 +206,27 @@ export const OrderDetail: React.FC = () => {
 
   // Mutations
   const [transitionOrder, { loading: transitioning }] = useMutation(TransitionOrderToStateDocument);
+  const [transitionFulfillment] = useMutation(TransitionFulfillmentToStateDocument);
+
+  const handleTransitionFulfillment = async (fulfillmentId: string, state: string) => {
+    try {
+      const res = await transitionFulfillment({ variables: { id: fulfillmentId, state } });
+      const result = res.data?.transitionFulfillmentToState;
+      if (result && result.__typename === 'Fulfillment') {
+        dispatch(addToast({ message: `Expédition: ${state}`, type: 'success' }));
+        refetch();
+      } else {
+        dispatch(
+          addToast({
+            message: (result as { message?: string } | undefined)?.message || 'Échec de la transition',
+            type: 'error',
+          }),
+        );
+      }
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    }
+  };
   const [updateCustomFields, { loading: updatingFields }] = useMutation(
     UpdateOrderCustomFieldsDocument
   );
@@ -1168,6 +1200,62 @@ export const OrderDetail: React.FC = () => {
             )}
           </div>
 
+          {/* Fulfillments */}
+          <div className="bg-card rounded-xl p-6 border border-border">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-foreground font-semibold flex items-center gap-2">
+                <Truck className="h-5 w-5 text-orange-400" />
+                Expéditions
+              </h3>
+              {['PaymentSettled', 'PartiallyShipped'].includes(order.state) && (
+                <Button variant="primary" size="sm" onClick={() => setShowFulfillmentDialog(true)}>
+                  Créer une expédition
+                </Button>
+              )}
+            </div>
+            {!order.fulfillments || order.fulfillments.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Aucune expédition pour cette commande.</p>
+            ) : (
+              <div className="space-y-3">
+                {order.fulfillments.map((f) => (
+                  <div
+                    key={f.id}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-border p-3"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="info">{f.state}</Badge>
+                        {f.method && <span className="text-sm text-foreground">{f.method}</span>}
+                      </div>
+                      {f.trackingCode && (
+                        <p className="text-xs text-muted-foreground mt-1">Suivi: {f.trackingCode}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {f.lines.reduce((n, l) => n + l.quantity, 0)} article(s)
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      {(FULFILLMENT_NEXT_STATES[f.state] ?? []).map((next) => (
+                        <Button
+                          key={next}
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleTransitionFulfillment(f.id, next)}
+                        >
+                          {next === 'Shipped'
+                            ? 'Marquer expédié'
+                            : next === 'Delivered'
+                              ? 'Marquer livré'
+                              : next}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Shipping / Tracking */}
           <div className="bg-card rounded-xl p-6 border border-border">
             <h3 className="text-foreground font-semibold mb-4 flex items-center gap-2">
@@ -1282,6 +1370,12 @@ export const OrderDetail: React.FC = () => {
         orderId={id!}
         lines={order.lines || []}
         onSuccess={refetch}
+      />
+      <FulfillmentDialog
+        isOpen={showFulfillmentDialog}
+        onClose={() => setShowFulfillmentDialog(false)}
+        order={order}
+        onFulfilled={() => refetch()}
       />
     </div>
   );
