@@ -90,15 +90,12 @@ export class OscarService {
    * Get featured products
    */
   async getFeaturedProducts(ctx: RequestContext, take: number = 10): Promise<Product[]> {
-    // The `isFeatured` custom field was removed (see RemoveProductCustomFields migration);
-    // "featured" now means a product that has a featured image. Return the most recent such products.
     const qb = this.connection
       .getRepository(ctx, Product)
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.featuredAsset', 'featuredAsset')
-      .where('product.enabled = :enabled', { enabled: true })
-      .andWhere('product.featuredAssetId IS NOT NULL')
-      .orderBy('product.createdAt', 'DESC')
+      .where('product.customFieldsIsfeatured = :isFeatured', { isFeatured: true })
+      .andWhere('product.enabled = :enabled', { enabled: true })
       .take(take);
 
     return qb.getMany();
@@ -127,14 +124,12 @@ export class OscarService {
    * Get popular products (by view count)
    */
   async getPopularProducts(ctx: RequestContext, take: number = 10): Promise<Product[]> {
-    // The `viewCount` custom field was removed, so there is no popularity signal to sort by.
-    // Fall back to the most recently created enabled products until view tracking is reinstated.
     const qb = this.connection
       .getRepository(ctx, Product)
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.featuredAsset', 'featuredAsset')
       .where('product.enabled = :enabled', { enabled: true })
-      .orderBy('product.createdAt', 'DESC')
+      .orderBy('product.customFieldsViewcount', 'DESC')
       .take(take);
 
     return qb.getMany();
@@ -143,9 +138,15 @@ export class OscarService {
   /**
    * Increment product view count
    */
-  async incrementViewCount(_ctx: RequestContext, _productId: ID): Promise<boolean> {
-    // The `viewCount` custom field was removed, so there is no column to increment.
-    // Keep the trackProductView mutation functional as a no-op until view tracking is reinstated.
+  async incrementViewCount(ctx: RequestContext, productId: ID): Promise<boolean> {
+    await this.connection
+      .getRepository(ctx, Product)
+      .createQueryBuilder()
+      .update(Product)
+      .set({ customFields: () => '"customFieldsViewcount" + 1' } as any)
+      .where('id = :id', { id: productId })
+      .execute();
+
     return true;
   }
 
