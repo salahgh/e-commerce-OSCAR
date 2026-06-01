@@ -73,16 +73,18 @@ export const cibPaymentHandler = new PaymentMethodHandler({
         };
       }
 
-      // Production implementation would go here
-      // const response = await callCibApi(args, order, amount);
-
+      // No real CIB/SATIM gateway integration exists yet. Decline rather than fake an
+      // authorization, so an order is never marked paid without money actually captured.
+      // Enable the payment method's `testMode` flag to simulate success in non-production.
       return {
         amount,
-        state: 'Authorized',
-        transactionId: `CIB-${order.code}-${Date.now()}`,
+        state: 'Declined',
+        errorMessage:
+          'CIB payment gateway is not yet integrated. Enable test mode for non-production use.',
         metadata: {
           paymentMethod: 'cib',
           merchantId: args.merchantId,
+          notIntegrated: true,
           ...metadata,
         },
       };

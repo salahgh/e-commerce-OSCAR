@@ -20,6 +20,17 @@ import { collectionPercentageDiscount } from './plugins/oscar-plugin/promotion/c
 
 const IS_DEV = process.env.NODE_ENV !== 'production';
 
+// Fail fast rather than boot production with insecure default secrets.
+if (!IS_DEV) {
+  const missing = ['COOKIE_SECRET', 'SUPERADMIN_PASSWORD'].filter((k) => !process.env[k]);
+  if (missing.length > 0) {
+    throw new Error(
+      `Refusing to start in production with unset secret(s): ${missing.join(', ')}. ` +
+        'Set them in the environment.',
+    );
+  }
+}
+
 // Parse DATABASE_URL (provided by Railway, Render, etc.) into individual connection options
 const parseDatabaseUrl = () => {
   const url = process.env.DATABASE_URL;
@@ -58,8 +69,10 @@ const getCorsOrigins = (): string[] | boolean => {
   if (corsOrigins) {
     return corsOrigins.split(',').map(origin => origin.trim());
   }
-  // Default: allow all origins (set CORS_ORIGINS for stricter security)
-  return true;
+  // No CORS_ORIGINS set in production: deny cross-origin by default. Previously this
+  // returned `true` (allow ALL origins) which, combined with credentials:true, is unsafe.
+  // Set CORS_ORIGINS to the storefront/back-office origins to enable them.
+  return false;
 };
 
 export const config: VendureConfig = {
@@ -101,7 +114,7 @@ export const config: VendureConfig = {
     const dbUrl = parseDatabaseUrl();
     return {
       type: 'postgres' as const,
-      synchronize: true, // Set to false in production, use migrations instead
+      synchronize: IS_DEV, // dev only; production relies on migrations (migration:run)
       migrations: [path.join(__dirname, './migrations/*.+(js|ts)')],
       logging: false,
       database: dbUrl?.database || process.env.DB_NAME!,

@@ -79,20 +79,19 @@ export const baridimobPaymentHandler = new PaymentMethodHandler({
         };
       }
 
-      // Production implementation:
-      // 1. Call Baridimob API to create payment request
-      // 2. Customer receives push notification on Baridimob app
-      // 3. Customer confirms payment
-      // 4. Webhook callback confirms payment
-
+      // No real Baridimob gateway integration exists yet. Decline rather than fake an
+      // authorization, so an order is never marked paid without money actually captured.
+      // Enable the payment method's `testMode` flag to simulate success in non-production.
       return {
         amount,
-        state: 'Authorized',
-        transactionId: `BRDMOB-${order.code}-${Date.now()}`,
+        state: 'Declined',
+        errorMessage:
+          'Baridimob payment gateway is not yet integrated. Enable test mode for non-production use.',
         metadata: {
           paymentMethod: 'baridimob',
           merchantAccount: args.merchantAccount,
           customerPhone,
+          notIntegrated: true,
           ...metadata,
         },
       };
