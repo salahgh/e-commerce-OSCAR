@@ -143,7 +143,9 @@ export class OscarService {
       .getRepository(ctx, Product)
       .createQueryBuilder()
       .update(Product)
-      .set({ customFields: () => '"customFieldsViewcount" + 1' } as any)
+      // Target the embedded customFields.viewCount property so TypeORM maps it to the
+      // customFieldsViewcount column; a flat `customFields` raw setter is not a known property.
+      .set({ customFields: { viewCount: () => '"customFieldsViewcount" + 1' } } as any)
       .where('id = :id', { id: productId })
       .execute();
 
