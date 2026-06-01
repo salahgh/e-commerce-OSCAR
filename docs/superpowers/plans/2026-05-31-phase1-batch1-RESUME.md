@@ -14,13 +14,13 @@ Each task = implement → spec-compliance review → code-quality review → com
 | T1 | Global settings inventory-defaults save (store tab) | ✅ done + reviewed | `af7db55` |
 | T2 | Tax Categories CRUD (`sections/TaxSettings.tsx`, `taxes` tab) | ✅ done + reviewed | `8c0e24f` |
 | T3 | Tax Rates CRUD (extends `TaxSettings.tsx`) | ✅ done + reviewed | `d979496` |
-| T4 | Zone CRUD + member management (`sections/ZoneSettings.tsx`, `zones` tab) | ⬜ TODO (next) | — |
-| T5 | Channel CRUD (`sections/ChannelSettings.tsx`, `channels` tab) | ⬜ TODO | — |
-| T6 | Create shipping method flow (`sections/ShippingMethodCreateModal.tsx`) | ⬜ TODO | — |
-| T7 | Create payment method flow (`sections/PaymentMethodCreateModal.tsx`) | ⬜ TODO | — |
-| T8 | Final type-check/build + runtime checklist doc | ⬜ TODO | — |
+| T4 | Zone CRUD + member management (`sections/ZoneSettings.tsx`, `zones` tab) | ✅ done + reviewed | `d34e4dc` |
+| T5 | Channel CRUD (`sections/ChannelSettings.tsx`, `channels` tab) | ✅ done + reviewed | `d2df2f0` |
+| T6 | Create shipping method flow (`sections/ShippingMethodCreateModal.tsx`) | ✅ done + reviewed | `bd15e9d` |
+| T7 | Create payment method flow (`sections/PaymentMethodCreateModal.tsx`) | ✅ done + reviewed | `0e3ef1e` |
+| T8 | Final type-check/build + runtime checklist doc | ✅ done | `df304e7` |
 
-**Resume at: Task 4.**
+**Status: Phase 1 Batch 1 COMPLETE (T1–T8 done).** Runtime verification pending — see `2026-05-31-phase1-batch1-runtime-checklist.md` (run with the backend up).
 
 ## Verified conventions (apply to all remaining tasks)
 

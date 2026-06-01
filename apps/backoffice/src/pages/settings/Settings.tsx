@@ -39,6 +39,7 @@ import {
   Loader2,
   PlayCircle,
   Percent,
+  Plus,
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { addToast } from '../../store/slices/uiSlice';
@@ -70,6 +71,10 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { formatPrice } from '../../lib/utils';
 import { TaxSettings } from './sections/TaxSettings';
+import { ZoneSettings } from './sections/ZoneSettings';
+import { ChannelSettings } from './sections/ChannelSettings';
+import { ShippingMethodCreateModal } from './sections/ShippingMethodCreateModal';
+import { PaymentMethodCreateModal } from './sections/PaymentMethodCreateModal';
 
 // Store settings form schema
 const StoreSettingsSchema = Yup.object().shape({
@@ -97,6 +102,8 @@ export const Settings: React.FC = () => {
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [deletingPaymentId, setDeletingPaymentId] = useState<string | null>(null);
   const [deletingShippingId, setDeletingShippingId] = useState<string | null>(null);
+  const [shippingModalOpen, setShippingModalOpen] = useState(false);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [trackInventory, setTrackInventory] = useState(false);
   const [outOfStockThreshold, setOutOfStockThreshold] = useState(0);
   const [deletePaymentMethod, { loading: deletingPayment }] = useMutation(
@@ -682,10 +689,21 @@ export const Settings: React.FC = () => {
 
           {/* Shipping Methods */}
           <div className="bg-muted/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Truck className="h-5 w-5 text-blue-500" />
-              Méthodes de Livraison
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <Truck className="h-5 w-5 text-blue-500" />
+                Méthodes de Livraison
+              </h3>
+              <Button variant="primary" size="sm" onClick={() => setShippingModalOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Nouvelle méthode
+              </Button>
+            </div>
+            <ShippingMethodCreateModal
+              isOpen={shippingModalOpen}
+              onClose={() => setShippingModalOpen(false)}
+              onCreated={() => refetchShipping()}
+            />
             {shippingLoading ? (
               <Spinner size="md" />
             ) : shippingMethods.length === 0 ? (
@@ -796,7 +814,17 @@ export const Settings: React.FC = () => {
                 Activez ou désactivez les méthodes de paiement disponibles
               </p>
             </div>
+            <Button variant="primary" size="sm" onClick={() => setPaymentModalOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nouvelle méthode
+            </Button>
           </div>
+
+          <PaymentMethodCreateModal
+            isOpen={paymentModalOpen}
+            onClose={() => setPaymentModalOpen(false)}
+            onCreated={() => refetchPayment()}
+          />
 
           {paymentLoading ? (
             <div className="flex justify-center py-8">
@@ -938,6 +966,18 @@ export const Settings: React.FC = () => {
       label: 'Taxes',
       icon: <Percent className="h-4 w-4" />,
       content: <TaxSettings />,
+    },
+    {
+      id: 'zones',
+      label: 'Zones',
+      icon: <Globe className="h-4 w-4" />,
+      content: <ZoneSettings />,
+    },
+    {
+      id: 'channels',
+      label: 'Canaux',
+      icon: <Building className="h-4 w-4" />,
+      content: <ChannelSettings />,
     },
     {
       id: 'email',
