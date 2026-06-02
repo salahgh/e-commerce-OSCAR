@@ -5,6 +5,7 @@ import {
   applyClear,
   recomputeOrderTotals,
   makeOptimisticOrderLine,
+  makeEmptyOptimisticOrder,
   type OptimisticCartVariant,
 } from '../optimisticCart';
 import { CurrencyCode, type OrderFieldsFragment } from '../../graphql/generated/graphql';
@@ -62,6 +63,18 @@ describe('makeOptimisticOrderLine', () => {
   });
 });
 
+describe('makeEmptyOptimisticOrder', () => {
+  it('defaults to DZD and an active AddingItems order with no lines', () => {
+    const o = makeEmptyOptimisticOrder('order-temp');
+    expect(o.id).toBe('order-temp');
+    expect(o.currencyCode).toBe(CurrencyCode.Dzd);
+    expect(o.state).toBe('AddingItems');
+    expect(o.active).toBe(true);
+    expect(o.lines).toEqual([]);
+    expect(o.totalWithTax).toBe(0);
+  });
+});
+
 describe('applyAddItem', () => {
   it('creates a new order from null with one line and correct totals', () => {
     const o = applyAddItem(null, VARIANT, 2, 'temp-1');
@@ -72,6 +85,7 @@ describe('applyAddItem', () => {
     expect(o.shippingWithTax).toBe(0);
     expect(o.totalWithTax).toBe(500000);
     expect(o.totalQuantity).toBe(2);
+    expect(o.id).not.toBe(o.lines[0].id); // order id distinct from line id
   });
 
   it('appends a new variant to an existing order and sums totals over shipping', () => {

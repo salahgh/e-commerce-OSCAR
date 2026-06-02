@@ -107,11 +107,11 @@ export function applyAddItem(
   quantity: number,
   tempId: string,
 ): Order {
-  const base = order ?? makeEmptyOptimisticOrder(tempId, undefined);
+  const base = order ?? makeEmptyOptimisticOrder(`order-${tempId}`);
   const existing = base.lines.find((l) => l.productVariant.id === v.productVariantId);
   const lines: Line[] = existing
     ? base.lines.map((l) =>
-        l === existing
+        l.id === existing.id
           ? { ...l, quantity: l.quantity + quantity, linePriceWithTax: l.unitPriceWithTax * (l.quantity + quantity) }
           : l,
       )
