@@ -139,8 +139,32 @@ export const config: VendureConfig = {
   // When adding or changing custom fields, remember to generate
   // a database migration. See https://docs.vendure.io/guides/developer-guide/migrations/
   customFields: {
-    // Product custom fields removed - using native Vendure translations instead
-    // To migrate existing data, run a migration script before deployment
+    // Product name/description use native Vendure translations; only the curated
+    // `isFeatured` flag and real `viewCount` popularity signal are kept as custom fields.
+    Product: [
+      {
+        name: 'isFeatured',
+        type: 'boolean',
+        defaultValue: false,
+        public: true,
+        label: [
+          { languageCode: LanguageCode.en, value: 'Featured' },
+          { languageCode: LanguageCode.fr, value: 'En vedette' },
+          { languageCode: LanguageCode.ar, value: 'مميز' },
+        ],
+      },
+      {
+        name: 'viewCount',
+        type: 'int',
+        defaultValue: 0,
+        public: true,
+        label: [
+          { languageCode: LanguageCode.en, value: 'View Count' },
+          { languageCode: LanguageCode.fr, value: 'Nombre de vues' },
+          { languageCode: LanguageCode.ar, value: 'عدد المشاهدات' },
+        ],
+      },
+    ],
     ProductVariant: [
       { name: 'minStockAlert', type: 'int', label: [{ languageCode: LanguageCode.en, value: 'Min Stock Alert' }] },
       { name: 'originalPrice', type: 'int', nullable: true, label: [{ languageCode: LanguageCode.en, value: 'Original Price (cents)' }] },
