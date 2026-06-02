@@ -1,4 +1,4 @@
-import { loginSchema, validationRules } from '../validation';
+import { loginSchema, validationRules, makeShippingAddressSchema } from '../validation';
 import * as Yup from 'yup';
 
 describe('loginSchema', () => {
@@ -28,5 +28,38 @@ describe('validationRules.phone', () => {
 
   it('rejects non-10-digit input', async () => {
     await expect(validationRules.phone.validate('12345')).rejects.toBeInstanceOf(Yup.ValidationError);
+  });
+});
+
+describe('makeShippingAddressSchema', () => {
+  const base = {
+    fullName: 'Sara Ben Ali',
+    phoneNumber: '0551234567',
+    address: '12 Rue Didouche',
+    city: 'Alger',
+    postalCode: '16000',
+    wilayaCode: '16',
+  };
+
+  it('requires wilayaCode', async () => {
+    await expect(
+      makeShippingAddressSchema(false).validate({ ...base, wilayaCode: '' })
+    ).rejects.toBeInstanceOf(Yup.ValidationError);
+  });
+
+  it('accepts a valid guest payload (with email) when includeEmail=true', async () => {
+    await expect(
+      makeShippingAddressSchema(true).validate({ ...base, email: 'sara@example.com' })
+    ).resolves.toBeTruthy();
+  });
+
+  it('rejects a missing/invalid email when includeEmail=true', async () => {
+    await expect(
+      makeShippingAddressSchema(true).validate({ ...base, email: 'nope' })
+    ).rejects.toBeInstanceOf(Yup.ValidationError);
+  });
+
+  it('does not require email when includeEmail=false', async () => {
+    await expect(makeShippingAddressSchema(false).validate(base)).resolves.toBeTruthy();
   });
 });

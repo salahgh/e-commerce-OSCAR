@@ -75,23 +75,31 @@ export const updateProfileSchema = Yup.object().shape({
   phone: validationRules.phone.optional(),
 });
 
-// Shipping Address Schema
-export const shippingAddressSchema = Yup.object().shape({
-  fullName: Yup.string()
-    .min(3, 'Full name must be at least 3 characters')
-    .required('Full name is required')
-    .trim(),
-  phoneNumber: validationRules.phone,
-  address: Yup.string()
-    .min(10, 'Address must be at least 10 characters')
-    .required('Address is required')
-    .trim(),
-  city: Yup.string()
-    .min(2, 'City must be at least 2 characters')
-    .required('City is required')
-    .trim(),
-  postalCode: Yup.string()
-    .matches(/^[0-9]{5}$/, 'Postal code must be 5 digits')
-    .required('Postal code is required'),
-  notes: Yup.string().max(500, 'Notes must be less than 500 characters').optional(),
-});
+// Shipping Address Schema (factory — email required only for guest checkout)
+export const makeShippingAddressSchema = (includeEmail: boolean) =>
+  Yup.object().shape({
+    fullName: Yup.string()
+      .min(3, 'Full name must be at least 3 characters')
+      .required('Full name is required')
+      .trim(),
+    phoneNumber: validationRules.phone,
+    address: Yup.string()
+      .min(10, 'Address must be at least 10 characters')
+      .required('Address is required')
+      .trim(),
+    city: Yup.string()
+      .min(2, 'City must be at least 2 characters')
+      .required('City is required')
+      .trim(),
+    wilayaCode: Yup.string().required('Wilaya is required'),
+    postalCode: Yup.string()
+      .matches(/^[0-9]{5}$/, 'Postal code must be 5 digits')
+      .required('Postal code is required'),
+    notes: Yup.string().max(500, 'Notes must be less than 500 characters').optional(),
+    ...(includeEmail
+      ? { email: Yup.string().email('Invalid email address').required('Email is required').trim() }
+      : {}),
+  });
+
+/** Default (guest email NOT required) — kept for back-compat with existing importers. */
+export const shippingAddressSchema = makeShippingAddressSchema(false);
