@@ -134,6 +134,10 @@
     "allItems": "جميع المنتجات",
     "noSubcategories": "لا توجد فئات فرعية"
   },
+  "a11y": {
+    "goBack": "رجوع",
+    "close": "إغلاق"
+  },
   "products": {
     "title": "المنتجات",
     "addToCart": "أضف إلى السلة",

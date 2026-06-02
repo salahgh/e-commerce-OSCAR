@@ -134,6 +134,10 @@
     "allItems": "All items",
     "noSubcategories": "No subcategories"
   },
+  "a11y": {
+    "goBack": "Go back",
+    "close": "Close"
+  },
   "products": {
     "title": "Products",
     "addToCart": "Add to Cart",
