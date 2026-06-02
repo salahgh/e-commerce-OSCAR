@@ -1,4 +1,4 @@
-import { loginSchema, validationRules, makeShippingAddressSchema } from '../validation';
+import { loginSchema, validationRules, makeShippingAddressSchema, addressFormSchema } from '../validation';
 import * as Yup from 'yup';
 
 describe('loginSchema', () => {
@@ -67,5 +67,26 @@ describe('makeShippingAddressSchema', () => {
 
   it('does not require email when includeEmail=false', async () => {
     await expect(makeShippingAddressSchema(false).validate(base)).resolves.toBeTruthy();
+  });
+});
+
+describe('addressFormSchema', () => {
+  const base = {
+    fullName: 'Sara Ben Ali',
+    phoneNumber: '0551234567',
+    streetLine1: '12 Rue Didouche',
+    city: 'Alger',
+    wilayaCode: '16',
+    postalCode: '16000',
+    defaultShippingAddress: false,
+  };
+  it('accepts a valid address', async () => {
+    await expect(addressFormSchema.validate(base)).resolves.toBeTruthy();
+  });
+  it('requires wilayaCode', async () => {
+    await expect(addressFormSchema.validate({ ...base, wilayaCode: '' })).rejects.toBeInstanceOf(Yup.ValidationError);
+  });
+  it('requires a 5-digit postalCode', async () => {
+    await expect(addressFormSchema.validate({ ...base, postalCode: '1' })).rejects.toBeInstanceOf(Yup.ValidationError);
   });
 });
