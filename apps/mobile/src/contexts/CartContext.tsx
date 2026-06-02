@@ -5,10 +5,24 @@ import {
   useAdjustOrderLineMutation,
   useRemoveOrderLineMutation,
   useRemoveAllOrderLinesMutation,
+  GetActiveOrderDocument,
   Order,
   OrderLine,
+  type OrderFieldsFragment,
+  type GetActiveOrderQuery,
+  type AddItemToOrderMutation,
+  type AdjustOrderLineMutation,
+  type RemoveOrderLineMutation,
+  type RemoveAllOrderLinesMutation,
 } from '../graphql/generated/graphql';
 import { formatPrice } from '../utils/vendureAdapters';
+import {
+  applyAddItem,
+  applyAdjustLine,
+  applyRemoveLine,
+  applyClear,
+  type OptimisticCartVariant,
+} from '../utils/optimisticCart';
 
 interface CartItem {
   id: string;
@@ -32,7 +46,11 @@ interface CartContextValue {
   total: number;
   loading: boolean;
   error: any;
-  addToCart: (productVariantId: string, quantity: number) => Promise<void>;
+  addToCart: (
+    productVariantId: string,
+    quantity: number,
+    optimistic?: OptimisticCartVariant,
+  ) => Promise<void>;
   updateQuantity: (orderLineId: string, quantity: number) => Promise<void>;
   removeFromCart: (orderLineId: string) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -63,11 +81,29 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isMiniCartOpen, setMiniCartOpen] = useState(false);
 
   const addToCart = useCallback(
-    async (productVariantId: string, quantity: number) => {
+    async (productVariantId: string, quantity: number, optimistic?: OptimisticCartVariant) => {
       try {
+        const currentOrder = (orderData?.activeOrder ?? null) as OrderFieldsFragment | null;
+        const tempId = `temp-${productVariantId}-${Date.now()}`;
         const { data } = await addItemMutation({
           variables: { productVariantId, quantity },
-          refetchQueries: ['GetActiveOrder'],
+          ...(optimistic
+            ? {
+                optimisticResponse: {
+                  __typename: 'Mutation',
+                  addItemToOrder: applyAddItem(currentOrder, optimistic, quantity, tempId),
+                } as unknown as AddItemToOrderMutation,
+              }
+            : {}),
+          update: (cache, { data: mutationData }) => {
+            const res = mutationData?.addItemToOrder;
+            if (res && 'id' in res && !('errorCode' in res)) {
+              cache.writeQuery<GetActiveOrderQuery>({
+                query: GetActiveOrderDocument,
+                data: { activeOrder: res as OrderFieldsFragment },
+              });
+            }
+          },
         });
 
         if (data?.addItemToOrder) {
@@ -76,8 +112,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const errorResult = result as { errorCode: string; message: string };
             throw new Error(errorResult.message || 'Failed to add item to cart');
           }
-          // Auto-open the mini-cart sheet so the user sees the new line
-          // without leaving the PDP. Closed by the user or by navigating away.
+          // Auto-open the mini-cart sheet so the user sees the new line.
           setMiniCartOpen(true);
         }
       } catch (error) {
@@ -85,15 +120,23 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
     },
-    [addItemMutation]
+    [addItemMutation, orderData],
   );
 
   const updateQuantity = useCallback(
     async (orderLineId: string, quantity: number) => {
       try {
+        const currentOrder = (orderData?.activeOrder ?? null) as OrderFieldsFragment | null;
         const { data } = await adjustLineMutation({
           variables: { orderLineId, quantity },
-          refetchQueries: ['GetActiveOrder'],
+          ...(currentOrder
+            ? {
+                optimisticResponse: {
+                  __typename: 'Mutation',
+                  adjustOrderLine: applyAdjustLine(currentOrder, orderLineId, quantity),
+                } as unknown as AdjustOrderLineMutation,
+              }
+            : {}),
         });
 
         if (data?.adjustOrderLine) {
@@ -108,15 +151,23 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
     },
-    [adjustLineMutation]
+    [adjustLineMutation, orderData],
   );
 
   const removeFromCart = useCallback(
     async (orderLineId: string) => {
       try {
+        const currentOrder = (orderData?.activeOrder ?? null) as OrderFieldsFragment | null;
         const { data } = await removeLineMutation({
           variables: { orderLineId },
-          refetchQueries: ['GetActiveOrder'],
+          ...(currentOrder
+            ? {
+                optimisticResponse: {
+                  __typename: 'Mutation',
+                  removeOrderLine: applyRemoveLine(currentOrder, orderLineId),
+                } as unknown as RemoveOrderLineMutation,
+              }
+            : {}),
         });
 
         if (data?.removeOrderLine) {
@@ -131,13 +182,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
     },
-    [removeLineMutation]
+    [removeLineMutation, orderData],
   );
 
   const clearCart = useCallback(async () => {
     try {
+      const currentOrder = (orderData?.activeOrder ?? null) as OrderFieldsFragment | null;
       const { data } = await removeAllLinesMutation({
-        refetchQueries: ['GetActiveOrder'],
+        ...(currentOrder
+          ? {
+              optimisticResponse: {
+                __typename: 'Mutation',
+                removeAllOrderLines: applyClear(currentOrder),
+              } as unknown as RemoveAllOrderLinesMutation,
+            }
+          : {}),
       });
 
       if (data?.removeAllOrderLines) {
@@ -151,7 +210,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Clear cart error:', error);
       throw error;
     }
-  }, [removeAllLinesMutation]);
+  }, [removeAllLinesMutation, orderData]);
 
   const order = orderData?.activeOrder || null;
 
