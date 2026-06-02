@@ -18,7 +18,7 @@ Two cart pain points, both fully mobile-only:
 - **In:** cache persistence (read survival) **and** optimistic UI for all three cart ops (add, adjust quantity, remove).
 - **Out:** any offline *mutation* queue — no NetInfo, no write-while-offline, no replay-on-reconnect. Cart writes still require connectivity; only the *reads* survive offline and the *UI* is optimistic.
 
-**Apollo version:** this app is on **Apollo Client 4** (`@apollo/client@^4.0.9`). `@react-native-async-storage/async-storage` is already a dependency. The persistence library (`apollo3-cache-persist`) drives the cache via `extract()`/`restore()`, which AC4's `InMemoryCache` still supports. **Plan step 0 verifies AC4 runtime + type compatibility**; if it fails, fall back to a small hand-rolled persistor exposing the same `restore()`/`purge()` interface. Either path adds **zero new `tsc` errors** (the baseline is already red — see root status doc — and new work must not add to it).
+**Apollo version & persistence library (verified 2026-06-02):** this app is on **Apollo Client 4** (`@apollo/client@4.2.1`). The roadmap-named `apollo3-cache-persist@0.15.0` peer-depends on `@apollo/client@^3.7.17` and **fails to install against AC4** (`npm ERESOLVE`). Forcing an unsupported peer dep is rejected. **M1c therefore uses a small in-house persistor** (`src/apollo/persistence.ts`, ~50 lines) over the already-installed `@react-native-async-storage/async-storage`, using only public AC4 APIs (`cache.extract()` / `cache.restore()`) plus React Native `AppState` as the persist trigger. **No new runtime dependency**, no peer conflict, and `restore`/`persist`/`purge` become unit-testable (real `InMemoryCache` + the AsyncStorage mock already in `jest.setup.js`). New work adds **zero new `tsc` errors** (the baseline is already red — see root status doc — and new work must not add to it).
 
 **Reference rule:** `apps/frontend` is the web reference, but it is Next.js (no AsyncStorage, different persistence story) and this is mobile-only infrastructure, so there is no frontend pattern to mirror here. Net-new is permitted.
 
@@ -32,19 +32,26 @@ Two cart pain points, both fully mobile-only:
 - Create and export a singleton **`cachePersistor`** built from that `cache` (see 2.2).
 - Export `async purgeApolloCache()` → `cachePersistor.purge()`.
 
-### 2.2 `src/apollo/persistence.ts` (new)
+### 2.2 `src/apollo/persistence.ts` (new — in-house persistor)
 ```
-createPersistor(cache: InMemoryCache): CachePersistor<NormalizedCacheObject>
+createPersistor(cache: InMemoryCache): ApolloPersistor
+ApolloPersistor = {
+  restore(): Promise<void>   // hydrate cache from AsyncStorage (no-op if empty/corrupt)
+  persist(): Promise<void>   // JSON.stringify(cache.extract()) → AsyncStorage (skip if > 1 MB)
+  purge():   Promise<void>   // remove the persisted key
+  start(): () => void        // auto-persist on AppState 'background'/'inactive'; returns unsubscribe
+}
 ```
-- Uses `CachePersistor` from `apollo3-cache-persist` with `new AsyncStorageWrapper(AsyncStorage)`.
-- Config: `key: 'oscar-apollo-cache'`, `maxSize: 1024 * 1024` (1 MB; trims to in-memory-only past that), `debounce: 1000` (coalesce writes).
+- Single key `oscar-apollo-cache`; 1 MB cap (`MAX_BYTES = 1024 * 1024`) — if `extract()` serializes larger, drop the persisted copy rather than store a huge/stale blob.
+- `restore`/`persist`/`purge` are wrapped in try/catch and only `console.warn` on failure — persistence must never crash or block the app.
+- `start()` subscribes to RN `AppState`; backgrounding the app flushes the whole cache to disk. (Force-kill without a background event loses only the *cached* copy of the most recent edit; the server session in SecureStore still re-fetches it on next launch — so no data loss, just not offline-instant for that one edit.)
 - `client.ts` instantiates `cachePersistor = createPersistor(cache)`.
 
 ### 2.3 `src/hooks/useApolloPersistence.ts` (new)
 ```
 useApolloPersistence(): boolean   // true once restore settles
 ```
-- On mount, calls `cachePersistor.restore()` once; on success **or failure** flips `restored = true` (a failed restore must never permanently block the app — log and continue with an empty cache).
+- On mount, calls `cachePersistor.restore()` once; on success **or failure** flips `restored = true` (a failed restore must never permanently block the app — log and continue with an empty cache). Also calls `cachePersistor.start()` to begin AppState auto-persist, and calls its returned unsubscribe on cleanup.
 - Does **not** depend on Apollo React context, so it is safe to call in `RootLayout` above `<ApolloProvider>`.
 
 ### 2.4 `app/_layout.tsx` (modified)
@@ -143,14 +150,22 @@ A snapshot is never required for correctness — it only enables the instant *ad
 - `applyClear` → `lines: []`, totals 0, `shippingWithTax` preserved.
 - `recomputeOrderTotals` → `totalWithTax = subTotalWithTax + shippingWithTax`.
 
-**Wiring check — `src/contexts/__tests__/CartContext.optimistic.test.tsx` (integration):**
-- With `MockedProvider` (AC4 testing): mount `CartProvider` + a tiny consumer rendering `itemCount`/`items`; mock `GetActiveOrder` (initially empty) and a **delayed** `AddItemToOrder`. Call `addToCart` with a snapshot and assert the item is visible **before** the mock resolves (optimistic), then matches server data after it resolves.
-- If AC4 + `MockedProvider` optimistic timing proves flaky in RNTL, downgrade this to assert the post-resolve cache state only, and rely on the pure-fn tests as the contract. Document whichever is shipped — do not claim an optimistic-timing assertion that isn't actually running.
+**Persistence round-trip — `src/apollo/__tests__/persistence.test.ts` (solid):**
+- `persist()` then `restore()` into a fresh `InMemoryCache` round-trips a written query (real `InMemoryCache` + the AsyncStorage mock from `jest.setup.js`).
+- `restore()` with nothing stored is a no-op (no throw, empty cache).
+- `restore()` with corrupt JSON is swallowed (no throw).
+- `purge()` removes the key (a subsequent `restore()` is a no-op).
+The AppState auto-persist **trigger** (`start()`) is not asserted here — it's covered under runtime verification.
+
+**CartContext wiring — `src/contexts/__tests__/CartContext.optimistic.test.tsx` (deterministic):**
+- Mock the generated hooks (`jest.mock('../../graphql/generated/graphql', () => ({ ...jest.requireActual(...), useGetActiveOrderQuery, useAddItemToOrderMutation, ... }))`), capturing the options passed to the add mutation. Render `CartProvider` + a consumer that calls `addToCart('pv1', 2, snapshot)`. Assert: (a) **no** `refetchQueries` in the options (proving the round-trip was removed), (b) `optimisticResponse.addItemToOrder.lines` has the new line with `linePriceWithTax === unitPriceWithTax * 2`, (c) `update` is a function.
+- This is a deterministic *wiring* assertion (the mutation hook is mocked, so no Apollo timing). The **visual** optimism (line appears before the server resolves) is runtime-verified — not claimed as a unit test.
 
 **Runtime-verified (not unit-tested), added to `docs/superpowers/plans/RUNTIME-VERIFICATION-runbook.md`:**
-- Cold start shows the last cart/storefront before the network resolves (airplane-mode launch).
+- Airplane-mode cold start renders the last cart/storefront before any network response (AppState-persisted cache).
+- Add/adjust/remove update the cart UI instantly before the server responds; an `InsufficientStockError` rolls the change back.
 - Logout purges persisted storage (next launch starts clean; no prior cart).
-AsyncStorage native behavior is not meaningfully unit-testable; this line between unit-tested and runtime-verified is stated explicitly.
+These depend on native AppState/launch behavior; the line between unit-tested and runtime-verified is stated explicitly.
 
 ---
 
