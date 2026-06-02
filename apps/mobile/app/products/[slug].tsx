@@ -125,13 +125,25 @@ export default function ProductDetailScreen() {
   }, []);
 
   const handleAddToCart = async () => {
-    if (!selectedVariant?.id) return;
+    if (!selectedVariant?.id || !product) return;
 
     try {
       setAddingToCart(true);
       setAddToCartSuccess(false);
 
-      await addToCart(selectedVariant.id, quantity);
+      await addToCart(selectedVariant.id, quantity, {
+        productVariantId: selectedVariant.id,
+        unitPriceWithTax: selectedVariant.priceWithTax, // raw cents (un-adapted query data)
+        name: selectedVariant.name,
+        sku: selectedVariant.sku,
+        product: {
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          featuredAsset: product.featuredAsset ?? null,
+        },
+        featuredAsset: product.featuredAsset ?? null,
+      });
 
       setAddToCartSuccess(true);
       setTimeout(() => {

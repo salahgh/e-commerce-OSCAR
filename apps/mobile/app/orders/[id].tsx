@@ -66,7 +66,19 @@ export default function OrderDetailScreen() {
         continue;
       }
       try {
-        await addToCart(variantId, line.quantity);
+        await addToCart(variantId, line.quantity, {
+          productVariantId: variantId,
+          unitPriceWithTax: line.unitPriceWithTax, // raw cents, taken from the order line
+          name: line.productVariant?.name ?? '',
+          sku: line.productVariant?.sku ?? '',
+          product: {
+            id: line.productVariant?.product?.id ?? '',
+            name: line.productVariant?.product?.name ?? '',
+            slug: line.productVariant?.product?.slug ?? '',
+            featuredAsset: line.productVariant?.product?.featuredAsset ?? null,
+          },
+          featuredAsset: line.featuredAsset ?? null,
+        });
         added += 1;
       } catch {
         failed += 1;
