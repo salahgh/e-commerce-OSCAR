@@ -22,6 +22,9 @@ import {
 import { useAuth } from '../../src/contexts/AuthContext';
 import { colors, spacing, typography } from '../../src/theme';
 import { formatPrice } from '../../src/utils/vendureAdapters';
+import { buildShippingAddressInput, buildGuestCustomerInput } from '../../src/utils/checkout';
+import { makeShippingAddressSchema } from '../../src/utils/validation';
+import { wilayas } from '../../src/data/wilayas';
 
 type CheckoutStep = 'shipping' | 'shippingMethod' | 'payment' | 'review';
 
@@ -52,6 +55,16 @@ export default function CheckoutScreen() {
     skip: currentStep !== 'payment',
   });
 
+  // Prefill the address form for logged-in customers (mirrors the frontend checkout).
+  const prefill: Partial<ShippingAddressFormValues> | undefined =
+    isAuthenticated && user
+      ? {
+          email: user.email,
+          fullName: `${user.firstName} ${user.lastName}`.trim(),
+          phoneNumber: user.phoneNumber ?? '',
+        }
+      : undefined;
+
   const shippingMethods = shippingMethodsData?.eligibleShippingMethods || [];
   const paymentMethods = paymentMethodsData?.eligiblePaymentMethods || [];
 
@@ -71,47 +84,30 @@ export default function CheckoutScreen() {
 
   const handleShippingSubmit = async (values: ShippingAddressFormValues) => {
     try {
-      // If not authenticated, set customer for order first (guest checkout)
+      // Guest checkout: attach a customer (with a REAL email) to the order first.
       if (!isAuthenticated) {
         const customerResult = await setCustomerMutation({
-          variables: {
-            input: {
-              firstName: values.fullName.split(' ')[0] || values.fullName,
-              lastName: values.fullName.split(' ').slice(1).join(' ') || '',
-              emailAddress: values.email || `guest_${Date.now()}@oscar-fashion.com`,
-              phoneNumber: values.phoneNumber,
-            },
-          },
+          variables: { input: buildGuestCustomerInput(values) },
         });
-
-        if (customerResult.data?.setCustomerForOrder && 'errorCode' in customerResult.data.setCustomerForOrder) {
-          const error = customerResult.data.setCustomerForOrder as { message: string };
-          throw new Error(error.message);
+        const customerResp = customerResult.data?.setCustomerForOrder;
+        if (customerResp && 'errorCode' in customerResp) {
+          if (customerResp.__typename === 'AlreadyLoggedInError') {
+            throw new Error(
+              t(
+                'checkout.staleSession',
+                'Your session is out of sync — please sign in again to continue.'
+              )
+            );
+          }
+          throw new Error((customerResp as { message: string }).message);
         }
       }
 
-      // Set shipping address
       const { data } = await setShippingAddressMutation({
-        variables: {
-          input: {
-            fullName: values.fullName,
-            streetLine1: values.address,
-            streetLine2: values.notes || '',
-            city: values.city,
-            province: values.wilaya || '',
-            postalCode: values.postalCode || '',
-            countryCode: 'DZ',
-            phoneNumber: values.phoneNumber,
-          },
-        },
+        variables: { input: buildShippingAddressInput(values, wilayas) },
       });
-
-      if (data?.setOrderShippingAddress) {
-        const result = data.setOrderShippingAddress;
-        if ('errorCode' in result) {
-          const errorResult = result as { message: string };
-          throw new Error(errorResult.message);
-        }
+      if (data?.setOrderShippingAddress && 'errorCode' in data.setOrderShippingAddress) {
+        throw new Error((data.setOrderShippingAddress as { message: string }).message);
       }
 
       setShippingAddress(values);
@@ -300,7 +296,9 @@ export default function CheckoutScreen() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {currentStep === 'shipping' && (
           <ShippingAddressForm
-            initialValues={shippingAddress || undefined}
+            initialValues={shippingAddress || prefill}
+            showEmail={!isAuthenticated}
+            validationSchema={makeShippingAddressSchema(!isAuthenticated)}
             onSubmit={handleShippingSubmit}
             submitButtonText={t('checkout.continueToDelivery', 'Continue to Delivery')}
           />
