@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '../../theme';
 import { useAppFont } from '../../hooks/useAppFont';
+import { productAccessibilityLabel } from '../../utils/a11y';
 
 export interface FigmaProduct {
   id: string;
@@ -61,6 +62,8 @@ export const ProductCardFigma: React.FC<ProductCardFigmaProps> = ({
       style={[styles.card, { width }]}
       onPress={handlePress}
       activeOpacity={0.8}
+      accessibilityRole="button"
+      accessibilityLabel={productAccessibilityLabel({ name: product.name, price: typeof product.price === 'number' ? product.price : undefined, currencyCode: 'DZD' })}
     >
       {/* Image Container */}
       <View style={[styles.imageContainer, { width: imageSize, height: imageSize }]}>

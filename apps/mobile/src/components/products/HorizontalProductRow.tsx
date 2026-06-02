@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { colors, spacing, typography } from '../../theme';
+import { productAccessibilityLabel } from '../../utils/a11y';
 
 export interface SimpleProduct {
   id: string;
@@ -28,7 +29,12 @@ export function HorizontalProductRow({ title, products }: { title: string; produ
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={() => <View style={{ width: spacing.md }} />}
         renderItem={({ item }) => (
-          <Pressable style={styles.card} onPress={() => router.push(`/products/${item.slug}` as any)}>
+          <Pressable
+            style={styles.card}
+            onPress={() => router.push(`/products/${item.slug}` as any)}
+            accessibilityRole="button"
+            accessibilityLabel={productAccessibilityLabel({ name: item.name, price: item.price, currencyCode: item.currencyCode })}
+          >
             <View style={styles.thumb}>
               {item.imageUrl ? (
                 <Image source={{ uri: item.imageUrl }} style={styles.thumbImage} contentFit="cover" />
