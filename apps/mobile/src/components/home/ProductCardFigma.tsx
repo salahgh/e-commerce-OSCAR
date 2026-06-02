@@ -63,7 +63,7 @@ export const ProductCardFigma: React.FC<ProductCardFigmaProps> = ({
       onPress={handlePress}
       activeOpacity={0.8}
       accessibilityRole="button"
-      accessibilityLabel={productAccessibilityLabel({ name: product.name, price: typeof product.price === 'number' ? product.price : undefined, currencyCode: 'DZD' })}
+      accessibilityLabel={productAccessibilityLabel({ name: product.name, price: typeof product.price === 'number' ? product.price : Number(product.price) || undefined, currencyCode: 'DZD' })}
     >
       {/* Image Container */}
       <View style={[styles.imageContainer, { width: imageSize, height: imageSize }]}>
