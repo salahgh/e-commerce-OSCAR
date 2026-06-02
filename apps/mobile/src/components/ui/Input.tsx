@@ -78,6 +78,7 @@ export const Input: React.FC<InputProps> = ({
           editable={!disabled}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          accessibilityLabel={label ?? props.placeholder}
           {...props}
         />
 
