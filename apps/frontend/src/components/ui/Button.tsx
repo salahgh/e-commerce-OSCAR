@@ -1,82 +1,95 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
-import { Loader2 } from "lucide-react"
-
-import { cn } from "@/lib/utils/index"
+import * as React from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '@/lib/utils/cn';
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  // Base — all buttons
+  'inline-flex items-center justify-center rounded gap-2 font-medium transition-colors duration-fast ease-standard outline-none focus-visible:ring-2 focus-visible:ring-border-focus focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base disabled:cursor-not-allowed disabled:opacity-50 whitespace-nowrap',
   {
     variants: {
-      variant: {
-        default:
-          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-        outline:
-          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+      intent: {
+        primary:
+          'bg-accent text-accent-content hover:bg-accent-hover active:bg-accent-pressed disabled:bg-accent-disabled disabled:text-content-inverse',
         secondary:
-          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+          'bg-bg-base text-content-strong border border-border-strong hover:bg-bg-subtle active:bg-bg-muted disabled:bg-bg-muted',
+        ghost:
+          'bg-transparent text-content-strong hover:bg-bg-subtle active:bg-bg-muted disabled:text-content-subtle',
+        link:
+          'bg-transparent text-content-strong underline-offset-4 hover:underline px-0 h-auto',
+        danger:
+          'bg-state-danger-border text-content-inverse hover:bg-state-danger-content disabled:bg-state-danger-bg disabled:text-state-danger-content',
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-8",
-        icon: "h-9 w-9",
+        sm: 'h-8 px-4 py-2 text-12',
+        md: 'h-10 px-4 py-2 text-14',
+        lg: 'h-12 px-4 py-2 text-18',
+        // iconOnly variants — square aspect
+        'icon-sm': 'h-8 w-8 p-0',
+        'icon-md': 'h-10 w-10 p-0',
+        'icon-lg': 'h-12 w-12 p-0',
       },
+      fullWidth: { true: 'w-full', false: '' },
     },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-)
+    defaultVariants: { intent: 'primary', size: 'md', fullWidth: false },
+  },
+);
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'disabled'>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean
-  leftIcon?: React.ReactNode
-  rightIcon?: React.ReactNode
-  loading?: boolean
+  asChild?: boolean;
+  loading?: boolean;
+  disabled?: boolean;
+  leadingIcon?: React.ReactNode;
+  trailingIcon?: React.ReactNode;
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, leftIcon, rightIcon, loading, children, disabled, ...props }, ref) => {
-    // When asChild is true, Slot expects a single child - don't add icon wrappers
-    if (asChild) {
-      return (
-        <Slot
-          className={cn(buttonVariants({ variant, size, className }))}
-          ref={ref}
-          {...props}
-        >
-          {children}
-        </Slot>
-      )
-    }
-
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    { className, intent, size, fullWidth, asChild = false, loading = false, disabled, leadingIcon, trailingIcon, children, ...props },
+    ref,
+  ) => {
+    const Comp = asChild ? Slot : 'button';
+    const isDisabled = disabled || loading;
+    // When `asChild` is true, Slot expects exactly one React element child
+    // (e.g. a <Link>). The caller is responsible for arranging icons inside it.
+    const content = asChild ? (
+      children
+    ) : (
+      <>
+        {loading ? <Spinner /> : leadingIcon}
+        {children}
+        {!loading && trailingIcon}
+      </>
+    );
     return (
-      <button
-        className={cn(buttonVariants({ variant, size, className }))}
+      <Comp
         ref={ref}
-        disabled={disabled || loading}
+        className={cn(buttonVariants({ intent, size, fullWidth }), className)}
+        disabled={isDisabled}
+        aria-busy={loading || undefined}
         {...props}
       >
-        {loading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          leftIcon && <span className="mr-1">{leftIcon}</span>
-        )}
-        {children}
-        {!loading && rightIcon && <span className="ml-1">{rightIcon}</span>}
-      </button>
-    )
-  }
-)
-Button.displayName = "Button"
+        {content}
+      </Comp>
+    );
+  },
+);
+Button.displayName = 'Button';
 
-export { Button, buttonVariants }
+function Spinner() {
+  return (
+    <svg
+      className="h-4 w-4 animate-spin"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="3" />
+      <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export { buttonVariants };

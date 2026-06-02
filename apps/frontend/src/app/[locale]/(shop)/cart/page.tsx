@@ -1,228 +1,209 @@
 'use client';
 
-import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { Link } from '@/i18n/routing';
+import { Trash2, ShoppingBag, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Button, Skeleton } from '@/components/ui';
+import { formatPrice } from '@oscar/shared';
 import { useCart } from '@/contexts/CartContext';
-import { formatPrice } from '@/lib/utils/formatters';
-import { ShoppingBag, Minus, Plus, Trash2, ImageOff } from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-function normalizeUrl(url?: string) {
-  return url?.replace(/\\/g, '/');
-}
-
-function CartItemImage({ src, alt }: { src?: string; alt: string }) {
-  const [error, setError] = useState(false);
-  if (!src || error) {
-    return (
-      <div className="w-full h-full bg-muted flex items-center justify-center">
-        <ImageOff className="w-6 h-6 text-muted-foreground" />
-      </div>
-    );
-  }
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt={alt} className="w-full h-full object-cover" onError={() => setError(true)} />
-  );
-}
+import { Link } from '@/i18n/routing';
+import { Alert, Button, Card, IconButton, QuantityStepper, Skeleton } from '@/components/ui';
 
 export default function CartPage() {
-  const router = useRouter();
-  const params = useParams();
-  const locale = (params.locale as string) || 'fr';
-  const t = useTranslations('cart');
-  const { cart, loading, updateQuantity, removeItem } = useCart();
+  const t = useTranslations('CartPage');
+  const tSummary = useTranslations('CartPage.summary');
+  const tEmpty = useTranslations('CartPage.empty');
+  const tPromo = useTranslations('CartPage.promo');
+  const { cart, loading, updateQuantity, removeItem, applyCoupon, removeCoupon } = useCart();
 
-  const handleCheckout = () => {
-    router.push(`/${locale}/checkout`);
-  };
-
-  if (loading) {
+  if (loading && !cart) {
     return (
-      <div className="max-w-[1440px] mx-auto px-6 md:px-12 py-8">
-        <Skeleton className="h-10 w-48 mb-8" />
-        <div style={{ display: 'flex', gap: '2rem' }}>
-          <div style={{ flex: 1 }}>
-            <Skeleton className="h-24 mb-4" />
-            <Skeleton className="h-24 mb-4" />
-            <Skeleton className="h-24 mb-4" />
-          </div>
-          <div style={{ width: '340px' }}>
-            <Skeleton className="h-64" />
-          </div>
+      <div className="mx-auto grid max-w-7xl gap-8 px-6 py-12 lg:grid-cols-[1fr_360px]">
+        <div className="flex flex-col gap-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-32 w-full" />
+          ))}
         </div>
+        <Skeleton className="h-72 w-full" />
       </div>
     );
   }
 
-  if (!cart || !cart.items || cart.items.length === 0) {
+  if (!cart || cart.items.length === 0) {
     return (
-      <div className="max-w-[1440px] mx-auto px-6 md:px-12 py-16">
-        <div className="max-w-md mx-auto text-center">
-          <ShoppingBag className="h-24 w-24 mx-auto text-muted-foreground/30 mb-6" />
-          <h1 className="text-2xl font-bold text-foreground mb-4">{t('emptyTitle')}</h1>
-          <p className="text-muted-foreground mb-8">{t('emptyMessage')}</p>
-          <Button asChild size="lg">
-            <Link href="/products">{t('continueShopping')}</Link>
-          </Button>
+      <div className="mx-auto flex max-w-2xl flex-col items-center gap-6 px-6 py-24 text-center">
+        <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-bg-muted">
+          <ShoppingBag className="h-10 w-10 text-content-muted" />
         </div>
+        <h1 className="text-32 font-bold text-content-strong">{tEmpty('title')}</h1>
+        <p className="text-16 text-content-muted">{tEmpty('body')}</p>
+        <Button asChild size="lg">
+          <Link href="/products">
+            <span className="inline-flex items-center gap-2">
+              <span>{tEmpty('cta')}</span>
+              <ArrowRight className="h-5 w-5 ltr:inline rtl:hidden" />
+              <ArrowLeft className="h-5 w-5 ltr:hidden rtl:inline" />
+            </span>
+          </Link>
+        </Button>
       </div>
     );
   }
-
-  const subtotal = cart.subTotal || 0;
-  const total = cart.total || subtotal;
-  const itemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div className="bg-background min-h-screen">
-      <div className="max-w-[1440px] mx-auto px-6 md:px-12 py-8">
-        <h1 className="text-3xl font-bold text-foreground mb-8">{t('title')}</h1>
-
-        <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
-          {/* Cart Items */}
-          <div style={{ flex: 1 }}>
-            {/* Header Row */}
-            <div className="hidden md:grid border-b border-border pb-3 mb-4 text-sm font-medium text-muted-foreground"
-              style={{ gridTemplateColumns: '2fr 1fr 1fr auto' }}>
-              <span>{t('product')}</span>
-              <span className="text-center">{t('price')}</span>
-              <span className="text-center">{t('quantityLabel')}</span>
-              <span className="w-10" />
-            </div>
-
-            {/* Items */}
-            <div className="space-y-4">
-              {cart.items.map((item) => (
-                <CartRow
-                  key={item.id}
-                  item={item}
-                  onUpdateQuantity={updateQuantity}
-                  onRemove={removeItem}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Order Summary Sidebar */}
-          <div style={{ width: '340px', flexShrink: 0 }} className="hidden md:block">
-            <div className="bg-card border border-border rounded-xl p-6 sticky top-24">
-              <h2 className="text-xl font-bold text-foreground mb-6">{t('orderSummary')}</h2>
-
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between text-muted-foreground">
-                  <span>{t('totalItems', { count: itemCount })}</span>
-                  <span>{formatPrice(subtotal / 100)}</span>
+    <div className="mx-auto grid max-w-7xl gap-8 px-6 py-12 lg:grid-cols-[1fr_380px]">
+      {/* Line items */}
+      <section aria-labelledby="cart-title" className="flex flex-col gap-4">
+        <h1 id="cart-title" className="text-32 font-bold text-content-strong">
+          {t('titleWithCount', { count: cart.totalQuantity })}
+        </h1>
+        <ul className="flex flex-col gap-3">
+          {cart.items.map((item) => (
+            <li key={item.id}>
+              <Card padding="md" className="flex items-stretch gap-4">
+                <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded bg-bg-muted">
+                  {item.imageUrl && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={item.imageUrl} alt={item.productName} className="h-full w-full object-cover" />
+                  )}
                 </div>
-              </div>
-
-              <div className="border-t border-border pt-4 mb-6">
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold text-foreground">{t('totalAmount')}</span>
-                  <span className="text-xl font-bold text-foreground">
-                    {formatPrice(total / 100)}
-                  </span>
+                <div className="flex flex-1 flex-col justify-between gap-3 md:flex-row md:items-center">
+                  <div className="flex flex-col gap-1">
+                    <Link
+                      href={`/products/${item.productSlug ?? ''}`}
+                      className="text-16 font-medium text-content-strong hover:underline"
+                    >
+                      {item.productName}
+                    </Link>
+                    <p className="text-12 text-content-muted">{item.variantName} · {item.sku}</p>
+                  </div>
+                  <div className="flex items-center justify-between gap-4 md:justify-end">
+                    <QuantityStepper
+                      value={item.quantity}
+                      onChange={(q) => updateQuantity(item.id, q)}
+                      min={1}
+                      max={99}
+                      size="sm"
+                    />
+                    <span className="min-w-[6rem] text-end text-16 font-bold text-content-strong">
+                      {formatPrice(item.linePrice * 100, cart.currencyCode)}
+                    </span>
+                    <IconButton
+                      aria-label={t('removeItemAria')}
+                      intent="ghost"
+                      size="sm"
+                      onClick={() => removeItem(item.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-state-danger-content" />
+                    </IconButton>
+                  </div>
                 </div>
-              </div>
+              </Card>
+            </li>
+          ))}
+        </ul>
+      </section>
 
-              <Button
-                onClick={handleCheckout}
-                className="w-full h-12 bg-[#1E1E1E] hover:bg-[#333] text-white text-lg font-medium rounded-lg"
-              >
-                {t('confirmOrder')}
-              </Button>
-            </div>
-          </div>
-        </div>
+      {/* Order summary */}
+      <aside className="sticky top-24 flex h-fit flex-col gap-4">
+        <Card padding="lg" className="flex flex-col gap-4">
+          <h2 className="text-24 font-bold text-content-strong">{tSummary('title')}</h2>
 
-        {/* Mobile Summary */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-40">
-          <div className="flex items-center justify-between mb-3">
-            <span className="font-bold text-foreground">{t('totalAmount')}</span>
-            <span className="text-xl font-bold text-foreground">{formatPrice(total / 100)}</span>
+          <CouponField
+            currentCodes={cart.couponCodes}
+            onApply={applyCoupon}
+            onRemove={removeCoupon}
+            placeholder={tPromo('placeholder')}
+            applyLabel={tPromo('apply')}
+            removeLabel={tPromo('remove')}
+          />
+
+          <dl className="flex flex-col gap-2 border-t border-border pt-4 text-14">
+            <Row label={tSummary('subtotal')} value={formatPrice(cart.subTotal * 100, cart.currencyCode)} />
+            <Row
+              label={tSummary('shipping')}
+              value={cart.shipping > 0 ? formatPrice(cart.shipping * 100, cart.currencyCode) : tSummary('shippingTbd')}
+            />
+            {cart.discounts.map((d, i) => (
+              <Row key={i} label={d.description} value={`- ${formatPrice(Math.abs(d.amountWithTax) * 100, cart.currencyCode)}`} />
+            ))}
+          </dl>
+          <div className="flex items-baseline justify-between border-t border-border pt-4">
+            <span className="text-16 font-medium text-content-strong">{tSummary('total')}</span>
+            <span className="text-24 font-bold text-content-strong">
+              {formatPrice(cart.total * 100, cart.currencyCode)}
+            </span>
           </div>
-          <Button
-            onClick={handleCheckout}
-            className="w-full h-12 bg-[#1E1E1E] hover:bg-[#333] text-white text-lg font-medium rounded-lg"
-          >
-            {t('confirmOrder')}
+          <Button asChild size="lg" fullWidth>
+            <Link href="/checkout">
+              <span className="inline-flex items-center gap-2">
+                <span>{tSummary('checkout')}</span>
+                <ArrowRight className="h-5 w-5 ltr:inline rtl:hidden" />
+                <ArrowLeft className="h-5 w-5 ltr:hidden rtl:inline" />
+              </span>
+            </Link>
           </Button>
-        </div>
-      </div>
+        </Card>
+      </aside>
     </div>
   );
 }
 
-function CartRow({
-  item,
-  onUpdateQuantity,
-  onRemove,
-}: {
-  item: any;
-  onUpdateQuantity: (id: string, qty: number) => Promise<void>;
-  onRemove: (id: string) => Promise<void>;
-}) {
-  const [updating, setUpdating] = useState(false);
-  const t = useTranslations('cart');
-
-  const handleQty = async (newQty: number) => {
-    if (newQty < 1 || newQty === item.quantity) return;
-    setUpdating(true);
-    try { await onUpdateQuantity(item.id, newQty); } finally { setUpdating(false); }
-  };
-
-  const handleRemove = async () => {
-    setUpdating(true);
-    try { await onRemove(item.id); } finally { setUpdating(false); }
-  };
-
+function Row({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
   return (
-    <div className={cn(
-      'flex items-center gap-4 py-4 border-b border-border',
-      updating && 'opacity-50 pointer-events-none'
-    )}>
-      {/* Image */}
-      <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg overflow-hidden shrink-0">
-        <CartItemImage src={normalizeUrl(item.imageUrl)} alt={item.productName} />
-      </div>
+    <div className="flex justify-between gap-4">
+      <dt className="text-content-muted">{label}</dt>
+      <dd className="font-medium text-content">{value}</dd>
+    </div>
+  );
+}
 
-      {/* Name + Delete */}
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-foreground line-clamp-2 mb-1">{item.productName}</p>
-        <button
-          onClick={handleRemove}
-          className="text-sm text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1"
-        >
-          <Trash2 className="w-3 h-3" />
-          {t('delete')}
-        </button>
-      </div>
-
-      {/* Price */}
-      <div className="text-center shrink-0 w-24 hidden md:block">
-        <span className="font-bold text-foreground">{formatPrice(item.unitPrice / 100)}</span>
-      </div>
-
-      {/* Quantity */}
-      <div className="flex items-center border border-border rounded-lg overflow-hidden shrink-0">
-        <button
-          onClick={() => handleQty(item.quantity + 1)}
-          className="w-8 h-8 flex items-center justify-center hover:bg-muted transition-colors"
-        >
-          <Plus className="w-3 h-3" />
-        </button>
-        <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
-        <button
-          onClick={() => handleQty(item.quantity - 1)}
-          disabled={item.quantity <= 1}
-          className="w-8 h-8 flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-40"
-        >
-          <Minus className="w-3 h-3" />
-        </button>
-      </div>
+function CouponField({
+  currentCodes,
+  onApply,
+  onRemove,
+  placeholder,
+  applyLabel,
+  removeLabel,
+}: {
+  currentCodes: string[];
+  onApply: (code: string) => Promise<boolean>;
+  onRemove: (code: string) => Promise<void>;
+  placeholder: string;
+  applyLabel: string;
+  removeLabel: string;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          const form = e.currentTarget;
+          const input = form.elements.namedItem('coupon') as HTMLInputElement;
+          const code = input.value.trim();
+          if (!code) return;
+          const ok = await onApply(code);
+          if (ok) input.value = '';
+        }}
+        className="flex gap-2"
+      >
+        <input
+          name="coupon"
+          placeholder={placeholder}
+          className="flex-1 rounded border border-border-input bg-bg-base px-3 text-14 focus:border-border-focus focus:outline-none"
+        />
+        <Button intent="secondary" type="submit">{applyLabel}</Button>
+      </form>
+      {currentCodes.map((code) => (
+        <div key={code} className="flex items-center justify-between rounded bg-bg-subtle px-3 py-2 text-12">
+          <span className="font-medium text-content-strong">{code}</span>
+          <button
+            type="button"
+            onClick={() => onRemove(code)}
+            className="text-state-danger-content hover:underline"
+          >
+            {removeLabel}
+          </button>
+        </div>
+      ))}
     </div>
   );
 }

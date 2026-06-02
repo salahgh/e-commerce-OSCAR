@@ -1,143 +1,67 @@
 'use client';
 
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { getColorHex, getContrastColor, isValidHexColor } from '@/lib/colors';
+import * as React from 'react';
+import { Check } from 'lucide-react';
+import { cn } from '@/lib/utils/cn';
+import { getContrastColor } from '@oscar/shared';
 
-export interface ColorSwatchProps {
-  /** Color name (e.g., "Black", "Blue") or hex code (e.g., "#FF0000") */
-  color: string;
-  /** Hex code from API (takes priority over color name lookup) */
-  hex?: string | null;
-  /** Size of the swatch */
-  size?: 'xs' | 'sm' | 'md' | 'lg';
-  /** Show color name label */
-  showLabel?: boolean;
-  /** Whether this swatch is selected */
+interface ColorSwatchProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  hex: string;
   selected?: boolean;
-  /** Click handler */
-  onClick?: () => void;
-  /** Additional CSS classes */
-  className?: string;
+  size?: 'sm' | 'md' | 'lg';
 }
 
-const sizeClasses = {
-  xs: 'w-4 h-4',
-  sm: 'w-6 h-6',
-  md: 'w-8 h-8',
-  lg: 'w-10 h-10',
-};
+const sizeMap = { sm: 'h-6 w-6', md: 'h-8 w-8', lg: 'h-10 w-10' } as const;
 
-const labelSizeClasses = {
-  xs: 'text-[10px]',
-  sm: 'text-xs',
-  md: 'text-sm',
-  lg: 'text-base',
-};
-
-export const ColorSwatch: React.FC<ColorSwatchProps> = ({
-  color,
-  hex,
-  size = 'md',
-  showLabel = false,
-  selected = false,
-  onClick,
-  className,
-}) => {
-  // Determine the hex color to use
-  // Priority: 1. hex prop from API, 2. color if it's already a hex, 3. lookup by name
-  let displayHex: string | null = null;
-
-  if (hex && isValidHexColor(hex)) {
-    displayHex = hex;
-  } else if (isValidHexColor(color)) {
-    displayHex = color;
-  } else {
-    displayHex = getColorHex(color);
-  }
-
-  // If no hex found, show a gray swatch with text
-  if (!displayHex) {
+export const ColorSwatch = React.forwardRef<HTMLButtonElement, ColorSwatchProps>(
+  ({ hex, selected, size = 'md', className, ...props }, ref) => {
+    const checkColor = getContrastColor(hex);
     return (
       <button
+        ref={ref}
         type="button"
+        aria-pressed={selected}
+        aria-label={hex}
         className={cn(
-          'inline-flex items-center gap-2',
-          onClick && 'cursor-pointer',
-          className
+          'relative inline-flex items-center justify-center rounded-full border-2 transition-all duration-fast',
+          selected ? 'border-accent ring-2 ring-accent ring-offset-2 ring-offset-bg-base' : 'border-border hover:border-border-strong',
+          sizeMap[size],
+          className,
         )}
-        onClick={onClick}
-        title={color}
+        style={{ backgroundColor: hex }}
+        {...props}
       >
-        <div
-          className={cn(
-            sizeClasses[size],
-            'rounded-full bg-muted flex items-center justify-center',
-            'border-2 border-border',
-            selected && 'ring-2 ring-primary ring-offset-2'
-          )}
-        >
-          <span className="text-[8px] text-muted-foreground font-bold">?</span>
-        </div>
-        {showLabel && (
-          <span className={cn(labelSizeClasses[size], 'text-muted-foreground')}>
-            {color}
-          </span>
+        {selected && (
+          <Check className="h-4 w-4" strokeWidth={3} style={{ color: checkColor }} />
         )}
       </button>
     );
-  }
+  },
+);
+ColorSwatch.displayName = 'ColorSwatch';
 
-  const isWhiteOrLight = displayHex.toLowerCase() === '#ffffff' || displayHex.toLowerCase() === '#f5f5dc';
-  const contrastColor = getContrastColor(displayHex);
+interface ColorSwatchGroupProps {
+  options: Array<{ hex: string; name: string; value: string }>;
+  value?: string;
+  onValueChange?: (value: string) => void;
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+}
 
+export function ColorSwatchGroup({ options, value, onValueChange, size, className }: ColorSwatchGroupProps) {
   return (
-    <button
-      type="button"
-      className={cn(
-        'inline-flex items-center gap-2',
-        onClick && 'cursor-pointer hover:scale-110 transition-transform',
-        className
-      )}
-      onClick={onClick}
-      title={color}
-    >
-      <div
-        className={cn(
-          sizeClasses[size],
-          'rounded-full flex-shrink-0 transition-all',
-          isWhiteOrLight && 'border-2 border-border',
-          !isWhiteOrLight && 'border-2 border-transparent',
-          selected && 'ring-2 ring-primary ring-offset-2'
-        )}
-        style={{ backgroundColor: displayHex }}
-      >
-        {selected && (
-          <div className="w-full h-full flex items-center justify-center">
-            <svg
-              className={cn(
-                'w-4 h-4',
-                contrastColor === 'white' ? 'text-white' : 'text-black'
-              )}
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </div>
-        )}
-      </div>
-      {showLabel && (
-        <span className={cn(labelSizeClasses[size], 'text-foreground')}>
-          {color}
-        </span>
-      )}
-    </button>
+    <div role="radiogroup" className={cn('flex flex-wrap gap-3', className)}>
+      {options.map((opt) => (
+        <ColorSwatch
+          key={opt.value}
+          hex={opt.hex}
+          size={size}
+          selected={value === opt.value}
+          onClick={() => onValueChange?.(opt.value)}
+          title={opt.name}
+          aria-label={opt.name}
+        />
+      ))}
+    </div>
   );
-};
-
-export default ColorSwatch;
+}

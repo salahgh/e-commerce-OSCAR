@@ -1,64 +1,30 @@
-import { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
-import { generateMetadata as genMeta, pageMeta } from '@/lib/seo';
-import { FAQJsonLd, BreadcrumbJsonLd } from '@/components/seo';
-import FAQClient, { faqCategories } from './FAQClient';
+import { useTranslations } from 'next-intl';
+import { InfoPageLayout } from '@/components/patterns';
+import { Accordion, AccordionItem } from '@/components/ui';
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-
-  return genMeta({
-    title: pageMeta.faq.title,
-    description: pageMeta.faq.description,
-    canonical: `/${locale}/faq`,
-    locale,
-    keywords: [
-      'faq',
-      'questions frequentes',
-      'aide',
-      'support',
-      'commande',
-      'livraison',
-      'retour',
-      'paiement',
-    ],
-  });
-}
-
-export default async function FAQPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-  const t = await getTranslations('faq');
-
-  // Flatten all FAQs for structured data
-  const allFaqs = faqCategories.flatMap((cat) =>
-    cat.items.map((item) => ({
-      question: item.question,
-      answer: item.answer,
-    }))
-  );
-
-  // Breadcrumb items
-  const breadcrumbItems = [
-    { name: t('breadcrumbHome'), url: `/${locale}` },
-    { name: t('breadcrumbFaq') },
+export default function FaqPage() {
+  const t = useTranslations('FaqPage');
+  const tInfo = useTranslations('InfoPage');
+  const qa = [
+    { q: t('q1'), a: t('a1') },
+    { q: t('q2'), a: t('a2') },
+    { q: t('q3'), a: t('a3') },
+    { q: t('q4'), a: t('a4') },
+    { q: t('q5'), a: t('a5') },
   ];
-
   return (
-    <>
-      {/* Structured Data */}
-      <FAQJsonLd faqs={allFaqs} />
-      <BreadcrumbJsonLd items={breadcrumbItems} />
-
-      {/* Client Component */}
-      <FAQClient />
-    </>
+    <InfoPageLayout
+      title={t('title')}
+      intro={t('intro')}
+      breadcrumbs={[{ label: tInfo('breadcrumbHome'), href: '/' }, { label: t('title') }]}
+    >
+      <Accordion type="single" defaultValue="faq-0">
+        {qa.map((it, i) => (
+          <AccordionItem key={i} value={`faq-${i}`} title={it.q}>
+            {it.a}
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </InfoPageLayout>
   );
 }

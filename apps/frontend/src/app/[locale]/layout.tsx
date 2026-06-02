@@ -1,33 +1,67 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { NextIntlClientProvider } from 'next-intl';
-import { Inter, DM_Sans, IBM_Plex_Sans_Arabic } from 'next/font/google';
+import { hasLocale, NextIntlClientProvider } from 'next-intl';
+import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
+import { IBM_Plex_Sans_Arabic } from 'next/font/google';
+import { ThemeProvider } from 'next-themes';
 import { ApolloWrapper } from '@/lib/apollo/apollo-wrapper';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
-import { ThemeProvider } from '@/components/providers/ThemeProvider';
-import { Toaster } from 'react-hot-toast';
-import { locales } from '@/i18n/config';
-import { PWAInstallPrompt, OfflineIndicator, UpdateAvailableBanner } from '@/components/pwa';
-import '../globals.css';
+import { WishlistProvider } from '@/contexts/WishlistContext';
+import { MiniCart, SkipToContent } from '@/components/layout';
+import { ToastProvider } from '@/components/ui/Toast';
+import { routing } from '@/i18n/routing';
+import { localeDirection, type Locale } from '@/i18n/config';
 
-const inter = Inter({
-  subsets: ['latin'],
+const plexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ['arabic', 'latin'],
+  weight: ['400', '500', '700'],
   display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-plex-arabic',
 });
 
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-dm-sans',
-});
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
-const ibmPlexArabic = IBM_Plex_Sans_Arabic({
-  weight: ['400', '500', '600', '700'],
-  subsets: ['arabic'],
-  display: 'swap',
-  variable: '--font-ibm-arabic',
-});
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://oscarfashion.dz';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) return {};
+
+  const t = await getTranslations({ locale, namespace: 'HomePage' });
+  const title = t('title');
+  const description = t('subtitle');
+  const isDefault = locale === routing.defaultLocale;
+  const path = isDefault ? '/' : `/${locale}`;
+
+  const languages: Record<string, string> = {};
+  for (const l of routing.locales) {
+    languages[l] = l === routing.defaultLocale ? SITE_URL : `${SITE_URL}/${l}`;
+  }
+  languages['x-default'] = SITE_URL;
+
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: { default: title, template: '%s · OSCAR Najar' },
+    description,
+    alternates: { canonical: `${SITE_URL}${path === '/' ? '' : path}`, languages },
+    openGraph: {
+      title,
+      description,
+      url: `${SITE_URL}${path === '/' ? '' : path}`,
+      siteName: 'OSCAR Najar',
+      locale,
+      type: 'website',
+    },
+    twitter: { card: 'summary_large_image', title, description },
+  };
+}
 
 export default async function LocaleLayout({
   children,
@@ -36,75 +70,35 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  // Await params before using
   const { locale } = await params;
 
-  // Validate locale
-  if (!locales.includes(locale as any)) {
+  if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
 
-  // Load messages
-  let messages;
-  try {
-    messages = (await import(`../../messages/${locale}.json`)).default;
-  } catch (error) {
-    notFound();
-  }
+  setRequestLocale(locale);
+  const messages = await getMessages();
+  const dir = localeDirection[locale as Locale];
 
   return (
-    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
-      <head>
-        {/* PWA Meta Tags */}
-        <meta name="application-name" content="OSCAR Fashion" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="OSCAR Fashion" />
-        <meta name="format-detection" content="telephone=no" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-TileColor" content="#000000" />
-        <meta name="msapplication-tap-highlight" content="no" />
-        <meta name="theme-color" content="#000000" />
-
-        {/* PWA Links */}
-        <link rel="manifest" href="/manifest.json" />
-
-        {/* Preconnect to important origins */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8085'} />
-      </head>
-      <body className={`${dmSans.variable} ${inter.variable} ${ibmPlexArabic.variable} ${dmSans.className}`}>
-        <ThemeProvider>
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <ApolloWrapper locale={locale}>
-              <AuthProvider>
-                <CartProvider>
-                  {/* Offline indicator */}
-                  <OfflineIndicator />
-
-                  {children}
-
-                  {/* PWA Install Prompt */}
-                  <PWAInstallPrompt />
-
-                  {/* Update Available Banner */}
-                  <UpdateAvailableBanner />
-
-                  <Toaster
-                    position={locale === 'ar' ? 'top-left' : 'top-right'}
-                    toastOptions={{
-                      duration: 4000,
-                      style: {
-                        background: 'var(--card)',
-                        color: 'var(--card-foreground)',
-                      },
-                    }}
-                  />
-                </CartProvider>
-              </AuthProvider>
-            </ApolloWrapper>
-          </NextIntlClientProvider>
+    <html lang={locale} dir={dir} className={plexArabic.variable} suppressHydrationWarning>
+      <body className="bg-bg-base text-content font-sans antialiased">
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+          <ApolloWrapper>
+            <NextIntlClientProvider locale={locale} messages={messages}>
+              <ToastProvider>
+                <AuthProvider>
+                  <CartProvider>
+                    <WishlistProvider>
+                      <SkipToContent />
+                      {children}
+                      <MiniCart />
+                    </WishlistProvider>
+                  </CartProvider>
+                </AuthProvider>
+              </ToastProvider>
+            </NextIntlClientProvider>
+          </ApolloWrapper>
         </ThemeProvider>
       </body>
     </html>

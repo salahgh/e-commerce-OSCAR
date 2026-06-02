@@ -1,8 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { useAuth } from './AuthContext';
-import toast from 'react-hot-toast';
+import { useToast } from '@/components/ui/Toast';
 import {
   useGetActiveOrderQuery,
   useAddItemToOrderMutation,
@@ -11,10 +12,9 @@ import {
   useRemoveAllOrderLinesMutation,
   useApplyCouponCodeMutation,
   useRemoveCouponCodeMutation,
-  OrderFieldsFragment,
-} from '@/graphql/generated/graphql';
+  type OrderFieldsFragment,
+} from '@oscar/graphql-shop/generated';
 
-// Simplified cart item type based on Vendure Order
 interface CartItem {
   id: string;
   productVariantId: string;
@@ -61,11 +61,14 @@ interface CartContextType {
   removeCoupon: (couponCode: string) => Promise<void>;
   itemCount: number;
   refetchCart: () => Promise<void>;
+  /** Mini-cart drawer open state (Header controls this). */
+  isMiniCartOpen: boolean;
+  openMiniCart: () => void;
+  closeMiniCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Map Vendure Order to our Cart type
 function mapOrderToCart(order: OrderFieldsFragment): Cart {
   return {
     id: order.id,
@@ -78,9 +81,10 @@ function mapOrderToCart(order: OrderFieldsFragment): Cart {
       variantName: line.productVariant.name,
       sku: line.productVariant.sku,
       quantity: line.quantity,
-      unitPrice: line.unitPriceWithTax / 100, // Convert from cents
+      unitPrice: line.unitPriceWithTax / 100,
       linePrice: line.linePriceWithTax / 100,
-      imageUrl: line.featuredAsset?.preview || line.productVariant.product.featuredAsset?.preview,
+      imageUrl:
+        line.featuredAsset?.preview ?? line.productVariant.product.featuredAsset?.preview ?? undefined,
       productSlug: line.productVariant.product.slug,
     })),
     totalQuantity: order.totalQuantity,
@@ -88,8 +92,8 @@ function mapOrderToCart(order: OrderFieldsFragment): Cart {
     shipping: order.shippingWithTax / 100,
     total: order.totalWithTax / 100,
     currencyCode: order.currencyCode,
-    couponCodes: order.couponCodes || [],
-    discounts: (order.discounts || []).map((d) => ({
+    couponCodes: order.couponCodes ?? [],
+    discounts: (order.discounts ?? []).map((d) => ({
       adjustmentSource: d.adjustmentSource,
       amount: d.amount / 100,
       amountWithTax: d.amountWithTax / 100,
@@ -100,15 +104,15 @@ function mapOrderToCart(order: OrderFieldsFragment): Cart {
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  useAuth();
+  const tErrors = useTranslations('Cart.errors');
+  const tToasts = useTranslations('Cart.toasts');
+  const toast = useToast();
   const [cart, setCart] = useState<Cart | null>(null);
+  const [isMiniCartOpen, setMiniCartOpen] = useState(false);
 
-  // GraphQL query for active order
-  const { data, loading, refetch } = useGetActiveOrderQuery({
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data, loading, refetch } = useGetActiveOrderQuery({ fetchPolicy: 'cache-and-network' });
 
-  // GraphQL mutations
   const [addItemMutation] = useAddItemToOrderMutation();
   const [adjustLineMutation] = useAdjustOrderLineMutation();
   const [removeLineMutation] = useRemoveOrderLineMutation();
@@ -116,13 +120,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [applyCouponMutation] = useApplyCouponCodeMutation();
   const [removeCouponMutation] = useRemoveCouponCodeMutation();
 
-  // Update cart when data changes
   useEffect(() => {
-    if (data?.activeOrder) {
-      setCart(mapOrderToCart(data.activeOrder));
-    } else {
-      setCart(null);
-    }
+    setCart(data?.activeOrder ? mapOrderToCart(data.activeOrder) : null);
   }, [data]);
 
   const refetchCart = useCallback(async () => {
@@ -131,167 +130,111 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addToCart = async (productVariantId: string, quantity: number) => {
     try {
-      const { data: result } = await addItemMutation({
-        variables: { productVariantId, quantity },
-      });
-
-      if (result?.addItemToOrder) {
-        const response = result.addItemToOrder;
-
-        // Check for errors
-        if ('errorCode' in response) {
-          if (response.errorCode === 'INSUFFICIENT_STOCK_ERROR') {
-            toast.error(`Stock insuffisant. Disponible: ${(response as any).quantityAvailable}`);
-          } else {
-            toast.error((response as any).message || 'Erreur lors de l\'ajout au panier');
-          }
-          return;
+      const { data: result } = await addItemMutation({ variables: { productVariantId, quantity } });
+      const response = result?.addItemToOrder;
+      if (!response) return;
+      if ('errorCode' in response) {
+        if (response.errorCode === 'INSUFFICIENT_STOCK_ERROR') {
+          toast.error(tErrors('insufficientStock', { available: (response as { quantityAvailable?: number }).quantityAvailable ?? 0 }));
+        } else {
+          toast.error((response as { message?: string }).message ?? tErrors('addFailed'));
         }
-
-        // Success - update cart
-        if ('id' in response) {
-          setCart(mapOrderToCart(response as OrderFieldsFragment));
-          toast.success('Produit ajouté au panier');
-        }
+        return;
       }
-    } catch (error: any) {
-      console.error('Error adding to cart:', error);
-      toast.error(error.message || 'Erreur lors de l\'ajout au panier');
+      if ('id' in response) {
+        setCart(mapOrderToCart(response as OrderFieldsFragment));
+        toast.success(tToasts('added'));
+        // Auto-open the mini-cart so the user sees the new item — feels
+        // more like adding to a real cart than a toast that vanishes.
+        setMiniCartOpen(true);
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : tErrors('addFailed'));
     }
   };
 
   const updateQuantity = async (orderLineId: string, quantity: number) => {
+    if (quantity < 1) return removeItem(orderLineId);
     try {
-      if (quantity < 1) {
-        await removeItem(orderLineId);
+      const { data: result } = await adjustLineMutation({ variables: { orderLineId, quantity } });
+      const response = result?.adjustOrderLine;
+      if (!response) return;
+      if ('errorCode' in response) {
+        toast.error((response as { message?: string }).message ?? tErrors('updateFailed'));
         return;
       }
-
-      const { data: result } = await adjustLineMutation({
-        variables: { orderLineId, quantity },
-      });
-
-      if (result?.adjustOrderLine) {
-        const response = result.adjustOrderLine;
-
-        if ('errorCode' in response) {
-          toast.error((response as any).message || 'Erreur lors de la mise à jour');
-          return;
-        }
-
-        if ('id' in response) {
-          setCart(mapOrderToCart(response as OrderFieldsFragment));
-          toast.success('Quantité mise à jour');
-        }
-      }
-    } catch (error: any) {
-      console.error('Error updating quantity:', error);
-      toast.error(error.message || 'Erreur lors de la mise à jour');
+      if ('id' in response) setCart(mapOrderToCart(response as OrderFieldsFragment));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : tErrors('updateFailed'));
     }
   };
 
   const removeItem = async (orderLineId: string) => {
     try {
-      const { data: result } = await removeLineMutation({
-        variables: { orderLineId },
-      });
-
-      if (result?.removeOrderLine) {
-        const response = result.removeOrderLine;
-
-        if ('errorCode' in response) {
-          toast.error((response as any).message || 'Erreur lors de la suppression');
-          return;
-        }
-
-        if ('id' in response) {
-          setCart(mapOrderToCart(response as OrderFieldsFragment));
-          toast.success('Produit retiré du panier');
-        }
+      const { data: result } = await removeLineMutation({ variables: { orderLineId } });
+      const response = result?.removeOrderLine;
+      if (!response) return;
+      if ('errorCode' in response) {
+        toast.error((response as { message?: string }).message ?? tErrors('removeFailed'));
+        return;
       }
-    } catch (error: any) {
-      console.error('Error removing item:', error);
-      toast.error(error.message || 'Erreur lors de la suppression');
+      if ('id' in response) setCart(mapOrderToCart(response as OrderFieldsFragment));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : tErrors('removeFailed'));
     }
   };
 
   const clearCart = async () => {
     try {
       const { data: result } = await removeAllLinesMutation();
-
-      if (result?.removeAllOrderLines) {
-        const response = result.removeAllOrderLines;
-
-        if ('errorCode' in response) {
-          toast.error((response as any).message || 'Erreur lors du vidage du panier');
-          return;
-        }
-
-        if ('id' in response) {
-          setCart(mapOrderToCart(response as OrderFieldsFragment));
-          toast.success('Panier vidé');
-        }
+      const response = result?.removeAllOrderLines;
+      if (!response) return;
+      if ('errorCode' in response) {
+        toast.error((response as { message?: string }).message ?? tErrors('clearFailed'));
+        return;
       }
-    } catch (error: any) {
-      console.error('Error clearing cart:', error);
-      toast.error(error.message || 'Erreur lors du vidage du panier');
+      if ('id' in response) setCart(mapOrderToCart(response as OrderFieldsFragment));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : tErrors('clearFailed'));
     }
   };
 
   const applyCoupon = async (couponCode: string): Promise<boolean> => {
     try {
-      const { data: result } = await applyCouponMutation({
-        variables: { couponCode },
-      });
-
-      if (result?.applyCouponCode) {
-        const response = result.applyCouponCode;
-
-        if ('errorCode' in response) {
-          // Handle specific error types
-          if (response.errorCode === 'COUPON_CODE_INVALID_ERROR') {
-            toast.error('Code promo invalide');
-          } else if (response.errorCode === 'COUPON_CODE_EXPIRED_ERROR') {
-            toast.error('Ce code promo a expiré');
-          } else if (response.errorCode === 'COUPON_CODE_LIMIT_ERROR') {
-            toast.error('Ce code promo a atteint sa limite d\'utilisation');
-          } else {
-            toast.error((response as any).message || 'Code promo invalide');
-          }
-          return false;
-        }
-
-        if ('id' in response) {
-          setCart(mapOrderToCart(response as OrderFieldsFragment));
-          toast.success('Code promo appliqué avec succès!');
-          return true;
-        }
+      const { data: result } = await applyCouponMutation({ variables: { couponCode } });
+      const response = result?.applyCouponCode;
+      if (!response) return false;
+      if ('errorCode' in response) {
+        const messages: Record<string, string> = {
+          COUPON_CODE_INVALID_ERROR: tErrors('couponInvalid'),
+          COUPON_CODE_EXPIRED_ERROR: tErrors('couponExpired'),
+          COUPON_CODE_LIMIT_ERROR: tErrors('couponLimit'),
+        };
+        toast.error(messages[response.errorCode] ?? (response as { message?: string }).message ?? tErrors('couponInvalid'));
+        return false;
+      }
+      if ('id' in response) {
+        setCart(mapOrderToCart(response as OrderFieldsFragment));
+        toast.success(tToasts('couponApplied'));
+        return true;
       }
       return false;
-    } catch (error: any) {
-      console.error('Error applying coupon:', error);
-      toast.error(error.message || 'Erreur lors de l\'application du code promo');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : tErrors('couponFailed'));
       return false;
     }
   };
 
   const removeCoupon = async (couponCode: string) => {
     try {
-      const { data: result } = await removeCouponMutation({
-        variables: { couponCode },
-      });
-
+      const { data: result } = await removeCouponMutation({ variables: { couponCode } });
       if (result?.removeCouponCode) {
         setCart(mapOrderToCart(result.removeCouponCode as OrderFieldsFragment));
-        toast.success('Code promo retiré');
       }
-    } catch (error: any) {
-      console.error('Error removing coupon:', error);
-      toast.error(error.message || 'Erreur lors de la suppression du code promo');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : tErrors('couponRemoveFailed'));
     }
   };
-
-  const itemCount = cart?.totalQuantity || 0;
 
   return (
     <CartContext.Provider
@@ -304,8 +247,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         clearCart,
         applyCoupon,
         removeCoupon,
-        itemCount,
+        itemCount: cart?.totalQuantity ?? 0,
         refetchCart,
+        isMiniCartOpen,
+        openMiniCart: () => setMiniCartOpen(true),
+        closeMiniCart: () => setMiniCartOpen(false),
       }}
     >
       {children}
@@ -315,8 +261,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
-  }
+  if (!context) throw new Error('useCart must be used within a CartProvider');
   return context;
 };

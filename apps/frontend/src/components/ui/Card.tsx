@@ -1,92 +1,50 @@
-import * as React from "react"
+import * as React from 'react';
+import { cn } from '@/lib/utils/cn';
 
-import { cn } from "@/lib/utils/index"
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  interactive?: boolean;
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+}
 
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "rounded-xl border bg-card text-card-foreground shadow",
-      className
-    )}
-    {...props}
-  />
-))
-Card.displayName = "Card"
+const padMap = { none: 'p-0', sm: 'p-3', md: 'p-4', lg: 'p-6' };
 
-const CardHeader = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
-    {...props}
-  />
-))
-CardHeader.displayName = "CardHeader"
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, interactive, padding = 'md', ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        'rounded border border-border bg-bg-elevated shadow-card transition-shadow duration-fast',
+        padMap[padding],
+        interactive && 'cursor-pointer hover:shadow-elevated',
+        className,
+      )}
+      {...props}
+    />
+  ),
+);
+Card.displayName = 'Card';
 
-const CardTitle = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("font-semibold leading-none tracking-tight", className)}
-    {...props}
-  />
-))
-CardTitle.displayName = "CardTitle"
+export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn('flex flex-col gap-2', className)} {...props} />;
+}
 
-const CardDescription = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
-    {...props}
-  />
-))
-CardDescription.displayName = "CardDescription"
+export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+  return (
+    <h3
+      className={cn('text-18 font-bold text-content-strong', className)}
+      {...props}
+    />
+  );
+}
 
-const CardContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
-))
-CardContent.displayName = "CardContent"
+export function CardDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
+  return <p className={cn('text-14 text-content-muted', className)} {...props} />;
+}
 
-const CardFooter = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
-    {...props}
-  />
-))
-CardFooter.displayName = "CardFooter"
+export function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn('flex flex-col gap-2', className)} {...props} />;
+}
 
-// Compound component pattern for Card.Header, Card.Content, etc.
-type CardComponent = typeof Card & {
-  Header: typeof CardHeader;
-  Content: typeof CardContent;
-  Footer: typeof CardFooter;
-  Title: typeof CardTitle;
-  Description: typeof CardDescription;
-};
-
-const CardWithSubcomponents = Card as CardComponent;
-CardWithSubcomponents.Header = CardHeader;
-CardWithSubcomponents.Content = CardContent;
-CardWithSubcomponents.Footer = CardFooter;
-CardWithSubcomponents.Title = CardTitle;
-CardWithSubcomponents.Description = CardDescription;
-
-export { CardWithSubcomponents as Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+export function CardFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn('flex items-center justify-between gap-4 pt-2', className)} {...props} />;
+}

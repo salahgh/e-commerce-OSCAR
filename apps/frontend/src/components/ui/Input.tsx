@@ -1,66 +1,48 @@
-import * as React from "react"
+import * as React from 'react';
+import { cn } from '@/lib/utils/cn';
 
-import { cn } from "@/lib/utils/index"
-
-export interface InputProps extends React.ComponentProps<"input"> {
-  leftIcon?: React.ReactNode
-  rightIcon?: React.ReactNode
-  error?: string
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  invalid?: boolean;
+  leadingIcon?: React.ReactNode;
+  trailingIcon?: React.ReactNode;
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, leftIcon, rightIcon, error, ...props }, ref) => {
-    if (leftIcon || rightIcon) {
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, invalid, leadingIcon, trailingIcon, type = 'text', ...props }, ref) => {
+    if (leadingIcon || trailingIcon) {
       return (
-        <div className="relative">
-          {leftIcon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              {leftIcon}
-            </div>
+        <div
+          className={cn(
+            'group flex h-10 items-center gap-2 rounded border bg-bg-base px-4 transition-colors duration-fast',
+            invalid ? 'border-state-danger-border' : 'border-border-input focus-within:border-border-focus',
+            className,
           )}
+        >
+          {leadingIcon && <span className="text-content-muted">{leadingIcon}</span>}
           <input
-            type={type}
-            className={cn(
-              "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-              leftIcon && "pl-10",
-              rightIcon && "pr-10",
-              error && "border-destructive focus-visible:ring-destructive",
-              className
-            )}
             ref={ref}
+            type={type}
+            aria-invalid={invalid || undefined}
+            className="flex-1 bg-transparent text-14 text-content placeholder:text-content-muted focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
             {...props}
           />
-          {rightIcon && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              {rightIcon}
-            </div>
-          )}
-          {error && (
-            <p className="text-sm text-destructive mt-1">{error}</p>
-          )}
+          {trailingIcon && <span className="text-content-muted">{trailingIcon}</span>}
         </div>
-      )
+      );
     }
-
     return (
-      <div>
-        <input
-          type={type}
-          className={cn(
-            "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-            error && "border-destructive focus-visible:ring-destructive",
-            className
-          )}
-          ref={ref}
-          {...props}
-        />
-        {error && (
-          <p className="text-sm text-destructive mt-1">{error}</p>
+      <input
+        ref={ref}
+        type={type}
+        aria-invalid={invalid || undefined}
+        className={cn(
+          'flex h-10 w-full rounded border bg-bg-base px-4 text-14 text-content placeholder:text-content-muted transition-colors duration-fast outline-none focus:border-border-focus disabled:cursor-not-allowed disabled:opacity-50',
+          invalid ? 'border-state-danger-border focus:border-state-danger-border' : 'border-border-input',
+          className,
         )}
-      </div>
-    )
-  }
-)
-Input.displayName = "Input"
-
-export { Input }
+        {...props}
+      />
+    );
+  },
+);
+Input.displayName = 'Input';

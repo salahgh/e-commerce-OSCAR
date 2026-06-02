@@ -1,549 +1,496 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import Link from 'next/link';
-import { useCart } from '@/contexts/CartContext';
-import { useAuth } from '@/contexts/AuthContext';
+import * as React from 'react';
+import { useTranslations } from 'next-intl';
+import { formatPrice, wilayas, getShippingZone } from '@oscar/shared';
 import {
-  CheckoutSteps,
-  ShippingAddressForm,
-  BillingAddressForm,
-  ShippingMethodForm,
-  PaymentMethodForm,
-  OrderReview,
-} from '@/components/checkout';
-import { CartSummary } from '@/components/cart';
-import { Button, Card, Skeleton } from '@/components/ui';
-import {
-  ShoppingCart,
-  ArrowLeft,
-  Lock,
-  Truck,
-  CreditCard,
-  Shield,
-  ChevronDown,
-  ChevronUp,
-} from 'lucide-react';
-import toast from 'react-hot-toast';
-import { formatPrice } from '@/lib/utils/formatters';
-import { wilayas, getCommunesByWilayaCode } from '@/lib/data/algeria';
-import {
-  useGetEligibleShippingMethodsQuery,
-  useGetEligiblePaymentMethodsQuery,
+  useSetCustomerForOrderMutation,
   useSetOrderShippingAddressMutation,
   useSetOrderBillingAddressMutation,
+  useGetEligibleShippingMethodsQuery,
   useSetOrderShippingMethodMutation,
+  useGetEligiblePaymentMethodsQuery,
   useTransitionOrderToStateMutation,
   useAddPaymentToOrderMutation,
-  useSetCustomerForOrderMutation,
-} from '@/graphql/generated/graphql';
+} from '@oscar/graphql-shop/generated';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
+import { useRouter, Link } from '@/i18n/routing';
+import {
+  Alert,
+  Button,
+  Card,
+  Checkbox,
+  Field,
+  Input,
+  Radio,
+  Select,
+  Skeleton,
+} from '@/components/ui';
 
-const steps = [
-  { number: 1, label: 'Adresse', description: 'Livraison' },
-  { number: 2, label: 'Facturation', description: 'Adresse' },
-  { number: 3, label: 'Méthode', description: 'Expédition' },
-  { number: 4, label: 'Paiement', description: 'Mode' },
-  { number: 5, label: 'Confirmation', description: 'Commande' },
-];
-
-// Maps a checkout form's values (wilaya/commune codes) to a Vendure
-// CreateAddressInput. Shared by the shipping and billing submit handlers.
-const buildAddressInput = (values: any) => {
-  const wilaya = wilayas.find((w) => w.code === values.wilaya);
-  const commune = getCommunesByWilayaCode(values.wilaya).find((c) => c.code === values.commune);
-  return {
-    fullName: `${values.firstName} ${values.lastName}`,
-    streetLine1: values.address,
-    streetLine2: values.notes || '',
-    city: commune?.name || values.commune,
-    province: wilaya?.name || values.wilaya,
-    postalCode: values.postalCode || '',
-    countryCode: 'DZ',
-    phoneNumber: values.phone,
-  };
-};
+type Stage = 'address' | 'shipping' | 'payment';
 
 export default function CheckoutPage() {
+  const t = useTranslations('CheckoutPage');
+  const tAddr = useTranslations('CheckoutPage.address');
+  const tShip = useTranslations('CheckoutPage.shipping');
+  const tPay = useTranslations('CheckoutPage.payment');
+  const tSummary = useTranslations('CheckoutPage.summary');
+  const tErrors = useTranslations('CheckoutPage.errors');
   const router = useRouter();
-  const params = useParams();
-  const locale = (params.locale as string) || 'fr';
-  const { cart, loading: cartLoading, refetchCart } = useCart();
-  const { customer, isAuthenticated } = useAuth();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [mobileOrderSummaryOpen, setMobileOrderSummaryOpen] = useState(false);
 
-  // Checkout data
-  const [shippingAddress, setShippingAddress] = useState<any>(null);
-  const [billingAddress, setBillingAddress] = useState<any>(null); // null = same as shipping
-  const [selectedShippingMethodId, setSelectedShippingMethodId] = useState<string>('');
-  const [selectedPaymentMethodCode, setSelectedPaymentMethodCode] = useState<string>('');
-  const [termsAccepted, setTermsAccepted] = useState(false);
+  const { cart, refetchCart } = useCart();
+  const { customer, isAuthenticated, logout } = useAuth();
 
-  // GraphQL queries
-  const { data: shippingMethodsData, loading: shippingLoading } = useGetEligibleShippingMethodsQuery({
-    skip: currentStep < 3,
+  const [setCustomer] = useSetCustomerForOrderMutation();
+  const [setShipping] = useSetOrderShippingAddressMutation();
+  const [setBilling] = useSetOrderBillingAddressMutation();
+  const [setShippingMethod] = useSetOrderShippingMethodMutation();
+  const [transition] = useTransitionOrderToStateMutation();
+  const [addPayment] = useAddPaymentToOrderMutation();
+
+  const [stage, setStage] = React.useState<Stage>('address');
+  const [submitting, setSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  // True when the Vendure session reports "already logged in" but the
+  // frontend has no active customer — leftover state from an earlier failed
+  // attempt that left the session bound to a nonexistent user. Recovery
+  // requires logging out (which also clears the cart).
+  const [staleSession, setStaleSession] = React.useState(false);
+
+  const [addr, setAddr] = React.useState({
+    email: '',
+    fullName: '',
+    streetLine1: '',
+    streetLine2: '',
+    city: '',
+    wilayaCode: '',
+    postalCode: '',
+    phoneNumber: '',
   });
 
-  const { data: paymentMethodsData, loading: paymentLoading } = useGetEligiblePaymentMethodsQuery({
-    skip: currentStep < 4,
+  // Prefill known fields from the logged-in customer.
+  React.useEffect(() => {
+    if (customer) {
+      setAddr((a) => ({
+        ...a,
+        email: a.email || customer.emailAddress,
+        fullName: a.fullName || `${customer.firstName} ${customer.lastName}`.trim(),
+        phoneNumber: a.phoneNumber || customer.phoneNumber || '',
+      }));
+    }
+  }, [customer]);
+  const [billingSameAsShipping, setBillingSameAsShipping] = React.useState(true);
+
+  const [selectedShipping, setSelectedShipping] = React.useState<string>('');
+  const [selectedPayment, setSelectedPayment] = React.useState<string>('');
+
+  const shippingQuery = useGetEligibleShippingMethodsQuery({
+    skip: stage !== 'shipping' && stage !== 'payment',
+    fetchPolicy: 'network-only',
+  });
+  const paymentQuery = useGetEligiblePaymentMethodsQuery({
+    skip: stage !== 'payment',
+    fetchPolicy: 'network-only',
   });
 
-  // GraphQL mutations
-  const [setShippingAddressMutation] = useSetOrderShippingAddressMutation();
-  const [setBillingAddressMutation] = useSetOrderBillingAddressMutation();
-  const [setShippingMethodMutation] = useSetOrderShippingMethodMutation();
-  const [setCustomerMutation] = useSetCustomerForOrderMutation();
-  const [transitionOrderMutation] = useTransitionOrderToStateMutation();
-  const [addPaymentMutation] = useAddPaymentToOrderMutation();
+  if (!cart || cart.items.length === 0) {
+    return (
+      <div className="mx-auto flex max-w-2xl flex-col items-center gap-4 px-6 py-24 text-center">
+        <h1 className="text-24 font-bold text-content-strong">{t('title')}</h1>
+        <p className="text-14 text-content-muted">{t('emptyCart')}</p>
+        <Button asChild>
+          <Link href="/products">{t('browse')}</Link>
+        </Button>
+      </div>
+    );
+  }
 
-  // Map shipping methods for UI
-  const shippingMethods = (shippingMethodsData?.eligibleShippingMethods || []).map((method) => ({
-    id: method.id,
-    name: method.name,
-    description: method.description || '',
-    price: method.priceWithTax,
-    estimatedDays: method.metadata?.estimatedDays || '3-5 jours ouvrables',
-    icon: 'standard' as const,
-  }));
+  const selectedWilaya = wilayas.find((w) => w.code === addr.wilayaCode);
 
-  // Map payment methods for UI
-  const paymentMethods = (paymentMethodsData?.eligiblePaymentMethods || []).map((method) => ({
-    id: method.id,
-    code: method.code,
-    name: method.name,
-    description: method.description || '',
-    icon: method.code === 'cash-on-delivery' ? ('cash' as const) :
-          method.code === 'baridimob' ? ('baridimob' as const) : ('cib' as const),
-    available: method.isEligible,
-  }));
-
-  // Redirect if cart is empty
-  useEffect(() => {
-    if (!cartLoading && (!cart || !cart.items || cart.items.length === 0)) {
-      router.push(`/${locale}/cart`);
-      toast.error('Votre panier est vide');
-    }
-  }, [cart, cartLoading, router, locale]);
-
-  // Pre-fill shipping address if user is authenticated
-  useEffect(() => {
-    if (isAuthenticated && customer && !shippingAddress) {
-      setShippingAddress({
-        firstName: customer.firstName || '',
-        lastName: customer.lastName || '',
-        email: customer.emailAddress || '',
-        phone: customer.phoneNumber || '',
-        address: '',
-        wilaya: '',
-        commune: '',
-        postalCode: '',
-        notes: '',
-      });
-    }
-  }, [isAuthenticated, customer, shippingAddress]);
-
-  const handleShippingAddressSubmit = async (values: any) => {
-    setIsSubmitting(true);
+  async function submitAddress(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
     try {
-      // Set customer for guest checkout
+      // For guest checkout, attach the customer to the order first.
       if (!isAuthenticated) {
-        const customerResult = await setCustomerMutation({
+        const trimmed = addr.fullName.trim();
+        const spaceIdx = trimmed.indexOf(' ');
+        const firstName = spaceIdx === -1 ? trimmed : trimmed.slice(0, spaceIdx);
+        const lastName = spaceIdx === -1 ? trimmed : trimmed.slice(spaceIdx + 1);
+        const { data: customerData } = await setCustomer({
           variables: {
             input: {
-              firstName: values.firstName,
-              lastName: values.lastName,
-              emailAddress: values.email,
-              phoneNumber: values.phone,
+              emailAddress: addr.email,
+              firstName,
+              lastName,
+              phoneNumber: addr.phoneNumber || undefined,
             },
           },
         });
-
-        if (customerResult.data?.setCustomerForOrder) {
-          const response = customerResult.data.setCustomerForOrder;
-          if ('errorCode' in response) {
-            toast.error((response as any).message || 'Erreur lors de la définition du client');
-            setIsSubmitting(false);
-            return;
-          }
-        }
-      }
-
-      // Set shipping address
-      const result = await setShippingAddressMutation({
-        variables: { input: buildAddressInput(values) },
-      });
-
-      if (result.data?.setOrderShippingAddress) {
-        const response = result.data.setOrderShippingAddress;
-        if ('errorCode' in response) {
-          toast.error((response as any).message || 'Erreur lors de la définition de l\'adresse');
-          setIsSubmitting(false);
+        const customerResp = customerData?.setCustomerForOrder;
+        if (customerResp && customerResp.__typename === 'AlreadyLoggedInError') {
+          // Frontend says we're not logged in, but the Vendure session
+          // disagrees. The order will never gain a customer and the state
+          // transition will fail. Surface a recoverable error.
+          setStaleSession(true);
+          setSubmitting(false);
           return;
         }
-
-        setShippingAddress(values);
-        await refetchCart();
-        setCurrentStep(2);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (
+          customerResp &&
+          customerResp.__typename !== 'Order' &&
+          'message' in customerResp
+        ) {
+          throw new Error(customerResp.message);
+        }
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Erreur lors de la définition de l\'adresse');
+
+      const input = {
+        fullName: addr.fullName,
+        streetLine1: addr.streetLine1,
+        streetLine2: addr.streetLine2 || undefined,
+        city: addr.city,
+        province: selectedWilaya?.name ?? addr.wilayaCode,
+        postalCode: addr.postalCode || undefined,
+        countryCode: 'DZ',
+        phoneNumber: addr.phoneNumber,
+      };
+      const { data: ship } = await setShipping({ variables: { input } });
+      if (ship?.setOrderShippingAddress.__typename !== 'Order') {
+        const err = ship?.setOrderShippingAddress as { message?: string } | undefined;
+        throw new Error(err?.message ?? tErrors('addressFailed'));
+      }
+      if (billingSameAsShipping) {
+        await setBilling({ variables: { input } });
+      }
+      await refetchCart();
+      setStage('shipping');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : tErrors('addressFailed'));
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
-  };
-
-  // billingValues === null  =>  bill to the shipping address.
-  const handleBillingAddressSubmit = async (billingValues: any | null) => {
-    setIsSubmitting(true);
-    try {
-      const source = billingValues ?? shippingAddress;
-      const result = await setBillingAddressMutation({
-        variables: { input: buildAddressInput(source) },
-      });
-
-      if (result.data?.setOrderBillingAddress) {
-        const response = result.data.setOrderBillingAddress;
-        if ('errorCode' in response) {
-          toast.error(
-            (response as any).message || 'Erreur lors de la définition de l\'adresse de facturation'
-          );
-          setIsSubmitting(false);
-          return;
-        }
-
-        setBillingAddress(billingValues);
-        await refetchCart();
-        setCurrentStep(3);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Erreur lors de la définition de l\'adresse de facturation');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleShippingMethodSubmit = async (methodId: string) => {
-    setIsSubmitting(true);
-    try {
-      const result = await setShippingMethodMutation({
-        variables: {
-          shippingMethodId: [methodId],
-        },
-      });
-
-      if (result.data?.setOrderShippingMethod) {
-        const response = result.data.setOrderShippingMethod;
-        if ('errorCode' in response) {
-          toast.error((response as any).message || 'Erreur lors de la sélection de la méthode');
-          setIsSubmitting(false);
-          return;
-        }
-
-        setSelectedShippingMethodId(methodId);
-        await refetchCart();
-        setCurrentStep(4);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Erreur lors de la sélection de la méthode de livraison');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handlePaymentMethodSubmit = (methodCode: string, accepted: boolean) => {
-    setSelectedPaymentMethodCode(methodCode);
-    setTermsAccepted(accepted);
-    setCurrentStep(5);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleOrderSubmit = async () => {
-    setIsSubmitting(true);
-    try {
-      // Transition order to ArrangingPayment state
-      const transitionResult = await transitionOrderMutation({
-        variables: {
-          state: 'ArrangingPayment',
-        },
-      });
-
-      if (transitionResult.data?.transitionOrderToState) {
-        const response = transitionResult.data.transitionOrderToState;
-        if ('errorCode' in response) {
-          toast.error((response as any).message || 'Erreur lors de la transition de la commande');
-          setIsSubmitting(false);
-          return;
-        }
-      }
-
-      // Add payment
-      const paymentResult = await addPaymentMutation({
-        variables: {
-          input: {
-            method: selectedPaymentMethodCode,
-            metadata: {},
-          },
-        },
-      });
-
-      if (paymentResult.data?.addPaymentToOrder) {
-        const response = paymentResult.data.addPaymentToOrder;
-        if ('errorCode' in response) {
-          toast.error((response as any).message || 'Erreur lors du paiement');
-          setIsSubmitting(false);
-          return;
-        }
-
-        // Success - order is complete
-        if ('code' in response) {
-          toast.success('Commande confirmée avec succès!');
-          await refetchCart();
-          router.push(`/${locale}/order-confirmation?code=${response.code}`);
-        }
-      }
-    } catch (error: any) {
-      console.error('Order creation error:', error);
-      toast.error(error.message || 'Erreur lors de la confirmation de la commande');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleEditStep = (step: number) => {
-    setCurrentStep(step);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Loading state
-  if (cartLoading) {
-    return (
-      <div className="container-custom py-6 md:py-8">
-        <Skeleton className="h-8 w-64 mb-6" />
-        <Skeleton className="h-16 w-full mb-8" />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-          <div className="lg:col-span-2">
-            <Skeleton className="h-96" />
-          </div>
-          <div className="hidden lg:block">
-            <Skeleton className="h-96" />
-          </div>
-        </div>
-      </div>
-    );
   }
 
-  // Empty cart check
-  if (!cart || !cart.items || cart.items.length === 0) {
-    return null;
+  async function chooseShipping() {
+    if (!selectedShipping) return;
+    setError(null);
+    setSubmitting(true);
+    try {
+      const { data } = await setShippingMethod({ variables: { shippingMethodId: [selectedShipping] } });
+      if (data?.setOrderShippingMethod.__typename !== 'Order') {
+        const err = data?.setOrderShippingMethod as { message?: string } | undefined;
+        throw new Error(err?.message ?? tErrors('shippingFailed'));
+      }
+      await refetchCart();
+      setStage('payment');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : tErrors('shippingFailed'));
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  const selectedShipping = shippingMethods.find((m) => m.id === selectedShippingMethodId);
-  const selectedPayment = paymentMethods.find((m) => m.code === selectedPaymentMethodCode);
+  async function placeOrder() {
+    if (!selectedPayment) return;
+    setError(null);
+    setSubmitting(true);
+    try {
+      const { data: stateData } = await transition({ variables: { state: 'ArrangingPayment' } });
+      if (stateData?.transitionOrderToState?.__typename === 'OrderStateTransitionError') {
+        const e = stateData.transitionOrderToState;
+        throw new Error(e.message || tErrors('transitionFailed'));
+      }
+      const { data } = await addPayment({
+        variables: { input: { method: selectedPayment, metadata: {} } },
+      });
+      const resp = data?.addPaymentToOrder;
+      if (!resp) throw new Error(tErrors('paymentFailed'));
+      if (resp.__typename === 'Order') {
+        // Order has moved out of AddingItems → activeOrder query returns null.
+        // Refresh the cart context so the header badge stops showing stale
+        // line items from the completed order.
+        await refetchCart();
+        router.push(`/checkout/confirmation/${resp.code}`);
+        return;
+      }
+      const e = resp as { message?: string };
+      throw new Error(e.message ?? tErrors('paymentFailed'));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : tErrors('paymentFailed'));
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
-  // Get wilaya and commune names for display
-  const getAddressDisplayInfo = () => {
-    if (!shippingAddress) return null;
-    const wilaya = wilayas.find((w) => w.code === shippingAddress.wilaya);
-    const communes = getCommunesByWilayaCode(shippingAddress.wilaya);
-    const commune = communes.find((c) => c.code === shippingAddress.commune);
-    return {
-      ...shippingAddress,
-      wilayaName: wilaya?.name || shippingAddress.wilaya,
-      communeName: commune?.name || shippingAddress.commune,
-    };
-  };
-
-  const displayAddress = getAddressDisplayInfo();
-
-  // Resolve the billing address for review (null = same as shipping).
-  const getBillingDisplayInfo = () => {
-    if (!billingAddress) return null;
-    const wilaya = wilayas.find((w) => w.code === billingAddress.wilaya);
-    const commune = getCommunesByWilayaCode(billingAddress.wilaya).find(
-      (c) => c.code === billingAddress.commune
-    );
-    return {
-      firstName: billingAddress.firstName,
-      lastName: billingAddress.lastName,
-      address: billingAddress.address,
-      city: commune?.name || billingAddress.commune,
-      wilaya: wilaya?.name || billingAddress.wilaya,
-      postalCode: billingAddress.postalCode,
-      phone: billingAddress.phone,
-    };
-  };
-
-  const displayBillingAddress = getBillingDisplayInfo();
+  const shippingMethods = shippingQuery.data?.eligibleShippingMethods ?? [];
+  const paymentMethods = paymentQuery.data?.eligiblePaymentMethods ?? [];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b sticky top-0 z-40">
-        <div className="container-custom py-4">
-          <div className="flex items-center justify-between">
-            <Link
-              href={`/${locale}/cart`}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Retour au panier</span>
-            </Link>
-            <h1 className="text-lg md:text-xl font-bold">Finaliser ma commande</h1>
-            <div className="flex items-center gap-1 text-sm text-green-600">
-              <Lock className="h-4 w-4" />
-              <span className="hidden sm:inline">Paiement sécurisé</span>
+    <div className="mx-auto grid w-full max-w-7xl gap-8 px-6 py-10 lg:grid-cols-[1fr_360px]">
+      <div className="flex flex-col gap-6">
+        <header className="flex flex-col gap-1">
+          <h1 className="text-24 font-bold text-content-strong">{t('title')}</h1>
+          <p className="text-14 text-content-muted">{t('subtitle')}</p>
+        </header>
+
+        {error && <Alert intent="danger">{error}</Alert>}
+
+        {staleSession && (
+          <Alert intent="warning" title={tErrors('staleSessionTitle')}>
+            <div className="flex flex-col gap-3">
+              <p>{tErrors('staleSessionBody')}</p>
+              <div>
+                <Button
+                  intent="secondary"
+                  onClick={async () => {
+                    await logout();
+                    router.push('/products');
+                  }}
+                >
+                  {tErrors('staleSessionReset')}
+                </Button>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </Alert>
+        )}
 
-      <div className="container-custom py-6 md:py-8">
-        {/* Progress Steps */}
-        <div className="mb-6 md:mb-8">
-          <CheckoutSteps currentStep={currentStep} steps={steps} />
-        </div>
-
-        {/* Mobile Order Summary Toggle */}
-        <div className="lg:hidden mb-6">
-          <Card>
-            <button
-              onClick={() => setMobileOrderSummaryOpen(!mobileOrderSummaryOpen)}
-              className="w-full p-4 flex items-center justify-between"
-            >
-              <div className="flex items-center gap-3">
-                <ShoppingCart className="h-5 w-5 text-muted-foreground" />
-                <span className="font-medium">
-                  {mobileOrderSummaryOpen ? 'Masquer' : 'Voir'} le résumé ({cart.items?.length || 0} article{(cart.items?.length || 0) > 1 ? 's' : ''})
-                </span>
+        {/* Address */}
+        <Card padding="lg" className="flex flex-col gap-4">
+          <h2 className="text-16 font-bold text-content-strong">{t('stepAddress')}</h2>
+          {stage === 'address' ? (
+            <form className="flex flex-col gap-4" onSubmit={submitAddress}>
+              {!isAuthenticated && (
+                <Field label={tAddr('email')} required hint={tAddr('emailHint')}>
+                  <Input
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={addr.email}
+                    onChange={(e) => setAddr((a) => ({ ...a, email: e.target.value }))}
+                  />
+                </Field>
+              )}
+              <Field label={tAddr('fullName')} required>
+                <Input
+                  required
+                  value={addr.fullName}
+                  onChange={(e) => setAddr((a) => ({ ...a, fullName: e.target.value }))}
+                />
+              </Field>
+              <Field label={tAddr('streetLine1')} required>
+                <Input
+                  required
+                  value={addr.streetLine1}
+                  onChange={(e) => setAddr((a) => ({ ...a, streetLine1: e.target.value }))}
+                />
+              </Field>
+              <Field label={tAddr('streetLine2')}>
+                <Input
+                  value={addr.streetLine2}
+                  onChange={(e) => setAddr((a) => ({ ...a, streetLine2: e.target.value }))}
+                />
+              </Field>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <Field label={tAddr('wilaya')} required>
+                  <Select
+                    required
+                    value={addr.wilayaCode}
+                    onChange={(e) => setAddr((a) => ({ ...a, wilayaCode: e.target.value }))}
+                  >
+                    <option value="">{tAddr('selectWilaya')}</option>
+                    {wilayas.map((w) => (
+                      <option key={w.code} value={w.code}>
+                        {w.code} — {w.name}
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
+                <Field label={tAddr('city')} required>
+                  <Input
+                    required
+                    value={addr.city}
+                    onChange={(e) => setAddr((a) => ({ ...a, city: e.target.value }))}
+                  />
+                </Field>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-primary">{formatPrice(cart.total || 0)}</span>
-                {mobileOrderSummaryOpen ? (
-                  <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <Field label={tAddr('postalCode')}>
+                  <Input
+                    value={addr.postalCode}
+                    onChange={(e) => setAddr((a) => ({ ...a, postalCode: e.target.value }))}
+                  />
+                </Field>
+                <Field label={tAddr('phone')} required>
+                  <Input
+                    type="tel"
+                    required
+                    value={addr.phoneNumber}
+                    onChange={(e) => setAddr((a) => ({ ...a, phoneNumber: e.target.value }))}
+                    placeholder="0555 00 00 00"
+                  />
+                </Field>
+              </div>
+              <Checkbox
+                label={tAddr('useShippingForBilling')}
+                checked={billingSameAsShipping}
+                onChange={(e) => setBillingSameAsShipping(e.target.checked)}
+              />
+              <Button type="submit" loading={submitting}>
+                {submitting ? tSummary('saving') : tSummary('continue')}
+              </Button>
+            </form>
+          ) : (
+            <p className="text-12 text-content-muted">
+              {addr.fullName} · {addr.streetLine1} · {selectedWilaya?.name}
+            </p>
+          )}
+        </Card>
+
+        {/* Shipping */}
+        {(stage === 'shipping' || stage === 'payment') && (
+          <Card padding="lg" className="flex flex-col gap-4">
+            <h2 className="text-16 font-bold text-content-strong">{t('stepShipping')}</h2>
+            {stage === 'shipping' ? (
+              <>
+                {shippingQuery.loading && (
+                  <div className="flex flex-col gap-2">
+                    {Array.from({ length: 2 }).map((_, i) => (
+                      <Skeleton key={i} className="h-12 w-full" />
+                    ))}
+                  </div>
                 )}
-              </div>
-            </button>
-            {mobileOrderSummaryOpen && (
-              <div className="border-t p-4">
-                <CartSummary />
-              </div>
+                {!shippingQuery.loading && shippingMethods.length === 0 && (
+                  <p className="text-14 text-content-muted">{tShip('empty')}</p>
+                )}
+                <ul className="flex flex-col gap-2">
+                  {shippingMethods.map((m) => (
+                    <li key={m.id}>
+                      <label className="flex cursor-pointer items-center justify-between rounded border border-border p-3 transition-colors hover:bg-bg-subtle">
+                        <div className="flex items-center gap-3">
+                          <Radio
+                            name="shipping"
+                            value={m.id}
+                            checked={selectedShipping === m.id}
+                            onChange={() => setSelectedShipping(m.id)}
+                          />
+                          <div>
+                            <p className="text-14 font-medium text-content-strong">{m.name}</p>
+                            {m.description && (
+                              <p className="text-12 text-content-muted">{m.description}</p>
+                            )}
+                            {addr.wilayaCode && (
+                              <p className="text-12 text-content-muted">
+                                {tShip('deliveryEstimate', {
+                                  delay: tShip(`delayZone${getShippingZone(addr.wilayaCode)}` as 'delayZone1' | 'delayZone2' | 'delayZone3' | 'delayZone4'),
+                                })}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <span className="text-14 font-bold text-content-strong">
+                          {formatPrice(m.priceWithTax, cart.currencyCode)}
+                        </span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+                <Button onClick={chooseShipping} disabled={!selectedShipping} loading={submitting}>
+                  {submitting ? tSummary('saving') : tSummary('continue')}
+                </Button>
+              </>
+            ) : (
+              <p className="text-12 text-content-muted">
+                {shippingMethods.find((m) => m.id === selectedShipping)?.name}
+              </p>
             )}
           </Card>
-        </div>
+        )}
 
-        {/* Checkout Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            <Card>
-              <Card.Content className="p-4 md:p-6">
-                {currentStep === 1 && (
-                  <ShippingAddressForm
-                    initialValues={shippingAddress}
-                    onSubmit={handleShippingAddressSubmit}
-                    isAuthenticated={isAuthenticated}
-                    isSubmitting={isSubmitting}
-                  />
-                )}
-
-                {currentStep === 2 && (
-                  <BillingAddressForm
-                    shippingValues={shippingAddress}
-                    initialValues={shippingAddress}
-                    onSubmit={handleBillingAddressSubmit}
-                    onBack={() => handleEditStep(1)}
-                    isSubmitting={isSubmitting}
-                  />
-                )}
-
-                {currentStep === 3 && (
-                  <ShippingMethodForm
-                    shippingMethods={shippingMethods}
-                    initialMethod={selectedShippingMethodId}
-                    onSubmit={handleShippingMethodSubmit}
-                    onBack={() => handleEditStep(2)}
-                  />
-                )}
-
-                {currentStep === 4 && (
-                  <PaymentMethodForm
-                    paymentMethods={paymentMethods.length > 0 ? paymentMethods : undefined}
-                    initialMethod={selectedPaymentMethodCode}
-                    onSubmit={handlePaymentMethodSubmit}
-                    onBack={() => handleEditStep(3)}
-                    isSubmitting={isSubmitting}
-                  />
-                )}
-
-                {currentStep === 5 && displayAddress && selectedShipping && selectedPayment && (
-                  <OrderReview
-                    shippingAddress={{
-                      ...displayAddress,
-                      city: displayAddress.communeName,
-                      wilaya: displayAddress.wilayaName,
-                    }}
-                    billingAddress={displayBillingAddress}
-                    shippingMethod={selectedShipping}
-                    paymentMethod={selectedPayment}
-                    cartItems={cart.items}
-                    subtotal={cart.subTotal}
-                    discount={0}
-                    shippingCost={cart.shipping}
-                    total={cart.total}
-                    onEdit={handleEditStep}
-                    onSubmit={handleOrderSubmit}
-                    isSubmitting={isSubmitting}
-                  />
-                )}
-              </Card.Content>
-            </Card>
-          </div>
-
-          {/* Sidebar - Order Summary (Desktop) */}
-          <div className="hidden lg:block">
-            <div className="sticky top-24">
-              <CartSummary />
-
-              {/* Security Badges */}
-              <Card className="mt-4">
-                <Card.Content className="p-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <Shield className="h-5 w-5 text-green-600" />
-                      <span>Paiement 100% sécurisé</span>
+        {/* Payment */}
+        {stage === 'payment' && (
+          <Card padding="lg" className="flex flex-col gap-4">
+            <h2 className="text-16 font-bold text-content-strong">{t('stepPayment')}</h2>
+            {paymentQuery.loading && <p className="text-12 text-content-muted">{tPay('loading')}</p>}
+            {!paymentQuery.loading && paymentMethods.length === 0 && (
+              <p className="text-14 text-content-muted">{tPay('empty')}</p>
+            )}
+            <ul className="flex flex-col gap-2">
+              {paymentMethods.map((m) => (
+                <li key={m.id}>
+                  <label
+                    className={`flex cursor-pointer items-center gap-3 rounded border border-border p-3 transition-colors ${
+                      m.isEligible ? 'hover:bg-bg-subtle' : 'cursor-not-allowed opacity-60'
+                    }`}
+                  >
+                    <Radio
+                      name="payment"
+                      value={m.code}
+                      checked={selectedPayment === m.code}
+                      onChange={() => setSelectedPayment(m.code)}
+                      disabled={!m.isEligible}
+                    />
+                    <div className="flex-1">
+                      <p className="text-14 font-medium text-content-strong">{m.name}</p>
+                      {m.description && (
+                        <p className="text-12 text-content-muted">{m.description}</p>
+                      )}
+                      {!m.isEligible && m.eligibilityMessage && (
+                        <p className="text-12 text-state-warning-content">{m.eligibilityMessage}</p>
+                      )}
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <Truck className="h-5 w-5 text-blue-600" />
-                      <span>Livraison dans les 48 wilayas</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <CreditCard className="h-5 w-5 text-purple-600" />
-                      <span>Plusieurs moyens de paiement</span>
-                    </div>
-                  </div>
-                </Card.Content>
-              </Card>
-
-              {/* Help Link */}
-              <div className="mt-4 text-center">
-                <Link
-                  href={`/${locale}/contact`}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Besoin d'aide ? Contactez-nous
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
+                    {!m.isEligible && (
+                      <span className="text-12 text-content-muted">{tPay('ineligible')}</span>
+                    )}
+                  </label>
+                </li>
+              ))}
+            </ul>
+            <Button onClick={placeOrder} disabled={!selectedPayment} loading={submitting}>
+              {submitting ? tSummary('placing') : tSummary('placeOrder')}
+            </Button>
+            <p className="text-12 text-content-muted">{tSummary('termsNotice')}</p>
+          </Card>
+        )}
       </div>
+
+      {/* Summary aside */}
+      <aside className="lg:sticky lg:top-24 lg:h-fit">
+        <Card padding="lg" className="flex flex-col gap-3">
+          <h2 className="text-16 font-bold text-content-strong">{tSummary('title')}</h2>
+          <p className="text-12 text-content-muted">
+            {tSummary('items')} · {cart.totalQuantity}
+          </p>
+          <dl className="flex flex-col gap-1 border-t border-border pt-3 text-14">
+            <Row label={tSummary('subtotal')} value={formatPrice(cart.subTotal * 100, cart.currencyCode)} />
+            <Row
+              label={tSummary('shipping')}
+              value={
+                cart.shipping > 0
+                  ? formatPrice(cart.shipping * 100, cart.currencyCode)
+                  : tSummary('shippingTbd')
+              }
+            />
+          </dl>
+          <div className="flex items-baseline justify-between border-t border-border pt-3">
+            <span className="text-14 font-medium text-content-strong">{tSummary('total')}</span>
+            <span className="text-20 font-bold text-content-strong">
+              {formatPrice(cart.total * 100, cart.currencyCode)}
+            </span>
+          </div>
+        </Card>
+      </aside>
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
+  return (
+    <div className="flex justify-between gap-3">
+      <dt className="text-content-muted">{label}</dt>
+      <dd className="font-medium text-content">{value}</dd>
     </div>
   );
 }

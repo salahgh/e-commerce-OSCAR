@@ -1,108 +1,68 @@
 'use client';
 
-import { useLocale } from 'next-intl';
-import { useGetRootCollectionsQuery } from '@/graphql/generated/graphql';
-import { CategoryCard } from '@/components/category';
-import { Skeleton } from '@/components/ui';
-import { Folder } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useGetRootCollectionsQuery } from '@oscar/graphql-shop/generated';
+import { Link } from '@/i18n/routing';
+import { Alert, Skeleton } from '@/components/ui';
+import { PageHeader } from '@/components/layout';
 
 export default function CategoriesPage() {
-  const locale = useLocale();
-
+  const t = useTranslations('CategoriesPage');
   const { data, loading, error } = useGetRootCollectionsQuery();
-
-  const collections = data?.collections?.items || [];
+  const items = data?.collections.items ?? [];
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Catégories</h1>
-        <p className="text-muted-foreground">
-          Parcourez nos collections et trouvez ce que vous cherchez
-        </p>
-      </div>
+    <div className="flex flex-col">
+      <PageHeader
+        breadcrumbs={[{ label: t('breadcrumbHome'), href: '/' }, { label: t('breadcrumbAll') }]}
+        title={t('title')}
+        description={t('subtitle')}
+      />
 
-      {/* Loading State */}
-      {loading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="rounded-lg border bg-card overflow-hidden">
-              <Skeleton className="aspect-[3/2]" />
-              <div className="p-4">
-                <Skeleton className="h-5 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-1/2" />
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="mx-auto w-full max-w-7xl px-6 py-8">
+        {error && (
+          <Alert intent="danger" title={t('errorTitle')} className="mb-6">
+            {error.message}
+          </Alert>
+        )}
 
-      {/* Error State */}
-      {error && (
-        <div className="bg-destructive/10 text-destructive rounded-lg p-6 text-center">
-          <p>Erreur lors du chargement des catégories</p>
-          <p className="text-sm mt-2">{error.message}</p>
-        </div>
-      )}
-
-      {/* Empty State */}
-      {!loading && !error && collections.length === 0 && (
-        <div className="text-center py-16">
-          <Folder className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Aucune catégorie</h2>
-          <p className="text-muted-foreground">
-            Aucune catégorie n'est disponible pour le moment.
-          </p>
-        </div>
-      )}
-
-      {/* Categories Grid */}
-      {!loading && !error && collections.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {collections.map((collection) => (
-            <CategoryCard
-              key={collection.id}
-              id={collection.id}
-              name={collection.name}
-              slug={collection.slug}
-              description={collection.description || undefined}
-              imageUrl={collection.featuredAsset?.preview}
-              locale={locale}
-              childCount={collection.children?.length}
-              variant="default"
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Featured Subcategories Section */}
-      {!loading && !error && collections.length > 0 && (
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold mb-6">Sous-catégories populaires</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {collections
-              .flatMap((collection) =>
-                (collection.children || []).slice(0, 2).map((child) => ({
-                  ...child,
-                  parentName: collection.name,
-                }))
-              )
-              .slice(0, 12)
-              .map((subcategory) => (
-                <CategoryCard
-                  key={subcategory.id}
-                  id={subcategory.id}
-                  name={subcategory.name}
-                  slug={subcategory.slug}
-                  imageUrl={subcategory.featuredAsset?.preview}
-                  locale={locale}
-                  variant="compact"
-                />
-              ))}
+        {loading && (
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="aspect-[4/5] w-full" />
+            ))}
           </div>
-        </div>
-      )}
+        )}
+
+        {!loading && items.length === 0 && !error && (
+          <p className="py-12 text-center text-content-muted">{t('empty')}</p>
+        )}
+
+        {items.length > 0 && (
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+            {items.map((c) => (
+              <Link
+                key={c.id}
+                href={`/categories/${c.slug}`}
+                className="group relative aspect-[4/5] overflow-hidden rounded border border-border bg-bg-muted"
+              >
+                {c.featuredAsset?.preview && (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={c.featuredAsset.preview}
+                    alt={c.name}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-slow group-hover:scale-105"
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-content-strong/70 to-transparent" />
+                <span className="absolute inset-x-4 bottom-4 text-18 font-bold text-content-inverse">
+                  {c.name}
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,356 +1,112 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Lock, Eye, EyeOff, User, Phone, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
-
-// Convert phone number to email format for Vendure auth
-function phoneToEmail(phone: string): string {
-  const cleaned = phone.replace(/\s/g, '').replace(/\D/g, '');
-  return `+213${cleaned}@phone.dz`;
-}
-
-// Format phone number for display (XXX XX XX XX)
-function formatPhoneDisplay(phone: string): string {
-  const cleaned = phone.replace(/\s/g, '').replace(/\D/g, '');
-  if (cleaned.length <= 3) return cleaned;
-  if (cleaned.length <= 5) return `${cleaned.slice(0, 3)} ${cleaned.slice(3)}`;
-  if (cleaned.length <= 7) return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 5)} ${cleaned.slice(5)}`;
-  return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 5)} ${cleaned.slice(5, 7)} ${cleaned.slice(7, 9)}`;
-}
-
-// Validate Algerian phone number (without the +213 prefix)
-function validateAlgerianPhone(phone: string): boolean {
-  const cleaned = phone.replace(/\s/g, '').replace(/\D/g, '');
-  return /^[567]\d{8}$/.test(cleaned);
-}
+import { useToast } from '@/components/ui/Toast';
+import { useRouter, Link } from '@/i18n/routing';
+import { Alert, Button, Card, Field, Input } from '@/components/ui';
 
 export default function RegisterPage() {
-  const t = useTranslations('auth');
-  const params = useParams();
+  const tFields = useTranslations('auth.fields');
+  const tPlaceholders = useTranslations('auth.placeholders');
+  const tRegister = useTranslations('auth.register');
+  const { register } = useAuth();
   const router = useRouter();
-  const locale = params?.locale as string;
+  const toast = useToast();
 
-  const { register, loading: authLoading } = useAuth();
-
-  const [formData, setFormData] = useState({
+  const [form, setForm] = React.useState({
     firstName: '',
     lastName: '',
-    phone: '',
+    email: '',
     password: '',
-    confirmPassword: '',
-    acceptTerms: false,
   });
+  const [submitting, setSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = t('validation.firstNameRequired');
-    }
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = t('validation.lastNameRequired');
-    }
-    // Phone number is required
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Le numéro de téléphone est requis';
-    } else if (!validateAlgerianPhone(formData.phone)) {
-      newErrors.phone = 'Numéro invalide. Format: 5XX XX XX XX, 6XX XX XX XX ou 7XX XX XX XX';
-    }
-    if (!formData.password) {
-      newErrors.password = t('validation.passwordRequired');
-    } else if (formData.password.length < 8) {
-      newErrors.password = t('validation.passwordMin');
-    }
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = t('errors.passwordMismatch');
-    }
-    if (!formData.acceptTerms) {
-      newErrors.acceptTerms = t('validation.termsRequired');
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '').slice(0, 9);
-    handleChange('phone', value);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setSubmitting(true);
     setError(null);
-
-    if (!validate()) {
-      return;
-    }
-
-    setIsSubmitting(true);
-
     try {
-      // Convert phone to email format for Vendure
-      const fullPhoneNumber = `+213${formData.phone}`;
-      const emailAddress = phoneToEmail(formData.phone);
-
       const result = await register({
-        emailAddress: emailAddress,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phoneNumber: fullPhoneNumber,
-        password: formData.password,
+        firstName: form.firstName,
+        lastName: form.lastName,
+        emailAddress: form.email,
+        password: form.password,
       });
-
       if (result.requiresVerification) {
-        setSuccess(true);
-        setTimeout(() => {
-          router.push(`/${locale}/login`);
-        }, 2000);
+        toast.info(tRegister('verifyToastBody'), { title: tRegister('verifyToastTitle') });
+        router.push(`/verification-pending?email=${encodeURIComponent(form.email)}`);
       } else {
-        router.push(`/${locale}`);
+        router.push('/');
       }
-    } catch (err: any) {
-      setError(err.message || t('errors.registrationFailed'));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : tRegister('failed'));
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
-  };
-
-  const handleChange = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: '' }));
-    }
-  };
-
-  if (success) {
-    return (
-      <Card className="w-full">
-        <CardContent className="pt-6">
-          <div className="text-center space-y-4">
-            <div className="mx-auto w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-              <CheckCircle2 className="h-6 w-6 text-green-600" />
-            </div>
-            <h2 className="text-xl font-semibold">{t('register.success')}</h2>
-            <p className="text-muted-foreground">{t('register.checkEmail')}</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader className="space-y-1 text-center">
-        <CardTitle className="text-2xl font-bold">
-          {t('register.title')}
-        </CardTitle>
-        <CardDescription>
-          {t('register.hasAccount')}{' '}
-          <Link
-            href={`/${locale}/login`}
-            className="text-primary hover:underline font-medium"
-          >
-            {t('register.signIn')}
-          </Link>
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+    <Card padding="lg" className="flex flex-col gap-6">
+      <header className="flex flex-col gap-1">
+        <h1 className="text-32 font-bold text-content-strong">{tRegister('title')}</h1>
+        <p className="text-14 text-content-muted">{tRegister('subtitle')}</p>
+      </header>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">{t('fields.firstName')}</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="firstName"
-                  type="text"
-                  placeholder={t('placeholders.firstName')}
-                  className="pl-10"
-                  value={formData.firstName}
-                  onChange={(e) => handleChange('firstName', e.target.value)}
-                  required
-                />
-              </div>
-              {errors.firstName && (
-                <p className="text-sm text-destructive">{errors.firstName}</p>
-              )}
-            </div>
+      {error && <Alert intent="danger">{error}</Alert>}
 
-            <div className="space-y-2">
-              <Label htmlFor="lastName">{t('fields.lastName')}</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="lastName"
-                  type="text"
-                  placeholder={t('placeholders.lastName')}
-                  className="pl-10"
-                  value={formData.lastName}
-                  onChange={(e) => handleChange('lastName', e.target.value)}
-                  required
-                />
-              </div>
-              {errors.lastName && (
-                <p className="text-sm text-destructive">{errors.lastName}</p>
-              )}
-            </div>
-          </div>
+      <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label={tFields('firstName')} required>
+            <Input
+              required
+              autoComplete="given-name"
+              value={form.firstName}
+              onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
+            />
+          </Field>
+          <Field label={tFields('lastName')} required>
+            <Input
+              required
+              autoComplete="family-name"
+              value={form.lastName}
+              onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
+            />
+          </Field>
+        </div>
+        <Field label={tFields('email')} required>
+          <Input
+            type="email"
+            required
+            autoComplete="email"
+            value={form.email}
+            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+            placeholder={tPlaceholders('email')}
+          />
+        </Field>
+        <Field label={tFields('password')} required hint={tRegister('passwordHint')}>
+          <Input
+            type="password"
+            required
+            autoComplete="new-password"
+            value={form.password}
+            onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+            placeholder={tPlaceholders('password')}
+          />
+        </Field>
+        <Button type="submit" size="lg" fullWidth loading={submitting}>
+          {tRegister('createAccount')}
+        </Button>
+      </form>
 
-          <div className="space-y-2">
-            <Label htmlFor="phone">Numéro de téléphone</Label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <div className="absolute left-10 top-1/2 -translate-y-1/2 text-muted-foreground font-medium border-r pr-2">
-                +213
-              </div>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="5XX XX XX XX"
-                className="pl-[5.5rem]"
-                value={formatPhoneDisplay(formData.phone)}
-                onChange={handlePhoneChange}
-                required
-                autoComplete="tel"
-                maxLength={12}
-              />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Entrez votre numéro sans le 0 (ex: 551234567)
-            </p>
-            {errors.phone && (
-              <p className="text-sm text-destructive">{errors.phone}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">{t('fields.password')}</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder={t('placeholders.password')}
-                className="pl-10 pr-10"
-                value={formData.password}
-                onChange={(e) => handleChange('password', e.target.value)}
-                required
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="text-sm text-destructive">{errors.password}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">{t('fields.confirmPassword')}</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
-                placeholder={t('placeholders.confirmPassword')}
-                className="pl-10 pr-10"
-                value={formData.confirmPassword}
-                onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                required
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                {showConfirmPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-            {errors.confirmPassword && (
-              <p className="text-sm text-destructive">{errors.confirmPassword}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-start space-x-2">
-              <Checkbox
-                id="acceptTerms"
-                checked={formData.acceptTerms}
-                onCheckedChange={(checked) => handleChange('acceptTerms', checked)}
-              />
-              <Label htmlFor="acceptTerms" className="text-sm font-normal leading-relaxed cursor-pointer">
-                {t('register.termsNotice')}{' '}
-                <Link href={`/${locale}/terms`} className="text-primary hover:underline">
-                  {t('register.termsLink')}
-                </Link>
-              </Label>
-            </div>
-            {errors.acceptTerms && (
-              <p className="text-sm text-destructive">{errors.acceptTerms}</p>
-            )}
-          </div>
-
-          <Button
-            type="submit"
-            className="w-full"
-            size="lg"
-            disabled={isSubmitting || authLoading}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t('register.creating')}
-              </>
-            ) : (
-              t('register.createAccount')
-            )}
-          </Button>
-        </form>
-      </CardContent>
+      <p className="text-center text-14 text-content-muted">
+        {tRegister('hasAccount')}{' '}
+        <Link href="/login" className="font-medium text-content-strong hover:underline">
+          {tRegister('signIn')}
+        </Link>
+      </p>
     </Card>
   );
 }

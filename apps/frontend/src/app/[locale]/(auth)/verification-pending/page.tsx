@@ -1,112 +1,69 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useParams, useSearchParams } from 'next/navigation';
+import * as React from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Mail, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Link } from '@/i18n/routing';
+import { Alert, Button, Card } from '@/components/ui';
 
 export default function VerificationPendingPage() {
-  const t = useTranslations('auth');
-  const params = useParams();
+  const t = useTranslations('auth.verificationPending');
+  const tLogin = useTranslations('auth.login');
+
   const searchParams = useSearchParams();
-  const locale = params?.locale as string;
-  const email = searchParams?.get('email') || '';
+  const email = searchParams.get('email') ?? '';
 
   const { resendVerification } = useAuth();
+  const [submitting, setSubmitting] = React.useState(false);
+  const [resent, setResent] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
-  const [isResending, setIsResending] = useState(false);
-  const [resent, setResent] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleResend = async () => {
-    if (!email) return;
-
-    setIsResending(true);
+  async function onResend() {
+    if (!email) {
+      setError(t('description'));
+      return;
+    }
+    setSubmitting(true);
     setError(null);
-    setResent(false);
-
     try {
       await resendVerification(email);
       setResent(true);
-    } catch (err: any) {
-      setError(err.message || t('errors.registrationFailed'));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('resend'));
     } finally {
-      setIsResending(false);
+      setSubmitting(false);
     }
-  };
+  }
 
   return (
-    <Card className="w-full">
-      <CardHeader className="space-y-1 text-center">
-        <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-          <Mail className="h-8 w-8 text-primary" />
-        </div>
-        <CardTitle className="text-2xl font-bold">
-          {t('verificationPending.title')}
-        </CardTitle>
-        <CardDescription className="text-base">
-          {t('verificationPending.description')}
-          {email && (
-            <span className="block mt-1 font-medium text-foreground">
-              {email}
-            </span>
-          )}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+    <Card padding="lg" className="flex flex-col gap-6 text-center">
+      <header className="flex flex-col gap-2">
+        <h1 className="text-32 font-bold text-content-strong">{t('title')}</h1>
+        <p className="text-14 text-content-muted">
+          {t('description')} {email && <strong className="text-content-strong">{email}</strong>}
+        </p>
+      </header>
 
-        {resent && (
-          <Alert className="border-green-200 bg-green-50 text-green-800">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertDescription>{t('verificationPending.resent')}</AlertDescription>
-          </Alert>
-        )}
+      {error && <Alert intent="danger">{error}</Alert>}
+      {resent && <Alert intent="success">{t('resent')}</Alert>}
 
-        <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
-          <p>{t('verificationPending.checkSpam')}</p>
-        </div>
+      <p className="text-12 text-content-subtle">{t('checkSpam')}</p>
 
-        <div className="space-y-3">
-          <Button
-            onClick={handleResend}
-            variant="outline"
-            className="w-full"
-            disabled={isResending || !email}
-          >
-            {isResending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t('verificationPending.resending')}
-              </>
-            ) : (
-              t('verificationPending.resend')
-            )}
-          </Button>
+      <Button
+        type="button"
+        intent="secondary"
+        fullWidth
+        onClick={onResend}
+        loading={submitting}
+        disabled={resent}
+      >
+        {submitting ? t('resending') : t('resend')}
+      </Button>
 
-          <Button asChild variant="ghost" className="w-full">
-            <Link href={`/${locale}/login`}>
-              {t('forgotPassword.backToLogin')}
-            </Link>
-          </Button>
-        </div>
-      </CardContent>
+      <Link href="/login" className="text-14 font-medium text-content-strong hover:underline">
+        {tLogin('signIn')}
+      </Link>
     </Card>
   );
 }

@@ -1,144 +1,61 @@
-import { MetadataRoute } from 'next';
-import { siteConfig, localeConfig } from '@/lib/seo';
+import type { MetadataRoute } from 'next';
+import { routing } from '@/i18n/routing';
 
-// GraphQL endpoint for fetching products and collections
-const GRAPHQL_URL = process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8085/shop-api';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://oscarfashion.dz';
 
-// Fetch products for sitemap
-async function fetchProducts(): Promise<Array<{ slug: string; updatedAt: string }>> {
-  try {
-    const response = await fetch(GRAPHQL_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: `
-          query GetProductsForSitemap {
-            products(options: { take: 1000 }) {
-              items {
-                slug
-                updatedAt
-              }
-            }
-          }
-        `,
-      }),
-      next: { revalidate: 3600 }, // Revalidate every hour
-    });
+// Static routes that should appear in every locale's sitemap.
+const STATIC_PATHS = [
+  '/',
+  '/products',
+  '/categories',
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/shipping',
+  '/returns',
+  '/size-guide',
+  '/faq',
+  '/about',
+  '/careers',
+  '/contact',
+  '/legal/terms',
+  '/legal/privacy',
+];
 
-    const { data } = await response.json();
-    return data?.products?.items || [];
-  } catch (error) {
-    console.error('[Sitemap] Failed to fetch products:', error);
-    return [];
-  }
+function localeUrl(locale: string, path: string): string {
+  const isDefault = locale === routing.defaultLocale;
+  if (isDefault) return `${SITE_URL}${path}`.replace(/\/$/, '') || SITE_URL;
+  const prefix = path === '/' ? '' : path;
+  return `${SITE_URL}/${locale}${prefix}`;
 }
 
-// Fetch collections for sitemap
-async function fetchCollections(): Promise<Array<{ slug: string; updatedAt: string }>> {
-  try {
-    const response = await fetch(GRAPHQL_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: `
-          query GetCollectionsForSitemap {
-            collections(options: { take: 100 }) {
-              items {
-                slug
-                updatedAt
-              }
-            }
-          }
-        `,
-      }),
-      next: { revalidate: 3600 },
-    });
-
-    const { data } = await response.json();
-    return data?.collections?.items || [];
-  } catch (error) {
-    console.error('[Sitemap] Failed to fetch collections:', error);
-    return [];
+function buildAlternates(path: string): Record<string, string> {
+  const alternates: Record<string, string> = {};
+  for (const locale of routing.locales) {
+    alternates[locale] = localeUrl(locale, path);
   }
+  alternates['x-default'] = localeUrl(routing.defaultLocale, path);
+  return alternates;
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = siteConfig.url;
-  const locales = Object.keys(localeConfig);
+  const now = new Date();
+  const entries: MetadataRoute.Sitemap = [];
 
-  // Static pages
-  const staticPages = [
-    { path: '', priority: 1.0, changeFrequency: 'daily' as const },
-    { path: '/products', priority: 0.9, changeFrequency: 'daily' as const },
-    { path: '/search', priority: 0.7, changeFrequency: 'weekly' as const },
-    { path: '/about', priority: 0.5, changeFrequency: 'monthly' as const },
-    { path: '/contact', priority: 0.5, changeFrequency: 'monthly' as const },
-    { path: '/faq', priority: 0.5, changeFrequency: 'monthly' as const },
-    { path: '/shipping', priority: 0.4, changeFrequency: 'monthly' as const },
-    { path: '/returns', priority: 0.4, changeFrequency: 'monthly' as const },
-    { path: '/terms', priority: 0.3, changeFrequency: 'yearly' as const },
-    { path: '/privacy', priority: 0.3, changeFrequency: 'yearly' as const },
-  ];
+  for (const path of STATIC_PATHS) {
+    for (const locale of routing.locales) {
+      entries.push({
+        url: localeUrl(locale, path),
+        lastModified: now,
+        changeFrequency: path === '/' ? 'daily' : 'weekly',
+        priority: path === '/' ? 1.0 : 0.7,
+        alternates: { languages: buildAlternates(path) },
+      });
+    }
+  }
 
-  // Generate static page entries for all locales
-  const staticEntries: MetadataRoute.Sitemap = staticPages.flatMap((page) =>
-    locales.map((locale) => ({
-      url: `${baseUrl}/${locale}${page.path}`,
-      lastModified: new Date(),
-      changeFrequency: page.changeFrequency,
-      priority: page.priority,
-      alternates: {
-        languages: Object.fromEntries(
-          locales.map((loc) => [
-            localeConfig[loc]?.hreflang || loc,
-            `${baseUrl}/${loc}${page.path}`,
-          ])
-        ),
-      },
-    }))
-  );
+  // TODO: extend with /products/[slug] and /categories/[slug] by fetching slugs
+  // from the Vendure Shop API at build time. Backend must be reachable.
 
-  // Fetch dynamic content
-  const [products, collections] = await Promise.all([
-    fetchProducts(),
-    fetchCollections(),
-  ]);
-
-  // Generate product entries for all locales
-  const productEntries: MetadataRoute.Sitemap = products.flatMap((product) =>
-    locales.map((locale) => ({
-      url: `${baseUrl}/${locale}/products/${product.slug}`,
-      lastModified: new Date(product.updatedAt),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-      alternates: {
-        languages: Object.fromEntries(
-          locales.map((loc) => [
-            localeConfig[loc]?.hreflang || loc,
-            `${baseUrl}/${loc}/products/${product.slug}`,
-          ])
-        ),
-      },
-    }))
-  );
-
-  // Generate collection entries for all locales
-  const collectionEntries: MetadataRoute.Sitemap = collections.flatMap((collection) =>
-    locales.map((locale) => ({
-      url: `${baseUrl}/${locale}/collections/${collection.slug}`,
-      lastModified: new Date(collection.updatedAt),
-      changeFrequency: 'weekly' as const,
-      priority: 0.7,
-      alternates: {
-        languages: Object.fromEntries(
-          locales.map((loc) => [
-            localeConfig[loc]?.hreflang || loc,
-            `${baseUrl}/${loc}/collections/${collection.slug}`,
-          ])
-        ),
-      },
-    }))
-  );
-
-  return [...staticEntries, ...collectionEntries, ...productEntries];
+  return entries;
 }

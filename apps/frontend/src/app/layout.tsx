@@ -1,16 +1,11 @@
 import type { Metadata } from 'next';
+import '@/styles/globals.css';
 
 export const metadata: Metadata = {
-  title: 'OSCAR Fashion - Mode & Elegance',
-  description: 'Decouvrez les dernieres tendances de la mode chez OSCAR Fashion',
+  title: { default: 'OSCAR Najar', template: '%s · OSCAR Najar' },
+  description: "OSCAR Najar — la mode élégante au cœur de l'Algérie.",
 };
 
-// Root layout is minimal - the [locale]/layout.tsx handles html/body
-// This prevents hydration mismatches from duplicate html/body wrappers
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return children;
 }

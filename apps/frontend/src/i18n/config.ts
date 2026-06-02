@@ -1,5 +1,5 @@
 export const locales = ['ar', 'fr', 'en'] as const;
-export type Locale = typeof locales[number];
+export type Locale = (typeof locales)[number];
 
 export const defaultLocale: Locale = 'fr';
 
@@ -9,8 +9,8 @@ export const localeNames: Record<Locale, string> = {
   en: 'English',
 };
 
-export const localeFlags: Record<Locale, string> = {
-  ar: '🇩🇿',
-  fr: '🇫🇷',
-  en: '🇬🇧',
+export const localeDirection: Record<Locale, 'ltr' | 'rtl'> = {
+  ar: 'rtl',
+  fr: 'ltr',
+  en: 'ltr',
 };
