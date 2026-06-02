@@ -68,7 +68,7 @@ export default function PaymentStatusScreen() {
             },
             {
               label: t('payment.goHome', 'Go to Home'),
-              onPress: () => router.replace('/(tabs)/home'),
+              onPress: () => router.replace('/(tabs)'),
               variant: 'outline' as const,
             },
           ],
@@ -93,12 +93,12 @@ export default function PaymentStatusScreen() {
             },
             {
               label: t('payment.contactSupport', 'Contact Support'),
-              onPress: () => router.push('/support'),
+              onPress: () => router.push('/profile/support'),
               variant: 'outline' as const,
             },
             {
               label: t('payment.goHome', 'Go to Home'),
-              onPress: () => router.replace('/(tabs)/home'),
+              onPress: () => router.replace('/(tabs)'),
               variant: 'outline' as const,
             },
           ],
@@ -128,7 +128,7 @@ export default function PaymentStatusScreen() {
             },
             {
               label: t('payment.goHome', 'Go to Home'),
-              onPress: () => router.replace('/(tabs)/home'),
+              onPress: () => router.replace('/(tabs)'),
               variant: 'outline' as const,
             },
           ],
@@ -145,7 +145,7 @@ export default function PaymentStatusScreen() {
           actions: [
             {
               label: t('payment.goHome', 'Go to Home'),
-              onPress: () => router.replace('/(tabs)/home'),
+              onPress: () => router.replace('/(tabs)'),
               variant: 'primary' as const,
             },
           ],
