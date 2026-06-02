@@ -18,6 +18,7 @@ import {
   useTransitionOrderToStateMutation,
   useAddPaymentToOrderMutation,
   useSetCustomerForOrderMutation,
+  useActiveCustomerQuery,
 } from '../../src/graphql/generated/graphql';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { colors, spacing, typography } from '../../src/theme';
@@ -25,6 +26,8 @@ import { formatPrice } from '../../src/utils/vendureAdapters';
 import { submitCheckoutAddress, STALE_SESSION_ERROR } from '../../src/utils/checkout';
 import { makeShippingAddressSchema } from '../../src/utils/validation';
 import { wilayas } from '../../src/data/wilayas';
+import { addressToCheckoutValues, SavedAddress } from '../../src/utils/address';
+import { SavedAddressPicker } from '../../src/components/checkout/SavedAddressPicker';
 
 type CheckoutStep = 'shipping' | 'shippingMethod' | 'payment' | 'review';
 
@@ -64,6 +67,22 @@ export default function CheckoutScreen() {
           phoneNumber: user.phoneNumber ?? '',
         }
       : undefined;
+
+  // Saved addresses for the signed-in shopper — selecting one prefills the form.
+  const { data: customerData } = useActiveCustomerQuery({ skip: !isAuthenticated, fetchPolicy: 'cache-and-network' });
+  const savedAddresses = (customerData?.activeCustomer?.addresses ?? []) as SavedAddress[];
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedAddressId && savedAddresses.length > 0) {
+      const def = savedAddresses.find((a) => a.defaultShippingAddress) ?? savedAddresses[0];
+      setSelectedAddressId(def.id);
+    }
+  }, [savedAddresses, selectedAddressId]);
+
+  const selectedAddress = savedAddresses.find((a) => a.id === selectedAddressId) ?? null;
+  const formInitialValues =
+    shippingAddress ?? (selectedAddress ? addressToCheckoutValues(selectedAddress, wilayas) : prefill);
 
   const shippingMethods = shippingMethodsData?.eligibleShippingMethods || [];
   const paymentMethods = paymentMethodsData?.eligiblePaymentMethods || [];
@@ -280,13 +299,23 @@ export default function CheckoutScreen() {
       {/* Content */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {currentStep === 'shipping' && (
-          <ShippingAddressForm
-            initialValues={shippingAddress || prefill}
-            showEmail={!isAuthenticated}
-            validationSchema={makeShippingAddressSchema(!isAuthenticated)}
-            onSubmit={handleShippingSubmit}
-            submitButtonText={t('checkout.continueToDelivery', 'Continue to Delivery')}
-          />
+          <>
+            {isAuthenticated && (
+              <SavedAddressPicker
+                addresses={savedAddresses}
+                selectedId={selectedAddressId}
+                onSelect={(a) => setSelectedAddressId(a.id)}
+              />
+            )}
+            <ShippingAddressForm
+              key={selectedAddressId ?? 'new'}
+              initialValues={formInitialValues}
+              showEmail={!isAuthenticated}
+              validationSchema={makeShippingAddressSchema(!isAuthenticated)}
+              onSubmit={handleShippingSubmit}
+              submitButtonText={t('checkout.continueToDelivery', 'Continue to Delivery')}
+            />
+          </>
         )}
 
         {currentStep === 'shippingMethod' && (

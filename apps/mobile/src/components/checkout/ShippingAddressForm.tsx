@@ -64,6 +64,7 @@ export const ShippingAddressForm: React.FC<ShippingAddressFormProps> = ({
 
         <Formik
           initialValues={{ ...defaultInitialValues, ...initialValues }}
+          enableReinitialize
           validationSchema={validationSchema ?? shippingAddressSchema}
           onSubmit={onSubmit}
         >
