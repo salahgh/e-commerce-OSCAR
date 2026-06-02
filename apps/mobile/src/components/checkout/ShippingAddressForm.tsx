@@ -3,8 +3,9 @@ import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } fr
 import { Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { Input, Button } from '../ui';
+import { WilayaPicker } from './WilayaPicker';
 import { colors, spacing, typography } from '../../theme';
-import { shippingAddressSchema } from '../../utils/validation';
+import { makeShippingAddressSchema, shippingAddressSchema } from '../../utils/validation';
 
 export interface ShippingAddressFormValues {
   fullName: string;
@@ -13,6 +14,8 @@ export interface ShippingAddressFormValues {
   city: string;
   postalCode: string;
   notes?: string;
+  email: string;
+  wilayaCode: string;
 }
 
 interface ShippingAddressFormProps {
@@ -20,6 +23,8 @@ interface ShippingAddressFormProps {
   onSubmit: (values: ShippingAddressFormValues) => void;
   loading?: boolean;
   submitButtonText?: string;
+  showEmail?: boolean;
+  validationSchema?: ReturnType<typeof makeShippingAddressSchema>;
 }
 
 const defaultInitialValues: ShippingAddressFormValues = {
@@ -29,6 +34,8 @@ const defaultInitialValues: ShippingAddressFormValues = {
   city: '',
   postalCode: '',
   notes: '',
+  email: '',
+  wilayaCode: '',
 };
 
 export const ShippingAddressForm: React.FC<ShippingAddressFormProps> = ({
@@ -36,6 +43,8 @@ export const ShippingAddressForm: React.FC<ShippingAddressFormProps> = ({
   onSubmit,
   loading = false,
   submitButtonText,
+  showEmail = false,
+  validationSchema,
 }) => {
   const { t } = useTranslation();
 
@@ -55,11 +64,24 @@ export const ShippingAddressForm: React.FC<ShippingAddressFormProps> = ({
 
         <Formik
           initialValues={{ ...defaultInitialValues, ...initialValues }}
-          validationSchema={shippingAddressSchema}
+          validationSchema={validationSchema ?? shippingAddressSchema}
           onSubmit={onSubmit}
         >
-          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isValid }) => (
+          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, setFieldValue, isValid }) => (
             <View style={styles.form}>
+              {showEmail && (
+                <Input
+                  label={t('checkout.email', 'Email')}
+                  placeholder="you@example.com"
+                  value={values.email}
+                  onChangeText={handleChange('email')}
+                  onBlur={handleBlur('email')}
+                  error={touched.email && errors.email ? errors.email : undefined}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  required
+                />
+              )}
               <Input
                 label={t('checkout.fullName', 'Full Name')}
                 placeholder={t('checkout.fullNamePlaceholder', 'John Doe')}
@@ -119,6 +141,12 @@ export const ShippingAddressForm: React.FC<ShippingAddressFormProps> = ({
                   required
                 />
               </View>
+
+              <WilayaPicker
+                value={values.wilayaCode}
+                onSelect={(code) => setFieldValue('wilayaCode', code)}
+                error={touched.wilayaCode && errors.wilayaCode ? errors.wilayaCode : undefined}
+              />
 
               <Input
                 label={t('checkout.notes', 'Delivery Notes')}
