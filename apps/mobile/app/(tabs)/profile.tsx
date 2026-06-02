@@ -95,6 +95,11 @@ export default function ProfileScreen() {
       onPress: () => router.push('/profile/edit'),
     },
     {
+      icon: 'location-outline',
+      label: t('profile.addresses', 'My Addresses'),
+      onPress: () => router.push('/profile/addresses' as any),
+    },
+    {
       icon: 'cube-outline',
       label: t('profile.trackOrders'),
       onPress: () => router.push('/(tabs)/orders' as any),
