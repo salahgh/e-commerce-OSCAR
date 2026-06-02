@@ -8,6 +8,7 @@ import {
 import { useRouter, useSegments } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing } from '../../theme';
+import { useTranslation } from 'react-i18next';
 
 interface BackButtonProps {
   onPress?: () => void;
@@ -29,6 +30,7 @@ export const BackButton: React.FC<BackButtonProps> = ({
   disabled = false,
 }) => {
   const router = useRouter();
+  const { t } = useTranslation();
   const segments = useSegments();
 
   // Check if we can go back
@@ -69,6 +71,8 @@ export const BackButton: React.FC<BackButtonProps> = ({
       onPress={handlePress}
       disabled={disabled}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={t('a11y.goBack', 'Go back')}
       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
     >
       <Ionicons
@@ -98,6 +102,7 @@ export const CloseButton: React.FC<CloseButtonProps> = ({
   variant = 'default',
   backgroundColor,
 }) => {
+  const { t } = useTranslation();
   const getButtonStyle = (): ViewStyle => {
     switch (variant) {
       case 'circle':
@@ -120,6 +125,8 @@ export const CloseButton: React.FC<CloseButtonProps> = ({
       style={[getButtonStyle(), style]}
       onPress={onPress}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={t('a11y.close', 'Close')}
       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
     >
       <Ionicons name="close" size={size} color={color} />
@@ -138,6 +145,7 @@ export const FloatingBackButton: React.FC<FloatingBackButtonProps> = ({
   style,
 }) => {
   const router = useRouter();
+  const { t } = useTranslation();
   const segments = useSegments();
 
   const canGoBack = segments.length > 1;
@@ -158,6 +166,8 @@ export const FloatingBackButton: React.FC<FloatingBackButtonProps> = ({
     <TouchableOpacity
       style={[styles.floatingButton, style]}
       onPress={handlePress}
+      accessibilityRole="button"
+      accessibilityLabel={t('a11y.goBack', 'Go back')}
       activeOpacity={0.8}
     >
       <Ionicons
