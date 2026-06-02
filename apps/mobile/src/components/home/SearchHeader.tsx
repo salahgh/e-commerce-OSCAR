@@ -23,14 +23,6 @@ export const SearchHeader: React.FC = () => {
           {t('home.searchPlaceholder')}
         </Text>
       </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.iconButton}
-        onPress={() => router.push('/profile/notifications')}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="calendar-outline" size={spacing.iconSize.md} color={colors.text.primary} />
-      </TouchableOpacity>
     </View>
   );
 };
