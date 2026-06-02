@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { gql, InMemoryCache } from '@apollo/client';
-import { createPersistor } from '../persistence';
+import { createPersistor, CACHE_KEY } from '../persistence';
 
 const PING = gql`
   query Ping {
@@ -36,7 +36,7 @@ describe('createPersistor', () => {
   });
 
   it('restore() swallows corrupt stored JSON', async () => {
-    await AsyncStorage.setItem('oscar-apollo-cache', '{not valid json');
+    await AsyncStorage.setItem(CACHE_KEY, '{not valid json');
     const cache = new InMemoryCache();
     await expect(createPersistor(cache).restore()).resolves.toBeUndefined();
   });

@@ -11,7 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppState, type AppStateStatus } from 'react-native';
 import type { InMemoryCache } from '@apollo/client';
 
-const CACHE_KEY = 'oscar-apollo-cache';
+export const CACHE_KEY = 'oscar-apollo-cache';
 const MAX_BYTES = 1024 * 1024; // 1 MB cap
 
 export interface ApolloPersistor {
