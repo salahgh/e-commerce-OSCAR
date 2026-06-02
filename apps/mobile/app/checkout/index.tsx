@@ -28,6 +28,7 @@ import { makeShippingAddressSchema } from '../../src/utils/validation';
 import { wilayas } from '../../src/data/wilayas';
 import { addressToCheckoutValues, SavedAddress } from '../../src/utils/address';
 import { SavedAddressPicker } from '../../src/components/checkout/SavedAddressPicker';
+import { partitionPaymentMethods } from '../../src/utils/payment';
 
 type CheckoutStep = 'shipping' | 'shippingMethod' | 'payment' | 'review';
 
@@ -87,6 +88,9 @@ export default function CheckoutScreen() {
   const shippingMethods = shippingMethodsData?.eligibleShippingMethods || [];
   const paymentMethods = paymentMethodsData?.eligiblePaymentMethods || [];
 
+  const { available: availablePaymentMethods, comingSoon: comingSoonPayments } =
+    partitionPaymentMethods(paymentMethods);
+
   // Auto-select first shipping method if only one
   useEffect(() => {
     if (shippingMethods.length === 1 && !selectedShippingMethod) {
@@ -94,12 +98,13 @@ export default function CheckoutScreen() {
     }
   }, [shippingMethods]);
 
-  // Auto-select first payment method if only one
+  // Default the payment selection to COD (or the first available method).
   useEffect(() => {
-    if (paymentMethods.length === 1 && !selectedPaymentMethod) {
-      setSelectedPaymentMethod(paymentMethods[0].id);
+    if (!selectedPaymentMethod && availablePaymentMethods.length > 0) {
+      const cod = availablePaymentMethods.find((m) => m.code === 'cash-on-delivery');
+      setSelectedPaymentMethod((cod ?? availablePaymentMethods[0]).id);
     }
-  }, [paymentMethods]);
+  }, [availablePaymentMethods, selectedPaymentMethod]);
 
   const handleShippingSubmit = async (values: ShippingAddressFormValues) => {
     try {
@@ -384,12 +389,12 @@ export default function CheckoutScreen() {
 
             {loadingPaymentMethods ? (
               <LoadingSpinner />
-            ) : paymentMethods.length === 0 ? (
+            ) : availablePaymentMethods.length === 0 ? (
               <Text style={styles.noMethodsText}>
                 {t('checkout.noPaymentMethods', 'No payment methods available')}
               </Text>
             ) : (
-              paymentMethods.map((method) => (
+              availablePaymentMethods.map((method) => (
                 <TouchableOpacity
                   key={method.id}
                   style={[
@@ -428,6 +433,39 @@ export default function CheckoutScreen() {
               ))
             )}
 
+            {comingSoonPayments.length > 0 && (
+              <View style={styles.comingSoonSection}>
+                <Text style={styles.comingSoonSectionTitle}>
+                  {t('checkout.comingSoonPayments', 'Online payment — coming soon')}
+                </Text>
+                {comingSoonPayments.map((entry) => (
+                  <View key={entry.code} style={[styles.methodCard, styles.methodCardDisabled]}>
+                    <Ionicons
+                      name={entry.icon as keyof typeof Ionicons.glyphMap}
+                      size={22}
+                      color={colors.text.tertiary}
+                      style={styles.comingSoonIcon}
+                    />
+                    <View style={styles.methodInfo}>
+                      <Text style={[styles.methodName, styles.methodNameDisabled]}>
+                        {t(entry.labelKey, entry.labelFallback)}
+                      </Text>
+                    </View>
+                    <View style={styles.comingSoonBadge}>
+                      <Text style={styles.comingSoonBadgeText}>
+                        {t('checkout.comingSoon', 'Coming soon')}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+                <Text style={styles.comingSoonNote}>
+                  {t(
+                    'checkout.onlinePaymentSoonNote',
+                    'CIB and BaridiMob online payment will be available soon. For now, pay cash on delivery.',
+                  )}
+                </Text>
+              </View>
+            )}
             <Button
               title={t('checkout.continueToReview', 'Continue to Review')}
               onPress={handlePaymentMethodSelect}
@@ -728,6 +766,34 @@ const styles = StyleSheet.create({
   },
   continueButton: {
     marginTop: spacing.lg,
+  },
+  comingSoonSection: {
+    marginTop: spacing.xl,
+  },
+  comingSoonSectionTitle: {
+    ...typography.styles.bodySmall,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.semiBold,
+    marginBottom: spacing.sm,
+  },
+  comingSoonIcon: {
+    marginRight: spacing.md,
+  },
+  comingSoonBadge: {
+    backgroundColor: colors.border,
+    borderRadius: 12,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+  },
+  comingSoonBadgeText: {
+    ...typography.styles.caption,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.medium,
+  },
+  comingSoonNote: {
+    ...typography.styles.caption,
+    color: colors.text.tertiary,
+    marginTop: spacing.sm,
   },
   reviewSection: {
     backgroundColor: colors.surface,
