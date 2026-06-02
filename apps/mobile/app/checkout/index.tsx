@@ -22,7 +22,7 @@ import {
 import { useAuth } from '../../src/contexts/AuthContext';
 import { colors, spacing, typography } from '../../src/theme';
 import { formatPrice } from '../../src/utils/vendureAdapters';
-import { buildShippingAddressInput, buildGuestCustomerInput } from '../../src/utils/checkout';
+import { submitCheckoutAddress, STALE_SESSION_ERROR } from '../../src/utils/checkout';
 import { makeShippingAddressSchema } from '../../src/utils/validation';
 import { wilayas } from '../../src/data/wilayas';
 
@@ -84,41 +84,26 @@ export default function CheckoutScreen() {
 
   const handleShippingSubmit = async (values: ShippingAddressFormValues) => {
     try {
-      // Guest checkout: attach a customer (with a REAL email) to the order first.
-      if (!isAuthenticated) {
-        const customerResult = await setCustomerMutation({
-          variables: { input: buildGuestCustomerInput(values) },
-        });
-        const customerResp = customerResult.data?.setCustomerForOrder;
-        if (customerResp && 'errorCode' in customerResp) {
-          if (customerResp.__typename === 'AlreadyLoggedInError') {
-            throw new Error(
-              t(
-                'checkout.staleSession',
-                'Your session is out of sync — please sign in again to continue.'
-              )
-            );
-          }
-          throw new Error((customerResp as { message: string }).message);
-        }
-      }
-
-      const { data } = await setShippingAddressMutation({
-        variables: { input: buildShippingAddressInput(values, wilayas) },
+      await submitCheckoutAddress({
+        values,
+        isAuthenticated,
+        wilayas,
+        setCustomer: async (input) =>
+          (await setCustomerMutation({ variables: { input } })).data?.setCustomerForOrder,
+        setShippingAddress: async (input) =>
+          (await setShippingAddressMutation({ variables: { input } })).data?.setOrderShippingAddress,
       });
-      if (data?.setOrderShippingAddress && 'errorCode' in data.setOrderShippingAddress) {
-        throw new Error((data.setOrderShippingAddress as { message: string }).message);
-      }
 
       setShippingAddress(values);
       setCurrentStep('shippingMethod');
       refetchCart();
     } catch (error: any) {
+      const message =
+        error?.message === STALE_SESSION_ERROR
+          ? t('checkout.staleSession', 'Your session is out of sync — please sign in again to continue.')
+          : error?.message || t('checkout.addressError', 'Failed to set shipping address');
       console.error('Set shipping address error:', error);
-      Alert.alert(
-        t('common.error', 'Error'),
-        error.message || t('checkout.addressError', 'Failed to set shipping address')
-      );
+      Alert.alert(t('common.error', 'Error'), message);
     }
   };
 

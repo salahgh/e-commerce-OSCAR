@@ -1,4 +1,10 @@
-import { resolveWilayaName, buildShippingAddressInput, buildGuestCustomerInput } from '../checkout';
+import {
+  resolveWilayaName,
+  buildShippingAddressInput,
+  buildGuestCustomerInput,
+  submitCheckoutAddress,
+  STALE_SESSION_ERROR,
+} from '../checkout';
 import type { Wilaya } from '../../data/wilayas';
 
 const WILAYAS = [
@@ -65,5 +71,77 @@ describe('buildGuestCustomerInput', () => {
     const out = buildGuestCustomerInput(VALUES);
     expect(out.emailAddress).toBe('sara@example.com');
     expect(out.emailAddress).not.toMatch(/guest_/);
+  });
+});
+
+describe('submitCheckoutAddress', () => {
+  const okOrder = { __typename: 'Order' };
+
+  function makeDeps(overrides: Record<string, unknown> = {}) {
+    return {
+      values: VALUES,
+      isAuthenticated: false,
+      wilayas: WILAYAS,
+      setCustomer: jest.fn().mockResolvedValue(okOrder),
+      setShippingAddress: jest.fn().mockResolvedValue(okOrder),
+      ...overrides,
+    } as Parameters<typeof submitCheckoutAddress>[0] & {
+      setCustomer: jest.Mock;
+      setShippingAddress: jest.Mock;
+    };
+  }
+
+  it('guest: attaches the customer with the real email, then sets the shipping address', async () => {
+    const deps = makeDeps();
+    await submitCheckoutAddress(deps);
+    expect(deps.setCustomer).toHaveBeenCalledTimes(1);
+    expect(deps.setCustomer).toHaveBeenCalledWith(
+      expect.objectContaining({ emailAddress: 'sara@example.com', firstName: 'Sara', lastName: 'Ben Ali' })
+    );
+    expect(deps.setShippingAddress).toHaveBeenCalledWith(
+      expect.objectContaining({ province: 'Alger', countryCode: 'DZ' })
+    );
+  });
+
+  it('authenticated: does NOT attach a customer, only sets the shipping address', async () => {
+    const deps = makeDeps({ isAuthenticated: true });
+    await submitCheckoutAddress(deps);
+    expect(deps.setCustomer).not.toHaveBeenCalled();
+    expect(deps.setShippingAddress).toHaveBeenCalledTimes(1);
+  });
+
+  it('throws STALE_SESSION on AlreadyLoggedInError and never sets the address', async () => {
+    const deps = makeDeps({
+      setCustomer: jest.fn().mockResolvedValue({
+        __typename: 'AlreadyLoggedInError',
+        errorCode: 'ALREADY_LOGGED_IN_ERROR',
+        message: 'already logged in',
+      }),
+    });
+    await expect(submitCheckoutAddress(deps)).rejects.toThrow(STALE_SESSION_ERROR);
+    expect(deps.setShippingAddress).not.toHaveBeenCalled();
+  });
+
+  it('throws the GraphQL message on other customer errors', async () => {
+    const deps = makeDeps({
+      setCustomer: jest.fn().mockResolvedValue({
+        __typename: 'GuestCheckoutError',
+        errorCode: 'GUEST_CHECKOUT_ERROR',
+        message: 'boom',
+      }),
+    });
+    await expect(submitCheckoutAddress(deps)).rejects.toThrow('boom');
+    expect(deps.setShippingAddress).not.toHaveBeenCalled();
+  });
+
+  it('throws when setting the shipping address errors', async () => {
+    const deps = makeDeps({
+      setShippingAddress: jest.fn().mockResolvedValue({
+        __typename: 'NoActiveOrderError',
+        errorCode: 'NO_ACTIVE_ORDER_ERROR',
+        message: 'no order',
+      }),
+    });
+    await expect(submitCheckoutAddress(deps)).rejects.toThrow('no order');
   });
 });

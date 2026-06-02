@@ -65,3 +65,53 @@ export function buildGuestCustomerInput(values: CheckoutAddressValues): GuestCus
     phoneNumber: values.phoneNumber,
   };
 }
+
+/** Thrown by submitCheckoutAddress when Vendure reports the session is already logged in. */
+export const STALE_SESSION_ERROR = 'STALE_SESSION';
+
+/** Minimal shape of a Vendure union result (Order on success, ErrorResult variants on failure). */
+interface OrderResultLike {
+  __typename?: string;
+  errorCode?: string;
+  message?: string;
+}
+
+export interface SubmitCheckoutAddressDeps {
+  values: CheckoutAddressValues;
+  isAuthenticated: boolean;
+  wilayas: Wilaya[];
+  /** Attach a guest customer; resolves to the setCustomerForOrder union (or null). */
+  setCustomer: (input: GuestCustomerInput) => Promise<OrderResultLike | null | undefined>;
+  /** Set the order shipping address; resolves to the setOrderShippingAddress union (or null). */
+  setShippingAddress: (input: ShippingAddressInput) => Promise<OrderResultLike | null | undefined>;
+}
+
+/**
+ * Orchestrate the checkout address submit:
+ * - Guests: attach the customer (real email) first, then set the shipping address.
+ * - Authenticated: skip setCustomer; only set the shipping address.
+ * Throws Error(STALE_SESSION_ERROR) on AlreadyLoggedInError, or Error(message) on any
+ * other GraphQL error result. Resolves to void on success.
+ */
+export async function submitCheckoutAddress({
+  values,
+  isAuthenticated,
+  wilayas,
+  setCustomer,
+  setShippingAddress,
+}: SubmitCheckoutAddressDeps): Promise<void> {
+  if (!isAuthenticated) {
+    const customerResp = await setCustomer(buildGuestCustomerInput(values));
+    if (customerResp && 'errorCode' in customerResp) {
+      if (customerResp.__typename === 'AlreadyLoggedInError') {
+        throw new Error(STALE_SESSION_ERROR);
+      }
+      throw new Error(customerResp.message || 'Failed to set customer for order');
+    }
+  }
+
+  const shipResp = await setShippingAddress(buildShippingAddressInput(values, wilayas));
+  if (shipResp && 'errorCode' in shipResp) {
+    throw new Error(shipResp.message || 'Failed to set shipping address');
+  }
+}

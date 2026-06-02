@@ -53,9 +53,15 @@ describe('makeShippingAddressSchema', () => {
     ).resolves.toBeTruthy();
   });
 
-  it('rejects a missing/invalid email when includeEmail=true', async () => {
+  it('rejects an invalid email format when includeEmail=true', async () => {
     await expect(
       makeShippingAddressSchema(true).validate({ ...base, email: 'nope' })
+    ).rejects.toBeInstanceOf(Yup.ValidationError);
+  });
+
+  it('rejects an empty/omitted email when includeEmail=true', async () => {
+    await expect(
+      makeShippingAddressSchema(true).validate({ ...base, email: '' })
     ).rejects.toBeInstanceOf(Yup.ValidationError);
   });
 
