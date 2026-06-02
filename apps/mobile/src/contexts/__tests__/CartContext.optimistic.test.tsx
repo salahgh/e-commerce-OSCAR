@@ -55,4 +55,31 @@ describe('CartContext optimistic wiring', () => {
     expect(opts.optimisticResponse.addItemToOrder.lines[0].linePriceWithTax).toBe(500000);
     expect(opts.optimisticResponse.addItemToOrder.totalQuantity).toBe(2);
   });
+
+  it('update writer commits an Order result to GetActiveOrder and ignores error variants', async () => {
+    render(
+      <CartProvider>
+        <Consumer />
+      </CartProvider>,
+    );
+
+    fireEvent.press(screen.getByTestId('add'));
+    await waitFor(() => expect(mockAddItem).toHaveBeenCalled());
+    const { update } = mockAddItem.mock.calls[0][0];
+
+    // An Order result links activeOrder (this is the first-order case the writer exists for).
+    const writeQuery = jest.fn();
+    const order = { __typename: 'Order', id: 'o1' };
+    update({ writeQuery }, { data: { addItemToOrder: order } });
+    expect(writeQuery).toHaveBeenCalledTimes(1);
+    expect(writeQuery.mock.calls[0][0].data).toEqual({ activeOrder: order });
+
+    // An error variant (e.g. InsufficientStockError) must NOT be written to activeOrder.
+    writeQuery.mockClear();
+    update(
+      { writeQuery },
+      { data: { addItemToOrder: { __typename: 'InsufficientStockError', errorCode: 'INSUFFICIENT_STOCK_ERROR', message: 'x' } } },
+    );
+    expect(writeQuery).not.toHaveBeenCalled();
+  });
 });
