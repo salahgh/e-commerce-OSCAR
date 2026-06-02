@@ -14,13 +14,20 @@ _Last updated: 2026-06-02. This file is the portable roadmap so work can resume 
 - **M1b — Saved address book + checkout picker:** `profile/addresses` CRUD (list↔inline form, set-default) on the codegen'd `Create/Update/DeleteCustomerAddress` mutations; `AddressForm`/`AddressCard`; pure helpers in `src/utils/address.ts` (province↔wilaya-code round-trip + prefill mappers) with `addressFormSchema`; checkout `SavedAddressPicker` prefilling the M1a form; profile-tab entry; en/fr/ar i18n.
 - **M1c — Offline-first cache + optimistic cart** (branch `m1c-offline-optimistic-cart`): in-house Apollo cache persistor (`src/apollo/persistence.ts`) over AsyncStorage — whole-cache `extract()`/`restore()`, AppState-triggered, 1 MB cap — restored via a splash gate (`src/hooks/useApolloPersistence.ts`) so the storefront/cart survive cold starts; logout purges it (`purgeApolloCache`). Optimistic `add`/`adjust`/`remove`/`clear` via pure raw-cents builders in `src/utils/optimisticCart.ts` feeding Apollo `optimisticResponse` — **every `refetchQueries` dropped**; an `update` writer links the first-ever order. PDP + reorder pass a variant snapshot. `apollo3-cache-persist` was rejected (peer-deps Apollo Client 3; will not install on this app's AC4). No offline write-queue (deferred). See `specs/2026-06-02-mobile-m1c-*` + `plans/2026-06-02-mobile-m1c-*`.
 - **M1d — Payment availability gating** (branch `m1d-payment-gating`): COD stays the working checkout path; **CIB & BaridiMob render as a non-selectable "Coming soon" section** in the payment step (always shown, greyed, badged) so the backend-blocked gateway is never invoked. Pure tested helper `src/utils/payment.ts` (`getPaymentAvailability` / `isSelectableMethod` / `partitionPaymentMethods` + a local coming-soon catalog — mobile can't import `@oscar/shared`); en/fr/ar strings. The orphaned gateway screens (`app/payment/*`, `PaymentWebView`, `PaymentMethodSelector`) are left **deferred/untouched** for the future real-gateway slice (known issues: wrong `myapp://`→`oscar-fashion://` scheme, mock dead-domain URLs, `securePa yment` i18n typo). See `specs/2026-06-02-mobile-m1d-*` + `plans/2026-06-02-mobile-m1d-*`.
+- **M3a — Recently-viewed products** (branch `m3a-recently-viewed`): track opened products locally (`RecentlyViewedContext` over AsyncStorage, mirrors `WishlistContext`) via a tested pure `addRecent` helper (`src/utils/recentlyViewed.ts` — dedupe-move-to-front + cap 12). A **"Recently viewed" row on Home + PDP** (PDP excludes the current product), rendered through a shared `HorizontalProductRow` **extracted from `RelatedProducts`**. The PDP records one view per open. en/fr/ar strings. See `specs/2026-06-02-mobile-m3a-*` + `plans/2026-06-02-mobile-m3a-*`.
 
-**Health:** 75 unit tests pass; `npm run lint` = 0 errors (warnings are pre-existing). M0/M1a/M1b/M1c/M1d source is `tsc`-clean (baseline still 155 pre-existing errors; **zero new** introduced).
+**Health:** 80 unit tests pass; `npm run lint` = 0 errors (warnings are pre-existing). M0/M1a/M1b/M1c/M1d/M3a source is `tsc`-clean (baseline still 155 pre-existing errors; **zero new** introduced).
 
 ## Next up (recommended order)
-1. **M2 — Engagement/retention** (reviews, push notifications, recently-viewed, wishlist sync) — mostly backend-dependent, largely deferred under mobile-only.
-2. **M3 — UX polish / accessibility / real dark mode / Arabic fonts / haptics.**
-3. **M4 — Native capabilities & release hardening** (deep links, EAS OTA, biometric, camera/media, typed `app.config.ts` + endpoint hardening).
+**M3 (UX polish) is being built slice-by-slice — M3a (recently-viewed) is done.** Remaining M3 slices, in order:
+1. **Haptic feedback** — `expo-haptics` is installed but unused; wire a small tested util to key actions (add-to-cart, place-order, tab switches, errors).
+2. **Accessibility pass** — `accessibilityLabel`/`Role`/`State` on key interactive components (buttons, product cards, tab bar, form inputs).
+3. **Real dark mode** — make `src/theme/colors` theme-aware so screens actually switch with the existing `ThemeContext` (large; touches most StyleSheets). Arabic-font application is folded in here / as a small follow-up.
+
+Then (largely backend-dependent, deferred under mobile-only):
+4. **M2 — Engagement/retention** (reviews, push notifications, wishlist sync) — recently-viewed already shipped in M3a.
+5. **M4 — Native capabilities & release hardening** (deep links, EAS OTA, biometric, camera/media, typed `app.config.ts` + endpoint hardening).
+6. **Real CIB/BaridiMob gateway** — resumes once backend `oscar-plugin` payment work lands (M1d gated it as "coming soon").
 
 > **Real CIB/BaridiMob online payment is backend-blocked** (gateway *initiate* + settlement metadata). M1d gated it as "coming soon"; the real WebView/deep-link gateway slice resumes once the backend `oscar-plugin` payment work lands.
 
