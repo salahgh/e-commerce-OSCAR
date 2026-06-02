@@ -91,7 +91,7 @@ export default function ProductDetailScreen() {
       price: formatPrice(selectedVariant.priceWithTax),
       currencyCode: selectedVariant.currencyCode ?? 'DZD',
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- track once per product.id; track is a stable useCallback([])
   }, [product?.id]);
 
   const handleOptionSelect = (groupName: string, value: string) => {
