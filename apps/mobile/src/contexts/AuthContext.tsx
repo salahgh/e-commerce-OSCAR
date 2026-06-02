@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { useMutation, useLazyQuery } from '@apollo/client/react';
 import * as SecureStore from 'expo-secure-store';
-import { apolloClient, VENDURE_TOKEN_KEY } from '../apollo/client';
+import { apolloClient, VENDURE_TOKEN_KEY, purgeApolloCache } from '../apollo/client';
 import { Storage, STORAGE_KEYS } from '../utils/storage';
 import {
   ShopLoginMutation,
@@ -241,10 +241,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await logoutMutation();
       await clearAuth();
       await apolloClient.clearStore();
+      await purgeApolloCache();
     } catch (error) {
       console.error('Logout error:', error);
       await clearAuth();
       await apolloClient.clearStore();
+      await purgeApolloCache();
     }
   }, [logoutMutation]);
 
