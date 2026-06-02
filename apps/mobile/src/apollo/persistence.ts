@@ -27,7 +27,10 @@ export function createPersistor(cache: InMemoryCache): ApolloPersistor {
     try {
       const data = JSON.stringify(cache.extract());
       if (data.length > MAX_BYTES) {
-        await AsyncStorage.removeItem(CACHE_KEY); // too large — drop rather than store a huge blob
+        // Too large to persist — drop any prior snapshot rather than store a huge blob.
+        // Warn so a user permanently over the cap (always cold-starting empty) is debuggable.
+        console.warn(`[persist] cache ${data.length} bytes exceeds ${MAX_BYTES} cap, skipping`);
+        await AsyncStorage.removeItem(CACHE_KEY);
         return;
       }
       await AsyncStorage.setItem(CACHE_KEY, data);
@@ -54,6 +57,9 @@ export function createPersistor(cache: InMemoryCache): ApolloPersistor {
   };
 
   const start = (): (() => void) => {
+    // iOS emits 'inactive' then 'background' on a single background transition, so persist()
+    // can fire twice; AsyncStorage serializes the same-key writes, so the double-write is
+    // harmless (the second just overwrites with identical data).
     const onChange = (state: AppStateStatus): void => {
       if (state === 'background' || state === 'inactive') void persist();
     };
