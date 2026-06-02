@@ -18,5 +18,6 @@ export type { PriceRange } from './PriceSheet';
 export { SizeGuideModal } from './SizeGuideModal';
 export { RelatedProducts } from './RelatedProducts';
 export { HorizontalProductRow } from './HorizontalProductRow';
+export { RecentlyViewedRow } from './RecentlyViewedRow';
 export { FilterBottomSheet } from './FilterBottomSheet';
 export type { ColorFacetOption, FilterOptions } from './FilterBottomSheet';
