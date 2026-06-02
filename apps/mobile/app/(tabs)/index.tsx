@@ -28,6 +28,7 @@ import {
   PromoBanner,
 } from '@/src/components/home';
 import type { FigmaProduct } from '@/src/components/home';
+import { RecentlyViewedRow } from '@/src/components/products';
 import { LoadingSpinner, ErrorState } from '@/src/components/ui';
 import { colors, spacing } from '@/src/theme';
 import { formatPrice } from '@/src/utils/vendureAdapters';
@@ -302,6 +303,9 @@ export default function HomeScreen() {
         {/*    </View>*/}
         {/*  </View>*/}
         {/*)}*/}
+
+        {/* Recently viewed */}
+        <RecentlyViewedRow />
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
