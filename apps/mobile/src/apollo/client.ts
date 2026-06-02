@@ -5,6 +5,7 @@ import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import i18n from '../i18n';
+import { createPersistor } from './persistence';
 
 export const VENDURE_TOKEN_KEY = 'vendure_token';
 
@@ -115,7 +116,7 @@ const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
 });
 
 // InMemory Cache configuration for Vendure
-const cache = new InMemoryCache({
+export const cache = new InMemoryCache({
   typePolicies: {
     Query: {
       fields: {
@@ -154,3 +155,11 @@ export const apolloClient = new ApolloClient({
     },
   },
 });
+
+// Cache persistence (cold-start read survival). Restore is driven by the
+// `useApolloPersistence` bootstrap hook; purge runs on logout.
+export const cachePersistor = createPersistor(cache);
+
+export async function purgeApolloCache(): Promise<void> {
+  await cachePersistor.purge();
+}
