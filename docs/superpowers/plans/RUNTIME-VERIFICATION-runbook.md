@@ -79,3 +79,19 @@ On an order in `PaymentSettled` (back-office `:5173` → Orders → open one):
 The recent `origin/main` merge brought a design-system refactor (new fonts, component-based home,
 forced light theme). Smoke-check: home renders the new `HomePageContent`, the cart and PDP pages
 render, locale switch (fr/ar/en) works, and Arabic RTL is applied.
+
+## 6. M1c — Offline-first cache + optimistic cart (mobile `apps/mobile`)
+
+These cannot be unit-tested (native AppState/launch + Apollo write timing). Run on a device/emulator:
+
+1. **Cold-start read survival:** Browse a few products, add to cart, send the app to the
+   background (so AppState persists), then fully close it. Enable airplane mode and relaunch —
+   the storefront and cart render from cache before any spinner/network.
+2. **Optimistic add/adjust/remove:** With normal connectivity, add to cart / change a quantity /
+   remove a line — the cart UI updates instantly (before the server responds), then totals
+   reconcile to the server amount.
+3. **Stock rollback:** Adjust a line above available stock → the optimistic bump appears, then
+   rolls back when `InsufficientStockError` returns, and an error is surfaced.
+4. **First-ever add:** From an empty session (no active order), add one item — the line appears
+   and survives a refetch (proves the `writeQuery` link replaced `refetchQueries`).
+5. **Logout hygiene:** Log out, then relaunch — the cart/storefront start clean (purged).
