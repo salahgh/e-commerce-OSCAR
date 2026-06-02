@@ -14,12 +14,16 @@ jest.mock('@/src/contexts/CartContext', () => ({
 jest.mock('@/src/contexts/WishlistContext', () => ({
   useWishlist: () => ({ has: () => false, toggle: jest.fn() }),
 }));
+jest.mock('@/src/contexts/RecentlyViewedContext', () => ({
+  useRecentlyViewed: () => ({ items: [], track: jest.fn(), clear: jest.fn(), hydrating: false }),
+}));
 
 // Mock heavy/native child barrels and expo-image so only the screen's own code runs.
 jest.mock('@/src/components/products', () => ({
   ImageCarousel: () => null,
   SizeGuideModal: () => null,
   RelatedProducts: () => null,
+  RecentlyViewedRow: () => null,
 }));
 jest.mock('@/src/components/ui', () => {
   const { Text } = require('react-native');

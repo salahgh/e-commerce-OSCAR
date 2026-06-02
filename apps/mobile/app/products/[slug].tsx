@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,10 +15,11 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGetProductBySlugQuery } from '../../src/graphql/generated/graphql';
 import { Button, LoadingSpinner, ErrorState, Badge, Chip } from '../../src/components/ui';
-import { ImageCarousel, SizeGuideModal, RelatedProducts } from '../../src/components/products';
+import { ImageCarousel, SizeGuideModal, RelatedProducts, RecentlyViewedRow } from '../../src/components/products';
 import { colors, spacing, typography } from '../../src/theme';
 import { useCart } from '../../src/contexts/CartContext';
 import { useWishlist } from '../../src/contexts/WishlistContext';
+import { useRecentlyViewed } from '../../src/contexts/RecentlyViewedContext';
 import { formatPrice } from '../../src/utils/vendureAdapters';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -35,6 +36,7 @@ export default function ProductDetailScreen() {
   const [addToCartSuccess, setAddToCartSuccess] = useState(false);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const wishlist = useWishlist();
+  const { track } = useRecentlyViewed();
 
   const { data, loading, error, refetch } = useGetProductBySlugQuery({
     variables: { slug },
@@ -77,6 +79,20 @@ export default function ProductDetailScreen() {
       });
     }) || product.variants[0];
   }, [product, selectedOptions]);
+
+  // Record this product as recently viewed once per open (keyed on product id).
+  useEffect(() => {
+    if (!product || !selectedVariant) return;
+    track({
+      productId: product.id,
+      slug: product.slug,
+      name: product.name,
+      imageUrl: product.featuredAsset?.preview ?? null,
+      price: formatPrice(selectedVariant.priceWithTax),
+      currencyCode: selectedVariant.currencyCode ?? 'DZD',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?.id]);
 
   const handleOptionSelect = (groupName: string, value: string) => {
     setSelectedOptions(prev => ({
@@ -338,6 +354,7 @@ export default function ProductDetailScreen() {
           currentProductId={product.id}
           collectionSlug={product.collections?.[0]?.slug ?? null}
         />
+        <RecentlyViewedRow excludeProductId={product.id} />
       </ScrollView>
 
       {/* Bottom Actions */}
