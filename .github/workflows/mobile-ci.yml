@@ -1,0 +1,46 @@
+name: Mobile CI
+
+on:
+  pull_request:
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test -- --ci
+
+      # Type-check is intentionally NON-BLOCKING for now. The generated Apollo
+      # Client 4 GraphQL types (src/graphql/generated/graphql.ts, which still
+      # references the removed `QueryResult` type) plus the i18n `compatibilityJSON: 'v3'`
+      # config produce ~155 pre-existing errors that are unrelated to app logic.
+      # Tracked as tech debt — flip `continue-on-error` to false once the
+      # codegen/Apollo-v4 mismatch is resolved.
+      - name: Type-check (non-blocking)
+        run: npx tsc --noEmit
+        continue-on-error: true
