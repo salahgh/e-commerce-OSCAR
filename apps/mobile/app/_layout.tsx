@@ -22,6 +22,7 @@ import {
 import { useFonts } from 'expo-font';
 
 import { apolloClient } from '@/src/apollo/client';
+import { useApolloPersistence } from '@/src/hooks/useApolloPersistence';
 import { AuthProvider, useAuth } from '@/src/contexts/AuthContext';
 import { CartProvider } from '@/src/contexts/CartContext';
 import { WishlistProvider } from '@/src/contexts/WishlistContext';
@@ -112,7 +113,9 @@ export default function RootLayout() {
     });
   }, []);
 
-  if (!languageLoaded || !fontsLoaded) {
+  const cacheRestored = useApolloPersistence();
+
+  if (!languageLoaded || !fontsLoaded || !cacheRestored) {
     return <LoadingSpinner />;
   }
 
