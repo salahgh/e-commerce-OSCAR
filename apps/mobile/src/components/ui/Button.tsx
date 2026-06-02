@@ -9,6 +9,7 @@ import {
   TouchableOpacityProps,
 } from 'react-native';
 import { colors, spacing, typography } from '../../theme';
+import { haptics } from '../../utils/haptics';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 export type ButtonSize = 'small' | 'medium' | 'large';
@@ -103,7 +104,10 @@ export const Button: React.FC<ButtonProps> = ({
   return (
     <TouchableOpacity
       style={[getButtonStyle(), isDisabled && styles.disabled, style]}
-      onPress={onPress}
+      onPress={() => {
+        haptics.light();
+        onPress();
+      }}
       disabled={isDisabled}
       activeOpacity={0.7}
       {...props}

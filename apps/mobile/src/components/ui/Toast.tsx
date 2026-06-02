@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '../../theme';
+import { haptics } from '../../utils/haptics';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -185,6 +186,10 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       duration: toastConfig.duration || 3000,
       position: toastConfig.position || 'top',
     };
+
+    if (newToast.type === 'success') haptics.success();
+    else if (newToast.type === 'error') haptics.error();
+    else if (newToast.type === 'warning') haptics.warning();
 
     setToasts((prev) => [...prev, newToast]);
   }, []);
