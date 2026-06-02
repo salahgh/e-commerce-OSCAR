@@ -99,6 +99,8 @@ export default function CheckoutScreen() {
   }, [shippingMethods]);
 
   // Default the payment selection to COD (or the first available method).
+  // availablePaymentMethods is a fresh array each render; the !selectedPaymentMethod
+  // guard ensures setSelectedPaymentMethod fires at most once (no re-select churn).
   useEffect(() => {
     if (!selectedPaymentMethod && availablePaymentMethods.length > 0) {
       const cod = availablePaymentMethods.find((m) => m.code === 'cash-on-delivery');
@@ -433,7 +435,7 @@ export default function CheckoutScreen() {
               ))
             )}
 
-            {comingSoonPayments.length > 0 && (
+            {!loadingPaymentMethods && comingSoonPayments.length > 0 && (
               <View style={styles.comingSoonSection}>
                 <Text style={styles.comingSoonSectionTitle}>
                   {t('checkout.comingSoonPayments', 'Online payment — coming soon')}
