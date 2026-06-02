@@ -25,7 +25,11 @@
     "saving": "Enregistrement...",
     "sending": "Envoi...",
     "send": "Envoyer",
-    "tagline": "Des styles accessibles pour tous"
+    "tagline": "Des styles accessibles pour tous",
+    "errorEyebrow": "Une erreur est survenue",
+    "errorBoundaryTitle": "Erreur inattendue",
+    "errorBoundaryMessage": "L'application a rencontré un problème. Vous pouvez réessayer ou revenir à l'accueil.",
+    "goHome": "Accueil"
   },
   "auth": {
     "login": "Connexion",

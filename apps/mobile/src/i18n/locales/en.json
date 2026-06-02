@@ -25,7 +25,11 @@
     "saving": "Saving...",
     "sending": "Sending...",
     "send": "Send",
-    "tagline": "Affordable Style for Everyone"
+    "tagline": "Affordable Style for Everyone",
+    "errorEyebrow": "Something went wrong",
+    "errorBoundaryTitle": "Unexpected error",
+    "errorBoundaryMessage": "The app ran into a problem. You can try again or go back home.",
+    "goHome": "Go home"
   },
   "auth": {
     "login": "Login",

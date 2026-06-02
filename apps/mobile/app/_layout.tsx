@@ -29,6 +29,8 @@ import { ThemeProvider, useThemeMode } from '@/src/contexts/ThemeContext';
 import { ToastProvider , LoadingSpinner } from '@/src/components/ui';
 import { MiniCartSheet } from '@/src/components/cart';
 
+export { AppErrorBoundary as ErrorBoundary } from '@/src/components/AppErrorBoundary';
+
 export const unstable_settings = {
   initialRouteName: 'splash',
 };
