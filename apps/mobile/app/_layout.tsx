@@ -26,6 +26,7 @@ import { useApolloPersistence } from '@/src/hooks/useApolloPersistence';
 import { AuthProvider, useAuth } from '@/src/contexts/AuthContext';
 import { CartProvider } from '@/src/contexts/CartContext';
 import { WishlistProvider } from '@/src/contexts/WishlistContext';
+import { RecentlyViewedProvider } from '@/src/contexts/RecentlyViewedContext';
 import { ThemeProvider, useThemeMode } from '@/src/contexts/ThemeContext';
 import { ToastProvider , LoadingSpinner } from '@/src/components/ui';
 import { MiniCartSheet } from '@/src/components/cart';
@@ -126,15 +127,17 @@ export default function RootLayout() {
           <AuthProvider>
             <CartProvider>
               <WishlistProvider>
-                <ThemeProvider>
-                  <NavigationThemeBridge>
-                    <ToastProvider>
-                      <RootNavigator />
-                      <MiniCartSheet />
-                      <StatusBar style="auto" />
-                    </ToastProvider>
-                  </NavigationThemeBridge>
-                </ThemeProvider>
+                <RecentlyViewedProvider>
+                  <ThemeProvider>
+                    <NavigationThemeBridge>
+                      <ToastProvider>
+                        <RootNavigator />
+                        <MiniCartSheet />
+                        <StatusBar style="auto" />
+                      </ToastProvider>
+                    </NavigationThemeBridge>
+                  </ThemeProvider>
+                </RecentlyViewedProvider>
               </WishlistProvider>
             </CartProvider>
           </AuthProvider>
