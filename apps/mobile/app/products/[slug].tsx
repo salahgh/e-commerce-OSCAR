@@ -13,7 +13,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useGetProductQuery } from '../../src/graphql/generated/graphql';
+import { useGetProductBySlugQuery } from '../../src/graphql/generated/graphql';
 import { Button, LoadingSpinner, ErrorState, Badge, Chip } from '../../src/components/ui';
 import { ImageCarousel, SizeGuideModal, RelatedProducts } from '../../src/components/products';
 import { colors, spacing, typography } from '../../src/theme';
@@ -24,7 +24,7 @@ import { formatPrice } from '../../src/utils/vendureAdapters';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function ProductDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { slug } = useLocalSearchParams<{ slug: string }>();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { addToCart, loading: cartLoading } = useCart();
@@ -35,13 +35,13 @@ export default function ProductDetailScreen() {
   const [addToCartSuccess, setAddToCartSuccess] = useState(false);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const wishlist = useWishlist();
-  const isFavorite = !!data?.product && wishlist.has(data.product.id);
 
-  const { data, loading, error, refetch } = useGetProductQuery({
-    variables: { id },
+  const { data, loading, error, refetch } = useGetProductBySlugQuery({
+    variables: { slug },
   });
 
   const product = data?.product;
+  const isFavorite = !!product && wishlist.has(product.id);
 
   // Get unique option groups from variants
   const optionGroups = useMemo(() => {

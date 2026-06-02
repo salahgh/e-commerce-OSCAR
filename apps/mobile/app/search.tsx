@@ -178,7 +178,7 @@ export default function SearchScreen() {
   }, []);
 
   const handleProductPress = useCallback((product: SimpleProduct) => {
-    router.push(`/products/${product.id}`);
+    router.push(`/products/${product.slug}`);
   }, []);
 
   const handleViewAllResults = useCallback(() => {

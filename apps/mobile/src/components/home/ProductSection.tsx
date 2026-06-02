@@ -97,7 +97,7 @@ export const CompactProductCard: React.FC<CompactProductCardProps> = ({
     if (onPress) {
       onPress();
     } else {
-      router.push(`/products/${product.id}`);
+      router.push(`/products/${product.slug}`);
     }
   };
 

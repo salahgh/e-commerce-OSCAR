@@ -30,7 +30,7 @@ export const ProductListItem: React.FC<ProductListItemProps> = ({
     if (onPress) {
       onPress(product);
     } else {
-      router.push(`/products/${product.id}`);
+      router.push(`/products/${product.slug}`);
     }
   };
 

@@ -44,7 +44,7 @@ export const ProductCardFigma: React.FC<ProductCardFigmaProps> = ({
     if (onPress) {
       onPress(product);
     } else {
-      router.push(`/products/${product.id}`);
+      router.push(`/products/${product.slug}`);
     }
   };
 

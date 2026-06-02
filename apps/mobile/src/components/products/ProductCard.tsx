@@ -27,7 +27,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
     if (onPress) {
       onPress(product);
     } else {
-      router.push(`/products/${product.id}`);
+      router.push(`/products/${product.slug}`);
     }
   };
 
