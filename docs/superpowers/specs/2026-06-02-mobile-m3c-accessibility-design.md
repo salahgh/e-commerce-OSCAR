@@ -33,14 +33,14 @@ No new prop is needed (`accessibilityLabel` is already part of the inherited `To
 
 **3.2 `Input` (`src/components/ui/Input.tsx`)** — on the underlying `TextInput`, set `accessibilityLabel` to the field's `label` (falling back to `placeholder`) so the field is announced. If the component shows an error, add `accessibilityState`/`accessibilityHint` for it only if trivial; otherwise label-only is the minimum.
 
-**3.3 `BackButton` (`src/components/navigation/BackButton.tsx`)** — add `accessibilityRole="button"` and `accessibilityLabel={t('a11y.goBack', 'Go back')}` to its touchable.
+**3.3 `BackButton.tsx` (`src/components/navigation/BackButton.tsx`)** — this file exports three shared icon-only controls: `BackButton`, `FloatingBackButton`, and `CloseButton`. Add `useTranslation`, and on each touchable add `accessibilityRole="button"` + a localized label: `BackButton`/`FloatingBackButton` → `t('a11y.goBack', 'Go back')`; `CloseButton` → `t('a11y.close', 'Close')`.
 
 **3.4 Product cards** — on the card's `TouchableOpacity`/`Pressable`, add `accessibilityRole="button"` and `accessibilityLabel={productAccessibilityLabel({ name, price, currencyCode })}` (and, to stop the reader from also reading the inner text, the inner `Text`/`Image` may be marked non-accessible where the wrapper owns the label — keep this minimal: setting the wrapper label is the required change):
 - `src/components/products/HorizontalProductRow.tsx` (the `Pressable` card) — `price`/`currencyCode` are already on the `SimpleProduct`.
 - `src/components/home/ProductCardFigma.tsx` (the `TouchableOpacity`) — uses `FigmaProduct` (`name`, `price`, has no `currencyCode` → default `'DZD'`).
 
 ## 4. i18n — `src/i18n/locales/{en,fr,ar}.json`
-Add an `a11y` object with `goBack` (en "Go back" / fr "Retour" / ar "رجوع"). Card labels come from product data via the helper (no new keys).
+Add an `a11y` object with `goBack` (en "Go back" / fr "Retour" / ar "رجوع") and `close` (en "Close" / fr "Fermer" / ar "إغلاق"). Card labels come from product data via the helper (no new keys).
 
 ## 5. Testing
 
