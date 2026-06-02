@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,9 @@ import { Button, Divider, LoadingSpinner, ErrorState, Badge } from '../../src/co
 import { useGetOrderByCodeQuery } from '../../src/graphql/generated/graphql';
 import { colors, spacing, typography } from '../../src/theme';
 import { formatPrice } from '../../src/utils/vendureAdapters';
+import { useCart } from '../../src/contexts/CartContext';
+import { useToast } from '../../src/components/ui';
+import { summarizeReorder } from '../../src/utils/reorder';
 
 // Map Vendure order states to display info
 const orderStateMap: Record<string, { label: string; color: string; icon: string }> = {
@@ -46,6 +49,46 @@ export default function OrderDetailScreen() {
   });
 
   const order = data?.orderByCode;
+
+  const { addToCart } = useCart();
+  const toast = useToast();
+  const [reordering, setReordering] = useState(false);
+
+  const handleReorder = async () => {
+    if (reordering || !order?.lines?.length) return;
+    setReordering(true);
+    let added = 0;
+    let failed = 0;
+    for (const line of order.lines) {
+      const variantId = line.productVariant?.id;
+      if (!variantId) {
+        failed += 1;
+        continue;
+      }
+      try {
+        await addToCart(variantId, line.quantity);
+        added += 1;
+      } catch {
+        failed += 1;
+      }
+    }
+    setReordering(false);
+
+    const status = summarizeReorder({ added, failed });
+    if (status === 'failed') {
+      toast.error(t('orders.reorderFailed', 'Could not add items to your cart'));
+      return;
+    }
+    if (status === 'partial') {
+      toast.show({
+        type: 'warning',
+        message: t('orders.reorderPartial', `${added} added, ${failed} unavailable`),
+      });
+    } else {
+      toast.success(t('orders.reorderSuccess', 'Items added to cart'));
+    }
+    router.push('/(tabs)/cart');
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -281,11 +324,7 @@ export default function OrderDetailScreen() {
                   {
                     text: t('common.yes', 'Yes'),
                     onPress: () => {
-                      // TODO: Implement reorder functionality
-                      Alert.alert(
-                        t('common.success', 'Success'),
-                        t('orders.reorderSuccess', 'Items added to cart')
-                      );
+                      handleReorder();
                     },
                   },
                 ]
@@ -293,6 +332,7 @@ export default function OrderDetailScreen() {
             }}
             variant="outline"
             fullWidth
+            disabled={reordering}
             style={styles.reorderButton}
           />
         </View>
