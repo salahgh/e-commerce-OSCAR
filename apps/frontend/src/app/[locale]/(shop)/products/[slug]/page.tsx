@@ -38,6 +38,8 @@ import {
   SizeGuideDialog,
   type ProductCardData,
 } from '@/components/patterns';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { productSchema, breadcrumbSchema } from '@/lib/seo/schema';
 
 export default function ProductPage() {
   const t = useTranslations('ProductPage');
@@ -142,8 +144,30 @@ export default function ProductPage() {
     await addToCart(selectedVariant.id, quantity);
   }
 
+  const localePath = (path: string) =>
+    params?.locale && params.locale !== 'fr' ? `/${params.locale}${path}` : path;
+  const ldImage = images[0]?.preview ?? product.featuredAsset?.preview ?? undefined;
+  const brandName = product.facetValues.find((f) => /brand|marque/i.test(f.facet?.name ?? ''))?.name;
+  const productLd = productSchema({
+    name: product.name,
+    description: product.description?.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() || undefined,
+    image: ldImage,
+    url: localePath(`/products/${slug}`),
+    sku: selectedVariant?.sku,
+    brandName,
+    price: (selectedVariant?.priceWithTax ?? variants[0]?.priceWithTax ?? 0) / 100,
+    priceCurrency: selectedVariant?.currencyCode ?? 'DZD',
+    inStock: (selectedVariant?.stockLevel ?? 'IN_STOCK') !== 'OUT_OF_STOCK',
+  });
+  const breadcrumbLd = breadcrumbSchema([
+    { name: t('breadcrumbHome'), url: localePath('/') },
+    { name: t('breadcrumbProducts'), url: localePath('/products') },
+    { name: product.name, url: localePath(`/products/${slug}`) },
+  ]);
+
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-8">
+      <JsonLd data={[productLd, breadcrumbLd]} />
       <Breadcrumb
         items={[
           { label: t('breadcrumbHome'), href: '/' },

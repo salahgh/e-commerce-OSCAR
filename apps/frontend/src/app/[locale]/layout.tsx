@@ -12,6 +12,11 @@ import { MiniCart, SkipToContent } from '@/components/layout';
 import { ToastProvider } from '@/components/ui/Toast';
 import { routing } from '@/i18n/routing';
 import { localeDirection, type Locale } from '@/i18n/config';
+import type { Viewport } from 'next';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { organizationSchema, websiteSchema } from '@/lib/seo/schema';
+import { ServiceWorkerRegistrar } from '@/components/pwa/ServiceWorkerRegistrar';
+import { PWAInstallPrompt } from '@/components/pwa/PWAInstallPrompt';
 
 const plexArabic = IBM_Plex_Sans_Arabic({
   subsets: ['arabic', 'latin'],
@@ -25,6 +30,10 @@ export function generateStaticParams() {
 }
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://oscarfashion.dz';
+
+export const viewport: Viewport = {
+  themeColor: '#1E1E1E',
+};
 
 export async function generateMetadata({
   params,
@@ -60,6 +69,11 @@ export async function generateMetadata({
       type: 'website',
     },
     twitter: { card: 'summary_large_image', title, description },
+    icons: {
+      icon: '/icons/favicon.png',
+      apple: '/icons/apple-touch-icon.png',
+    },
+    appleWebApp: { capable: true, title: 'OSCAR', statusBarStyle: 'default' },
   };
 }
 
@@ -83,6 +97,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={dir} className={plexArabic.variable} suppressHydrationWarning>
       <body className="bg-bg-base text-content font-sans antialiased">
+        <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <ApolloWrapper>
             <NextIntlClientProvider locale={locale} messages={messages}>
@@ -93,6 +108,8 @@ export default async function LocaleLayout({
                       <SkipToContent />
                       {children}
                       <MiniCart />
+                      <ServiceWorkerRegistrar />
+                      <PWAInstallPrompt />
                     </WishlistProvider>
                   </CartProvider>
                 </AuthProvider>
