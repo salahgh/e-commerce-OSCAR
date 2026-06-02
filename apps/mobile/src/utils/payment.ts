@@ -21,7 +21,7 @@ export const COMING_SOON_PAYMENTS: ComingSoonPayment[] = [
   { code: 'baridimob', labelKey: 'checkout.baridimob', labelFallback: 'BaridiMob', icon: 'phone-portrait-outline' },
 ];
 
-const COMING_SOON_CODES = new Set(['cib', 'baridimob']);
+const COMING_SOON_CODES = new Set(COMING_SOON_PAYMENTS.map((p) => p.code));
 
 export function getPaymentAvailability(code: string): PaymentAvailability {
   return COMING_SOON_CODES.has(code.toLowerCase()) ? 'coming-soon' : 'available';
