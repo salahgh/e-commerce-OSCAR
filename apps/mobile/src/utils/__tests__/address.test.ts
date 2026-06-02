@@ -87,6 +87,9 @@ describe('addressToFormValues', () => {
       defaultShippingAddress: true,
     });
   });
+  it('yields an empty wilayaCode when the saved province is not a known wilaya', () => {
+    expect(addressToFormValues({ ...SAVED, province: 'Unknown Place' }, WILAYAS).wilayaCode).toBe('');
+  });
 });
 
 describe('addressToCheckoutValues', () => {
@@ -100,5 +103,8 @@ describe('addressToCheckoutValues', () => {
       wilayaCode: '16',
       postalCode: '16000',
     });
+  });
+  it('yields an empty wilayaCode for an unknown province', () => {
+    expect(addressToCheckoutValues({ ...SAVED, province: 'Unknown Place' }, WILAYAS).wilayaCode).toBe('');
   });
 });

@@ -101,6 +101,9 @@ export default function AddressesScreen() {
     <View style={styles.container}>
       <Stack.Screen
         options={{
+          headerShown: true,
+          headerStyle: { backgroundColor: colors.surface },
+          headerTintColor: colors.text.primary,
           title,
           headerBackVisible: mode.kind === 'list',
           headerLeft:
