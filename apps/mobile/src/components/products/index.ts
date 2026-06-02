@@ -1,4 +1,5 @@
 export { ProductCard } from './ProductCard';
+export type { SimpleProduct } from './ProductCard';
 export { ProductGrid } from './ProductGrid';
 export { ProductListItem } from './ProductListItem';
 export { SearchBar } from './SearchBar';
@@ -17,6 +18,5 @@ export type { PriceRange } from './PriceSheet';
 export { SizeGuideModal } from './SizeGuideModal';
 export { RelatedProducts } from './RelatedProducts';
 export { HorizontalProductRow } from './HorizontalProductRow';
-export type { SimpleProduct } from './HorizontalProductRow';
 export { FilterBottomSheet } from './FilterBottomSheet';
 export type { ColorFacetOption, FilterOptions } from './FilterBottomSheet';
