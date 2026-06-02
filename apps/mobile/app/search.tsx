@@ -297,7 +297,7 @@ export default function SearchScreen() {
         {/* Results Header */}
         <View style={styles.resultsHeader}>
           <Text style={styles.resultsCount}>
-            {searchResults.length} {t('search.results', 'results')} for "{debouncedQuery}"
+            {searchResults.length} {t('search.results', 'results')} for &quot;{debouncedQuery}&quot;
           </Text>
           <TouchableOpacity onPress={handleViewAllResults}>
             <Text style={styles.viewAllText}>{t('common.viewAll', 'View All')}</Text>
