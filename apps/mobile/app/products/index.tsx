@@ -1,24 +1,16 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import {
-  useSearchProductsQuery,
-} from '../../src/graphql/generated/graphql';
+import { useSearchProductsQuery } from '../../src/graphql/generated/graphql';
 import { SimpleProduct } from '../../src/components/products/ProductCard';
 import { ProductGrid } from '../../src/components/products';
 import { SortSheet, SortValue } from '../../src/components/products/SortSheet';
 import { PriceSheet, PriceRange } from '../../src/components/products/PriceSheet';
 import { SizeSheet } from '../../src/components/products/SizeSheet';
-import { colors, spacing, typography } from '../../src/theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
 import { formatPrice } from '../../src/utils/vendureAdapters';
 import { parseProductDiscount } from '../../src/utils/discountParser';
 import { useAppFont } from '../../src/hooks/useAppFont';
@@ -28,6 +20,8 @@ export default function ProductsScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const { fontFamily } = useAppFont();
+  const colors = useThemeColors();
+  const styles = useStyles();
 
   // Filter state
   const [searchInput, setSearchInput] = useState('');
@@ -122,7 +116,10 @@ export default function ProductsScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Header: Back + Search + Filter icon */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
         <View style={styles.searchInputContainer}>
@@ -149,10 +146,20 @@ export default function ProductsScreen() {
           onPress={() => setShowSort(true)}
           activeOpacity={0.7}
         >
-          <Text style={[styles.filterChipText, { fontFamily: fontFamily.medium }, sortValue !== null && styles.filterChipTextActive]}>
+          <Text
+            style={[
+              styles.filterChipText,
+              { fontFamily: fontFamily.medium },
+              sortValue !== null && styles.filterChipTextActive,
+            ]}
+          >
             {t('filters.classement')}
           </Text>
-          <Ionicons name="swap-vertical" size={14} color={sortValue !== null ? colors.text.inverse : colors.text.primary} />
+          <Ionicons
+            name="swap-vertical"
+            size={14}
+            color={sortValue !== null ? colors.text.inverse : colors.text.primary}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -160,10 +167,20 @@ export default function ProductsScreen() {
           onPress={() => setShowPrice(true)}
           activeOpacity={0.7}
         >
-          <Text style={[styles.filterChipText, { fontFamily: fontFamily.medium }, priceRange !== null && styles.filterChipTextActive]}>
+          <Text
+            style={[
+              styles.filterChipText,
+              { fontFamily: fontFamily.medium },
+              priceRange !== null && styles.filterChipTextActive,
+            ]}
+          >
             {t('filters.prix')}
           </Text>
-          <Ionicons name="chevron-down" size={14} color={priceRange !== null ? colors.text.inverse : colors.text.primary} />
+          <Ionicons
+            name="chevron-down"
+            size={14}
+            color={priceRange !== null ? colors.text.inverse : colors.text.primary}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -171,10 +188,20 @@ export default function ProductsScreen() {
           onPress={() => setShowSize(true)}
           activeOpacity={0.7}
         >
-          <Text style={[styles.filterChipText, { fontFamily: fontFamily.medium }, selectedSizes.length > 0 && styles.filterChipTextActive]}>
+          <Text
+            style={[
+              styles.filterChipText,
+              { fontFamily: fontFamily.medium },
+              selectedSizes.length > 0 && styles.filterChipTextActive,
+            ]}
+          >
             {t('filters.taille')}
           </Text>
-          <Ionicons name="chevron-down" size={14} color={selectedSizes.length > 0 ? colors.text.inverse : colors.text.primary} />
+          <Ionicons
+            name="chevron-down"
+            size={14}
+            color={selectedSizes.length > 0 ? colors.text.inverse : colors.text.primary}
+          />
         </TouchableOpacity>
       </View>
 
@@ -217,60 +244,62 @@ export default function ProductsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md,
-    gap: spacing.md,
-  },
-  searchInputContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    borderRadius: 8,
-    paddingHorizontal: spacing.sm,
-    height: 36,
-    gap: spacing.sm,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    color: colors.text.primary,
-    paddingVertical: 0,
-  },
-  chipsRow: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.xl,
-    paddingBottom: spacing.md,
-    gap: spacing.sm,
-  },
-  filterChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: spacing.borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.gray[2],
-    backgroundColor: colors.surface,
-  },
-  filterChipActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  filterChipText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.primary,
-  },
-  filterChipTextActive: {
-    color: colors.text.inverse,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.xl,
+      paddingVertical: spacing.md,
+      gap: spacing.md,
+    },
+    searchInputContainer: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.gray[1],
+      borderRadius: 8,
+      paddingHorizontal: spacing.sm,
+      height: 36,
+      gap: spacing.sm,
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: 14,
+      color: colors.text.primary,
+      paddingVertical: 0,
+    },
+    chipsRow: {
+      flexDirection: 'row',
+      paddingHorizontal: spacing.xl,
+      paddingBottom: spacing.md,
+      gap: spacing.sm,
+    },
+    filterChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      borderRadius: spacing.borderRadius.lg,
+      borderWidth: 1,
+      borderColor: colors.gray[2],
+      backgroundColor: colors.surface,
+    },
+    filterChipActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    filterChipText: {
+      fontSize: typography.fontSize.sm,
+      color: colors.text.primary,
+    },
+    filterChipTextActive: {
+      color: colors.text.inverse,
+    },
+  })
+);
