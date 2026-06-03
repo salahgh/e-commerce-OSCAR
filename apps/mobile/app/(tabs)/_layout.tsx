@@ -4,12 +4,14 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
-import { colors, typography } from '@/src/theme';
+import { typography, makeThemedStyles, useThemeColors } from '@/src/theme';
 import { useCart } from '@/src/contexts/CartContext';
 
 export default function TabLayout() {
   const { t } = useTranslation();
   const { itemCount } = useCart();
+  const colors = useThemeColors();
+  const styles = useStyles();
 
   return (
     <Tabs
@@ -79,23 +81,25 @@ export default function TabLayout() {
   );
 }
 
-const styles = StyleSheet.create({
-  badge: {
-    position: 'absolute',
-    top: -8,
-    right: -12,
-    backgroundColor: colors.error,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-  },
-  badgeText: {
-    ...typography.styles.caption,
-    color: colors.white,
-    fontSize: 11,
-    fontWeight: typography.fontWeight.bold,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    badge: {
+      position: 'absolute',
+      top: -8,
+      right: -12,
+      backgroundColor: colors.error,
+      borderRadius: 10,
+      minWidth: 20,
+      height: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 4,
+    },
+    badgeText: {
+      ...typography.styles.caption,
+      color: colors.white,
+      fontSize: 11,
+      fontWeight: typography.fontWeight.bold,
+    },
+  })
+);
