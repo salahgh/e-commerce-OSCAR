@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useGetRootCollectionsQuery } from '../../src/graphql/generated/graphql';
-import { colors, spacing, typography } from '../../src/theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
 import { useAppFont } from '../../src/hooks/useAppFont';
 
 const SIDEBAR_WIDTH = 111;
@@ -25,6 +25,8 @@ export default function ExploreScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { fontFamily } = useAppFont();
+  const colors = useThemeColors();
+  const styles = useStyles();
 
   const [searchInput, setSearchInput] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -118,7 +120,11 @@ export default function ExploreScreen() {
           {selectedCollection && (
             <>
               {/* "Tout les articles" link */}
-              <TouchableOpacity style={styles.viewAllRow} onPress={handleViewAll} activeOpacity={0.7}>
+              <TouchableOpacity
+                style={styles.viewAllRow}
+                onPress={handleViewAll}
+                activeOpacity={0.7}
+              >
                 <Text style={[styles.viewAllText, { fontFamily: fontFamily.medium }]}>
                   {t('explore.allItems', 'Tout les articles')}
                 </Text>
@@ -177,140 +183,142 @@ export default function ExploreScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  // Search bar
-  searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md,
-    gap: spacing.lg,
-  },
-  searchInputContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#F9FAFB',
-    paddingHorizontal: spacing.sm,
-    height: 36,
-    gap: spacing.sm,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    color: colors.text.primary,
-    paddingVertical: 0,
-  },
-  filterIcon: {
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  // Main content
-  mainContent: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  // Left sidebar
-  sidebar: {
-    width: SIDEBAR_WIDTH,
-    backgroundColor: '#EFEFEF',
-  },
-  sidebarItem: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginBottom: 28,
-  },
-  sidebarItemActive: {
-    backgroundColor: colors.surface,
-    borderLeftWidth: 2,
-    borderLeftColor: '#1E1E1E',
-  },
-  sidebarText: {
-    fontSize: 14,
-    color: '#999DAF',
-    lineHeight: 24,
-  },
-  sidebarTextActive: {
-    color: '#1E1E1E',
-  },
-  // Right panel
-  rightPanel: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 0,
-  },
-  viewAllRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: '#F9FAFB',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginBottom: 23,
-  },
-  viewAllText: {
-    fontSize: 12,
-    color: colors.text.primary,
-    lineHeight: 16,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    color: colors.text.primary,
-    lineHeight: 16,
-    marginBottom: 24,
-  },
-  // Subcategory circles
-  circleGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: CIRCLE_GAP,
-  },
-  circleItem: {
-    width: CIRCLE_SIZE,
-    alignItems: 'center',
-    gap: 6,
-  },
-  circleImage: {
-    width: CIRCLE_SIZE,
-    height: CIRCLE_SIZE,
-    borderRadius: CIRCLE_SIZE / 2,
-  },
-  circlePlaceholder: {
-    backgroundColor: '#F0F0F0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  circleName: {
-    fontSize: 12,
-    color: colors.text.primary,
-    lineHeight: 16,
-    textAlign: 'center',
-    width: CIRCLE_SIZE,
-  },
-  emptyChildren: {
-    alignItems: 'center',
-    paddingTop: 60,
-    gap: spacing.md,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: colors.text.tertiary,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    // Search bar
+    searchRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.xl,
+      paddingVertical: spacing.md,
+      gap: spacing.lg,
+    },
+    searchInputContainer: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.gray[1],
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.gray[1],
+      paddingHorizontal: spacing.sm,
+      height: 36,
+      gap: spacing.sm,
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: 14,
+      color: colors.text.primary,
+      paddingVertical: 0,
+    },
+    filterIcon: {
+      width: 24,
+      height: 24,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    // Main content
+    mainContent: {
+      flex: 1,
+      flexDirection: 'row',
+    },
+    // Left sidebar
+    sidebar: {
+      width: SIDEBAR_WIDTH,
+      backgroundColor: colors.gray[2],
+    },
+    sidebarItem: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      marginBottom: 28,
+    },
+    sidebarItemActive: {
+      backgroundColor: colors.surface,
+      borderLeftWidth: 2,
+      borderLeftColor: colors.primary,
+    },
+    sidebarText: {
+      fontSize: 14,
+      color: colors.text.tertiary,
+      lineHeight: 24,
+    },
+    sidebarTextActive: {
+      color: colors.primary,
+    },
+    // Right panel
+    rightPanel: {
+      flex: 1,
+      paddingHorizontal: 24,
+      paddingTop: 0,
+    },
+    viewAllRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.gray[1],
+      borderRadius: 8,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      marginBottom: 23,
+    },
+    viewAllText: {
+      fontSize: 12,
+      color: colors.text.primary,
+      lineHeight: 16,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      color: colors.text.primary,
+      lineHeight: 16,
+      marginBottom: 24,
+    },
+    // Subcategory circles
+    circleGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: CIRCLE_GAP,
+    },
+    circleItem: {
+      width: CIRCLE_SIZE,
+      alignItems: 'center',
+      gap: 6,
+    },
+    circleImage: {
+      width: CIRCLE_SIZE,
+      height: CIRCLE_SIZE,
+      borderRadius: CIRCLE_SIZE / 2,
+    },
+    circlePlaceholder: {
+      backgroundColor: colors.gray[2],
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    circleName: {
+      fontSize: 12,
+      color: colors.text.primary,
+      lineHeight: 16,
+      textAlign: 'center',
+      width: CIRCLE_SIZE,
+    },
+    emptyChildren: {
+      alignItems: 'center',
+      paddingTop: 60,
+      gap: spacing.md,
+    },
+    emptyText: {
+      fontSize: 14,
+      color: colors.text.tertiary,
+    },
+  })
+);
