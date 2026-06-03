@@ -1,24 +1,18 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-  Keyboard,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Keyboard } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, typography } from '../../src/theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
 import { useAppFont } from '../../src/hooks/useAppFont';
 
 export default function SupportScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { fontFamily } = useAppFont();
+  const styles = useStyles();
+  const colors = useThemeColors();
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
 
@@ -55,9 +49,7 @@ export default function SupportScreen() {
 
       <View style={styles.content}>
         {/* Title */}
-        <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>
-          {t('profile.needHelp')}
-        </Text>
+        <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>{t('profile.needHelp')}</Text>
         <Text style={[styles.subtitle, { fontFamily: fontFamily.regular }]}>
           {t('profile.helpSubtitle')}
         </Text>
@@ -89,59 +81,61 @@ export default function SupportScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md,
-  },
-  headerTitle: {
-    fontSize: typography.fontSize.lg,
-    color: colors.text.primary,
-  },
-  content: {
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.xl,
-  },
-  title: {
-    fontSize: 20,
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#6A7282',
-    lineHeight: 22,
-    marginBottom: spacing.xl,
-  },
-  messageInput: {
-    height: 140,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    fontSize: 14,
-    color: colors.text.primary,
-    marginBottom: spacing.lg,
-  },
-  sendButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  sendButtonDisabled: {
-    opacity: 0.5,
-  },
-  sendButtonText: {
-    fontSize: 16,
-    color: colors.text.inverse,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: spacing.xl,
+      paddingVertical: spacing.md,
+    },
+    headerTitle: {
+      fontSize: typography.fontSize.lg,
+      color: colors.text.primary,
+    },
+    content: {
+      paddingHorizontal: spacing.xl,
+      paddingTop: spacing.xl,
+    },
+    title: {
+      fontSize: 20,
+      color: colors.text.primary,
+      marginBottom: spacing.sm,
+    },
+    subtitle: {
+      fontSize: 14,
+      color: colors.text.secondary,
+      lineHeight: 22,
+      marginBottom: spacing.xl,
+    },
+    messageInput: {
+      height: 140,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.md,
+      fontSize: 14,
+      color: colors.text.primary,
+      marginBottom: spacing.lg,
+    },
+    sendButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+      paddingVertical: 16,
+      alignItems: 'center',
+    },
+    sendButtonDisabled: {
+      opacity: 0.5,
+    },
+    sendButtonText: {
+      fontSize: 16,
+      color: colors.text.inverse,
+    },
+  })
+);

@@ -15,8 +15,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/contexts/AuthContext';
-import { useActiveCustomerQuery, useUpdateCustomerProfileMutation } from '../../src/graphql/generated/graphql';
-import { colors, spacing, typography } from '../../src/theme';
+import {
+  useActiveCustomerQuery,
+  useUpdateCustomerProfileMutation,
+} from '../../src/graphql/generated/graphql';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
 import { useAppFont } from '../../src/hooks/useAppFont';
 import { changeLanguage, getCurrentLanguage, Language } from '../../src/i18n';
 
@@ -25,12 +28,16 @@ export default function EditProfileScreen() {
   const insets = useSafeAreaInsets();
   const { fontFamily } = useAppFont();
   const { user, updateUser } = useAuth();
+  const styles = useStyles();
+  const colors = useThemeColors();
 
   const { data } = useActiveCustomerQuery({ fetchPolicy: 'cache-and-network' });
   const customer = data?.activeCustomer;
 
   const [fullName, setFullName] = useState(
-    customer ? `${customer.firstName} ${customer.lastName}` : `${user?.firstName || ''} ${user?.lastName || ''}`
+    customer
+      ? `${customer.firstName} ${customer.lastName}`
+      : `${user?.firstName || ''} ${user?.lastName || ''}`
   );
   const [email] = useState(customer?.emailAddress || user?.email || '');
   const [phone, setPhone] = useState(customer?.phoneNumber || '');
@@ -113,7 +120,9 @@ export default function EditProfileScreen() {
 
           {/* Full Name */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.fullName')}</Text>
+            <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>
+              {t('auth.fullName')}
+            </Text>
             <TextInput
               style={[styles.input, { fontFamily: fontFamily.regular }]}
               value={fullName}
@@ -125,7 +134,9 @@ export default function EditProfileScreen() {
 
           {/* Email */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.addressEmail')}</Text>
+            <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>
+              {t('auth.addressEmail')}
+            </Text>
             <TextInput
               style={[styles.input, styles.inputDisabled, { fontFamily: fontFamily.regular }]}
               value={email}
@@ -135,7 +146,9 @@ export default function EditProfileScreen() {
 
           {/* Phone */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.phoneNumber')}</Text>
+            <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>
+              {t('auth.phoneNumber')}
+            </Text>
             <TextInput
               style={[styles.input, { fontFamily: fontFamily.regular }]}
               value={phone}
@@ -148,19 +161,25 @@ export default function EditProfileScreen() {
 
           {/* Password */}
           <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.password')}</Text>
+            <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>
+              {t('auth.password')}
+            </Text>
             <TouchableOpacity
               style={styles.passwordRow}
               onPress={() => router.push('/profile/change-password')}
             >
-              <Text style={[styles.passwordDots, { fontFamily: fontFamily.regular }]}>••••••••••</Text>
+              <Text style={[styles.passwordDots, { fontFamily: fontFamily.regular }]}>
+                ••••••••••
+              </Text>
               <Ionicons name="eye-off-outline" size={20} color={colors.text.tertiary} />
             </TouchableOpacity>
           </View>
 
           {/* Language */}
           <View style={styles.langSection}>
-            <Text style={[styles.langTitle, { fontFamily: fontFamily.bold }]}>{t('profile.language')}</Text>
+            <Text style={[styles.langTitle, { fontFamily: fontFamily.bold }]}>
+              {t('profile.language')}
+            </Text>
 
             <TouchableOpacity
               style={styles.langOption}
@@ -172,7 +191,9 @@ export default function EditProfileScreen() {
                 size={22}
                 color={selectedLang === 'ar' ? colors.primary : colors.border}
               />
-              <Text style={[styles.langLabel, { fontFamily: fontFamily.medium }]}>(AR) العربية</Text>
+              <Text style={[styles.langLabel, { fontFamily: fontFamily.medium }]}>
+                (AR) العربية
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -185,7 +206,9 @@ export default function EditProfileScreen() {
                 size={22}
                 color={selectedLang === 'fr' ? colors.primary : colors.border}
               />
-              <Text style={[styles.langLabel, { fontFamily: fontFamily.medium }]}>Français (FR)</Text>
+              <Text style={[styles.langLabel, { fontFamily: fontFamily.medium }]}>
+                Français (FR)
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -206,116 +229,118 @@ export default function EditProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md,
-  },
-  headerTitle: {
-    fontSize: typography.fontSize.lg,
-    color: colors.text.primary,
-  },
-  scrollContent: {
-    paddingHorizontal: spacing.xl,
-    paddingBottom: spacing['3xl'],
-  },
-  avatarSection: {
-    alignItems: 'center',
-    paddingVertical: spacing['2xl'],
-  },
-  avatarContainer: {
-    position: 'relative',
-  },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#F0F0F0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cameraButton: {
-    position: 'absolute',
-    bottom: 4,
-    right: 4,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 2,
-  },
-  fieldGroup: {
-    marginBottom: spacing.md,
-  },
-  fieldLabel: {
-    fontSize: 13,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  input: {
-    height: 48,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    fontSize: 14,
-    color: colors.text.primary,
-    paddingHorizontal: 0,
-  },
-  inputDisabled: {
-    color: colors.text.tertiary,
-  },
-  passwordRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: 48,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  passwordDots: {
-    fontSize: 14,
-    color: colors.text.primary,
-  },
-  langSection: {
-    marginTop: spacing.xl,
-    marginBottom: spacing.xl,
-  },
-  langTitle: {
-    fontSize: 16,
-    color: colors.text.primary,
-    marginBottom: spacing.lg,
-  },
-  langOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  langLabel: {
-    fontSize: 15,
-    color: colors.text.primary,
-  },
-  saveButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    fontSize: 16,
-    color: colors.text.inverse,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: spacing.xl,
+      paddingVertical: spacing.md,
+    },
+    headerTitle: {
+      fontSize: typography.fontSize.lg,
+      color: colors.text.primary,
+    },
+    scrollContent: {
+      paddingHorizontal: spacing.xl,
+      paddingBottom: spacing['3xl'],
+    },
+    avatarSection: {
+      alignItems: 'center',
+      paddingVertical: spacing['2xl'],
+    },
+    avatarContainer: {
+      position: 'relative',
+    },
+    avatar: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      backgroundColor: colors.gray[2],
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    cameraButton: {
+      position: 'absolute',
+      bottom: 4,
+      right: 4,
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: colors.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.15,
+      shadowRadius: 2,
+    },
+    fieldGroup: {
+      marginBottom: spacing.md,
+    },
+    fieldLabel: {
+      fontSize: 13,
+      color: colors.text.primary,
+      marginBottom: spacing.xs,
+    },
+    input: {
+      height: 48,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      fontSize: 14,
+      color: colors.text.primary,
+      paddingHorizontal: 0,
+    },
+    inputDisabled: {
+      color: colors.text.tertiary,
+    },
+    passwordRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      height: 48,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    passwordDots: {
+      fontSize: 14,
+      color: colors.text.primary,
+    },
+    langSection: {
+      marginTop: spacing.xl,
+      marginBottom: spacing.xl,
+    },
+    langTitle: {
+      fontSize: 16,
+      color: colors.text.primary,
+      marginBottom: spacing.lg,
+    },
+    langOption: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      paddingVertical: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    langLabel: {
+      fontSize: 15,
+      color: colors.text.primary,
+    },
+    saveButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+      paddingVertical: 16,
+      alignItems: 'center',
+    },
+    saveButtonText: {
+      fontSize: 16,
+      color: colors.text.inverse,
+    },
+  })
+);

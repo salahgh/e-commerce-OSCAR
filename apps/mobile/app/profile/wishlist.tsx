@@ -6,11 +6,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useWishlist, WishlistEntry } from '../../src/contexts/WishlistContext';
 import { Button } from '../../src/components/ui';
-import { colors, spacing, typography } from '../../src/theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
 
 export default function WishlistScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const styles = useStyles();
+  const colors = useThemeColors();
   const { items, remove } = useWishlist();
 
   const renderItem = ({ item }: { item: WishlistEntry }) => (
@@ -65,64 +67,66 @@ export default function WishlistScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  list: {
-    padding: spacing.lg,
-  },
-  separator: {
-    height: spacing.md,
-  },
-  card: {
-    flexDirection: 'row',
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.sm,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  thumb: {
-    width: 72,
-    height: 72,
-    borderRadius: 8,
-    backgroundColor: colors.background,
-    overflow: 'hidden',
-  },
-  thumbImage: {
-    width: '100%',
-    height: '100%',
-  },
-  cardBody: {
-    flex: 1,
-    paddingHorizontal: spacing.md,
-    gap: spacing.xs,
-  },
-  cardName: {
-    ...typography.styles.body,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  cardPrice: {
-    ...typography.styles.bodySmall,
-    color: colors.text.secondary,
-  },
-  removeBtn: {
-    padding: spacing.sm,
-  },
-  empty: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
-    gap: spacing.md,
-  },
-  emptyTitle: {
-    ...typography.styles.h4,
-    color: colors.text.primary,
-    textAlign: 'center',
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    list: {
+      padding: spacing.lg,
+    },
+    separator: {
+      height: spacing.md,
+    },
+    card: {
+      flexDirection: 'row',
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: spacing.sm,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    thumb: {
+      width: 72,
+      height: 72,
+      borderRadius: 8,
+      backgroundColor: colors.background,
+      overflow: 'hidden',
+    },
+    thumbImage: {
+      width: '100%',
+      height: '100%',
+    },
+    cardBody: {
+      flex: 1,
+      paddingHorizontal: spacing.md,
+      gap: spacing.xs,
+    },
+    cardName: {
+      ...typography.styles.body,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+    },
+    cardPrice: {
+      ...typography.styles.bodySmall,
+      color: colors.text.secondary,
+    },
+    removeBtn: {
+      padding: spacing.sm,
+    },
+    empty: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: spacing.xl,
+      gap: spacing.md,
+    },
+    emptyTitle: {
+      ...typography.styles.h4,
+      color: colors.text.primary,
+      textAlign: 'center',
+    },
+  })
+);

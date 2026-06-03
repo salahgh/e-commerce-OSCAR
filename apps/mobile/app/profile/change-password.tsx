@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { Input, Button } from '../../src/components/ui';
 import { useUpdateCustomerPasswordMutation } from '../../src/graphql/generated/graphql';
 import { changePasswordSchema } from '../../src/utils/validation';
-import { colors, spacing, typography } from '../../src/theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
 
 interface ChangePasswordFormValues {
   currentPassword: string;
@@ -27,6 +27,8 @@ interface ChangePasswordFormValues {
 export default function ChangePasswordScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const styles = useStyles();
+  const colors = useThemeColors();
   const [submitError, setSubmitError] = useState<string>('');
 
   const [updatePassword, { loading: updating }] = useUpdateCustomerPasswordMutation();
@@ -172,71 +174,73 @@ export default function ChangePasswordScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
-    paddingTop: spacing.xl,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  headerTitle: {
-    ...typography.styles.h3,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-  },
-  placeholder: {
-    width: 40,
-  },
-  content: {
-    flex: 1,
-  },
-  infoBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
-    backgroundColor: colors.info + '15',
-    padding: spacing.md,
-    borderRadius: 8,
-    margin: spacing.lg,
-  },
-  infoText: {
-    ...typography.styles.bodySmall,
-    color: colors.text.secondary,
-    flex: 1,
-  },
-  form: {
-    padding: spacing.lg,
-    paddingTop: 0,
-    gap: spacing.md,
-  },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.error + '15',
-    padding: spacing.md,
-    borderRadius: 8,
-  },
-  errorText: {
-    ...typography.styles.bodySmall,
-    color: colors.error,
-    flex: 1,
-  },
-  submitButton: {
-    marginTop: spacing.md,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: colors.surface,
+      padding: spacing.lg,
+      paddingTop: spacing.xl,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    backButton: {
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'flex-start',
+    },
+    headerTitle: {
+      ...typography.styles.h3,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.bold,
+    },
+    placeholder: {
+      width: 40,
+    },
+    content: {
+      flex: 1,
+    },
+    infoBox: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: spacing.sm,
+      backgroundColor: colors.info + '15',
+      padding: spacing.md,
+      borderRadius: 8,
+      margin: spacing.lg,
+    },
+    infoText: {
+      ...typography.styles.bodySmall,
+      color: colors.text.secondary,
+      flex: 1,
+    },
+    form: {
+      padding: spacing.lg,
+      paddingTop: 0,
+      gap: spacing.md,
+    },
+    errorContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      backgroundColor: colors.error + '15',
+      padding: spacing.md,
+      borderRadius: 8,
+    },
+    errorText: {
+      ...typography.styles.bodySmall,
+      color: colors.error,
+      flex: 1,
+    },
+    submitButton: {
+      marginTop: spacing.md,
+    },
+  })
+);
