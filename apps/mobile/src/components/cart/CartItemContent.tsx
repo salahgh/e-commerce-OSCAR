@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { CartItemData } from './CartItem';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 
 interface CartItemContentProps {
   item: CartItemData;
@@ -16,6 +16,9 @@ export const CartItemContent: React.FC<CartItemContentProps> = ({
   onUpdateQuantity,
   loading = false,
 }) => {
+  const styles = useStyles();
+  const colors = useThemeColors();
+
   const handleProductPress = () => {
     if (item.productId) {
       router.push(`/products/${item.productId}`);
@@ -99,98 +102,102 @@ export const CartItemContent: React.FC<CartItemContentProps> = ({
   );
 };
 
-export const cartItemStyles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    padding: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    marginBottom: spacing.md,
-    elevation: 1,
-    shadowColor: colors.text.primary,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-  },
-});
+export const useCartItemStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      padding: spacing.md,
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      marginBottom: spacing.md,
+      elevation: 1,
+      shadowColor: colors.text.primary,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+    },
+  })
+);
 
-const styles = StyleSheet.create({
-  imageContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    overflow: 'hidden',
-    marginRight: spacing.md,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-  },
-  placeholderImage: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: colors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  details: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  productName: {
-    ...typography.styles.body,
-    fontWeight: typography.fontWeight.semiBold,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  attributes: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.xs,
-  },
-  attribute: {
-    ...typography.styles.caption,
-    color: colors.text.secondary,
-  },
-  price: {
-    ...typography.styles.body,
-    fontWeight: typography.fontWeight.semiBold,
-    color: colors.primary,
-    marginBottom: spacing.sm,
-  },
-  quantityRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  quantityControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  quantityButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: colors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background,
-  },
-  quantityButtonDisabled: {
-    opacity: 0.5,
-  },
-  quantity: {
-    ...typography.styles.body,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    minWidth: 24,
-    textAlign: 'center',
-  },
-  subtotal: {
-    ...typography.styles.body,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    imageContainer: {
+      width: 80,
+      height: 80,
+      borderRadius: 8,
+      overflow: 'hidden',
+      marginRight: spacing.md,
+    },
+    image: {
+      width: '100%',
+      height: '100%',
+    },
+    placeholderImage: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: colors.border,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    details: {
+      flex: 1,
+      justifyContent: 'space-between',
+    },
+    productName: {
+      ...typography.styles.body,
+      fontWeight: typography.fontWeight.semiBold,
+      color: colors.text.primary,
+      marginBottom: spacing.xs,
+    },
+    attributes: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      marginBottom: spacing.xs,
+    },
+    attribute: {
+      ...typography.styles.caption,
+      color: colors.text.secondary,
+    },
+    price: {
+      ...typography.styles.body,
+      fontWeight: typography.fontWeight.semiBold,
+      color: colors.primary,
+      marginBottom: spacing.sm,
+    },
+    quantityRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    quantityControls: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    quantityButton: {
+      width: 28,
+      height: 28,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: colors.border,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.background,
+    },
+    quantityButtonDisabled: {
+      opacity: 0.5,
+    },
+    quantity: {
+      ...typography.styles.body,
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+      minWidth: 24,
+      textAlign: 'center',
+    },
+    subtotal: {
+      ...typography.styles.body,
+      fontWeight: typography.fontWeight.bold,
+      color: colors.text.primary,
+    },
+  })
+);

@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { CartItemContent, cartItemStyles } from './CartItemContent';
-import { colors, spacing } from '../../theme';
+import { CartItemContent, useCartItemStyles } from './CartItemContent';
+import { spacing, makeThemedStyles, useThemeColors } from '../../theme';
 
 export interface CartItemData {
   id: string;
@@ -29,6 +29,10 @@ export const CartItem: React.FC<CartItemProps> = ({
   onRemove,
   loading = false,
 }) => {
+  const styles = useStyles();
+  const colors = useThemeColors();
+  const cartItemStyles = useCartItemStyles();
+
   const handleRemove = () => {
     if (item.id) {
       onRemove(item.id);
@@ -37,11 +41,7 @@ export const CartItem: React.FC<CartItemProps> = ({
 
   return (
     <View style={cartItemStyles.container}>
-      <CartItemContent
-        item={item}
-        onUpdateQuantity={onUpdateQuantity}
-        loading={loading}
-      />
+      <CartItemContent item={item} onUpdateQuantity={onUpdateQuantity} loading={loading} />
 
       <TouchableOpacity
         style={styles.removeButton}
@@ -55,9 +55,11 @@ export const CartItem: React.FC<CartItemProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  removeButton: {
-    padding: spacing.xs,
-    marginLeft: spacing.sm,
-  },
-});
+const useStyles = makeThemedStyles((_colors) =>
+  StyleSheet.create({
+    removeButton: {
+      padding: spacing.xs,
+      marginLeft: spacing.sm,
+    },
+  })
+);

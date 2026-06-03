@@ -1,16 +1,10 @@
 import React, { useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Swipeable, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { CartItemData } from './CartItem';
-import { CartItemContent, cartItemStyles } from './CartItemContent';
-import { colors, spacing, typography } from '../../theme';
+import { CartItemContent, useCartItemStyles } from './CartItemContent';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 
 const DELETE_BUTTON_WIDTH = 80;
 
@@ -27,6 +21,10 @@ export const SwipeableCartItem: React.FC<SwipeableCartItemProps> = ({
   onRemove,
   loading = false,
 }) => {
+  const styles = useStyles();
+  const colors = useThemeColors();
+  const cartItemStyles = useCartItemStyles();
+
   const swipeableRef = useRef<Swipeable>(null);
 
   const handleRemove = () => {
@@ -61,11 +59,7 @@ export const SwipeableCartItem: React.FC<SwipeableCartItemProps> = ({
           },
         ]}
       >
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={handleRemove}
-          activeOpacity={0.7}
-        >
+        <TouchableOpacity style={styles.deleteButton} onPress={handleRemove} activeOpacity={0.7}>
           <Ionicons name="trash-outline" size={24} color={colors.text.inverse} />
           <Text style={styles.deleteText}>Delete</Text>
         </TouchableOpacity>
@@ -82,11 +76,7 @@ export const SwipeableCartItem: React.FC<SwipeableCartItemProps> = ({
       friction={2}
     >
       <View style={cartItemStyles.container}>
-        <CartItemContent
-          item={item}
-          onUpdateQuantity={onUpdateQuantity}
-          loading={loading}
-        />
+        <CartItemContent item={item} onUpdateQuantity={onUpdateQuantity} loading={loading} />
 
         <View style={styles.swipeHint}>
           <Ionicons name="chevron-back" size={16} color={colors.text.tertiary} />
@@ -104,27 +94,29 @@ export const SwipeableCartItemWrapper: React.FC<SwipeableCartItemProps> = (props
   );
 };
 
-const styles = StyleSheet.create({
-  swipeHint: {
-    justifyContent: 'center',
-    paddingLeft: spacing.xs,
-  },
-  deleteContainer: {
-    width: DELETE_BUTTON_WIDTH,
-    marginBottom: spacing.md,
-  },
-  deleteButton: {
-    flex: 1,
-    backgroundColor: colors.error,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderTopRightRadius: 12,
-    borderBottomRightRadius: 12,
-  },
-  deleteText: {
-    color: colors.text.inverse,
-    fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.medium,
-    marginTop: spacing.xs,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    swipeHint: {
+      justifyContent: 'center',
+      paddingLeft: spacing.xs,
+    },
+    deleteContainer: {
+      width: DELETE_BUTTON_WIDTH,
+      marginBottom: spacing.md,
+    },
+    deleteButton: {
+      flex: 1,
+      backgroundColor: colors.error,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderTopRightRadius: 12,
+      borderBottomRightRadius: 12,
+    },
+    deleteText: {
+      color: colors.text.inverse,
+      fontSize: typography.fontSize.xs,
+      fontWeight: typography.fontWeight.medium,
+      marginTop: spacing.xs,
+    },
+  })
+);
