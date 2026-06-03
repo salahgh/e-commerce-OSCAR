@@ -198,6 +198,7 @@
     "wilaya": "Wilaya",
     "email": "E-mail",
     "staleSession": "Votre session n'est plus synchronisée — veuillez vous reconnecter pour continuer.",
+    "signInAgain": "Se reconnecter",
     "chooseCommune": "Choisir votre commune",
     "orderPlaced": "Commande passée avec succès!",
     "thankYou": "Merci pour votre commande. Nous vous enverrons un email de confirmation sous peu.",

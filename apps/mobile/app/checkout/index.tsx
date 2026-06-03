@@ -43,7 +43,7 @@ export default function CheckoutScreen() {
   const { fontFamily } = useAppFont();
   const { t } = useTranslation();
   const { order, items, subTotal, shipping, total, refetchCart } = useCart();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
 
   // State
   const [currentStep, setCurrentStep] = useState<CheckoutStep>('shipping');
@@ -141,15 +141,28 @@ export default function CheckoutScreen() {
       setCurrentStep('shippingMethod');
       refetchCart();
     } catch (error: any) {
-      const message =
-        error?.message === STALE_SESSION_ERROR
-          ? t(
-              'checkout.staleSession',
-              'Your session is out of sync — please sign in again to continue.'
-            )
-          : error?.message || t('checkout.addressError', 'Failed to set shipping address');
+      const isStaleSession = error?.message === STALE_SESSION_ERROR;
+      const message = isStaleSession
+        ? t(
+            'checkout.staleSession',
+            'Your session is out of sync — please sign in again to continue.'
+          )
+        : error?.message || t('checkout.addressError', 'Failed to set shipping address');
       console.error('Set shipping address error:', error);
-      Alert.alert(t('common.error', 'Error'), message);
+      if (isStaleSession) {
+        Alert.alert(t('common.error', 'Error'), message, [
+          { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+          {
+            text: t('checkout.signInAgain', 'Sign in again'),
+            onPress: async () => {
+              await logout();
+              router.replace('/(auth)/login');
+            },
+          },
+        ]);
+      } else {
+        Alert.alert(t('common.error', 'Error'), message);
+      }
     }
   };
 
