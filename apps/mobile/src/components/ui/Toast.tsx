@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography } from '../../theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../theme';
 import { haptics } from '../../utils/haptics';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -53,13 +53,15 @@ export const useToast = (): ToastContextType => {
 };
 
 // Toast Item Component
-const ToastItem: React.FC<{
+const ToastItemComponent: React.FC<{
   toast: ToastItem;
   onHide: (id: string) => void;
   position: ToastPosition;
   safeAreaTop: number;
   safeAreaBottom: number;
 }> = ({ toast, onHide, position, safeAreaTop, safeAreaBottom }) => {
+  const styles = useStyles();
+  const colors = useThemeColors();
   const translateY = useRef(new Animated.Value(position === 'top' ? -100 : 100)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
@@ -169,14 +171,13 @@ const ToastItem: React.FC<{
 
 // Toast Provider Component
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const styles = useStyles();
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const insets = useSafeAreaInsets();
   const idCounter = useRef(0);
 
   const show = useCallback((config: ToastConfig | string) => {
-    const toastConfig: ToastConfig = typeof config === 'string'
-      ? { message: config }
-      : config;
+    const toastConfig: ToastConfig = typeof config === 'string' ? { message: config } : config;
 
     const id = `toast-${idCounter.current++}`;
     const newToast: ToastItem = {
@@ -198,21 +199,33 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const success = useCallback((message: string) => {
-    show({ message, type: 'success' });
-  }, [show]);
+  const success = useCallback(
+    (message: string) => {
+      show({ message, type: 'success' });
+    },
+    [show]
+  );
 
-  const error = useCallback((message: string) => {
-    show({ message, type: 'error' });
-  }, [show]);
+  const error = useCallback(
+    (message: string) => {
+      show({ message, type: 'error' });
+    },
+    [show]
+  );
 
-  const warning = useCallback((message: string) => {
-    show({ message, type: 'warning' });
-  }, [show]);
+  const warning = useCallback(
+    (message: string) => {
+      show({ message, type: 'warning' });
+    },
+    [show]
+  );
 
-  const info = useCallback((message: string) => {
-    show({ message, type: 'info' });
-  }, [show]);
+  const info = useCallback(
+    (message: string) => {
+      show({ message, type: 'info' });
+    },
+    [show]
+  );
 
   const topToasts = toasts.filter((t) => t.position === 'top');
   const bottomToasts = toasts.filter((t) => t.position === 'bottom');
@@ -224,7 +237,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {/* Top Toasts */}
       <View style={[styles.topContainer]} pointerEvents="box-none">
         {topToasts.map((toast) => (
-          <ToastItem
+          <ToastItemComponent
             key={toast.id}
             toast={toast}
             onHide={hide}
@@ -238,7 +251,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {/* Bottom Toasts */}
       <View style={[styles.bottomContainer]} pointerEvents="box-none">
         {bottomToasts.map((toast) => (
-          <ToastItem
+          <ToastItemComponent
             key={toast.id}
             toast={toast}
             onHide={hide}
@@ -252,66 +265,68 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 };
 
-const styles = StyleSheet.create({
-  topContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    zIndex: 9999,
-  },
-  bottomContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    zIndex: 9999,
-  },
-  toastItem: {
-    width: SCREEN_WIDTH - spacing.lg * 2,
-    maxWidth: 400,
-    borderRadius: spacing.borderRadius.md,
-    marginVertical: spacing.xs,
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.text.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
-  },
-  toastContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.md,
-    paddingRight: spacing.sm,
-  },
-  toastMessage: {
-    flex: 1,
-    fontSize: typography.fontSize.sm,
-    color: colors.text.inverse,
-    marginLeft: spacing.sm,
-    fontWeight: typography.fontWeight.medium,
-  },
-  actionButton: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    marginLeft: spacing.sm,
-  },
-  actionText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.bold,
-    textDecorationLine: 'underline',
-  },
-  closeToastButton: {
-    padding: spacing.xs,
-    marginLeft: spacing.xs,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    topContainer: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      alignItems: 'center',
+      zIndex: 9999,
+    },
+    bottomContainer: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      alignItems: 'center',
+      zIndex: 9999,
+    },
+    toastItem: {
+      width: SCREEN_WIDTH - spacing.lg * 2,
+      maxWidth: 400,
+      borderRadius: spacing.borderRadius.md,
+      marginVertical: spacing.xs,
+      ...Platform.select({
+        ios: {
+          shadowColor: colors.text.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+        },
+        android: {
+          elevation: 8,
+        },
+      }),
+    },
+    toastContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: spacing.md,
+      paddingRight: spacing.sm,
+    },
+    toastMessage: {
+      flex: 1,
+      fontSize: typography.fontSize.sm,
+      color: colors.text.inverse,
+      marginLeft: spacing.sm,
+      fontWeight: typography.fontWeight.medium,
+    },
+    actionButton: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      marginLeft: spacing.sm,
+    },
+    actionText: {
+      fontSize: typography.fontSize.sm,
+      color: colors.text.inverse,
+      fontWeight: typography.fontWeight.bold,
+      textDecorationLine: 'underline',
+    },
+    closeToastButton: {
+      padding: spacing.xs,
+      marginLeft: spacing.xs,
+    },
+  })
+);

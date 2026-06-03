@@ -1,13 +1,7 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ViewStyle,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography } from '../../theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../theme';
 
 interface CheckboxProps {
   checked: boolean;
@@ -30,6 +24,9 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   size = 'medium',
   containerStyle,
 }) => {
+  const styles = useStyles();
+  const colors = useThemeColors();
+
   const getSize = () => {
     switch (size) {
       case 'small':
@@ -60,30 +57,13 @@ export const Checkbox: React.FC<CheckboxProps> = ({
             error && styles.checkboxError,
           ]}
         >
-          {checked && (
-            <Ionicons
-              name="checkmark"
-              size={boxSize - 6}
-              color={colors.text.inverse}
-            />
-          )}
+          {checked && <Ionicons name="checkmark" size={boxSize - 6} color={colors.text.inverse} />}
         </View>
 
         {(label || description) && (
           <View style={styles.textContainer}>
-            {label && (
-              <Text
-                style={[
-                  styles.label,
-                  disabled && styles.labelDisabled,
-                ]}
-              >
-                {label}
-              </Text>
-            )}
-            {description && (
-              <Text style={styles.description}>{description}</Text>
-            )}
+            {label && <Text style={[styles.label, disabled && styles.labelDisabled]}>{label}</Text>}
+            {description && <Text style={styles.description}>{description}</Text>}
           </View>
         )}
       </TouchableOpacity>
@@ -93,55 +73,57 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.sm,
-  },
-  touchable: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  checkbox: {
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: spacing.borderRadius.sm,
-    backgroundColor: colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxChecked: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  checkboxDisabled: {
-    backgroundColor: colors.background,
-    borderColor: colors.borderLight,
-    opacity: 0.6,
-  },
-  checkboxError: {
-    borderColor: colors.error,
-  },
-  textContainer: {
-    flex: 1,
-    marginLeft: spacing.md,
-  },
-  label: {
-    fontSize: typography.fontSize.md,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  labelDisabled: {
-    color: colors.text.disabled,
-  },
-  description: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    marginTop: spacing.xs,
-  },
-  errorText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.error,
-    marginTop: spacing.xs,
-    marginLeft: 32,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      marginBottom: spacing.sm,
+    },
+    touchable: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+    },
+    checkbox: {
+      borderWidth: 2,
+      borderColor: colors.border,
+      borderRadius: spacing.borderRadius.sm,
+      backgroundColor: colors.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    checkboxChecked: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    checkboxDisabled: {
+      backgroundColor: colors.background,
+      borderColor: colors.borderLight,
+      opacity: 0.6,
+    },
+    checkboxError: {
+      borderColor: colors.error,
+    },
+    textContainer: {
+      flex: 1,
+      marginLeft: spacing.md,
+    },
+    label: {
+      fontSize: typography.fontSize.md,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+    },
+    labelDisabled: {
+      color: colors.text.disabled,
+    },
+    description: {
+      fontSize: typography.fontSize.sm,
+      color: colors.text.secondary,
+      marginTop: spacing.xs,
+    },
+    errorText: {
+      fontSize: typography.fontSize.xs,
+      color: colors.error,
+      marginTop: spacing.xs,
+      marginLeft: 32,
+    },
+  })
+);

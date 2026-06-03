@@ -8,7 +8,7 @@ import {
   ViewStyle,
   TouchableOpacity,
 } from 'react-native';
-import { colors, spacing, typography } from '../../theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../theme';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -35,6 +35,8 @@ export const Input: React.FC<InputProps> = ({
   style,
   ...props
 }) => {
+  const styles = useStyles();
+  const colors = useThemeColors();
   const [isFocused, setIsFocused] = useState(false);
 
   const hasError = !!error;
@@ -101,68 +103,70 @@ export const Input: React.FC<InputProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.md,
-  },
-  labelContainer: {
-    marginBottom: spacing.xs,
-  },
-  label: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-  },
-  required: {
-    color: colors.error,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: spacing.borderRadius.md,
-    paddingHorizontal: spacing.md,
-    minHeight: 48,
-  },
-  inputFocused: {
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  inputError: {
-    borderColor: colors.error,
-  },
-  inputDisabled: {
-    backgroundColor: colors.background,
-    opacity: 0.6,
-  },
-  input: {
-    flex: 1,
-    fontSize: typography.fontSize.md,
-    color: colors.text.primary,
-    paddingVertical: spacing.md,
-  },
-  inputWithLeftIcon: {
-    marginLeft: spacing.sm,
-  },
-  inputWithRightIcon: {
-    marginRight: spacing.sm,
-  },
-  leftIcon: {
-    marginRight: spacing.xs,
-  },
-  rightIcon: {
-    marginLeft: spacing.xs,
-    padding: spacing.xs,
-  },
-  helperText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.secondary,
-    marginTop: spacing.xs,
-    marginLeft: spacing.xs,
-  },
-  errorText: {
-    color: colors.error,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      marginBottom: spacing.md,
+    },
+    labelContainer: {
+      marginBottom: spacing.xs,
+    },
+    label: {
+      fontSize: typography.fontSize.sm,
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+    },
+    required: {
+      color: colors.error,
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: spacing.borderRadius.md,
+      paddingHorizontal: spacing.md,
+      minHeight: 48,
+    },
+    inputFocused: {
+      borderWidth: 2,
+      borderColor: colors.primary,
+    },
+    inputError: {
+      borderColor: colors.error,
+    },
+    inputDisabled: {
+      backgroundColor: colors.background,
+      opacity: 0.6,
+    },
+    input: {
+      flex: 1,
+      fontSize: typography.fontSize.md,
+      color: colors.text.primary,
+      paddingVertical: spacing.md,
+    },
+    inputWithLeftIcon: {
+      marginLeft: spacing.sm,
+    },
+    inputWithRightIcon: {
+      marginRight: spacing.sm,
+    },
+    leftIcon: {
+      marginRight: spacing.xs,
+    },
+    rightIcon: {
+      marginLeft: spacing.xs,
+      padding: spacing.xs,
+    },
+    helperText: {
+      fontSize: typography.fontSize.xs,
+      color: colors.text.secondary,
+      marginTop: spacing.xs,
+      marginLeft: spacing.xs,
+    },
+    errorText: {
+      color: colors.error,
+    },
+  })
+);

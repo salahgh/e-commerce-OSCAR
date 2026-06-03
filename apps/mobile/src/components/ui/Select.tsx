@@ -7,9 +7,10 @@ import {
   Modal,
   FlatList,
   ViewStyle,
+  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography } from '../../theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../theme';
 
 export interface SelectOption {
   label: string;
@@ -44,6 +45,8 @@ export const Select: React.FC<SelectProps> = ({
   containerStyle,
   searchable = false,
 }) => {
+  const styles = useStyles();
+  const colors = useThemeColors();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -51,9 +54,7 @@ export const Select: React.FC<SelectProps> = ({
   const hasError = !!error;
 
   const filteredOptions = searchable
-    ? options.filter((opt) =>
-        opt.label.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    ? options.filter((opt) => opt.label.toLowerCase().includes(searchQuery.toLowerCase()))
     : options;
 
   const handleSelect = (option: SelectOption) => {
@@ -84,9 +85,7 @@ export const Select: React.FC<SelectProps> = ({
       >
         {item.label}
       </Text>
-      {item.value === value && (
-        <Ionicons name="checkmark" size={20} color={colors.primary} />
-      )}
+      {item.value === value && <Ionicons name="checkmark" size={20} color={colors.primary} />}
     </TouchableOpacity>
   );
 
@@ -111,12 +110,7 @@ export const Select: React.FC<SelectProps> = ({
         disabled={disabled}
         activeOpacity={0.7}
       >
-        <Text
-          style={[
-            styles.selectText,
-            !selectedOption && styles.placeholderText,
-          ]}
-        >
+        <Text style={[styles.selectText, !selectedOption && styles.placeholderText]}>
           {selectedOption ? selectedOption.label : placeholder}
         </Text>
         <Ionicons
@@ -127,9 +121,7 @@ export const Select: React.FC<SelectProps> = ({
       </TouchableOpacity>
 
       {(error || helperText) && (
-        <Text style={[styles.helperText, hasError && styles.errorText]}>
-          {error || helperText}
-        </Text>
+        <Text style={[styles.helperText, hasError && styles.errorText]}>{error || helperText}</Text>
       )}
 
       <Modal
@@ -138,11 +130,7 @@ export const Select: React.FC<SelectProps> = ({
         animationType="fade"
         onRequestClose={() => setIsOpen(false)}
       >
-        <TouchableOpacity
-          style={styles.overlay}
-          activeOpacity={1}
-          onPress={() => setIsOpen(false)}
-        >
+        <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={() => setIsOpen(false)}>
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
@@ -186,138 +174,137 @@ export const Select: React.FC<SelectProps> = ({
   );
 };
 
-// Import TextInput for searchable select
-import { TextInput } from 'react-native';
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.md,
-  },
-  labelContainer: {
-    marginBottom: spacing.xs,
-  },
-  label: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-  },
-  required: {
-    color: colors.error,
-  },
-  selectButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: spacing.borderRadius.md,
-    paddingHorizontal: spacing.md,
-    minHeight: 48,
-  },
-  selectButtonError: {
-    borderColor: colors.error,
-  },
-  selectButtonDisabled: {
-    backgroundColor: colors.background,
-    opacity: 0.6,
-  },
-  selectText: {
-    fontSize: typography.fontSize.md,
-    color: colors.text.primary,
-    flex: 1,
-  },
-  placeholderText: {
-    color: colors.text.tertiary,
-  },
-  helperText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.secondary,
-    marginTop: spacing.xs,
-    marginLeft: spacing.xs,
-  },
-  errorText: {
-    color: colors.error,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: colors.overlay,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContainer: {
-    width: '90%',
-    maxHeight: '70%',
-  },
-  modalContent: {
-    backgroundColor: colors.surface,
-    borderRadius: spacing.borderRadius.lg,
-    overflow: 'hidden',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  modalTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.semiBold,
-    color: colors.text.primary,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.background,
-    margin: spacing.md,
-    paddingHorizontal: spacing.md,
-    borderRadius: spacing.borderRadius.md,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: typography.fontSize.md,
-    color: colors.text.primary,
-    paddingVertical: spacing.md,
-    marginLeft: spacing.sm,
-  },
-  optionsList: {
-    maxHeight: 300,
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
-  },
-  optionSelected: {
-    backgroundColor: colors.secondaryLight,
-  },
-  optionDisabled: {
-    opacity: 0.5,
-  },
-  optionText: {
-    fontSize: typography.fontSize.md,
-    color: colors.text.primary,
-  },
-  optionTextSelected: {
-    color: colors.primary,
-    fontWeight: typography.fontWeight.semiBold,
-  },
-  optionTextDisabled: {
-    color: colors.text.disabled,
-  },
-  emptyContainer: {
-    padding: spacing.xl,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: typography.fontSize.md,
-    color: colors.text.tertiary,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      marginBottom: spacing.md,
+    },
+    labelContainer: {
+      marginBottom: spacing.xs,
+    },
+    label: {
+      fontSize: typography.fontSize.sm,
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+    },
+    required: {
+      color: colors.error,
+    },
+    selectButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: spacing.borderRadius.md,
+      paddingHorizontal: spacing.md,
+      minHeight: 48,
+    },
+    selectButtonError: {
+      borderColor: colors.error,
+    },
+    selectButtonDisabled: {
+      backgroundColor: colors.background,
+      opacity: 0.6,
+    },
+    selectText: {
+      fontSize: typography.fontSize.md,
+      color: colors.text.primary,
+      flex: 1,
+    },
+    placeholderText: {
+      color: colors.text.tertiary,
+    },
+    helperText: {
+      fontSize: typography.fontSize.xs,
+      color: colors.text.secondary,
+      marginTop: spacing.xs,
+      marginLeft: spacing.xs,
+    },
+    errorText: {
+      color: colors.error,
+    },
+    overlay: {
+      flex: 1,
+      backgroundColor: colors.overlay,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalContainer: {
+      width: '90%',
+      maxHeight: '70%',
+    },
+    modalContent: {
+      backgroundColor: colors.surface,
+      borderRadius: spacing.borderRadius.lg,
+      overflow: 'hidden',
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    modalTitle: {
+      fontSize: typography.fontSize.lg,
+      fontWeight: typography.fontWeight.semiBold,
+      color: colors.text.primary,
+    },
+    searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.background,
+      margin: spacing.md,
+      paddingHorizontal: spacing.md,
+      borderRadius: spacing.borderRadius.md,
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: typography.fontSize.md,
+      color: colors.text.primary,
+      paddingVertical: spacing.md,
+      marginLeft: spacing.sm,
+    },
+    optionsList: {
+      maxHeight: 300,
+    },
+    option: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderLight,
+    },
+    optionSelected: {
+      backgroundColor: colors.secondaryLight,
+    },
+    optionDisabled: {
+      opacity: 0.5,
+    },
+    optionText: {
+      fontSize: typography.fontSize.md,
+      color: colors.text.primary,
+    },
+    optionTextSelected: {
+      color: colors.primary,
+      fontWeight: typography.fontWeight.semiBold,
+    },
+    optionTextDisabled: {
+      color: colors.text.disabled,
+    },
+    emptyContainer: {
+      padding: spacing.xl,
+      alignItems: 'center',
+    },
+    emptyText: {
+      fontSize: typography.fontSize.md,
+      color: colors.text.tertiary,
+    },
+  })
+);

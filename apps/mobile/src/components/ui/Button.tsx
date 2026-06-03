@@ -8,7 +8,7 @@ import {
   TextStyle,
   TouchableOpacityProps,
 } from 'react-native';
-import { colors, spacing, typography } from '../../theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../theme';
 import { haptics } from '../../utils/haptics';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
@@ -42,6 +42,8 @@ export const Button: React.FC<ButtonProps> = ({
   textStyle,
   ...props
 }) => {
+  const styles = useStyles();
+  const colors = useThemeColors();
   const isDisabled = disabled || loading;
 
   const getButtonStyle = (): ViewStyle => {
@@ -128,74 +130,76 @@ export const Button: React.FC<ButtonProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  base: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: spacing.borderRadius.md,
-    borderWidth: 0,
-  },
-  fullWidth: {
-    width: '100%',
-  },
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    base: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: spacing.borderRadius.md,
+      borderWidth: 0,
+    },
+    fullWidth: {
+      width: '100%',
+    },
 
-  // Size variants
-  size_small: {
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    minHeight: 36,
-  },
-  size_medium: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.xl,
-    minHeight: 44,
-  },
-  size_large: {
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing['2xl'],
-    minHeight: 52,
-  },
+    // Size variants
+    size_small: {
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.lg,
+      minHeight: 36,
+    },
+    size_medium: {
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.xl,
+      minHeight: 44,
+    },
+    size_large: {
+      paddingVertical: spacing.lg,
+      paddingHorizontal: spacing['2xl'],
+      minHeight: 52,
+    },
 
-  // Color variants
-  primary: {
-    backgroundColor: colors.primary,
-    ...spacing.shadows.sm,
-  },
-  secondary: {
-    backgroundColor: colors.secondary,
-    ...spacing.shadows.sm,
-  },
-  outline: {
-    backgroundColor: colors.transparent,
-    borderWidth: 1.5,
-    borderColor: colors.primary,
-  },
-  ghost: {
-    backgroundColor: colors.transparent,
-  },
-  danger: {
-    backgroundColor: colors.error,
-    ...spacing.shadows.sm,
-  },
+    // Color variants
+    primary: {
+      backgroundColor: colors.primary,
+      ...spacing.shadows.sm,
+    },
+    secondary: {
+      backgroundColor: colors.secondary,
+      ...spacing.shadows.sm,
+    },
+    outline: {
+      backgroundColor: colors.transparent,
+      borderWidth: 1.5,
+      borderColor: colors.primary,
+    },
+    ghost: {
+      backgroundColor: colors.transparent,
+    },
+    danger: {
+      backgroundColor: colors.error,
+      ...spacing.shadows.sm,
+    },
 
-  // Disabled state
-  disabled: {
-    opacity: 0.5,
-  },
+    // Disabled state
+    disabled: {
+      opacity: 0.5,
+    },
 
-  // Text styles
-  text: {
-    ...typography.styles.button,
-    textAlign: 'center',
-  },
-  text_small: {
-    fontSize: typography.fontSize.sm,
-  },
-  text_medium: {
-    fontSize: typography.fontSize.md,
-  },
-  text_large: {
-    fontSize: typography.fontSize.lg,
-  },
-});
+    // Text styles
+    text: {
+      ...typography.styles.button,
+      textAlign: 'center',
+    },
+    text_small: {
+      fontSize: typography.fontSize.sm,
+    },
+    text_medium: {
+      fontSize: typography.fontSize.md,
+    },
+    text_large: {
+      fontSize: typography.fontSize.lg,
+    },
+  })
+);
