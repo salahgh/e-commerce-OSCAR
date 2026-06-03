@@ -5,12 +5,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { SettingsItem } from '../../src/components/profile';
 import { useThemeMode, ThemeMode } from '../../src/contexts/ThemeContext';
-import { colors, spacing, typography } from '../../src/theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
 
 export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const { mode: themeMode, setMode: setThemeMode } = useThemeMode();
+  const colors = useThemeColors();
+  const styles = useStyles();
   const themeOptions: Array<{ value: ThemeMode; labelKey: string }> = [
     { value: 'system', labelKey: 'theme.system' },
     { value: 'light', labelKey: 'theme.light' },
@@ -33,7 +35,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="settings-screen">
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -152,79 +154,81 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
-    paddingTop: spacing.xl,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  headerTitle: {
-    ...typography.styles.h3,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-  },
-  placeholder: {
-    width: 40,
-  },
-  content: {
-    flex: 1,
-  },
-  section: {
-    padding: spacing.lg,
-  },
-  sectionTitle: {
-    ...typography.styles.h4,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  sectionSubtitle: {
-    ...typography.styles.bodySmall,
-    color: colors.text.secondary,
-    marginBottom: spacing.md,
-  },
-  languageList: {
-    gap: spacing.sm,
-  },
-  languageItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    padding: spacing.md,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: colors.border,
-  },
-  languageItemSelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primary + '10',
-  },
-  languageFlag: {
-    fontSize: 28,
-    marginRight: spacing.md,
-  },
-  languageName: {
-    ...typography.styles.body,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    flex: 1,
-  },
-  languageNameSelected: {
-    color: colors.primary,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: colors.surface,
+      padding: spacing.lg,
+      paddingTop: spacing.xl,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    backButton: {
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'flex-start',
+    },
+    headerTitle: {
+      ...typography.styles.h3,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.bold,
+    },
+    placeholder: {
+      width: 40,
+    },
+    content: {
+      flex: 1,
+    },
+    section: {
+      padding: spacing.lg,
+    },
+    sectionTitle: {
+      ...typography.styles.h4,
+      fontWeight: typography.fontWeight.bold,
+      color: colors.text.primary,
+      marginBottom: spacing.xs,
+    },
+    sectionSubtitle: {
+      ...typography.styles.bodySmall,
+      color: colors.text.secondary,
+      marginBottom: spacing.md,
+    },
+    languageList: {
+      gap: spacing.sm,
+    },
+    languageItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      padding: spacing.md,
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: colors.border,
+    },
+    languageItemSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primary + '10',
+    },
+    languageFlag: {
+      fontSize: 28,
+      marginRight: spacing.md,
+    },
+    languageName: {
+      ...typography.styles.body,
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+      flex: 1,
+    },
+    languageNameSelected: {
+      color: colors.primary,
+    },
+  })
+);
