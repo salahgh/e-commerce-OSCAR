@@ -16,11 +16,141 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Button } from '../../src/components/ui';
-import { colors, spacing, typography } from '../../src/theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
+
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    confettiContainer: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 10,
+      pointerEvents: 'none',
+    },
+    confettiParticle: {
+      position: 'absolute',
+    },
+    content: {
+      flex: 1,
+      padding: spacing.xl,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    iconWrapper: {
+      width: 160,
+      height: 160,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: spacing.xl,
+    },
+    iconBackground: {
+      position: 'absolute',
+      width: 140,
+      height: 140,
+      borderRadius: 70,
+      backgroundColor: colors.success + '20',
+    },
+    iconContainer: {
+      zIndex: 2,
+    },
+    pulseRing: {
+      position: 'absolute',
+      width: 160,
+      height: 160,
+      borderRadius: 80,
+      borderWidth: 2,
+      borderColor: colors.success + '30',
+    },
+    contentAnimated: {
+      width: '100%',
+      alignItems: 'center',
+    },
+    title: {
+      ...typography.styles.h2,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.bold,
+      textAlign: 'center',
+      marginBottom: spacing.md,
+    },
+    message: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      textAlign: 'center',
+      marginBottom: spacing.xl,
+      lineHeight: 24,
+    },
+    orderNumberContainer: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: spacing.lg,
+      marginBottom: spacing.xl,
+      width: '100%',
+      alignItems: 'center',
+      borderWidth: 2,
+      borderColor: colors.primary,
+      borderStyle: 'dashed',
+    },
+    orderNumberLabel: {
+      ...typography.styles.caption,
+      color: colors.text.secondary,
+      textTransform: 'uppercase',
+      marginBottom: spacing.xs,
+    },
+    orderNumber: {
+      ...typography.styles.h3,
+      color: colors.primary,
+      fontWeight: typography.fontWeight.bold,
+    },
+    infoBox: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: spacing.sm,
+      backgroundColor: colors.info + '15',
+      padding: spacing.md,
+      borderRadius: 8,
+      marginBottom: spacing.xl,
+      width: '100%',
+    },
+    infoText: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      flex: 1,
+    },
+    actions: {
+      width: '100%',
+      gap: spacing.md,
+    },
+    actionButton: {
+      // No additional styles needed
+    },
+    additionalInfo: {
+      marginTop: spacing.xl,
+      alignItems: 'center',
+    },
+    additionalInfoText: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      marginBottom: spacing.xs,
+    },
+    additionalInfoLink: {
+      ...typography.styles.body,
+      color: colors.primary,
+      fontWeight: typography.fontWeight.semiBold,
+    },
+  })
+);
 
 export default function OrderConfirmationScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const styles = useStyles();
+  const colors = useThemeColors();
   const { orderNumber, orderId } = useLocalSearchParams<{
     orderNumber: string;
     orderId: string;
@@ -53,7 +183,10 @@ export default function OrderConfirmationScreen() {
     );
 
     // Checkmark draw animation
-    checkmarkProgress.value = withDelay(400, withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) }));
+    checkmarkProgress.value = withDelay(
+      400,
+      withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) })
+    );
 
     // Content fade in
     contentOpacity.value = withDelay(600, withTiming(1, { duration: 400 }));
@@ -68,10 +201,7 @@ export default function OrderConfirmationScreen() {
 
   // Animated styles
   const iconContainerStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: iconScale.value },
-      { rotate: `${iconRotation.value}deg` },
-    ],
+    transform: [{ scale: iconScale.value }, { rotate: `${iconRotation.value}deg` }],
   }));
 
   const circleStyle = useAnimatedStyle(() => ({
@@ -139,9 +269,7 @@ export default function OrderConfirmationScreen() {
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Confetti */}
-      <View style={styles.confettiContainer}>
-        {renderConfetti()}
-      </View>
+      <View style={styles.confettiContainer}>{renderConfetti()}</View>
 
       <View style={styles.content}>
         {/* Success Icon with Animation */}
@@ -161,7 +289,9 @@ export default function OrderConfirmationScreen() {
         {/* Animated Content */}
         <Animated.View style={[styles.contentAnimated, contentStyle]}>
           {/* Success Message */}
-          <Text style={styles.title}>{t('checkout.orderPlaced', 'Order Placed Successfully!')}</Text>
+          <Text style={styles.title}>
+            {t('checkout.orderPlaced', 'Order Placed Successfully!')}
+          </Text>
 
           <Text style={styles.message}>
             {t(
@@ -173,7 +303,9 @@ export default function OrderConfirmationScreen() {
           {/* Order Number */}
           {orderNumber && (
             <View style={styles.orderNumberContainer}>
-              <Text style={styles.orderNumberLabel}>{t('checkout.orderNumber', 'Order Number')}</Text>
+              <Text style={styles.orderNumberLabel}>
+                {t('checkout.orderNumber', 'Order Number')}
+              </Text>
               <Text style={styles.orderNumber}>{orderNumber}</Text>
             </View>
           )}
@@ -232,129 +364,3 @@ export default function OrderConfirmationScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  confettiContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 10,
-    pointerEvents: 'none',
-  },
-  confettiParticle: {
-    position: 'absolute',
-  },
-  content: {
-    flex: 1,
-    padding: spacing.xl,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  iconWrapper: {
-    width: 160,
-    height: 160,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  iconBackground: {
-    position: 'absolute',
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: colors.success + '20',
-  },
-  iconContainer: {
-    zIndex: 2,
-  },
-  pulseRing: {
-    position: 'absolute',
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    borderWidth: 2,
-    borderColor: colors.success + '30',
-  },
-  contentAnimated: {
-    width: '100%',
-    alignItems: 'center',
-  },
-  title: {
-    ...typography.styles.h2,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-    textAlign: 'center',
-    marginBottom: spacing.md,
-  },
-  message: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-    lineHeight: 24,
-  },
-  orderNumberContainer: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.lg,
-    marginBottom: spacing.xl,
-    width: '100%',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: colors.primary,
-    borderStyle: 'dashed',
-  },
-  orderNumberLabel: {
-    ...typography.styles.caption,
-    color: colors.text.secondary,
-    textTransform: 'uppercase',
-    marginBottom: spacing.xs,
-  },
-  orderNumber: {
-    ...typography.styles.h3,
-    color: colors.primary,
-    fontWeight: typography.fontWeight.bold,
-  },
-  infoBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
-    backgroundColor: colors.info + '15',
-    padding: spacing.md,
-    borderRadius: 8,
-    marginBottom: spacing.xl,
-    width: '100%',
-  },
-  infoText: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    flex: 1,
-  },
-  actions: {
-    width: '100%',
-    gap: spacing.md,
-  },
-  actionButton: {
-    // No additional styles needed
-  },
-  additionalInfo: {
-    marginTop: spacing.xl,
-    alignItems: 'center',
-  },
-  additionalInfoText: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    marginBottom: spacing.xs,
-  },
-  additionalInfoLink: {
-    ...typography.styles.body,
-    color: colors.primary,
-    fontWeight: typography.fontWeight.semiBold,
-  },
-});
