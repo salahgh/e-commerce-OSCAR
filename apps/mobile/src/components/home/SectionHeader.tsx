@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles } from '../../theme';
 import { useAppFont } from '../../hooks/useAppFont';
 
 interface SectionHeaderProps {
@@ -12,6 +12,7 @@ interface SectionHeaderProps {
 export const SectionHeader: React.FC<SectionHeaderProps> = ({ title, onSeeAll }) => {
   const { t } = useTranslation();
   const { fontFamily } = useAppFont();
+  const styles = useStyles();
 
   return (
     <View style={styles.container}>
@@ -27,20 +28,22 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({ title, onSeeAll })
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-  },
-  title: {
-    fontSize: typography.fontSize.lg,
-    color: colors.text.primary,
-  },
-  seeAll: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: spacing.lg,
+      marginBottom: spacing.md,
+    },
+    title: {
+      fontSize: typography.fontSize.lg,
+      color: colors.text.primary,
+    },
+    seeAll: {
+      fontSize: typography.fontSize.sm,
+      color: colors.text.secondary,
+    },
+  })
+);

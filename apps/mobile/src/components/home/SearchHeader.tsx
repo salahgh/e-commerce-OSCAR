@@ -3,13 +3,15 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 import { useAppFont } from '../../hooks/useAppFont';
 
 export const SearchHeader: React.FC = () => {
   const { t } = useTranslation();
   const router = useRouter();
   const { fontFamily } = useAppFont();
+  const colors = useThemeColors();
+  const styles = useStyles();
 
   return (
     <View style={styles.container}>
@@ -27,32 +29,34 @@ export const SearchHeader: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    gap: spacing.md,
-  },
-  searchBar: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.gray[1],
-    borderRadius: spacing.borderRadius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    gap: spacing.sm,
-  },
-  placeholder: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.tertiary,
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      gap: spacing.md,
+    },
+    searchBar: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.gray[1],
+      borderRadius: spacing.borderRadius.md,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.md,
+      gap: spacing.sm,
+    },
+    placeholder: {
+      fontSize: typography.fontSize.sm,
+      color: colors.text.tertiary,
+    },
+    iconButton: {
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  })
+);

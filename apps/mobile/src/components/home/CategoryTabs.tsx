@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 import { useAppFont } from '../../hooks/useAppFont';
 import { useGetRootCollectionsQuery } from '../../graphql/generated/graphql';
 
@@ -12,6 +19,8 @@ interface CategoryTabsProps {
 export const CategoryTabs: React.FC<CategoryTabsProps> = ({ onCategoryChange }) => {
   const { t } = useTranslation();
   const { fontFamily } = useAppFont();
+  const colors = useThemeColors();
+  const styles = useStyles();
   const [activeSlug, setActiveSlug] = useState<string | undefined>(undefined);
 
   const { data, loading, error } = useGetRootCollectionsQuery();
@@ -23,9 +32,7 @@ export const CategoryTabs: React.FC<CategoryTabsProps> = ({ onCategoryChange }) 
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>
-        {t('home.categories')}
-      </Text>
+      <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>{t('home.categories')}</Text>
 
       {loading ? (
         <ActivityIndicator size="small" color={colors.primary} style={styles.loader} />
@@ -80,40 +87,42 @@ export const CategoryTabs: React.FC<CategoryTabsProps> = ({ onCategoryChange }) 
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-  },
-  title: {
-    fontSize: typography.fontSize.lg,
-    color: colors.text.primary,
-    marginBottom: spacing.md,
-  },
-  loader: {
-    alignSelf: 'flex-start',
-    marginVertical: spacing.sm,
-  },
-  tabsContainer: {
-    gap: spacing.sm,
-  },
-  tab: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: spacing.borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.gray[2],
-    backgroundColor: colors.surface,
-  },
-  tabActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  tabText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.primary,
-  },
-  tabTextActive: {
-    color: colors.text.inverse,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      paddingHorizontal: spacing.lg,
+      marginBottom: spacing.lg,
+    },
+    title: {
+      fontSize: typography.fontSize.lg,
+      color: colors.text.primary,
+      marginBottom: spacing.md,
+    },
+    loader: {
+      alignSelf: 'flex-start',
+      marginVertical: spacing.sm,
+    },
+    tabsContainer: {
+      gap: spacing.sm,
+    },
+    tab: {
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      borderRadius: spacing.borderRadius.lg,
+      borderWidth: 1,
+      borderColor: colors.gray[2],
+      backgroundColor: colors.surface,
+    },
+    tabActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    tabText: {
+      fontSize: typography.fontSize.sm,
+      color: colors.text.primary,
+    },
+    tabTextActive: {
+      color: colors.text.inverse,
+    },
+  })
+);
