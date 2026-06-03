@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { Button, ErrorBanner } from '../../src/components/ui';
-import { colors, spacing, typography } from '../../src/theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
 
 type State = 'verifying' | 'success' | 'error';
 
@@ -15,6 +15,8 @@ type State = 'verifying' | 'success' | 'error';
  * Calls AuthContext.verifyEmail on mount, then redirects on success.
  */
 export default function VerifyEmailScreen() {
+  const styles = useStyles();
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { verifyEmail } = useAuth();
@@ -67,7 +69,10 @@ export default function VerifyEmailScreen() {
           <>
             <Ionicons name="alert-circle" size={64} color={colors.error} />
             <ErrorBanner message={error ?? ''} />
-            <Button title={t('auth.login', 'Sign in')} onPress={() => router.replace('/(auth)/login' as any)} />
+            <Button
+              title={t('auth.login', 'Sign in')}
+              onPress={() => router.replace('/(auth)/login' as any)}
+            />
           </>
         )}
       </View>
@@ -75,18 +80,20 @@ export default function VerifyEmailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing.lg },
-  body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md },
-  title: {
-    ...typography.styles.h3,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-    textAlign: 'center',
-  },
-  subtitle: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    textAlign: 'center',
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing.lg },
+    body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md },
+    title: {
+      ...typography.styles.h3,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.bold,
+      textAlign: 'center',
+    },
+    subtitle: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      textAlign: 'center',
+    },
+  })
+);

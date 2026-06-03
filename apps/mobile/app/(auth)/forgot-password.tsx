@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Input, Button, ErrorBanner } from '../../src/components/ui';
-import { colors, spacing, typography } from '../../src/theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
 import { forgotPasswordSchema } from '../../src/utils/validation';
 import { useRequestPasswordResetMutation } from '../../src/graphql/generated/graphql';
 
@@ -25,6 +25,8 @@ interface ForgotPasswordFormValues {
 }
 
 export default function ForgotPasswordScreen() {
+  const styles = useStyles();
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [error, setError] = useState<string | null>(null);
@@ -86,12 +88,8 @@ export default function ForgotPasswordScreen() {
           </Animated.View>
           <Text style={styles.successTitle}>{t('auth.checkEmail')}</Text>
           <Text style={styles.successEmail}>{submittedEmail}</Text>
-          <Text style={styles.successMessage}>
-            {t('auth.resetEmailSent')}
-          </Text>
-          <Text style={styles.spamNote}>
-            {t('auth.checkSpam')}
-          </Text>
+          <Text style={styles.successMessage}>{t('auth.resetEmailSent')}</Text>
+          <Text style={styles.spamNote}>{t('auth.checkSpam')}</Text>
           <Button
             title={t('auth.backToLogin')}
             onPress={() => router.replace('/(auth)/login')}
@@ -133,9 +131,7 @@ export default function ForgotPasswordScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>{t('auth.forgotPassword')}</Text>
-          <Text style={styles.subtitle}>
-            {t('auth.resetEmailSent')}
-          </Text>
+          <Text style={styles.subtitle}>{t('auth.resetEmailSent')}</Text>
         </View>
 
         {/* Error Banner */}
@@ -185,95 +181,97 @@ export default function ForgotPasswordScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: spacing['2xl'],
-    justifyContent: 'center',
-  },
-  iconContainer: {
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  iconCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.secondaryLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    marginBottom: spacing['3xl'],
-    alignItems: 'center',
-  },
-  title: {
-    ...typography.styles.h2,
-    color: colors.text.primary,
-    marginBottom: spacing.md,
-    textAlign: 'center',
-  },
-  subtitle: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  form: {
-    marginBottom: spacing.xl,
-  },
-  submitButton: {
-    marginTop: spacing.md,
-  },
-  backToLoginButton: {
-    marginTop: spacing.md,
-  },
-  successContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing['2xl'],
-  },
-  successIconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: 'rgba(76, 175, 80, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  successTitle: {
-    ...typography.styles.h2,
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-    textAlign: 'center',
-  },
-  successEmail: {
-    ...typography.styles.body,
-    color: colors.primary,
-    fontWeight: typography.fontWeight.semiBold,
-    marginBottom: spacing.lg,
-    textAlign: 'center',
-  },
-  successMessage: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: spacing.md,
-  },
-  spamNote: {
-    ...typography.styles.caption,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-    marginBottom: spacing['3xl'],
-  },
-  backButton: {
-    marginBottom: spacing.sm,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      padding: spacing['2xl'],
+      justifyContent: 'center',
+    },
+    iconContainer: {
+      alignItems: 'center',
+      marginBottom: spacing.xl,
+    },
+    iconCircle: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      backgroundColor: colors.secondaryLight,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    header: {
+      marginBottom: spacing['3xl'],
+      alignItems: 'center',
+    },
+    title: {
+      ...typography.styles.h2,
+      color: colors.text.primary,
+      marginBottom: spacing.md,
+      textAlign: 'center',
+    },
+    subtitle: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      textAlign: 'center',
+      lineHeight: 22,
+    },
+    form: {
+      marginBottom: spacing.xl,
+    },
+    submitButton: {
+      marginTop: spacing.md,
+    },
+    backToLoginButton: {
+      marginTop: spacing.md,
+    },
+    successContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: spacing['2xl'],
+    },
+    successIconContainer: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      backgroundColor: 'rgba(76, 175, 80, 0.1)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: spacing.xl,
+    },
+    successTitle: {
+      ...typography.styles.h2,
+      color: colors.text.primary,
+      marginBottom: spacing.sm,
+      textAlign: 'center',
+    },
+    successEmail: {
+      ...typography.styles.body,
+      color: colors.primary,
+      fontWeight: typography.fontWeight.semiBold,
+      marginBottom: spacing.lg,
+      textAlign: 'center',
+    },
+    successMessage: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      textAlign: 'center',
+      lineHeight: 22,
+      marginBottom: spacing.md,
+    },
+    spamNote: {
+      ...typography.styles.caption,
+      color: colors.text.tertiary,
+      textAlign: 'center',
+      marginBottom: spacing['3xl'],
+    },
+    backButton: {
+      marginBottom: spacing.sm,
+    },
+  })
+);

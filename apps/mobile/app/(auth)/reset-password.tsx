@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Keyboard } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Keyboard,
+} from 'react-native';
 import { router, useLocalSearchParams, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Formik } from 'formik';
@@ -8,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { Input, Button, ErrorBanner } from '../../src/components/ui';
-import { colors, spacing, typography } from '../../src/theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
 
 interface ResetFormValues {
   password: string;
@@ -27,6 +35,8 @@ const resetSchema = Yup.object().shape({
  * set a new password.
  */
 export default function ResetPasswordScreen() {
+  const styles = useStyles();
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { resetPassword } = useAuth();
@@ -91,7 +101,9 @@ export default function ResetPasswordScreen() {
         <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.body}>
           <Text style={styles.title}>{t('auth.resetPasswordTitle', 'New password')}</Text>
-          <Text style={styles.subtitle}>{t('auth.resetPasswordDesc', 'Enter your new password.')}</Text>
+          <Text style={styles.subtitle}>
+            {t('auth.resetPasswordDesc', 'Enter your new password.')}
+          </Text>
 
           {error && <ErrorBanner message={error} />}
 
@@ -100,7 +112,15 @@ export default function ResetPasswordScreen() {
             validationSchema={resetSchema}
             onSubmit={onSubmit}
           >
-            {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+            {({
+              values,
+              errors,
+              touched,
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              isSubmitting,
+            }) => (
               <View style={styles.form}>
                 <Input
                   label={t('auth.password', 'Password')}
@@ -138,17 +158,19 @@ export default function ResetPasswordScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flexGrow: 1, paddingHorizontal: spacing.lg, backgroundColor: colors.background },
-  body: { gap: spacing.md },
-  title: {
-    ...typography.styles.h2,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-  },
-  subtitle: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-  },
-  form: { gap: spacing.md, marginTop: spacing.md },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: { flexGrow: 1, paddingHorizontal: spacing.lg, backgroundColor: colors.background },
+    body: { gap: spacing.md },
+    title: {
+      ...typography.styles.h2,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.bold,
+    },
+    subtitle: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+    },
+    form: { gap: spacing.md, marginTop: spacing.md },
+  })
+);
