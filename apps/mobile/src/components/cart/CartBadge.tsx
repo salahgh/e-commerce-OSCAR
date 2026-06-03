@@ -1,14 +1,8 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 import { useCart } from '../../contexts/CartContext';
 
 interface CartBadgeProps {
@@ -23,9 +17,13 @@ export const CartBadge: React.FC<CartBadgeProps> = ({
   size = 'medium',
   showZero = false,
   onPress,
-  color = colors.text.primary,
-  badgeColor = colors.error,
+  color: colorProp,
+  badgeColor: badgeColorProp,
 }) => {
+  const colors = useThemeColors();
+  const color = colorProp ?? colors.text.primary;
+  const badgeColor = badgeColorProp ?? colors.error;
+  const styles = useStyles();
   const router = useRouter();
   const { itemCount } = useCart();
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
@@ -105,9 +103,7 @@ export const CartBadge: React.FC<CartBadgeProps> = ({
             },
           ]}
         >
-          <Text style={[styles.badgeText, { fontSize: badgeSize.fontSize }]}>
-            {displayCount}
-          </Text>
+          <Text style={[styles.badgeText, { fontSize: badgeSize.fontSize }]}>{displayCount}</Text>
         </Animated.View>
       )}
     </TouchableOpacity>
@@ -120,71 +116,65 @@ interface TabCartBadgeProps {
   focused?: boolean;
 }
 
-export const TabCartBadge: React.FC<TabCartBadgeProps> = ({
-  color,
-  focused,
-}) => {
+export const TabCartBadge: React.FC<TabCartBadgeProps> = ({ color, focused }) => {
+  const styles = useStyles();
   const { itemCount } = useCart();
 
   return (
     <View style={styles.tabContainer}>
-      <Ionicons
-        name={focused ? 'cart' : 'cart-outline'}
-        size={24}
-        color={color}
-      />
+      <Ionicons name={focused ? 'cart' : 'cart-outline'} size={24} color={color} />
       {itemCount > 0 ? (
         <View style={styles.tabBadge}>
-          <Text style={styles.tabBadgeText}>
-            {itemCount > 99 ? '99+' : itemCount}
-          </Text>
+          <Text style={styles.tabBadgeText}>{itemCount > 99 ? '99+' : itemCount}</Text>
         </View>
       ) : null}
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  badge: {
-    position: 'absolute',
-    top: -6,
-    right: -10,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    minWidth: 20,
-    paddingHorizontal: 4,
-  },
-  badgeText: {
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.bold,
-    textAlign: 'center',
-  },
-  tabContainer: {
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  tabBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -12,
-    backgroundColor: colors.error,
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-  },
-  tabBadgeText: {
-    color: colors.text.inverse,
-    fontSize: 10,
-    fontWeight: typography.fontWeight.bold,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      position: 'relative',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    badge: {
+      position: 'absolute',
+      top: -6,
+      right: -10,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      minWidth: 20,
+      paddingHorizontal: 4,
+    },
+    badgeText: {
+      color: colors.text.inverse,
+      fontWeight: typography.fontWeight.bold,
+      textAlign: 'center',
+    },
+    tabContainer: {
+      position: 'relative',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    tabBadge: {
+      position: 'absolute',
+      top: -4,
+      right: -12,
+      backgroundColor: colors.error,
+      borderRadius: 10,
+      minWidth: 18,
+      height: 18,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 4,
+    },
+    tabBadgeText: {
+      color: colors.text.inverse,
+      fontSize: 10,
+      fontWeight: typography.fontWeight.bold,
+    },
+  })
+);
