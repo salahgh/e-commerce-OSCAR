@@ -76,7 +76,7 @@ Then (largely backend-dependent, deferred under mobile-only):
 > **Real CIB/BaridiMob online payment is backend-blocked** (gateway *initiate* + settlement metadata). M1d gated it as "coming soon"; the real WebView/deep-link gateway slice resumes once the backend `oscar-plugin` payment work lands.
 
 ## Deferred minors (small follow-ups)
-- M1a: localize the reorder toasts (`orders.reorder*`) in fr/ar; stale-session recovery (logout) action; show wilaya in the checkout review step.
+- M1a: reorder toasts **✅ localized** (en/fr/ar `orders.reorder*` — 5 keys; `reorderPartial` now interpolates `{{added}}`/`{{failed}}`). Remaining: stale-session recovery (logout) action; show wilaya in the checkout review step.
 - M1b: editing a non-app-created address whose `province` isn't an exact wilaya `name` drops the wilaya selection; no explicit "enter a new address" chip at checkout for signed-in users.
 - M1c: **offline write-queue deferred** (NetInfo + queue/replay cart mutations while offline) — reads survive offline and the UI is optimistic, but cart *writes* still need connectivity. Optimistic totals are a raw-cents estimate reconciled by the `cache-and-network` server response. Persistence's AppState auto-trigger is runtime-verified, not unit-tested (see runbook §6).
 

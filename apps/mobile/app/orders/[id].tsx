@@ -107,7 +107,11 @@ export default function OrderDetailScreen() {
     if (status === 'partial') {
       toast.show({
         type: 'warning',
-        message: t('orders.reorderPartial', `${added} added, ${failed} unavailable`),
+        message: t('orders.reorderPartial', {
+          added,
+          failed,
+          defaultValue: '{{added}} added, {{failed}} unavailable',
+        }),
       });
     } else {
       toast.success(t('orders.reorderSuccess', 'Items added to cart'));

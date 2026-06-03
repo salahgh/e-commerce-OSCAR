@@ -390,6 +390,11 @@
     "emptyTitle": "No Orders Yet",
     "emptyMessage": "Your order history will appear here",
     "startShopping": "Start Shopping",
+    "reorder": "Reorder Items",
+    "reorderMessage": "Add all items from this order to your cart?",
+    "reorderSuccess": "Items added to cart",
+    "reorderFailed": "Could not add items to your cart",
+    "reorderPartial": "{{added}} added, {{failed}} unavailable",
     "status": {
       "pending": "Pending",
       "processing": "Processing",

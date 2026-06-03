@@ -390,6 +390,11 @@
     "emptyTitle": "Aucune commande",
     "emptyMessage": "Votre historique de commandes apparaîtra ici",
     "startShopping": "Commencer les achats",
+    "reorder": "Commander à nouveau",
+    "reorderMessage": "Ajouter tous les articles de cette commande à votre panier ?",
+    "reorderSuccess": "Articles ajoutés au panier",
+    "reorderFailed": "Impossible d'ajouter les articles à votre panier",
+    "reorderPartial": "{{added}} ajouté(s), {{failed}} indisponible(s)",
     "status": {
       "pending": "En attente",
       "processing": "En cours",

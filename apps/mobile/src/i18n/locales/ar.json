@@ -390,6 +390,11 @@
     "emptyTitle": "لا توجد طلبات",
     "emptyMessage": "سيظهر سجل طلباتك هنا",
     "startShopping": "ابدأ التسوق",
+    "reorder": "إعادة الطلب",
+    "reorderMessage": "هل تريد إضافة جميع عناصر هذا الطلب إلى سلتك؟",
+    "reorderSuccess": "تمت إضافة العناصر إلى السلة",
+    "reorderFailed": "تعذّرت إضافة العناصر إلى سلتك",
+    "reorderPartial": "{{added}} مُضافة، {{failed}} غير متوفرة",
     "status": {
       "pending": "قيد الانتظار",
       "processing": "قيد المعالجة",
