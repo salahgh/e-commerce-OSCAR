@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { makeThemedStyles, useThemeColors, spacing, typography } from '../../theme';
 import { haptics } from '../../utils/haptics';
+import { useAppFont } from '../../hooks/useAppFont';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 export type ButtonSize = 'small' | 'medium' | 'large';
@@ -44,6 +45,7 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   const isDisabled = disabled || loading;
 
   const getButtonStyle = (): ViewStyle => {
@@ -122,7 +124,9 @@ export const Button: React.FC<ButtonProps> = ({
       ) : (
         <>
           {icon && iconPosition === 'left' && <>{icon}</>}
-          <Text style={[getTextStyle(), textStyle]}>{title}</Text>
+          <Text style={[getTextStyle(), { fontFamily: fontFamily.semiBold }, textStyle]}>
+            {title}
+          </Text>
           {icon && iconPosition === 'right' && <>{icon}</>}
         </>
       )}

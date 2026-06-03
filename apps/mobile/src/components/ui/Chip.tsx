@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { makeThemedStyles, useThemeColors, spacing, typography } from '../../theme';
+import { useAppFont } from '../../hooks/useAppFont';
 
 interface ChipProps {
   label: string;
@@ -21,6 +22,7 @@ export const Chip: React.FC<ChipProps> = ({
 }) => {
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
 
   const getChipStyle = (): ViewStyle => {
     if (variant === 'outlined') {
@@ -57,7 +59,7 @@ export const Chip: React.FC<ChipProps> = ({
       disabled={!onPress}
       activeOpacity={0.7}
     >
-      <Text style={[getTextStyle(), textStyle]}>{label}</Text>
+      <Text style={[getTextStyle(), { fontFamily: fontFamily.medium }, textStyle]}>{label}</Text>
     </TouchableOpacity>
   );
 };

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { makeThemedStyles, useThemeColors, spacing, typography } from '../../theme';
+import { useAppFont } from '../../hooks/useAppFont';
 
 interface DividerProps {
   label?: string;
@@ -21,6 +22,7 @@ export const Divider: React.FC<DividerProps> = ({
 }) => {
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   const resolvedColor = color ?? colors.border;
   const spacingValue = spacing[spacingProp] || spacing.md;
 
@@ -44,7 +46,7 @@ export const Divider: React.FC<DividerProps> = ({
     return (
       <View style={[styles.horizontalWithLabel, { marginVertical: spacingValue }, style]}>
         <View style={[styles.line, { backgroundColor: resolvedColor, height: thickness }]} />
-        <Text style={styles.label}>{label}</Text>
+        <Text style={[styles.label, { fontFamily: fontFamily.regular }]}>{label}</Text>
         <View style={[styles.line, { backgroundColor: resolvedColor, height: thickness }]} />
       </View>
     );

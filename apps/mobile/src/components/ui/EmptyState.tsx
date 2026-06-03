@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { makeThemedStyles, useThemeColors, spacing, typography } from '../../theme';
 import { Button } from './Button';
+import { useAppFont } from '../../hooks/useAppFont';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -31,6 +32,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
 
   const displayMessage = description || message;
   const displayActionLabel = actionLabel || actionText;
@@ -48,9 +50,13 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     <View style={[styles.container, style]}>
       {icon ? <View style={styles.iconContainer}>{renderIcon()}</View> : null}
 
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, { fontFamily: fontFamily.semiBold }]}>{title}</Text>
 
-      {displayMessage ? <Text style={styles.description}>{displayMessage}</Text> : null}
+      {displayMessage ? (
+        <Text style={[styles.description, { fontFamily: fontFamily.regular }]}>
+          {displayMessage}
+        </Text>
+      ) : null}
 
       {displayActionLabel && displayOnAction ? (
         <Button

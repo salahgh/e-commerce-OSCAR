@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { makeThemedStyles, spacing, typography } from '../../theme';
 import { Button } from './Button';
+import { useAppFont } from '../../hooks/useAppFont';
 
 interface ErrorStateProps {
   title?: string;
@@ -19,6 +20,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
   style,
 }) => {
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
 
   return (
     <View style={[styles.container, style]}>
@@ -26,8 +28,8 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
         <Text style={styles.icon}>⚠️</Text>
       </View>
 
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.message}>{message}</Text>
+      <Text style={[styles.title, { fontFamily: fontFamily.semiBold }]}>{title}</Text>
+      <Text style={[styles.message, { fontFamily: fontFamily.regular }]}>{message}</Text>
 
       {onRetry && (
         <Button title={retryLabel} onPress={onRetry} variant="primary" style={styles.retryButton} />
@@ -44,13 +46,17 @@ interface ErrorBannerProps {
 
 export const ErrorBanner: React.FC<ErrorBannerProps> = ({ message, onDismiss, style }) => {
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
 
   return (
     <View style={[styles.banner, style]}>
       <Text style={styles.bannerIcon}>❌</Text>
-      <Text style={styles.bannerText}>{message}</Text>
+      <Text style={[styles.bannerText, { fontFamily: fontFamily.regular }]}>{message}</Text>
       {onDismiss && (
-        <Text style={styles.dismissButton} onPress={onDismiss}>
+        <Text
+          style={[styles.dismissButton, { fontFamily: fontFamily.regular }]}
+          onPress={onDismiss}
+        >
           ✕
         </Text>
       )}
@@ -65,11 +71,12 @@ interface InlineErrorProps {
 
 export const InlineError: React.FC<InlineErrorProps> = ({ message, style }) => {
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
 
   return (
     <View style={[styles.inlineError, style]}>
-      <Text style={styles.inlineErrorIcon}>!</Text>
-      <Text style={styles.inlineErrorText}>{message}</Text>
+      <Text style={[styles.inlineErrorIcon, { fontFamily: fontFamily.bold }]}>!</Text>
+      <Text style={[styles.inlineErrorText, { fontFamily: fontFamily.regular }]}>{message}</Text>
     </View>
   );
 };
