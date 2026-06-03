@@ -1,6 +1,7 @@
 import React, { ReactElement } from 'react';
 import { render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ThemeProvider } from '../contexts/ThemeContext';
 
 const METRICS = {
   frame: { x: 0, y: 0, width: 390, height: 844 },
@@ -8,5 +9,9 @@ const METRICS = {
 };
 
 export function renderWithProviders(ui: ReactElement) {
-  return render(<SafeAreaProvider initialMetrics={METRICS}>{ui}</SafeAreaProvider>);
+  return render(
+    <SafeAreaProvider initialMetrics={METRICS}>
+      <ThemeProvider>{ui}</ThemeProvider>
+    </SafeAreaProvider>,
+  );
 }

@@ -4,7 +4,10 @@ import { StyleSheet } from 'react-native';
 jest.mock('@expo/vector-icons', () => ({ Ionicons: () => null }));
 jest.mock('expo-router', () => ({ useRouter: () => ({ back: jest.fn() }) }));
 jest.mock('@/src/components/profile', () => ({ SettingsItem: () => null }));
-jest.mock('@/src/contexts/ThemeContext', () => ({ useThemeMode: jest.fn() }));
+jest.mock('@/src/contexts/ThemeContext', () => ({
+  useThemeMode: jest.fn(),
+  ThemeProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 import { useThemeMode } from '@/src/contexts/ThemeContext';
 import { renderWithProviders } from '@/src/test/renderWithProviders';
