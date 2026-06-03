@@ -30,16 +30,17 @@ import {
 import type { FigmaProduct } from '@/src/components/home';
 import { RecentlyViewedRow } from '@/src/components/products';
 import { LoadingSpinner, ErrorState } from '@/src/components/ui';
-import { colors, spacing } from '@/src/theme';
+import { spacing, makeThemedStyles, useThemeColors } from '@/src/theme';
 import { formatPrice } from '@/src/utils/vendureAdapters';
 import { parseProductDiscount } from '@/src/utils/discountParser';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function HomeScreen() {
-
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
+  const styles = useStyles();
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
   const [bannerIndex, setBannerIndex] = useState(0);
@@ -84,11 +85,7 @@ export default function HomeScreen() {
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await Promise.all([
-        refetchBanners(),
-        refetchFeatured(),
-        refetchNewArrivals(),
-      ]);
+      await Promise.all([refetchBanners(), refetchFeatured(), refetchNewArrivals()]);
     } finally {
       setRefreshing(false);
     }
@@ -154,7 +151,9 @@ export default function HomeScreen() {
   };
 
   // const bestSellers: FigmaProduct[] = (featuredData?.search?.items || []).map(transformSearchItem);
-  const newArrivals: FigmaProduct[] = (newArrivalsData?.products?.items || []).map(transformProductItem);
+  const newArrivals: FigmaProduct[] = (newArrivalsData?.products?.items || []).map(
+    transformProductItem
+  );
   // // Picked-for-you: combine and deduplicate
   // const pickedForYou: FigmaProduct[] = [...newArrivals, ...bestSellers]
   //   .filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i)
@@ -197,7 +196,6 @@ export default function HomeScreen() {
           />
         }
       >
-
         {/* 1. Search Header */}
         <SearchHeader />
 
@@ -214,7 +212,9 @@ export default function HomeScreen() {
                   <PromoBanner
                     imageUrl={item.featuredAsset!.preview}
                     height={190}
-                    onPress={() => item.slug && router.push(`/products?category=${item.slug}` as any)}
+                    onPress={() =>
+                      item.slug && router.push(`/products?category=${item.slug}` as any)
+                    }
                   />
                 </View>
               )}
@@ -223,10 +223,9 @@ export default function HomeScreen() {
               pagingEnabled
               showsHorizontalScrollIndicator={false}
               bounces={false}
-              onScroll={Animated.event(
-                [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-                { useNativeDriver: false }
-              )}
+              onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+                useNativeDriver: false,
+              })}
               onMomentumScrollEnd={handleBannerScroll}
               snapToInterval={SCREEN_WIDTH}
               decelerationRate="fast"
@@ -313,52 +312,54 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  bannerSection: {
-    marginBottom: spacing.xl,
-    position: 'relative',
-  },
-  bannerSlide: {
-    width: SCREEN_WIDTH,
-    height: 190 + spacing.xl,
-  },
-  dotsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  dot: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.primary,
-    marginHorizontal: 4,
-  },
-  section: {
-    marginBottom: spacing.xl,
-  },
-  productListContent: {
-    paddingHorizontal: spacing.lg,
-    gap: spacing.md,
-  },
-  productCardWrapper: {
-    // Let the card define its own width (170px)
-  },
-  gridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: spacing.lg,
-    justifyContent: 'space-between',
-  },
-  gridItem: {
-    marginBottom: spacing.md,
-  },
-  bottomSpacer: {
-    height: spacing['2xl'],
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    bannerSection: {
+      marginBottom: spacing.xl,
+      position: 'relative',
+    },
+    bannerSlide: {
+      width: SCREEN_WIDTH,
+      height: 190 + spacing.xl,
+    },
+    dotsContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    dot: {
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.primary,
+      marginHorizontal: 4,
+    },
+    section: {
+      marginBottom: spacing.xl,
+    },
+    productListContent: {
+      paddingHorizontal: spacing.lg,
+      gap: spacing.md,
+    },
+    productCardWrapper: {
+      // Let the card define its own width (170px)
+    },
+    gridContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      paddingHorizontal: spacing.lg,
+      justifyContent: 'space-between',
+    },
+    gridItem: {
+      marginBottom: spacing.md,
+    },
+    bottomSpacer: {
+      height: spacing['2xl'],
+    },
+  })
+);
