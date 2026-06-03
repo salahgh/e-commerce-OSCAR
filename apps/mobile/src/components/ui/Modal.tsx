@@ -13,7 +13,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography } from '../../theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../theme';
 import { Button } from './Button';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -45,6 +45,9 @@ export const Modal: React.FC<ModalProps> = ({
   contentStyle,
   footer,
 }) => {
+  const styles = useStyles();
+  const colors = useThemeColors();
+
   const getModalWidth = () => {
     switch (size) {
       case 'small':
@@ -83,15 +86,8 @@ export const Modal: React.FC<ModalProps> = ({
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboardView}
       >
-        <TouchableWithoutFeedback
-          onPress={closeOnBackdrop ? onClose : undefined}
-        >
-          <View
-            style={[
-              styles.overlay,
-              position === 'bottom' && styles.overlayBottom,
-            ]}
-          >
+        <TouchableWithoutFeedback onPress={closeOnBackdrop ? onClose : undefined}>
+          <View style={[styles.overlay, position === 'bottom' && styles.overlayBottom]}>
             <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
               <View
                 style={[
@@ -115,11 +111,7 @@ export const Modal: React.FC<ModalProps> = ({
                         onPress={onClose}
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                       >
-                        <Ionicons
-                          name="close"
-                          size={24}
-                          color={colors.text.secondary}
-                        />
+                        <Ionicons name="close" size={24} color={colors.text.secondary} />
                       </TouchableOpacity>
                     )}
                   </View>
@@ -170,6 +162,8 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   confirmVariant = 'primary',
   loading = false,
 }) => {
+  const styles = useStyles();
+
   return (
     <Modal
       visible={visible}
@@ -219,6 +213,9 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   buttonText = 'OK',
   type = 'info',
 }) => {
+  const styles = useStyles();
+  const colors = useThemeColors();
+
   const getIconName = () => {
     switch (type) {
       case 'success':
@@ -251,14 +248,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
       onClose={onClose}
       size="small"
       showCloseButton={false}
-      footer={
-        <Button
-          title={buttonText}
-          variant="primary"
-          onPress={onClose}
-          fullWidth
-        />
-      }
+      footer={<Button title={buttonText} variant="primary" onPress={onClose} fullWidth />}
     >
       <View style={styles.alertContent}>
         <Ionicons name={getIconName()} size={48} color={getIconColor()} />
@@ -269,97 +259,99 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  keyboardView: {
-    flex: 1,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: colors.overlay,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  overlayBottom: {
-    justifyContent: 'flex-end',
-  },
-  container: {
-    backgroundColor: colors.surface,
-    borderRadius: spacing.borderRadius.lg,
-    overflow: 'hidden',
-  },
-  containerCenter: {
-    marginHorizontal: spacing.lg,
-  },
-  containerBottom: {
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    borderTopLeftRadius: spacing.borderRadius.xl,
-    borderTopRightRadius: spacing.borderRadius.xl,
-  },
-  containerFull: {
-    borderRadius: 0,
-    height: '100%',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  title: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.semiBold,
-    color: colors.text.primary,
-    flex: 1,
-  },
-  closeButton: {
-    padding: spacing.xs,
-    marginLeft: spacing.sm,
-  },
-  content: {
-    flexGrow: 0,
-  },
-  contentContainer: {
-    padding: spacing.lg,
-  },
-  footer: {
-    padding: spacing.lg,
-    paddingTop: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  confirmFooter: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  confirmButton: {
-    flex: 1,
-  },
-  confirmMessage: {
-    fontSize: typography.fontSize.md,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  alertContent: {
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-  },
-  alertTitle: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.semiBold,
-    color: colors.text.primary,
-    marginTop: spacing.md,
-    textAlign: 'center',
-  },
-  alertMessage: {
-    fontSize: typography.fontSize.md,
-    color: colors.text.secondary,
-    marginTop: spacing.sm,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    keyboardView: {
+      flex: 1,
+    },
+    overlay: {
+      flex: 1,
+      backgroundColor: colors.overlay,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    overlayBottom: {
+      justifyContent: 'flex-end',
+    },
+    container: {
+      backgroundColor: colors.surface,
+      borderRadius: spacing.borderRadius.lg,
+      overflow: 'hidden',
+    },
+    containerCenter: {
+      marginHorizontal: spacing.lg,
+    },
+    containerBottom: {
+      borderBottomLeftRadius: 0,
+      borderBottomRightRadius: 0,
+      borderTopLeftRadius: spacing.borderRadius.xl,
+      borderTopRightRadius: spacing.borderRadius.xl,
+    },
+    containerFull: {
+      borderRadius: 0,
+      height: '100%',
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    title: {
+      fontSize: typography.fontSize.lg,
+      fontWeight: typography.fontWeight.semiBold,
+      color: colors.text.primary,
+      flex: 1,
+    },
+    closeButton: {
+      padding: spacing.xs,
+      marginLeft: spacing.sm,
+    },
+    content: {
+      flexGrow: 0,
+    },
+    contentContainer: {
+      padding: spacing.lg,
+    },
+    footer: {
+      padding: spacing.lg,
+      paddingTop: spacing.md,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    confirmFooter: {
+      flexDirection: 'row',
+      gap: spacing.md,
+    },
+    confirmButton: {
+      flex: 1,
+    },
+    confirmMessage: {
+      fontSize: typography.fontSize.md,
+      color: colors.text.secondary,
+      textAlign: 'center',
+      lineHeight: 22,
+    },
+    alertContent: {
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+    },
+    alertTitle: {
+      fontSize: typography.fontSize.lg,
+      fontWeight: typography.fontWeight.semiBold,
+      color: colors.text.primary,
+      marginTop: spacing.md,
+      textAlign: 'center',
+    },
+    alertMessage: {
+      fontSize: typography.fontSize.md,
+      color: colors.text.secondary,
+      marginTop: spacing.sm,
+      textAlign: 'center',
+      lineHeight: 22,
+    },
+  })
+);

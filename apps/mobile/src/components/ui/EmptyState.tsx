@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography } from '../../theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../theme';
 import { Button } from './Button';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
@@ -29,6 +29,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   onAction,
   style,
 }) => {
+  const styles = useStyles();
+  const colors = useThemeColors();
+
   const displayMessage = description || message;
   const displayActionLabel = actionLabel || actionText;
   const displayOnAction = onActionPress || onAction;
@@ -61,30 +64,32 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing['4xl'],
-  },
-  iconContainer: {
-    marginBottom: spacing['2xl'],
-  },
-  title: {
-    ...typography.styles.h3,
-    color: colors.text.primary,
-    textAlign: 'center',
-    marginBottom: spacing.md,
-  },
-  description: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: spacing['2xl'],
-  },
-  action: {
-    marginTop: spacing.lg,
-    minWidth: 200,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: spacing['4xl'],
+    },
+    iconContainer: {
+      marginBottom: spacing['2xl'],
+    },
+    title: {
+      ...typography.styles.h3,
+      color: colors.text.primary,
+      textAlign: 'center',
+      marginBottom: spacing.md,
+    },
+    description: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      textAlign: 'center',
+      marginBottom: spacing['2xl'],
+    },
+    action: {
+      marginTop: spacing.lg,
+      minWidth: 200,
+    },
+  })
+);

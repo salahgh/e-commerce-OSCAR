@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
-import { colors, spacing, typography } from '../../theme';
+import { makeThemedStyles, spacing, typography } from '../../theme';
 import { Button } from './Button';
 
 interface ErrorStateProps {
@@ -18,6 +18,8 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
   retryLabel = 'Retry',
   style,
 }) => {
+  const styles = useStyles();
+
   return (
     <View style={[styles.container, style]}>
       <View style={styles.iconContainer}>
@@ -41,6 +43,8 @@ interface ErrorBannerProps {
 }
 
 export const ErrorBanner: React.FC<ErrorBannerProps> = ({ message, onDismiss, style }) => {
+  const styles = useStyles();
+
   return (
     <View style={[styles.banner, style]}>
       <Text style={styles.bannerIcon}>❌</Text>
@@ -60,6 +64,8 @@ interface InlineErrorProps {
 }
 
 export const InlineError: React.FC<InlineErrorProps> = ({ message, style }) => {
+  const styles = useStyles();
+
   return (
     <View style={[styles.inlineError, style]}>
       <Text style={styles.inlineErrorIcon}>!</Text>
@@ -68,84 +74,86 @@ export const InlineError: React.FC<InlineErrorProps> = ({ message, style }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing['4xl'],
-  },
-  iconContainer: {
-    marginBottom: spacing['2xl'],
-  },
-  icon: {
-    fontSize: 64,
-  },
-  title: {
-    ...typography.styles.h2,
-    color: colors.text.primary,
-    marginBottom: spacing.md,
-    textAlign: 'center',
-  },
-  message: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: spacing['2xl'],
-  },
-  retryButton: {
-    marginTop: spacing.lg,
-    minWidth: 200,
-  },
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: spacing['4xl'],
+    },
+    iconContainer: {
+      marginBottom: spacing['2xl'],
+    },
+    icon: {
+      fontSize: 64,
+    },
+    title: {
+      ...typography.styles.h2,
+      color: colors.text.primary,
+      marginBottom: spacing.md,
+      textAlign: 'center',
+    },
+    message: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      textAlign: 'center',
+      marginBottom: spacing['2xl'],
+    },
+    retryButton: {
+      marginTop: spacing.lg,
+      minWidth: 200,
+    },
 
-  // Error Banner
-  banner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.errorLight,
-    padding: spacing.md,
-    borderRadius: spacing.borderRadius.md,
-    marginBottom: spacing.md,
-  },
-  bannerIcon: {
-    fontSize: 20,
-    marginRight: spacing.sm,
-  },
-  bannerText: {
-    flex: 1,
-    ...typography.styles.bodySmall,
-    color: colors.text.inverse,
-  },
-  dismissButton: {
-    fontSize: 20,
-    color: colors.text.inverse,
-    paddingHorizontal: spacing.sm,
-  },
+    // Error Banner
+    banner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.errorLight,
+      padding: spacing.md,
+      borderRadius: spacing.borderRadius.md,
+      marginBottom: spacing.md,
+    },
+    bannerIcon: {
+      fontSize: 20,
+      marginRight: spacing.sm,
+    },
+    bannerText: {
+      flex: 1,
+      ...typography.styles.bodySmall,
+      color: colors.text.inverse,
+    },
+    dismissButton: {
+      fontSize: 20,
+      color: colors.text.inverse,
+      paddingHorizontal: spacing.sm,
+    },
 
-  // Inline Error
-  inlineError: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.errorLight,
-    padding: spacing.sm,
-    borderRadius: spacing.borderRadius.sm,
-    marginTop: spacing.xs,
-  },
-  inlineErrorIcon: {
-    fontSize: 16,
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.bold,
-    marginRight: spacing.xs,
-    backgroundColor: colors.error,
-    borderRadius: 12,
-    width: 20,
-    height: 20,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  inlineErrorText: {
-    ...typography.styles.caption,
-    color: colors.text.inverse,
-    flex: 1,
-  },
-});
+    // Inline Error
+    inlineError: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.errorLight,
+      padding: spacing.sm,
+      borderRadius: spacing.borderRadius.sm,
+      marginTop: spacing.xs,
+    },
+    inlineErrorIcon: {
+      fontSize: 16,
+      color: colors.text.inverse,
+      fontWeight: typography.fontWeight.bold,
+      marginRight: spacing.xs,
+      backgroundColor: colors.error,
+      borderRadius: 12,
+      width: 20,
+      height: 20,
+      textAlign: 'center',
+      lineHeight: 20,
+    },
+    inlineErrorText: {
+      ...typography.styles.caption,
+      color: colors.text.inverse,
+      flex: 1,
+    },
+  })
+);

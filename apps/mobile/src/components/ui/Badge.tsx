@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { colors, spacing, typography } from '../../theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../theme';
 
 type BadgeVariant = 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info';
 type BadgeSize = 'small' | 'medium' | 'large';
@@ -20,6 +20,9 @@ export const Badge: React.FC<BadgeProps> = ({
   style,
   textStyle,
 }) => {
+  const styles = useStyles();
+  const colors = useThemeColors();
+
   const getBackgroundColor = () => {
     switch (variant) {
       case 'primary':
@@ -68,6 +71,7 @@ interface NotificationBadgeProps {
 }
 
 export const NotificationBadge: React.FC<NotificationBadgeProps> = ({ count, max = 99, style }) => {
+  const styles = useStyles();
   const displayCount = count > max ? `${max}+` : count.toString();
 
   if (count === 0) return null;
@@ -79,56 +83,58 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = ({ count, max
   );
 };
 
-const styles = StyleSheet.create({
-  badge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: spacing.borderRadius.full,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  badge_small: {
-    paddingHorizontal: spacing.xs,
-    paddingVertical: 2,
-  },
-  badge_medium: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  badge_large: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  text: {
-    fontWeight: typography.fontWeight.semiBold,
-  },
-  text_small: {
-    fontSize: typography.fontSize.xs,
-  },
-  text_medium: {
-    fontSize: typography.fontSize.sm,
-  },
-  text_large: {
-    fontSize: typography.fontSize.md,
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: -6,
-    right: -6,
-    backgroundColor: colors.error,
-    borderRadius: spacing.borderRadius.full,
-    minWidth: 18,
-    height: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-    borderWidth: 2,
-    borderColor: colors.surface,
-  },
-  notificationText: {
-    color: colors.text.inverse,
-    fontSize: 10,
-    fontWeight: typography.fontWeight.bold,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    badge: {
+      alignSelf: 'flex-start',
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      borderRadius: spacing.borderRadius.full,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    badge_small: {
+      paddingHorizontal: spacing.xs,
+      paddingVertical: 2,
+    },
+    badge_medium: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+    },
+    badge_large: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+    },
+    text: {
+      fontWeight: typography.fontWeight.semiBold,
+    },
+    text_small: {
+      fontSize: typography.fontSize.xs,
+    },
+    text_medium: {
+      fontSize: typography.fontSize.sm,
+    },
+    text_large: {
+      fontSize: typography.fontSize.md,
+    },
+    notificationBadge: {
+      position: 'absolute',
+      top: -6,
+      right: -6,
+      backgroundColor: colors.error,
+      borderRadius: spacing.borderRadius.full,
+      minWidth: 18,
+      height: 18,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 4,
+      borderWidth: 2,
+      borderColor: colors.surface,
+    },
+    notificationText: {
+      color: colors.text.inverse,
+      fontSize: 10,
+      fontWeight: typography.fontWeight.bold,
+    },
+  })
+);
