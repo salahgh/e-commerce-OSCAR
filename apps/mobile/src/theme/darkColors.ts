@@ -4,8 +4,15 @@
  * Twin of `colors` (same key structure) with conventional-dark values:
  * near-black page, elevated surfaces LIGHTER than the page, off-white text,
  * a neutral (#ECECEC) primary accent, and brand yellow (#FFD500) kept as the
- * "pop" secondary. Brand/status hues read fine on dark and stay vivid; only the
- * pale status TINT backgrounds are darkened. See the M3d-1 design spec.
+ * "pop" secondary. Brand/status hues read fine on dark and stay vivid; the pale
+ * status TINT `*Light` backgrounds are darkened.
+ *
+ * NOTE (M3e audit): the LOW end (indices 1–3) of the `*Scale` ramps below is
+ * inherited from the light palette and is currently UNUSED in dark mode — the
+ * only consumed `*Scale` tokens are `errorScale[2]` (the verify-phone error
+ * border, dark-adapted) and `errorScale[6]` (discount-badge text). Adapt other
+ * indices per-usage if/when a dark component starts consuming them.
+ * See the M3d-1 design spec.
  */
 import { colors } from './colors';
 
@@ -94,7 +101,7 @@ export const darkColors: ColorPalette = {
   errorLight: '#3A1717',
   errorScale: {
     1: '#FFE5E5',
-    2: '#FF9999',
+    2: '#7A3333', // dark-adapted: muted brick-red border on the dark errorLight (#3A1717) banner (was #FF9999, a too-bright light-mode pink); sole dark consumer is verify-phone
     3: '#FF6666',
     4: '#E53C3C',
     5: '#CC3636',
