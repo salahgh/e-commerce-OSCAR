@@ -1,8 +1,16 @@
 import React from 'react';
-import { Modal, View, Text, StyleSheet, TouchableOpacity, ScrollView, Pressable } from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Pressable,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 
 interface SizeGuideModalProps {
   visible: boolean;
@@ -20,6 +28,8 @@ const SIZE_CHART = [
 
 export function SizeGuideModal({ visible, onClose }: SizeGuideModalProps) {
   const { t } = useTranslation();
+  const colors = useThemeColors();
+  const styles = useStyles();
 
   return (
     <Modal visible={visible} onRequestClose={onClose} transparent animationType="slide">
@@ -60,80 +70,82 @@ export function SizeGuideModal({ visible, onClose }: SizeGuideModalProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    backgroundColor: colors.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xl,
-    maxHeight: '85%',
-  },
-  handle: {
-    alignSelf: 'center',
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.border,
-    marginBottom: spacing.md,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.xs,
-  },
-  title: {
-    ...typography.styles.h3,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-  },
-  intro: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    marginBottom: spacing.md,
-  },
-  tableScroll: {
-    marginBottom: spacing.md,
-  },
-  table: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    minWidth: '100%',
-  },
-  row: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  headRow: {
-    backgroundColor: colors.surface,
-  },
-  cell: {
-    flex: 1,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    minWidth: 80,
-  },
-  headCell: {
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  sizeCell: {
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-  },
-  footnote: {
-    ...typography.styles.caption,
-    color: colors.text.secondary,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+      justifyContent: 'flex-end',
+    },
+    sheet: {
+      backgroundColor: colors.background,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.sm,
+      paddingBottom: spacing.xl,
+      maxHeight: '85%',
+    },
+    handle: {
+      alignSelf: 'center',
+      width: 40,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: colors.border,
+      marginBottom: spacing.md,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: spacing.xs,
+    },
+    title: {
+      ...typography.styles.h3,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.bold,
+    },
+    intro: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      marginBottom: spacing.md,
+    },
+    tableScroll: {
+      marginBottom: spacing.md,
+    },
+    table: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      minWidth: '100%',
+    },
+    row: {
+      flexDirection: 'row',
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    headRow: {
+      backgroundColor: colors.surface,
+    },
+    cell: {
+      flex: 1,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      minWidth: 80,
+    },
+    headCell: {
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.medium,
+    },
+    sizeCell: {
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.bold,
+    },
+    footnote: {
+      ...typography.styles.caption,
+      color: colors.text.secondary,
+    },
+  })
+);

@@ -13,7 +13,7 @@ import {
   Text,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing } from '../../theme';
+import { spacing, makeThemedStyles, useThemeColors } from '../../theme';
 import { ZoomableImage } from './ZoomableImage';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -42,6 +42,8 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
   const [modalIndex, setModalIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const modalFlatListRef = useRef<FlatList>(null);
+  const colors = useThemeColors();
+  const styles = useStyles();
 
   // Auto play functionality
   React.useEffect(() => {
@@ -96,10 +98,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
 
   const renderThumbnail = ({ item, index }: { item: string; index: number }) => (
     <TouchableOpacity
-      style={[
-        styles.thumbnail,
-        activeIndex === index && styles.thumbnailActive,
-      ]}
+      style={[styles.thumbnail, activeIndex === index && styles.thumbnailActive]}
       onPress={() => handleThumbnailPress(index)}
       activeOpacity={0.8}
     >
@@ -150,10 +149,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
           {images.map((_, index) => (
             <View
               key={`indicator-${index}`}
-              style={[
-                styles.indicator,
-                activeIndex === index && styles.indicatorActive,
-              ]}
+              style={[styles.indicator, activeIndex === index && styles.indicatorActive]}
             />
           ))}
         </View>
@@ -181,16 +177,13 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
         <StatusBar backgroundColor={colors.black} barStyle="light-content" />
         <View style={styles.modalContainer}>
           {/* Close Button */}
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setModalVisible(false)}
-          >
-            <Ionicons name="close" size={28} color={colors.text.inverse} />
+          <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+            <Ionicons name="close" size={28} color={colors.white} />
           </TouchableOpacity>
 
           {/* Image Counter */}
           <View style={styles.counterContainer}>
-            <Ionicons name="images-outline" size={16} color={colors.text.inverse} />
+            <Ionicons name="images-outline" size={16} color={colors.white} />
             <Text style={styles.counterText}>
               {modalIndex + 1} / {images.length}
             </Text>
@@ -199,7 +192,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
           {/* Zoom Hint */}
           {!isZoomed && (
             <View style={styles.zoomHint}>
-              <Ionicons name="expand-outline" size={16} color={colors.text.inverse} />
+              <Ionicons name="expand-outline" size={16} color={colors.white} />
               <Text style={styles.zoomHintText}>Pinch to zoom</Text>
             </View>
           )}
@@ -229,10 +222,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
             {images.map((_, index) => (
               <View
                 key={`modal-indicator-${index}`}
-                style={[
-                  styles.modalIndicator,
-                  modalIndex === index && styles.modalIndicatorActive,
-                ]}
+                style={[styles.modalIndicator, modalIndex === index && styles.modalIndicatorActive]}
               />
             ))}
           </View>
@@ -242,142 +232,144 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.surface,
-  },
-  mainImageContainer: {
-    width: SCREEN_WIDTH,
-    backgroundColor: colors.background,
-  },
-  mainImage: {
-    width: '100%',
-    height: '100%',
-  },
-  placeholder: {
-    backgroundColor: colors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  indicatorContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    position: 'absolute',
-    bottom: 80,
-    left: 0,
-    right: 0,
-  },
-  indicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.text.inverse,
-    opacity: 0.5,
-    marginHorizontal: 4,
-  },
-  indicatorActive: {
-    width: 24,
-    opacity: 1,
-    backgroundColor: colors.primary,
-  },
-  thumbnailsContainer: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-  },
-  thumbnail: {
-    width: 60,
-    height: 60,
-    marginRight: spacing.sm,
-    borderRadius: spacing.borderRadius.sm,
-    overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: colors.transparent,
-  },
-  thumbnailActive: {
-    borderColor: colors.primary,
-  },
-  thumbnailImage: {
-    width: '100%',
-    height: '100%',
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: colors.black,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    zIndex: 10,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.overlayWhite,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  counterContainer: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    zIndex: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.overlayWhite,
-    borderRadius: 12,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    gap: spacing.xs,
-  },
-  counterText: {
-    color: colors.text.inverse,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  zoomHint: {
-    position: 'absolute',
-    bottom: 100,
-    alignSelf: 'center',
-    zIndex: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.overlay,
-    borderRadius: 16,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    gap: spacing.xs,
-  },
-  zoomHintText: {
-    color: colors.text.inverse,
-    fontSize: 12,
-  },
-  modalImageContainer: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalIndicatorContainer: {
-    position: 'absolute',
-    bottom: 50,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.text.inverse,
-    opacity: 0.5,
-    marginHorizontal: 4,
-  },
-  modalIndicatorActive: {
-    width: 24,
-    opacity: 1,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: colors.surface,
+    },
+    mainImageContainer: {
+      width: SCREEN_WIDTH,
+      backgroundColor: colors.background,
+    },
+    mainImage: {
+      width: '100%',
+      height: '100%',
+    },
+    placeholder: {
+      backgroundColor: colors.border,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    indicatorContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+      position: 'absolute',
+      bottom: 80,
+      left: 0,
+      right: 0,
+    },
+    indicator: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.white,
+      opacity: 0.5,
+      marginHorizontal: 4,
+    },
+    indicatorActive: {
+      width: 24,
+      opacity: 1,
+      backgroundColor: colors.primary,
+    },
+    thumbnailsContainer: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.md,
+    },
+    thumbnail: {
+      width: 60,
+      height: 60,
+      marginRight: spacing.sm,
+      borderRadius: spacing.borderRadius.sm,
+      overflow: 'hidden',
+      borderWidth: 2,
+      borderColor: colors.transparent,
+    },
+    thumbnailActive: {
+      borderColor: colors.primary,
+    },
+    thumbnailImage: {
+      width: '100%',
+      height: '100%',
+    },
+    modalContainer: {
+      flex: 1,
+      backgroundColor: colors.black,
+    },
+    closeButton: {
+      position: 'absolute',
+      top: 50,
+      right: 20,
+      zIndex: 10,
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: colors.overlayWhite,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    counterContainer: {
+      position: 'absolute',
+      top: 50,
+      left: 20,
+      zIndex: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.overlayWhite,
+      borderRadius: 12,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      gap: spacing.xs,
+    },
+    counterText: {
+      color: colors.white,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    zoomHint: {
+      position: 'absolute',
+      bottom: 100,
+      alignSelf: 'center',
+      zIndex: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.overlay,
+      borderRadius: 16,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      gap: spacing.xs,
+    },
+    zoomHintText: {
+      color: colors.white,
+      fontSize: 12,
+    },
+    modalImageContainer: {
+      width: SCREEN_WIDTH,
+      height: SCREEN_HEIGHT,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalIndicatorContainer: {
+      position: 'absolute',
+      bottom: 50,
+      left: 0,
+      right: 0,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalIndicator: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.white,
+      opacity: 0.5,
+      marginHorizontal: 4,
+    },
+    modalIndicatorActive: {
+      width: 24,
+      opacity: 1,
+    },
+  })
+);
