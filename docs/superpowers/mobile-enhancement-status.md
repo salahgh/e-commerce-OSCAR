@@ -21,8 +21,17 @@ _Last updated: 2026-06-02. This file is the portable roadmap so work can resume 
 **Health:** 89 unit tests pass; `npm run lint` = 0 errors (warnings are pre-existing). M0/M1a/M1b/M1c/M1d/M3a/M3b/M3c source is `tsc`-clean (baseline still 155 pre-existing errors; **zero new** introduced).
 
 ## Next up (recommended order)
-**M3 (UX polish) is being built slice-by-slice — M3a (recently-viewed), M3b (haptics), and M3c (accessibility) are done.** Remaining M3 slice:
-1. **Real dark mode** — make `src/theme/colors` theme-aware so screens actually switch with the existing `ThemeContext` (large; touches most StyleSheets). Arabic-font application is folded in here / as a small follow-up.
+**M3 (UX polish) is being built slice-by-slice — M3a (recently-viewed), M3b (haptics), and M3c (accessibility) are done.** Remaining: M3d (dark mode).
+
+### M3d — Real dark mode (RESUME HERE on the second laptop)
+**Status: not started — scoped, awaiting the first sub-slice.** This is a *program*, not a single slice. Blast radius (measured 2026-06-02): **62 files import the static `colors`**, across **~93 `StyleSheet.create` blocks** and **~860 `colors.*` usages**. The theme toggle already exists (`app/profile/settings.tsx` → `setMode`) and `ThemeContext` resolves `light`/`dark`, **but** every StyleSheet reads the static `src/theme/colors.ts` at import time, so nothing switches. There is **no dark palette yet** (only shade names like `primaryDark`).
+
+**Decompose into sub-slices:**
+- **M3d-1 — Foundation (do first):** add a dark palette (a `darkColors` object or a `colors[mode]` map in `src/theme/`), a tested `useThemeColors()` hook/selector keyed on `useThemeMode().resolved`, and a `makeThemedStyles(colors => StyleSheet.create({...}))` pattern. Pure palette-selector is unit-testable. Nothing visual yet.
+- **M3d-2 — Settings-screen proof:** convert `app/profile/settings.tsx` (where the toggle lives — dogfood) end-to-end to the dynamic palette so toggling dark mode visibly darkens that screen. Establishes the conversion recipe.
+- **M3d-3…N — Screen-by-screen conversion:** migrate the remaining ~93 StyleSheets in batches (tabs/home first, then PDP/cart/checkout/profile/auth), each its own small slice. **Arabic-font application** (IBM Plex Sans Arabic is loaded in `app/_layout.tsx` but not wired into `typography` for the `ar` locale) folds in as a small follow-up here.
+
+**Recommended next action:** brainstorm → spec → plan **M3d-1 (Foundation + the Settings-screen proof)** as one bounded slice; defer the screen sweep.
 
 Then (largely backend-dependent, deferred under mobile-only):
 4. **M2 — Engagement/retention** (reviews, push notifications, wishlist sync) — recently-viewed already shipped in M3a.
@@ -46,7 +55,7 @@ Then (largely backend-dependent, deferred under mobile-only):
 git clone https://github.com/salahgh/e-commerce-OSCAR.git   # or: git pull origin main
 cd e-commerce-OSCAR/apps/mobile
 npm install            # standalone npm project — NOT pnpm
-npm test               # 53 tests should pass
+npm test               # 89 tests should pass (15→16 suites)
 npm run lint           # 0 errors expected
 # read docs/superpowers/ (this file, specs/, plans/) for full context
 ```
