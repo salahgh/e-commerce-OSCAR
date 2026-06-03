@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { Input, Button, ErrorBanner } from '../../src/components/ui';
 import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
+import { useAppFont } from '../../src/hooks/useAppFont';
 
 interface ResetFormValues {
   password: string;
@@ -37,6 +38,7 @@ const resetSchema = Yup.object().shape({
 export default function ResetPasswordScreen() {
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { resetPassword } = useAuth();
@@ -68,7 +70,9 @@ export default function ResetPasswordScreen() {
         <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.body}>
           <Ionicons name="checkmark-circle" size={64} color={colors.success} />
-          <Text style={styles.title}>{t('auth.passwordChanged', 'Password changed')}</Text>
+          <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>
+            {t('auth.passwordChanged', 'Password changed')}
+          </Text>
           <Button
             title={t('auth.login', 'Sign in')}
             onPress={() => router.replace('/(auth)/login' as any)}
@@ -100,8 +104,10 @@ export default function ResetPasswordScreen() {
       >
         <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.body}>
-          <Text style={styles.title}>{t('auth.resetPasswordTitle', 'New password')}</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>
+            {t('auth.resetPasswordTitle', 'New password')}
+          </Text>
+          <Text style={[styles.subtitle, { fontFamily: fontFamily.regular }]}>
             {t('auth.resetPasswordDesc', 'Enter your new password.')}
           </Text>
 

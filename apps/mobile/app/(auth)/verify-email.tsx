@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { Button, ErrorBanner } from '../../src/components/ui';
 import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
+import { useAppFont } from '../../src/hooks/useAppFont';
 
 type State = 'verifying' | 'success' | 'error';
 
@@ -17,6 +18,7 @@ type State = 'verifying' | 'success' | 'error';
 export default function VerifyEmailScreen() {
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { verifyEmail } = useAuth();
@@ -55,14 +57,20 @@ export default function VerifyEmailScreen() {
         {state === 'verifying' && (
           <>
             <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={styles.title}>{t('auth.verifying', 'Verifying...')}</Text>
+            <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>
+              {t('auth.verifying', 'Verifying...')}
+            </Text>
           </>
         )}
         {state === 'success' && (
           <>
             <Ionicons name="checkmark-circle" size={64} color={colors.success} />
-            <Text style={styles.title}>{t('auth.verifySuccess', 'Email verified')}</Text>
-            <Text style={styles.subtitle}>{t('auth.redirecting', 'Redirecting...')}</Text>
+            <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>
+              {t('auth.verifySuccess', 'Email verified')}
+            </Text>
+            <Text style={[styles.subtitle, { fontFamily: fontFamily.regular }]}>
+              {t('auth.redirecting', 'Redirecting...')}
+            </Text>
           </>
         )}
         {state === 'error' && (

@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Input, Button, ErrorBanner } from '../../src/components/ui';
 import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
+import { useAppFont } from '../../src/hooks/useAppFont';
 import { forgotPasswordSchema } from '../../src/utils/validation';
 import { useRequestPasswordResetMutation } from '../../src/graphql/generated/graphql';
 
@@ -27,6 +28,7 @@ interface ForgotPasswordFormValues {
 export default function ForgotPasswordScreen() {
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [error, setError] = useState<string | null>(null);
@@ -86,10 +88,18 @@ export default function ForgotPasswordScreen() {
           >
             <Ionicons name="mail-outline" size={64} color={colors.success} />
           </Animated.View>
-          <Text style={styles.successTitle}>{t('auth.checkEmail')}</Text>
-          <Text style={styles.successEmail}>{submittedEmail}</Text>
-          <Text style={styles.successMessage}>{t('auth.resetEmailSent')}</Text>
-          <Text style={styles.spamNote}>{t('auth.checkSpam')}</Text>
+          <Text style={[styles.successTitle, { fontFamily: fontFamily.semiBold }]}>
+            {t('auth.checkEmail')}
+          </Text>
+          <Text style={[styles.successEmail, { fontFamily: fontFamily.semiBold }]}>
+            {submittedEmail}
+          </Text>
+          <Text style={[styles.successMessage, { fontFamily: fontFamily.regular }]}>
+            {t('auth.resetEmailSent')}
+          </Text>
+          <Text style={[styles.spamNote, { fontFamily: fontFamily.regular }]}>
+            {t('auth.checkSpam')}
+          </Text>
           <Button
             title={t('auth.backToLogin')}
             onPress={() => router.replace('/(auth)/login')}
@@ -130,8 +140,12 @@ export default function ForgotPasswordScreen() {
 
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>{t('auth.forgotPassword')}</Text>
-          <Text style={styles.subtitle}>{t('auth.resetEmailSent')}</Text>
+          <Text style={[styles.title, { fontFamily: fontFamily.semiBold }]}>
+            {t('auth.forgotPassword')}
+          </Text>
+          <Text style={[styles.subtitle, { fontFamily: fontFamily.regular }]}>
+            {t('auth.resetEmailSent')}
+          </Text>
         </View>
 
         {/* Error Banner */}
