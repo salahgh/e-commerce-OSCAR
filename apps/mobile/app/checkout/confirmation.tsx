@@ -17,6 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Button } from '../../src/components/ui';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
+import { useAppFont } from '../../src/hooks/useAppFont';
 
 const useStyles = makeThemedStyles((colors) =>
   StyleSheet.create({
@@ -151,6 +152,7 @@ export default function OrderConfirmationScreen() {
   const insets = useSafeAreaInsets();
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   const { orderNumber, orderId } = useLocalSearchParams<{
     orderNumber: string;
     orderId: string;
@@ -289,11 +291,11 @@ export default function OrderConfirmationScreen() {
         {/* Animated Content */}
         <Animated.View style={[styles.contentAnimated, contentStyle]}>
           {/* Success Message */}
-          <Text style={styles.title}>
+          <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>
             {t('checkout.orderPlaced', 'Order Placed Successfully!')}
           </Text>
 
-          <Text style={styles.message}>
+          <Text style={[styles.message, { fontFamily: fontFamily.regular }]}>
             {t(
               'checkout.orderPlacedMessage',
               'Thank you for your order. We will send you a confirmation email shortly.'
@@ -303,17 +305,19 @@ export default function OrderConfirmationScreen() {
           {/* Order Number */}
           {orderNumber && (
             <View style={styles.orderNumberContainer}>
-              <Text style={styles.orderNumberLabel}>
+              <Text style={[styles.orderNumberLabel, { fontFamily: fontFamily.regular }]}>
                 {t('checkout.orderNumber', 'Order Number')}
               </Text>
-              <Text style={styles.orderNumber}>{orderNumber}</Text>
+              <Text style={[styles.orderNumber, { fontFamily: fontFamily.bold }]}>
+                {orderNumber}
+              </Text>
             </View>
           )}
 
           {/* Info Box */}
           <View style={styles.infoBox}>
             <Ionicons name="information-circle-outline" size={24} color={colors.info} />
-            <Text style={styles.infoText}>
+            <Text style={[styles.infoText, { fontFamily: fontFamily.regular }]}>
               {t(
                 'checkout.trackingInfo',
                 'You can track your order status in the "My Orders" section of your profile.'
@@ -352,10 +356,10 @@ export default function OrderConfirmationScreen() {
 
           {/* Additional Info */}
           <View style={styles.additionalInfo}>
-            <Text style={styles.additionalInfoText}>
+            <Text style={[styles.additionalInfoText, { fontFamily: fontFamily.regular }]}>
               {t('checkout.needHelp', 'Need help with your order?')}
             </Text>
-            <Text style={styles.additionalInfoLink}>
+            <Text style={[styles.additionalInfoLink, { fontFamily: fontFamily.semiBold }]}>
               {t('checkout.contactSupport', 'Contact our support team')}
             </Text>
           </View>

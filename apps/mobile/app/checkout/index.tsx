@@ -22,6 +22,7 @@ import {
 } from '../../src/graphql/generated/graphql';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
+import { useAppFont } from '../../src/hooks/useAppFont';
 import { formatPrice } from '../../src/utils/vendureAdapters';
 import { submitCheckoutAddress, STALE_SESSION_ERROR } from '../../src/utils/checkout';
 import { makeShippingAddressSchema } from '../../src/utils/validation';
@@ -35,6 +36,7 @@ type CheckoutStep = 'shipping' | 'shippingMethod' | 'payment' | 'review';
 export default function CheckoutScreen() {
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   const { t } = useTranslation();
   const { order, items, subTotal, shipping, total, refetchCart } = useCart();
   const { user, isAuthenticated } = useAuth();
@@ -262,8 +264,10 @@ export default function CheckoutScreen() {
       <View style={styles.container}>
         <View style={styles.emptyContainer}>
           <Ionicons name="cart-outline" size={64} color={colors.text.tertiary} />
-          <Text style={styles.emptyTitle}>{t('checkout.emptyCart', 'Your cart is empty')}</Text>
-          <Text style={styles.emptyMessage}>
+          <Text style={[styles.emptyTitle, { fontFamily: fontFamily.bold }]}>
+            {t('checkout.emptyCart', 'Your cart is empty')}
+          </Text>
+          <Text style={[styles.emptyMessage, { fontFamily: fontFamily.regular }]}>
             {t('checkout.emptyCartMessage', 'Add some items to checkout')}
           </Text>
           <Button
@@ -283,7 +287,9 @@ export default function CheckoutScreen() {
         <TouchableOpacity onPress={goBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('checkout.title', 'Checkout')}</Text>
+        <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
+          {t('checkout.title', 'Checkout')}
+        </Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -342,14 +348,14 @@ export default function CheckoutScreen() {
 
         {currentStep === 'shippingMethod' && (
           <View style={styles.stepContent}>
-            <Text style={styles.sectionTitle}>
+            <Text style={[styles.sectionTitle, { fontFamily: fontFamily.semiBold }]}>
               {t('checkout.selectShippingMethod', 'Select Delivery Method')}
             </Text>
 
             {loadingShippingMethods ? (
               <LoadingSpinner />
             ) : shippingMethods.length === 0 ? (
-              <Text style={styles.noMethodsText}>
+              <Text style={[styles.noMethodsText, { fontFamily: fontFamily.regular }]}>
                 {t('checkout.noShippingMethods', 'No delivery methods available')}
               </Text>
             ) : (
@@ -373,12 +379,16 @@ export default function CheckoutScreen() {
                     </View>
                   </View>
                   <View style={styles.methodInfo}>
-                    <Text style={styles.methodName}>{method.name}</Text>
+                    <Text style={[styles.methodName, { fontFamily: fontFamily.semiBold }]}>
+                      {method.name}
+                    </Text>
                     {method.description && (
-                      <Text style={styles.methodDescription}>{method.description}</Text>
+                      <Text style={[styles.methodDescription, { fontFamily: fontFamily.regular }]}>
+                        {method.description}
+                      </Text>
                     )}
                   </View>
-                  <Text style={styles.methodPrice}>
+                  <Text style={[styles.methodPrice, { fontFamily: fontFamily.bold }]}>
                     {method.priceWithTax === 0
                       ? t('checkout.free', 'Free')
                       : `${formatPrice(method.priceWithTax)} DZD`}
@@ -400,14 +410,14 @@ export default function CheckoutScreen() {
 
         {currentStep === 'payment' && (
           <View style={styles.stepContent}>
-            <Text style={styles.sectionTitle}>
+            <Text style={[styles.sectionTitle, { fontFamily: fontFamily.semiBold }]}>
               {t('checkout.selectPaymentMethod', 'Select Payment Method')}
             </Text>
 
             {loadingPaymentMethods ? (
               <LoadingSpinner />
             ) : availablePaymentMethods.length === 0 ? (
-              <Text style={styles.noMethodsText}>
+              <Text style={[styles.noMethodsText, { fontFamily: fontFamily.regular }]}>
                 {t('checkout.noPaymentMethods', 'No payment methods available')}
               </Text>
             ) : (
@@ -435,15 +445,23 @@ export default function CheckoutScreen() {
                   </View>
                   <View style={styles.methodInfo}>
                     <Text
-                      style={[styles.methodName, !method.isEligible && styles.methodNameDisabled]}
+                      style={[
+                        styles.methodName,
+                        !method.isEligible && styles.methodNameDisabled,
+                        { fontFamily: fontFamily.semiBold },
+                      ]}
                     >
                       {method.name}
                     </Text>
                     {method.description && (
-                      <Text style={styles.methodDescription}>{method.description}</Text>
+                      <Text style={[styles.methodDescription, { fontFamily: fontFamily.regular }]}>
+                        {method.description}
+                      </Text>
                     )}
                     {!method.isEligible && method.eligibilityMessage && (
-                      <Text style={styles.eligibilityMessage}>{method.eligibilityMessage}</Text>
+                      <Text style={[styles.eligibilityMessage, { fontFamily: fontFamily.regular }]}>
+                        {method.eligibilityMessage}
+                      </Text>
                     )}
                   </View>
                 </TouchableOpacity>
@@ -452,7 +470,7 @@ export default function CheckoutScreen() {
 
             {!loadingPaymentMethods && comingSoonPayments.length > 0 && (
               <View style={styles.comingSoonSection}>
-                <Text style={styles.comingSoonSectionTitle}>
+                <Text style={[styles.comingSoonSectionTitle, { fontFamily: fontFamily.semiBold }]}>
                   {t('checkout.comingSoonPayments', 'Online payment — coming soon')}
                 </Text>
                 {comingSoonPayments.map((entry) => (
@@ -464,18 +482,24 @@ export default function CheckoutScreen() {
                       style={styles.comingSoonIcon}
                     />
                     <View style={styles.methodInfo}>
-                      <Text style={[styles.methodName, styles.methodNameDisabled]}>
+                      <Text
+                        style={[
+                          styles.methodName,
+                          styles.methodNameDisabled,
+                          { fontFamily: fontFamily.semiBold },
+                        ]}
+                      >
                         {t(entry.labelKey, entry.labelFallback)}
                       </Text>
                     </View>
                     <View style={styles.comingSoonBadge}>
-                      <Text style={styles.comingSoonBadgeText}>
+                      <Text style={[styles.comingSoonBadgeText, { fontFamily: fontFamily.medium }]}>
                         {t('checkout.comingSoon', 'Coming soon')}
                       </Text>
                     </View>
                   </View>
                 ))}
-                <Text style={styles.comingSoonNote}>
+                <Text style={[styles.comingSoonNote, { fontFamily: fontFamily.regular }]}>
                   {t(
                     'checkout.onlinePaymentSoonNote',
                     'CIB and BaridiMob online payment will be available soon. For now, pay cash on delivery.'
@@ -498,23 +522,33 @@ export default function CheckoutScreen() {
             {/* Shipping Address Review */}
             <View style={styles.reviewSection}>
               <View style={styles.reviewHeader}>
-                <Text style={styles.reviewTitle}>
+                <Text style={[styles.reviewTitle, { fontFamily: fontFamily.semiBold }]}>
                   {t('checkout.shippingAddress', 'Shipping Address')}
                 </Text>
                 <TouchableOpacity onPress={() => setCurrentStep('shipping')}>
-                  <Text style={styles.editButton}>{t('common.edit', 'Edit')}</Text>
+                  <Text style={[styles.editButton, { fontFamily: fontFamily.medium }]}>
+                    {t('common.edit', 'Edit')}
+                  </Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.reviewContent}>
-                <Text style={styles.reviewText}>{shippingAddress.fullName}</Text>
-                <Text style={styles.reviewText}>{shippingAddress.phoneNumber}</Text>
-                <Text style={styles.reviewText}>{shippingAddress.address}</Text>
-                <Text style={styles.reviewText}>
+                <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
+                  {shippingAddress.fullName}
+                </Text>
+                <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
+                  {shippingAddress.phoneNumber}
+                </Text>
+                <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
+                  {shippingAddress.address}
+                </Text>
+                <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
                   {shippingAddress.city}
                   {shippingAddress.postalCode && `, ${shippingAddress.postalCode}`}
                 </Text>
                 {shippingAddress.notes && (
-                  <Text style={styles.reviewTextSecondary}>Notes: {shippingAddress.notes}</Text>
+                  <Text style={[styles.reviewTextSecondary, { fontFamily: fontFamily.regular }]}>
+                    Notes: {shippingAddress.notes}
+                  </Text>
                 )}
               </View>
             </View>
@@ -522,15 +556,17 @@ export default function CheckoutScreen() {
             {/* Shipping Method Review */}
             <View style={styles.reviewSection}>
               <View style={styles.reviewHeader}>
-                <Text style={styles.reviewTitle}>
+                <Text style={[styles.reviewTitle, { fontFamily: fontFamily.semiBold }]}>
                   {t('checkout.deliveryMethod', 'Delivery Method')}
                 </Text>
                 <TouchableOpacity onPress={() => setCurrentStep('shippingMethod')}>
-                  <Text style={styles.editButton}>{t('common.edit', 'Edit')}</Text>
+                  <Text style={[styles.editButton, { fontFamily: fontFamily.medium }]}>
+                    {t('common.edit', 'Edit')}
+                  </Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.reviewContent}>
-                <Text style={styles.reviewText}>
+                <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
                   {shippingMethods.find((m) => m.id === selectedShippingMethod)?.name || ''}
                 </Text>
               </View>
@@ -539,15 +575,17 @@ export default function CheckoutScreen() {
             {/* Payment Method Review */}
             <View style={styles.reviewSection}>
               <View style={styles.reviewHeader}>
-                <Text style={styles.reviewTitle}>
+                <Text style={[styles.reviewTitle, { fontFamily: fontFamily.semiBold }]}>
                   {t('checkout.paymentMethod', 'Payment Method')}
                 </Text>
                 <TouchableOpacity onPress={() => setCurrentStep('payment')}>
-                  <Text style={styles.editButton}>{t('common.edit', 'Edit')}</Text>
+                  <Text style={[styles.editButton, { fontFamily: fontFamily.medium }]}>
+                    {t('common.edit', 'Edit')}
+                  </Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.reviewContent}>
-                <Text style={styles.reviewText}>
+                <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
                   {paymentMethods.find((m) => m.id === selectedPaymentMethod)?.name || ''}
                 </Text>
               </View>
@@ -573,7 +611,7 @@ export default function CheckoutScreen() {
             />
 
             {/* Terms */}
-            <Text style={styles.terms}>
+            <Text style={[styles.terms, { fontFamily: fontFamily.regular }]}>
               {t(
                 'checkout.terms',
                 'By placing your order, you agree to our Terms & Conditions and Privacy Policy'
@@ -600,6 +638,7 @@ function StepItem({
 }) {
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   return (
     <View style={styles.stepItem}>
       <View
@@ -612,12 +651,26 @@ function StepItem({
         {isComplete ? (
           <Ionicons name="checkmark" size={14} color={colors.surface} />
         ) : (
-          <Text style={[styles.stepNumber, (isActive || isComplete) && styles.stepNumberActive]}>
+          <Text
+            style={[
+              styles.stepNumber,
+              (isActive || isComplete) && styles.stepNumberActive,
+              { fontFamily: fontFamily.bold },
+            ]}
+          >
             {number}
           </Text>
         )}
       </View>
-      <Text style={[styles.stepLabel, isActive && styles.stepLabelActive]}>{label}</Text>
+      <Text
+        style={[
+          styles.stepLabel,
+          isActive && styles.stepLabelActive,
+          { fontFamily: isActive ? fontFamily.medium : fontFamily.regular },
+        ]}
+      >
+        {label}
+      </Text>
     </View>
   );
 }

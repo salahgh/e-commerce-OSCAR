@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { wilayas } from '../../data/wilayas';
 import { FilterSheet } from '../products/FilterSheet';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
+import { useAppFont } from '../../hooks/useAppFont';
 
 interface WilayaPickerProps {
   value: string; // wilaya code
@@ -52,12 +53,13 @@ export const WilayaPicker: React.FC<WilayaPickerProps> = ({ value, onSelect, err
   const { t } = useTranslation();
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   const [open, setOpen] = useState(false);
   const selectedName = wilayas.find((w) => w.code === value)?.name ?? '';
 
   return (
     <View style={styles.group}>
-      <Text style={styles.label}>
+      <Text style={[styles.label, { fontFamily: fontFamily.medium }]}>
         {t('checkout.wilaya', 'Wilaya')}
         <Text style={styles.required}> *</Text>
       </Text>
@@ -68,12 +70,20 @@ export const WilayaPicker: React.FC<WilayaPickerProps> = ({ value, onSelect, err
         accessibilityRole="button"
         accessibilityLabel={t('checkout.chooseWilaya', 'Choose wilaya')}
       >
-        <Text style={[styles.selectText, !value && styles.placeholder]}>
+        <Text
+          style={[
+            styles.selectText,
+            !value && styles.placeholder,
+            { fontFamily: fontFamily.regular },
+          ]}
+        >
           {selectedName || t('checkout.chooseWilaya', 'Choose wilaya')}
         </Text>
         <Ionicons name="chevron-down" size={20} color={colors.text.tertiary} />
       </TouchableOpacity>
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      {error ? (
+        <Text style={[styles.errorText, { fontFamily: fontFamily.regular }]}>{error}</Text>
+      ) : null}
 
       <FilterSheet
         visible={open}
@@ -92,7 +102,13 @@ export const WilayaPicker: React.FC<WilayaPickerProps> = ({ value, onSelect, err
             }}
             activeOpacity={0.7}
           >
-            <Text style={[styles.optionText, value === w.code && styles.optionTextActive]}>
+            <Text
+              style={[
+                styles.optionText,
+                value === w.code && styles.optionTextActive,
+                { fontFamily: value === w.code ? fontFamily.semiBold : fontFamily.regular },
+              ]}
+            >
               {w.code} - {w.name}
             </Text>
             {value === w.code && <Ionicons name="checkmark" size={20} color={colors.primary} />}

@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import type { SavedAddress } from '../../utils/address';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
+import { useAppFont } from '../../hooks/useAppFont';
 
 interface Props {
   addresses: SavedAddress[];
@@ -46,10 +47,13 @@ export const SavedAddressPicker: React.FC<Props> = ({ addresses, selectedId, onS
   const { t } = useTranslation();
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   if (addresses.length === 0) return null;
   return (
     <View style={styles.wrap}>
-      <Text style={styles.title}>{t('address.useSaved', 'Use a saved address')}</Text>
+      <Text style={[styles.title, { fontFamily: fontFamily.semiBold }]}>
+        {t('address.useSaved', 'Use a saved address')}
+      </Text>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -66,10 +70,16 @@ export const SavedAddressPicker: React.FC<Props> = ({ addresses, selectedId, onS
             >
               {selected && <Ionicons name="checkmark-circle" size={16} color={colors.primary} />}
               <View style={styles.chipText}>
-                <Text style={styles.chipName} numberOfLines={1}>
+                <Text
+                  style={[styles.chipName, { fontFamily: fontFamily.medium }]}
+                  numberOfLines={1}
+                >
                   {a.fullName}
                 </Text>
-                <Text style={styles.chipLine} numberOfLines={1}>
+                <Text
+                  style={[styles.chipLine, { fontFamily: fontFamily.regular }]}
+                  numberOfLines={1}
+                >
                   {a.streetLine1}
                   {a.province ? ` · ${a.province}` : ''}
                 </Text>

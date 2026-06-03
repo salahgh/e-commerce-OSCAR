@@ -6,6 +6,7 @@ import { Input, Button } from '../ui';
 import { WilayaPicker } from './WilayaPicker';
 import { spacing, typography, makeThemedStyles } from '../../theme';
 import { makeShippingAddressSchema, shippingAddressSchema } from '../../utils/validation';
+import { useAppFont } from '../../hooks/useAppFont';
 
 export interface ShippingAddressFormValues {
   fullName: string;
@@ -82,6 +83,7 @@ export const ShippingAddressForm: React.FC<ShippingAddressFormProps> = ({
 }) => {
   const { t } = useTranslation();
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
 
   return (
     <KeyboardAvoidingView
@@ -91,8 +93,10 @@ export const ShippingAddressForm: React.FC<ShippingAddressFormProps> = ({
     >
       <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.title}>{t('checkout.shippingAddress', 'Shipping Address')}</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>
+            {t('checkout.shippingAddress', 'Shipping Address')}
+          </Text>
+          <Text style={[styles.subtitle, { fontFamily: fontFamily.regular }]}>
             {t('checkout.shippingAddressSubtitle', 'Where should we deliver your order?')}
           </Text>
         </View>

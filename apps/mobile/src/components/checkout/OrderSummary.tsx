@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { CartItemData } from '../cart/CartItem';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 import { Divider } from '../ui';
+import { useAppFont } from '../../hooks/useAppFont';
 
 interface OrderSummaryProps {
   items: CartItemData[];
@@ -143,10 +144,13 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
   const { t } = useTranslation();
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{t('checkout.orderSummary', 'Order Summary')}</Text>
+      <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>
+        {t('checkout.orderSummary', 'Order Summary')}
+      </Text>
 
       {showItems && (
         <ScrollView style={styles.itemsList} showsVerticalScrollIndicator={false}>
@@ -167,24 +171,35 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
               </View>
 
               <View style={styles.itemDetails}>
-                <Text style={styles.itemName} numberOfLines={2}>
+                <Text
+                  style={[styles.itemName, { fontFamily: fontFamily.medium }]}
+                  numberOfLines={2}
+                >
                   {item.productName}
                 </Text>
 
                 {(item.selectedSize || item.selectedColor) && (
                   <View style={styles.itemAttributes}>
                     {item.selectedSize && (
-                      <Text style={styles.itemAttribute}>Size: {item.selectedSize}</Text>
+                      <Text style={[styles.itemAttribute, { fontFamily: fontFamily.regular }]}>
+                        Size: {item.selectedSize}
+                      </Text>
                     )}
                     {item.selectedColor && (
-                      <Text style={styles.itemAttribute}>Color: {item.selectedColor}</Text>
+                      <Text style={[styles.itemAttribute, { fontFamily: fontFamily.regular }]}>
+                        Color: {item.selectedColor}
+                      </Text>
                     )}
                   </View>
                 )}
 
                 <View style={styles.itemPriceRow}>
-                  <Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>
-                  <Text style={styles.itemPrice}>{item.subtotal?.toFixed(2)} DZD</Text>
+                  <Text style={[styles.itemQuantity, { fontFamily: fontFamily.regular }]}>
+                    Qty: {item.quantity}
+                  </Text>
+                  <Text style={[styles.itemPrice, { fontFamily: fontFamily.semiBold }]}>
+                    {item.subtotal?.toFixed(2)} DZD
+                  </Text>
                 </View>
               </View>
             </View>
@@ -194,7 +209,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
 
       {!showItems && (
         <View style={styles.itemCount}>
-          <Text style={styles.itemCountText}>
+          <Text style={[styles.itemCountText, { fontFamily: fontFamily.regular }]}>
             {t('checkout.itemsCount', { count: items.length })} ({items.length})
           </Text>
         </View>
@@ -205,13 +220,19 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
       {/* Summary Rows */}
       <View style={styles.summaryRows}>
         <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>{t('checkout.subtotal', 'Subtotal')}</Text>
-          <Text style={styles.summaryValue}>{subtotal.toFixed(2)} DZD</Text>
+          <Text style={[styles.summaryLabel, { fontFamily: fontFamily.regular }]}>
+            {t('checkout.subtotal', 'Subtotal')}
+          </Text>
+          <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
+            {subtotal.toFixed(2)} DZD
+          </Text>
         </View>
 
         <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>{t('checkout.shipping', 'Shipping')}</Text>
-          <Text style={styles.summaryValue}>
+          <Text style={[styles.summaryLabel, { fontFamily: fontFamily.regular }]}>
+            {t('checkout.shipping', 'Shipping')}
+          </Text>
+          <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
             {shippingCost > 0 ? `${shippingCost.toFixed(2)} DZD` : t('checkout.free', 'Free')}
           </Text>
         </View>
@@ -219,8 +240,12 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
         <Divider style={styles.divider} />
 
         <View style={[styles.summaryRow, styles.totalRow]}>
-          <Text style={styles.totalLabel}>{t('checkout.total', 'Total')}</Text>
-          <Text style={styles.totalValue}>{total.toFixed(2)} DZD</Text>
+          <Text style={[styles.totalLabel, { fontFamily: fontFamily.bold }]}>
+            {t('checkout.total', 'Total')}
+          </Text>
+          <Text style={[styles.totalValue, { fontFamily: fontFamily.bold }]}>
+            {total.toFixed(2)} DZD
+          </Text>
         </View>
       </View>
     </View>
