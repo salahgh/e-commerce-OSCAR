@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { InfoScreen, Section, Paragraph, Bullets } from '../../src/components/info';
 import { makeThemedStyles, spacing, typography } from '../../src/theme';
+import { useAppFont } from '../../src/hooks/useAppFont';
 
 const SIZE_CHART = [
   { size: 'XS', chest: '82-86', waist: '64-68', hip: '90-94' },
@@ -16,6 +17,7 @@ const SIZE_CHART = [
 export default function SizeGuideScreen() {
   const { t } = useTranslation();
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
   return (
     <InfoScreen title={t('info.sizeGuide')} intro={t('sizeGuidePage.intro')}>
       <Section title={t('sizeGuidePage.howTitle')}>
@@ -27,17 +29,27 @@ export default function SizeGuideScreen() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={styles.table}>
             <View style={[styles.row, styles.headRow]}>
-              <Text style={[styles.cell, styles.headCell]}>{t('sizeGuide.headerSize')}</Text>
-              <Text style={[styles.cell, styles.headCell]}>{t('sizeGuide.headerChest')}</Text>
-              <Text style={[styles.cell, styles.headCell]}>{t('sizeGuide.headerWaist')}</Text>
-              <Text style={[styles.cell, styles.headCell]}>{t('sizeGuide.headerHip')}</Text>
+              <Text style={[styles.cell, styles.headCell, { fontFamily: fontFamily.medium }]}>
+                {t('sizeGuide.headerSize')}
+              </Text>
+              <Text style={[styles.cell, styles.headCell, { fontFamily: fontFamily.medium }]}>
+                {t('sizeGuide.headerChest')}
+              </Text>
+              <Text style={[styles.cell, styles.headCell, { fontFamily: fontFamily.medium }]}>
+                {t('sizeGuide.headerWaist')}
+              </Text>
+              <Text style={[styles.cell, styles.headCell, { fontFamily: fontFamily.medium }]}>
+                {t('sizeGuide.headerHip')}
+              </Text>
             </View>
             {SIZE_CHART.map((row) => (
               <View key={row.size} style={styles.row}>
-                <Text style={[styles.cell, styles.sizeCell]}>{row.size}</Text>
-                <Text style={styles.cell}>{row.chest}</Text>
-                <Text style={styles.cell}>{row.waist}</Text>
-                <Text style={styles.cell}>{row.hip}</Text>
+                <Text style={[styles.cell, styles.sizeCell, { fontFamily: fontFamily.bold }]}>
+                  {row.size}
+                </Text>
+                <Text style={[styles.cell, { fontFamily: fontFamily.regular }]}>{row.chest}</Text>
+                <Text style={[styles.cell, { fontFamily: fontFamily.regular }]}>{row.waist}</Text>
+                <Text style={[styles.cell, { fontFamily: fontFamily.regular }]}>{row.hip}</Text>
               </View>
             ))}
           </View>

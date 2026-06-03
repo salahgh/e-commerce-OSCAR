@@ -4,6 +4,7 @@ import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
+import { useAppFont } from '../../src/hooks/useAppFont';
 
 const ENTRIES = [
   { key: 'shipping', icon: 'cube-outline', path: '/info/shipping' },
@@ -22,12 +23,15 @@ export default function InfoIndex() {
   const router = useRouter();
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
 
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: t('info.indexTitle'), headerBackTitle: '' }} />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.intro}>{t('info.indexSubtitle')}</Text>
+        <Text style={[styles.intro, { fontFamily: fontFamily.regular }]}>
+          {t('info.indexSubtitle')}
+        </Text>
         {ENTRIES.map((entry) => (
           <TouchableOpacity
             key={entry.key}
@@ -36,7 +40,9 @@ export default function InfoIndex() {
             activeOpacity={0.7}
           >
             <Ionicons name={entry.icon as any} size={22} color={colors.text.secondary} />
-            <Text style={styles.rowLabel}>{t(`info.${entry.key}`)}</Text>
+            <Text style={[styles.rowLabel, { fontFamily: fontFamily.medium }]}>
+              {t(`info.${entry.key}`)}
+            </Text>
             <Ionicons name="chevron-forward" size={18} color={colors.text.tertiary} />
           </TouchableOpacity>
         ))}

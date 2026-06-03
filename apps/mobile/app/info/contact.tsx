@@ -4,11 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { InfoScreen, Section } from '../../src/components/info';
 import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
+import { useAppFont } from '../../src/hooks/useAppFont';
 
 export default function ContactScreen() {
   const { t } = useTranslation();
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   const email = t('contactPage.emailValue');
   const phone = t('contactPage.phoneValue');
 
@@ -21,8 +23,10 @@ export default function ContactScreen() {
           activeOpacity={0.7}
         >
           <Ionicons name="mail-outline" size={18} color={colors.text.secondary} />
-          <Text style={styles.cardLabel}>{t('contactPage.emailTitle')}</Text>
-          <Text style={styles.cardValue}>{email}</Text>
+          <Text style={[styles.cardLabel, { fontFamily: fontFamily.regular }]}>
+            {t('contactPage.emailTitle')}
+          </Text>
+          <Text style={[styles.cardValue, { fontFamily: fontFamily.medium }]}>{email}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.card}
@@ -30,19 +34,31 @@ export default function ContactScreen() {
           activeOpacity={0.7}
         >
           <Ionicons name="call-outline" size={18} color={colors.text.secondary} />
-          <Text style={styles.cardLabel}>{t('contactPage.phoneTitle')}</Text>
-          <Text style={styles.cardValue}>{phone}</Text>
+          <Text style={[styles.cardLabel, { fontFamily: fontFamily.regular }]}>
+            {t('contactPage.phoneTitle')}
+          </Text>
+          <Text style={[styles.cardValue, { fontFamily: fontFamily.medium }]}>{phone}</Text>
         </TouchableOpacity>
         <View style={styles.card}>
           <Ionicons name="location-outline" size={18} color={colors.text.secondary} />
-          <Text style={styles.cardLabel}>{t('contactPage.addressTitle')}</Text>
-          <Text style={styles.cardValue}>{t('contactPage.addressLine1')}</Text>
-          <Text style={styles.cardValue}>{t('contactPage.addressLine2')}</Text>
+          <Text style={[styles.cardLabel, { fontFamily: fontFamily.regular }]}>
+            {t('contactPage.addressTitle')}
+          </Text>
+          <Text style={[styles.cardValue, { fontFamily: fontFamily.medium }]}>
+            {t('contactPage.addressLine1')}
+          </Text>
+          <Text style={[styles.cardValue, { fontFamily: fontFamily.medium }]}>
+            {t('contactPage.addressLine2')}
+          </Text>
         </View>
         <View style={styles.card}>
           <Ionicons name="time-outline" size={18} color={colors.text.secondary} />
-          <Text style={styles.cardLabel}>{t('contactPage.hoursTitle')}</Text>
-          <Text style={styles.cardValue}>{t('contactPage.hoursValue')}</Text>
+          <Text style={[styles.cardLabel, { fontFamily: fontFamily.regular }]}>
+            {t('contactPage.hoursTitle')}
+          </Text>
+          <Text style={[styles.cardValue, { fontFamily: fontFamily.medium }]}>
+            {t('contactPage.hoursValue')}
+          </Text>
         </View>
       </View>
     </InfoScreen>

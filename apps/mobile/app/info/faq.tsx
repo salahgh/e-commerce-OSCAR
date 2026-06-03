@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { InfoScreen } from '../../src/components/info';
 import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
+import { useAppFont } from '../../src/hooks/useAppFont';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -21,6 +22,7 @@ export default function FaqScreen() {
   const { t } = useTranslation();
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   const [openIdx, setOpenIdx] = useState<number | null>(0);
 
   const qa = [
@@ -44,7 +46,7 @@ export default function FaqScreen() {
           return (
             <View key={i} style={styles.item}>
               <TouchableOpacity style={styles.head} onPress={() => toggle(i)} activeOpacity={0.7}>
-                <Text style={styles.q}>{item.q}</Text>
+                <Text style={[styles.q, { fontFamily: fontFamily.semiBold }]}>{item.q}</Text>
                 <Ionicons
                   name="chevron-down"
                   size={18}
@@ -52,7 +54,9 @@ export default function FaqScreen() {
                   style={{ transform: [{ rotate: open ? '180deg' : '0deg' }] }}
                 />
               </TouchableOpacity>
-              {open ? <Text style={styles.a}>{item.a}</Text> : null}
+              {open ? (
+                <Text style={[styles.a, { fontFamily: fontFamily.regular }]}>{item.a}</Text>
+              ) : null}
             </View>
           );
         })}

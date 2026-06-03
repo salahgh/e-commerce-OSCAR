@@ -4,6 +4,7 @@ import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { spacing, typography, makeThemedStyles } from '../../theme';
+import { useAppFont } from '../../hooks/useAppFont';
 
 interface InfoScreenProps {
   title: string;
@@ -20,20 +21,25 @@ export function InfoScreen({ title, intro, showContactCta = true, children }: In
   const { t } = useTranslation();
   const router = useRouter();
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
 
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title, headerBackTitle: '' }} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>{title}</Text>
-        {intro ? <Text style={styles.intro}>{intro}</Text> : null}
+        <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>{title}</Text>
+        {intro ? (
+          <Text style={[styles.intro, { fontFamily: fontFamily.regular }]}>{intro}</Text>
+        ) : null}
         <View style={styles.body}>{children}</View>
 
         {showContactCta && (
           <View style={styles.cta}>
-            <Text style={styles.ctaHeading}>{t('info.helpHeading')}</Text>
+            <Text style={[styles.ctaHeading, { fontFamily: fontFamily.regular }]}>
+              {t('info.helpHeading')}
+            </Text>
             <TouchableOpacity onPress={() => router.push('/info/contact' as any)}>
-              <Text style={styles.ctaLink}>
+              <Text style={[styles.ctaLink, { fontFamily: fontFamily.semiBold }]}>
                 {t('info.helpCta')} <Ionicons name="arrow-forward" size={14} />
               </Text>
             </TouchableOpacity>
@@ -46,9 +52,12 @@ export function InfoScreen({ title, intro, showContactCta = true, children }: In
 
 export function Section({ title, children }: { title?: string; children: React.ReactNode }) {
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
   return (
     <View style={styles.section}>
-      {title ? <Text style={styles.sectionTitle}>{title}</Text> : null}
+      {title ? (
+        <Text style={[styles.sectionTitle, { fontFamily: fontFamily.bold }]}>{title}</Text>
+      ) : null}
       {children}
     </View>
   );
@@ -56,17 +65,19 @@ export function Section({ title, children }: { title?: string; children: React.R
 
 export function Paragraph({ children }: { children: React.ReactNode }) {
   const styles = useStyles();
-  return <Text style={styles.paragraph}>{children}</Text>;
+  const { fontFamily } = useAppFont();
+  return <Text style={[styles.paragraph, { fontFamily: fontFamily.regular }]}>{children}</Text>;
 }
 
 export function Bullets({ items }: { items: string[] }) {
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
   return (
     <View style={styles.bullets}>
       {items.map((line, i) => (
         <View key={i} style={styles.bulletRow}>
-          <Text style={styles.bulletDot}>•</Text>
-          <Text style={styles.bulletText}>{line}</Text>
+          <Text style={[styles.bulletDot, { fontFamily: fontFamily.regular }]}>•</Text>
+          <Text style={[styles.bulletText, { fontFamily: fontFamily.regular }]}>{line}</Text>
         </View>
       ))}
     </View>
