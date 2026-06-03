@@ -13,3 +13,8 @@ export const theme = {
 export type Theme = typeof theme;
 
 export { colors, typography, fonts, textStyles, spacing };
+
+// ── Dark-mode foundation (M3d-1) ──
+export { darkColors, type ColorPalette } from './darkColors';
+export { palettes, getPalette } from './palettes';
+export { useThemeColors, makeThemedStyles } from './useThemedStyles';
