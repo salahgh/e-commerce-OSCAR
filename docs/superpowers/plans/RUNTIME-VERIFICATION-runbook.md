@@ -95,3 +95,41 @@ These cannot be unit-tested (native AppState/launch + Apollo write timing). Run 
 4. **First-ever add:** From an empty session (no active order), add one item — the line appears
    and survives a refetch (proves the `writeQuery` link replaced `refetchQueries`).
 5. **Logout hygiene:** Log out, then relaunch — the cart/storefront start clean (purged).
+
+## 7. M3d + M3e — Mobile dark mode & brand-font sweep (mobile `apps/mobile`)
+
+Both sweeps are statically verified (tsc 155 / lint 0 / 104 tests) but their **appearance** can only be confirmed on a device. One pass checks both: toggle dark, switch to Arabic, and sweep the screens. No backend needed for the UI itself (though product/cart data needs the shop-API from §1).
+
+### Setup
+```bash
+cd apps/mobile && npx expo start    # then open in Expo Go / a simulator
+```
+- **Dark mode:** Profile → Settings → Theme → toggle **Dark** (also try **System** with the OS in dark). The global chrome (status bar, nav) flips via `NavigationThemeBridge`.
+- **Arabic + RTL:** Profile → Settings → Language → **العربية**. The app applies `dir=rtl` and reloads.
+- Verify in **all three** language states: `fr` (default) and `en` should render in **Gabarito**; `ar` in **IBM Plex Sans Arabic**.
+
+### What to confirm per screen (sweep each area)
+For **dark**: page = near-black `#121212`, cards/sheets are *lighter* than the page (`#1E1E1E`), text is off-white, nothing stays light-on-light or dark-on-dark. For **fonts**: every label uses the brand font for the locale (no system-font fallback — Arabic should look like IBM Plex, not the OS default); weights look right (headings heavier than body).
+
+| Area (slice) | Dark check | Font check (esp. `ar`) |
+|---|---|---|
+| Tabs + tab bar, Home (M3d-2/M3e-2) | tab bar, cart badge, home rows flip | tab labels, section headers, product cards |
+| Products: PDP, listing, sheets (M3d-3/M3e-3) | PDP, filter/sort/size sheets, search bar | name/price/desc, size-guide table cells |
+| Checkout: steps, summary, address (M3d-4/M3e-4) | step indicator, order summary, wilaya picker | step labels, totals, address forms |
+| Auth (M3d-5/M3e-5) | login/register/verify/forgot screens | titles, inputs, helper text |
+| Orders: tab + detail (M3d-2,6/M3e-2,8) | order rows, status pills, detail timeline | order #, dates, status, section titles |
+| Profile + Info (M3d-8/M3e-6,7) | settings, edit, wishlist; contact/faq/size-guide | settings rows, FAQ Q/A, info paragraphs |
+| Cart: rows, mini-cart, swipe (M3d-11/M3e-8) | item rows, mini-cart sheet, swipe-delete | item names, prices, quantity, subtotal |
+| Shared UI: buttons/inputs/badges/modals/toasts (M3d-10/M3e-1) | exercise each primitive | button/chip/empty/error labels |
+| Onboarding / splash / error boundary (M3d-9) | slides, splash, trigger an error | error-boundary title/message/buttons |
+
+### Edge cases to specifically confirm (the sweep's judgment calls)
+- **Always-dark surfaces stay dark** in *light* mode too: the PDP image lightbox and "Out of Stock" overlay use `colors.white` (not `text.inverse`), so they must NOT flip to dark text.
+- **verify-phone error banner** (Auth → phone verify, trigger an error): in dark, the banner border is now a **muted brick-red `#7A3333`** (was a bright pink) on the dark red `errorLight` bg — confirm it reads as a subtle border, not a glaring hairline.
+- **Selected states** (Select dropdown option, size/variant chip in VariantPicker): the selected background is `secondaryLight` (`#3D3517` dark) — confirm the selected item is distinguishable from unselected.
+- **Kept-fixed decoratives**: onboarding's `#2C3E50` slide background, checkout confetti, the gold review star (`#F2C94C`) — these intentionally do NOT theme; confirm they look right in both modes.
+- **Emoji stay emoji** (NOT brand-font-wrapped): Settings language/theme flags (🇫🇷🇬🇧🇩🇿), ErrorState ⚠️/❌ — confirm they render as emoji glyphs.
+- **RTL** (`ar`): rows, back-arrows, and alignment mirror correctly; the brand Arabic font renders throughout.
+
+### Known NOT-themed / NOT-wired (excluded — not bugs)
+The 8 dead components (`components/orders` ×3, `components/navigation` ×2, `components/home` ×3 — unreachable, no screen imports them) and the 5 deferred payment surfaces (`app/payment/*`, `PaymentWebView`, `PaymentMethodSelector` — gated "coming soon", COD-only) are intentionally excluded from both sweeps. If reached, they may show light surfaces / system-font text — that's expected, pending the dead-code decision + the real CIB/BaridiMob gateway work.
