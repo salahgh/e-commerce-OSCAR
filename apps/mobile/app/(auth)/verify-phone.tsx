@@ -199,7 +199,7 @@ const useStyles = makeThemedStyles((colors) =>
       gap: spacing.md,
       backgroundColor: colors.errorLight,
       borderWidth: 1,
-      borderColor: colors.errorLight,
+      borderColor: colors.errorScale[2],
       borderRadius: 8,
       paddingHorizontal: spacing.lg,
       paddingVertical: spacing.md,
