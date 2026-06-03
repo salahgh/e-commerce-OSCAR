@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { wilayas } from '../../data/wilayas';
 import { FilterSheet } from '../products/FilterSheet';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 
 interface WilayaPickerProps {
   value: string; // wilaya code
@@ -12,8 +12,46 @@ interface WilayaPickerProps {
   error?: string;
 }
 
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    group: { gap: spacing.xs },
+    label: {
+      ...typography.styles.bodySmall,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+    },
+    required: { color: colors.error },
+    select: {
+      height: 48,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.lg,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    selectError: { borderColor: colors.error },
+    selectText: { ...typography.styles.body, color: colors.text.primary, flex: 1 },
+    placeholder: { color: colors.text.tertiary },
+    errorText: { ...typography.styles.caption, color: colors.error },
+    option: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+    },
+    optionText: { ...typography.styles.body, color: colors.text.primary },
+    optionTextActive: { color: colors.primary, fontWeight: typography.fontWeight.semiBold },
+  })
+);
+
 export const WilayaPicker: React.FC<WilayaPickerProps> = ({ value, onSelect, error }) => {
   const { t } = useTranslation();
+  const styles = useStyles();
+  const colors = useThemeColors();
   const [open, setOpen] = useState(false);
   const selectedName = wilayas.find((w) => w.code === value)?.name ?? '';
 
@@ -64,37 +102,3 @@ export const WilayaPicker: React.FC<WilayaPickerProps> = ({ value, onSelect, err
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  group: { gap: spacing.xs },
-  label: {
-    ...typography.styles.bodySmall,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  required: { color: colors.error },
-  select: {
-    height: 48,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  selectError: { borderColor: colors.error },
-  selectText: { ...typography.styles.body, color: colors.text.primary, flex: 1 },
-  placeholder: { color: colors.text.tertiary },
-  errorText: { ...typography.styles.caption, color: colors.error },
-  option: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  optionText: { ...typography.styles.body, color: colors.text.primary },
-  optionTextActive: { color: colors.primary, fontWeight: typography.fontWeight.semiBold },
-});

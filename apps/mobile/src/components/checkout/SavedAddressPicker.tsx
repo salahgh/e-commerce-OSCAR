@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import type { SavedAddress } from '../../utils/address';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 
 interface Props {
   addresses: SavedAddress[];
@@ -11,13 +11,50 @@ interface Props {
   onSelect: (a: SavedAddress) => void;
 }
 
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    wrap: { marginBottom: spacing.lg, gap: spacing.sm },
+    title: {
+      ...typography.styles.body,
+      fontWeight: typography.fontWeight.semiBold,
+      color: colors.text.primary,
+    },
+    row: { gap: spacing.sm, paddingRight: spacing.lg },
+    chip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      maxWidth: 220,
+      backgroundColor: colors.surface,
+      borderWidth: 2,
+      borderColor: colors.border,
+      borderRadius: 10,
+      padding: spacing.md,
+    },
+    chipSelected: { borderColor: colors.primary },
+    chipText: { flexShrink: 1 },
+    chipName: {
+      ...typography.styles.bodySmall,
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+    },
+    chipLine: { ...typography.styles.caption, color: colors.text.secondary },
+  })
+);
+
 export const SavedAddressPicker: React.FC<Props> = ({ addresses, selectedId, onSelect }) => {
   const { t } = useTranslation();
+  const styles = useStyles();
+  const colors = useThemeColors();
   if (addresses.length === 0) return null;
   return (
     <View style={styles.wrap}>
       <Text style={styles.title}>{t('address.useSaved', 'Use a saved address')}</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.row}
+      >
         {addresses.map((a) => {
           const selected = a.id === selectedId;
           return (
@@ -29,7 +66,9 @@ export const SavedAddressPicker: React.FC<Props> = ({ addresses, selectedId, onS
             >
               {selected && <Ionicons name="checkmark-circle" size={16} color={colors.primary} />}
               <View style={styles.chipText}>
-                <Text style={styles.chipName} numberOfLines={1}>{a.fullName}</Text>
+                <Text style={styles.chipName} numberOfLines={1}>
+                  {a.fullName}
+                </Text>
                 <Text style={styles.chipLine} numberOfLines={1}>
                   {a.streetLine1}
                   {a.province ? ` · ${a.province}` : ''}
@@ -42,24 +81,3 @@ export const SavedAddressPicker: React.FC<Props> = ({ addresses, selectedId, onS
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  wrap: { marginBottom: spacing.lg, gap: spacing.sm },
-  title: { ...typography.styles.body, fontWeight: typography.fontWeight.semiBold, color: colors.text.primary },
-  row: { gap: spacing.sm, paddingRight: spacing.lg },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    maxWidth: 220,
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: 10,
-    padding: spacing.md,
-  },
-  chipSelected: { borderColor: colors.primary },
-  chipText: { flexShrink: 1 },
-  chipName: { ...typography.styles.bodySmall, fontWeight: typography.fontWeight.medium, color: colors.text.primary },
-  chipLine: { ...typography.styles.caption, color: colors.text.secondary },
-});

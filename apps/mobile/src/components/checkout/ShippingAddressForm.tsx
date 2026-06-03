@@ -4,7 +4,7 @@ import { Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { Input, Button } from '../ui';
 import { WilayaPicker } from './WilayaPicker';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles } from '../../theme';
 import { makeShippingAddressSchema, shippingAddressSchema } from '../../utils/validation';
 
 export interface ShippingAddressFormValues {
@@ -38,6 +38,40 @@ const defaultInitialValues: ShippingAddressFormValues = {
   wilayaCode: '',
 };
 
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    header: {
+      marginBottom: spacing.lg,
+    },
+    title: {
+      ...typography.styles.h3,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.bold,
+      marginBottom: spacing.xs,
+    },
+    subtitle: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+    },
+    form: {
+      gap: spacing.md,
+    },
+    row: {
+      flexDirection: 'row',
+      gap: spacing.md,
+    },
+    halfWidth: {
+      flex: 1,
+    },
+    submitButton: {
+      marginTop: spacing.md,
+    },
+  })
+);
+
 export const ShippingAddressForm: React.FC<ShippingAddressFormProps> = ({
   initialValues,
   onSubmit,
@@ -47,6 +81,7 @@ export const ShippingAddressForm: React.FC<ShippingAddressFormProps> = ({
   validationSchema,
 }) => {
   const { t } = useTranslation();
+  const styles = useStyles();
 
   return (
     <KeyboardAvoidingView
@@ -68,7 +103,16 @@ export const ShippingAddressForm: React.FC<ShippingAddressFormProps> = ({
           validationSchema={validationSchema ?? shippingAddressSchema}
           onSubmit={onSubmit}
         >
-          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, setFieldValue, isValid }) => (
+          {({
+            values,
+            errors,
+            touched,
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            setFieldValue,
+            isValid,
+          }) => (
             <View style={styles.form}>
               {showEmail && (
                 <Input
@@ -175,35 +219,3 @@ export const ShippingAddressForm: React.FC<ShippingAddressFormProps> = ({
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    marginBottom: spacing.lg,
-  },
-  title: {
-    ...typography.styles.h3,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-  },
-  form: {
-    gap: spacing.md,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  halfWidth: {
-    flex: 1,
-  },
-  submitButton: {
-    marginTop: spacing.md,
-  },
-});

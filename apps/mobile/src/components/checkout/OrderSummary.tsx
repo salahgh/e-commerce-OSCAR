@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { CartItemData } from '../cart/CartItem';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 import { Divider } from '../ui';
 
 interface OrderSummaryProps {
@@ -14,6 +14,125 @@ interface OrderSummaryProps {
   showItems?: boolean;
 }
 
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: spacing.lg,
+      elevation: 2,
+      shadowColor: colors.text.primary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    },
+    title: {
+      ...typography.styles.h4,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.bold,
+      marginBottom: spacing.md,
+    },
+    itemsList: {
+      maxHeight: 200,
+      marginBottom: spacing.md,
+    },
+    item: {
+      flexDirection: 'row',
+      marginBottom: spacing.md,
+    },
+    itemImageContainer: {
+      width: 60,
+      height: 60,
+      borderRadius: 8,
+      overflow: 'hidden',
+      marginRight: spacing.md,
+    },
+    itemImage: {
+      width: '100%',
+      height: '100%',
+    },
+    placeholderImage: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: colors.border,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    itemDetails: {
+      flex: 1,
+    },
+    itemName: {
+      ...typography.styles.bodySmall,
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+      marginBottom: spacing.xs,
+    },
+    itemAttributes: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      marginBottom: spacing.xs,
+    },
+    itemAttribute: {
+      ...typography.styles.caption,
+      color: colors.text.secondary,
+    },
+    itemPriceRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    itemQuantity: {
+      ...typography.styles.caption,
+      color: colors.text.secondary,
+    },
+    itemPrice: {
+      ...typography.styles.bodySmall,
+      fontWeight: typography.fontWeight.semiBold,
+      color: colors.text.primary,
+    },
+    itemCount: {
+      paddingVertical: spacing.md,
+    },
+    itemCountText: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+    },
+    divider: {
+      marginVertical: spacing.md,
+    },
+    summaryRows: {
+      gap: spacing.sm,
+    },
+    summaryRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    summaryLabel: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+    },
+    summaryValue: {
+      ...typography.styles.body,
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+    },
+    totalRow: {
+      marginTop: spacing.sm,
+    },
+    totalLabel: {
+      ...typography.styles.h4,
+      fontWeight: typography.fontWeight.bold,
+      color: colors.text.primary,
+    },
+    totalValue: {
+      ...typography.styles.h4,
+      fontWeight: typography.fontWeight.bold,
+      color: colors.primary,
+    },
+  })
+);
+
 export const OrderSummary: React.FC<OrderSummaryProps> = ({
   items,
   subtotal,
@@ -22,6 +141,8 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
   showItems = true,
 }) => {
   const { t } = useTranslation();
+  const styles = useStyles();
+  const colors = useThemeColors();
 
   return (
     <View style={styles.container}>
@@ -105,120 +226,3 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.lg,
-    elevation: 2,
-    shadowColor: colors.text.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  title: {
-    ...typography.styles.h4,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-    marginBottom: spacing.md,
-  },
-  itemsList: {
-    maxHeight: 200,
-    marginBottom: spacing.md,
-  },
-  item: {
-    flexDirection: 'row',
-    marginBottom: spacing.md,
-  },
-  itemImageContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    overflow: 'hidden',
-    marginRight: spacing.md,
-  },
-  itemImage: {
-    width: '100%',
-    height: '100%',
-  },
-  placeholderImage: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: colors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  itemDetails: {
-    flex: 1,
-  },
-  itemName: {
-    ...typography.styles.bodySmall,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  itemAttributes: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.xs,
-  },
-  itemAttribute: {
-    ...typography.styles.caption,
-    color: colors.text.secondary,
-  },
-  itemPriceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  itemQuantity: {
-    ...typography.styles.caption,
-    color: colors.text.secondary,
-  },
-  itemPrice: {
-    ...typography.styles.bodySmall,
-    fontWeight: typography.fontWeight.semiBold,
-    color: colors.text.primary,
-  },
-  itemCount: {
-    paddingVertical: spacing.md,
-  },
-  itemCountText: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-  },
-  divider: {
-    marginVertical: spacing.md,
-  },
-  summaryRows: {
-    gap: spacing.sm,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  summaryLabel: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-  },
-  summaryValue: {
-    ...typography.styles.body,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-  },
-  totalRow: {
-    marginTop: spacing.sm,
-  },
-  totalLabel: {
-    ...typography.styles.h4,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-  },
-  totalValue: {
-    ...typography.styles.h4,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.primary,
-  },
-});
