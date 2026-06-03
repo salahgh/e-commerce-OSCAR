@@ -14,6 +14,7 @@ import {
   type ColorPalette,
 } from '../../src/theme';
 import { formatPrice } from '../../src/utils/vendureAdapters';
+import { useAppFont } from '../../src/hooks/useAppFont';
 
 // Map Vendure order states to display info (palette-aware so colors theme correctly)
 function getOrderStateInfo(state: string, colors: ColorPalette) {
@@ -84,6 +85,7 @@ function OrderItem({ order, onPress }: OrderItemProps) {
   const { t } = useTranslation();
   const colors = useThemeColors();
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
   const stateInfo = getOrderStateInfo(order.state, colors);
 
   // Get first product image
@@ -95,8 +97,10 @@ function OrderItem({ order, onPress }: OrderItemProps) {
     <TouchableOpacity style={styles.orderCard} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.orderHeader}>
         <View>
-          <Text style={styles.orderNumber}>#{order.code}</Text>
-          <Text style={styles.orderDate}>{formatDate(order.createdAt)}</Text>
+          <Text style={[styles.orderNumber, { fontFamily: fontFamily.bold }]}>#{order.code}</Text>
+          <Text style={[styles.orderDate, { fontFamily: fontFamily.regular }]}>
+            {formatDate(order.createdAt)}
+          </Text>
         </View>
         <Badge
           label={stateInfo.label}
@@ -109,21 +113,29 @@ function OrderItem({ order, onPress }: OrderItemProps) {
       <View style={styles.orderDetails}>
         <View style={styles.orderItems}>
           <Ionicons name="cube-outline" size={16} color={colors.text.secondary} />
-          <Text style={styles.orderItemsText}>
+          <Text style={[styles.orderItemsText, { fontFamily: fontFamily.regular }]}>
             {t('orders.itemCount', '{{count}} items', { count: order.totalQuantity })}
           </Text>
         </View>
 
         <View style={styles.orderTotal}>
-          <Text style={styles.orderTotalLabel}>{t('orders.total', 'Total')}:</Text>
-          <Text style={styles.orderTotalValue}>{formatPrice(order.totalWithTax)} DZD</Text>
+          <Text style={[styles.orderTotalLabel, { fontFamily: fontFamily.regular }]}>
+            {t('orders.total', 'Total')}:
+          </Text>
+          <Text style={[styles.orderTotalValue, { fontFamily: fontFamily.bold }]}>
+            {formatPrice(order.totalWithTax)} DZD
+          </Text>
         </View>
       </View>
 
       <View style={styles.orderFooter}>
         <View style={styles.statusIndicator}>
           <Ionicons name={stateInfo.icon as any} size={18} color={stateInfo.color} />
-          <Text style={[styles.statusText, { color: stateInfo.color }]}>{stateInfo.label}</Text>
+          <Text
+            style={[styles.statusText, { color: stateInfo.color, fontFamily: fontFamily.medium }]}
+          >
+            {stateInfo.label}
+          </Text>
         </View>
         <Ionicons name="chevron-forward" size={20} color={colors.text.tertiary} />
       </View>
@@ -136,6 +148,7 @@ export default function OrdersScreen() {
   const { isAuthenticated } = useAuth();
   const colors = useThemeColors();
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
   const [refreshing, setRefreshing] = useState(false);
 
   const { data, loading, error, refetch } = useGetMyOrdersQuery({
@@ -167,19 +180,25 @@ export default function OrdersScreen() {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>{t('orders.title', 'My Orders')}</Text>
-          <Text style={styles.headerSubtitle}>
+          <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
+            {t('orders.title', 'My Orders')}
+          </Text>
+          <Text style={[styles.headerSubtitle, { fontFamily: fontFamily.regular }]}>
             {t('orders.subtitle', 'Track and manage your orders')}
           </Text>
         </View>
         <View style={styles.authPrompt}>
           <Ionicons name="lock-closed-outline" size={64} color={colors.text.tertiary} />
-          <Text style={styles.authTitle}>{t('orders.loginRequired', 'Login Required')}</Text>
-          <Text style={styles.authMessage}>
+          <Text style={[styles.authTitle, { fontFamily: fontFamily.bold }]}>
+            {t('orders.loginRequired', 'Login Required')}
+          </Text>
+          <Text style={[styles.authMessage, { fontFamily: fontFamily.regular }]}>
             {t('orders.loginMessage', 'Please log in to view your orders')}
           </Text>
           <TouchableOpacity style={styles.loginButton} onPress={() => router.push('/(auth)/login')}>
-            <Text style={styles.loginButtonText}>{t('auth.login', 'Log In')}</Text>
+            <Text style={[styles.loginButtonText, { fontFamily: fontFamily.semiBold }]}>
+              {t('auth.login', 'Log In')}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -190,8 +209,10 @@ export default function OrdersScreen() {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>{t('orders.title', 'My Orders')}</Text>
-          <Text style={styles.headerSubtitle}>
+          <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
+            {t('orders.title', 'My Orders')}
+          </Text>
+          <Text style={[styles.headerSubtitle, { fontFamily: fontFamily.regular }]}>
             {t('orders.subtitle', 'Track and manage your orders')}
           </Text>
         </View>
@@ -204,7 +225,9 @@ export default function OrdersScreen() {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>{t('orders.title', 'My Orders')}</Text>
+          <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
+            {t('orders.title', 'My Orders')}
+          </Text>
         </View>
         <ErrorState
           title={t('orders.errorTitle', 'Failed to Load Orders')}
@@ -221,8 +244,10 @@ export default function OrdersScreen() {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>{t('orders.title', 'My Orders')}</Text>
-          <Text style={styles.headerSubtitle}>
+          <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
+            {t('orders.title', 'My Orders')}
+          </Text>
+          <Text style={[styles.headerSubtitle, { fontFamily: fontFamily.regular }]}>
             {t('orders.subtitle', 'Track and manage your orders')}
           </Text>
         </View>
@@ -241,8 +266,10 @@ export default function OrdersScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>{t('orders.title', 'My Orders')}</Text>
-        <Text style={styles.headerSubtitle}>
+        <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
+          {t('orders.title', 'My Orders')}
+        </Text>
+        <Text style={[styles.headerSubtitle, { fontFamily: fontFamily.regular }]}>
           {t('orders.orderCount', '{{count}} orders', {
             count: data?.activeCustomer?.orders?.totalItems || orders.length,
           })}

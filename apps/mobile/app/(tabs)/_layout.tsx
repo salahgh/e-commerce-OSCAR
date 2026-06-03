@@ -6,12 +6,14 @@ import { useTranslation } from 'react-i18next';
 
 import { typography, makeThemedStyles, useThemeColors } from '@/src/theme';
 import { useCart } from '@/src/contexts/CartContext';
+import { useAppFont } from '../../src/hooks/useAppFont';
 
 export default function TabLayout() {
   const { t } = useTranslation();
   const { itemCount } = useCart();
   const colors = useThemeColors();
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
 
   return (
     <Tabs
@@ -61,7 +63,9 @@ export default function TabLayout() {
               <Ionicons name={focused ? 'cart' : 'cart-outline'} size={24} color={color} />
               {itemCount > 0 ? (
                 <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{itemCount > 99 ? '99+' : itemCount}</Text>
+                  <Text style={[styles.badgeText, { fontFamily: fontFamily.bold }]}>
+                    {itemCount > 99 ? '99+' : itemCount}
+                  </Text>
                 </View>
               ) : null}
             </View>
