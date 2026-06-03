@@ -8,8 +8,8 @@ import {
 import type { Wilaya } from '../../data/wilayas';
 
 const WILAYAS = [
-  { code: '16', name: 'Alger', nameAr: '', shippingZone: 1, communes: [] },
-  { code: '31', name: 'Oran', nameAr: '', shippingZone: 2, communes: [] },
+  { code: '16', name: 'Alger', nameAr: 'الجزائر', shippingZone: 1, communes: [] },
+  { code: '31', name: 'Oran', nameAr: 'وهران', shippingZone: 2, communes: [] },
 ] as unknown as Wilaya[];
 
 const FORM = {
@@ -41,6 +41,15 @@ describe('resolveWilayaCode', () => {
   });
   it('returns empty string for an unknown province', () => {
     expect(resolveWilayaCode('Nowhere', WILAYAS)).toBe('');
+  });
+  it('matches the Arabic wilaya name (non-app-created addresses)', () => {
+    expect(resolveWilayaCode('الجزائر', WILAYAS)).toBe('16');
+  });
+  it('matches case-insensitively and trims surrounding whitespace', () => {
+    expect(resolveWilayaCode('  alger ', WILAYAS)).toBe('16');
+  });
+  it('returns empty string for a blank province', () => {
+    expect(resolveWilayaCode('   ', WILAYAS)).toBe('');
   });
 });
 

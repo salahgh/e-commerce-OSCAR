@@ -37,9 +37,22 @@ export interface SavedAddress {
   defaultShippingAddress?: boolean | null;
 }
 
-/** Reverse of resolveWilayaName: province display name -> wilaya code ('' if unknown). */
+/**
+ * Reverse of resolveWilayaName: province display name -> wilaya code ('' if unknown).
+ * Matches the French `name` OR Arabic `nameAr`, case-insensitively and trimmed, so a
+ * non-app-created address (e.g. saved via the web with the Arabic province, or with
+ * casing/whitespace variance) still resolves its wilaya instead of dropping the selection.
+ */
 export function resolveWilayaCode(provinceName: string, wilayas: Wilaya[]): string {
-  return wilayas.find((w) => w.name === provinceName)?.code ?? '';
+  const needle = provinceName.trim().toLowerCase();
+  if (!needle) return '';
+  return (
+    wilayas.find((w) => {
+      const name = w.name.trim().toLowerCase();
+      const nameAr = (w.nameAr ?? '').trim().toLowerCase();
+      return name === needle || (nameAr !== '' && nameAr === needle);
+    })?.code ?? ''
+  );
 }
 
 export function buildCreateAddressInput(values: AddressFormValues, wilayas: Wilaya[]): CreateAddressInputShape {
