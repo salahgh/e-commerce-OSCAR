@@ -1,22 +1,17 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  View,
-  StyleSheet,
-  Animated,
-  StatusBar, Text,
-} from 'react-native';
+import { View, StyleSheet, Animated, StatusBar, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, typography } from '../src/theme';
+import { spacing, typography, makeThemedStyles } from '../src/theme';
 import Logo from '../assets/images/logooscarsvg1.svg';
 
 const ONBOARDING_KEY = '@oscar_onboarding_complete';
 
 export default function SplashScreen() {
-
   const router = useRouter();
   const { t } = useTranslation();
+  const styles = useStyles();
 
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const logoScale = useRef(new Animated.Value(0.8)).current;
@@ -82,9 +77,8 @@ export default function SplashScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.surface} />
-      <View>
-      </View>
+      <StatusBar barStyle="dark-content" />
+      <View></View>
       <Animated.View style={[styles.content, { opacity: exitOpacity }]}>
         {/* Logo */}
         <Animated.View
@@ -108,28 +102,30 @@ export default function SplashScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  content: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing['2xl'],
-  },
-  logoContainer: {
-    width: 206,
-    height: 158,
-  },
-  tagline: {
-    ...typography.styles.h4,
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    width: 315,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    content: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing['2xl'],
+    },
+    logoContainer: {
+      width: 206,
+      height: 158,
+    },
+    tagline: {
+      ...typography.styles.h4,
+      fontSize: typography.fontSize.xl,
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.secondary,
+      textAlign: 'center',
+      width: 315,
+    },
+  })
+);

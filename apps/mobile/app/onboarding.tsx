@@ -17,7 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, typography } from '../src/theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../src/theme';
 import { Button } from '../src/components/ui';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -36,6 +36,8 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const styles = useStyles();
+  const colors = useThemeColors();
 
   const slides: OnboardingSlide[] = [
     {
@@ -185,11 +187,7 @@ export default function OnboardingScreen() {
           });
 
           return (
-            <TouchableOpacity
-              key={index}
-              onPress={() => goToSlide(index)}
-              activeOpacity={0.8}
-            >
+            <TouchableOpacity key={index} onPress={() => goToSlide(index)} activeOpacity={0.8}>
               <Animated.View
                 style={[
                   styles.dot,
@@ -231,10 +229,9 @@ export default function OnboardingScreen() {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         bounces={false}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: false }
-        )}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+          useNativeDriver: false,
+        })}
         onMomentumScrollEnd={handleScroll}
         scrollEventThrottle={16}
       />
@@ -256,11 +253,7 @@ export default function OnboardingScreen() {
               textStyle={styles.getStartedButtonText}
             />
           ) : (
-            <TouchableOpacity
-              style={styles.nextButton}
-              onPress={handleNext}
-              activeOpacity={0.8}
-            >
+            <TouchableOpacity style={styles.nextButton} onPress={handleNext} activeOpacity={0.8}>
               <Ionicons name="arrow-forward" size={24} color={colors.primary} />
             </TouchableOpacity>
           )}
@@ -270,93 +263,95 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  skipButton: {
-    position: 'absolute',
-    right: spacing.lg,
-    zIndex: 10,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-  },
-  skipText: {
-    fontSize: typography.fontSize.md,
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontWeight: typography.fontWeight.medium,
-  },
-  slide: {
-    width: SCREEN_WIDTH,
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing['2xl'],
-  },
-  slideContent: {
-    alignItems: 'center',
-    maxWidth: 320,
-  },
-  iconContainer: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing['4xl'],
-  },
-  slideTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: colors.surface,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-  },
-  slideDescription: {
-    fontSize: typography.fontSize.md,
-    color: 'rgba(255, 255, 255, 0.85)',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  bottomContainer: {
-    paddingHorizontal: spacing['2xl'],
-    paddingTop: spacing.xl,
-  },
-  paginationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing['2xl'],
-  },
-  dot: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.surface,
-    marginHorizontal: 4,
-  },
-  buttonContainer: {
-    alignItems: 'center',
-  },
-  nextButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  getStartedButton: {
-    backgroundColor: colors.surface,
-    paddingVertical: spacing.lg,
-  },
-  getStartedButtonText: {
-    color: colors.primary,
-    fontWeight: 'bold',
-    fontSize: typography.fontSize.lg,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    skipButton: {
+      position: 'absolute',
+      right: spacing.lg,
+      zIndex: 10,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+    },
+    skipText: {
+      fontSize: typography.fontSize.md,
+      color: 'rgba(255, 255, 255, 0.8)',
+      fontWeight: typography.fontWeight.medium,
+    },
+    slide: {
+      width: SCREEN_WIDTH,
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: spacing['2xl'],
+    },
+    slideContent: {
+      alignItems: 'center',
+      maxWidth: 320,
+    },
+    iconContainer: {
+      width: 180,
+      height: 180,
+      borderRadius: 90,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: spacing['4xl'],
+    },
+    slideTitle: {
+      fontSize: 32,
+      fontWeight: 'bold',
+      color: colors.surface,
+      textAlign: 'center',
+      marginBottom: spacing.lg,
+    },
+    slideDescription: {
+      fontSize: typography.fontSize.md,
+      color: 'rgba(255, 255, 255, 0.85)',
+      textAlign: 'center',
+      lineHeight: 24,
+    },
+    bottomContainer: {
+      paddingHorizontal: spacing['2xl'],
+      paddingTop: spacing.xl,
+    },
+    paginationContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: spacing['2xl'],
+    },
+    dot: {
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.surface,
+      marginHorizontal: 4,
+    },
+    buttonContainer: {
+      alignItems: 'center',
+    },
+    nextButton: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      backgroundColor: colors.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    getStartedButton: {
+      backgroundColor: colors.surface,
+      paddingVertical: spacing.lg,
+    },
+    getStartedButtonText: {
+      color: colors.primary,
+      fontWeight: 'bold',
+      fontSize: typography.fontSize.lg,
+    },
+  })
+);
