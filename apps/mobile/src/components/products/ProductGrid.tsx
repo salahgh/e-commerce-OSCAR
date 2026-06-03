@@ -1,9 +1,16 @@
 import React from 'react';
-import { View, FlatList, StyleSheet, ActivityIndicator, RefreshControl, Dimensions } from 'react-native';
+import {
+  View,
+  FlatList,
+  StyleSheet,
+  ActivityIndicator,
+  RefreshControl,
+  Dimensions,
+} from 'react-native';
 import { SimpleProduct } from './ProductCard';
 import { ProductCardFigma, FigmaProduct } from '../home/ProductCardFigma';
 import { EmptyState, LoadingSpinner } from '../ui';
-import { colors, spacing } from '../../theme';
+import { spacing, useThemeColors } from '../../theme';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -49,6 +56,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   onProductPress,
 }) => {
   const cardWidth = (SCREEN_WIDTH - spacing.md * 2 - spacing.xs * (numColumns - 1)) / numColumns;
+  const colors = useThemeColors();
 
   const renderProduct = ({ item }: { item: SimpleProduct }) => {
     const figmaProduct = toFigmaProduct(item);

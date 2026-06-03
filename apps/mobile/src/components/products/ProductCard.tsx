@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles } from '../../theme';
 
 export interface SimpleProduct {
   id: string;
@@ -22,6 +22,7 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
   const router = useRouter();
+  const styles = useStyles();
 
   const handlePress = () => {
     if (onPress) {
@@ -70,71 +71,73 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
   );
 };
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: spacing.md,
-    elevation: 2,
-    shadowColor: colors.text.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  imageContainer: {
-    width: '100%',
-    height: 200,
-    position: 'relative',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-  },
-  placeholderImage: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: colors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderText: {
-    ...typography.styles.bodySmall,
-    color: colors.text.tertiary,
-  },
-  stockOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: colors.overlayDark,
-    padding: spacing.sm,
-    alignItems: 'center',
-  },
-  stockText: {
-    ...typography.styles.bodySmall,
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.semiBold,
-  },
-  info: {
-    padding: spacing.md,
-  },
-  name: {
-    ...typography.styles.body,
-    fontWeight: typography.fontWeight.semiBold,
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-    minHeight: 40,
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.xs,
-  },
-  price: {
-    ...typography.styles.h4,
-    color: colors.primary,
-    fontWeight: typography.fontWeight.bold,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      overflow: 'hidden',
+      marginBottom: spacing.md,
+      elevation: 2,
+      shadowColor: colors.text.primary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    },
+    imageContainer: {
+      width: '100%',
+      height: 200,
+      position: 'relative',
+    },
+    image: {
+      width: '100%',
+      height: '100%',
+    },
+    placeholderImage: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: colors.border,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    placeholderText: {
+      ...typography.styles.bodySmall,
+      color: colors.text.tertiary,
+    },
+    stockOverlay: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: colors.overlayDark,
+      padding: spacing.sm,
+      alignItems: 'center',
+    },
+    stockText: {
+      ...typography.styles.bodySmall,
+      color: colors.white,
+      fontWeight: typography.fontWeight.semiBold,
+    },
+    info: {
+      padding: spacing.md,
+    },
+    name: {
+      ...typography.styles.body,
+      fontWeight: typography.fontWeight.semiBold,
+      color: colors.text.primary,
+      marginBottom: spacing.sm,
+      minHeight: 40,
+    },
+    priceContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginBottom: spacing.xs,
+    },
+    price: {
+      ...typography.styles.h4,
+      color: colors.primary,
+      fontWeight: typography.fontWeight.bold,
+    },
+  })
+);

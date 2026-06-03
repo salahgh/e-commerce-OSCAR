@@ -8,7 +8,7 @@ import {
   ScrollView,
   ViewStyle,
 } from 'react-native';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles } from '../../theme';
 
 export interface Variant {
   id: string;
@@ -43,6 +43,7 @@ export const VariantPicker: React.FC<VariantPickerProps> = ({
   showStock = false,
   showPrice = false,
 }) => {
+  const styles = useStyles();
   const renderColorVariant = (variant: Variant) => {
     const isSelected = selectedVariantId === variant.id;
     const isDisabled = variant.disabled || (variant.stock !== undefined && variant.stock <= 0);
@@ -129,12 +130,7 @@ export const VariantPicker: React.FC<VariantPickerProps> = ({
           {variant.name}
         </Text>
         {showPrice && variant.price !== undefined && (
-          <Text
-            style={[
-              styles.variantPrice,
-              isSelected && styles.variantPriceSelected,
-            ]}
-          >
+          <Text style={[styles.variantPrice, isSelected && styles.variantPriceSelected]}>
             {variant.price.toFixed(2)} DZD
           </Text>
         )}
@@ -235,154 +231,156 @@ export const MultiVariantPicker: React.FC<MultiVariantPickerProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.lg,
-  },
-  groupName: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.semiBold,
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-    textTransform: 'uppercase',
-  },
-  variantsContainer: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      marginBottom: spacing.lg,
+    },
+    groupName: {
+      fontSize: typography.fontSize.sm,
+      fontWeight: typography.fontWeight.semiBold,
+      color: colors.text.primary,
+      marginBottom: spacing.sm,
+      textTransform: 'uppercase',
+    },
+    variantsContainer: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      paddingVertical: spacing.xs,
+    },
 
-  // Color variant styles
-  colorVariant: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: colors.transparent,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    padding: 2,
-  },
-  colorVariantSelected: {
-    borderColor: colors.primary,
-  },
-  colorCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  colorCircleSelected: {
-    borderWidth: 0,
-  },
-  crossLine: {
-    position: 'absolute',
-    width: 40,
-    height: 2,
-    backgroundColor: colors.error,
-    transform: [{ rotate: '45deg' }],
-  },
+    // Color variant styles
+    colorVariant: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      borderWidth: 2,
+      borderColor: colors.transparent,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      padding: 2,
+    },
+    colorVariantSelected: {
+      borderColor: colors.primary,
+    },
+    colorCircle: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    colorCircleSelected: {
+      borderWidth: 0,
+    },
+    crossLine: {
+      position: 'absolute',
+      width: 40,
+      height: 2,
+      backgroundColor: colors.error,
+      transform: [{ rotate: '45deg' }],
+    },
 
-  // Size variant styles
-  sizeVariant: {
-    minWidth: 48,
-    height: 44,
-    borderRadius: spacing.borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.surface,
-  },
-  sizeVariantSelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primary,
-  },
-  sizeText: {
-    fontSize: typography.fontSize.md,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-  },
-  sizeTextSelected: {
-    color: colors.text.inverse,
-  },
-  stockWarning: {
-    fontSize: typography.fontSize.xs,
-    color: colors.warning,
-    marginTop: 2,
-  },
+    // Size variant styles
+    sizeVariant: {
+      minWidth: 48,
+      height: 44,
+      borderRadius: spacing.borderRadius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: spacing.md,
+      backgroundColor: colors.surface,
+    },
+    sizeVariantSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primary,
+    },
+    sizeText: {
+      fontSize: typography.fontSize.md,
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+    },
+    sizeTextSelected: {
+      color: colors.text.inverse,
+    },
+    stockWarning: {
+      fontSize: typography.fontSize.xs,
+      color: colors.warning,
+      marginTop: 2,
+    },
 
-  // Text variant styles
-  textVariant: {
-    borderRadius: spacing.borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-  },
-  textVariantSelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.secondaryLight,
-  },
-  textVariantLabel: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-  },
-  textVariantLabelSelected: {
-    color: colors.primary,
-  },
-  variantPrice: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.secondary,
-    marginTop: spacing.xs,
-  },
-  variantPriceSelected: {
-    color: colors.primary,
-  },
+    // Text variant styles
+    textVariant: {
+      borderRadius: spacing.borderRadius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+    },
+    textVariantSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.secondaryLight,
+    },
+    textVariantLabel: {
+      fontSize: typography.fontSize.sm,
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+    },
+    textVariantLabelSelected: {
+      color: colors.primary,
+    },
+    variantPrice: {
+      fontSize: typography.fontSize.xs,
+      color: colors.text.secondary,
+      marginTop: spacing.xs,
+    },
+    variantPriceSelected: {
+      color: colors.primary,
+    },
 
-  // Image variant styles
-  imageVariant: {
-    width: 64,
-    height: 64,
-    borderRadius: spacing.borderRadius.md,
-    borderWidth: 2,
-    borderColor: colors.transparent,
-    overflow: 'hidden',
-  },
-  imageVariantSelected: {
-    borderColor: colors.primary,
-  },
-  variantImage: {
-    width: '100%',
-    height: '100%',
-  },
-  placeholderImage: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: colors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.tertiary,
-  },
-  imageOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.overlayWhiteLight,
-  },
+    // Image variant styles
+    imageVariant: {
+      width: 64,
+      height: 64,
+      borderRadius: spacing.borderRadius.md,
+      borderWidth: 2,
+      borderColor: colors.transparent,
+      overflow: 'hidden',
+    },
+    imageVariantSelected: {
+      borderColor: colors.primary,
+    },
+    variantImage: {
+      width: '100%',
+      height: '100%',
+    },
+    placeholderImage: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: colors.border,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    placeholderText: {
+      fontSize: typography.fontSize.xs,
+      color: colors.text.tertiary,
+    },
+    imageOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: colors.overlayWhiteLight,
+    },
 
-  // Disabled styles
-  variantDisabled: {
-    opacity: 0.5,
-  },
-  textDisabled: {
-    color: colors.text.disabled,
-  },
-});
+    // Disabled styles
+    variantDisabled: {
+      opacity: 0.5,
+    },
+    textDisabled: {
+      color: colors.text.disabled,
+    },
+  })
+);
