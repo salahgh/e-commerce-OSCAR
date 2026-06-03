@@ -20,7 +20,7 @@ import {
   addressToFormValues,
 } from '../../src/utils/address';
 import { wilayas } from '../../src/data/wilayas';
-import { colors, spacing } from '../../src/theme';
+import { spacing, makeThemedStyles, useThemeColors } from '../../src/theme';
 
 type Mode = { kind: 'list' } | { kind: 'create' } | { kind: 'edit'; address: SavedAddress };
 
@@ -28,6 +28,8 @@ export default function AddressesScreen() {
   const { t } = useTranslation();
   const toast = useToast();
   const [mode, setMode] = useState<Mode>({ kind: 'list' });
+  const colors = useThemeColors();
+  const styles = useStyles();
 
   const { data, loading } = useActiveCustomerQuery({ fetchPolicy: 'cache-and-network' });
   const [createAddress, { loading: creating }] = useCreateCustomerAddressMutation();
@@ -94,8 +96,8 @@ export default function AddressesScreen() {
     mode.kind === 'create'
       ? t('address.addTitle', 'Add address')
       : mode.kind === 'edit'
-      ? t('address.editTitle', 'Edit address')
-      : t('address.title', 'My Addresses');
+        ? t('address.editTitle', 'Edit address')
+        : t('address.title', 'My Addresses');
 
   return (
     <View style={styles.container}>
@@ -110,7 +112,10 @@ export default function AddressesScreen() {
             mode.kind === 'list'
               ? undefined
               : () => (
-                  <TouchableOpacity onPress={() => setMode({ kind: 'list' })} accessibilityLabel={t('common.back', 'Back')}>
+                  <TouchableOpacity
+                    onPress={() => setMode({ kind: 'list' })}
+                    accessibilityLabel={t('common.back', 'Back')}
+                  >
                     <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
                   </TouchableOpacity>
                 ),
@@ -119,10 +124,14 @@ export default function AddressesScreen() {
 
       {mode.kind !== 'list' ? (
         <AddressForm
-          initialValues={mode.kind === 'edit' ? addressToFormValues(mode.address, wilayas) : undefined}
+          initialValues={
+            mode.kind === 'edit' ? addressToFormValues(mode.address, wilayas) : undefined
+          }
           onSubmit={handleSubmit}
           submitting={creating || updating}
-          submitLabel={mode.kind === 'edit' ? t('common.save', 'Save') : t('address.add', 'Add address')}
+          submitLabel={
+            mode.kind === 'edit' ? t('common.save', 'Save') : t('address.add', 'Add address')
+          }
         />
       ) : loading && addresses.length === 0 ? (
         <LoadingSpinner />
@@ -133,7 +142,11 @@ export default function AddressesScreen() {
             title={t('address.emptyTitle', 'No saved addresses')}
             message={t('address.emptyMessage', 'Add an address to speed up checkout.')}
           />
-          <Button title={t('address.add', 'Add address')} onPress={() => setMode({ kind: 'create' })} style={styles.addBtn} />
+          <Button
+            title={t('address.add', 'Add address')}
+            onPress={() => setMode({ kind: 'create' })}
+            style={styles.addBtn}
+          />
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.list}>
@@ -159,9 +172,17 @@ export default function AddressesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  list: { padding: spacing.lg, gap: spacing.md },
-  emptyWrap: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl, gap: spacing.lg },
-  addBtn: { marginTop: spacing.md, minWidth: 200 },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    list: { padding: spacing.lg, gap: spacing.md },
+    emptyWrap: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: spacing.xl,
+      gap: spacing.lg,
+    },
+    addBtn: { marginTop: spacing.md, minWidth: 200 },
+  })
+);
