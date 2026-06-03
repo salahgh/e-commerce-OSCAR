@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '../ui';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
+import { useAppFont } from '../../hooks/useAppFont';
 
 interface ProfileHeaderProps {
   firstName: string;
@@ -25,6 +26,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const { t } = useTranslation();
   const colors = useThemeColors();
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
 
   const fullName = `${firstName} ${lastName}`;
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -36,16 +38,16 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
       {/* User Info */}
       <View style={styles.info}>
-        <Text style={styles.name}>{fullName}</Text>
+        <Text style={[styles.name, { fontFamily: fontFamily.bold }]}>{fullName}</Text>
         <View style={styles.contactInfo}>
           <View style={styles.contactRow}>
             <Ionicons name="mail-outline" size={16} color={colors.text.secondary} />
-            <Text style={styles.contactText}>{email}</Text>
+            <Text style={[styles.contactText, { fontFamily: fontFamily.regular }]}>{email}</Text>
           </View>
           {phone && (
             <View style={styles.contactRow}>
               <Ionicons name="call-outline" size={16} color={colors.text.secondary} />
-              <Text style={styles.contactText}>{phone}</Text>
+              <Text style={[styles.contactText, { fontFamily: fontFamily.regular }]}>{phone}</Text>
             </View>
           )}
         </View>

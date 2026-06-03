@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { SettingsItem } from '../../src/components/profile';
 import { useThemeMode, ThemeMode } from '../../src/contexts/ThemeContext';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
+import { useAppFont } from '../../src/hooks/useAppFont';
 
 export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
@@ -13,6 +14,7 @@ export default function SettingsScreen() {
   const { mode: themeMode, setMode: setThemeMode } = useThemeMode();
   const colors = useThemeColors();
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
   const themeOptions: Array<{ value: ThemeMode; labelKey: string }> = [
     { value: 'system', labelKey: 'theme.system' },
     { value: 'light', labelKey: 'theme.light' },
@@ -41,15 +43,19 @@ export default function SettingsScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('profile.settings', 'Settings')}</Text>
+        <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
+          {t('profile.settings', 'Settings')}
+        </Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Language Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('profile.language', 'Language')}</Text>
-          <Text style={styles.sectionSubtitle}>
+          <Text style={[styles.sectionTitle, { fontFamily: fontFamily.bold }]}>
+            {t('profile.language', 'Language')}
+          </Text>
+          <Text style={[styles.sectionSubtitle, { fontFamily: fontFamily.regular }]}>
             {t('profile.languageDesc', 'Select your preferred language')}
           </Text>
 
@@ -65,7 +71,13 @@ export default function SettingsScreen() {
                   activeOpacity={0.7}
                 >
                   <Text style={styles.languageFlag}>{language.flag}</Text>
-                  <Text style={[styles.languageName, isSelected && styles.languageNameSelected]}>
+                  <Text
+                    style={[
+                      styles.languageName,
+                      isSelected && styles.languageNameSelected,
+                      { fontFamily: fontFamily.medium },
+                    ]}
+                  >
                     {language.name}
                   </Text>
                   {isSelected && (
@@ -79,7 +91,9 @@ export default function SettingsScreen() {
 
         {/* Notifications Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('profile.notifications', 'Notifications')}</Text>
+          <Text style={[styles.sectionTitle, { fontFamily: fontFamily.bold }]}>
+            {t('profile.notifications', 'Notifications')}
+          </Text>
           <SettingsItem
             icon="notifications-outline"
             label={t('profile.orderUpdates', 'Order Updates')}
@@ -114,8 +128,12 @@ export default function SettingsScreen() {
 
         {/* Appearance Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('theme.title')}</Text>
-          <Text style={styles.sectionSubtitle}>{t('theme.subtitle')}</Text>
+          <Text style={[styles.sectionTitle, { fontFamily: fontFamily.bold }]}>
+            {t('theme.title')}
+          </Text>
+          <Text style={[styles.sectionSubtitle, { fontFamily: fontFamily.regular }]}>
+            {t('theme.subtitle')}
+          </Text>
           <View style={styles.languageList}>
             {themeOptions.map((opt) => {
               const isSelected = themeMode === opt.value;
@@ -138,7 +156,13 @@ export default function SettingsScreen() {
                     color={isSelected ? colors.primary : colors.text.secondary}
                     style={{ marginRight: spacing.md }}
                   />
-                  <Text style={[styles.languageName, isSelected && styles.languageNameSelected]}>
+                  <Text
+                    style={[
+                      styles.languageName,
+                      isSelected && styles.languageNameSelected,
+                      { fontFamily: fontFamily.medium },
+                    ]}
+                  >
                     {t(opt.labelKey)}
                   </Text>
                   {isSelected && (

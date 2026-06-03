@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
+import { useAppFont } from '../../hooks/useAppFont';
 
 interface SettingsItemProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -30,6 +31,7 @@ export const SettingsItem: React.FC<SettingsItemProps> = ({
 }) => {
   const colors = useThemeColors();
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
 
   const handlePress = () => {
     if (onPress && !showSwitch) {
@@ -54,8 +56,12 @@ export const SettingsItem: React.FC<SettingsItemProps> = ({
       </View>
 
       <View style={styles.content}>
-        <Text style={[styles.label, { color: textColor }]}>{label}</Text>
-        {value && !showSwitch && <Text style={styles.value}>{value}</Text>}
+        <Text style={[styles.label, { color: textColor, fontFamily: fontFamily.medium }]}>
+          {label}
+        </Text>
+        {value && !showSwitch && (
+          <Text style={[styles.value, { fontFamily: fontFamily.regular }]}>{value}</Text>
+        )}
       </View>
 
       {showSwitch && onSwitchChange ? (

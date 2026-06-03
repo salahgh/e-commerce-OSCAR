@@ -7,12 +7,14 @@ import { useTranslation } from 'react-i18next';
 import { useWishlist, WishlistEntry } from '../../src/contexts/WishlistContext';
 import { Button } from '../../src/components/ui';
 import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
+import { useAppFont } from '../../src/hooks/useAppFont';
 
 export default function WishlistScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   const { items, remove } = useWishlist();
 
   const renderItem = ({ item }: { item: WishlistEntry }) => (
@@ -26,11 +28,11 @@ export default function WishlistScreen() {
         ) : null}
       </View>
       <View style={styles.cardBody}>
-        <Text style={styles.cardName} numberOfLines={2}>
+        <Text style={[styles.cardName, { fontFamily: fontFamily.medium }]} numberOfLines={2}>
           {item.name}
         </Text>
         {item.price !== undefined && (
-          <Text style={styles.cardPrice}>
+          <Text style={[styles.cardPrice, { fontFamily: fontFamily.regular }]}>
             {item.price} {item.currencyCode ?? 'DZD'}
           </Text>
         )}
@@ -51,7 +53,9 @@ export default function WishlistScreen() {
       {items.length === 0 ? (
         <View style={styles.empty}>
           <Ionicons name="heart-outline" size={64} color={colors.text.secondary} />
-          <Text style={styles.emptyTitle}>{t('wishlist.empty')}</Text>
+          <Text style={[styles.emptyTitle, { fontFamily: fontFamily.medium }]}>
+            {t('wishlist.empty')}
+          </Text>
           <Button title={t('wishlist.browse')} onPress={() => router.push('/products')} />
         </View>
       ) : (

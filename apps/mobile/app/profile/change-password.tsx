@@ -17,6 +17,7 @@ import { Input, Button } from '../../src/components/ui';
 import { useUpdateCustomerPasswordMutation } from '../../src/graphql/generated/graphql';
 import { changePasswordSchema } from '../../src/utils/validation';
 import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
+import { useAppFont } from '../../src/hooks/useAppFont';
 
 interface ChangePasswordFormValues {
   currentPassword: string;
@@ -29,6 +30,7 @@ export default function ChangePasswordScreen() {
   const router = useRouter();
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   const [submitError, setSubmitError] = useState<string>('');
 
   const [updatePassword, { loading: updating }] = useUpdateCustomerPasswordMutation();
@@ -79,7 +81,9 @@ export default function ChangePasswordScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('profile.changePassword', 'Change Password')}</Text>
+        <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
+          {t('profile.changePassword', 'Change Password')}
+        </Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -90,7 +94,7 @@ export default function ChangePasswordScreen() {
       >
         <View style={styles.infoBox}>
           <Ionicons name="information-circle-outline" size={20} color={colors.info} />
-          <Text style={styles.infoText}>
+          <Text style={[styles.infoText, { fontFamily: fontFamily.regular }]}>
             {t('profile.passwordRequirements', 'Password must be at least 6 characters long')}
           </Text>
         </View>
@@ -146,7 +150,9 @@ export default function ChangePasswordScreen() {
               {submitError ? (
                 <View style={styles.errorContainer}>
                   <Ionicons name="alert-circle-outline" size={20} color={colors.error} />
-                  <Text style={styles.errorText}>{submitError}</Text>
+                  <Text style={[styles.errorText, { fontFamily: fontFamily.regular }]}>
+                    {submitError}
+                  </Text>
                 </View>
               ) : null}
 
