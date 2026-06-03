@@ -5,28 +5,37 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Button, Divider, LoadingSpinner, ErrorState, Badge } from '../../src/components/ui';
 import { useGetOrderByCodeQuery } from '../../src/graphql/generated/graphql';
-import { colors, spacing, typography } from '../../src/theme';
+import {
+  spacing,
+  typography,
+  makeThemedStyles,
+  useThemeColors,
+  type ColorPalette,
+} from '../../src/theme';
 import { formatPrice } from '../../src/utils/vendureAdapters';
 import { useCart } from '../../src/contexts/CartContext';
 import { useToast } from '../../src/components/ui';
 import { summarizeReorder } from '../../src/utils/reorder';
 
-// Map Vendure order states to display info
-const orderStateMap: Record<string, { label: string; color: string; icon: string }> = {
-  AddingItems: { label: 'Draft', color: colors.text.tertiary, icon: 'cart-outline' },
-  ArrangingPayment: { label: 'Awaiting Payment', color: colors.warning, icon: 'time-outline' },
-  PaymentAuthorized: { label: 'Payment Authorized', color: colors.info, icon: 'card-outline' },
-  PaymentSettled: { label: 'Paid', color: colors.success, icon: 'checkmark-circle-outline' },
-  PartiallyShipped: { label: 'Partially Shipped', color: colors.info, icon: 'cube-outline' },
-  Shipped: { label: 'Shipped', color: colors.info, icon: 'airplane-outline' },
-  PartiallyDelivered: { label: 'Partially Delivered', color: colors.info, icon: 'cube-outline' },
-  Delivered: { label: 'Delivered', color: colors.success, icon: 'checkmark-done-outline' },
-  Modifying: { label: 'Modifying', color: colors.warning, icon: 'create-outline' },
-  ArrangingAdditionalPayment: { label: 'Additional Payment Required', color: colors.warning, icon: 'card-outline' },
-  Cancelled: { label: 'Cancelled', color: colors.error, icon: 'close-circle-outline' },
-};
-
-function getOrderStateInfo(state: string) {
+// Map Vendure order states to display info (palette-aware so colors theme correctly)
+function getOrderStateInfo(state: string, colors: ColorPalette) {
+  const orderStateMap: Record<string, { label: string; color: string; icon: string }> = {
+    AddingItems: { label: 'Draft', color: colors.text.tertiary, icon: 'cart-outline' },
+    ArrangingPayment: { label: 'Awaiting Payment', color: colors.warning, icon: 'time-outline' },
+    PaymentAuthorized: { label: 'Payment Authorized', color: colors.info, icon: 'card-outline' },
+    PaymentSettled: { label: 'Paid', color: colors.success, icon: 'checkmark-circle-outline' },
+    PartiallyShipped: { label: 'Partially Shipped', color: colors.info, icon: 'cube-outline' },
+    Shipped: { label: 'Shipped', color: colors.info, icon: 'airplane-outline' },
+    PartiallyDelivered: { label: 'Partially Delivered', color: colors.info, icon: 'cube-outline' },
+    Delivered: { label: 'Delivered', color: colors.success, icon: 'checkmark-done-outline' },
+    Modifying: { label: 'Modifying', color: colors.warning, icon: 'create-outline' },
+    ArrangingAdditionalPayment: {
+      label: 'Additional Payment Required',
+      color: colors.warning,
+      icon: 'card-outline',
+    },
+    Cancelled: { label: 'Cancelled', color: colors.error, icon: 'close-circle-outline' },
+  };
   return (
     orderStateMap[state] || {
       label: state,
@@ -41,6 +50,8 @@ export default function OrderDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id: string }>();
   const orderCode = params.id;
+  const colors = useThemeColors();
+  const styles = useStyles();
 
   const { data, loading, error, refetch } = useGetOrderByCodeQuery({
     variables: { code: orderCode },
@@ -133,7 +144,7 @@ export default function OrderDetailScreen() {
     );
   }
 
-  const stateInfo = getOrderStateInfo(order.state);
+  const stateInfo = getOrderStateInfo(order.state, colors);
   const shippingCost = order.shippingWithTax || 0;
   const subTotal = order.subTotalWithTax || 0;
   const totalAmount = order.totalWithTax || 0;
@@ -222,9 +233,7 @@ export default function OrderDetailScreen() {
             {order.shippingLines?.[0] && (
               <View style={styles.infoRow}>
                 <Ionicons name="car-outline" size={20} color={colors.text.secondary} />
-                <Text style={styles.infoText}>
-                  {order.shippingLines[0].shippingMethod?.name}
-                </Text>
+                <Text style={styles.infoText}>{order.shippingLines[0].shippingMethod?.name}</Text>
               </View>
             )}
           </View>
@@ -259,8 +268,7 @@ export default function OrderDetailScreen() {
           <View style={styles.itemsList}>
             {order.lines?.map((line) => {
               const productImage =
-                line.featuredAsset?.preview ||
-                line.productVariant?.product?.featuredAsset?.preview;
+                line.featuredAsset?.preview || line.productVariant?.product?.featuredAsset?.preview;
 
               return (
                 <View key={line.id} style={styles.itemCard}>
@@ -287,14 +295,10 @@ export default function OrderDetailScreen() {
                       )}
                     <View style={styles.itemPriceRow}>
                       <Text style={styles.itemQuantity}>Qty: {line.quantity}</Text>
-                      <Text style={styles.itemPrice}>
-                        {formatPrice(line.unitPriceWithTax)} DZD
-                      </Text>
+                      <Text style={styles.itemPrice}>{formatPrice(line.unitPriceWithTax)} DZD</Text>
                     </View>
                   </View>
-                  <Text style={styles.itemSubtotal}>
-                    {formatPrice(line.linePriceWithTax)} DZD
-                  </Text>
+                  <Text style={styles.itemSubtotal}>{formatPrice(line.linePriceWithTax)} DZD</Text>
                 </View>
               );
             })}
@@ -353,199 +357,201 @@ export default function OrderDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
-    paddingTop: spacing.xl,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  headerContent: {
-    flex: 1,
-    marginLeft: spacing.sm,
-  },
-  orderNumber: {
-    ...typography.styles.h4,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  orderDate: {
-    ...typography.styles.caption,
-    color: colors.text.secondary,
-  },
-  content: {
-    padding: spacing.lg,
-  },
-  statusCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.lg,
-    marginBottom: spacing.lg,
-  },
-  statusIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.md,
-  },
-  statusInfo: {
-    flex: 1,
-  },
-  statusLabel: {
-    ...typography.styles.h4,
-    fontWeight: typography.fontWeight.bold,
-    marginBottom: spacing.xs,
-  },
-  statusDate: {
-    ...typography.styles.caption,
-    color: colors.text.secondary,
-  },
-  section: {
-    marginBottom: spacing.lg,
-  },
-  sectionTitle: {
-    ...typography.styles.h4,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing.md,
-  },
-  sectionContent: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: spacing.sm,
-    gap: spacing.sm,
-  },
-  infoText: {
-    ...typography.styles.body,
-    color: colors.text.primary,
-    flex: 1,
-  },
-  itemsList: {
-    gap: spacing.md,
-  },
-  itemCard: {
-    flexDirection: 'row',
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
-  },
-  itemImageContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    overflow: 'hidden',
-    marginRight: spacing.md,
-  },
-  itemImage: {
-    width: '100%',
-    height: '100%',
-  },
-  placeholderImage: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: colors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  itemDetails: {
-    flex: 1,
-  },
-  itemName: {
-    ...typography.styles.bodySmall,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  itemVariant: {
-    ...typography.styles.caption,
-    color: colors.text.secondary,
-    marginBottom: spacing.xs,
-  },
-  itemPriceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  itemQuantity: {
-    ...typography.styles.caption,
-    color: colors.text.secondary,
-  },
-  itemPrice: {
-    ...typography.styles.bodySmall,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-  },
-  itemSubtotal: {
-    ...typography.styles.body,
-    fontWeight: typography.fontWeight.semiBold,
-    color: colors.text.primary,
-    alignSelf: 'flex-start',
-  },
-  summaryContent: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  summaryLabel: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-  },
-  summaryValue: {
-    ...typography.styles.body,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text.primary,
-  },
-  divider: {
-    marginVertical: spacing.sm,
-  },
-  totalRow: {
-    marginTop: spacing.sm,
-    marginBottom: 0,
-  },
-  totalLabel: {
-    ...typography.styles.h4,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-  },
-  totalValue: {
-    ...typography.styles.h4,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.primary,
-  },
-  actions: {
-    gap: spacing.md,
-    marginTop: spacing.md,
-    marginBottom: spacing.xl,
-  },
-  reorderButton: {},
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      padding: spacing.lg,
+      paddingTop: spacing.xl,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    backButton: {
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'flex-start',
+    },
+    headerContent: {
+      flex: 1,
+      marginLeft: spacing.sm,
+    },
+    orderNumber: {
+      ...typography.styles.h4,
+      fontWeight: typography.fontWeight.bold,
+      color: colors.text.primary,
+      marginBottom: spacing.xs,
+    },
+    orderDate: {
+      ...typography.styles.caption,
+      color: colors.text.secondary,
+    },
+    content: {
+      padding: spacing.lg,
+    },
+    statusCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: spacing.lg,
+      marginBottom: spacing.lg,
+    },
+    statusIconContainer: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: colors.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: spacing.md,
+    },
+    statusInfo: {
+      flex: 1,
+    },
+    statusLabel: {
+      ...typography.styles.h4,
+      fontWeight: typography.fontWeight.bold,
+      marginBottom: spacing.xs,
+    },
+    statusDate: {
+      ...typography.styles.caption,
+      color: colors.text.secondary,
+    },
+    section: {
+      marginBottom: spacing.lg,
+    },
+    sectionTitle: {
+      ...typography.styles.h4,
+      fontWeight: typography.fontWeight.bold,
+      color: colors.text.primary,
+      marginBottom: spacing.md,
+    },
+    sectionContent: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: spacing.md,
+    },
+    infoRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      marginBottom: spacing.sm,
+      gap: spacing.sm,
+    },
+    infoText: {
+      ...typography.styles.body,
+      color: colors.text.primary,
+      flex: 1,
+    },
+    itemsList: {
+      gap: spacing.md,
+    },
+    itemCard: {
+      flexDirection: 'row',
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: spacing.md,
+    },
+    itemImageContainer: {
+      width: 60,
+      height: 60,
+      borderRadius: 8,
+      overflow: 'hidden',
+      marginRight: spacing.md,
+    },
+    itemImage: {
+      width: '100%',
+      height: '100%',
+    },
+    placeholderImage: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: colors.border,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    itemDetails: {
+      flex: 1,
+    },
+    itemName: {
+      ...typography.styles.bodySmall,
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+      marginBottom: spacing.xs,
+    },
+    itemVariant: {
+      ...typography.styles.caption,
+      color: colors.text.secondary,
+      marginBottom: spacing.xs,
+    },
+    itemPriceRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    itemQuantity: {
+      ...typography.styles.caption,
+      color: colors.text.secondary,
+    },
+    itemPrice: {
+      ...typography.styles.bodySmall,
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+    },
+    itemSubtotal: {
+      ...typography.styles.body,
+      fontWeight: typography.fontWeight.semiBold,
+      color: colors.text.primary,
+      alignSelf: 'flex-start',
+    },
+    summaryContent: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: spacing.md,
+    },
+    summaryRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.sm,
+    },
+    summaryLabel: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+    },
+    summaryValue: {
+      ...typography.styles.body,
+      fontWeight: typography.fontWeight.medium,
+      color: colors.text.primary,
+    },
+    divider: {
+      marginVertical: spacing.sm,
+    },
+    totalRow: {
+      marginTop: spacing.sm,
+      marginBottom: 0,
+    },
+    totalLabel: {
+      ...typography.styles.h4,
+      fontWeight: typography.fontWeight.bold,
+      color: colors.text.primary,
+    },
+    totalValue: {
+      ...typography.styles.h4,
+      fontWeight: typography.fontWeight.bold,
+      color: colors.primary,
+    },
+    actions: {
+      gap: spacing.md,
+      marginTop: spacing.md,
+      marginBottom: spacing.xl,
+    },
+    reorderButton: {},
+  })
+);
