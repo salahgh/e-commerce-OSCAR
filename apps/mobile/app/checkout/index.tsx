@@ -24,7 +24,11 @@ import { useAuth } from '../../src/contexts/AuthContext';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
 import { useAppFont } from '../../src/hooks/useAppFont';
 import { formatPrice } from '../../src/utils/vendureAdapters';
-import { submitCheckoutAddress, STALE_SESSION_ERROR } from '../../src/utils/checkout';
+import {
+  submitCheckoutAddress,
+  STALE_SESSION_ERROR,
+  resolveWilayaName,
+} from '../../src/utils/checkout';
 import { makeShippingAddressSchema } from '../../src/utils/validation';
 import { wilayas } from '../../src/data/wilayas';
 import { addressToCheckoutValues, SavedAddress } from '../../src/utils/address';
@@ -545,6 +549,11 @@ export default function CheckoutScreen() {
                   {shippingAddress.city}
                   {shippingAddress.postalCode && `, ${shippingAddress.postalCode}`}
                 </Text>
+                {shippingAddress.wilayaCode ? (
+                  <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
+                    {resolveWilayaName(shippingAddress.wilayaCode, wilayas)}
+                  </Text>
+                ) : null}
                 {shippingAddress.notes && (
                   <Text style={[styles.reviewTextSecondary, { fontFamily: fontFamily.regular }]}>
                     Notes: {shippingAddress.notes}
