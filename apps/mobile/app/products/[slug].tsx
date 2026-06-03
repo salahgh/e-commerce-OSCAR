@@ -15,8 +15,13 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGetProductBySlugQuery } from '../../src/graphql/generated/graphql';
 import { Button, LoadingSpinner, ErrorState, Badge, Chip } from '../../src/components/ui';
-import { ImageCarousel, SizeGuideModal, RelatedProducts, RecentlyViewedRow } from '../../src/components/products';
-import { colors, spacing, typography } from '../../src/theme';
+import {
+  ImageCarousel,
+  SizeGuideModal,
+  RelatedProducts,
+  RecentlyViewedRow,
+} from '../../src/components/products';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
 import { useCart } from '../../src/contexts/CartContext';
 import { useWishlist } from '../../src/contexts/WishlistContext';
 import { useRecentlyViewed } from '../../src/contexts/RecentlyViewedContext';
@@ -37,6 +42,8 @@ export default function ProductDetailScreen() {
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const wishlist = useWishlist();
   const { track } = useRecentlyViewed();
+  const colors = useThemeColors();
+  const styles = useStyles();
 
   const { data, loading, error, refetch } = useGetProductBySlugQuery({
     variables: { slug },
@@ -72,12 +79,14 @@ export default function ProductDetailScreen() {
     if (!product?.variants || product.variants.length === 0) return null;
     if (product.variants.length === 1) return product.variants[0];
 
-    return product.variants.find((variant: any) => {
-      return variant.options?.every((option: any) => {
-        const groupName = option.group?.name || 'Option';
-        return selectedOptions[groupName] === option.name;
-      });
-    }) || product.variants[0];
+    return (
+      product.variants.find((variant: any) => {
+        return variant.options?.every((option: any) => {
+          const groupName = option.group?.name || 'Option';
+          return selectedOptions[groupName] === option.name;
+        });
+      }) || product.variants[0]
+    );
   }, [product, selectedOptions]);
 
   // Record this product as recently viewed once per open (keyed on product id).
@@ -95,7 +104,7 @@ export default function ProductDetailScreen() {
   }, [product?.id]);
 
   const handleOptionSelect = (groupName: string, value: string) => {
-    setSelectedOptions(prev => ({
+    setSelectedOptions((prev) => ({
       ...prev,
       [groupName]: value,
     }));
@@ -109,9 +118,10 @@ export default function ProductDetailScreen() {
 
     try {
       await Share.share({
-        message: Platform.OS === 'ios'
-          ? `Check out ${product.name} - ${price} DZD`
-          : `Check out ${product.name} - ${price} DZD\n${productUrl}`,
+        message:
+          Platform.OS === 'ios'
+            ? `Check out ${product.name} - ${price} DZD`
+            : `Check out ${product.name} - ${price} DZD\n${productUrl}`,
         url: Platform.OS === 'ios' ? productUrl : undefined,
         title: product.name,
       });
@@ -208,18 +218,14 @@ export default function ProductDetailScreen() {
   const collectionName = product.collections?.[0]?.name;
 
   // Check if all required options are selected
-  const allOptionsSelected = optionGroups.every(group => selectedOptions[group.name]);
+  const allOptionsSelected = optionGroups.every((group) => selectedOptions[group.name]);
   const canAddToCart = !isOutOfStock && (optionGroups.length === 0 || allOptionsSelected);
 
   return (
     <View style={styles.container}>
       {/* Floating Header */}
       <View style={[styles.floatingHeader, { top: insets.top + spacing.sm }]}>
-        <TouchableOpacity
-          style={styles.floatingButton}
-          onPress={handleGoBack}
-          activeOpacity={0.8}
-        >
+        <TouchableOpacity style={styles.floatingButton} onPress={handleGoBack} activeOpacity={0.8}>
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
 
@@ -235,11 +241,7 @@ export default function ProductDetailScreen() {
               color={isFavorite ? colors.error : colors.text.primary}
             />
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.floatingButton}
-            onPress={handleShare}
-            activeOpacity={0.8}
-          >
+          <TouchableOpacity style={styles.floatingButton} onPress={handleShare} activeOpacity={0.8}>
             <Ionicons name="share-outline" size={24} color={colors.text.primary} />
           </TouchableOpacity>
         </View>
@@ -338,10 +340,7 @@ export default function ProductDetailScreen() {
                   />
                 </TouchableOpacity>
                 <Text style={styles.quantityText}>{quantity}</Text>
-                <TouchableOpacity
-                  onPress={incrementQuantity}
-                  style={styles.quantityButton}
-                >
+                <TouchableOpacity onPress={incrementQuantity} style={styles.quantityButton}>
                   <Ionicons name="add" size={20} color={colors.primary} />
                 </TouchableOpacity>
               </View>
@@ -378,147 +377,149 @@ export default function ProductDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  floatingHeader: {
-    position: 'absolute',
-    left: spacing.md,
-    right: spacing.md,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    zIndex: 100,
-  },
-  floatingButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  floatingActions: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  imageContainer: {
-    width: SCREEN_WIDTH,
-    position: 'relative',
-  },
-  content: {
-    padding: spacing.lg,
-  },
-  category: {
-    ...typography.styles.caption,
-    color: colors.text.tertiary,
-    marginBottom: spacing.xs,
-    textTransform: 'uppercase',
-  },
-  name: {
-    ...typography.styles.h2,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-    fontWeight: typography.fontWeight.bold,
-  },
-  sku: {
-    ...typography.styles.caption,
-    color: colors.text.tertiary,
-    marginBottom: spacing.md,
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  price: {
-    ...typography.styles.h2,
-    color: colors.primary,
-    fontWeight: typography.fontWeight.bold,
-  },
-  outOfStock: {
-    ...typography.styles.body,
-    color: colors.error,
-    fontWeight: typography.fontWeight.semiBold,
-    marginBottom: spacing.lg,
-  },
-  lowStock: {
-    ...typography.styles.body,
-    color: colors.warning,
-    fontWeight: typography.fontWeight.medium,
-    marginBottom: spacing.lg,
-  },
-  inStock: {
-    ...typography.styles.body,
-    color: colors.success,
-    fontWeight: typography.fontWeight.medium,
-    marginBottom: spacing.lg,
-  },
-  section: {
-    marginBottom: spacing.lg,
-  },
-  sectionTitle: {
-    ...typography.styles.h4,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.semiBold,
-    marginBottom: spacing.md,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.sm,
-  },
-  sizeGuideLink: {
-    ...typography.styles.bodySmall,
-    color: colors.text.secondary,
-    textDecorationLine: 'underline',
-  },
-  description: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    lineHeight: 24,
-  },
-  optionsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  optionChip: {
-    marginRight: 0,
-  },
-  quantitySelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  quantityButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  quantityText: {
-    ...typography.styles.h3,
-    color: colors.text.primary,
-    minWidth: 40,
-    textAlign: 'center',
-  },
-  bottomActions: {
-    padding: spacing.lg,
-    backgroundColor: colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    floatingHeader: {
+      position: 'absolute',
+      left: spacing.md,
+      right: spacing.md,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      zIndex: 100,
+    },
+    floatingButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: colors.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    floatingActions: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+    },
+    imageContainer: {
+      width: SCREEN_WIDTH,
+      position: 'relative',
+    },
+    content: {
+      padding: spacing.lg,
+    },
+    category: {
+      ...typography.styles.caption,
+      color: colors.text.tertiary,
+      marginBottom: spacing.xs,
+      textTransform: 'uppercase',
+    },
+    name: {
+      ...typography.styles.h2,
+      color: colors.text.primary,
+      marginBottom: spacing.xs,
+      fontWeight: typography.fontWeight.bold,
+    },
+    sku: {
+      ...typography.styles.caption,
+      color: colors.text.tertiary,
+      marginBottom: spacing.md,
+    },
+    priceContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    price: {
+      ...typography.styles.h2,
+      color: colors.primary,
+      fontWeight: typography.fontWeight.bold,
+    },
+    outOfStock: {
+      ...typography.styles.body,
+      color: colors.error,
+      fontWeight: typography.fontWeight.semiBold,
+      marginBottom: spacing.lg,
+    },
+    lowStock: {
+      ...typography.styles.body,
+      color: colors.warning,
+      fontWeight: typography.fontWeight.medium,
+      marginBottom: spacing.lg,
+    },
+    inStock: {
+      ...typography.styles.body,
+      color: colors.success,
+      fontWeight: typography.fontWeight.medium,
+      marginBottom: spacing.lg,
+    },
+    section: {
+      marginBottom: spacing.lg,
+    },
+    sectionTitle: {
+      ...typography.styles.h4,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.semiBold,
+      marginBottom: spacing.md,
+    },
+    sectionHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: spacing.sm,
+    },
+    sizeGuideLink: {
+      ...typography.styles.bodySmall,
+      color: colors.text.secondary,
+      textDecorationLine: 'underline',
+    },
+    description: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      lineHeight: 24,
+    },
+    optionsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    optionChip: {
+      marginRight: 0,
+    },
+    quantitySelector: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+    },
+    quantityButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.border,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    quantityText: {
+      ...typography.styles.h3,
+      color: colors.text.primary,
+      minWidth: 40,
+      textAlign: 'center',
+    },
+    bottomActions: {
+      padding: spacing.lg,
+      backgroundColor: colors.surface,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+  })
+);
