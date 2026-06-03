@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { Button } from '../../src/components/ui';
-import { colors, spacing, typography } from '../../src/theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
 import { useAppFont } from '../../src/hooks/useAppFont';
 import { loginSchema } from '../../src/utils/validation';
 import Logo from '../../assets/images/logooscarsvg1.svg';
@@ -34,6 +34,8 @@ export default function LoginScreen() {
   const { fontFamily } = useAppFont();
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const styles = useStyles();
+  const colors = useThemeColors();
 
   const handleLogin = async (values: LoginFormValues) => {
     Keyboard.dismiss();
@@ -93,8 +95,11 @@ export default function LoginScreen() {
                   {t('auth.emailOrPhone')}
                 </Text>
                 <TextInput
-                  style={[styles.input, { fontFamily: fontFamily.regular },
-                    touched.email && errors.email && styles.inputError]}
+                  style={[
+                    styles.input,
+                    { fontFamily: fontFamily.regular },
+                    touched.email && errors.email && styles.inputError,
+                  ]}
                   placeholder={t('auth.enterEmail')}
                   placeholderTextColor={colors.text.tertiary}
                   value={values.email}
@@ -115,8 +120,12 @@ export default function LoginScreen() {
                 <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>
                   {t('auth.password')}
                 </Text>
-                <View style={[styles.passwordContainer,
-                  touched.password && errors.password && styles.inputError]}>
+                <View
+                  style={[
+                    styles.passwordContainer,
+                    touched.password && errors.password && styles.inputError,
+                  ]}
+                >
                   <TextInput
                     style={[styles.passwordInput, { fontFamily: fontFamily.regular }]}
                     placeholder={t('auth.enterPassword')}
@@ -193,133 +202,135 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: spacing.xl,
-  },
-  // Logo
-  logoContainer: {
-    alignItems: 'flex-start',
-    marginTop: spacing['2xl'],
-    marginBottom: spacing['3xl'],
-  },
-  // Header
-  header: {
-    marginBottom: 50,
-  },
-  title: {
-    fontSize: 26,
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: '#6A7282',
-  },
-  // Error
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: '#FFE5E5',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderRadius: 8,
-    marginBottom: spacing.lg,
-  },
-  errorText: {
-    fontSize: 14,
-    color: colors.error,
-    flex: 1,
-  },
-  // Form
-  form: {
-    gap: spacing.lg,
-  },
-  fieldGroup: {
-    gap: spacing.sm,
-  },
-  fieldLabel: {
-    fontSize: 13,
-    color: colors.text.primary,
-  },
-  input: {
-    height: 48,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.lg,
-    fontSize: 14,
-    color: colors.text.primary,
-  },
-  inputError: {
-    borderColor: colors.error,
-  },
-  fieldError: {
-    fontSize: 12,
-    color: colors.error,
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 48,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.lg,
-  },
-  passwordInput: {
-    flex: 1,
-    fontSize: 14,
-    color: colors.text.primary,
-    paddingVertical: 0,
-  },
-  // Actions
-  actionContainer: {
-    marginTop: 40,
-    alignItems: 'center',
-    gap: spacing.xl,
-  },
-  submitButton: {
-    width: '100%',
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  submitText: {
-    fontSize: 16,
-    color: colors.text.inverse,
-  },
-  forgotContainer: {
-    alignItems: 'center',
-  },
-  forgotText: {
-    fontSize: 15,
-    color: '#183DE5',
-  },
-  // Spacer
-  spacer: {
-    flex: 1,
-    minHeight: 40,
-  },
-  // Register
-  registerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  registerText: {
-    fontSize: 15,
-    color: colors.text.primary,
-  },
-  registerLink: {
-    fontSize: 15,
-    color: '#183DE5',
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingHorizontal: spacing.xl,
+    },
+    // Logo
+    logoContainer: {
+      alignItems: 'flex-start',
+      marginTop: spacing['2xl'],
+      marginBottom: spacing['3xl'],
+    },
+    // Header
+    header: {
+      marginBottom: 50,
+    },
+    title: {
+      fontSize: 26,
+      color: colors.text.primary,
+      marginBottom: spacing.sm,
+    },
+    subtitle: {
+      fontSize: 15,
+      color: colors.text.secondary,
+    },
+    // Error
+    errorContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      backgroundColor: colors.errorLight,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      borderRadius: 8,
+      marginBottom: spacing.lg,
+    },
+    errorText: {
+      fontSize: 14,
+      color: colors.error,
+      flex: 1,
+    },
+    // Form
+    form: {
+      gap: spacing.lg,
+    },
+    fieldGroup: {
+      gap: spacing.sm,
+    },
+    fieldLabel: {
+      fontSize: 13,
+      color: colors.text.primary,
+    },
+    input: {
+      height: 48,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.lg,
+      fontSize: 14,
+      color: colors.text.primary,
+    },
+    inputError: {
+      borderColor: colors.error,
+    },
+    fieldError: {
+      fontSize: 12,
+      color: colors.error,
+    },
+    passwordContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      height: 48,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.lg,
+    },
+    passwordInput: {
+      flex: 1,
+      fontSize: 14,
+      color: colors.text.primary,
+      paddingVertical: 0,
+    },
+    // Actions
+    actionContainer: {
+      marginTop: 40,
+      alignItems: 'center',
+      gap: spacing.xl,
+    },
+    submitButton: {
+      width: '100%',
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+      paddingVertical: 16,
+      alignItems: 'center',
+    },
+    submitText: {
+      fontSize: 16,
+      color: colors.text.inverse,
+    },
+    forgotContainer: {
+      alignItems: 'center',
+    },
+    forgotText: {
+      fontSize: 15,
+      color: colors.info,
+    },
+    // Spacer
+    spacer: {
+      flex: 1,
+      minHeight: 40,
+    },
+    // Register
+    registerContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    registerText: {
+      fontSize: 15,
+      color: colors.text.primary,
+    },
+    registerLink: {
+      fontSize: 15,
+      color: colors.info,
+    },
+  })
+);

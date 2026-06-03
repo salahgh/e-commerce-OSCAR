@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../src/contexts/AuthContext';
-import { colors, spacing, typography } from '../../src/theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
 import { useAppFont } from '../../src/hooks/useAppFont';
 import { registerSchema } from '../../src/utils/validation';
 import Logo from '../../assets/images/logooscarsvg1.svg';
@@ -37,6 +37,8 @@ export default function RegisterScreen() {
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const styles = useStyles();
+  const colors = useThemeColors();
 
   const handleRegister = async (values: RegisterFormValues) => {
     Keyboard.dismiss();
@@ -107,7 +109,9 @@ export default function RegisterScreen() {
             <View style={styles.form}>
               {/* Full Name */}
               <View style={styles.fieldGroup}>
-                <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.fullName')}</Text>
+                <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>
+                  {t('auth.fullName')}
+                </Text>
                 <TextInput
                   style={[styles.input, { fontFamily: fontFamily.regular }]}
                   placeholder={t('auth.enterFullName')}
@@ -121,7 +125,9 @@ export default function RegisterScreen() {
 
               {/* Email */}
               <View style={styles.fieldGroup}>
-                <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.addressEmail')}</Text>
+                <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>
+                  {t('auth.addressEmail')}
+                </Text>
                 <TextInput
                   style={[styles.input, { fontFamily: fontFamily.regular }]}
                   placeholder={t('auth.enterAddressEmail')}
@@ -137,11 +143,15 @@ export default function RegisterScreen() {
 
               {/* Phone */}
               <View style={styles.fieldGroup}>
-                <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.phoneNumber')}</Text>
+                <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>
+                  {t('auth.phoneNumber')}
+                </Text>
                 <View style={styles.phoneContainer}>
                   <View style={styles.phonePrefix}>
                     <Text style={[styles.phonePrefixFlag]}>🇩🇿</Text>
-                    <Text style={[styles.phonePrefixText, { fontFamily: fontFamily.medium }]}>+213</Text>
+                    <Text style={[styles.phonePrefixText, { fontFamily: fontFamily.medium }]}>
+                      +213
+                    </Text>
                   </View>
                   <View style={styles.phoneDivider} />
                   <TextInput
@@ -168,7 +178,9 @@ export default function RegisterScreen() {
 
               {/* Password */}
               <View style={styles.fieldGroup}>
-                <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.password')}</Text>
+                <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>
+                  {t('auth.password')}
+                </Text>
                 <View style={styles.passwordContainer}>
                   <TextInput
                     style={[styles.passwordInput, { fontFamily: fontFamily.regular }]}
@@ -181,14 +193,20 @@ export default function RegisterScreen() {
                     autoCapitalize="none"
                   />
                   <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                    <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.text.tertiary} />
+                    <Ionicons
+                      name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                      size={20}
+                      color={colors.text.tertiary}
+                    />
                   </TouchableOpacity>
                 </View>
               </View>
 
               {/* Confirm Password */}
               <View style={styles.fieldGroup}>
-                <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>{t('auth.confirmYourPassword')}</Text>
+                <Text style={[styles.fieldLabel, { fontFamily: fontFamily.medium }]}>
+                  {t('auth.confirmYourPassword')}
+                </Text>
                 <View style={styles.passwordContainer}>
                   <TextInput
                     style={[styles.passwordInput, { fontFamily: fontFamily.regular }]}
@@ -201,7 +219,11 @@ export default function RegisterScreen() {
                     autoCapitalize="none"
                   />
                   <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
-                    <Ionicons name={showConfirm ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.text.tertiary} />
+                    <Ionicons
+                      name={showConfirm ? 'eye-off-outline' : 'eye-outline'}
+                      size={20}
+                      color={colors.text.tertiary}
+                    />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -228,7 +250,9 @@ export default function RegisterScreen() {
           </Text>
           <Link href="/(auth)/login" asChild>
             <TouchableOpacity>
-              <Text style={[styles.loginLink, { fontFamily: fontFamily.medium }]}>{t('auth.signIn')}</Text>
+              <Text style={[styles.loginLink, { fontFamily: fontFamily.medium }]}>
+                {t('auth.signIn')}
+              </Text>
             </TouchableOpacity>
           </Link>
         </View>
@@ -237,141 +261,143 @@ export default function RegisterScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: spacing.xl,
-  },
-  logoContainer: {
-    alignItems: 'flex-start',
-    marginTop: spacing.xl,
-    marginBottom: spacing['3xl'],
-  },
-  title: {
-    fontSize: 26,
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: '#6A7282',
-    marginBottom: spacing['2xl'],
-    lineHeight: 22,
-  },
-  errorBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: '#FFE5E5',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderRadius: 8,
-    marginBottom: spacing.lg,
-  },
-  errorText: {
-    fontSize: 14,
-    color: colors.error,
-    flex: 1,
-  },
-  form: {
-    gap: spacing.md,
-  },
-  fieldGroup: {
-    gap: spacing.xs,
-  },
-  fieldLabel: {
-    fontSize: 13,
-    color: colors.text.primary,
-  },
-  input: {
-    height: 48,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.lg,
-    fontSize: 14,
-    color: colors.text.primary,
-  },
-  phoneContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 48,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  phonePrefix: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: spacing.md,
-    backgroundColor: '#F9FAFB',
-    height: '100%',
-    justifyContent: 'center',
-  },
-  phonePrefixFlag: {
-    fontSize: 18,
-  },
-  phonePrefixText: {
-    fontSize: 14,
-    color: colors.text.primary,
-  },
-  phoneDivider: {
-    width: 1,
-    height: 24,
-    backgroundColor: colors.border,
-  },
-  phoneInput: {
-    flex: 1,
-    fontSize: 14,
-    color: colors.text.primary,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 0,
-    height: '100%',
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 48,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.lg,
-  },
-  passwordInput: {
-    flex: 1,
-    fontSize: 14,
-    color: colors.text.primary,
-    paddingVertical: 0,
-  },
-  submitButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: spacing.xl,
-  },
-  submitText: {
-    fontSize: 16,
-    color: colors.text.inverse,
-  },
-  loginContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: spacing.xl,
-  },
-  loginText: {
-    fontSize: 15,
-    color: colors.text.primary,
-  },
-  loginLink: {
-    fontSize: 15,
-    color: '#183DE5',
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingHorizontal: spacing.xl,
+    },
+    logoContainer: {
+      alignItems: 'flex-start',
+      marginTop: spacing.xl,
+      marginBottom: spacing['3xl'],
+    },
+    title: {
+      fontSize: 26,
+      color: colors.text.primary,
+      marginBottom: spacing.sm,
+    },
+    subtitle: {
+      fontSize: 15,
+      color: colors.text.secondary,
+      marginBottom: spacing['2xl'],
+      lineHeight: 22,
+    },
+    errorBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      backgroundColor: colors.errorLight,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      borderRadius: 8,
+      marginBottom: spacing.lg,
+    },
+    errorText: {
+      fontSize: 14,
+      color: colors.error,
+      flex: 1,
+    },
+    form: {
+      gap: spacing.md,
+    },
+    fieldGroup: {
+      gap: spacing.xs,
+    },
+    fieldLabel: {
+      fontSize: 13,
+      color: colors.text.primary,
+    },
+    input: {
+      height: 48,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.lg,
+      fontSize: 14,
+      color: colors.text.primary,
+    },
+    phoneContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      height: 48,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      overflow: 'hidden',
+    },
+    phonePrefix: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: spacing.md,
+      backgroundColor: colors.gray[1],
+      height: '100%',
+      justifyContent: 'center',
+    },
+    phonePrefixFlag: {
+      fontSize: 18,
+    },
+    phonePrefixText: {
+      fontSize: 14,
+      color: colors.text.primary,
+    },
+    phoneDivider: {
+      width: 1,
+      height: 24,
+      backgroundColor: colors.border,
+    },
+    phoneInput: {
+      flex: 1,
+      fontSize: 14,
+      color: colors.text.primary,
+      paddingHorizontal: spacing.md,
+      paddingVertical: 0,
+      height: '100%',
+    },
+    passwordContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      height: 48,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.lg,
+    },
+    passwordInput: {
+      flex: 1,
+      fontSize: 14,
+      color: colors.text.primary,
+      paddingVertical: 0,
+    },
+    submitButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+      paddingVertical: 16,
+      alignItems: 'center',
+      marginTop: spacing.xl,
+    },
+    submitText: {
+      fontSize: 16,
+      color: colors.text.inverse,
+    },
+    loginContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: spacing.xl,
+    },
+    loginText: {
+      fontSize: 15,
+      color: colors.text.primary,
+    },
+    loginLink: {
+      fontSize: 15,
+      color: colors.info,
+    },
+  })
+);

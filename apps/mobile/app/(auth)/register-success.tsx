@@ -1,16 +1,10 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Link, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, typography } from '../../src/theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
 import { useAppFont } from '../../src/hooks/useAppFont';
 import Logo from '../../assets/images/logooscarsvg1.svg';
 
@@ -18,6 +12,8 @@ export default function RegisterSuccessScreen() {
   const insets = useSafeAreaInsets();
   const { fontFamily } = useAppFont();
   const { t } = useTranslation();
+  const styles = useStyles();
+  const colors = useThemeColors();
 
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -51,11 +47,17 @@ export default function RegisterSuccessScreen() {
       {/* Success animation */}
       <View style={styles.successContainer}>
         {/* Rings */}
-        <Animated.View style={[styles.ring, { transform: [{ scale: ringScale2 }], opacity: ringOpacity2 }]} />
-        <Animated.View style={[styles.ring, { transform: [{ scale: ringScale1 }], opacity: ringOpacity1 }]} />
+        <Animated.View
+          style={[styles.ring, { transform: [{ scale: ringScale2 }], opacity: ringOpacity2 }]}
+        />
+        <Animated.View
+          style={[styles.ring, { transform: [{ scale: ringScale1 }], opacity: ringOpacity1 }]}
+        />
 
         {/* Checkmark circle */}
-        <Animated.View style={[styles.checkCircle, { transform: [{ scale: scaleAnim }], opacity: opacityAnim }]}>
+        <Animated.View
+          style={[styles.checkCircle, { transform: [{ scale: scaleAnim }], opacity: opacityAnim }]}
+        >
           <Ionicons name="checkmark" size={36} color={colors.text.primary} />
         </Animated.View>
       </View>
@@ -89,7 +91,9 @@ export default function RegisterSuccessScreen() {
           </Text>
           <Link href="/(auth)/register" asChild>
             <TouchableOpacity>
-              <Text style={[styles.registerLink, { fontFamily: fontFamily.medium }]}>{t('auth.createAccount')}</Text>
+              <Text style={[styles.registerLink, { fontFamily: fontFamily.medium }]}>
+                {t('auth.createAccount')}
+              </Text>
             </TouchableOpacity>
           </Link>
         </View>
@@ -98,81 +102,83 @@ export default function RegisterSuccessScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    paddingHorizontal: spacing.xl,
-  },
-  logoContainer: {
-    marginTop: spacing['3xl'],
-    marginBottom: spacing['4xl'],
-  },
-  // Success animation
-  successContainer: {
-    width: 200,
-    height: 200,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing['3xl'],
-  },
-  ring: {
-    position: 'absolute',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  checkCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#F0F0F0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  // Text
-  title: {
-    fontSize: 24,
-    color: colors.text.primary,
-    textAlign: 'center',
-    marginBottom: spacing.md,
-    lineHeight: 32,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: '#6A7282',
-    textAlign: 'center',
-  },
-  // Bottom
-  bottomSection: {
-    width: '100%',
-    paddingTop: spacing.md,
-  },
-  homeButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  homeButtonText: {
-    fontSize: 16,
-    color: colors.text.inverse,
-  },
-  registerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: spacing.xl,
-  },
-  registerText: {
-    fontSize: 15,
-    color: colors.text.primary,
-  },
-  registerLink: {
-    fontSize: 15,
-    color: '#183DE5',
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      paddingHorizontal: spacing.xl,
+    },
+    logoContainer: {
+      marginTop: spacing['3xl'],
+      marginBottom: spacing['4xl'],
+    },
+    // Success animation
+    successContainer: {
+      width: 200,
+      height: 200,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: spacing['3xl'],
+    },
+    ring: {
+      position: 'absolute',
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    checkCircle: {
+      width: 72,
+      height: 72,
+      borderRadius: 36,
+      backgroundColor: colors.gray[2],
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    // Text
+    title: {
+      fontSize: 24,
+      color: colors.text.primary,
+      textAlign: 'center',
+      marginBottom: spacing.md,
+      lineHeight: 32,
+    },
+    subtitle: {
+      fontSize: 15,
+      color: colors.text.secondary,
+      textAlign: 'center',
+    },
+    // Bottom
+    bottomSection: {
+      width: '100%',
+      paddingTop: spacing.md,
+    },
+    homeButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+      paddingVertical: 16,
+      alignItems: 'center',
+    },
+    homeButtonText: {
+      fontSize: 16,
+      color: colors.text.inverse,
+    },
+    registerContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: spacing.xl,
+    },
+    registerText: {
+      fontSize: 15,
+      color: colors.text.primary,
+    },
+    registerLink: {
+      fontSize: 15,
+      color: colors.info,
+    },
+  })
+);

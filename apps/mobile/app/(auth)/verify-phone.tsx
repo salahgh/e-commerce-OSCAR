@@ -1,17 +1,11 @@
 import React, { useState, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, typography } from '../../src/theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
 import { useAppFont } from '../../src/hooks/useAppFont';
 
 const CODE_LENGTH = 6;
@@ -20,6 +14,8 @@ export default function VerifyPhoneScreen() {
   const insets = useSafeAreaInsets();
   const { fontFamily } = useAppFont();
   const { t } = useTranslation();
+  const styles = useStyles();
+  const colors = useThemeColors();
 
   const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
   const [error, setError] = useState<string | null>(null);
@@ -118,7 +114,9 @@ export default function VerifyPhoneScreen() {
         {code.map((digit, index) => (
           <TextInput
             key={index}
-            ref={(ref) => { inputRefs.current[index] = ref; }}
+            ref={(ref) => {
+              inputRefs.current[index] = ref;
+            }}
             style={[
               styles.codeInput,
               { fontFamily: fontFamily.bold },
@@ -141,7 +139,9 @@ export default function VerifyPhoneScreen() {
           {t('auth.didNotReceiveCode')}{' '}
         </Text>
         <TouchableOpacity onPress={handleResend}>
-          <Text style={[styles.resendLink, { fontFamily: fontFamily.medium }]}>{t('auth.resendCode')}</Text>
+          <Text style={[styles.resendLink, { fontFamily: fontFamily.medium }]}>
+            {t('auth.resendCode')}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -151,7 +151,10 @@ export default function VerifyPhoneScreen() {
       {/* Confirm Button */}
       <View style={[styles.bottomSection, { paddingBottom: insets.bottom + spacing.md }]}>
         <TouchableOpacity
-          style={[styles.confirmButton, code.join('').length < CODE_LENGTH && styles.confirmButtonDisabled]}
+          style={[
+            styles.confirmButton,
+            code.join('').length < CODE_LENGTH && styles.confirmButtonDisabled,
+          ]}
           onPress={handleConfirm}
           activeOpacity={0.8}
           disabled={code.join('').length < CODE_LENGTH || loading}
@@ -168,7 +171,9 @@ export default function VerifyPhoneScreen() {
           </Text>
           <Link href="/(auth)/login" asChild>
             <TouchableOpacity>
-              <Text style={[styles.loginLink, { fontFamily: fontFamily.medium }]}>{t('auth.signIn')}</Text>
+              <Text style={[styles.loginLink, { fontFamily: fontFamily.medium }]}>
+                {t('auth.signIn')}
+              </Text>
             </TouchableOpacity>
           </Link>
         </View>
@@ -177,118 +182,120 @@ export default function VerifyPhoneScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    paddingHorizontal: spacing.xl,
-  },
-  backButton: {
-    paddingVertical: spacing.lg,
-  },
-  // Error
-  errorBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: '#FFE5E5',
-    borderWidth: 1,
-    borderColor: '#FFCCCC',
-    borderRadius: 8,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  errorText: {
-    fontSize: 14,
-    color: colors.text.primary,
-    flex: 1,
-    lineHeight: 20,
-  },
-  // Header
-  header: {
-    marginTop: spacing['2xl'],
-    marginBottom: spacing['3xl'],
-  },
-  title: {
-    fontSize: 26,
-    color: colors.text.primary,
-    marginBottom: spacing.md,
-    lineHeight: 34,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: '#6A7282',
-    lineHeight: 22,
-  },
-  // OTP
-  codeContainer: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginBottom: spacing['2xl'],
-  },
-  codeInput: {
-    width: 48,
-    height: 52,
-    borderRadius: 8,
-    textAlign: 'center',
-    fontSize: 22,
-    color: colors.text.primary,
-  },
-  codeInputEmpty: {
-    backgroundColor: '#F0F0F0',
-    borderWidth: 0,
-  },
-  codeInputFilled: {
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  codeInputError: {
-    borderColor: colors.error,
-  },
-  // Resend
-  resendContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  resendText: {
-    fontSize: 14,
-    color: colors.text.primary,
-  },
-  resendLink: {
-    fontSize: 14,
-    color: '#183DE5',
-  },
-  // Bottom
-  bottomSection: {
-    paddingTop: spacing.md,
-  },
-  confirmButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  confirmButtonDisabled: {
-    opacity: 0.5,
-  },
-  confirmText: {
-    fontSize: 16,
-    color: colors.text.inverse,
-  },
-  loginContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: spacing.xl,
-  },
-  loginText: {
-    fontSize: 15,
-    color: colors.text.primary,
-  },
-  loginLink: {
-    fontSize: 15,
-    color: '#183DE5',
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      paddingHorizontal: spacing.xl,
+    },
+    backButton: {
+      paddingVertical: spacing.lg,
+    },
+    // Error
+    errorBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      backgroundColor: colors.errorLight,
+      borderWidth: 1,
+      borderColor: colors.errorLight,
+      borderRadius: 8,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      marginBottom: spacing.lg,
+    },
+    errorText: {
+      fontSize: 14,
+      color: colors.text.primary,
+      flex: 1,
+      lineHeight: 20,
+    },
+    // Header
+    header: {
+      marginTop: spacing['2xl'],
+      marginBottom: spacing['3xl'],
+    },
+    title: {
+      fontSize: 26,
+      color: colors.text.primary,
+      marginBottom: spacing.md,
+      lineHeight: 34,
+    },
+    subtitle: {
+      fontSize: 15,
+      color: colors.text.secondary,
+      lineHeight: 22,
+    },
+    // OTP
+    codeContainer: {
+      flexDirection: 'row',
+      gap: spacing.md,
+      marginBottom: spacing['2xl'],
+    },
+    codeInput: {
+      width: 48,
+      height: 52,
+      borderRadius: 8,
+      textAlign: 'center',
+      fontSize: 22,
+      color: colors.text.primary,
+    },
+    codeInputEmpty: {
+      backgroundColor: colors.gray[2],
+      borderWidth: 0,
+    },
+    codeInputFilled: {
+      backgroundColor: colors.surface,
+      borderWidth: 2,
+      borderColor: colors.primary,
+    },
+    codeInputError: {
+      borderColor: colors.error,
+    },
+    // Resend
+    resendContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    resendText: {
+      fontSize: 14,
+      color: colors.text.primary,
+    },
+    resendLink: {
+      fontSize: 14,
+      color: colors.info,
+    },
+    // Bottom
+    bottomSection: {
+      paddingTop: spacing.md,
+    },
+    confirmButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+      paddingVertical: 16,
+      alignItems: 'center',
+    },
+    confirmButtonDisabled: {
+      opacity: 0.5,
+    },
+    confirmText: {
+      fontSize: 16,
+      color: colors.text.inverse,
+    },
+    loginContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: spacing.xl,
+    },
+    loginText: {
+      fontSize: 15,
+      color: colors.text.primary,
+    },
+    loginLink: {
+      fontSize: 15,
+      color: colors.info,
+    },
+  })
+);
