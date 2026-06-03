@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { CartItemData } from './CartItem';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
+import { useAppFont } from '../../hooks/useAppFont';
 
 interface CartItemContentProps {
   item: CartItemData;
@@ -18,6 +19,7 @@ export const CartItemContent: React.FC<CartItemContentProps> = ({
 }) => {
   const styles = useStyles();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
 
   const handleProductPress = () => {
     if (item.productId) {
@@ -51,21 +53,29 @@ export const CartItemContent: React.FC<CartItemContentProps> = ({
 
       <View style={styles.details}>
         <TouchableOpacity onPress={handleProductPress}>
-          <Text style={styles.productName} numberOfLines={2}>
+          <Text style={[styles.productName, { fontFamily: fontFamily.semiBold }]} numberOfLines={2}>
             {item.productName}
           </Text>
         </TouchableOpacity>
 
         {(item.selectedSize || item.selectedColor) && (
           <View style={styles.attributes}>
-            {item.selectedSize && <Text style={styles.attribute}>Size: {item.selectedSize}</Text>}
+            {item.selectedSize && (
+              <Text style={[styles.attribute, { fontFamily: fontFamily.regular }]}>
+                Size: {item.selectedSize}
+              </Text>
+            )}
             {item.selectedColor && (
-              <Text style={styles.attribute}>Color: {item.selectedColor}</Text>
+              <Text style={[styles.attribute, { fontFamily: fontFamily.regular }]}>
+                Color: {item.selectedColor}
+              </Text>
             )}
           </View>
         )}
 
-        <Text style={styles.price}>{item.price?.toFixed(2)} DZD</Text>
+        <Text style={[styles.price, { fontFamily: fontFamily.semiBold }]}>
+          {item.price?.toFixed(2)} DZD
+        </Text>
 
         <View style={styles.quantityRow}>
           <View style={styles.quantityControls}>
@@ -84,7 +94,9 @@ export const CartItemContent: React.FC<CartItemContentProps> = ({
               />
             </TouchableOpacity>
 
-            <Text style={styles.quantity}>{item.quantity}</Text>
+            <Text style={[styles.quantity, { fontFamily: fontFamily.medium }]}>
+              {item.quantity}
+            </Text>
 
             <TouchableOpacity
               onPress={incrementQuantity}
@@ -95,7 +107,9 @@ export const CartItemContent: React.FC<CartItemContentProps> = ({
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.subtotal}>{item.subtotal?.toFixed(2)} DZD</Text>
+          <Text style={[styles.subtotal, { fontFamily: fontFamily.bold }]}>
+            {item.subtotal?.toFixed(2)} DZD
+          </Text>
         </View>
       </View>
     </>

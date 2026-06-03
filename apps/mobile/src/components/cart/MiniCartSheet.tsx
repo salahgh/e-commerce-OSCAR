@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { useCart } from '../../contexts/CartContext';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 import { Button } from '../ui';
+import { useAppFont } from '../../hooks/useAppFont';
 
 /**
  * Global mini-cart bottom sheet, mounted in app/_layout.tsx.
@@ -26,6 +27,7 @@ export function MiniCartSheet() {
   const router = useRouter();
   const colors = useThemeColors();
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
   const { items, itemCount, subTotal, isMiniCartOpen, closeMiniCart } = useCart();
 
   const go = (path: string) => {
@@ -45,7 +47,7 @@ export function MiniCartSheet() {
           <View style={styles.handle} />
 
           <View style={styles.header}>
-            <Text style={styles.title}>
+            <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>
               {t('miniCart.title')}
               {itemCount > 0 ? ` (${itemCount})` : ''}
             </Text>
@@ -67,22 +69,34 @@ export function MiniCartSheet() {
                   ) : null}
                 </View>
                 <View style={styles.rowBody}>
-                  <Text style={styles.rowName} numberOfLines={1}>
+                  <Text
+                    style={[styles.rowName, { fontFamily: fontFamily.medium }]}
+                    numberOfLines={1}
+                  >
                     {item.productName}
                   </Text>
-                  <Text style={styles.rowVariant} numberOfLines={1}>
+                  <Text
+                    style={[styles.rowVariant, { fontFamily: fontFamily.regular }]}
+                    numberOfLines={1}
+                  >
                     {item.variantName} · ×{item.quantity}
                   </Text>
                 </View>
-                <Text style={styles.rowPrice}>{item.linePrice}</Text>
+                <Text style={[styles.rowPrice, { fontFamily: fontFamily.semiBold }]}>
+                  {item.linePrice}
+                </Text>
               </View>
             ))}
           </ScrollView>
 
           <View style={styles.footer}>
             <View style={styles.subtotalRow}>
-              <Text style={styles.subtotalLabel}>{t('miniCart.subtotal')}</Text>
-              <Text style={styles.subtotalValue}>{subTotal}</Text>
+              <Text style={[styles.subtotalLabel, { fontFamily: fontFamily.regular }]}>
+                {t('miniCart.subtotal')}
+              </Text>
+              <Text style={[styles.subtotalValue, { fontFamily: fontFamily.bold }]}>
+                {subTotal}
+              </Text>
             </View>
             <Button title={t('miniCart.checkout')} onPress={() => go('/checkout')} />
             <View style={{ height: spacing.sm }} />

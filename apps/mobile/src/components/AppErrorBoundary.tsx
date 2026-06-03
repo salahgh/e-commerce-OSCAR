@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { spacing, typography, makeThemedStyles } from '../theme';
+import { useAppFont } from '../hooks/useAppFont';
 
 interface AppErrorBoundaryProps {
   error: Error;
@@ -17,6 +18,7 @@ export function AppErrorBoundary({ error, retry }: AppErrorBoundaryProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
 
   React.useEffect(() => {
     console.error('[AppErrorBoundary]', error);
@@ -24,10 +26,14 @@ export function AppErrorBoundary({ error, retry }: AppErrorBoundaryProps) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.eyebrow}>{t('common.errorEyebrow', 'Something went wrong')}</Text>
-      <Text style={styles.title}>{t('common.errorBoundaryTitle', 'Unexpected error')}</Text>
-      <Text style={styles.message}>{error?.message}</Text>
-      <Text style={styles.hint}>
+      <Text style={[styles.eyebrow, { fontFamily: fontFamily.regular }]}>
+        {t('common.errorEyebrow', 'Something went wrong')}
+      </Text>
+      <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>
+        {t('common.errorBoundaryTitle', 'Unexpected error')}
+      </Text>
+      <Text style={[styles.message, { fontFamily: fontFamily.regular }]}>{error?.message}</Text>
+      <Text style={[styles.hint, { fontFamily: fontFamily.regular }]}>
         {t(
           'common.errorBoundaryMessage',
           'The app ran into a problem. You can try again or go back home.'
@@ -35,7 +41,9 @@ export function AppErrorBoundary({ error, retry }: AppErrorBoundaryProps) {
       </Text>
 
       <TouchableOpacity style={styles.primaryButton} onPress={retry} activeOpacity={0.8}>
-        <Text style={styles.primaryButtonText}>{t('common.retry', 'Retry')}</Text>
+        <Text style={[styles.primaryButtonText, { fontFamily: fontFamily.semiBold }]}>
+          {t('common.retry', 'Retry')}
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -43,7 +51,9 @@ export function AppErrorBoundary({ error, retry }: AppErrorBoundaryProps) {
         onPress={() => router.replace('/(tabs)')}
         activeOpacity={0.8}
       >
-        <Text style={styles.secondaryButtonText}>{t('common.goHome', 'Go home')}</Text>
+        <Text style={[styles.secondaryButtonText, { fontFamily: fontFamily.medium }]}>
+          {t('common.goHome', 'Go home')}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );

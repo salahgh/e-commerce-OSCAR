@@ -16,6 +16,7 @@ import { formatPrice } from '../../src/utils/vendureAdapters';
 import { useCart } from '../../src/contexts/CartContext';
 import { useToast } from '../../src/components/ui';
 import { summarizeReorder } from '../../src/utils/reorder';
+import { useAppFont } from '../../src/hooks/useAppFont';
 
 // Map Vendure order states to display info (palette-aware so colors theme correctly)
 function getOrderStateInfo(state: string, colors: ColorPalette) {
@@ -52,6 +53,7 @@ export default function OrderDetailScreen() {
   const orderCode = params.id;
   const colors = useThemeColors();
   const styles = useStyles();
+  const { fontFamily } = useAppFont();
 
   const { data, loading, error, refetch } = useGetOrderByCodeQuery({
     variables: { code: orderCode },
@@ -181,8 +183,10 @@ export default function OrderDetailScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <Text style={styles.orderNumber}>#{order.code}</Text>
-          <Text style={styles.orderDate}>{formatDate(order.createdAt)}</Text>
+          <Text style={[styles.orderNumber, { fontFamily: fontFamily.bold }]}>#{order.code}</Text>
+          <Text style={[styles.orderDate, { fontFamily: fontFamily.regular }]}>
+            {formatDate(order.createdAt)}
+          </Text>
         </View>
         <Badge
           label={stateInfo.label}
@@ -199,8 +203,12 @@ export default function OrderDetailScreen() {
             <Ionicons name={stateInfo.icon as any} size={32} color={stateInfo.color} />
           </View>
           <View style={styles.statusInfo}>
-            <Text style={[styles.statusLabel, { color: stateInfo.color }]}>{stateInfo.label}</Text>
-            <Text style={styles.statusDate}>
+            <Text
+              style={[styles.statusLabel, { color: stateInfo.color, fontFamily: fontFamily.bold }]}
+            >
+              {stateInfo.label}
+            </Text>
+            <Text style={[styles.statusDate, { fontFamily: fontFamily.regular }]}>
               {t('orders.lastUpdated', 'Last updated')}: {formatDate(order.updatedAt)}
             </Text>
           </View>
@@ -208,24 +216,28 @@ export default function OrderDetailScreen() {
 
         {/* Shipping Information */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
+          <Text style={[styles.sectionTitle, { fontFamily: fontFamily.bold }]}>
             {t('orders.shippingInformation', 'Shipping Information')}
           </Text>
           <View style={styles.sectionContent}>
             <View style={styles.infoRow}>
               <Ionicons name="location-outline" size={20} color={colors.text.secondary} />
-              <Text style={styles.infoText}>{formatAddress()}</Text>
+              <Text style={[styles.infoText, { fontFamily: fontFamily.regular }]}>
+                {formatAddress()}
+              </Text>
             </View>
             {order.shippingAddress?.phoneNumber && (
               <View style={styles.infoRow}>
                 <Ionicons name="call-outline" size={20} color={colors.text.secondary} />
-                <Text style={styles.infoText}>{order.shippingAddress.phoneNumber}</Text>
+                <Text style={[styles.infoText, { fontFamily: fontFamily.regular }]}>
+                  {order.shippingAddress.phoneNumber}
+                </Text>
               </View>
             )}
             {trackingCode && (
               <View style={styles.infoRow}>
                 <Ionicons name="qr-code-outline" size={20} color={colors.text.secondary} />
-                <Text style={styles.infoText}>
+                <Text style={[styles.infoText, { fontFamily: fontFamily.regular }]}>
                   {t('orders.trackingNumber', 'Tracking')}: {trackingCode}
                 </Text>
               </View>
@@ -233,7 +245,9 @@ export default function OrderDetailScreen() {
             {order.shippingLines?.[0] && (
               <View style={styles.infoRow}>
                 <Ionicons name="car-outline" size={20} color={colors.text.secondary} />
-                <Text style={styles.infoText}>{order.shippingLines[0].shippingMethod?.name}</Text>
+                <Text style={[styles.infoText, { fontFamily: fontFamily.regular }]}>
+                  {order.shippingLines[0].shippingMethod?.name}
+                </Text>
               </View>
             )}
           </View>
@@ -241,18 +255,20 @@ export default function OrderDetailScreen() {
 
         {/* Payment Information */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
+          <Text style={[styles.sectionTitle, { fontFamily: fontFamily.bold }]}>
             {t('orders.paymentInformation', 'Payment Information')}
           </Text>
           <View style={styles.sectionContent}>
             <View style={styles.infoRow}>
               <Ionicons name="card-outline" size={20} color={colors.text.secondary} />
-              <Text style={styles.infoText}>{paymentMethod}</Text>
+              <Text style={[styles.infoText, { fontFamily: fontFamily.regular }]}>
+                {paymentMethod}
+              </Text>
             </View>
             {paidAt && (
               <View style={styles.infoRow}>
                 <Ionicons name="checkmark-circle-outline" size={20} color={colors.success} />
-                <Text style={styles.infoText}>
+                <Text style={[styles.infoText, { fontFamily: fontFamily.regular }]}>
                   {t('orders.paidOn', 'Paid on')} {formatDate(paidAt)}
                 </Text>
               </View>
@@ -262,7 +278,7 @@ export default function OrderDetailScreen() {
 
         {/* Order Items */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
+          <Text style={[styles.sectionTitle, { fontFamily: fontFamily.bold }]}>
             {t('orders.orderItems', 'Order Items')} ({order.totalQuantity})
           </Text>
           <View style={styles.itemsList}>
@@ -286,19 +302,30 @@ export default function OrderDetailScreen() {
                     )}
                   </View>
                   <View style={styles.itemDetails}>
-                    <Text style={styles.itemName} numberOfLines={2}>
+                    <Text
+                      style={[styles.itemName, { fontFamily: fontFamily.medium }]}
+                      numberOfLines={2}
+                    >
                       {line.productVariant?.product?.name}
                     </Text>
                     {line.productVariant?.name &&
                       line.productVariant.name !== line.productVariant?.product?.name && (
-                        <Text style={styles.itemVariant}>{line.productVariant.name}</Text>
+                        <Text style={[styles.itemVariant, { fontFamily: fontFamily.regular }]}>
+                          {line.productVariant.name}
+                        </Text>
                       )}
                     <View style={styles.itemPriceRow}>
-                      <Text style={styles.itemQuantity}>Qty: {line.quantity}</Text>
-                      <Text style={styles.itemPrice}>{formatPrice(line.unitPriceWithTax)} DZD</Text>
+                      <Text style={[styles.itemQuantity, { fontFamily: fontFamily.regular }]}>
+                        Qty: {line.quantity}
+                      </Text>
+                      <Text style={[styles.itemPrice, { fontFamily: fontFamily.medium }]}>
+                        {formatPrice(line.unitPriceWithTax)} DZD
+                      </Text>
                     </View>
                   </View>
-                  <Text style={styles.itemSubtotal}>{formatPrice(line.linePriceWithTax)} DZD</Text>
+                  <Text style={[styles.itemSubtotal, { fontFamily: fontFamily.semiBold }]}>
+                    {formatPrice(line.linePriceWithTax)} DZD
+                  </Text>
                 </View>
               );
             })}
@@ -307,22 +334,34 @@ export default function OrderDetailScreen() {
 
         {/* Order Summary */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('orders.orderSummary', 'Order Summary')}</Text>
+          <Text style={[styles.sectionTitle, { fontFamily: fontFamily.bold }]}>
+            {t('orders.orderSummary', 'Order Summary')}
+          </Text>
           <View style={styles.summaryContent}>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>{t('orders.subtotal', 'Subtotal')}</Text>
-              <Text style={styles.summaryValue}>{formatPrice(subTotal)} DZD</Text>
+              <Text style={[styles.summaryLabel, { fontFamily: fontFamily.regular }]}>
+                {t('orders.subtotal', 'Subtotal')}
+              </Text>
+              <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
+                {formatPrice(subTotal)} DZD
+              </Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>{t('orders.shipping', 'Shipping')}</Text>
-              <Text style={styles.summaryValue}>
+              <Text style={[styles.summaryLabel, { fontFamily: fontFamily.regular }]}>
+                {t('orders.shipping', 'Shipping')}
+              </Text>
+              <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
                 {shippingCost > 0 ? `${formatPrice(shippingCost)} DZD` : t('orders.free', 'Free')}
               </Text>
             </View>
             <Divider style={styles.divider} />
             <View style={[styles.summaryRow, styles.totalRow]}>
-              <Text style={styles.totalLabel}>{t('orders.total', 'Total')}</Text>
-              <Text style={styles.totalValue}>{formatPrice(totalAmount)} DZD</Text>
+              <Text style={[styles.totalLabel, { fontFamily: fontFamily.bold }]}>
+                {t('orders.total', 'Total')}
+              </Text>
+              <Text style={[styles.totalValue, { fontFamily: fontFamily.bold }]}>
+                {formatPrice(totalAmount)} DZD
+              </Text>
             </View>
           </View>
         </View>
