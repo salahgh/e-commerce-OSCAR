@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { colors, spacing, typography } from '../../theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../theme';
 
 interface ChipProps {
   label: string;
@@ -19,6 +19,9 @@ export const Chip: React.FC<ChipProps> = ({
   style,
   textStyle,
 }) => {
+  const styles = useStyles();
+  const colors = useThemeColors();
+
   const getChipStyle = (): ViewStyle => {
     if (variant === 'outlined') {
       return {
@@ -59,31 +62,33 @@ export const Chip: React.FC<ChipProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  chip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: spacing.borderRadius.full,
-    marginRight: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  filled: {
-    backgroundColor: colors.background,
-  },
-  filledSelected: {
-    backgroundColor: colors.primary,
-  },
-  outlined: {
-    backgroundColor: colors.transparent,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  outlinedSelected: {
-    borderColor: colors.primary,
-    borderWidth: 2,
-  },
-  text: {
-    ...typography.styles.bodySmall,
-    fontWeight: typography.fontWeight.medium,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    chip: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      borderRadius: spacing.borderRadius.full,
+      marginRight: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    filled: {
+      backgroundColor: colors.background,
+    },
+    filledSelected: {
+      backgroundColor: colors.primary,
+    },
+    outlined: {
+      backgroundColor: colors.transparent,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    outlinedSelected: {
+      borderColor: colors.primary,
+      borderWidth: 2,
+    },
+    text: {
+      ...typography.styles.bodySmall,
+      fontWeight: typography.fontWeight.medium,
+    },
+  })
+);

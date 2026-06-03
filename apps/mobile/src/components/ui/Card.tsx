@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle, TouchableOpacity, TouchableOpacityProps } from 'react-native';
-import { colors, spacing } from '../../theme';
+import { makeThemedStyles, useThemeColors, spacing } from '../../theme';
 
 type CardVariant = 'elevated' | 'outlined' | 'flat';
 
@@ -32,6 +32,9 @@ export const Card: React.FC<CardProps> = ({
   pressable = false,
   ...props
 }) => {
+  const styles = useStyles();
+  const colors = useThemeColors();
+
   const getPadding = () => {
     if (typeof padding === 'number') return padding;
     return spacing[padding] || spacing.lg;
@@ -90,4 +93,10 @@ export const InfoCard: React.FC<CardProps> = (props) => (
 
 export const FlatCard: React.FC<CardProps> = (props) => (
   <Card variant="flat" padding="md" {...props} />
+);
+
+const useStyles = makeThemedStyles((_colors) =>
+  StyleSheet.create({
+    // Card styles are computed inline via getCardStyle() using dynamic colors
+  })
 );

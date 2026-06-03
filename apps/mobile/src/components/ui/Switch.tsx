@@ -1,13 +1,6 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-  ViewStyle,
-} from 'react-native';
-import { colors, spacing, typography } from '../../theme';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, ViewStyle } from 'react-native';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../theme';
 
 interface SwitchProps {
   value: boolean;
@@ -30,6 +23,9 @@ export const Switch: React.FC<SwitchProps> = ({
   containerStyle,
   labelPosition = 'left',
 }) => {
+  const styles = useStyles();
+  const colors = useThemeColors();
+
   const animatedValue = React.useRef(new Animated.Value(value ? 1 : 0)).current;
 
   React.useEffect(() => {
@@ -84,11 +80,7 @@ export const Switch: React.FC<SwitchProps> = ({
 
   const renderLabel = () => (
     <View style={styles.textContainer}>
-      {label && (
-        <Text style={[styles.label, disabled && styles.labelDisabled]}>
-          {label}
-        </Text>
-      )}
+      {label && <Text style={[styles.label, disabled && styles.labelDisabled]}>{label}</Text>}
       {description && <Text style={styles.description}>{description}</Text>}
     </View>
   );
@@ -96,10 +88,7 @@ export const Switch: React.FC<SwitchProps> = ({
   return (
     <View style={[styles.container, containerStyle]}>
       <TouchableOpacity
-        style={[
-          styles.touchable,
-          labelPosition === 'right' && styles.touchableReverse,
-        ]}
+        style={[styles.touchable, labelPosition === 'right' && styles.touchableReverse]}
         onPress={handlePress}
         disabled={disabled}
         activeOpacity={0.7}
@@ -136,53 +125,55 @@ export const Switch: React.FC<SwitchProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.sm,
-  },
-  touchable: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  touchableReverse: {
-    flexDirection: 'row-reverse',
-  },
-  track: {
-    borderRadius: 20,
-    justifyContent: 'center',
-  },
-  trackDisabled: {
-    opacity: 0.5,
-  },
-  thumb: {
-    backgroundColor: colors.surface,
-    borderRadius: 50,
-    position: 'absolute',
-    shadowColor: colors.text.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  thumbDisabled: {
-    backgroundColor: colors.background,
-  },
-  textContainer: {
-    flex: 1,
-    marginHorizontal: spacing.md,
-  },
-  label: {
-    fontSize: typography.fontSize.md,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  labelDisabled: {
-    color: colors.text.disabled,
-  },
-  description: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-    marginTop: spacing.xs,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      marginBottom: spacing.sm,
+    },
+    touchable: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    touchableReverse: {
+      flexDirection: 'row-reverse',
+    },
+    track: {
+      borderRadius: 20,
+      justifyContent: 'center',
+    },
+    trackDisabled: {
+      opacity: 0.5,
+    },
+    thumb: {
+      backgroundColor: colors.surface,
+      borderRadius: 50,
+      position: 'absolute',
+      shadowColor: colors.text.primary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+      elevation: 2,
+    },
+    thumbDisabled: {
+      backgroundColor: colors.background,
+    },
+    textContainer: {
+      flex: 1,
+      marginHorizontal: spacing.md,
+    },
+    label: {
+      fontSize: typography.fontSize.md,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+    },
+    labelDisabled: {
+      color: colors.text.disabled,
+    },
+    description: {
+      fontSize: typography.fontSize.sm,
+      color: colors.text.secondary,
+      marginTop: spacing.xs,
+    },
+  })
+);

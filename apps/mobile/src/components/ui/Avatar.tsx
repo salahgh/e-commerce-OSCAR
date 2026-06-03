@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, ViewStyle, ImageSourcePropType } from 'react-native';
-import { colors, spacing, typography } from '../../theme';
+import { makeThemedStyles, spacing, typography } from '../../theme';
 
 type AvatarSize = 'small' | 'medium' | 'large' | 'xlarge';
 
@@ -12,6 +12,8 @@ interface AvatarProps {
 }
 
 export const Avatar: React.FC<AvatarProps> = ({ source, name, size = 'medium', style }) => {
+  const styles = useStyles();
+
   const getInitials = (fullName?: string): string => {
     if (!fullName) return '?';
     const names = fullName.trim().split(' ');
@@ -88,17 +90,19 @@ export const Avatar: React.FC<AvatarProps> = ({ source, name, size = 'medium', s
   );
 };
 
-const styles = StyleSheet.create({
-  avatar: {
-    overflow: 'hidden',
-  },
-  placeholder: {
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  initials: {
-    color: colors.text.inverse,
-    fontWeight: typography.fontWeight.semiBold,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    avatar: {
+      overflow: 'hidden',
+    },
+    placeholder: {
+      backgroundColor: colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    initials: {
+      color: colors.text.inverse,
+      fontWeight: typography.fontWeight.semiBold,
+    },
+  })
+);
