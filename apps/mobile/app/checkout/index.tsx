@@ -21,7 +21,7 @@ import {
   useActiveCustomerQuery,
 } from '../../src/graphql/generated/graphql';
 import { useAuth } from '../../src/contexts/AuthContext';
-import { colors, spacing, typography } from '../../src/theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
 import { formatPrice } from '../../src/utils/vendureAdapters';
 import { submitCheckoutAddress, STALE_SESSION_ERROR } from '../../src/utils/checkout';
 import { makeShippingAddressSchema } from '../../src/utils/validation';
@@ -33,6 +33,8 @@ import { partitionPaymentMethods } from '../../src/utils/payment';
 type CheckoutStep = 'shipping' | 'shippingMethod' | 'payment' | 'review';
 
 export default function CheckoutScreen() {
+  const styles = useStyles();
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const { order, items, subTotal, shipping, total, refetchCart } = useCart();
   const { user, isAuthenticated } = useAuth();
@@ -44,20 +46,24 @@ export default function CheckoutScreen() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
 
   // GraphQL Mutations
-  const [setShippingAddressMutation, { loading: settingAddress }] = useSetOrderShippingAddressMutation();
-  const [setShippingMethodMutation, { loading: settingShipping }] = useSetOrderShippingMethodMutation();
+  const [setShippingAddressMutation, { loading: settingAddress }] =
+    useSetOrderShippingAddressMutation();
+  const [setShippingMethodMutation, { loading: settingShipping }] =
+    useSetOrderShippingMethodMutation();
   const [transitionOrderMutation, { loading: transitioning }] = useTransitionOrderToStateMutation();
   const [addPaymentMutation, { loading: addingPayment }] = useAddPaymentToOrderMutation();
   const [setCustomerMutation, { loading: settingCustomer }] = useSetCustomerForOrderMutation();
 
   // Queries
-  const { data: shippingMethodsData, loading: loadingShippingMethods } = useGetEligibleShippingMethodsQuery({
-    skip: currentStep !== 'shippingMethod',
-  });
+  const { data: shippingMethodsData, loading: loadingShippingMethods } =
+    useGetEligibleShippingMethodsQuery({
+      skip: currentStep !== 'shippingMethod',
+    });
 
-  const { data: paymentMethodsData, loading: loadingPaymentMethods } = useGetEligiblePaymentMethodsQuery({
-    skip: currentStep !== 'payment',
-  });
+  const { data: paymentMethodsData, loading: loadingPaymentMethods } =
+    useGetEligiblePaymentMethodsQuery({
+      skip: currentStep !== 'payment',
+    });
 
   // Prefill the address form for logged-in customers (mirrors the frontend checkout).
   const prefill: Partial<ShippingAddressFormValues> | undefined =
@@ -70,7 +76,10 @@ export default function CheckoutScreen() {
       : undefined;
 
   // Saved addresses for the signed-in shopper — selecting one prefills the form.
-  const { data: customerData } = useActiveCustomerQuery({ skip: !isAuthenticated, fetchPolicy: 'cache-and-network' });
+  const { data: customerData } = useActiveCustomerQuery({
+    skip: !isAuthenticated,
+    fetchPolicy: 'cache-and-network',
+  });
   const savedAddresses = (customerData?.activeCustomer?.addresses ?? []) as SavedAddress[];
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
 
@@ -83,7 +92,8 @@ export default function CheckoutScreen() {
 
   const selectedAddress = savedAddresses.find((a) => a.id === selectedAddressId) ?? null;
   const formInitialValues =
-    shippingAddress ?? (selectedAddress ? addressToCheckoutValues(selectedAddress, wilayas) : prefill);
+    shippingAddress ??
+    (selectedAddress ? addressToCheckoutValues(selectedAddress, wilayas) : prefill);
 
   const shippingMethods = shippingMethodsData?.eligibleShippingMethods || [];
   const paymentMethods = paymentMethodsData?.eligiblePaymentMethods || [];
@@ -117,7 +127,8 @@ export default function CheckoutScreen() {
         setCustomer: async (input) =>
           (await setCustomerMutation({ variables: { input } })).data?.setCustomerForOrder,
         setShippingAddress: async (input) =>
-          (await setShippingAddressMutation({ variables: { input } })).data?.setOrderShippingAddress,
+          (await setShippingAddressMutation({ variables: { input } })).data
+            ?.setOrderShippingAddress,
       });
 
       setShippingAddress(values);
@@ -126,7 +137,10 @@ export default function CheckoutScreen() {
     } catch (error: any) {
       const message =
         error?.message === STALE_SESSION_ERROR
-          ? t('checkout.staleSession', 'Your session is out of sync — please sign in again to continue.')
+          ? t(
+              'checkout.staleSession',
+              'Your session is out of sync — please sign in again to continue.'
+            )
           : error?.message || t('checkout.addressError', 'Failed to set shipping address');
       console.error('Set shipping address error:', error);
       Alert.alert(t('common.error', 'Error'), message);
@@ -187,7 +201,7 @@ export default function CheckoutScreen() {
       }
 
       // Find the payment method code
-      const paymentMethod = paymentMethods.find(m => m.id === selectedPaymentMethod);
+      const paymentMethod = paymentMethods.find((m) => m.id === selectedPaymentMethod);
       const paymentMethodCode = paymentMethod?.code || 'cash-on-delivery';
 
       // Add payment to order
@@ -240,7 +254,8 @@ export default function CheckoutScreen() {
     }
   };
 
-  const isLoading = settingAddress || settingShipping || transitioning || addingPayment || settingCustomer;
+  const isLoading =
+    settingAddress || settingShipping || transitioning || addingPayment || settingCustomer;
 
   if (items.length === 0) {
     return (
@@ -463,7 +478,7 @@ export default function CheckoutScreen() {
                 <Text style={styles.comingSoonNote}>
                   {t(
                     'checkout.onlinePaymentSoonNote',
-                    'CIB and BaridiMob online payment will be available soon. For now, pay cash on delivery.',
+                    'CIB and BaridiMob online payment will be available soon. For now, pay cash on delivery.'
                   )}
                 </Text>
               </View>
@@ -583,6 +598,8 @@ function StepItem({
   isActive: boolean;
   isComplete: boolean;
 }) {
+  const styles = useStyles();
+  const colors = useThemeColors();
   return (
     <View style={styles.stepItem}>
       <View
@@ -605,261 +622,263 @@ function StepItem({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: spacing.lg,
-    paddingTop: spacing.xl,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  headerTitle: {
-    ...typography.styles.h3,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-  },
-  placeholder: {
-    width: 40,
-  },
-  stepIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: spacing.md,
-    backgroundColor: colors.surface,
-  },
-  stepItem: {
-    alignItems: 'center',
-    gap: 4,
-  },
-  stepCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: colors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  stepCircleActive: {
-    backgroundColor: colors.primary,
-  },
-  stepCircleComplete: {
-    backgroundColor: colors.success,
-  },
-  stepNumber: {
-    fontSize: 12,
-    color: colors.text.tertiary,
-    fontWeight: typography.fontWeight.bold,
-  },
-  stepNumberActive: {
-    color: colors.surface,
-  },
-  stepLabel: {
-    fontSize: 10,
-    color: colors.text.tertiary,
-  },
-  stepLabelActive: {
-    color: colors.primary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  stepLine: {
-    flex: 1,
-    height: 2,
-    backgroundColor: colors.border,
-    marginHorizontal: 4,
-  },
-  content: {
-    flex: 1,
-    padding: spacing.lg,
-  },
-  stepContent: {
-    gap: spacing.md,
-  },
-  sectionTitle: {
-    ...typography.styles.h4,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.semiBold,
-    marginBottom: spacing.sm,
-  },
-  noMethodsText: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    padding: spacing.xl,
-  },
-  methodCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  methodCardSelected: {
-    borderColor: colors.primary,
-  },
-  methodCardDisabled: {
-    opacity: 0.5,
-  },
-  methodRadio: {
-    marginRight: spacing.md,
-  },
-  radioOuter: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    borderColor: colors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  radioOuterSelected: {
-    borderColor: colors.primary,
-  },
-  radioOuterDisabled: {
-    borderColor: colors.text.tertiary,
-  },
-  radioInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: colors.primary,
-  },
-  methodInfo: {
-    flex: 1,
-  },
-  methodName: {
-    ...typography.styles.body,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.semiBold,
-  },
-  methodNameDisabled: {
-    color: colors.text.tertiary,
-  },
-  methodDescription: {
-    ...typography.styles.bodySmall,
-    color: colors.text.secondary,
-    marginTop: 2,
-  },
-  eligibilityMessage: {
-    ...typography.styles.caption,
-    color: colors.error,
-    marginTop: 4,
-  },
-  methodPrice: {
-    ...typography.styles.body,
-    color: colors.primary,
-    fontWeight: typography.fontWeight.bold,
-  },
-  continueButton: {
-    marginTop: spacing.lg,
-  },
-  comingSoonSection: {
-    marginTop: spacing.xl,
-  },
-  comingSoonSectionTitle: {
-    ...typography.styles.bodySmall,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.semiBold,
-    marginBottom: spacing.sm,
-  },
-  comingSoonIcon: {
-    marginRight: spacing.md,
-  },
-  comingSoonBadge: {
-    backgroundColor: colors.border,
-    borderRadius: 12,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-  },
-  comingSoonBadgeText: {
-    ...typography.styles.caption,
-    color: colors.text.secondary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  comingSoonNote: {
-    ...typography.styles.caption,
-    color: colors.text.tertiary,
-    marginTop: spacing.sm,
-  },
-  reviewSection: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-  },
-  reviewHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  reviewTitle: {
-    ...typography.styles.body,
-    fontWeight: typography.fontWeight.semiBold,
-    color: colors.text.primary,
-  },
-  editButton: {
-    ...typography.styles.body,
-    color: colors.primary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  reviewContent: {
-    gap: spacing.xs,
-  },
-  reviewText: {
-    ...typography.styles.body,
-    color: colors.text.primary,
-  },
-  reviewTextSecondary: {
-    ...typography.styles.bodySmall,
-    color: colors.text.secondary,
-    fontStyle: 'italic',
-  },
-  placeOrderButton: {
-    marginTop: spacing.lg,
-  },
-  terms: {
-    ...typography.styles.caption,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-    marginTop: spacing.md,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing['2xl'],
-  },
-  emptyTitle: {
-    ...typography.styles.h3,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-    marginTop: spacing.lg,
-    marginBottom: spacing.sm,
-  },
-  emptyMessage: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-  },
-  emptyButton: {
-    minWidth: 200,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: spacing.lg,
+      paddingTop: spacing.xl,
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    backButton: {
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'flex-start',
+    },
+    headerTitle: {
+      ...typography.styles.h3,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.bold,
+    },
+    placeholder: {
+      width: 40,
+    },
+    stepIndicator: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: spacing.md,
+      backgroundColor: colors.surface,
+    },
+    stepItem: {
+      alignItems: 'center',
+      gap: 4,
+    },
+    stepCircle: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: colors.border,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    stepCircleActive: {
+      backgroundColor: colors.primary,
+    },
+    stepCircleComplete: {
+      backgroundColor: colors.success,
+    },
+    stepNumber: {
+      fontSize: 12,
+      color: colors.text.tertiary,
+      fontWeight: typography.fontWeight.bold,
+    },
+    stepNumberActive: {
+      color: colors.surface,
+    },
+    stepLabel: {
+      fontSize: 10,
+      color: colors.text.tertiary,
+    },
+    stepLabelActive: {
+      color: colors.primary,
+      fontWeight: typography.fontWeight.medium,
+    },
+    stepLine: {
+      flex: 1,
+      height: 2,
+      backgroundColor: colors.border,
+      marginHorizontal: 4,
+    },
+    content: {
+      flex: 1,
+      padding: spacing.lg,
+    },
+    stepContent: {
+      gap: spacing.md,
+    },
+    sectionTitle: {
+      ...typography.styles.h4,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.semiBold,
+      marginBottom: spacing.sm,
+    },
+    noMethodsText: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      textAlign: 'center',
+      padding: spacing.xl,
+    },
+    methodCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+      borderWidth: 2,
+      borderColor: 'transparent',
+    },
+    methodCardSelected: {
+      borderColor: colors.primary,
+    },
+    methodCardDisabled: {
+      opacity: 0.5,
+    },
+    methodRadio: {
+      marginRight: spacing.md,
+    },
+    radioOuter: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      borderWidth: 2,
+      borderColor: colors.border,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    radioOuterSelected: {
+      borderColor: colors.primary,
+    },
+    radioOuterDisabled: {
+      borderColor: colors.text.tertiary,
+    },
+    radioInner: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: colors.primary,
+    },
+    methodInfo: {
+      flex: 1,
+    },
+    methodName: {
+      ...typography.styles.body,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.semiBold,
+    },
+    methodNameDisabled: {
+      color: colors.text.tertiary,
+    },
+    methodDescription: {
+      ...typography.styles.bodySmall,
+      color: colors.text.secondary,
+      marginTop: 2,
+    },
+    eligibilityMessage: {
+      ...typography.styles.caption,
+      color: colors.error,
+      marginTop: 4,
+    },
+    methodPrice: {
+      ...typography.styles.body,
+      color: colors.primary,
+      fontWeight: typography.fontWeight.bold,
+    },
+    continueButton: {
+      marginTop: spacing.lg,
+    },
+    comingSoonSection: {
+      marginTop: spacing.xl,
+    },
+    comingSoonSectionTitle: {
+      ...typography.styles.bodySmall,
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.semiBold,
+      marginBottom: spacing.sm,
+    },
+    comingSoonIcon: {
+      marginRight: spacing.md,
+    },
+    comingSoonBadge: {
+      backgroundColor: colors.border,
+      borderRadius: 12,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+    },
+    comingSoonBadgeText: {
+      ...typography.styles.caption,
+      color: colors.text.secondary,
+      fontWeight: typography.fontWeight.medium,
+    },
+    comingSoonNote: {
+      ...typography.styles.caption,
+      color: colors.text.tertiary,
+      marginTop: spacing.sm,
+    },
+    reviewSection: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: spacing.md,
+      marginBottom: spacing.md,
+    },
+    reviewHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.sm,
+    },
+    reviewTitle: {
+      ...typography.styles.body,
+      fontWeight: typography.fontWeight.semiBold,
+      color: colors.text.primary,
+    },
+    editButton: {
+      ...typography.styles.body,
+      color: colors.primary,
+      fontWeight: typography.fontWeight.medium,
+    },
+    reviewContent: {
+      gap: spacing.xs,
+    },
+    reviewText: {
+      ...typography.styles.body,
+      color: colors.text.primary,
+    },
+    reviewTextSecondary: {
+      ...typography.styles.bodySmall,
+      color: colors.text.secondary,
+      fontStyle: 'italic',
+    },
+    placeOrderButton: {
+      marginTop: spacing.lg,
+    },
+    terms: {
+      ...typography.styles.caption,
+      color: colors.text.tertiary,
+      textAlign: 'center',
+      marginTop: spacing.md,
+    },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: spacing['2xl'],
+    },
+    emptyTitle: {
+      ...typography.styles.h3,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.bold,
+      marginTop: spacing.lg,
+      marginBottom: spacing.sm,
+    },
+    emptyMessage: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      textAlign: 'center',
+      marginBottom: spacing.xl,
+    },
+    emptyButton: {
+      minWidth: 200,
+    },
+  })
+);
