@@ -3,7 +3,7 @@ import { View, StyleSheet, Animated, StatusBar, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
-import { spacing, typography, makeThemedStyles } from '../src/theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../src/theme';
 import Logo from '../assets/images/logooscarsvg1.svg';
 
 const ONBOARDING_KEY = '@oscar_onboarding_complete';
@@ -12,6 +12,7 @@ export default function SplashScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const styles = useStyles();
+  const colors = useThemeColors();
 
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const logoScale = useRef(new Animated.Value(0.8)).current;
@@ -77,7 +78,7 @@ export default function SplashScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.surface} />
       <View></View>
       <Animated.View style={[styles.content, { opacity: exitOpacity }]}>
         {/* Logo */}
