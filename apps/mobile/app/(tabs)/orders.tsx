@@ -1,37 +1,39 @@
 import React, { useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  RefreshControl,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { EmptyState, ErrorState, LoadingSpinner, Badge } from '../../src/components/ui';
 import { useGetMyOrdersQuery } from '../../src/graphql/generated/graphql';
 import { useAuth } from '../../src/contexts/AuthContext';
-import { colors, spacing, typography } from '../../src/theme';
+import {
+  spacing,
+  typography,
+  makeThemedStyles,
+  useThemeColors,
+  type ColorPalette,
+} from '../../src/theme';
 import { formatPrice } from '../../src/utils/vendureAdapters';
 
-// Map Vendure order states to display info
-const orderStateMap: Record<string, { label: string; color: string; icon: string }> = {
-  AddingItems: { label: 'Draft', color: colors.text.tertiary, icon: 'cart-outline' },
-  ArrangingPayment: { label: 'Awaiting Payment', color: colors.warning, icon: 'time-outline' },
-  PaymentAuthorized: { label: 'Payment Authorized', color: colors.info, icon: 'card-outline' },
-  PaymentSettled: { label: 'Paid', color: colors.success, icon: 'checkmark-circle-outline' },
-  PartiallyShipped: { label: 'Partially Shipped', color: colors.info, icon: 'cube-outline' },
-  Shipped: { label: 'Shipped', color: colors.info, icon: 'airplane-outline' },
-  PartiallyDelivered: { label: 'Partially Delivered', color: colors.info, icon: 'cube-outline' },
-  Delivered: { label: 'Delivered', color: colors.success, icon: 'checkmark-done-outline' },
-  Modifying: { label: 'Modifying', color: colors.warning, icon: 'create-outline' },
-  ArrangingAdditionalPayment: { label: 'Additional Payment Required', color: colors.warning, icon: 'card-outline' },
-  Cancelled: { label: 'Cancelled', color: colors.error, icon: 'close-circle-outline' },
-};
-
-function getOrderStateInfo(state: string) {
+// Map Vendure order states to display info (palette-aware so colors theme correctly)
+function getOrderStateInfo(state: string, colors: ColorPalette) {
+  const orderStateMap: Record<string, { label: string; color: string; icon: string }> = {
+    AddingItems: { label: 'Draft', color: colors.text.tertiary, icon: 'cart-outline' },
+    ArrangingPayment: { label: 'Awaiting Payment', color: colors.warning, icon: 'time-outline' },
+    PaymentAuthorized: { label: 'Payment Authorized', color: colors.info, icon: 'card-outline' },
+    PaymentSettled: { label: 'Paid', color: colors.success, icon: 'checkmark-circle-outline' },
+    PartiallyShipped: { label: 'Partially Shipped', color: colors.info, icon: 'cube-outline' },
+    Shipped: { label: 'Shipped', color: colors.info, icon: 'airplane-outline' },
+    PartiallyDelivered: { label: 'Partially Delivered', color: colors.info, icon: 'cube-outline' },
+    Delivered: { label: 'Delivered', color: colors.success, icon: 'checkmark-done-outline' },
+    Modifying: { label: 'Modifying', color: colors.warning, icon: 'create-outline' },
+    ArrangingAdditionalPayment: {
+      label: 'Additional Payment Required',
+      color: colors.warning,
+      icon: 'card-outline',
+    },
+    Cancelled: { label: 'Cancelled', color: colors.error, icon: 'close-circle-outline' },
+  };
   return (
     orderStateMap[state] || {
       label: state,
@@ -80,13 +82,14 @@ interface OrderItemProps {
 
 function OrderItem({ order, onPress }: OrderItemProps) {
   const { t } = useTranslation();
-  const stateInfo = getOrderStateInfo(order.state);
+  const colors = useThemeColors();
+  const styles = useStyles();
+  const stateInfo = getOrderStateInfo(order.state, colors);
 
   // Get first product image
   const firstLine = order.lines[0];
   const productImage =
-    firstLine?.featuredAsset?.preview ||
-    firstLine?.productVariant?.product?.featuredAsset?.preview;
+    firstLine?.featuredAsset?.preview || firstLine?.productVariant?.product?.featuredAsset?.preview;
 
   return (
     <TouchableOpacity style={styles.orderCard} onPress={onPress} activeOpacity={0.7}>
@@ -131,6 +134,8 @@ function OrderItem({ order, onPress }: OrderItemProps) {
 export default function OrdersScreen() {
   const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
+  const colors = useThemeColors();
+  const styles = useStyles();
   const [refreshing, setRefreshing] = useState(false);
 
   const { data, loading, error, refetch } = useGetMyOrdersQuery({
@@ -169,16 +174,11 @@ export default function OrdersScreen() {
         </View>
         <View style={styles.authPrompt}>
           <Ionicons name="lock-closed-outline" size={64} color={colors.text.tertiary} />
-          <Text style={styles.authTitle}>
-            {t('orders.loginRequired', 'Login Required')}
-          </Text>
+          <Text style={styles.authTitle}>{t('orders.loginRequired', 'Login Required')}</Text>
           <Text style={styles.authMessage}>
             {t('orders.loginMessage', 'Please log in to view your orders')}
           </Text>
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={() => router.push('/(auth)/login')}
-          >
+          <TouchableOpacity style={styles.loginButton} onPress={() => router.push('/(auth)/login')}>
             <Text style={styles.loginButtonText}>{t('auth.login', 'Log In')}</Text>
           </TouchableOpacity>
         </View>
@@ -254,10 +254,7 @@ export default function OrdersScreen() {
         data={orders}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <OrderItem
-            order={item as any}
-            onPress={() => handleOrderPress(item.code)}
-          />
+          <OrderItem order={item as any} onPress={() => handleOrderPress(item.code)} />
         )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
@@ -274,133 +271,135 @@ export default function OrdersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
-    paddingTop: spacing.xl,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  headerTitle: {
-    ...typography.styles.h3,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-    marginBottom: spacing.xs,
-  },
-  headerSubtitle: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-  },
-  listContent: {
-    padding: spacing.md,
-  },
-  orderCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  orderHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing.md,
-  },
-  orderNumber: {
-    ...typography.styles.h4,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-  },
-  orderDate: {
-    ...typography.styles.caption,
-    color: colors.text.tertiary,
-    marginTop: 2,
-  },
-  orderDetails: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: colors.border,
-  },
-  orderItems: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  orderItemsText: {
-    ...typography.styles.bodySmall,
-    color: colors.text.secondary,
-  },
-  orderTotal: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  orderTotalLabel: {
-    ...typography.styles.bodySmall,
-    color: colors.text.secondary,
-  },
-  orderTotalValue: {
-    ...typography.styles.body,
-    color: colors.primary,
-    fontWeight: typography.fontWeight.bold,
-  },
-  orderFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: spacing.md,
-  },
-  statusIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  statusText: {
-    ...typography.styles.bodySmall,
-    fontWeight: typography.fontWeight.medium,
-  },
-  authPrompt: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xl,
-  },
-  authTitle: {
-    ...typography.styles.h3,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-    marginTop: spacing.lg,
-    marginBottom: spacing.sm,
-  },
-  authMessage: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-  },
-  loginButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.xl,
-    borderRadius: spacing.borderRadius.lg,
-  },
-  loginButtonText: {
-    ...typography.styles.body,
-    color: colors.surface,
-    fontWeight: typography.fontWeight.semiBold,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      backgroundColor: colors.surface,
+      padding: spacing.lg,
+      paddingTop: spacing.xl,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    headerTitle: {
+      ...typography.styles.h3,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.bold,
+      marginBottom: spacing.xs,
+    },
+    headerSubtitle: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+    },
+    listContent: {
+      padding: spacing.md,
+    },
+    orderCard: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: spacing.md,
+      marginBottom: spacing.md,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    orderHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: spacing.md,
+    },
+    orderNumber: {
+      ...typography.styles.h4,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.bold,
+    },
+    orderDate: {
+      ...typography.styles.caption,
+      color: colors.text.tertiary,
+      marginTop: 2,
+    },
+    orderDetails: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: spacing.sm,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: colors.border,
+    },
+    orderItems: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+    },
+    orderItemsText: {
+      ...typography.styles.bodySmall,
+      color: colors.text.secondary,
+    },
+    orderTotal: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+    },
+    orderTotalLabel: {
+      ...typography.styles.bodySmall,
+      color: colors.text.secondary,
+    },
+    orderTotalValue: {
+      ...typography.styles.body,
+      color: colors.primary,
+      fontWeight: typography.fontWeight.bold,
+    },
+    orderFooter: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: spacing.md,
+    },
+    statusIndicator: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+    },
+    statusText: {
+      ...typography.styles.bodySmall,
+      fontWeight: typography.fontWeight.medium,
+    },
+    authPrompt: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: spacing.xl,
+    },
+    authTitle: {
+      ...typography.styles.h3,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.bold,
+      marginTop: spacing.lg,
+      marginBottom: spacing.sm,
+    },
+    authMessage: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      textAlign: 'center',
+      marginBottom: spacing.xl,
+    },
+    loginButton: {
+      backgroundColor: colors.primary,
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.xl,
+      borderRadius: spacing.borderRadius.lg,
+    },
+    loginButtonText: {
+      ...typography.styles.body,
+      color: colors.surface,
+      fontWeight: typography.fontWeight.semiBold,
+    },
+  })
+);
