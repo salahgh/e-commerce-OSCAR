@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { FilterSheet } from './FilterSheet';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 import { useAppFont } from '../../hooks/useAppFont';
 
 const DEFAULT_SIZES = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
@@ -27,6 +27,8 @@ export const SizeSheet: React.FC<SizeSheetProps> = ({
 }) => {
   const { fontFamily } = useAppFont();
   const { t } = useTranslation();
+  const colors = useThemeColors();
+  const styles = useStyles();
   const [selected, setSelected] = useState<string[]>(value);
 
   useEffect(() => {
@@ -34,9 +36,7 @@ export const SizeSheet: React.FC<SizeSheetProps> = ({
   }, [visible, value]);
 
   const toggle = (size: string) => {
-    setSelected((prev) =>
-      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
-    );
+    setSelected((prev) => (prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]));
   };
 
   return (
@@ -45,7 +45,10 @@ export const SizeSheet: React.FC<SizeSheetProps> = ({
       onClose={onClose}
       title={t('filters.taille')}
       onClear={() => setSelected([])}
-      onSave={() => { onApply(selected); onClose(); }}
+      onSave={() => {
+        onApply(selected);
+        onClose();
+      }}
       resultCount={resultCount}
     >
       {availableSizes.map((size) => {
@@ -59,9 +62,7 @@ export const SizeSheet: React.FC<SizeSheetProps> = ({
           >
             <Text style={[styles.label, { fontFamily: fontFamily.medium }]}>{size}</Text>
             <View style={[styles.checkbox, isChecked && styles.checkboxChecked]}>
-              {isChecked && (
-                <Ionicons name="checkmark" size={16} color={colors.text.inverse} />
-              )}
+              {isChecked && <Ionicons name="checkmark" size={16} color={colors.text.inverse} />}
             </View>
           </TouchableOpacity>
         );
@@ -70,30 +71,32 @@ export const SizeSheet: React.FC<SizeSheetProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  label: {
-    fontSize: typography.fontSize.md,
-    color: colors.text.primary,
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: spacing.borderRadius.sm,
-    borderWidth: 2,
-    borderColor: colors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxChecked: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+    },
+    label: {
+      fontSize: typography.fontSize.md,
+      color: colors.text.primary,
+    },
+    checkbox: {
+      width: 22,
+      height: 22,
+      borderRadius: spacing.borderRadius.sm,
+      borderWidth: 2,
+      borderColor: colors.border,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    checkboxChecked: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+  })
+);

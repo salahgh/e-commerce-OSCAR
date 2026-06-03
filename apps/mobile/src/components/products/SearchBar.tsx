@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 
 interface SearchBarProps {
   value: string;
@@ -31,6 +31,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   loading = false,
 }) => {
   const { t } = useTranslation();
+  const colors = useThemeColors();
+  const styles = useStyles();
   const [isFocused, setIsFocused] = useState(false);
 
   const handleClear = () => {
@@ -70,54 +72,54 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       {/* Loading or Clear Button */}
       {loading ? (
         <ActivityIndicator size="small" color={colors.primary} style={styles.rightIcon} />
-      ) : (
-        value.length > 0 ? (
-          <TouchableOpacity
-            onPress={handleClear}
-            style={styles.clearButton}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Ionicons name="close-circle" size={20} color={colors.text.tertiary} />
-          </TouchableOpacity>
-        ) : null
-      )}
+      ) : value.length > 0 ? (
+        <TouchableOpacity
+          onPress={handleClear}
+          style={styles.clearButton}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="close-circle" size={20} color={colors.text.tertiary} />
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing.md,
-    height: 48,
-  },
-  containerFocused: {
-    borderColor: colors.primary,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  searchIcon: {
-    marginRight: spacing.sm,
-  },
-  input: {
-    flex: 1,
-    ...typography.styles.body,
-    color: colors.text.primary,
-    padding: 0,
-  },
-  rightIcon: {
-    marginLeft: spacing.sm,
-  },
-  clearButton: {
-    marginLeft: spacing.sm,
-    padding: spacing.xs,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: spacing.md,
+      height: 48,
+    },
+    containerFocused: {
+      borderColor: colors.primary,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    searchIcon: {
+      marginRight: spacing.sm,
+    },
+    input: {
+      flex: 1,
+      ...typography.styles.body,
+      color: colors.text.primary,
+      padding: 0,
+    },
+    rightIcon: {
+      marginLeft: spacing.sm,
+    },
+    clearButton: {
+      marginLeft: spacing.sm,
+      padding: spacing.xs,
+    },
+  })
+);

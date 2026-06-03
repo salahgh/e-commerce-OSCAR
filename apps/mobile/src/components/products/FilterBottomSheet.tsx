@@ -17,7 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles } from '../../theme';
 import { Button, Chip, Checkbox } from '../ui';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -94,6 +94,7 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
       : availableColors.map((label) => ({ label, count: 0 }));
   const insets = useSafeAreaInsets();
   const translateY = useSharedValue(0);
+  const styles = useStyles();
 
   const [filters, setFilters] = useState<FilterOptions>(initialFilters);
 
@@ -135,9 +136,7 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
 
   const handleSizeToggle = (size: string) => {
     const current = filters.sizes || [];
-    const updated = current.includes(size)
-      ? current.filter((s) => s !== size)
-      : [...current, size];
+    const updated = current.includes(size) ? current.filter((s) => s !== size) : [...current, size];
     setFilters({ ...filters, sizes: updated });
   };
 
@@ -150,10 +149,7 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
   };
 
   const handlePriceRange = (range: { min: number; max: number }) => {
-    if (
-      filters.priceRange?.min === range.min &&
-      filters.priceRange?.max === range.max
-    ) {
+    if (filters.priceRange?.min === range.min && filters.priceRange?.max === range.max) {
       setFilters({ ...filters, priceRange: undefined });
     } else {
       setFilters({ ...filters, priceRange: range });
@@ -182,11 +178,7 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
   return (
     <Modal transparent visible={visible} onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <TouchableOpacity
-          style={styles.backdrop}
-          activeOpacity={1}
-          onPress={onClose}
-        />
+        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
         <GestureDetector gesture={gesture}>
           <Animated.View style={[styles.container, animatedStyle]}>
             {/* Handle */}
@@ -219,10 +211,7 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
                       onPress={() =>
                         setFilters({
                           ...filters,
-                          sortBy:
-                            filters.sortBy === option.value
-                              ? undefined
-                              : option.value,
+                          sortBy: filters.sortBy === option.value ? undefined : option.value,
                         })
                       }
                     />
@@ -300,16 +289,12 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
                 <Text style={styles.sectionTitle}>Other</Text>
                 <Checkbox
                   checked={filters.inStock || false}
-                  onChange={(checked) =>
-                    setFilters({ ...filters, inStock: checked })
-                  }
+                  onChange={(checked) => setFilters({ ...filters, inStock: checked })}
                   label="In Stock Only"
                 />
                 <Checkbox
                   checked={filters.onSale || false}
-                  onChange={(checked) =>
-                    setFilters({ ...filters, onSale: checked })
-                  }
+                  onChange={(checked) => setFilters({ ...filters, onSale: checked })}
                   label="On Sale"
                 />
               </View>
@@ -330,75 +315,77 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.overlay,
-  },
-  container: {
-    position: 'absolute',
-    top: SCREEN_HEIGHT,
-    left: 0,
-    right: 0,
-    height: SCREEN_HEIGHT * 0.85,
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: spacing.borderRadius.xl,
-    borderTopRightRadius: spacing.borderRadius.xl,
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: colors.border,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginTop: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  title: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-  },
-  resetText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.primary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: spacing.lg,
-  },
-  section: {
-    marginTop: spacing.lg,
-  },
-  sectionTitle: {
-    fontSize: typography.fontSize.md,
-    fontWeight: typography.fontWeight.semiBold,
-    color: colors.text.primary,
-    marginBottom: spacing.md,
-  },
-  chipContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  footer: {
-    padding: spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    overlay: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: colors.overlay,
+    },
+    container: {
+      position: 'absolute',
+      top: SCREEN_HEIGHT,
+      left: 0,
+      right: 0,
+      height: SCREEN_HEIGHT * 0.85,
+      backgroundColor: colors.surface,
+      borderTopLeftRadius: spacing.borderRadius.xl,
+      borderTopRightRadius: spacing.borderRadius.xl,
+    },
+    handle: {
+      width: 40,
+      height: 4,
+      backgroundColor: colors.border,
+      borderRadius: 2,
+      alignSelf: 'center',
+      marginTop: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    title: {
+      fontSize: typography.fontSize.lg,
+      fontWeight: typography.fontWeight.bold,
+      color: colors.text.primary,
+    },
+    resetText: {
+      fontSize: typography.fontSize.sm,
+      color: colors.primary,
+      fontWeight: typography.fontWeight.medium,
+    },
+    content: {
+      flex: 1,
+      paddingHorizontal: spacing.lg,
+    },
+    section: {
+      marginTop: spacing.lg,
+    },
+    sectionTitle: {
+      fontSize: typography.fontSize.md,
+      fontWeight: typography.fontWeight.semiBold,
+      color: colors.text.primary,
+      marginBottom: spacing.md,
+    },
+    chipContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    footer: {
+      padding: spacing.lg,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+  })
+);

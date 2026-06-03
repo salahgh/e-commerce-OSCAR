@@ -10,7 +10,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 import { useTranslation } from 'react-i18next';
 import { useAppFont } from '../../hooks/useAppFont';
 import { Button } from '../ui';
@@ -43,6 +43,8 @@ export const FilterSheet: React.FC<FilterSheetProps> = ({
 }) => {
   const { fontFamily } = useAppFont();
   const { t } = useTranslation();
+  const colors = useThemeColors();
+  const styles = useStyles();
   const resolvedClearLabel = clearLabel || t('filters.clearAll');
   const resolvedSaveLabel = saveLabel || t('filters.save');
 
@@ -55,7 +57,10 @@ export const FilterSheet: React.FC<FilterSheetProps> = ({
               {/* Header */}
               <View style={styles.header}>
                 <Text style={[styles.title, { fontFamily: fontFamily.medium }]}>{title}</Text>
-                <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <TouchableOpacity
+                  onPress={onClose}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
                   <Ionicons name="close" size={22} color={colors.text.primary} />
                 </TouchableOpacity>
               </View>
@@ -75,7 +80,11 @@ export const FilterSheet: React.FC<FilterSheetProps> = ({
                   style={styles.footerButton}
                 />
                 <Button
-                  title={resultCount !== undefined ? `${resolvedSaveLabel} (${resultCount})` : resolvedSaveLabel}
+                  title={
+                    resultCount !== undefined
+                      ? `${resolvedSaveLabel} (${resultCount})`
+                      : resolvedSaveLabel
+                  }
                   variant="primary"
                   onPress={onSave}
                   size="medium"
@@ -90,49 +99,51 @@ export const FilterSheet: React.FC<FilterSheetProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  popup: {
-    width: POPUP_WIDTH,
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    maxHeight: '70%',
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.md,
-  },
-  title: {
-    fontSize: typography.fontSize.lg,
-    color: colors.text.primary,
-  },
-  content: {
-    paddingHorizontal: spacing.xl,
-    paddingBottom: spacing.md,
-  },
-  footer: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.lg,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-  },
-  footerButton: {
-    flex: 1,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.3)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    popup: {
+      width: POPUP_WIDTH,
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      maxHeight: '70%',
+      elevation: 10,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.15,
+      shadowRadius: 12,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: spacing.xl,
+      paddingTop: spacing.lg,
+      paddingBottom: spacing.md,
+    },
+    title: {
+      fontSize: typography.fontSize.lg,
+      color: colors.text.primary,
+    },
+    content: {
+      paddingHorizontal: spacing.xl,
+      paddingBottom: spacing.md,
+    },
+    footer: {
+      flexDirection: 'row',
+      gap: spacing.md,
+      paddingHorizontal: spacing.xl,
+      paddingVertical: spacing.lg,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+    },
+    footerButton: {
+      flex: 1,
+    },
+  })
+);

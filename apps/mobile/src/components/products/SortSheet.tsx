@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { FilterSheet } from './FilterSheet';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 import { useAppFont } from '../../hooks/useAppFont';
 
 export type SortValue = 'popular' | 'recent' | 'rated' | 'price_asc' | 'price_desc';
@@ -33,6 +33,8 @@ export const SortSheet: React.FC<SortSheetProps> = ({
 }) => {
   const { fontFamily } = useAppFont();
   const { t } = useTranslation();
+  const colors = useThemeColors();
+  const styles = useStyles();
   const [selected, setSelected] = useState<SortValue | null>(value);
 
   useEffect(() => {
@@ -45,7 +47,10 @@ export const SortSheet: React.FC<SortSheetProps> = ({
       onClose={onClose}
       title={t('filters.classement')}
       onClear={() => setSelected(null)}
-      onSave={() => { onApply(selected); onClose(); }}
+      onSave={() => {
+        onApply(selected);
+        onClose();
+      }}
       resultCount={resultCount}
     >
       {SORT_KEYS.map((option) => (
@@ -69,15 +74,17 @@ export const SortSheet: React.FC<SortSheetProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  option: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-  },
-  optionLabel: {
-    fontSize: typography.fontSize.md,
-    color: colors.text.primary,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    option: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+    },
+    optionLabel: {
+      fontSize: typography.fontSize.md,
+      color: colors.text.primary,
+    },
+  })
+);
