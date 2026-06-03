@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { spacing, typography, makeThemedStyles } from '../../theme';
+import { useAppFont } from '../../hooks/useAppFont';
 
 export interface SimpleProduct {
   id: string;
@@ -22,6 +23,7 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
   const router = useRouter();
+  const { fontFamily } = useAppFont();
   const styles = useStyles();
 
   const handlePress = () => {
@@ -43,14 +45,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
           <Image source={{ uri: imageUrl }} style={styles.image} resizeMode="cover" />
         ) : (
           <View style={styles.placeholderImage}>
-            <Text style={styles.placeholderText}>No Image</Text>
+            <Text style={[styles.placeholderText, { fontFamily: fontFamily.regular }]}>
+              No Image
+            </Text>
           </View>
         )}
 
         {/* Stock Status */}
         {isOutOfStock && (
           <View style={styles.stockOverlay}>
-            <Text style={styles.stockText}>Out of Stock</Text>
+            <Text style={[styles.stockText, { fontFamily: fontFamily.semiBold }]}>
+              Out of Stock
+            </Text>
           </View>
         )}
       </View>
@@ -58,13 +64,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
       {/* Product Info */}
       <View style={styles.info}>
         {/* Product Name */}
-        <Text style={styles.name} numberOfLines={2}>
+        <Text style={[styles.name, { fontFamily: fontFamily.semiBold }]} numberOfLines={2}>
           {product.name}
         </Text>
 
         {/* Price */}
         <View style={styles.priceContainer}>
-          <Text style={styles.price}>{product.price} DZD</Text>
+          <Text style={[styles.price, { fontFamily: fontFamily.bold }]}>{product.price} DZD</Text>
         </View>
       </View>
     </TouchableOpacity>

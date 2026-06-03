@@ -22,6 +22,7 @@ import {
   RecentlyViewedRow,
 } from '../../src/components/products';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
+import { useAppFont } from '../../src/hooks/useAppFont';
 import { useCart } from '../../src/contexts/CartContext';
 import { useWishlist } from '../../src/contexts/WishlistContext';
 import { useRecentlyViewed } from '../../src/contexts/RecentlyViewedContext';
@@ -43,6 +44,7 @@ export default function ProductDetailScreen() {
   const wishlist = useWishlist();
   const { track } = useRecentlyViewed();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   const styles = useStyles();
 
   const { data, loading, error, refetch } = useGetProductBySlugQuery({
@@ -262,33 +264,51 @@ export default function ProductDetailScreen() {
         {/* Product Info */}
         <View style={styles.content}>
           {/* Collection/Category */}
-          {collectionName && <Text style={styles.category}>{collectionName}</Text>}
+          {collectionName && (
+            <Text style={[styles.category, { fontFamily: fontFamily.regular }]}>
+              {collectionName}
+            </Text>
+          )}
 
           {/* Name */}
-          <Text style={styles.name}>{product.name}</Text>
+          <Text style={[styles.name, { fontFamily: fontFamily.bold }]}>{product.name}</Text>
 
           {/* SKU */}
-          {selectedVariant?.sku && <Text style={styles.sku}>SKU: {selectedVariant.sku}</Text>}
+          {selectedVariant?.sku && (
+            <Text style={[styles.sku, { fontFamily: fontFamily.regular }]}>
+              SKU: {selectedVariant.sku}
+            </Text>
+          )}
 
           {/* Price */}
           <View style={styles.priceContainer}>
-            <Text style={styles.price}>{price} DZD</Text>
+            <Text style={[styles.price, { fontFamily: fontFamily.bold }]}>{price} DZD</Text>
           </View>
 
           {/* Stock Status */}
           {isOutOfStock ? (
-            <Text style={styles.outOfStock}>{t('products.outOfStock', 'Out of Stock')}</Text>
+            <Text style={[styles.outOfStock, { fontFamily: fontFamily.semiBold }]}>
+              {t('products.outOfStock', 'Out of Stock')}
+            </Text>
           ) : isLowStock ? (
-            <Text style={styles.lowStock}>{t('products.lowStock', 'Low Stock')}</Text>
+            <Text style={[styles.lowStock, { fontFamily: fontFamily.medium }]}>
+              {t('products.lowStock', 'Low Stock')}
+            </Text>
           ) : (
-            <Text style={styles.inStock}>{t('products.inStock', 'In Stock')}</Text>
+            <Text style={[styles.inStock, { fontFamily: fontFamily.medium }]}>
+              {t('products.inStock', 'In Stock')}
+            </Text>
           )}
 
           {/* Description */}
           {product.description && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{t('products.description', 'Description')}</Text>
-              <Text style={styles.description}>{product.description}</Text>
+              <Text style={[styles.sectionTitle, { fontFamily: fontFamily.semiBold }]}>
+                {t('products.description', 'Description')}
+              </Text>
+              <Text style={[styles.description, { fontFamily: fontFamily.regular }]}>
+                {product.description}
+              </Text>
             </View>
           )}
 
@@ -298,12 +318,14 @@ export default function ProductDetailScreen() {
             return (
               <View key={group.name} style={styles.section}>
                 <View style={styles.sectionHeaderRow}>
-                  <Text style={styles.sectionTitle}>
+                  <Text style={[styles.sectionTitle, { fontFamily: fontFamily.semiBold }]}>
                     {t(`products.select${group.name}`, `Select ${group.name}`)}
                   </Text>
                   {isSize && (
                     <TouchableOpacity onPress={() => setSizeGuideOpen(true)}>
-                      <Text style={styles.sizeGuideLink}>{t('sizeGuide.openLink')}</Text>
+                      <Text style={[styles.sizeGuideLink, { fontFamily: fontFamily.regular }]}>
+                        {t('sizeGuide.openLink')}
+                      </Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -326,7 +348,9 @@ export default function ProductDetailScreen() {
           {/* Quantity Selector */}
           {!isOutOfStock && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{t('products.quantity', 'Quantity')}</Text>
+              <Text style={[styles.sectionTitle, { fontFamily: fontFamily.semiBold }]}>
+                {t('products.quantity', 'Quantity')}
+              </Text>
               <View style={styles.quantitySelector}>
                 <TouchableOpacity
                   onPress={decrementQuantity}
@@ -339,7 +363,9 @@ export default function ProductDetailScreen() {
                     color={quantity <= 1 ? colors.text.tertiary : colors.primary}
                   />
                 </TouchableOpacity>
-                <Text style={styles.quantityText}>{quantity}</Text>
+                <Text style={[styles.quantityText, { fontFamily: fontFamily.semiBold }]}>
+                  {quantity}
+                </Text>
                 <TouchableOpacity onPress={incrementQuantity} style={styles.quantityButton}>
                   <Ionicons name="add" size={20} color={colors.primary} />
                 </TouchableOpacity>

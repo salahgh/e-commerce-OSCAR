@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
+import { useAppFont } from '../../hooks/useAppFont';
 
 interface SizeGuideModalProps {
   visible: boolean;
@@ -29,6 +30,7 @@ const SIZE_CHART = [
 export function SizeGuideModal({ visible, onClose }: SizeGuideModalProps) {
   const { t } = useTranslation();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   const styles = useStyles();
 
   return (
@@ -37,33 +39,49 @@ export function SizeGuideModal({ visible, onClose }: SizeGuideModalProps) {
         <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
           <View style={styles.handle} />
           <View style={styles.header}>
-            <Text style={styles.title}>{t('sizeGuide.title')}</Text>
+            <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>
+              {t('sizeGuide.title')}
+            </Text>
             <TouchableOpacity onPress={onClose} accessibilityLabel={t('common.close')}>
               <Ionicons name="close" size={24} color={colors.text.primary} />
             </TouchableOpacity>
           </View>
-          <Text style={styles.intro}>{t('sizeGuide.intro')}</Text>
+          <Text style={[styles.intro, { fontFamily: fontFamily.regular }]}>
+            {t('sizeGuide.intro')}
+          </Text>
 
           <ScrollView style={styles.tableScroll} horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.table}>
               <View style={[styles.row, styles.headRow]}>
-                <Text style={[styles.cell, styles.headCell]}>{t('sizeGuide.headerSize')}</Text>
-                <Text style={[styles.cell, styles.headCell]}>{t('sizeGuide.headerChest')}</Text>
-                <Text style={[styles.cell, styles.headCell]}>{t('sizeGuide.headerWaist')}</Text>
-                <Text style={[styles.cell, styles.headCell]}>{t('sizeGuide.headerHip')}</Text>
+                <Text style={[styles.cell, styles.headCell, { fontFamily: fontFamily.medium }]}>
+                  {t('sizeGuide.headerSize')}
+                </Text>
+                <Text style={[styles.cell, styles.headCell, { fontFamily: fontFamily.medium }]}>
+                  {t('sizeGuide.headerChest')}
+                </Text>
+                <Text style={[styles.cell, styles.headCell, { fontFamily: fontFamily.medium }]}>
+                  {t('sizeGuide.headerWaist')}
+                </Text>
+                <Text style={[styles.cell, styles.headCell, { fontFamily: fontFamily.medium }]}>
+                  {t('sizeGuide.headerHip')}
+                </Text>
               </View>
               {SIZE_CHART.map((row) => (
                 <View key={row.size} style={styles.row}>
-                  <Text style={[styles.cell, styles.sizeCell]}>{row.size}</Text>
-                  <Text style={styles.cell}>{row.chest}</Text>
-                  <Text style={styles.cell}>{row.waist}</Text>
-                  <Text style={styles.cell}>{row.hip}</Text>
+                  <Text style={[styles.cell, styles.sizeCell, { fontFamily: fontFamily.bold }]}>
+                    {row.size}
+                  </Text>
+                  <Text style={[styles.cell, { fontFamily: fontFamily.regular }]}>{row.chest}</Text>
+                  <Text style={[styles.cell, { fontFamily: fontFamily.regular }]}>{row.waist}</Text>
+                  <Text style={[styles.cell, { fontFamily: fontFamily.regular }]}>{row.hip}</Text>
                 </View>
               ))}
             </View>
           </ScrollView>
 
-          <Text style={styles.footnote}>{t('sizeGuide.footnote')}</Text>
+          <Text style={[styles.footnote, { fontFamily: fontFamily.regular }]}>
+            {t('sizeGuide.footnote')}
+          </Text>
         </Pressable>
       </Pressable>
     </Modal>

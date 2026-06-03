@@ -10,6 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
+import { useAppFont } from '../../hooks/useAppFont';
 
 interface SearchBarProps {
   value: string;
@@ -32,6 +33,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   const { t } = useTranslation();
   const colors = useThemeColors();
+  const { fontFamily } = useAppFont();
   const styles = useStyles();
   const [isFocused, setIsFocused] = useState(false);
 
@@ -55,7 +57,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
       {/* Input */}
       <TextInput
-        style={styles.input}
+        style={[styles.input, { fontFamily: fontFamily.regular }]}
         value={value}
         onChangeText={onChangeText}
         onSubmitEditing={handleSearch}

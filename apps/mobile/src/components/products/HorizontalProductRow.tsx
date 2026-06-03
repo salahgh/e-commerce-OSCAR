@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { spacing, typography, makeThemedStyles } from '../../theme';
 import { productAccessibilityLabel } from '../../utils/a11y';
+import { useAppFont } from '../../hooks/useAppFont';
 
 export interface SimpleProduct {
   id: string;
@@ -22,12 +23,13 @@ export function HorizontalProductRow({
   products: SimpleProduct[];
 }) {
   const router = useRouter();
+  const { fontFamily } = useAppFont();
   const styles = useStyles();
   if (products.length === 0) return null;
 
   return (
     <View style={styles.section}>
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, { fontFamily: fontFamily.bold }]}>{title}</Text>
       <FlatList
         data={products}
         keyExtractor={(p) => p.id}
@@ -55,10 +57,10 @@ export function HorizontalProductRow({
                 />
               ) : null}
             </View>
-            <Text style={styles.cardName} numberOfLines={2}>
+            <Text style={[styles.cardName, { fontFamily: fontFamily.medium }]} numberOfLines={2}>
               {item.name}
             </Text>
-            <Text style={styles.cardPrice}>
+            <Text style={[styles.cardPrice, { fontFamily: fontFamily.semiBold }]}>
               {item.price} {item.currencyCode}
             </Text>
           </Pressable>
