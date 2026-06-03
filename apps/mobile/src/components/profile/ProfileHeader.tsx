@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '../ui';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 
 interface ProfileHeaderProps {
   firstName: string;
@@ -23,6 +23,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   showEditButton = true,
 }) => {
   const { t } = useTranslation();
+  const colors = useThemeColors();
+  const styles = useStyles();
 
   const fullName = `${firstName} ${lastName}`;
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -59,48 +61,50 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
-    borderRadius: 12,
-    marginBottom: spacing.lg,
-    elevation: 2,
-    shadowColor: colors.text.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  info: {
-    flex: 1,
-    marginLeft: spacing.md,
-  },
-  name: {
-    ...typography.styles.h4,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  contactInfo: {
-    gap: spacing.xs,
-  },
-  contactRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  contactText: {
-    ...typography.styles.bodySmall,
-    color: colors.text.secondary,
-  },
-  editButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.primary + '20',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      padding: spacing.lg,
+      borderRadius: 12,
+      marginBottom: spacing.lg,
+      elevation: 2,
+      shadowColor: colors.text.primary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    },
+    info: {
+      flex: 1,
+      marginLeft: spacing.md,
+    },
+    name: {
+      ...typography.styles.h4,
+      fontWeight: typography.fontWeight.bold,
+      color: colors.text.primary,
+      marginBottom: spacing.xs,
+    },
+    contactInfo: {
+      gap: spacing.xs,
+    },
+    contactRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+    },
+    contactText: {
+      ...typography.styles.bodySmall,
+      color: colors.text.secondary,
+    },
+    editButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.primary + '20',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  })
+);

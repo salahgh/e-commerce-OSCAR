@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles } from '../../theme';
 
 interface InfoScreenProps {
   title: string;
@@ -19,6 +19,7 @@ interface InfoScreenProps {
 export function InfoScreen({ title, intro, showContactCta = true, children }: InfoScreenProps) {
   const { t } = useTranslation();
   const router = useRouter();
+  const styles = useStyles();
 
   return (
     <View style={styles.container}>
@@ -44,6 +45,7 @@ export function InfoScreen({ title, intro, showContactCta = true, children }: In
 }
 
 export function Section({ title, children }: { title?: string; children: React.ReactNode }) {
+  const styles = useStyles();
   return (
     <View style={styles.section}>
       {title ? <Text style={styles.sectionTitle}>{title}</Text> : null}
@@ -53,10 +55,12 @@ export function Section({ title, children }: { title?: string; children: React.R
 }
 
 export function Paragraph({ children }: { children: React.ReactNode }) {
+  const styles = useStyles();
   return <Text style={styles.paragraph}>{children}</Text>;
 }
 
 export function Bullets({ items }: { items: string[] }) {
+  const styles = useStyles();
   return (
     <View style={styles.bullets}>
       {items.map((line, i) => (
@@ -69,58 +73,60 @@ export function Bullets({ items }: { items: string[] }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, paddingBottom: spacing.xl },
-  title: {
-    ...typography.styles.h2,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-    marginBottom: spacing.xs,
-  },
-  intro: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    marginBottom: spacing.lg,
-  },
-  body: { gap: spacing.lg },
-  section: { gap: spacing.sm },
-  sectionTitle: {
-    ...typography.styles.h4,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.bold,
-  },
-  paragraph: {
-    ...typography.styles.body,
-    color: colors.text.primary,
-    lineHeight: 22,
-  },
-  bullets: { gap: spacing.xs },
-  bulletRow: { flexDirection: 'row', gap: spacing.sm },
-  bulletDot: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-  },
-  bulletText: {
-    flex: 1,
-    ...typography.styles.body,
-    color: colors.text.primary,
-    lineHeight: 22,
-  },
-  cta: {
-    marginTop: spacing.xl,
-    padding: spacing.md,
-    borderRadius: 12,
-    backgroundColor: colors.surface,
-    gap: spacing.xs,
-  },
-  ctaHeading: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-  },
-  ctaLink: {
-    ...typography.styles.body,
-    color: colors.primary,
-    fontWeight: typography.fontWeight.semiBold,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: spacing.lg, paddingBottom: spacing.xl },
+    title: {
+      ...typography.styles.h2,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.bold,
+      marginBottom: spacing.xs,
+    },
+    intro: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      marginBottom: spacing.lg,
+    },
+    body: { gap: spacing.lg },
+    section: { gap: spacing.sm },
+    sectionTitle: {
+      ...typography.styles.h4,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.bold,
+    },
+    paragraph: {
+      ...typography.styles.body,
+      color: colors.text.primary,
+      lineHeight: 22,
+    },
+    bullets: { gap: spacing.xs },
+    bulletRow: { flexDirection: 'row', gap: spacing.sm },
+    bulletDot: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+    },
+    bulletText: {
+      flex: 1,
+      ...typography.styles.body,
+      color: colors.text.primary,
+      lineHeight: 22,
+    },
+    cta: {
+      marginTop: spacing.xl,
+      padding: spacing.md,
+      borderRadius: 12,
+      backgroundColor: colors.surface,
+      gap: spacing.xs,
+    },
+    ctaHeading: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+    },
+    ctaLink: {
+      ...typography.styles.body,
+      color: colors.primary,
+      fontWeight: typography.fontWeight.semiBold,
+    },
+  })
+);

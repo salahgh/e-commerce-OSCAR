@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 
 interface SettingsItemProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -28,6 +28,9 @@ export const SettingsItem: React.FC<SettingsItemProps> = ({
   iconColor,
   isDestructive = false,
 }) => {
+  const colors = useThemeColors();
+  const styles = useStyles();
+
   const handlePress = () => {
     if (onPress && !showSwitch) {
       onPress();
@@ -69,33 +72,35 @@ export const SettingsItem: React.FC<SettingsItemProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    padding: spacing.md,
-    borderRadius: 12,
-    marginBottom: spacing.sm,
-  },
-  iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.md,
-  },
-  content: {
-    flex: 1,
-  },
-  label: {
-    ...typography.styles.body,
-    fontWeight: typography.fontWeight.medium,
-    marginBottom: spacing.xxs,
-  },
-  value: {
-    ...typography.styles.bodySmall,
-    color: colors.text.secondary,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      padding: spacing.md,
+      borderRadius: 12,
+      marginBottom: spacing.sm,
+    },
+    iconContainer: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: spacing.md,
+    },
+    content: {
+      flex: 1,
+    },
+    label: {
+      ...typography.styles.body,
+      fontWeight: typography.fontWeight.medium,
+      marginBottom: spacing.xxs,
+    },
+    value: {
+      ...typography.styles.bodySmall,
+      color: colors.text.secondary,
+    },
+  })
+);
