@@ -18,7 +18,7 @@ import { useSearchProductsQuery } from '../src/graphql/generated/graphql';
 import { SimpleProduct } from '../src/components/products/ProductCard';
 import { ProductCardFigma, FigmaProduct } from '../src/components/home/ProductCardFigma';
 import { LoadingSpinner, EmptyState } from '../src/components/ui';
-import { colors, spacing, typography } from '../src/theme';
+import { spacing, typography, makeThemedStyles, useThemeColors } from '../src/theme';
 import { formatPrice } from '../src/utils/vendureAdapters';
 
 const SEARCH_HISTORY_KEY = '@oscar_search_history';
@@ -40,6 +40,8 @@ const popularSearches = [
 export default function SearchScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const styles = useStyles();
+  const colors = useThemeColors();
   const searchInputRef = useRef<TextInput>(null);
 
   // State
@@ -134,9 +136,7 @@ export default function SearchScreen() {
 
   const removeHistoryItem = async (item: string) => {
     try {
-      const updatedHistory = searchHistory.filter(
-        (h) => h.toLowerCase() !== item.toLowerCase()
-      );
+      const updatedHistory = searchHistory.filter((h) => h.toLowerCase() !== item.toLowerCase());
       setSearchHistory(updatedHistory);
       await AsyncStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(updatedHistory));
     } catch (error) {
@@ -153,13 +153,16 @@ export default function SearchScreen() {
     }
   }, [searchQuery, searchHistory]);
 
-  const handleSuggestionPress = useCallback((suggestion: string) => {
-    setSearchQuery(suggestion);
-    saveSearchHistory(suggestion);
-    setDebouncedQuery(suggestion);
-    setShowResults(true);
-    Keyboard.dismiss();
-  }, [searchHistory]);
+  const handleSuggestionPress = useCallback(
+    (suggestion: string) => {
+      setSearchQuery(suggestion);
+      saveSearchHistory(suggestion);
+      setDebouncedQuery(suggestion);
+      setShowResults(true);
+      Keyboard.dismiss();
+    },
+    [searchHistory]
+  );
 
   const handleClearSearch = useCallback(() => {
     setSearchQuery('');
@@ -188,7 +191,13 @@ export default function SearchScreen() {
   }, [debouncedQuery]);
 
   // Render search suggestion item
-  const renderSuggestionItem = ({ item, isHistory = false }: { item: string; isHistory?: boolean }) => (
+  const renderSuggestionItem = ({
+    item,
+    isHistory = false,
+  }: {
+    item: string;
+    isHistory?: boolean;
+  }) => (
     <TouchableOpacity
       style={styles.suggestionItem}
       onPress={() => handleSuggestionPress(item)}
@@ -236,9 +245,7 @@ export default function SearchScreen() {
             </TouchableOpacity>
           </View>
           {searchHistory.map((item) => (
-            <View key={item}>
-              {renderSuggestionItem({ item, isHistory: true })}
-            </View>
+            <View key={item}>{renderSuggestionItem({ item, isHistory: true })}</View>
           ))}
         </View>
       ) : null}
@@ -287,7 +294,10 @@ export default function SearchScreen() {
         <EmptyState
           icon="search-outline"
           title={t('search.noResults', 'No results found')}
-          message={t('search.noResultsMessage', `No products found for "${debouncedQuery}". Try a different search term.`)}
+          message={t(
+            'search.noResultsMessage',
+            `No products found for "${debouncedQuery}". Try a different search term.`
+          )}
         />
       );
     }
@@ -322,11 +332,7 @@ export default function SearchScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Search Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleGoBack}
-          activeOpacity={0.7}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={handleGoBack} activeOpacity={0.7}>
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
 
@@ -354,163 +360,163 @@ export default function SearchScreen() {
       </View>
 
       {/* Content */}
-      <View style={styles.content}>
-        {showResults ? renderResults() : renderSuggestions()}
-      </View>
+      <View style={styles.content}>{showResults ? renderResults() : renderSuggestions()}</View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    gap: spacing.sm,
-  },
-  backButton: {
-    padding: spacing.xs,
-  },
-  searchInputContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.background,
-    borderRadius: spacing.borderRadius.lg,
-    paddingHorizontal: spacing.md,
-    height: 44,
-    gap: spacing.sm,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: typography.fontSize.md,
-    color: colors.text.primary,
-  },
-  content: {
-    flex: 1,
-  },
-  suggestionsContainer: {
-    flex: 1,
-    paddingTop: spacing.md,
-  },
-  section: {
-    marginBottom: spacing.xl,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-  },
-  sectionTitle: {
-    fontSize: typography.fontSize.md,
-    fontWeight: typography.fontWeight.semiBold,
-    color: colors.text.primary,
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.sm,
-  },
-  clearText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.primary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  suggestionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-  },
-  suggestionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  suggestionText: {
-    fontSize: typography.fontSize.md,
-    color: colors.text.primary,
-  },
-  popularTags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: spacing.lg,
-    gap: spacing.sm,
-  },
-  popularTag: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: spacing.borderRadius.lg,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  popularTagText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  loadingText: {
-    fontSize: typography.fontSize.md,
-    color: colors.text.secondary,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.md,
-    padding: spacing.xl,
-  },
-  errorText: {
-    fontSize: typography.fontSize.md,
-    color: colors.text.secondary,
-    textAlign: 'center',
-  },
-  resultsContainer: {
-    flex: 1,
-  },
-  resultsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  resultsCount: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-  },
-  viewAllText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.primary,
-    fontWeight: typography.fontWeight.medium,
-  },
-  resultsGrid: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    paddingBottom: spacing['2xl'],
-  },
-  productRow: {
-    justifyContent: 'space-between',
-  },
-  productItem: {
-    width: '48%',
-    marginBottom: spacing.md,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      gap: spacing.sm,
+    },
+    backButton: {
+      padding: spacing.xs,
+    },
+    searchInputContainer: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.background,
+      borderRadius: spacing.borderRadius.lg,
+      paddingHorizontal: spacing.md,
+      height: 44,
+      gap: spacing.sm,
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: typography.fontSize.md,
+      color: colors.text.primary,
+    },
+    content: {
+      flex: 1,
+    },
+    suggestionsContainer: {
+      flex: 1,
+      paddingTop: spacing.md,
+    },
+    section: {
+      marginBottom: spacing.xl,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: spacing.lg,
+      marginBottom: spacing.md,
+    },
+    sectionTitle: {
+      fontSize: typography.fontSize.md,
+      fontWeight: typography.fontWeight.semiBold,
+      color: colors.text.primary,
+      paddingHorizontal: spacing.lg,
+      marginBottom: spacing.sm,
+    },
+    clearText: {
+      fontSize: typography.fontSize.sm,
+      color: colors.primary,
+      fontWeight: typography.fontWeight.medium,
+    },
+    suggestionItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.lg,
+    },
+    suggestionLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+    },
+    suggestionText: {
+      fontSize: typography.fontSize.md,
+      color: colors.text.primary,
+    },
+    popularTags: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      paddingHorizontal: spacing.lg,
+      gap: spacing.sm,
+    },
+    popularTag: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      borderRadius: spacing.borderRadius.lg,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    popularTagText: {
+      fontSize: typography.fontSize.sm,
+      color: colors.text.secondary,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.md,
+    },
+    loadingText: {
+      fontSize: typography.fontSize.md,
+      color: colors.text.secondary,
+    },
+    errorContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.md,
+      padding: spacing.xl,
+    },
+    errorText: {
+      fontSize: typography.fontSize.md,
+      color: colors.text.secondary,
+      textAlign: 'center',
+    },
+    resultsContainer: {
+      flex: 1,
+    },
+    resultsHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    resultsCount: {
+      fontSize: typography.fontSize.sm,
+      color: colors.text.secondary,
+    },
+    viewAllText: {
+      fontSize: typography.fontSize.sm,
+      color: colors.primary,
+      fontWeight: typography.fontWeight.medium,
+    },
+    resultsGrid: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.md,
+      paddingBottom: spacing['2xl'],
+    },
+    productRow: {
+      justifyContent: 'space-between',
+    },
+    productItem: {
+      width: '48%',
+      marginBottom: spacing.md,
+    },
+  })
+);
