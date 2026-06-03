@@ -88,13 +88,16 @@ export default function CheckoutScreen() {
   });
   const savedAddresses = (customerData?.activeCustomer?.addresses ?? []) as SavedAddress[];
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  // True once the shopper explicitly chooses "New address" — stops the auto-select
+  // below from re-picking a saved address and keeps the form empty (prefill only).
+  const [enteringNewAddress, setEnteringNewAddress] = useState(false);
 
   useEffect(() => {
-    if (!selectedAddressId && savedAddresses.length > 0) {
+    if (!enteringNewAddress && !selectedAddressId && savedAddresses.length > 0) {
       const def = savedAddresses.find((a) => a.defaultShippingAddress) ?? savedAddresses[0];
       setSelectedAddressId(def.id);
     }
-  }, [savedAddresses, selectedAddressId]);
+  }, [savedAddresses, selectedAddressId, enteringNewAddress]);
 
   const selectedAddress = savedAddresses.find((a) => a.id === selectedAddressId) ?? null;
   const formInitialValues =
@@ -349,7 +352,14 @@ export default function CheckoutScreen() {
               <SavedAddressPicker
                 addresses={savedAddresses}
                 selectedId={selectedAddressId}
-                onSelect={(a) => setSelectedAddressId(a.id)}
+                onSelect={(a) => {
+                  setEnteringNewAddress(false);
+                  setSelectedAddressId(a.id);
+                }}
+                onSelectNew={() => {
+                  setEnteringNewAddress(true);
+                  setSelectedAddressId(null);
+                }}
               />
             )}
             <ShippingAddressForm

@@ -10,6 +10,7 @@ interface Props {
   addresses: SavedAddress[];
   selectedId: string | null;
   onSelect: (a: SavedAddress) => void;
+  onSelectNew: () => void;
 }
 
 const useStyles = makeThemedStyles((colors) =>
@@ -33,6 +34,7 @@ const useStyles = makeThemedStyles((colors) =>
       padding: spacing.md,
     },
     chipSelected: { borderColor: colors.primary },
+    newChip: { alignItems: 'center' },
     chipText: { flexShrink: 1 },
     chipName: {
       ...typography.styles.bodySmall,
@@ -43,7 +45,12 @@ const useStyles = makeThemedStyles((colors) =>
   })
 );
 
-export const SavedAddressPicker: React.FC<Props> = ({ addresses, selectedId, onSelect }) => {
+export const SavedAddressPicker: React.FC<Props> = ({
+  addresses,
+  selectedId,
+  onSelect,
+  onSelectNew,
+}) => {
   const { t } = useTranslation();
   const styles = useStyles();
   const colors = useThemeColors();
@@ -87,6 +94,20 @@ export const SavedAddressPicker: React.FC<Props> = ({ addresses, selectedId, onS
             </TouchableOpacity>
           );
         })}
+        <TouchableOpacity
+          style={[styles.chip, styles.newChip, selectedId === null && styles.chipSelected]}
+          onPress={onSelectNew}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name="add-circle-outline"
+            size={18}
+            color={selectedId === null ? colors.primary : colors.text.secondary}
+          />
+          <Text style={[styles.chipName, { fontFamily: fontFamily.medium }]} numberOfLines={1}>
+            {t('address.newAddress', 'New address')}
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );

@@ -41,6 +41,7 @@
     "default": "Par défaut",
     "makeDefault": "Définir par défaut",
     "useSaved": "Utiliser une adresse enregistrée",
+    "newAddress": "Nouvelle adresse",
     "emptyTitle": "Aucune adresse enregistrée",
     "emptyMessage": "Ajoutez une adresse pour accélérer le paiement.",
     "added": "Adresse ajoutée",

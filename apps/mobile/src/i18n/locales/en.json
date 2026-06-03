@@ -41,6 +41,7 @@
     "default": "Default",
     "makeDefault": "Set default",
     "useSaved": "Use a saved address",
+    "newAddress": "New address",
     "emptyTitle": "No saved addresses",
     "emptyMessage": "Add an address to speed up checkout.",
     "added": "Address added",
