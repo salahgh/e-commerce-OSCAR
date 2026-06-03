@@ -3,10 +3,12 @@ import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native'
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { InfoScreen, Section } from '../../src/components/info';
-import { colors, spacing, typography } from '../../src/theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
 
 export default function ContactScreen() {
   const { t } = useTranslation();
+  const styles = useStyles();
+  const colors = useThemeColors();
   const email = t('contactPage.emailValue');
   const phone = t('contactPage.phoneValue');
 
@@ -47,25 +49,27 @@ export default function ContactScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  grid: { gap: spacing.sm },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: 4,
-  },
-  cardLabel: {
-    ...typography.styles.caption,
-    color: colors.text.secondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  cardValue: {
-    ...typography.styles.body,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    grid: { gap: spacing.sm },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 4,
+    },
+    cardLabel: {
+      ...typography.styles.caption,
+      color: colors.text.secondary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    cardValue: {
+      ...typography.styles.body,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+    },
+  })
+);

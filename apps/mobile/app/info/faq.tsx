@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { InfoScreen } from '../../src/components/info';
-import { colors, spacing, typography } from '../../src/theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -11,6 +19,8 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 export default function FaqScreen() {
   const { t } = useTranslation();
+  const styles = useStyles();
+  const colors = useThemeColors();
   const [openIdx, setOpenIdx] = useState<number | null>(0);
 
   const qa = [
@@ -51,29 +61,31 @@ export default function FaqScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  list: {},
-  item: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    paddingVertical: spacing.md,
-  },
-  head: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-  },
-  q: {
-    flex: 1,
-    ...typography.styles.body,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.semiBold,
-  },
-  a: {
-    marginTop: spacing.sm,
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    lineHeight: 22,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    list: {},
+    item: {
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      paddingVertical: spacing.md,
+    },
+    head: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.md,
+    },
+    q: {
+      flex: 1,
+      ...typography.styles.body,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.semiBold,
+    },
+    a: {
+      marginTop: spacing.sm,
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      lineHeight: 22,
+    },
+  })
+);

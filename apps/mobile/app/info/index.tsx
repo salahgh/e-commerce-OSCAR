@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, typography } from '../../src/theme';
+import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
 
 const ENTRIES = [
   { key: 'shipping', icon: 'cube-outline', path: '/info/shipping' },
@@ -20,6 +20,8 @@ const ENTRIES = [
 export default function InfoIndex() {
   const { t } = useTranslation();
   const router = useRouter();
+  const styles = useStyles();
+  const colors = useThemeColors();
 
   return (
     <View style={styles.container}>
@@ -43,28 +45,30 @@ export default function InfoIndex() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.sm },
-  intro: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-    marginBottom: spacing.sm,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
-    gap: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  rowLabel: {
-    flex: 1,
-    ...typography.styles.body,
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.medium,
-  },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: spacing.lg, gap: spacing.sm },
+    intro: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      marginBottom: spacing.sm,
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: spacing.md,
+      gap: spacing.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    rowLabel: {
+      flex: 1,
+      ...typography.styles.body,
+      color: colors.text.primary,
+      fontWeight: typography.fontWeight.medium,
+    },
+  })
+);

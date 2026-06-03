@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { InfoScreen, Section, Paragraph, Bullets } from '../../src/components/info';
-import { colors, spacing, typography } from '../../src/theme';
+import { makeThemedStyles, spacing, typography } from '../../src/theme';
 
 const SIZE_CHART = [
   { size: 'XS', chest: '82-86', waist: '64-68', hip: '90-94' },
@@ -15,15 +15,12 @@ const SIZE_CHART = [
 
 export default function SizeGuideScreen() {
   const { t } = useTranslation();
+  const styles = useStyles();
   return (
     <InfoScreen title={t('info.sizeGuide')} intro={t('sizeGuidePage.intro')}>
       <Section title={t('sizeGuidePage.howTitle')}>
         <Bullets
-          items={[
-            t('sizeGuidePage.how1'),
-            t('sizeGuidePage.how2'),
-            t('sizeGuidePage.how3'),
-          ]}
+          items={[t('sizeGuidePage.how1'), t('sizeGuidePage.how2'), t('sizeGuidePage.how3')]}
         />
       </Section>
       <Section>
@@ -51,21 +48,23 @@ export default function SizeGuideScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  table: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-  },
-  row: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.border },
-  headRow: { backgroundColor: colors.surface },
-  cell: {
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    minWidth: 90,
-    ...typography.styles.body,
-    color: colors.text.secondary,
-  },
-  headCell: { color: colors.text.secondary, fontWeight: typography.fontWeight.medium },
-  sizeCell: { color: colors.text.primary, fontWeight: typography.fontWeight.bold },
-});
+const useStyles = makeThemedStyles((colors) =>
+  StyleSheet.create({
+    table: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+    },
+    row: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.border },
+    headRow: { backgroundColor: colors.surface },
+    cell: {
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+      minWidth: 90,
+      ...typography.styles.body,
+      color: colors.text.secondary,
+    },
+    headCell: { color: colors.text.secondary, fontWeight: typography.fontWeight.medium },
+    sizeCell: { color: colors.text.primary, fontWeight: typography.fontWeight.bold },
+  })
+);
