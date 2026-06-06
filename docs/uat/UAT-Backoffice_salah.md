@@ -153,7 +153,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 
 | ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
-| BO-FAC-01 | Affichage de la liste | Facettes présentes | 1. Ouvrir `/facets` | — | Liste paginée (20/page) | Moyenne | ☐ |
+| BO-FAC-01 | Affichage de la liste | Facettes présentes | 1. Ouvrir `/facets` | — | Liste paginée (20/page) | Moyenne | ok — 3 attributs (Category 32 val., Color 12 val., Size) avec tri/visibilité |
 | BO-FAC-02 | Recherche / filtre visibilité / tri | — | 1. Rechercher, filtrer public/privé, trier | — | Comportements corrects | Basse | ☐ |
 | BO-FAC-03 | Création d'une facette | Permission `CreateFacet` | 1. `/facets/new` 2. Nom, code, description | « Matière » | Facette créée | Haute | ☐ |
 | BO-FAC-04 | Ajout de valeurs de facette | Facette créée | 1. Ajouter plusieurs valeurs | Coton, Lin | Valeurs ajoutées | Haute | ☐ |
@@ -163,7 +163,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-FAC-08 | Édition d'une facette | — | 1. Modifier 2. Enregistrer | — | Modifications sauvegardées | Moyenne | ☐ |
 | BO-FAC-09 | Suppression simple | Non utilisée | 1. Supprimer 2. Confirmer | — | Suppression réussie | Moyenne | ☐ |
 | BO-FAC-10 | Suppression forcée si utilisée | Facette utilisée | 1. Supprimer | — | Avertissement + suppression forcée possible | Moyenne | ☐ |
-| BO-FAC-11 | Pastilles couleur en liste | Facette couleur | 1. Observer la liste | — | Swatches affichés | Basse | ☐ |
+| BO-FAC-11 | Pastilles couleur en liste | Facette couleur | 1. Observer la liste | — | Swatches affichés | Basse | ok — pastilles couleur affichées sur la facette Color |
 
 ## 6. Commandes — `BO-ORD`
 
@@ -241,7 +241,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 
 | ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
-| BO-AST-01 | Affichage de la liste | Assets présents | 1. Ouvrir `/assets` | — | Liste/grille paginée (20/page) | Moyenne | ☐ |
+| BO-AST-01 | Affichage de la liste | Assets présents | 1. Ouvrir `/assets` | — | Liste/grille paginée (20/page) | Moyenne | ok — 17 fichiers, zone d'upload, filtres/tri (NB : aperçus 404 — binaires manquants en local) |
 | BO-AST-02 | Recherche par nom | — | 1. Saisir un terme | — | Filtrage correct | Basse | ☐ |
 | BO-AST-03 | Upload d'un asset | Permission `CreateAsset` | 1. Glisser/sélectionner un fichier 2. Nom, description, alt 3. Envoyer | image | Barre de progression puis succès | Haute | ☐ |
 | BO-AST-04 | Upload multiple | — | 1. Sélectionner plusieurs fichiers | 3 images | Tous envoyés | Moyenne | ☐ |
@@ -277,7 +277,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 
 | ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
-| BO-USR-01 | Liste des administrateurs | Permission `ReadAdministrator` | 1. Ouvrir `/users` | — | Liste paginée (10/page) avec rôles | Haute | ☐ |
+| BO-USR-01 | Liste des administrateurs | Permission `ReadAdministrator` | 1. Ouvrir `/users` | — | Liste paginée (10/page) avec rôles | Haute | ok — 2 admins (superadmin, tt test/Role Test) avec rôles et statut |
 | BO-USR-02 | Recherche (nom/e-mail) | — | 1. Saisir un terme | — | Filtrage correct | Basse | ☐ |
 | BO-USR-03 | Création d'un administrateur | Permission `CreateAdministrator` | 1. `/users/new` 2. Prénom, nom, e-mail, mot de passe 3. Affecter des rôles 4. Enregistrer | — | Admin créé, toast | Haute | ☐ |
 | BO-USR-04 | Validation e-mail | — | 1. E-mail invalide | `abc@` | Erreur de format | Moyenne | ☐ |
@@ -286,9 +286,9 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-USR-07 | Détail administrateur | — | 1. Ouvrir `/users/:id` | — | Infos en lecture seule | Basse | ☐ |
 | BO-USR-08 | Édition d'un administrateur | — | 1. `/users/:id/edit` 2. Modifier 3. Enregistrer | — | Modifications sauvegardées | Moyenne | ☐ |
 | BO-USR-09 | Suppression d'un administrateur | — | 1. Supprimer 2. Confirmer | — | Avertissement puis suppression | Moyenne | ☐ |
-| BO-USR-10 | Liste des rôles | — | 1. Ouvrir `/users/roles` | — | Liste paginée (20/page), nb permissions + nb utilisateurs | Moyenne | ☐ |
-| BO-USR-11 | Création d'un rôle | — | 1. `/users/roles/new` 2. Nom, code, description 3. Cocher des permissions par catégorie 4. Enregistrer | rôle « Gestionnaire commandes » | Rôle créé | Haute | ☐ |
-| BO-USR-12 | « Tout sélectionner » dans une catégorie | — | 1. Cliquer « tout sélectionner » sur une catégorie | — | Toutes les permissions de la catégorie cochées | Basse | ☐ |
+| BO-USR-10 | Liste des rôles | — | 1. Ouvrir `/users/roles` | — | Liste paginée (20/page), nb permissions + nb utilisateurs | Moyenne | ok — 3 rôles (Role Test 33 perms, Customer, Super Admin 91 perms) |
+| BO-USR-11 | Création d'un rôle | — | 1. `/users/roles/new` 2. Nom, code, description 3. Cocher des permissions par catégorie 4. Enregistrer | rôle « Gestionnaire commandes » | Rôle créé | Haute | ok — formulaire OK (code/description + permissions groupées par catégorie). NB : l'erreur 500 vue plus tôt était un rechargement HMR transitoire |
+| BO-USR-12 | « Tout sélectionner » dans une catégorie | — | 1. Cliquer « tout sélectionner » sur une catégorie | — | Toutes les permissions de la catégorie cochées | Basse | ok — case « tout sélectionner » + compteur par catégorie présents |
 | BO-USR-13 | Recherche de permissions | Beaucoup de permissions | 1. Filtrer par mot-clé | « order » | Permissions filtrées | Basse | ☐ |
 | BO-USR-14 | Édition d'un rôle | — | 1. Modifier les permissions 2. Enregistrer | — | Permissions mises à jour | Moyenne | ☐ |
 | BO-USR-15 | Suppression d'un rôle | Rôle non super-admin | 1. Supprimer 2. Confirmer | — | Avertissement puis suppression | Moyenne | ☐ |
@@ -315,10 +315,10 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-SET-12 | Onglet Canaux | — | 1. Consulter/éditer le canal actif | — | Devise, langue par défaut affichées | Basse | ☐ |
 | BO-SET-13 | Onglet Taxes | — | 1. Créer/éditer/supprimer une catégorie et un taux de taxe | — | CRUD taxes fonctionnel | Moyenne | ☐ |
 | BO-SET-14 | Onglet Zones & Pays | — | 1. Créer une zone 2. Ajouter/retirer des pays | — | Zones et pays gérés | Moyenne | ☐ |
-| BO-SET-15 | Méthodes de livraison — liste | — | 1. Ouvrir l'onglet | — | Méthodes listées (nom, code, zones, prix) | Moyenne | ☐ |
+| BO-SET-15 | Méthodes de livraison — liste | — | 1. Ouvrir l'onglet | — | Méthodes listées (nom, code, zones, prix) | Moyenne | ok — Standard Shipping affiché à **500 DA** (était 50 000 DA avant correction centimes) |
 | BO-SET-16 | Création d'une méthode de livraison | — | 1. Ouvrir ShippingMethodCreateModal 2. Nom, code, zones, prix 3. Créer | zone Alger, 400 DZD | Méthode créée | Haute | ☐ |
 | BO-SET-17 | Édition/suppression d'une méthode de livraison | — | 1. Modifier puis supprimer (confirmation) | — | Mise à jour/suppression OK | Moyenne | ☐ |
-| BO-SET-18 | Méthodes de paiement — liste | — | 1. Ouvrir l'onglet | — | Méthodes listées (handler, canaux) | Moyenne | ☐ |
+| BO-SET-18 | Méthodes de paiement — liste | — | 1. Ouvrir l'onglet | — | Méthodes listées (handler, canaux) | Moyenne | ok — Cash on Delivery (Activé, Mode Test) |
 | BO-SET-19 | Création d'une méthode de paiement | — | 1. Ouvrir PaymentMethodCreateModal 2. Nom, code, handler, canaux 3. Créer | COD | Méthode créée | Haute | ☐ |
 | BO-SET-20 | Configuration handler CIB / Baridimob | — | 1. Renseigner la config spécifique | — | Config enregistrée | Moyenne | ☐ |
 | BO-SET-21 | Édition/suppression d'une méthode de paiement | — | 1. Modifier puis supprimer | — | Mise à jour/suppression OK | Moyenne | ☐ |
@@ -347,7 +347,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-UX-11 | Recherche — caractères spéciaux/accents | — | 1. Rechercher avec accents/symboles | « été », « d'hiver » | Recherche robuste (échappement, insensible à la casse) | Basse | ☐ |
 | BO-UX-12 | Navigation clavier (Tab/Entrée/Échap) | — | 1. Parcourir un formulaire au clavier | — | Ordre logique, raccourcis fonctionnels | Basse | ☐ |
 | BO-UX-13 | Breadcrumb contextuel | Pages profondes | 1. Observer le fil d'Ariane | — | Chemin correct, dernier élément non cliquable | Basse | ☐ |
-| BO-UX-14 | Affichage devise DZD | Montants partout | 1. Vérifier le formatage | — | Séparateur de milliers + précision cohérents | Moyenne | ☐ |
+| BO-UX-14 | Affichage devise DZD | Montants partout | 1. Vérifier le formatage | — | Séparateur de milliers + précision cohérents | Moyenne | ok après corrections — **plusieurs bugs centimes (×100) corrigés** : Rapports, détail/liste client, BulkOperations, Settings livraison, facture imprimée |
 
 ---
 
