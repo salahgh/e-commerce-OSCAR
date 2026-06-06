@@ -1,6 +1,7 @@
 import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { useMemo } from 'react';
+import { usePermissions } from './usePermissions';
 
 // ==================== GraphQL Queries ====================
 
@@ -30,7 +31,7 @@ const DASHBOARD_KPI_METRICS = gql`
       lowStockProducts
       outOfStockProducts
       averageOrderValue
-      conversionRate
+      ordersPerCustomer
     }
   }
 `;
@@ -187,7 +188,8 @@ export interface KpiMetrics {
   outOfStockProducts: number;
   // Calculated
   averageOrderValue: number;
-  conversionRate: number;
+  /** Placed orders ÷ total customers. NOT a conversion rate. */
+  ordersPerCustomer: number;
 }
 
 export interface SalesDataPoint {
@@ -308,6 +310,16 @@ function formatDateLabel(dateStr: string, range: DateRange): string {
 
 export function useDashboardData(dateRange: DateRange = '30d') {
   const days = getDateRangeDays(dateRange);
+  const { hasAnyPermission } = usePermissions();
+
+  // Gate each query by the permission(s) its backend resolver requires (@Allow uses
+  // OR semantics; SuperAdmin always passes). Skipping forbidden queries lets a
+  // restricted role (e.g. orders-only) load the dashboard cleanly instead of firing
+  // FORBIDDEN requests — which previously logged the user straight back out.
+  const canOrders = hasAnyPermission(['ReadOrder']);
+  const canCatalog = hasAnyPermission(['ReadCatalog']);
+  const canOrdersOrCatalog = hasAnyPermission(['ReadOrder', 'ReadCatalog']);
+  const canKpi = hasAnyPermission(['ReadOrder', 'ReadCustomer', 'ReadCatalog']);
 
   // Fetch KPI metrics
   const {
@@ -316,6 +328,7 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     error: kpiError,
     refetch: refetchKpi,
   } = useQuery(DASHBOARD_KPI_METRICS, {
+    skip: !canKpi,
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
   });
@@ -326,6 +339,7 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     loading: salesTrendLoading,
     error: salesTrendError,
   } = useQuery(DASHBOARD_SALES_TREND, {
+    skip: !canOrders,
     variables: { days },
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
@@ -337,6 +351,7 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     loading: ordersByStatusLoading,
     error: ordersByStatusError,
   } = useQuery(DASHBOARD_ORDERS_BY_STATUS, {
+    skip: !canOrders,
     variables: { days },
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
@@ -348,6 +363,7 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     loading: categoryLoading,
     error: categoryError,
   } = useQuery(DASHBOARD_REVENUE_BY_CATEGORY, {
+    skip: !canOrdersOrCatalog,
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
   });
@@ -358,6 +374,7 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     loading: recentOrdersLoading,
     error: recentOrdersError,
   } = useQuery(DASHBOARD_RECENT_ORDERS, {
+    skip: !canOrders,
     variables: { limit: 10 },
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
@@ -369,6 +386,7 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     loading: lowStockLoading,
     error: lowStockError,
   } = useQuery(DASHBOARD_LOW_STOCK_ALERTS, {
+    skip: !canCatalog,
     variables: { threshold: 10 },
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
@@ -380,6 +398,7 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     loading: topProductsLoading,
     error: topProductsError,
   } = useQuery(DASHBOARD_TOP_SELLING_PRODUCTS, {
+    skip: !canOrdersOrCatalog,
     variables: { limit: 10 },
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
@@ -392,6 +411,7 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     error: catalogStatsError,
     refetch: refetchCatalogStats,
   } = useQuery(DASHBOARD_CATALOG_STATS, {
+    skip: !canCatalog,
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
   });
@@ -402,6 +422,7 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     loading: productsByCollectionLoading,
     error: productsByCollectionError,
   } = useQuery(DASHBOARD_PRODUCTS_BY_COLLECTION, {
+    skip: !canCatalog,
     variables: { limit: 8 },
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
@@ -413,6 +434,7 @@ export function useDashboardData(dateRange: DateRange = '30d') {
     loading: recentProductsLoading,
     error: recentProductsError,
   } = useQuery(DASHBOARD_RECENT_PRODUCTS, {
+    skip: !canCatalog,
     variables: { limit: 5 },
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
@@ -445,7 +467,7 @@ export function useDashboardData(dateRange: DateRange = '30d') {
       lowStockProducts: metrics?.lowStockProducts ?? 0,
       outOfStockProducts: metrics?.outOfStockProducts ?? 0,
       averageOrderValue: metrics?.averageOrderValue ?? 0,
-      conversionRate: metrics?.conversionRate ?? 0,
+      ordersPerCustomer: metrics?.ordersPerCustomer ?? 0,
     };
   }, [kpiData]);
 

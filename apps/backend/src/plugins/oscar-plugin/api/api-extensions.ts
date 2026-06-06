@@ -67,11 +67,11 @@ export const adminApiExtensions = gql`
   Comprehensive KPI metrics for the dashboard
   """
   type KpiMetrics {
-    # Revenue metrics (in cents)
-    revenueToday: Int!
-    revenueThisWeek: Int!
-    revenueThisMonth: Int!
-    revenueLastMonth: Int!
+    # Revenue metrics (in cents). Float (not Int) so large totals can't overflow Int32.
+    revenueToday: Float!
+    revenueThisWeek: Float!
+    revenueThisMonth: Float!
+    revenueLastMonth: Float!
     revenueGrowth: Float!
 
     # Order metrics
@@ -99,7 +99,8 @@ export const adminApiExtensions = gql`
 
     # Calculated metrics
     averageOrderValue: Float!
-    conversionRate: Float!
+    "Placed orders ÷ total customers. NOT a conversion rate (no traffic data)."
+    ordersPerCustomer: Float!
   }
 
   # ==================== CHART DATA ====================
@@ -109,7 +110,8 @@ export const adminApiExtensions = gql`
   """
   type SalesTrendDataPoint {
     date: String!
-    revenue: Int!
+    "Revenue in cents. Float to avoid Int32 overflow on high-volume days."
+    revenue: Float!
     orders: Int!
   }
 
@@ -131,7 +133,8 @@ export const adminApiExtensions = gql`
   type RevenueByCategoryDataPoint {
     categoryId: ID!
     categoryName: String!
-    revenue: Int!
+    "Revenue in cents (ex-tax, listPrice × quantity). Float to avoid Int32 overflow."
+    revenue: Float!
     percentage: Float!
   }
 
@@ -145,7 +148,8 @@ export const adminApiExtensions = gql`
     code: String!
     customerName: String!
     customerEmail: String!
-    total: Int!
+    "Order total with tax, in cents. Float to avoid Int32 overflow."
+    total: Float!
     state: String!
     itemCount: Int!
     createdAt: DateTime!
@@ -174,7 +178,8 @@ export const adminApiExtensions = gql`
     variantName: String!
     sku: String!
     quantitySold: Int!
-    revenue: Int!
+    "Revenue in cents (ex-tax, listPrice × quantity). Float to avoid Int32 overflow."
+    revenue: Float!
     imageUrl: String
   }
 

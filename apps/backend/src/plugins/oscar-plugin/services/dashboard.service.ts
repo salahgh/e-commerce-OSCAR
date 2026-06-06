@@ -16,7 +16,7 @@ import {
   Collection,
   StockLevel,
 } from '@vendure/core';
-import { MoreThanOrEqual, Between, In, IsNull } from 'typeorm';
+import { MoreThanOrEqual, IsNull, Not } from 'typeorm';
 
 export interface KpiMetrics {
   // Revenue metrics
@@ -51,7 +51,11 @@ export interface KpiMetrics {
 
   // Calculated metrics
   averageOrderValue: number;
-  conversionRate: number;
+  /**
+   * Orders per customer (placed orders / total customers). NOT a true conversion
+   * rate — we have no traffic/session data to compute orders ÷ visitors.
+   */
+  ordersPerCustomer: number;
 }
 
 export interface SalesTrendDataPoint {
@@ -179,43 +183,63 @@ export class DashboardService {
   async getKpiMetrics(ctx: RequestContext): Promise<KpiMetrics> {
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    // Week starts Monday (locale convention for DZ/FR). getDay(): 0=Sun..6=Sat.
     const weekStart = new Date(todayStart);
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
     // Get repositories
     const orderRepo = this.connection.getRepository(ctx, Order);
     const customerRepo = this.connection.getRepository(ctx, Customer);
     const productRepo = this.connection.getRepository(ctx, Product);
 
-    // Revenue calculations using simple entity fetching
+    // Revenue is summed over PLACED orders in "completed" payment/fulfilment
+    // states. calculateRevenue anchors on orderPlacedAt with a half-open
+    // [start, end) interval, so active carts (AddingItems) are excluded and
+    // orders never double-count at day boundaries.
     const completedStates = ['PaymentSettled', 'Shipped', 'Delivered', 'PartiallyShipped', 'PartiallyDelivered'];
 
     const revenueToday = await this.calculateRevenue(ctx, todayStart, now, completedStates);
     const revenueThisWeek = await this.calculateRevenue(ctx, weekStart, now, completedStates);
     const revenueThisMonth = await this.calculateRevenue(ctx, monthStart, now, completedStates);
-    const revenueLastMonth = await this.calculateRevenue(ctx, lastMonthStart, lastMonthEnd, completedStates);
+    // Full previous month: [lastMonthStart, monthStart) — half-open so the last
+    // day of the previous month is included (the old `day 0` upper bound dropped it).
+    const revenueLastMonth = await this.calculateRevenue(ctx, lastMonthStart, monthStart, completedStates);
 
-    const revenueGrowth = revenueLastMonth > 0
-      ? ((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100
+    // Growth compares like-for-like: month-to-date vs the SAME elapsed window of
+    // the previous month (not partial month vs full month, which always skewed
+    // negative early in the month).
+    const monthElapsedMs = now.getTime() - monthStart.getTime();
+    const lastMonthToDateEnd = new Date(lastMonthStart.getTime() + monthElapsedMs);
+    const revenueLastMonthToDate = await this.calculateRevenue(
+      ctx,
+      lastMonthStart,
+      lastMonthToDateEnd,
+      completedStates,
+    );
+    const revenueGrowth = revenueLastMonthToDate > 0
+      ? ((revenueThisMonth - revenueLastMonthToDate) / revenueLastMonthToDate) * 100
       : 0;
 
-    // Order counts by state
+    // Order counts cover PLACED orders only (orderPlacedAt set). Counting by
+    // createdAt with no state filter previously included every abandoned cart
+    // (state AddingItems), massively inflating "Commandes" and the ratio below.
     const ordersToday = await orderRepo.count({
-      where: { createdAt: MoreThanOrEqual(todayStart) },
+      where: { orderPlacedAt: MoreThanOrEqual(todayStart) },
     });
 
     const ordersThisWeek = await orderRepo.count({
-      where: { createdAt: MoreThanOrEqual(weekStart) },
+      where: { orderPlacedAt: MoreThanOrEqual(weekStart) },
     });
 
     const ordersThisMonth = await orderRepo.count({
-      where: { createdAt: MoreThanOrEqual(monthStart) },
+      where: { orderPlacedAt: MoreThanOrEqual(monthStart) },
     });
 
-    const totalOrders = await orderRepo.count();
+    const totalOrders = await orderRepo.count({
+      where: { orderPlacedAt: Not(IsNull()) },
+    });
 
     const pendingOrders = await orderRepo.count({
       where: { state: 'PaymentAuthorized' },
@@ -252,11 +276,12 @@ export class DashboardService {
 
     const totalCustomers = await customerRepo.count();
 
-    // Product counts
-    const totalProducts = await productRepo.count();
+    // Product counts — exclude soft-deleted products so these agree with
+    // getCatalogStats (which already filters deletedAt).
+    const totalProducts = await productRepo.count({ where: { deletedAt: IsNull() } as any });
 
     const activeProducts = await productRepo.count({
-      where: { enabled: true },
+      where: { enabled: true, deletedAt: IsNull() } as any,
     });
 
     // Low stock and out of stock — aggregate over StockLevel entries per variant,
@@ -276,11 +301,14 @@ export class DashboardService {
     const lowStockProducts = lowStockProductIds.size;
     const outOfStockProducts = outOfStockProductIds.size;
 
-    // Average order value
-    const averageOrderValue = ordersThisMonth > 0 ? revenueThisMonth / ordersThisMonth : 0;
+    // Average order value: completed-order revenue ÷ count of those SAME orders.
+    // (Previously divided by ALL orders this month incl. carts, understating AOV.)
+    const completedOrdersThisMonth = await this.countOrdersInRange(ctx, monthStart, now, completedStates);
+    const averageOrderValue = completedOrdersThisMonth > 0 ? revenueThisMonth / completedOrdersThisMonth : 0;
 
-    // Simplified conversion rate
-    const conversionRate = totalCustomers > 0 ? (totalOrders / totalCustomers) * 100 : 0;
+    // Orders per customer (lifetime placed orders ÷ customers). This is NOT a
+    // conversion rate; renamed to stop presenting a >100% "rate".
+    const ordersPerCustomer = totalCustomers > 0 ? totalOrders / totalCustomers : 0;
 
     return {
       revenueToday,
@@ -306,7 +334,7 @@ export class DashboardService {
       lowStockProducts,
       outOfStockProducts,
       averageOrderValue,
-      conversionRate,
+      ordersPerCustomer,
     };
   }
 
@@ -357,8 +385,15 @@ export class DashboardService {
       ranges.push({ dayStart, dayEnd });
     }
 
+    // Half-open [dayStart, dayEnd) on orderPlacedAt: an order at exactly midnight
+    // lands in one bucket only, and active carts (no orderPlacedAt) are excluded.
     const countFor = (dayStart: Date, dayEnd: Date, state: string) =>
-      orderRepo.count({ where: { createdAt: Between(dayStart, dayEnd), state: state as any } });
+      orderRepo
+        .createQueryBuilder('o')
+        .where('o.orderPlacedAt >= :dayStart', { dayStart })
+        .andWhere('o.orderPlacedAt < :dayEnd', { dayEnd })
+        .andWhere('o.state = :state', { state })
+        .getCount();
 
     // Fetch every (day, state) count concurrently instead of 5 * `days` serial counts.
     return Promise.all(
@@ -390,8 +425,13 @@ export class DashboardService {
    *
    * Note: `linePriceWithTax` is a TypeScript getter on OrderLine (computed
    * from listPrice/taxLines/adjustments) and does NOT exist as a DB column,
-   * so we use `listPrice * quantity` as the per-line revenue. Close enough
-   * for a category-share visualization.
+   * so we use `listPrice * quantity` as the per-line revenue.
+   *
+   * Each order line is attributed to exactly ONE collection (DISTINCT ON the
+   * line, taking the lowest collectionId) so the result is a true partition:
+   * a variant in multiple collections no longer multiplies its revenue and the
+   * percentages sum to 100%. Lines whose variant has no collection fall into an
+   * "uncategorized" bucket (LEFT JOIN) so the pie still totals real revenue.
    */
   async getRevenueByCategory(ctx: RequestContext): Promise<RevenueByCategoryDataPoint[]> {
     const completedStates = [
@@ -402,25 +442,32 @@ export class DashboardService {
       'PartiallyDelivered',
     ];
 
-    const rows = await this.connection
+    const rows: Array<{ collectionId: string | null; revenue: string }> = await this.connection
       .getRepository(ctx, OrderLine)
-      .createQueryBuilder('line')
-      .innerJoin('order', 'o', 'o.id = line."orderId"')
-      .innerJoin(
-        'collection_product_variants_product_variant',
-        'cpv',
-        'cpv."productVariantId" = line."productVariantId"',
-      )
-      .where('o.state IN (:...states)', { states: completedStates })
-      .select('cpv."collectionId"', 'collectionId')
-      .addSelect('SUM(line."listPrice" * line."quantity")', 'revenue')
-      .groupBy('cpv."collectionId"')
-      .getRawMany<{ collectionId: string; revenue: string }>();
+      .query(
+        `SELECT t."collectionId" AS "collectionId", SUM(t.revenue)::text AS revenue
+         FROM (
+           SELECT DISTINCT ON (line.id)
+                  cpv."collectionId" AS "collectionId",
+                  (line."listPrice" * line."quantity") AS revenue
+           FROM order_line line
+           INNER JOIN "order" o ON o.id = line."orderId"
+           LEFT JOIN collection_product_variants_product_variant cpv
+                  ON cpv."productVariantId" = line."productVariantId"
+           WHERE o.state = ANY($1)
+           ORDER BY line.id, cpv."collectionId" NULLS LAST
+         ) t
+         GROUP BY t."collectionId"`,
+        [completedStates],
+      );
 
     if (rows.length === 0) return [];
 
+    const ids = rows
+      .map(r => r.collectionId)
+      .filter((id): id is string => id != null);
     const collections = await Promise.all(
-      rows.map(r => this.collectionService.findOne(ctx, r.collectionId)),
+      ids.map(id => this.collectionService.findOne(ctx, id)),
     );
     const nameById = new Map<string, string>();
     for (const c of collections) {
@@ -432,9 +479,12 @@ export class DashboardService {
     return rows
       .map(row => {
         const revenue = Number(row.revenue || 0);
+        const uncategorized = row.collectionId == null;
         return {
-          categoryId: row.collectionId.toString(),
-          categoryName: nameById.get(row.collectionId.toString()) || 'Unknown',
+          categoryId: uncategorized ? 'uncategorized' : row.collectionId!.toString(),
+          categoryName: uncategorized
+            ? 'Sans catégorie'
+            : nameById.get(row.collectionId!.toString()) || 'Unknown',
           revenue,
           percentage: totalRevenue > 0 ? (revenue / totalRevenue) * 100 : 0,
         };
@@ -667,41 +717,42 @@ export class DashboardService {
   }
 
   /**
-   * Get top selling products (simplified)
+   * Top selling products by units sold across ALL completed orders.
+   *
+   * Aggregated in SQL (GROUP BY variant) rather than scanning an arbitrary
+   * `take: 100` recent slice in memory — the old approach was neither all-time
+   * nor a defined window and silently dropped orders. Uses the same
+   * `completedStates` as the rest of the dashboard, and `listPrice * quantity`
+   * (ex-tax) for revenue to stay consistent with revenue-by-category.
    */
   async getTopSellingProducts(ctx: RequestContext, limit: number = 10): Promise<TopSellingProduct[]> {
-    // Get recent completed orders
-    const { items: orders } = await this.orderService.findAll(ctx, {
-      take: 100,
-      filter: {
-        state: { in: ['PaymentSettled', 'Shipped', 'Delivered'] },
-      },
-    });
+    const completedStates = [
+      'PaymentSettled',
+      'Shipped',
+      'Delivered',
+      'PartiallyShipped',
+      'PartiallyDelivered',
+    ];
 
-    // Aggregate sales by variant
-    const variantSales = new Map<string, { quantity: number; revenue: number; variantId: string }>();
+    const rows = await this.connection
+      .getRepository(ctx, OrderLine)
+      .createQueryBuilder('line')
+      .innerJoin('order', 'o', 'o.id = line."orderId"')
+      .where('o.state IN (:...states)', { states: completedStates })
+      .andWhere('line."productVariantId" IS NOT NULL')
+      .select('line."productVariantId"', 'variantId')
+      .addSelect('SUM(line."quantity")', 'quantitySold')
+      .addSelect('SUM(line."listPrice" * line."quantity")', 'revenue')
+      .groupBy('line."productVariantId"')
+      .orderBy('"quantitySold"', 'DESC')
+      .limit(limit)
+      .getRawMany<{ variantId: string; quantitySold: string; revenue: string }>();
 
-    for (const order of orders) {
-      for (const line of order.lines || []) {
-        const variantId = line.productVariant?.id?.toString() || '';
-        if (!variantId) continue;
+    if (rows.length === 0) return [];
 
-        const existing = variantSales.get(variantId) || { quantity: 0, revenue: 0, variantId };
-        existing.quantity += line.quantity;
-        existing.revenue += line.linePriceWithTax;
-        variantSales.set(variantId, existing);
-      }
-    }
-
-    // Sort by quantity and get top sellers
-    const sorted = Array.from(variantSales.values())
-      .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, limit);
-
-    // Fetch variant details
     const result: TopSellingProduct[] = [];
-    for (const sale of sorted) {
-      const variant = await this.productVariantService.findOne(ctx, sale.variantId);
+    for (const row of rows) {
+      const variant = await this.productVariantService.findOne(ctx, row.variantId);
       if (!variant) continue;
 
       const product = await this.productService.findOne(ctx, variant.productId);
@@ -709,11 +760,11 @@ export class DashboardService {
       result.push({
         productId: variant.productId.toString(),
         productName: product?.name || 'Unknown',
-        variantId: sale.variantId,
+        variantId: row.variantId.toString(),
         variantName: variant.sku || `Variant ${variant.id}`,
         sku: variant.sku,
-        quantitySold: sale.quantity,
-        revenue: sale.revenue,
+        quantitySold: Number(row.quantitySold),
+        revenue: Number(row.revenue),
         imageUrl: product?.featuredAsset?.preview || null,
       });
     }
@@ -722,38 +773,47 @@ export class DashboardService {
   }
 
   // Helper methods
+
+  /**
+   * Sum of totalWithTax over orders PLACED in [startDate, endDate) in the given
+   * states. Anchored on orderPlacedAt (excludes active carts) with a half-open
+   * interval (no double-count at day boundaries). Summed in SQL rather than
+   * loading every order into memory.
+   */
   private async calculateRevenue(
     ctx: RequestContext,
     startDate: Date,
     endDate: Date,
     states: string[],
   ): Promise<number> {
-    const orderRepo = this.connection.getRepository(ctx, Order);
+    const result = await this.connection
+      .getRepository(ctx, Order)
+      .createQueryBuilder('o')
+      .select('COALESCE(SUM(o.totalWithTax), 0)', 'sum')
+      .where('o.orderPlacedAt >= :startDate', { startDate })
+      .andWhere('o.orderPlacedAt < :endDate', { endDate })
+      .andWhere('o.state IN (:...states)', { states })
+      .getRawOne<{ sum: string }>();
 
-    // Use entity fetching instead of raw SQL
-    const orders = await orderRepo.find({
-      where: {
-        createdAt: Between(startDate, endDate),
-        state: In(states) as any,
-      },
-    });
-
-    return orders.reduce((sum, order) => sum + order.totalWithTax, 0);
+    return Number(result?.sum ?? 0);
   }
 
+  /**
+   * Count of orders PLACED in [startDate, endDate) in the given states.
+   * Same anchoring/interval semantics as calculateRevenue.
+   */
   private async countOrdersInRange(
     ctx: RequestContext,
     startDate: Date,
     endDate: Date,
     states: string[],
   ): Promise<number> {
-    const orderRepo = this.connection.getRepository(ctx, Order);
-
-    return orderRepo.count({
-      where: {
-        createdAt: Between(startDate, endDate),
-        state: In(states) as any,
-      },
-    });
+    return this.connection
+      .getRepository(ctx, Order)
+      .createQueryBuilder('o')
+      .where('o.orderPlacedAt >= :startDate', { startDate })
+      .andWhere('o.orderPlacedAt < :endDate', { endDate })
+      .andWhere('o.state IN (:...states)', { states })
+      .getCount();
   }
 }

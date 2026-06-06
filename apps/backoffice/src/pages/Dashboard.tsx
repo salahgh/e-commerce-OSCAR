@@ -154,8 +154,8 @@ export const Dashboard: React.FC = () => {
           loading={kpisLoading}
         />
         <KPICard
-          title="Taux de conversion"
-          value={`${kpis.conversionRate.toFixed(1)}%`}
+          title="Commandes / client"
+          value={kpis.ordersPerCustomer.toFixed(2)}
           icon={<BarChart3 className="h-6 w-6" />}
           iconBgColor="bg-orange-500/20"
           iconColor="text-orange-400"

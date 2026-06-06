@@ -37,7 +37,7 @@ query DashboardKpiMetrics {
 
     # Calculated metrics
     averageOrderValue
-    conversionRate
+    ordersPerCustomer
   }
 }
 

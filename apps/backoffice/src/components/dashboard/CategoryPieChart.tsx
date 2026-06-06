@@ -33,7 +33,10 @@ const CustomTooltip = ({ active, payload }: any) => {
             <span className="text-foreground font-semibold">{formatPrice(data.value)}</span>
           </p>
           <p className="text-sm text-muted-foreground">
-            Commandes: <span className="text-foreground font-semibold">{data.count}</span>
+            Part:{' '}
+            <span className="text-foreground font-semibold">
+              {typeof data.percentage === 'number' ? `${data.percentage.toFixed(1)}%` : '—'}
+            </span>
           </p>
         </div>
       </div>

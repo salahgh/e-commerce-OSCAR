@@ -154,10 +154,6 @@ export const Dashboard: React.FC = () => {
             icon={<ShoppingCart className="h-6 w-6" />}
             iconBgColor="bg-green-500/20"
             iconColor="text-green-400"
-            trend={{
-              value: kpis.ordersThisMonth > 0 ? ((kpis.ordersThisMonth - kpis.ordersThisWeek * 4) / (kpis.ordersThisWeek * 4 || 1)) * 100 : 0,
-              isPositive: true,
-            }}
             subtitle={`${kpis.pendingOrders} en attente`}
             loading={kpisLoading}
           />
@@ -181,8 +177,8 @@ export const Dashboard: React.FC = () => {
 
         {canReadOrders ? (
           <KPICard
-            title="Taux de conversion"
-            value={`${kpis.conversionRate.toFixed(1)}%`}
+            title="Commandes / client"
+            value={kpis.ordersPerCustomer.toFixed(2)}
             icon={<Percent className="h-6 w-6" />}
             iconBgColor="bg-orange-500/20"
             iconColor="text-orange-400"
@@ -190,7 +186,7 @@ export const Dashboard: React.FC = () => {
             loading={kpisLoading}
           />
         ) : (
-          <LockedKPICard title="Taux de conversion" permission="ReadOrder" />
+          <LockedKPICard title="Commandes / client" permission="ReadOrder" />
         )}
       </div>
 
