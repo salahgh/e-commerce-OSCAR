@@ -165,7 +165,7 @@ export const FacetList: React.FC = () => {
             {totalItems} attribut{totalItems > 1 ? 's' : ''} au total
           </p>
         </div>
-        <PermissionGate permission="CreateCatalog" disableMode>
+        <PermissionGate anyOf={['CreateFacet', 'CreateCatalog']} disableMode>
           <Link
             to="/facets/new"
             className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
@@ -343,7 +343,7 @@ export const FacetList: React.FC = () => {
                         className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <PermissionGate permission="UpdateCatalog" disableMode>
+                        <PermissionGate anyOf={['UpdateFacet', 'UpdateCatalog']} disableMode>
                           <button
                             onClick={() => navigate(`/facets/${facet.id}`)}
                             className="p-2 text-primary hover:bg-primary/10 rounded-lg"
@@ -352,7 +352,7 @@ export const FacetList: React.FC = () => {
                             <Edit3 className="h-4 w-4" />
                           </button>
                         </PermissionGate>
-                        <PermissionGate permission="DeleteCatalog" disableMode>
+                        <PermissionGate anyOf={['DeleteFacet', 'DeleteCatalog']} disableMode>
                           <button
                             onClick={() => setDeletingFacet({ id: facet.id, name: facet.name })}
                             className="p-2 text-destructive hover:bg-destructive/10 rounded-lg"

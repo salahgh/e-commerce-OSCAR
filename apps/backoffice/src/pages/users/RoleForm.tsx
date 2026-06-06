@@ -14,11 +14,12 @@ import {
 import { Card } from '../../components/ui/Card';
 import { Spinner } from '../../components/ui/Spinner';
 import { addToast } from '../../store/slices/uiSlice';
+import { PERMISSION_CATEGORIES, PERMISSION_DESCRIPTIONS } from '../../config/permissions.config';
 
 interface FormValues {
   code: string;
   description: string;
-  permissions: Permission[];
+  permissions: string[];
 }
 
 const validationSchema = Yup.object().shape({
@@ -29,80 +30,6 @@ const validationSchema = Yup.object().shape({
   permissions: Yup.array().of(Yup.string()).min(1, 'Au moins une permission est requise'),
 });
 
-// Permission categories for grouping
-const PERMISSION_CATEGORIES = {
-  Catalogue: [
-    Permission.CreateCatalog,
-    Permission.ReadCatalog,
-    Permission.UpdateCatalog,
-    Permission.DeleteCatalog,
-    Permission.CreateProduct,
-    Permission.ReadProduct,
-    Permission.UpdateProduct,
-    Permission.DeleteProduct,
-    Permission.CreateFacet,
-    Permission.ReadFacet,
-    Permission.UpdateFacet,
-    Permission.DeleteFacet,
-    Permission.CreateCollection,
-    Permission.ReadCollection,
-    Permission.UpdateCollection,
-    Permission.DeleteCollection,
-  ],
-  Commandes: [
-    Permission.CreateOrder,
-    Permission.ReadOrder,
-    Permission.UpdateOrder,
-    Permission.DeleteOrder,
-  ],
-  Clients: [
-    Permission.CreateCustomer,
-    Permission.ReadCustomer,
-    Permission.UpdateCustomer,
-    Permission.DeleteCustomer,
-    Permission.CreateCustomerGroup,
-    Permission.ReadCustomerGroup,
-    Permission.UpdateCustomerGroup,
-    Permission.DeleteCustomerGroup,
-  ],
-  Administrateurs: [
-    Permission.CreateAdministrator,
-    Permission.ReadAdministrator,
-    Permission.UpdateAdministrator,
-    Permission.DeleteAdministrator,
-  ],
-  Paramètres: [
-    Permission.CreateSettings,
-    Permission.ReadSettings,
-    Permission.UpdateSettings,
-    Permission.DeleteSettings,
-    Permission.UpdateGlobalSettings,
-  ],
-  Paiements: [
-    Permission.CreatePaymentMethod,
-    Permission.ReadPaymentMethod,
-    Permission.UpdatePaymentMethod,
-    Permission.DeletePaymentMethod,
-  ],
-  Livraison: [
-    Permission.CreateShippingMethod,
-    Permission.ReadShippingMethod,
-    Permission.UpdateShippingMethod,
-    Permission.DeleteShippingMethod,
-  ],
-  Promotions: [
-    Permission.CreatePromotion,
-    Permission.ReadPromotion,
-    Permission.UpdatePromotion,
-    Permission.DeletePromotion,
-  ],
-  Assets: [
-    Permission.CreateAsset,
-    Permission.ReadAsset,
-    Permission.UpdateAsset,
-    Permission.DeleteAsset,
-  ],
-};
 
 export const RoleForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -139,14 +66,10 @@ export const RoleForm: React.FC = () => {
   const loading = loadingRole;
   const submitting = creating || updating;
 
-  const formatPermission = (permission: string): string => {
-    return permission.replace(/([A-Z])/g, ' $1').trim();
-  };
-
   const initialValues: FormValues = {
     code: role?.code || '',
     description: role?.description || '',
-    permissions: (role?.permissions as Permission[]) || [],
+    permissions: (role?.permissions as string[]) || [],
   };
 
   const handleSubmit = (values: FormValues) => {
@@ -157,7 +80,7 @@ export const RoleForm: React.FC = () => {
             id: id!,
             code: values.code,
             description: values.description,
-            permissions: values.permissions,
+            permissions: values.permissions as Permission[],
           },
         },
       });
@@ -167,7 +90,7 @@ export const RoleForm: React.FC = () => {
           input: {
             code: values.code,
             description: values.description,
-            permissions: values.permissions,
+            permissions: values.permissions as Permission[],
           },
         },
       });
@@ -291,7 +214,7 @@ export const RoleForm: React.FC = () => {
                 )}
 
                 <div className="space-y-6">
-                  {Object.entries(PERMISSION_CATEGORIES).map(([category, permissions]) => {
+                  {Object.entries(PERMISSION_CATEGORIES).map(([category, { label, permissions }]) => {
                     const selectedCount = permissions.filter((p) =>
                       values.permissions.includes(p)
                     ).length;
@@ -315,13 +238,13 @@ export const RoleForm: React.FC = () => {
                                 } else {
                                   setFieldValue(
                                     'permissions',
-                                    values.permissions.filter((p) => !permissions.includes(p))
+                                    values.permissions.filter((p) => !(permissions as string[]).includes(p))
                                   );
                                 }
                               }}
                               className="h-4 w-4 text-primary rounded border-border bg-card focus:ring-primary"
                             />
-                            <span className="font-medium text-foreground">{category}</span>
+                            <span className="font-medium text-foreground">{label}</span>
                           </div>
                           <span className="text-sm text-muted-foreground">
                             {selectedCount}/{permissions.length}
@@ -353,7 +276,7 @@ export const RoleForm: React.FC = () => {
                                 className="h-4 w-4 text-primary rounded border-border bg-card focus:ring-primary"
                               />
                               <span className="text-sm text-foreground">
-                                {formatPermission(permission)}
+                                {PERMISSION_DESCRIPTIONS[permission]}
                               </span>
                             </label>
                           ))}

@@ -54,6 +54,7 @@ import { Tabs } from '../../components/ui/Tabs';
 import { Badge } from '../../components/ui/Badge';
 import { AssetPickerModal } from '../../components/ui/AssetPickerModal';
 import { CollectionFilterBuilder } from '../../components/collections/CollectionFilterBuilder';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 import { cn } from '../../lib/utils';
 
 // Helper to get translation by language
@@ -548,15 +549,17 @@ export const CategoryDetail: React.FC = () => {
           )}
         </div>
         {!isNew && collection && (
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleDuplicate}
-            loading={duplicating}
-            icon={<Copy className="h-4 w-4" />}
-          >
-            Dupliquer
-          </Button>
+          <PermissionGate anyOf={['CreateCollection', 'CreateCatalog']} disableMode>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleDuplicate}
+              loading={duplicating}
+              icon={<Copy className="h-4 w-4" />}
+            >
+              Dupliquer
+            </Button>
+          </PermissionGate>
         )}
       </div>
 
@@ -992,22 +995,26 @@ export const CategoryDetail: React.FC = () => {
                         </div>
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 rounded-xl flex items-center justify-center">
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setShowAssetPicker(true)}
-                              className="p-3 bg-card rounded-full shadow-lg hover:bg-accent transition-colors"
-                              title="Choisir depuis la bibliotheque"
-                            >
-                              <FolderOpen className="h-5 w-5 text-foreground" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => fileInputRef.current?.click()}
-                              className="p-3 bg-card rounded-full shadow-lg hover:bg-accent transition-colors"
-                              title="Telecharger une nouvelle image"
-                            >
-                              <Upload className="h-5 w-5 text-foreground" />
-                            </button>
+                            <PermissionGate anyOf={['CreateAsset', 'CreateCatalog']} disableMode>
+                              <button
+                                type="button"
+                                onClick={() => setShowAssetPicker(true)}
+                                className="p-3 bg-card rounded-full shadow-lg hover:bg-accent transition-colors"
+                                title="Choisir depuis la bibliotheque"
+                              >
+                                <FolderOpen className="h-5 w-5 text-foreground" />
+                              </button>
+                            </PermissionGate>
+                            <PermissionGate anyOf={['CreateAsset', 'CreateCatalog']} disableMode>
+                              <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="p-3 bg-card rounded-full shadow-lg hover:bg-accent transition-colors"
+                                title="Telecharger une nouvelle image"
+                              >
+                                <Upload className="h-5 w-5 text-foreground" />
+                              </button>
+                            </PermissionGate>
                             <button
                               type="button"
                               onClick={removeImage}
@@ -1063,22 +1070,26 @@ export const CategoryDetail: React.FC = () => {
 
                         {/* Action buttons */}
                         <div className="grid grid-cols-2 gap-3">
-                          <button
-                            type="button"
-                            onClick={() => setShowAssetPicker(true)}
-                            className="flex flex-col items-center gap-2 p-4 bg-muted rounded-lg hover:bg-accent transition-colors border border-transparent hover:border-primary"
-                          >
-                            <FolderOpen className="h-6 w-6 text-primary" />
-                            <span className="text-sm font-medium text-foreground">Bibliotheque</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            className="flex flex-col items-center gap-2 p-4 bg-muted rounded-lg hover:bg-accent transition-colors border border-transparent hover:border-primary"
-                          >
-                            <Upload className="h-6 w-6 text-primary" />
-                            <span className="text-sm font-medium text-foreground">Telecharger</span>
-                          </button>
+                          <PermissionGate anyOf={['CreateAsset', 'CreateCatalog']} disableMode>
+                            <button
+                              type="button"
+                              onClick={() => setShowAssetPicker(true)}
+                              className="flex flex-col items-center gap-2 p-4 bg-muted rounded-lg hover:bg-accent transition-colors border border-transparent hover:border-primary"
+                            >
+                              <FolderOpen className="h-6 w-6 text-primary" />
+                              <span className="text-sm font-medium text-foreground">Bibliotheque</span>
+                            </button>
+                          </PermissionGate>
+                          <PermissionGate anyOf={['CreateAsset', 'CreateCatalog']} disableMode>
+                            <button
+                              type="button"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="flex flex-col items-center gap-2 p-4 bg-muted rounded-lg hover:bg-accent transition-colors border border-transparent hover:border-primary"
+                            >
+                              <Upload className="h-6 w-6 text-primary" />
+                              <span className="text-sm font-medium text-foreground">Telecharger</span>
+                            </button>
+                          </PermissionGate>
                         </div>
                       </div>
                     )}
@@ -1118,15 +1129,17 @@ export const CategoryDetail: React.FC = () => {
                       <ImageIcon className="h-5 w-5 text-amber-500" />
                       Galerie ({galleryAssets.length})
                     </h2>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowGalleryPicker(true)}
-                      icon={<Plus className="h-4 w-4" />}
-                    >
-                      Ajouter
-                    </Button>
+                    <PermissionGate anyOf={['CreateAsset', 'CreateCatalog']} disableMode>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowGalleryPicker(true)}
+                        icon={<Plus className="h-4 w-4" />}
+                      >
+                        Ajouter
+                      </Button>
+                    </PermissionGate>
                   </div>
                   <div className="p-4">
                     {galleryAssets.length === 0 ? (
@@ -1271,15 +1284,20 @@ export const CategoryDetail: React.FC = () => {
 
                 {/* Action Buttons */}
                 <div className="bg-card rounded-xl shadow-sm border border-border p-4 space-y-3">
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    loading={creating || updating}
-                    icon={<Save className="h-4 w-4" />}
-                    disabled={!isValid}
+                  <PermissionGate
+                    anyOf={['CreateCollection', 'UpdateCollection', 'CreateCatalog', 'UpdateCatalog']}
+                    disableMode
                   >
-                    {isNew ? 'Creer la categorie' : 'Enregistrer les modifications'}
-                  </Button>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      loading={creating || updating}
+                      icon={<Save className="h-4 w-4" />}
+                      disabled={!isValid}
+                    >
+                      {isNew ? 'Creer la categorie' : 'Enregistrer les modifications'}
+                    </Button>
+                  </PermissionGate>
                   <Button
                     type="button"
                     variant="ghost"

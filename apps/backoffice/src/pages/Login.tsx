@@ -82,8 +82,8 @@ export const Login: React.FC = () => {
         <div className="bg-card rounded-2xl shadow-xl p-8 border border-border">
           {/* Logo */}
           <div className="flex justify-center mb-8">
-            <div className="h-16 w-16 bg-primary rounded-xl flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-lg">
-              O
+            <div className="bg-white rounded-2xl px-6 py-4 shadow-lg">
+              <img src="/oscar-logo.svg" alt="OSCAR Najar" className="h-16 w-auto" />
             </div>
           </div>
 
@@ -111,7 +111,6 @@ export const Login: React.FC = () => {
                     ? 'border-destructive'
                     : 'border-input'
                 }`}
-                placeholder="superadmin"
               />
               {formik.touched.username && formik.errors.username && (
                 <p className="mt-1 text-sm text-destructive">{formik.errors.username}</p>
@@ -184,12 +183,6 @@ export const Login: React.FC = () => {
               )}
             </button>
           </form>
-
-          <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/30">
-            <p className="text-sm text-primary font-medium mb-2">Compte superadmin:</p>
-            <p className="text-xs text-primary/80">Utilisateur: superadmin</p>
-            <p className="text-xs text-primary/80">Mot de passe: superadmin123</p>
-          </div>
         </div>
 
         <p className="text-center text-sm text-muted-foreground mt-6">

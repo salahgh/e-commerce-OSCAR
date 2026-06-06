@@ -10,6 +10,7 @@ import { Modal, ModalContent, ModalFooter } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { TextArea } from '../../components/ui/TextArea';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 import { formatPrice } from '../../lib/utils';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
@@ -165,13 +166,15 @@ export const RefundDialog: React.FC<RefundDialogProps> = ({
         <Button variant="ghost" onClick={onClose}>
           Annuler
         </Button>
-        <Button
-          onClick={handleSubmit}
-          loading={loading}
-          disabled={settledPayments.length === 0 || !amount}
-        >
-          Rembourser
-        </Button>
+        <PermissionGate permission="UpdateOrder" disableMode>
+          <Button
+            onClick={handleSubmit}
+            loading={loading}
+            disabled={settledPayments.length === 0 || !amount}
+          >
+            Rembourser
+          </Button>
+        </PermissionGate>
       </ModalFooter>
     </Modal>
   );
@@ -289,9 +292,11 @@ export const ManualPaymentDialog: React.FC<ManualPaymentDialogProps> = ({
         <Button variant="ghost" onClick={onClose}>
           Annuler
         </Button>
-        <Button onClick={handleSubmit} loading={loading} disabled={!method}>
-          Enregistrer
-        </Button>
+        <PermissionGate permission="UpdateOrder" disableMode>
+          <Button onClick={handleSubmit} loading={loading} disabled={!method}>
+            Enregistrer
+          </Button>
+        </PermissionGate>
       </ModalFooter>
     </Modal>
   );
@@ -490,9 +495,11 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
         <Button variant="ghost" onClick={onClose}>
           Annuler
         </Button>
-        <Button onClick={handleSubmit} loading={loading}>
-          {dryRun ? 'Prévisualiser' : 'Appliquer'}
-        </Button>
+        <PermissionGate permission="UpdateOrder" disableMode>
+          <Button onClick={handleSubmit} loading={loading}>
+            {dryRun ? 'Prévisualiser' : 'Appliquer'}
+          </Button>
+        </PermissionGate>
       </ModalFooter>
     </Modal>
   );

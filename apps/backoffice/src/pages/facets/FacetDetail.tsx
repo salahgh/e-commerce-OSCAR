@@ -38,6 +38,7 @@ import { FacetValueEditor } from '../../components/facets/FacetValueEditor';
 import type { FacetValueData } from '../../components/facets/FacetValueEditor';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Modal, ModalContent, ModalFooter } from '../../components/ui/Modal';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 import { cn } from '../../lib/utils';
 
 // Helper to get translation by language
@@ -688,23 +689,27 @@ export const FacetDetail: React.FC = () => {
                         Valeurs ({facetValues.length})
                       </h2>
                       <div className="flex items-center gap-2">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowBulkImport(true)}
-                        >
-                          Importer
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          icon={<Plus className="h-4 w-4" />}
-                          onClick={handleAddValue}
-                        >
-                          Ajouter une valeur
-                        </Button>
+                        <PermissionGate anyOf={['UpdateFacet', 'UpdateCatalog']} disableMode>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowBulkImport(true)}
+                          >
+                            Importer
+                          </Button>
+                        </PermissionGate>
+                        <PermissionGate anyOf={['UpdateFacet', 'UpdateCatalog']} disableMode>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            icon={<Plus className="h-4 w-4" />}
+                            onClick={handleAddValue}
+                          >
+                            Ajouter une valeur
+                          </Button>
+                        </PermissionGate>
                       </div>
                     </div>
                   </div>
@@ -713,15 +718,17 @@ export const FacetDetail: React.FC = () => {
                       <div className="text-center py-8">
                         <Tag className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                         <p className="text-muted-foreground">Aucune valeur definie</p>
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          className="mt-4"
-                          icon={<Plus className="h-4 w-4" />}
-                          onClick={handleAddValue}
-                        >
-                          Ajouter une valeur
-                        </Button>
+                        <PermissionGate anyOf={['UpdateFacet', 'UpdateCatalog']} disableMode>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="mt-4"
+                            icon={<Plus className="h-4 w-4" />}
+                            onClick={handleAddValue}
+                          >
+                            Ajouter une valeur
+                          </Button>
+                        </PermissionGate>
                       </div>
                     ) : (
                       facetValues.map((value, index) => (
@@ -743,15 +750,17 @@ export const FacetDetail: React.FC = () => {
 
                     {facetValues.length > 0 && (
                       <div className="pt-4 border-t border-border">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          icon={<Plus className="h-4 w-4" />}
-                          onClick={handleAddValue}
-                        >
-                          Ajouter une valeur
-                        </Button>
+                        <PermissionGate anyOf={['UpdateFacet', 'UpdateCatalog']} disableMode>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            icon={<Plus className="h-4 w-4" />}
+                            onClick={handleAddValue}
+                          >
+                            Ajouter une valeur
+                          </Button>
+                        </PermissionGate>
                       </div>
                     )}
                   </div>
@@ -874,15 +883,20 @@ export const FacetDetail: React.FC = () => {
 
                 {/* Action Buttons */}
                 <div className="bg-card rounded-xl shadow-sm border border-border p-4 space-y-3 sticky top-4">
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    loading={creating || updating}
-                    icon={<Save className="h-4 w-4" />}
-                    disabled={!isValid}
+                  <PermissionGate
+                    anyOf={['CreateFacet', 'UpdateFacet', 'CreateCatalog', 'UpdateCatalog']}
+                    disableMode
                   >
-                    {isNew ? "Creer l'attribut" : 'Enregistrer les modifications'}
-                  </Button>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      loading={creating || updating}
+                      icon={<Save className="h-4 w-4" />}
+                      disabled={!isValid}
+                    >
+                      {isNew ? "Creer l'attribut" : 'Enregistrer les modifications'}
+                    </Button>
+                  </PermissionGate>
                   <Button
                     type="button"
                     variant="ghost"
@@ -945,9 +959,11 @@ export const FacetDetail: React.FC = () => {
           <Button variant="ghost" onClick={() => setShowBulkImport(false)}>
             Annuler
           </Button>
-          <Button variant="primary" onClick={handleBulkImport}>
-            Ajouter
-          </Button>
+          <PermissionGate anyOf={['UpdateFacet', 'UpdateCatalog']} disableMode>
+            <Button variant="primary" onClick={handleBulkImport}>
+              Ajouter
+            </Button>
+          </PermissionGate>
         </ModalFooter>
       </Modal>
 

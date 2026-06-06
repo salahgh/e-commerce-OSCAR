@@ -318,7 +318,7 @@ export const AssetList: React.FC = () => {
             </button>
           </div>
 
-          <PermissionGate permission="CreateCatalog" disableMode>
+          <PermissionGate anyOf={['CreateAsset', 'CreateCatalog']} disableMode>
             <label className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors cursor-pointer">
               <Upload className="h-5 w-5" />
               Telecharger
@@ -474,7 +474,7 @@ export const AssetList: React.FC = () => {
             >
               <X className="h-5 w-5" />
             </button>
-            <PermissionGate permission="DeleteCatalog" disableMode>
+            <PermissionGate anyOf={['DeleteAsset', 'DeleteCatalog']} disableMode>
               <button
                 onClick={() => setShowDeleteDialog(true)}
                 className="flex items-center gap-2 px-3 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90"
@@ -580,7 +580,7 @@ export const AssetList: React.FC = () => {
                     >
                       <Eye className="h-4 w-4" />
                     </button>
-                    <PermissionGate permission="UpdateCatalog" disableMode>
+                    <PermissionGate anyOf={['UpdateAsset', 'UpdateCatalog']} disableMode>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -694,7 +694,7 @@ export const AssetList: React.FC = () => {
                         >
                           <Eye className="h-4 w-4" />
                         </button>
-                        <PermissionGate permission="UpdateCatalog" disableMode>
+                        <PermissionGate anyOf={['UpdateAsset', 'UpdateCatalog']} disableMode>
                           <button
                             onClick={() => setEditingAsset(asset.id)}
                             className="p-2 text-green-600 hover:bg-green-100 rounded-lg"

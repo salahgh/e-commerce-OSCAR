@@ -33,6 +33,7 @@ import { TextArea } from '../../components/ui/TextArea';
 import { Select } from '../../components/ui/Select';
 import { Spinner } from '../../components/ui/Spinner';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 
 // Generate random promo code
 const generatePromoCode = (length: number = 8): string => {
@@ -619,15 +620,17 @@ export const PromotionForm: React.FC = () => {
               <Card>
                 <CardContent className="pt-6">
                   <div className="space-y-3">
-                    <Button
-                      type="submit"
-                      variant="primary"
-                      className="w-full"
-                      loading={creating || updating}
-                    >
-                      <Save className="h-4 w-4 mr-2" />
-                      {isEdit ? 'Enregistrer' : 'Créer la promotion'}
-                    </Button>
+                    <PermissionGate anyOf={['CreatePromotion', 'UpdatePromotion']} disableMode>
+                      <Button
+                        type="submit"
+                        variant="primary"
+                        className="w-full"
+                        loading={creating || updating}
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        {isEdit ? 'Enregistrer' : 'Créer la promotion'}
+                      </Button>
+                    </PermissionGate>
                     <Button
                       type="button"
                       variant="ghost"

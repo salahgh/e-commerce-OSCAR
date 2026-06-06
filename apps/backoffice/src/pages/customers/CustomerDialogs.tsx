@@ -8,6 +8,7 @@ import {
 import { Modal, ModalContent, ModalFooter } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
 
@@ -131,9 +132,11 @@ export const CreateCustomerDialog: React.FC<CreateCustomerDialogProps> = ({
         <Button variant="ghost" onClick={onClose}>
           Annuler
         </Button>
-        <Button onClick={handleSubmit} loading={loading}>
-          Créer
-        </Button>
+        <PermissionGate permission="CreateCustomer" disableMode>
+          <Button onClick={handleSubmit} loading={loading}>
+            Créer
+          </Button>
+        </PermissionGate>
       </ModalFooter>
     </Modal>
   );
@@ -365,9 +368,11 @@ export const AddressDialog: React.FC<AddressDialogProps> = ({
         <Button variant="ghost" onClick={onClose}>
           Annuler
         </Button>
-        <Button onClick={handleSubmit} loading={loading}>
-          {isEdit ? 'Mettre à jour' : 'Ajouter'}
-        </Button>
+        <PermissionGate permission="UpdateCustomer" disableMode>
+          <Button onClick={handleSubmit} loading={loading}>
+            {isEdit ? 'Mettre à jour' : 'Ajouter'}
+          </Button>
+        </PermissionGate>
       </ModalFooter>
     </Modal>
   );

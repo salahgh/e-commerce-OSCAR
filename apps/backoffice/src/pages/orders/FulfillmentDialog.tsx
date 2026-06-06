@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { Modal, ModalContent, ModalFooter } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 import { addToast } from '../../store/slices/uiSlice';
 import { CreateFulfillmentDocument } from '../../graphql/generated/graphql';
 
@@ -162,9 +163,11 @@ export const FulfillmentDialog: React.FC<FulfillmentDialogProps> = ({
         <Button variant="secondary" onClick={onClose}>
           Annuler
         </Button>
-        <Button variant="primary" onClick={handleSubmit} loading={loading} disabled={totalSelected === 0}>
-          Créer l’expédition
-        </Button>
+        <PermissionGate permission="UpdateOrder" disableMode>
+          <Button variant="primary" onClick={handleSubmit} loading={loading} disabled={totalSelected === 0}>
+            Créer l’expédition
+          </Button>
+        </PermissionGate>
       </ModalFooter>
     </Modal>
   );

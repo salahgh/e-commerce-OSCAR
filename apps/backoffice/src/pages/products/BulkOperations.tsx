@@ -27,6 +27,7 @@ import { Spinner } from '../../components/ui/Spinner';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Tabs } from '../../components/ui/Tabs';
 import { formatPrice } from '../../lib/utils';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 
 export const BulkOperations: React.FC = () => {
   const dispatch = useDispatch();
@@ -250,33 +251,39 @@ export const BulkOperations: React.FC = () => {
               )}
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setBulkAction('enable')}
-                disabled={selectedProducts.size === 0}
-                icon={<Eye className="h-4 w-4" />}
-              >
-                Activer
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setBulkAction('disable')}
-                disabled={selectedProducts.size === 0}
-                icon={<EyeOff className="h-4 w-4" />}
-              >
-                Désactiver
-              </Button>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => setBulkAction('delete')}
-                disabled={selectedProducts.size === 0}
-                icon={<Trash2 className="h-4 w-4" />}
-              >
-                Supprimer
-              </Button>
+              <PermissionGate anyOf={['UpdateProduct', 'UpdateCatalog']} disableMode>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setBulkAction('enable')}
+                  disabled={selectedProducts.size === 0}
+                  icon={<Eye className="h-4 w-4" />}
+                >
+                  Activer
+                </Button>
+              </PermissionGate>
+              <PermissionGate anyOf={['UpdateProduct', 'UpdateCatalog']} disableMode>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setBulkAction('disable')}
+                  disabled={selectedProducts.size === 0}
+                  icon={<EyeOff className="h-4 w-4" />}
+                >
+                  Désactiver
+                </Button>
+              </PermissionGate>
+              <PermissionGate anyOf={['DeleteProduct', 'DeleteCatalog']} disableMode>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => setBulkAction('delete')}
+                  disabled={selectedProducts.size === 0}
+                  icon={<Trash2 className="h-4 w-4" />}
+                >
+                  Supprimer
+                </Button>
+              </PermissionGate>
             </div>
           </div>
 
@@ -415,13 +422,15 @@ export const BulkOperations: React.FC = () => {
                 >
                   Annuler
                 </Button>
-                <Button
-                  icon={<Upload className="h-4 w-4" />}
-                  onClick={handleImport}
-                  loading={importing}
-                >
-                  Importer
-                </Button>
+                <PermissionGate anyOf={['CreateProduct', 'CreateCatalog']} disableMode>
+                  <Button
+                    icon={<Upload className="h-4 w-4" />}
+                    onClick={handleImport}
+                    loading={importing}
+                  >
+                    Importer
+                  </Button>
+                </PermissionGate>
               </div>
             </div>
           )}

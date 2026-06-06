@@ -27,6 +27,7 @@ import {
   TableHead,
   TableCell,
 } from '../../../components/ui/Table';
+import { PermissionGate } from '../../../components/auth/PermissionGate';
 
 interface ChannelRow {
   id: string;
@@ -196,10 +197,12 @@ export const ChannelSettings: React.FC = () => {
             Gérez les canaux de vente, leur langue, devise et zones par défaut
           </p>
         </div>
-        <Button variant="primary" size="sm" onClick={openCreate}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouveau canal
-        </Button>
+        <PermissionGate permission="CreateChannel" disableMode>
+          <Button variant="primary" size="sm" onClick={openCreate}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nouveau canal
+          </Button>
+        </PermissionGate>
       </div>
 
       {loading ? (
@@ -235,18 +238,22 @@ export const ChannelSettings: React.FC = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => openEdit(channel)}>
-                        <Edit2 className="h-4 w-4 mr-1" />
-                        Modifier
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeletingId(channel.id)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-1 text-red-400" />
-                        Supprimer
-                      </Button>
+                      <PermissionGate permission="UpdateChannel" disableMode>
+                        <Button variant="ghost" size="sm" onClick={() => openEdit(channel)}>
+                          <Edit2 className="h-4 w-4 mr-1" />
+                          Modifier
+                        </Button>
+                      </PermissionGate>
+                      <PermissionGate permission="DeleteChannel" disableMode>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeletingId(channel.id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1 text-red-400" />
+                          Supprimer
+                        </Button>
+                      </PermissionGate>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -317,9 +324,14 @@ export const ChannelSettings: React.FC = () => {
           <Button variant="ghost" onClick={closeModal} disabled={saving}>
             Annuler
           </Button>
-          <Button variant="primary" onClick={handleSave} loading={saving} disabled={saving}>
-            Enregistrer
-          </Button>
+          <PermissionGate
+            anyOf={editing ? ['UpdateChannel'] : ['CreateChannel']}
+            disableMode
+          >
+            <Button variant="primary" onClick={handleSave} loading={saving} disabled={saving}>
+              Enregistrer
+            </Button>
+          </PermissionGate>
         </ModalFooter>
       </Modal>
 

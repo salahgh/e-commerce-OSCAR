@@ -10,6 +10,7 @@ import {
 } from '../../graphql/generated/graphql';
 import { Modal, ModalContent, ModalFooter } from '../../components/ui/Modal';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 import { formatDate } from '../../lib/utils';
 
 interface AssetDetailModalProps {
@@ -265,14 +266,16 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
         </ModalContent>
 
         <ModalFooter>
-          <button
-            type="button"
-            onClick={() => setShowDeleteDialog(true)}
-            className="flex items-center gap-2 px-4 py-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors mr-auto"
-          >
-            <Trash2 className="h-4 w-4" />
-            Supprimer
-          </button>
+          <PermissionGate anyOf={['DeleteAsset', 'DeleteCatalog']} disableMode>
+            <button
+              type="button"
+              onClick={() => setShowDeleteDialog(true)}
+              className="flex items-center gap-2 px-4 py-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors mr-auto"
+            >
+              <Trash2 className="h-4 w-4" />
+              Supprimer
+            </button>
+          </PermissionGate>
           <button
             type="button"
             onClick={onClose}
@@ -280,15 +283,17 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
           >
             Annuler
           </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={updating}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-          >
-            <Save className="h-4 w-4" />
-            {updating ? 'Enregistrement...' : 'Enregistrer'}
-          </button>
+          <PermissionGate anyOf={['UpdateAsset', 'UpdateCatalog']} disableMode>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={updating}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              <Save className="h-4 w-4" />
+              {updating ? 'Enregistrement...' : 'Enregistrer'}
+            </button>
+          </PermissionGate>
         </ModalFooter>
       </Modal>
 

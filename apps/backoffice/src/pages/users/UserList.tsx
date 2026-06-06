@@ -23,6 +23,7 @@ import {
 import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 import { addToast } from '../../store/slices/uiSlice';
 import { formatDateTime } from '../../lib/utils';
 
@@ -143,13 +144,15 @@ export const UserList: React.FC = () => {
             <Shield className="h-5 w-5" />
             Gérer les rôles
           </Link>
-          <Link
-            to="/users/new"
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 flex items-center gap-2"
-          >
-            <Plus className="h-5 w-5" />
-            Nouvel admin
-          </Link>
+          <PermissionGate permission="CreateAdministrator" disableMode>
+            <Link
+              to="/users/new"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 flex items-center gap-2"
+            >
+              <Plus className="h-5 w-5" />
+              Nouvel admin
+            </Link>
+          </PermissionGate>
         </div>
       </div>
 
@@ -278,20 +281,24 @@ export const UserList: React.FC = () => {
                         >
                           <Eye className="h-5 w-5" />
                         </Link>
-                        <Link
-                          to={`/users/${admin.id}/edit`}
-                          className="text-yellow-400 hover:text-yellow-300 p-2 rounded-lg hover:bg-yellow-900/50"
-                          title="Modifier"
-                        >
-                          <Pencil className="h-5 w-5" />
-                        </Link>
-                        <button
-                          onClick={() => setDeleteId(admin.id)}
-                          className="text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-red-900/50"
-                          title="Supprimer"
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
+                        <PermissionGate permission="UpdateAdministrator" disableMode>
+                          <Link
+                            to={`/users/${admin.id}/edit`}
+                            className="text-yellow-400 hover:text-yellow-300 p-2 rounded-lg hover:bg-yellow-900/50"
+                            title="Modifier"
+                          >
+                            <Pencil className="h-5 w-5" />
+                          </Link>
+                        </PermissionGate>
+                        <PermissionGate permission="DeleteAdministrator" disableMode>
+                          <button
+                            onClick={() => setDeleteId(admin.id)}
+                            className="text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-red-900/50"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        </PermissionGate>
                       </div>
                     </td>
                   </tr>

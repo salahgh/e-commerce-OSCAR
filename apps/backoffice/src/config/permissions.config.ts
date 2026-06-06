@@ -80,8 +80,10 @@ export type Permission =
   | 'UpdateSeller'
   | 'DeleteSeller'
   // Settings
+  | 'CreateSettings'
   | 'ReadSettings'
   | 'UpdateSettings'
+  | 'DeleteSettings'
   | 'UpdateGlobalSettings'
   // Shipping Method
   | 'CreateShippingMethod'
@@ -208,26 +210,72 @@ export const CRUD_PERMISSIONS: Record<
     update: 'UpdateAsset',
     delete: 'DeleteAsset',
   },
-};
-
-/**
- * Sidebar menu permission configuration
- * Defines which permissions are required to see each menu item
- */
-export interface SidebarPermission {
-  permissions: Permission[];
-  mode: 'anyOf' | 'allOf';
-}
-
-export const SIDEBAR_PERMISSIONS: Record<string, SidebarPermission> = {
-  dashboard: { permissions: ['ReadCatalog', 'ReadOrder', 'ReadCustomer'], mode: 'anyOf' },
-  products: { permissions: ['ReadCatalog'], mode: 'anyOf' },
-  orders: { permissions: ['ReadOrder'], mode: 'anyOf' },
-  customers: { permissions: ['ReadCustomer'], mode: 'anyOf' },
-  users: { permissions: ['ReadAdministrator'], mode: 'anyOf' },
-  roles: { permissions: ['ReadAdministrator'], mode: 'anyOf' },
-  settings: { permissions: ['ReadSettings'], mode: 'anyOf' },
-  reports: { permissions: ['ReadOrder', 'ReadCustomer'], mode: 'anyOf' },
+  categories: {
+    create: 'CreateCollection',
+    read: 'ReadCollection',
+    update: 'UpdateCollection',
+    delete: 'DeleteCollection',
+  },
+  collections: {
+    create: 'CreateCollection',
+    read: 'ReadCollection',
+    update: 'UpdateCollection',
+    delete: 'DeleteCollection',
+  },
+  facets: {
+    create: 'CreateFacet',
+    read: 'ReadFacet',
+    update: 'UpdateFacet',
+    delete: 'DeleteFacet',
+  },
+  customerGroups: {
+    create: 'CreateCustomerGroup',
+    read: 'ReadCustomerGroup',
+    update: 'UpdateCustomerGroup',
+    delete: 'DeleteCustomerGroup',
+  },
+  channels: {
+    create: 'CreateChannel',
+    read: 'ReadChannel',
+    update: 'UpdateChannel',
+    delete: 'DeleteChannel',
+  },
+  zones: {
+    create: 'CreateZone',
+    read: 'ReadZone',
+    update: 'UpdateZone',
+    delete: 'DeleteZone',
+  },
+  taxRates: {
+    create: 'CreateTaxRate',
+    read: 'ReadTaxRate',
+    update: 'UpdateTaxRate',
+    delete: 'DeleteTaxRate',
+  },
+  taxCategories: {
+    create: 'CreateTaxCategory',
+    read: 'ReadTaxCategory',
+    update: 'UpdateTaxCategory',
+    delete: 'DeleteTaxCategory',
+  },
+  paymentMethods: {
+    create: 'CreatePaymentMethod',
+    read: 'ReadPaymentMethod',
+    update: 'UpdatePaymentMethod',
+    delete: 'DeletePaymentMethod',
+  },
+  shippingMethods: {
+    create: 'CreateShippingMethod',
+    read: 'ReadShippingMethod',
+    update: 'UpdateShippingMethod',
+    delete: 'DeleteShippingMethod',
+  },
+  sellers: {
+    create: 'CreateSeller',
+    read: 'ReadSeller',
+    update: 'UpdateSeller',
+    delete: 'DeleteSeller',
+  },
 };
 
 /**
@@ -439,8 +487,10 @@ export const PERMISSION_DESCRIPTIONS: Record<Permission, string> = {
   UpdateSeller: 'Modifier les vendeurs',
   DeleteSeller: 'Supprimer des vendeurs',
   // Settings
+  CreateSettings: 'Créer des paramètres système',
   ReadSettings: 'Voir les paramètres',
   UpdateSettings: 'Modifier les paramètres',
+  DeleteSettings: 'Supprimer des paramètres système',
   UpdateGlobalSettings: 'Modifier les paramètres globaux',
   // Shipping Method
   CreateShippingMethod: 'Créer des méthodes de livraison',

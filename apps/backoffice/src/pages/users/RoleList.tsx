@@ -19,6 +19,7 @@ import { Button } from '../../components/ui/Button';
 import { Spinner } from '../../components/ui/Spinner';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { PermissionGate } from '../../components/auth/PermissionGate';
+import { Tooltip } from '../../components/ui/Tooltip';
 import { addToast } from '../../store/slices/uiSlice';
 import { formatDateTime } from '../../lib/utils';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -244,7 +245,21 @@ export const RoleList: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {!isSystemRole(role.code) && (
+                        {isSystemRole(role.code) ? (
+                          <Tooltip
+                            content={<p className="text-sm">Rôle système — non modifiable</p>}
+                            position="left"
+                          >
+                            <div className="flex items-center gap-1 opacity-50 cursor-not-allowed">
+                              <span className="text-warning p-2 rounded-lg" aria-disabled>
+                                <Pencil className="h-5 w-5" />
+                              </span>
+                              <span className="text-destructive p-2 rounded-lg" aria-disabled>
+                                <Trash2 className="h-5 w-5" />
+                              </span>
+                            </div>
+                          </Tooltip>
+                        ) : (
                           <>
                             <PermissionGate permission="UpdateAdministrator" disableMode>
                               <Link

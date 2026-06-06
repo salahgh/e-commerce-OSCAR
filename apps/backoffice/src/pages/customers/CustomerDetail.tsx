@@ -65,6 +65,7 @@ import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { TextArea } from '../../components/ui/TextArea';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 import { formatDateTime, formatPrice } from '../../lib/utils';
 
 const WILAYAS = [
@@ -543,20 +544,24 @@ export const CustomerDetail: React.FC = () => {
             <div className="flex items-center gap-3">
               {!isEditing && (
                 <>
-                  <Button
-                    variant="secondary"
-                    onClick={() => setIsEditing(true)}
-                    icon={<Edit2 className="h-4 w-4" />}
-                  >
-                    Modifier
-                  </Button>
-                  <Button
-                    variant="danger"
-                    onClick={() => setShowDeleteDialog(true)}
-                    icon={<Trash2 className="h-4 w-4" />}
-                  >
-                    Supprimer
-                  </Button>
+                  <PermissionGate permission="UpdateCustomer" disableMode>
+                    <Button
+                      variant="secondary"
+                      onClick={() => setIsEditing(true)}
+                      icon={<Edit2 className="h-4 w-4" />}
+                    >
+                      Modifier
+                    </Button>
+                  </PermissionGate>
+                  <PermissionGate permission="DeleteCustomer" disableMode>
+                    <Button
+                      variant="danger"
+                      onClick={() => setShowDeleteDialog(true)}
+                      icon={<Trash2 className="h-4 w-4" />}
+                    >
+                      Supprimer
+                    </Button>
+                  </PermissionGate>
                 </>
               )}
             </div>
@@ -882,12 +887,14 @@ export const CustomerDetail: React.FC = () => {
                   Informations personnelles
                 </h3>
                 {!isEditing && (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="p-2 hover:bg-accent rounded-lg text-muted-foreground hover:text-foreground transition-all"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </button>
+                  <PermissionGate permission="UpdateCustomer" disableMode>
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="p-2 hover:bg-accent rounded-lg text-muted-foreground hover:text-foreground transition-all"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </button>
+                  </PermissionGate>
                 )}
               </div>
               <div className="p-6">
@@ -991,13 +998,15 @@ export const CustomerDetail: React.FC = () => {
                           >
                             Annuler
                           </Button>
-                          <Button
-                            type="submit"
-                            loading={updating}
-                            icon={<Save className="h-4 w-4" />}
-                          >
-                            Enregistrer
-                          </Button>
+                          <PermissionGate permission="UpdateCustomer" disableMode>
+                            <Button
+                              type="submit"
+                              loading={updating}
+                              icon={<Save className="h-4 w-4" />}
+                            >
+                              Enregistrer
+                            </Button>
+                          </PermissionGate>
                         </div>
                       </Form>
                     )}
@@ -1061,12 +1070,14 @@ export const CustomerDetail: React.FC = () => {
                   Notes internes
                 </h3>
                 {!isEditing && (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="p-2 hover:bg-accent rounded-lg text-muted-foreground hover:text-foreground transition-all"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </button>
+                  <PermissionGate permission="UpdateCustomer" disableMode>
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="p-2 hover:bg-accent rounded-lg text-muted-foreground hover:text-foreground transition-all"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </button>
+                  </PermissionGate>
                 )}
               </div>
               <div className="p-6">
@@ -1229,15 +1240,17 @@ export const CustomerDetail: React.FC = () => {
           <div className="bg-card rounded-xl border border-border overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-border">
               <h3 className="text-lg font-semibold text-foreground">Adresses ({addresses.length})</h3>
-              <Button
-                onClick={() => {
-                  setEditingAddress(undefined);
-                  setShowAddressDialog(true);
-                }}
-              >
-                <Home className="h-4 w-4 mr-2" />
-                Ajouter
-              </Button>
+              <PermissionGate permission="UpdateCustomer" disableMode>
+                <Button
+                  onClick={() => {
+                    setEditingAddress(undefined);
+                    setShowAddressDialog(true);
+                  }}
+                >
+                  <Home className="h-4 w-4 mr-2" />
+                  Ajouter
+                </Button>
+              </PermissionGate>
             </div>
             {addresses.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20">
@@ -1303,36 +1316,40 @@ export const CustomerDetail: React.FC = () => {
                       )}
                     </div>
                     <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-border">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          setEditingAddress({
-                            id: address.id,
-                            fullName: address.fullName,
-                            streetLine1: address.streetLine1,
-                            streetLine2: address.streetLine2,
-                            city: address.city,
-                            postalCode: address.postalCode,
-                            province: address.province,
-                            countryCode: address.country?.code,
-                            phoneNumber: address.phoneNumber,
-                            defaultShippingAddress: address.defaultShippingAddress,
-                            defaultBillingAddress: address.defaultBillingAddress,
-                          });
-                          setShowAddressDialog(true);
-                        }}
-                      >
-                        <Edit2 className="h-4 w-4 mr-1" />
-                        Modifier
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setDeletingAddressId(address.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <PermissionGate permission="UpdateCustomer" disableMode>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setEditingAddress({
+                              id: address.id,
+                              fullName: address.fullName,
+                              streetLine1: address.streetLine1,
+                              streetLine2: address.streetLine2,
+                              city: address.city,
+                              postalCode: address.postalCode,
+                              province: address.province,
+                              countryCode: address.country?.code,
+                              phoneNumber: address.phoneNumber,
+                              defaultShippingAddress: address.defaultShippingAddress,
+                              defaultBillingAddress: address.defaultBillingAddress,
+                            });
+                            setShowAddressDialog(true);
+                          }}
+                        >
+                          <Edit2 className="h-4 w-4 mr-1" />
+                          Modifier
+                        </Button>
+                      </PermissionGate>
+                      <PermissionGate permission="UpdateCustomer" disableMode>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setDeletingAddressId(address.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </PermissionGate>
                     </div>
                   </div>
                 ))}
@@ -1357,9 +1374,11 @@ export const CustomerDetail: React.FC = () => {
                 className="bg-background border-border"
               />
               <div className="flex justify-end">
-                <Button onClick={handleAddNote} loading={addingNote} disabled={!newNote.trim()}>
-                  Ajouter la note
-                </Button>
+                <PermissionGate permission="UpdateCustomer" disableMode>
+                  <Button onClick={handleAddNote} loading={addingNote} disabled={!newNote.trim()}>
+                    Ajouter la note
+                  </Button>
+                </PermissionGate>
               </div>
             </div>
             {(customer.history?.items || []).length === 0 ? (
@@ -1384,14 +1403,16 @@ export const CustomerDetail: React.FC = () => {
                           {formatDateTime(entry.createdAt)}
                         </p>
                       </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeleteNote(entry.id)}
-                        loading={deletingNote}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <PermissionGate permission="UpdateCustomer" disableMode>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteNote(entry.id)}
+                          loading={deletingNote}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </PermissionGate>
                     </div>
                   );
                 })}

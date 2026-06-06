@@ -27,6 +27,7 @@ import {
   TableHead,
   TableCell,
 } from '../../../components/ui/Table';
+import { PermissionGate } from '../../../components/auth/PermissionGate';
 
 interface ZoneMember {
   id: string;
@@ -173,10 +174,12 @@ export const ZoneSettings: React.FC = () => {
             Regroupez des pays en zones pour la taxe et la livraison
           </p>
         </div>
-        <Button variant="primary" size="sm" onClick={openCreate}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouvelle zone
-        </Button>
+        <PermissionGate permission="CreateZone" disableMode>
+          <Button variant="primary" size="sm" onClick={openCreate}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nouvelle zone
+          </Button>
+        </PermissionGate>
       </div>
 
       {loading ? (
@@ -204,18 +207,22 @@ export const ZoneSettings: React.FC = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => openEdit(zone)}>
-                        <Edit2 className="h-4 w-4 mr-1" />
-                        Modifier
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeletingId(zone.id)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-1 text-red-400" />
-                        Supprimer
-                      </Button>
+                      <PermissionGate permission="UpdateZone" disableMode>
+                        <Button variant="ghost" size="sm" onClick={() => openEdit(zone)}>
+                          <Edit2 className="h-4 w-4 mr-1" />
+                          Modifier
+                        </Button>
+                      </PermissionGate>
+                      <PermissionGate permission="DeleteZone" disableMode>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeletingId(zone.id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1 text-red-400" />
+                          Supprimer
+                        </Button>
+                      </PermissionGate>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -252,15 +259,17 @@ export const ZoneSettings: React.FC = () => {
                           className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-sm text-foreground"
                         >
                           {m.name}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveMember(m.id)}
-                            disabled={removingMember}
-                            className="text-muted-foreground hover:text-red-400 disabled:opacity-50"
-                            aria-label={`Retirer ${m.name}`}
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
+                          <PermissionGate permission="UpdateZone" disableMode>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveMember(m.id)}
+                              disabled={removingMember}
+                              className="text-muted-foreground hover:text-red-400 disabled:opacity-50"
+                              aria-label={`Retirer ${m.name}`}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </PermissionGate>
                         </span>
                       ))}
                     </div>
@@ -281,14 +290,16 @@ export const ZoneSettings: React.FC = () => {
                       ]}
                     />
                   </div>
-                  <Button
-                    variant="secondary"
-                    onClick={handleAddMember}
-                    loading={addingMember}
-                    disabled={!addCountryId || addingMember}
-                  >
-                    Ajouter
-                  </Button>
+                  <PermissionGate permission="UpdateZone" disableMode>
+                    <Button
+                      variant="secondary"
+                      onClick={handleAddMember}
+                      loading={addingMember}
+                      disabled={!addCountryId || addingMember}
+                    >
+                      Ajouter
+                    </Button>
+                  </PermissionGate>
                 </div>
               </div>
             ) : (
@@ -322,9 +333,14 @@ export const ZoneSettings: React.FC = () => {
           <Button variant="ghost" onClick={closeModal} disabled={saving}>
             Fermer
           </Button>
-          <Button variant="primary" onClick={handleSave} loading={saving} disabled={saving}>
-            Enregistrer
-          </Button>
+          <PermissionGate
+            anyOf={editing ? ['UpdateZone'] : ['CreateZone']}
+            disableMode
+          >
+            <Button variant="primary" onClick={handleSave} loading={saving} disabled={saving}>
+              Enregistrer
+            </Button>
+          </PermissionGate>
         </ModalFooter>
       </Modal>
 

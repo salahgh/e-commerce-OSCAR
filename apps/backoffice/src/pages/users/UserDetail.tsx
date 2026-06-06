@@ -21,6 +21,7 @@ import { Badge } from '../../components/ui/Badge';
 import { Card } from '../../components/ui/Card';
 import { Spinner } from '../../components/ui/Spinner';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 import { addToast } from '../../store/slices/uiSlice';
 import { formatDateTime } from '../../lib/utils';
 
@@ -156,20 +157,24 @@ export const UserDetail: React.FC = () => {
           </div>
         </div>
         <div className="flex gap-3">
-          <Link
-            to={`/users/${id}/edit`}
-            className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 flex items-center gap-2"
-          >
-            <Pencil className="h-5 w-5" />
-            Modifier
-          </Link>
-          <button
-            onClick={() => setShowDeleteDialog(true)}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
-          >
-            <Trash2 className="h-5 w-5" />
-            Supprimer
-          </button>
+          <PermissionGate permission="UpdateAdministrator" disableMode>
+            <Link
+              to={`/users/${id}/edit`}
+              className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 flex items-center gap-2"
+            >
+              <Pencil className="h-5 w-5" />
+              Modifier
+            </Link>
+          </PermissionGate>
+          <PermissionGate permission="DeleteAdministrator" disableMode>
+            <button
+              onClick={() => setShowDeleteDialog(true)}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+            >
+              <Trash2 className="h-5 w-5" />
+              Supprimer
+            </button>
+          </PermissionGate>
         </div>
       </div>
 

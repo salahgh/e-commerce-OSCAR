@@ -75,6 +75,7 @@ import { ZoneSettings } from './sections/ZoneSettings';
 import { ChannelSettings } from './sections/ChannelSettings';
 import { ShippingMethodCreateModal } from './sections/ShippingMethodCreateModal';
 import { PaymentMethodCreateModal } from './sections/PaymentMethodCreateModal';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 
 // Store settings form schema
 const StoreSettingsSchema = Yup.object().shape({
@@ -763,21 +764,25 @@ export const Settings: React.FC = () => {
                             <span className="text-lg font-semibold text-foreground">
                               {formatPrice(price)}
                             </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setEditingShipping(method.id)}
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setDeletingShippingId(method.id)}
-                              title="Supprimer"
-                            >
-                              <Trash2 className="h-4 w-4 text-red-400" />
-                            </Button>
+                            <PermissionGate permission="UpdateShippingMethod" disableMode>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setEditingShipping(method.id)}
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                            </PermissionGate>
+                            <PermissionGate permission="UpdateShippingMethod" disableMode>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setDeletingShippingId(method.id)}
+                                title="Supprimer"
+                              >
+                                <Trash2 className="h-4 w-4 text-red-400" />
+                              </Button>
+                            </PermissionGate>
                           </>
                         )}
                       </div>
@@ -868,29 +873,33 @@ export const Settings: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button
-                          variant={method.enabled ? 'outline' : 'primary'}
-                          size="sm"
-                          onClick={() => handleTogglePaymentMethod(method.id, method.enabled)}
-                        >
-                          {method.enabled ? (
-                            <>
-                              <X className="h-4 w-4 mr-1" /> Désactiver
-                            </>
-                          ) : (
-                            <>
-                              <Check className="h-4 w-4 mr-1" /> Activer
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDeletingPaymentId(method.id)}
-                          title="Supprimer"
-                        >
-                          <Trash2 className="h-4 w-4 text-red-400" />
-                        </Button>
+                        <PermissionGate permission="UpdatePaymentMethod" disableMode>
+                          <Button
+                            variant={method.enabled ? 'outline' : 'primary'}
+                            size="sm"
+                            onClick={() => handleTogglePaymentMethod(method.id, method.enabled)}
+                          >
+                            {method.enabled ? (
+                              <>
+                                <X className="h-4 w-4 mr-1" /> Désactiver
+                              </>
+                            ) : (
+                              <>
+                                <Check className="h-4 w-4 mr-1" /> Activer
+                              </>
+                            )}
+                          </Button>
+                        </PermissionGate>
+                        <PermissionGate permission="UpdatePaymentMethod" disableMode>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDeletingPaymentId(method.id)}
+                            title="Supprimer"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-400" />
+                          </Button>
+                        </PermissionGate>
                       </div>
                     </div>
 
@@ -1246,32 +1255,36 @@ export const Settings: React.FC = () => {
 
             {/* Action Buttons */}
             <div className="flex items-center gap-3">
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={handleReindex}
-                disabled={reindexing || !!activeJobId}
-              >
-                {reindexing || activeJobId ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                )}
-                Reconstruire l'index
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleRunPendingUpdates}
-                disabled={runningPending}
-              >
-                {runningPending ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <PlayCircle className="h-4 w-4 mr-2" />
-                )}
-                Executer les mises a jour
-              </Button>
+              <PermissionGate anyOf={['UpdateCatalog', 'UpdateSettings']} disableMode>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleReindex}
+                  disabled={reindexing || !!activeJobId}
+                >
+                  {reindexing || activeJobId ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  )}
+                  Reconstruire l'index
+                </Button>
+              </PermissionGate>
+              <PermissionGate permission="UpdateSettings" disableMode>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleRunPendingUpdates}
+                  disabled={runningPending}
+                >
+                  {runningPending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <PlayCircle className="h-4 w-4 mr-2" />
+                  )}
+                  Executer les mises a jour
+                </Button>
+              </PermissionGate>
               <Button
                 variant="ghost"
                 size="sm"
@@ -1291,20 +1304,22 @@ export const Settings: React.FC = () => {
                       {jobsData.jobs.items.filter(j => j.state === JobState.Pending).length} tache(s) bloquee(s) en attente
                     </span>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCancelPendingJobs}
-                    disabled={cancellingJobs}
-                    className="border-amber-600 text-amber-300 hover:bg-amber-900/50"
-                  >
-                    {cancellingJobs ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <XCircle className="h-4 w-4 mr-2" />
-                    )}
-                    Annuler les taches bloquees
-                  </Button>
+                  <PermissionGate permission="UpdateSettings" disableMode>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCancelPendingJobs}
+                      disabled={cancellingJobs}
+                      className="border-amber-600 text-amber-300 hover:bg-amber-900/50"
+                    >
+                      {cancellingJobs ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <XCircle className="h-4 w-4 mr-2" />
+                      )}
+                      Annuler les taches bloquees
+                    </Button>
+                  </PermissionGate>
                 </div>
               </div>
             )}

@@ -52,6 +52,7 @@ import { Spinner } from '../../components/ui/Spinner';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Modal, ModalContent, ModalFooter } from '../../components/ui/Modal';
 import { Pagination } from '../../components/ui/Pagination';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 import { cn } from '../../lib/utils';
 
 // Helper to get translation by language
@@ -195,13 +196,15 @@ const SortableFlatItem: React.FC<SortableFlatItemProps> = ({ collection, collect
             min="0"
           />
         ) : (
-          <button
-            onClick={() => setEditingOrder(true)}
-            className="px-2 py-1 text-xs font-medium bg-muted hover:bg-accent rounded transition-colors cursor-pointer"
-            title="Cliquer pour modifier l'ordre"
-          >
-            {collection.customFields?.displayOrder ?? '-'}
-          </button>
+          <PermissionGate anyOf={['UpdateCollection', 'UpdateCatalog']} disableMode>
+            <button
+              onClick={() => setEditingOrder(true)}
+              className="px-2 py-1 text-xs font-medium bg-muted hover:bg-accent rounded transition-colors cursor-pointer"
+              title="Cliquer pour modifier l'ordre"
+            >
+              {collection.customFields?.displayOrder ?? '-'}
+            </button>
+          </PermissionGate>
         )}
       </div>
 
@@ -214,13 +217,15 @@ const SortableFlatItem: React.FC<SortableFlatItemProps> = ({ collection, collect
         >
           <Edit2 className="h-4 w-4" />
         </Link>
-        <button
-          onClick={() => onDelete(collection.id, collection.name)}
-          className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-          title="Supprimer"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
+        <PermissionGate anyOf={['DeleteCollection', 'DeleteCatalog']} disableMode>
+          <button
+            onClick={() => onDelete(collection.id, collection.name)}
+            className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+            title="Supprimer"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </PermissionGate>
       </div>
     </div>
   );
@@ -953,13 +958,15 @@ export const CategoryList: React.FC = () => {
             >
               <Edit2 className="h-4 w-4" />
             </Link>
-            <button
-              onClick={() => setDeleteTarget({ id: collection.id, name: collection.name })}
-              className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-              title="Supprimer"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
+            <PermissionGate anyOf={['DeleteCollection', 'DeleteCatalog']} disableMode>
+              <button
+                onClick={() => setDeleteTarget({ id: collection.id, name: collection.name })}
+                className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                title="Supprimer"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </PermissionGate>
           </div>
         </div>
 
@@ -1079,20 +1086,24 @@ export const CategoryList: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            icon={<CheckSquare className="h-4 w-4" />}
-            onClick={() => {
-              setBulkSelectedIds(new Set());
-              setShowBulkModal(true);
-            }}
-            disabled={collections.length === 0}
-          >
-            Suppression groupée
-          </Button>
-          <Link to="/categories/new">
-            <Button icon={<Plus className="h-4 w-4" />}>Nouvelle catégorie</Button>
-          </Link>
+          <PermissionGate anyOf={['DeleteCollection', 'DeleteCatalog']} disableMode>
+            <Button
+              variant="secondary"
+              icon={<CheckSquare className="h-4 w-4" />}
+              onClick={() => {
+                setBulkSelectedIds(new Set());
+                setShowBulkModal(true);
+              }}
+              disabled={collections.length === 0}
+            >
+              Suppression groupée
+            </Button>
+          </PermissionGate>
+          <PermissionGate anyOf={['CreateCollection', 'CreateCatalog']} disableMode>
+            <Link to="/categories/new">
+              <Button icon={<Plus className="h-4 w-4" />}>Nouvelle catégorie</Button>
+            </Link>
+          </PermissionGate>
         </div>
       </div>
 
@@ -1442,14 +1453,16 @@ export const CategoryList: React.FC = () => {
           <Button variant="ghost" onClick={() => setShowBulkModal(false)}>
             Annuler
           </Button>
-          <Button
-            variant="danger"
-            disabled={bulkSelectedIds.size === 0}
-            icon={<Trash2 className="h-4 w-4" />}
-            onClick={() => setShowBulkConfirm(true)}
-          >
-            Supprimer {bulkSelectedIds.size > 0 ? `(${bulkSelectedIds.size})` : ''}
-          </Button>
+          <PermissionGate anyOf={['DeleteCollection', 'DeleteCatalog']} disableMode>
+            <Button
+              variant="danger"
+              disabled={bulkSelectedIds.size === 0}
+              icon={<Trash2 className="h-4 w-4" />}
+              onClick={() => setShowBulkConfirm(true)}
+            >
+              Supprimer {bulkSelectedIds.size > 0 ? `(${bulkSelectedIds.size})` : ''}
+            </Button>
+          </PermissionGate>
         </ModalFooter>
       </Modal>
 

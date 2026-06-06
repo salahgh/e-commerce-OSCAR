@@ -22,32 +22,48 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-// Error handling for Vendure
+// The canonical "is my session still valid?" query. Only an auth failure on THIS
+// operation means the session is dead — see the note below.
+const SESSION_CHECK_OPERATION = 'Me';
+
+// Error handling for Vendure.
+//
+// IMPORTANT: Vendure returns the `FORBIDDEN` code for BOTH cases:
+//   1. the session is expired / not authenticated, AND
+//   2. the user IS authenticated but lacks permission for this specific operation.
+// These are indistinguishable from the error alone. We must therefore NOT log the
+// user out on a forbidden *business* query — otherwise a restricted-role admin
+// (e.g. an orders-only role) is bounced to /login the moment any screen fires a
+// query they aren't permitted to run (the dashboard fires several catalog queries).
+//
+// Authorization is handled where it belongs — route guards (ProtectedRoute /
+// PermissionGate / /access-denied) and per-query `skip`s. Session validity is
+// decided solely by the `Me` query (re-run on load by AuthInitializer): if that
+// comes back forbidden, the token really is dead, so we clear it and re-login.
 const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
   if (graphQLErrors) {
-    graphQLErrors.forEach((error) => {
-      const { message, locations, path } = error;
-      console.error(`[GraphQL error]: Message: ${message}, Path: ${path}`, locations);
+    for (const error of graphQLErrors) {
+      console.error(
+        `[GraphQL error]: ${operation.operationName} — ${error.message}`,
+        error.path
+      );
 
-      // Handle Vendure auth errors - but DON'T redirect on dashboard page to avoid loops
-      const errorCode = (error as any).extensions?.code;
-      const isDashboardQuery = [
-        'OscarDashboardStats',
-        'RecentOrders',
-        'LowStockProducts',
-        'DashboardOrdersAnalysis',
-      ].includes(operation.operationName);
+      const errorCode = error.extensions?.code as string | undefined;
+      const isAuthError =
+        errorCode === 'FORBIDDEN' ||
+        error.message.includes('You are not currently authorized') ||
+        error.message.includes('Not authenticated');
 
-      if (
-        (errorCode === 'FORBIDDEN' ||
-          message.includes('You are not currently authorized') ||
-          message.includes('Not authenticated')) &&
-        !isDashboardQuery
-      ) {
+      if (isAuthError && operation.operationName === SESSION_CHECK_OPERATION) {
+        // The session itself is invalid/expired → wipe it and force a fresh login.
         localStorage.removeItem('vendure_auth_token');
-        window.location.href = '/login';
+        localStorage.removeItem('vendure_channel_id');
+        localStorage.removeItem('vendure_user');
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
       }
-    });
+    }
   }
   if (networkError) {
     console.error(`[Network error]: ${networkError}`);

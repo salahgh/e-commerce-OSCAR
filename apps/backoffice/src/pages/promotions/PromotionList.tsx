@@ -35,6 +35,7 @@ import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 import { formatDateTime, formatDate } from '../../lib/utils';
 
 type FilterStatus = 'all' | 'active' | 'inactive' | 'expired' | 'scheduled';
@@ -206,10 +207,12 @@ export const PromotionList: React.FC = () => {
             {totalItems} code{totalItems > 1 ? 's' : ''} promo
           </p>
         </div>
-        <Button variant="primary" onClick={() => navigate('/promotions/new')}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouveau Code Promo
-        </Button>
+        <PermissionGate permission="CreatePromotion" disableMode>
+          <Button variant="primary" onClick={() => navigate('/promotions/new')}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nouveau Code Promo
+          </Button>
+        </PermissionGate>
       </div>
 
       {/* Filters */}
@@ -415,21 +418,23 @@ export const PromotionList: React.FC = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => handleToggleEnabled(promo)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              promo.enabled
-                                ? 'text-green-400 hover:bg-green-500/20'
-                                : 'text-muted-foreground hover:bg-muted'
-                            }`}
-                            title={promo.enabled ? 'Désactiver' : 'Activer'}
-                          >
-                            {promo.enabled ? (
-                              <ToggleRight className="h-5 w-5" />
-                            ) : (
-                              <ToggleLeft className="h-5 w-5" />
-                            )}
-                          </button>
+                          <PermissionGate permission="UpdatePromotion" disableMode>
+                            <button
+                              onClick={() => handleToggleEnabled(promo)}
+                              className={`p-2 rounded-lg transition-colors ${
+                                promo.enabled
+                                  ? 'text-green-400 hover:bg-green-500/20'
+                                  : 'text-muted-foreground hover:bg-muted'
+                              }`}
+                              title={promo.enabled ? 'Désactiver' : 'Activer'}
+                            >
+                              {promo.enabled ? (
+                                <ToggleRight className="h-5 w-5" />
+                              ) : (
+                                <ToggleLeft className="h-5 w-5" />
+                              )}
+                            </button>
+                          </PermissionGate>
                           <Link
                             to={`/promotions/${promo.id}`}
                             className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
@@ -437,16 +442,18 @@ export const PromotionList: React.FC = () => {
                           >
                             <Edit2 className="h-5 w-5" />
                           </Link>
-                          <button
-                            onClick={() => {
-                              setPromotionToDelete(promo.id);
-                              setDeleteDialogOpen(true);
-                            }}
-                            className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-                            title="Supprimer"
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </button>
+                          <PermissionGate permission="DeletePromotion" disableMode>
+                            <button
+                              onClick={() => {
+                                setPromotionToDelete(promo.id);
+                                setDeleteDialogOpen(true);
+                              }}
+                              className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                              title="Supprimer"
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </button>
+                          </PermissionGate>
                         </div>
                       </td>
                     </tr>

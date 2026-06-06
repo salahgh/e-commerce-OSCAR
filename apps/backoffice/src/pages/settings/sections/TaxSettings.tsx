@@ -29,6 +29,7 @@ import {
   TableHead,
   TableCell,
 } from '../../../components/ui/Table';
+import { PermissionGate } from '../../../components/auth/PermissionGate';
 
 interface TaxRateRow {
   id: string;
@@ -165,10 +166,12 @@ const TaxRatesPanel: React.FC = () => {
             Gérez les taux de taxe par zone et catégorie
           </p>
         </div>
-        <Button variant="primary" size="sm" onClick={openCreate}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouveau taux
-        </Button>
+        <PermissionGate permission="CreateTaxRate" disableMode>
+          <Button variant="primary" size="sm" onClick={openCreate}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nouveau taux
+          </Button>
+        </PermissionGate>
       </div>
 
       {loading ? (
@@ -202,18 +205,22 @@ const TaxRatesPanel: React.FC = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => openEdit(rate)}>
-                        <Edit2 className="h-4 w-4 mr-1" />
-                        Modifier
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeletingId(rate.id)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-1 text-red-400" />
-                        Supprimer
-                      </Button>
+                      <PermissionGate permission="UpdateTaxRate" disableMode>
+                        <Button variant="ghost" size="sm" onClick={() => openEdit(rate)}>
+                          <Edit2 className="h-4 w-4 mr-1" />
+                          Modifier
+                        </Button>
+                      </PermissionGate>
+                      <PermissionGate permission="DeleteTaxRate" disableMode>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeletingId(rate.id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1 text-red-400" />
+                          Supprimer
+                        </Button>
+                      </PermissionGate>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -271,9 +278,14 @@ const TaxRatesPanel: React.FC = () => {
           <Button variant="ghost" onClick={closeModal} disabled={saving}>
             Annuler
           </Button>
-          <Button variant="primary" onClick={handleSave} loading={saving} disabled={saving}>
-            Enregistrer
-          </Button>
+          <PermissionGate
+            anyOf={editing ? ['UpdateTaxRate'] : ['CreateTaxRate']}
+            disableMode
+          >
+            <Button variant="primary" onClick={handleSave} loading={saving} disabled={saving}>
+              Enregistrer
+            </Button>
+          </PermissionGate>
         </ModalFooter>
       </Modal>
 
@@ -385,10 +397,12 @@ const TaxCategoriesPanel: React.FC = () => {
             Gérez les catégories de taxe applicables aux produits
           </p>
         </div>
-        <Button variant="primary" size="sm" onClick={openCreate}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouvelle catégorie
-        </Button>
+        <PermissionGate permission="CreateTaxCategory" disableMode>
+          <Button variant="primary" size="sm" onClick={openCreate}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nouvelle catégorie
+          </Button>
+        </PermissionGate>
       </div>
 
       {loading ? (
@@ -416,18 +430,22 @@ const TaxCategoriesPanel: React.FC = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => openEdit(category)}>
-                        <Edit2 className="h-4 w-4 mr-1" />
-                        Modifier
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeletingId(category.id)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-1 text-red-400" />
-                        Supprimer
-                      </Button>
+                      <PermissionGate permission="UpdateTaxCategory" disableMode>
+                        <Button variant="ghost" size="sm" onClick={() => openEdit(category)}>
+                          <Edit2 className="h-4 w-4 mr-1" />
+                          Modifier
+                        </Button>
+                      </PermissionGate>
+                      <PermissionGate permission="DeleteTaxCategory" disableMode>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeletingId(category.id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1 text-red-400" />
+                          Supprimer
+                        </Button>
+                      </PermissionGate>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -468,9 +486,14 @@ const TaxCategoriesPanel: React.FC = () => {
           <Button variant="ghost" onClick={closeModal} disabled={saving}>
             Annuler
           </Button>
-          <Button variant="primary" onClick={handleSave} loading={saving} disabled={saving}>
-            Enregistrer
-          </Button>
+          <PermissionGate
+            anyOf={editing ? ['UpdateTaxCategory'] : ['CreateTaxCategory']}
+            disableMode
+          >
+            <Button variant="primary" onClick={handleSave} loading={saving} disabled={saving}>
+              Enregistrer
+            </Button>
+          </PermissionGate>
         </ModalFooter>
       </Modal>
 

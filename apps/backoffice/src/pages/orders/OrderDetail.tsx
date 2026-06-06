@@ -53,6 +53,7 @@ import { Spinner } from '../../components/ui/Spinner';
 import { Input } from '../../components/ui/Input';
 import { TextArea } from '../../components/ui/TextArea';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 import { formatPrice, formatDateTime, formatDate } from '../../lib/utils';
 import { printInvoice } from '../../lib/export-utils';
 
@@ -586,39 +587,44 @@ export const OrderDetail: React.FC = () => {
                 {nextStates
                   .filter((s) => s !== 'Cancelled')
                   .map((state) => (
-                    <Button
-                      key={state}
-                      variant="primary"
-                      size="sm"
-                      onClick={() => handleTransition(state)}
-                      loading={transitioning}
-                    >
-                      <ChevronRight className="h-4 w-4 mr-1" />
-                      {ORDER_STATUS[state]?.label || state}
-                    </Button>
+                    <PermissionGate key={state} permission="UpdateOrder" disableMode>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handleTransition(state)}
+                        loading={transitioning}
+                      >
+                        <ChevronRight className="h-4 w-4 mr-1" />
+                        {ORDER_STATUS[state]?.label || state}
+                      </Button>
+                    </PermissionGate>
                   ))}
                 {nextStates.includes('Cancelled') && (
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => setShowCancelDialog(true)}
-                    className="ml-2"
-                  >
-                    <Ban className="h-4 w-4 mr-1" />
-                    Annuler
-                  </Button>
+                  <PermissionGate permission="UpdateOrder" disableMode>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => setShowCancelDialog(true)}
+                      className="ml-2"
+                    >
+                      <Ban className="h-4 w-4 mr-1" />
+                      Annuler
+                    </Button>
+                  </PermissionGate>
                 )}
                 {/* Modify order — available before the order is fully shipped/delivered */}
                 {!['Cancelled', 'Delivered'].includes(order.state) && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowModifyDialog(true)}
-                    className="ml-2"
-                  >
-                    <Edit2 className="h-4 w-4 mr-1" />
-                    Modifier
-                  </Button>
+                  <PermissionGate permission="UpdateOrder" disableMode>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowModifyDialog(true)}
+                      className="ml-2"
+                    >
+                      <Edit2 className="h-4 w-4 mr-1" />
+                      Modifier
+                    </Button>
+                  </PermissionGate>
                 )}
               </div>
             )}
@@ -937,9 +943,11 @@ export const OrderDetail: React.FC = () => {
                       onChange={(e) => setNewNote(e.target.value)}
                       className="flex-1 bg-background border-border"
                     />
-                    <Button onClick={handleAddNote} loading={addingNote} disabled={!newNote.trim()}>
-                      Ajouter
-                    </Button>
+                    <PermissionGate permission="UpdateOrder" disableMode>
+                      <Button onClick={handleAddNote} loading={addingNote} disabled={!newNote.trim()}>
+                        Ajouter
+                      </Button>
+                    </PermissionGate>
                   </div>
 
                   {/* Admin Notes */}
@@ -950,12 +958,14 @@ export const OrderDetail: React.FC = () => {
                         Notes internes
                       </h4>
                       {!editingNotes && (
-                        <button
-                          onClick={() => setEditingNotes(true)}
-                          className="text-primary hover:text-primary/80"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </button>
+                        <PermissionGate permission="UpdateOrder" disableMode>
+                          <button
+                            onClick={() => setEditingNotes(true)}
+                            className="text-primary hover:text-primary/80"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </button>
+                        </PermissionGate>
                       )}
                     </div>
                     {editingNotes ? (
@@ -1105,25 +1115,29 @@ export const OrderDetail: React.FC = () => {
                 Paiement
               </h3>
               <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setShowManualPaymentDialog(true)}
-                  title="Enregistrer un paiement manuel"
-                >
-                  + Paiement
-                </Button>
-                {order.payments && order.payments.some((p) => p.state === 'Settled') && (
+                <PermissionGate permission="UpdateOrder" disableMode>
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => {
-                      setRefundDefaultPaymentId(null);
-                      setShowRefundDialog(true);
-                    }}
+                    onClick={() => setShowManualPaymentDialog(true)}
+                    title="Enregistrer un paiement manuel"
                   >
-                    Rembourser
+                    + Paiement
                   </Button>
+                </PermissionGate>
+                {order.payments && order.payments.some((p) => p.state === 'Settled') && (
+                  <PermissionGate permission="UpdateOrder" disableMode>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setRefundDefaultPaymentId(null);
+                        setShowRefundDialog(true);
+                      }}
+                    >
+                      Rembourser
+                    </Button>
+                  </PermissionGate>
                 )}
               </div>
             </div>
@@ -1155,38 +1169,44 @@ export const OrderDetail: React.FC = () => {
                       </p>
                       {payment.state === 'Authorized' && (
                         <>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleSettlePayment(payment.id)}
-                            loading={settlingPayment}
-                            title="Régler ce paiement"
-                          >
-                            Régler
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleCancelPayment(payment.id)}
-                            loading={cancellingPayment}
-                            title="Annuler ce paiement"
-                          >
-                            <Ban className="h-4 w-4" />
-                          </Button>
+                          <PermissionGate permission="UpdateOrder" disableMode>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleSettlePayment(payment.id)}
+                              loading={settlingPayment}
+                              title="Régler ce paiement"
+                            >
+                              Régler
+                            </Button>
+                          </PermissionGate>
+                          <PermissionGate permission="UpdateOrder" disableMode>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleCancelPayment(payment.id)}
+                              loading={cancellingPayment}
+                              title="Annuler ce paiement"
+                            >
+                              <Ban className="h-4 w-4" />
+                            </Button>
+                          </PermissionGate>
                         </>
                       )}
                       {payment.state === 'Settled' && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            setRefundDefaultPaymentId(payment.id);
-                            setShowRefundDialog(true);
-                          }}
-                          title="Rembourser ce paiement"
-                        >
-                          Rembourser
-                        </Button>
+                        <PermissionGate permission="UpdateOrder" disableMode>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setRefundDefaultPaymentId(payment.id);
+                              setShowRefundDialog(true);
+                            }}
+                            title="Rembourser ce paiement"
+                          >
+                            Rembourser
+                          </Button>
+                        </PermissionGate>
                       )}
                     </div>
                   </div>
@@ -1208,9 +1228,11 @@ export const OrderDetail: React.FC = () => {
                 Expéditions
               </h3>
               {['PaymentSettled', 'PartiallyShipped'].includes(order.state) && (
-                <Button variant="primary" size="sm" onClick={() => setShowFulfillmentDialog(true)}>
-                  Créer une expédition
-                </Button>
+                <PermissionGate permission="UpdateOrder" disableMode>
+                  <Button variant="primary" size="sm" onClick={() => setShowFulfillmentDialog(true)}>
+                    Créer une expédition
+                  </Button>
+                </PermissionGate>
               )}
             </div>
             {!order.fulfillments || order.fulfillments.length === 0 ? (
@@ -1236,18 +1258,19 @@ export const OrderDetail: React.FC = () => {
                     </div>
                     <div className="flex gap-2">
                       {(FULFILLMENT_NEXT_STATES[f.state] ?? []).map((next) => (
-                        <Button
-                          key={next}
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleTransitionFulfillment(f.id, next)}
-                        >
-                          {next === 'Shipped'
-                            ? 'Marquer expédié'
-                            : next === 'Delivered'
-                              ? 'Marquer livré'
-                              : next}
-                        </Button>
+                        <PermissionGate key={next} permission="UpdateOrder" disableMode>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleTransitionFulfillment(f.id, next)}
+                          >
+                            {next === 'Shipped'
+                              ? 'Marquer expédié'
+                              : next === 'Delivered'
+                                ? 'Marquer livré'
+                                : next}
+                          </Button>
+                        </PermissionGate>
                       ))}
                     </div>
                   </div>
@@ -1279,12 +1302,14 @@ export const OrderDetail: React.FC = () => {
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm font-medium text-muted-foreground">Numéro de suivi</p>
                 {!editingTracking && (
-                  <button
-                    onClick={() => setEditingTracking(true)}
-                    className="text-primary hover:text-primary/80"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </button>
+                  <PermissionGate permission="UpdateOrder" disableMode>
+                    <button
+                      onClick={() => setEditingTracking(true)}
+                      className="text-primary hover:text-primary/80"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </button>
+                  </PermissionGate>
                 )}
               </div>
               {editingTracking ? (

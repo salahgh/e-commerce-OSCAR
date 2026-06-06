@@ -56,6 +56,7 @@ import { VariantManager } from '../../components/products/VariantManager';
 import { FacetSelector } from '../../components/products/FacetSelector';
 import { AssetPickerModal } from '../../components/ui/AssetPickerModal';
 import { formatPrice, formatDateTime } from '../../lib/utils';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 
 // Wizard steps - matching ProductCreate
 const STEPS = [
@@ -1208,21 +1209,25 @@ export const ProductEdit: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button
-            variant="secondary"
-            icon={<Copy className="h-4 w-4" />}
-            onClick={handleDuplicateProduct}
-            loading={duplicating}
-          >
-            Dupliquer
-          </Button>
-          <Button
-            variant="danger"
-            icon={<Trash2 className="h-4 w-4" />}
-            onClick={() => setShowDeleteDialog(true)}
-          >
-            Supprimer
-          </Button>
+          <PermissionGate anyOf={['CreateProduct', 'CreateCatalog']} disableMode>
+            <Button
+              variant="secondary"
+              icon={<Copy className="h-4 w-4" />}
+              onClick={handleDuplicateProduct}
+              loading={duplicating}
+            >
+              Dupliquer
+            </Button>
+          </PermissionGate>
+          <PermissionGate anyOf={['DeleteProduct', 'DeleteCatalog']} disableMode>
+            <Button
+              variant="danger"
+              icon={<Trash2 className="h-4 w-4" />}
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              Supprimer
+            </Button>
+          </PermissionGate>
           <Button
             variant="primary"
             icon={<Save className="h-4 w-4" />}

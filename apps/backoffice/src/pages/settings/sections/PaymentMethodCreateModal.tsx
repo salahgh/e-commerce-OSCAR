@@ -13,6 +13,7 @@ import { Input } from '../../../components/ui/Input';
 import { Select } from '../../../components/ui/Select';
 import { Spinner } from '../../../components/ui/Spinner';
 import { Modal, ModalContent, ModalFooter } from '../../../components/ui/Modal';
+import { PermissionGate } from '../../../components/auth/PermissionGate';
 
 interface ConfigArgDef {
   name: string;
@@ -283,14 +284,16 @@ export const PaymentMethodCreateModal: React.FC<PaymentMethodCreateModalProps> =
         <Button variant="ghost" onClick={handleClose} disabled={creating}>
           Annuler
         </Button>
-        <Button
-          variant="primary"
-          onClick={handleSubmit}
-          loading={creating}
-          disabled={creating || metaLoading}
-        >
-          Créer
-        </Button>
+        <PermissionGate permission="CreatePaymentMethod" disableMode>
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            loading={creating}
+            disabled={creating || metaLoading}
+          >
+            Créer
+          </Button>
+        </PermissionGate>
       </ModalFooter>
     </Modal>
   );

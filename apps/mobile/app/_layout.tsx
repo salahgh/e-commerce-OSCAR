@@ -117,7 +117,13 @@ export default function RootLayout() {
   const cacheRestored = useApolloPersistence();
 
   if (!languageLoaded || !fontsLoaded || !cacheRestored) {
-    return <LoadingSpinner />;
+    // ThemeProvider must wrap the loading state too: LoadingSpinner uses themed
+    // styles (useThemeColors), which throw outside a ThemeProvider.
+    return (
+      <ThemeProvider>
+        <LoadingSpinner />
+      </ThemeProvider>
+    );
   }
 
   return (

@@ -1,4 +1,1 @@
-- the ltr is missing not the rtl
-- eliminate this États de navigation (quand chaque élément du menu est sélectionné)
-- Authentification dans la version mobile et non dans la version desktop
-- only the Notifications page
+- 

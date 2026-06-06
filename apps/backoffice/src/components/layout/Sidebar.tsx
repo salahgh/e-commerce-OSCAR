@@ -22,114 +22,55 @@ import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { toggleSidebar } from '../../store/slices/uiSlice';
 import { usePermissions } from '../../hooks/usePermissions';
 import { Tooltip } from '../ui/Tooltip';
-import type { Permission } from '../../config/permissions.config';
 
 interface MenuItem {
   icon: LucideIcon;
   label: string;
   path: string;
-  /** Permissions required to access (OR logic) */
-  permissions?: Permission[];
   /** If true, always show (e.g., Profile) */
   alwaysVisible?: boolean;
   /** If true, hide completely when user lacks permission (instead of disabling) */
   hideWhenNoAccess?: boolean;
 }
 
+// NOTE: access for each item is derived from the route → permission map
+// (PAGE_PERMISSIONS) via `canAccessRoute`, the same source the router guard uses.
+// Do NOT duplicate permission lists here — that's what previously let the sidebar
+// and the guard disagree (e.g. Medias looked enabled but landed on /access-denied).
 const menuItems: MenuItem[] = [
-  {
-    icon: LayoutDashboard,
-    label: 'Dashboard',
-    path: '/',
-    permissions: ['ReadCatalog', 'ReadOrder', 'ReadCustomer'],
-    hideWhenNoAccess: true,
-  },
-  {
-    icon: Package,
-    label: 'Produits',
-    path: '/products',
-    permissions: ['ReadCatalog'],
-  },
-  {
-    icon: FolderTree,
-    label: 'Categories',
-    path: '/categories',
-    permissions: ['ReadCatalog'],
-  },
-  {
-    icon: Image,
-    label: 'Medias',
-    path: '/assets',
-    permissions: ['ReadCatalog'],
-  },
-  {
-    icon: Palette,
-    label: 'Attributs',
-    path: '/facets',
-    permissions: ['ReadCatalog'],
-  },
-  {
-    icon: ShoppingCart,
-    label: 'Commandes',
-    path: '/orders',
-    permissions: ['ReadOrder'],
-  },
-  {
-    icon: Users,
-    label: 'Clients',
-    path: '/customers',
-    permissions: ['ReadCustomer'],
-  },
-  {
-    icon: Tag,
-    label: 'Codes Promo',
-    path: '/promotions',
-    permissions: ['ReadPromotion'],
-  },
-  {
-    icon: Shield,
-    label: 'Administrateurs',
-    path: '/users',
-    permissions: ['ReadAdministrator'],
-  },
-  {
-    icon: UserCircle,
-    label: 'Mon Profil',
-    path: '/profile',
-    alwaysVisible: true,
-  },
-  {
-    icon: BarChart3,
-    label: 'Rapports',
-    path: '/reports',
-    permissions: ['ReadOrder', 'ReadCustomer'],
-  },
-  {
-    icon: Settings,
-    label: 'Parametres',
-    path: '/settings',
-    permissions: ['ReadSettings'],
-  },
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+  { icon: Package, label: 'Produits', path: '/products' },
+  { icon: FolderTree, label: 'Categories', path: '/categories' },
+  { icon: Image, label: 'Medias', path: '/assets' },
+  { icon: Palette, label: 'Attributs', path: '/facets' },
+  { icon: ShoppingCart, label: 'Commandes', path: '/orders' },
+  { icon: Users, label: 'Clients', path: '/customers' },
+  { icon: Tag, label: 'Codes Promo', path: '/promotions' },
+  { icon: Shield, label: 'Administrateurs', path: '/users' },
+  { icon: UserCircle, label: 'Mon Profil', path: '/profile', alwaysVisible: true },
+  { icon: BarChart3, label: 'Rapports', path: '/reports' },
+  { icon: Settings, label: 'Parametres', path: '/settings' },
 ];
 
 export const Sidebar: React.FC = () => {
   const location = useLocation();
   const sidebarOpen = useAppSelector((state) => state.ui.sidebarOpen);
   const dispatch = useAppDispatch();
-  const { hasAnyPermission, getPermissionDescription, isSuperAdmin } = usePermissions();
+  const { canAccessRoute, getRequiredPermissions, getPermissionDescription } = usePermissions();
 
-  // Check if user has permission to access a menu item
+  // Access is derived from the SAME route→permission mapping the router guard uses
+  // (canAccessRoute → PAGE_PERMISSIONS, SuperAdmin-aware), so the sidebar can never
+  // disagree with ProtectedRoute and present an item that then lands on /access-denied.
   const hasAccess = (item: MenuItem): boolean => {
-    if (isSuperAdmin) return true;
     if (item.alwaysVisible) return true;
-    if (!item.permissions || item.permissions.length === 0) return true;
-    return hasAnyPermission(item.permissions);
+    return canAccessRoute(item.path);
   };
 
   // Get tooltip message for disabled items
   const getDisabledTooltip = (item: MenuItem): string => {
-    if (!item.permissions || item.permissions.length === 0) return '';
-    const permissionLabels = item.permissions.map((p) => getPermissionDescription(p));
+    const required = getRequiredPermissions(item.path);
+    if (required.length === 0) return '';
+    const permissionLabels = required.map((p) => getPermissionDescription(p));
     return `Permission requise: ${permissionLabels.join(' ou ')}`;
   };
 

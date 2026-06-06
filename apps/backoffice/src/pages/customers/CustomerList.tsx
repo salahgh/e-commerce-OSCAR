@@ -25,6 +25,7 @@ import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { PermissionGate } from '../../components/auth/PermissionGate';
 import { formatDateTime, formatPrice } from '../../lib/utils';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
@@ -211,19 +212,23 @@ export const CustomerList: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           {selectedIds.size > 0 && (
-            <Button
-              variant="danger"
-              onClick={() => setShowBulkDeleteDialog(true)}
-              loading={deleting}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Supprimer ({selectedIds.size})
-            </Button>
+            <PermissionGate permission="DeleteCustomer" disableMode>
+              <Button
+                variant="danger"
+                onClick={() => setShowBulkDeleteDialog(true)}
+                loading={deleting}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Supprimer ({selectedIds.size})
+              </Button>
+            </PermissionGate>
           )}
-          <Button onClick={() => setShowCreateDialog(true)}>
-            <UserPlus className="h-4 w-4 mr-2" />
-            Nouveau client
-          </Button>
+          <PermissionGate permission="CreateCustomer" disableMode>
+            <Button onClick={() => setShowCreateDialog(true)}>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Nouveau client
+            </Button>
+          </PermissionGate>
         </div>
       </div>
 
