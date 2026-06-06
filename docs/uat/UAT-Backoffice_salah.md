@@ -51,21 +51,21 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-DASH-01 | Chargement du tableau de bord | Connecté, données présentes | 1. Ouvrir `/` | — | KPIs, graphiques, commandes récentes et alertes stock s'affichent | Haute | ok     |
 | BO-DASH-02 | Cartes KPI | idem | 1. Vérifier chaque carte | — | Ventes totales, nb commandes, panier moyen, taux de conversion, nouveaux clients, rétention affichés et cohérents | Haute | ok     |
 | BO-DASH-03 | Sélecteur de période (7/30/90 j) | idem | 1. Changer la période | 7j → 30j → 90j | KPIs et graphiques se recalculent | Moyenne | ok     |
-| BO-DASH-04 | Rafraîchissement manuel | idem | 1. Cliquer « Rafraîchir » | — | État de chargement puis données mises à jour | Basse | ☐      |
-| BO-DASH-05 | Graphique des ventes | idem | 1. Observer la courbe de revenus | — | Courbe cohérente avec la période | Moyenne | ☐      |
-| BO-DASH-06 | Graphique camembert par catégorie | idem | 1. Observer le camembert | — | Répartition du revenu par catégorie | Basse | ☐      |
-| BO-DASH-07 | Top produits / collections | idem | 1. Observer les barres | — | Classement correct | Basse | ☐      |
-| BO-DASH-08 | Commandes récentes | idem | 1. Vérifier la liste + badges statut | — | Liste à jour, badges colorés corrects | Moyenne | ☐      |
-| BO-DASH-09 | Alertes stock faible | Produit sous le seuil | 1. Observer le widget | — | Produits sous le seuil listés | Haute | ☐      |
-| BO-DASH-10 | Tableau de bord sans données | Période sans activité | 1. Choisir une période vide | — | États vides / graphiques vides sans erreur | Moyenne | ☐      |
-| BO-DASH-11 | Gestion d'erreur de chargement | Couper l'API | 1. Recharger | — | Message d'erreur + possibilité de réessayer | Moyenne | ☐      |
-| BO-DASH-12 | Rapports — filtre de période | `/reports` | 1. Choisir 7/30/90/180/365 j | — | Données recalculées | Moyenne | ☐      |
-| BO-DASH-13 | Rapport Ventes | `/reports` onglet Ventes | 1. Ouvrir l'onglet | — | Revenu total, tendance, panier moyen, revenu par catégorie, top produits | Moyenne | ☐      |
-| BO-DASH-14 | Rapport Produits | onglet Produits | 1. Ouvrir l'onglet | — | Produits les plus vendus (revenu + quantité) | Moyenne | ☐      |
-| BO-DASH-15 | Rapport Clients | onglet Clients | 1. Ouvrir l'onglet | — | Nouveaux vs récurrents, valeur vie client, top clients | Moyenne | ☐      |
-| BO-DASH-16 | Rapport Stock | onglet Stock | 1. Ouvrir l'onglet | — | Alertes stock faible, ruptures, stock par catégorie | Moyenne | ☐      |
-| BO-DASH-17 | Export CSV des rapports | Un rapport affiché | 1. Cliquer « Exporter CSV » | — | Fichier CSV téléchargé, contenu cohérent, échappement correct | Moyenne | ☐      |
-| BO-DASH-18 | Export CSV avec caractères spéciaux/accents | Données avec accents/virgules | 1. Exporter | « Robe d'été, rouge » | CSV correctement échappé (pas de colonnes décalées) | Basse | ☐      |
+| BO-DASH-04 | Rafraîchissement manuel | idem | 1. Cliquer « Rafraîchir » | — | État de chargement puis données mises à jour | Basse | ok |
+| BO-DASH-05 | Graphique des ventes | idem | 1. Observer la courbe de revenus | — | Courbe cohérente avec la période | Moyenne | ok |
+| BO-DASH-06 | Graphique camembert par catégorie | idem | 1. Observer le camembert | — | Répartition du revenu par catégorie | Basse | ok |
+| BO-DASH-07 | Top produits / collections | idem | 1. Observer les barres | — | Classement correct | Basse | ok |
+| BO-DASH-08 | Commandes récentes | idem | 1. Vérifier la liste + badges statut | — | Liste à jour, badges colorés corrects | Moyenne | ok |
+| BO-DASH-09 | Alertes stock faible | Produit sous le seuil | 1. Observer le widget | — | Produits sous le seuil listés | Haute | ok |
+| BO-DASH-10 | Tableau de bord sans données | Période sans activité | 1. Choisir une période vide | — | États vides / graphiques vides sans erreur | Moyenne | ok — états « Aucune donnée » corrects (vérifié avant peuplement des commandes) |
+| BO-DASH-11 | Gestion d'erreur de chargement | Couper l'API | 1. Recharger | — | Message d'erreur + possibilité de réessayer | Moyenne | non testé (nécessite coupure API) |
+| BO-DASH-12 | Rapports — filtre de période | `/reports` | 1. Choisir 7/30/90/180/365 j | — | Données recalculées | Moyenne | ok |
+| BO-DASH-13 | Rapport Ventes | `/reports` onglet Ventes | 1. Ouvrir l'onglet | — | Revenu total, tendance, panier moyen, revenu par catégorie, top produits | Moyenne | ok — **bug corrigé** : revenus affichés en centimes (×100) ; conversion DZD + libellé tooltip « Commandes » corrigés |
+| BO-DASH-14 | Rapport Produits | onglet Produits | 1. Ouvrir l'onglet | — | Produits les plus vendus (revenu + quantité) | Moyenne | N/A — pas d'onglet « Produits » distinct ; le top produits figure dans l'onglet Ventes (ok) |
+| BO-DASH-15 | Rapport Clients | onglet Clients | 1. Ouvrir l'onglet | — | Nouveaux vs récurrents, valeur vie client, top clients | Moyenne | ok |
+| BO-DASH-16 | Rapport Stock | onglet Stock | 1. Ouvrir l'onglet | — | Alertes stock faible, ruptures, stock par catégorie | Moyenne | ok (images aperçu 404 — fichiers assets manquants en local, non bloquant) |
+| BO-DASH-17 | Export CSV des rapports | Un rapport affiché | 1. Cliquer « Exporter CSV » | — | Fichier CSV téléchargé, contenu cohérent, échappement correct | Moyenne | partiel — boutons présents, conversion DZD OK dans le code ; téléchargement non vérifié en automatisation |
+| BO-DASH-18 | Export CSV avec caractères spéciaux/accents | Données avec accents/virgules | 1. Exporter | « Robe d'été, rouge » | CSV correctement échappé (pas de colonnes décalées) | Basse | non testé (téléchargement) |
 
 ## 3. Produits — `BO-PROD`
 

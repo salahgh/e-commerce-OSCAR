@@ -88,7 +88,8 @@ const CustomTooltip = ({ active, payload, label, formatter }: any) => {
             <p key={index} className="text-sm flex items-center gap-2" style={{ color: entry.color }}>
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
               {entry.name}: <span className="font-semibold text-foreground">
-                {formatter ? formatter(entry.value) : entry.value}
+                {/* Only currency series go through the formatter; counts (orders) stay raw. */}
+                {formatter && entry.dataKey !== 'orders' ? formatter(entry.value) : entry.value}
               </span>
             </p>
           ))}
@@ -108,7 +109,7 @@ const PieTooltip = ({ active, payload }: any) => {
         <p className="text-foreground font-medium mb-1">{data.name}</p>
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground">
-            Revenus: <span className="text-foreground font-semibold">{formatPrice(data.value)}</span>
+            Revenus: <span className="text-foreground font-semibold">{formatPrice(data.value / 100)}</span>
           </p>
           {data.count !== undefined && (
             <p className="text-sm text-muted-foreground">
@@ -555,7 +556,7 @@ export const Reports: React.FC = () => {
                     <div>
                       <p className="text-blue-100 text-sm">Chiffre d'affaires</p>
                       <p className="text-2xl font-bold mt-1">
-                        {formatPrice(salesMetrics.totalRevenue)}
+                        {formatPrice(salesMetrics.totalRevenue / 100)}
                       </p>
                     </div>
                     <DollarSign className="h-10 w-10 text-blue-200" />
@@ -577,7 +578,7 @@ export const Reports: React.FC = () => {
                     <div>
                       <p className="text-purple-100 text-sm">Panier moyen</p>
                       <p className="text-2xl font-bold mt-1">
-                        {formatPrice(salesMetrics.averageOrderValue)}
+                        {formatPrice(salesMetrics.averageOrderValue / 100)}
                       </p>
                     </div>
                     <TrendingUp className="h-10 w-10 text-purple-200" />
@@ -618,7 +619,7 @@ export const Reports: React.FC = () => {
                       <XAxis dataKey="date" stroke="rgb(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
                       <YAxis yAxisId="revenue" stroke="rgb(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value / 100000).toFixed(0)}k`} />
                       <YAxis yAxisId="orders" orientation="right" stroke="rgb(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                      <Tooltip content={<CustomTooltip formatter={(v: number) => formatPrice(v)} />} />
+                      <Tooltip content={<CustomTooltip formatter={(v: number) => formatPrice(v / 100)} />} />
                       <Legend />
                       <Area yAxisId="revenue" type="monotone" dataKey="revenue" name="Revenus" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" />
                       <Area yAxisId="orders" type="monotone" dataKey="orders" name="Commandes" stroke="#22c55e" strokeWidth={2} fillOpacity={1} fill="url(#colorOrders)" />
@@ -658,7 +659,7 @@ export const Reports: React.FC = () => {
                     </ResponsiveContainer>
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -mt-4 text-center pointer-events-none">
                       <p className="text-xl font-bold text-foreground">
-                        {formatPrice(salesByCategory.reduce((sum, d) => sum + d.value, 0))}
+                        {formatPrice(salesByCategory.reduce((sum, d) => sum + d.value, 0) / 100)}
                       </p>
                       <p className="text-xs text-muted-foreground">Total</p>
                     </div>
@@ -692,7 +693,7 @@ export const Reports: React.FC = () => {
                               <p className="text-xs text-muted-foreground">{data.quantity} vendus</p>
                             </div>
                           </div>
-                          <p className="font-semibold text-foreground text-sm">{formatPrice(data.revenue)}</p>
+                          <p className="font-semibold text-foreground text-sm">{formatPrice(data.revenue / 100)}</p>
                         </div>
                       ))
                     )}
@@ -718,7 +719,7 @@ export const Reports: React.FC = () => {
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" horizontal={true} vertical={false} />
                       <XAxis type="number" tickFormatter={(v) => `${(v / 100000).toFixed(0)}k`} stroke="rgb(var(--muted-foreground))" fontSize={12} />
                       <YAxis type="category" dataKey="name" width={100} stroke="rgb(var(--muted-foreground))" fontSize={12} />
-                      <Tooltip content={<CustomTooltip formatter={(v: number) => formatPrice(v)} />} />
+                      <Tooltip content={<CustomTooltip formatter={(v: number) => formatPrice(v / 100)} />} />
                       <Bar dataKey="revenue" name="Revenus" fill="#3b82f6" radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
