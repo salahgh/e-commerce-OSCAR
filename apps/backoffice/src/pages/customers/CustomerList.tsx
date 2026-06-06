@@ -402,7 +402,7 @@ export const CustomerList: React.FC = () => {
                       <div className="flex items-center justify-end gap-1">
                         <DollarSign className="h-4 w-4 text-green-400" />
                         <span className="text-sm font-medium text-foreground">
-                          {formatPrice(customer.totalSpent)}
+                          {formatPrice(customer.totalSpent / 100)}
                         </span>
                       </div>
                     </td>

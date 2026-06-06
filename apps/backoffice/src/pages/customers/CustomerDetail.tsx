@@ -764,7 +764,7 @@ export const CustomerDetail: React.FC = () => {
               </div>
             </div>
             <p className="text-2xl font-bold text-foreground mb-1">
-              {formatPrice(customerStats.lifetimeValue)}
+              {formatPrice(customerStats.lifetimeValue / 100)}
             </p>
             <p className="text-sm text-muted-foreground">Valeur totale</p>
           </div>
@@ -780,7 +780,7 @@ export const CustomerDetail: React.FC = () => {
               </div>
             </div>
             <p className="text-2xl font-bold text-foreground mb-1">
-              {formatPrice(customerStats.averageOrderValue)}
+              {formatPrice(customerStats.averageOrderValue / 100)}
             </p>
             <p className="text-sm text-muted-foreground">Panier moyen</p>
           </div>
@@ -1208,7 +1208,7 @@ export const CustomerDetail: React.FC = () => {
                           </td>
                           <td className="px-6 py-4 text-right">
                             <span className="text-foreground font-semibold">
-                              {formatPrice(order.totalWithTax)}
+                              {formatPrice(order.totalWithTax / 100)}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-right">
