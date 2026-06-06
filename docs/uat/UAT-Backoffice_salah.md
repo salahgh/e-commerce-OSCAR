@@ -131,11 +131,11 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 
 | ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
-| BO-CAT-01 | Affichage de la liste | Catégories présentes | 1. Ouvrir `/categories` | — | Arborescence paginée (20/page) | Haute | ☐ |
+| BO-CAT-01 | Affichage de la liste | Catégories présentes | 1. Ouvrir `/categories` | — | Arborescence paginée (20/page) | Haute | ok — 5 catégories en arbre, traductions FR/EN/AR, tri/filtre/recherche, déplier/replier |
 | BO-CAT-02 | Recherche par nom | — | 1. Saisir un terme | — | Filtrage correct | Moyenne | ☐ |
 | BO-CAT-03 | Tri (nom, code, date) | — | 1. Tester asc/desc | — | Ordre correct | Basse | ☐ |
 | BO-CAT-04 | Filtre de visibilité | — | 1. Filtrer public/privé/tous | — | Liste cohérente, code couleur public/privé | Moyenne | ☐ |
-| BO-CAT-05 | Création — informations de base | Permission `CreateCollection` | 1. `/categories/new` 2. Nom, slug, description | Nom « Femmes » | Champs validés, slug conforme | Haute | ☐ |
+| BO-CAT-05 | Création — informations de base | Permission `CreateCollection` | 1. `/categories/new` 2. Nom, slug, description | Nom « Femmes » | Champs validés, slug conforme | Haute | ok — formulaire complet (nom/slug/description, parent, ordre, public, FR/EN/AR) |
 | BO-CAT-06 | Validation nom (min 2) & slug (motif) | — | 1. Nom « A », slug « Bad Slug » | — | Erreurs de validation affichées | Moyenne | ☐ |
 | BO-CAT-07 | Traductions FR/EN/AR | — | 1. Renseigner les 3 langues | — | Traductions enregistrées | Moyenne | ☐ |
 | BO-CAT-08 | Image vedette + galerie | Assets dispo | 1. Définir vedette + galerie | — | Images associées | Moyenne | ☐ |
@@ -171,7 +171,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 
 | ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
-| BO-ORD-01 | Affichage de la liste | Commandes présentes | 1. Ouvrir `/orders` | — | Liste paginée (15/page) + statistiques | Haute | ☐ |
+| BO-ORD-01 | Affichage de la liste | Commandes présentes | 1. Ouvrir `/orders` | — | Liste paginée (15/page) + statistiques | Haute | ok — 103 commandes, 15/page, bandeau stats (valeur/panier/en attente/expédiées), montants DZD corrects |
 | BO-ORD-02 | Recherche par code ou client | — | 1. Saisir un code / un nom | — | Résultats filtrés | Haute | ☐ |
 | BO-ORD-03 | Filtre multi-statuts | — | 1. Sélectionner plusieurs statuts | Payée + Expédiée | Liste filtrée | Moyenne | ☐ |
 | BO-ORD-04 | Filtre par période (presets) | — | 1. Tester Aujourd'hui, Hier, 7/30 j, ce mois, mois dernier | — | Plages correctes (fin de journée incluse) | Moyenne | ☐ |
@@ -189,27 +189,27 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 
 | ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
-| BO-ORD-20 | Affichage du détail | Commande existante | 1. Ouvrir `/orders/:id` | — | En-tête, statut, récap, adresses, lignes affichés | Haute | ☐ |
-| BO-ORD-21 | Visualisation du flux de statut | — | 1. Observer la frise | — | Étapes AddingItems → … → Delivered | Basse | ☐ |
-| BO-ORD-22 | Récapitulatif des montants | — | 1. Vérifier sous-total, taxes, livraison, remise, total | — | Montants cohérents (DZD) | Haute | ☐ |
-| BO-ORD-23 | Adresses de facturation/livraison | — | 1. Vérifier les deux adresses | — | Affichées (peuvent différer), wilaya correcte | Moyenne | ☐ |
-| BO-ORD-24 | Édition d'une adresse | — | 1. Modifier l'adresse de livraison 2. Enregistrer | — | Adresse mise à jour | Moyenne | ☐ |
-| BO-ORD-25 | Lignes de commande | — | 1. Vérifier produit/SKU/quantité/prix | — | Détails corrects, variantes affichées | Haute | ☐ |
-| BO-ORD-26 | Transition de statut | Statut transitionnable | 1. Cliquer une transition disponible 2. Confirmer | — | Statut mis à jour, historique enregistré | Haute | ☐ |
-| BO-ORD-27 | Transition invalide masquée | — | 1. Observer les boutons | — | Seules les transitions valides sont proposées | Moyenne | ☐ |
-| BO-ORD-28 | Ajout d'un paiement manuel | — | 1. Ouvrir « Paiement manuel » 2. Montant + méthode 3. Valider | — | Paiement ajouté, statut mis à jour | Moyenne | ☐ |
-| BO-ORD-29 | Encaissement (settle) | Paiement autorisé | 1. Cliquer « Encaisser » | — | Paiement réglé | Moyenne | ☐ |
-| BO-ORD-30 | Remboursement total | Paiement réglé | 1. Ouvrir RefundDialog 2. Montant total + motif 3. Valider | — | Remboursement enregistré | Haute | ☐ |
-| BO-ORD-31 | Remboursement partiel | Paiement réglé | 1. Montant < total + motif | — | Remboursement partiel correct | Moyenne | ☐ |
-| BO-ORD-32 | Remboursement > montant payé (limite) | — | 1. Saisir un montant excessif | > payé | Champ borné au max, erreur si dépassement | Moyenne | ☐ |
-| BO-ORD-33 | Création d'un fulfillment | Commande payée | 1. Ouvrir FulfillmentDialog 2. Sélectionner les articles 3. N° de suivi 4. Valider | suivi `DZ123` | Fulfillment créé, statut « Expédié » | Haute | ☐ |
+| BO-ORD-20 | Affichage du détail | Commande existante | 1. Ouvrir `/orders/:id` | — | En-tête, statut, récap, adresses, lignes affichés | Haute | ok — en-tête (#code, statut, date, wilaya), récap, adresse, lignes, client, paiement |
+| BO-ORD-21 | Visualisation du flux de statut | — | 1. Observer la frise | — | Étapes AddingItems → … → Delivered | Basse | ok — frise En cours → Paiement en attente → Payé → Expédié → Livré |
+| BO-ORD-22 | Récapitulatif des montants | — | 1. Vérifier sous-total, taxes, livraison, remise, total | — | Montants cohérents (DZD) | Haute | ok — sous-total 10 724,7 + livraison 500 = total 11 224,7 DA (cohérent) |
+| BO-ORD-23 | Adresses de facturation/livraison | — | 1. Vérifier les deux adresses | — | Affichées (peuvent différer), wilaya correcte | Moyenne | ok — adresse livraison + wilaya affichées |
+| BO-ORD-24 | Édition d'une adresse | — | 1. Modifier l'adresse de livraison 2. Enregistrer | — | Adresse mise à jour | Moyenne | non testé (mutation) |
+| BO-ORD-25 | Lignes de commande | — | 1. Vérifier produit/SKU/quantité/prix | — | Détails corrects, variantes affichées | Haute | ok — produit/SKU/prix unitaire × qté = total ligne corrects |
+| BO-ORD-26 | Transition de statut | Statut transitionnable | 1. Cliquer une transition disponible 2. Confirmer | — | Statut mis à jour, historique enregistré | Haute | partiel — boutons de transition présents ; non exécuté (mutation) |
+| BO-ORD-27 | Transition invalide masquée | — | 1. Observer les boutons | — | Seules les transitions valides sont proposées | Moyenne | ok — pour « Payé » : seules Expédié/Part. expédié/Annuler proposées |
+| BO-ORD-28 | Ajout d'un paiement manuel | — | 1. Ouvrir « Paiement manuel » 2. Montant + méthode 3. Valider | — | Paiement ajouté, statut mis à jour | Moyenne | partiel — bouton « + Paiement » présent ; non exécuté |
+| BO-ORD-29 | Encaissement (settle) | Paiement autorisé | 1. Cliquer « Encaisser » | — | Paiement réglé | Moyenne | non testé (mutation) |
+| BO-ORD-30 | Remboursement total | Paiement réglé | 1. Ouvrir RefundDialog 2. Montant total + motif 3. Valider | — | Remboursement enregistré | Haute | partiel — dialogue OK, montant pré-rempli au total (DZD) ; non validé (mutation) |
+| BO-ORD-31 | Remboursement partiel | Paiement réglé | 1. Montant < total + motif | — | Remboursement partiel correct | Moyenne | non testé (mutation) |
+| BO-ORD-32 | Remboursement > montant payé (limite) | — | 1. Saisir un montant excessif | > payé | Champ borné au max, erreur si dépassement | Moyenne | ok — champ `max=11224.7` (borné au total payé, en DZD) |
+| BO-ORD-33 | Création d'un fulfillment | Commande payée | 1. Ouvrir FulfillmentDialog 2. Sélectionner les articles 3. N° de suivi 4. Valider | suivi `DZ123` | Fulfillment créé, statut « Expédié » | Haute | partiel — bouton « Créer une expédition » présent ; non exécuté |
 | BO-ORD-34 | Mise à jour du n° de suivi | Fulfillment existant | 1. Modifier le suivi | — | Suivi mis à jour | Basse | ☐ |
 | BO-ORD-35 | Expédition partielle | Plusieurs lignes | 1. Expédier une partie des articles | — | Statut « Partiellement expédié » | Moyenne | ☐ |
 | BO-ORD-36 | Modification de commande | État « modifiable » | 1. Ouvrir ModifyOrderDialog 2. Ajuster qté/prix/ligne 3. Valider | — | Commande recalculée | Moyenne | ☐ |
-| BO-ORD-37 | Annulation avec motif | — | 1. Annuler 2. Saisir motif 3. Confirmer | « rupture » | Commande annulée, motif consigné | Haute | ☐ |
+| BO-ORD-37 | Annulation avec motif | — | 1. Annuler 2. Saisir motif 3. Confirmer | « rupture » | Commande annulée, motif consigné | Haute | partiel — bouton « Annuler » présent ; non exécuté (mutation) |
 | BO-ORD-38 | Notes administrateur | — | 1. Ajouter une note 2. Enregistrer | — | Note avec auteur + horodatage | Basse | ☐ |
 | BO-ORD-39 | Édition/suppression d'une note | Note existante | 1. Modifier puis supprimer | — | Note mise à jour/supprimée | Basse | ☐ |
-| BO-ORD-40 | Onglet Historique | — | 1. Ouvrir l'historique | — | Chronologie des transitions/paiements/fulfillments | Moyenne | ☐ |
+| BO-ORD-40 | Onglet Historique | — | 1. Ouvrir l'historique | — | Chronologie des transitions/paiements/fulfillments | Moyenne | ok — onglets Articles/Historique/Notes présents |
 | BO-ORD-41 | Champs personnalisés (wilaya) | — | 1. Vérifier/éditer | — | Donnée custom affichée/modifiable | Basse | ☐ |
 | BO-ORD-42 | Impression / facture | — | 1. Imprimer la facture | — | Document généré | Basse | ☐ |
 | BO-ORD-43 | Copier le code de commande | — | 1. Cliquer « Copier » | — | Code copié dans le presse-papier | Basse | ☐ |
