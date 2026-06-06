@@ -65,12 +65,19 @@ export const RefundDialog: React.FC<RefundDialogProps> = ({
 
   const [refund, { loading }] = useMutation(RefundOrderDocument);
 
-  const selectedPayment = payments.find((p) => p.id === paymentId);
+  // Fall back to the first settled payment when paymentId is empty/stale (e.g. the
+  // dialog opened before payments loaded). Without this the <select> visually shows
+  // the first option while state stays '', so selectedPayment is undefined and the
+  // refund max reads "0 DA", making refunds impossible until the user re-selects.
+  const effectivePaymentId = settledPayments.some((p) => p.id === paymentId)
+    ? paymentId
+    : settledPayments[0]?.id || '';
+  const selectedPayment = payments.find((p) => p.id === effectivePaymentId);
   const maxAmountDA = selectedPayment ? selectedPayment.amount / 100 : 0;
   const amount = Number(amountStr.replace(',', '.'));
 
   const handleSubmit = async () => {
-    if (!paymentId) {
+    if (!effectivePaymentId) {
       dispatch(addToast({ message: 'Sélectionnez un paiement à rembourser', type: 'error' }));
       return;
     }
@@ -82,14 +89,25 @@ export const RefundDialog: React.FC<RefundDialogProps> = ({
       const result = await refund({
         variables: {
           input: {
-            paymentId,
+            paymentId: effectivePaymentId,
             amount: Math.round(amount * 100),
             reason: reason || undefined,
           },
         },
       });
       const response = result.data?.refundOrder;
-      if (response && '__typename' in response && response.__typename !== 'Refund') {
+      // No data (e.g. a GraphQL error under errorPolicy:'all') or a non-Refund
+      // result is a FAILURE — previously this fell through to a false "success" toast.
+      if (!response) {
+        dispatch(
+          addToast({
+            message: result.errors?.[0]?.message || 'Échec du remboursement',
+            type: 'error',
+          })
+        );
+        return;
+      }
+      if ('__typename' in response && response.__typename !== 'Refund') {
         dispatch(
           addToast({ message: (response as any).message || 'Échec du remboursement', type: 'error' })
         );
@@ -117,7 +135,7 @@ export const RefundDialog: React.FC<RefundDialogProps> = ({
                 Paiement à rembourser
               </label>
               <select
-                value={paymentId}
+                value={effectivePaymentId}
                 onChange={(e) => {
                   setPaymentId(e.target.value);
                   const p = payments.find((x) => x.id === e.target.value);
