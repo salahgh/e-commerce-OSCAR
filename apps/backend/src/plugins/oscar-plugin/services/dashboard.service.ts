@@ -786,10 +786,12 @@ export class DashboardService {
     endDate: Date,
     states: string[],
   ): Promise<number> {
+    // Order.totalWithTax is a getter (subTotalWithTax + shippingWithTax), not a
+    // column, so it can't be summed directly in SQL — sum the two real columns.
     const result = await this.connection
       .getRepository(ctx, Order)
       .createQueryBuilder('o')
-      .select('COALESCE(SUM(o.totalWithTax), 0)', 'sum')
+      .select('COALESCE(SUM(o."subTotalWithTax" + o."shippingWithTax"), 0)', 'sum')
       .where('o.orderPlacedAt >= :startDate', { startDate })
       .andWhere('o.orderPlacedAt < :endDate', { endDate })
       .andWhere('o.state IN (:...states)', { states })
