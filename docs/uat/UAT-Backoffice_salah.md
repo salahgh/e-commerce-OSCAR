@@ -73,9 +73,9 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 
 | ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
-| BO-PROD-01 | Affichage de la liste produits | Produits présents | 1. Ouvrir `/products` | — | Liste paginée (10/table, 12/grille) | Haute | ☐ |
-| BO-PROD-02 | Recherche par nom | — | 1. Saisir un nom partiel | « robe » | Résultats filtrés en temps réel | Haute | ☐ |
-| BO-PROD-03 | Recherche par SKU | — | 1. Saisir un SKU | SKU existant | Produit correspondant affiché | Moyenne | ☐ |
+| BO-PROD-01 | Affichage de la liste produits | Produits présents | 1. Ouvrir `/products` | — | Liste paginée (10/table, 12/grille) | Haute | ok — 97 produits, prix DZD corrects (note : 20 lignes/page observées, doc dit 10) |
+| BO-PROD-02 | Recherche par nom | — | 1. Saisir un nom partiel | « robe » | Résultats filtrés en temps réel | Haute | ok (« Denim » filtre en direct) |
+| BO-PROD-03 | Recherche par SKU | — | 1. Saisir un SKU | SKU existant | Produit correspondant affiché | Moyenne | ok |
 | BO-PROD-04 | Filtre statut activé/désactivé | — | 1. Filtrer « activés » puis « désactivés » | — | Liste cohérente avec le filtre | Moyenne | ☐ |
 | BO-PROD-05 | Filtre « en vedette » | — | 1. Activer le filtre vedette | — | Seuls les produits vedette listés | Basse | ☐ |
 | BO-PROD-06 | Filtre par catégorie/collection | — | 1. Choisir une collection | — | Produits de la collection | Moyenne | ☐ |
