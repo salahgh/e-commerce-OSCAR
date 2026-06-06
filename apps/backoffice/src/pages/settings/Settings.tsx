@@ -762,7 +762,7 @@ export const Settings: React.FC = () => {
                         ) : (
                           <>
                             <span className="text-lg font-semibold text-foreground">
-                              {formatPrice(price)}
+                              {formatPrice(price / 100)}
                             </span>
                             <PermissionGate permission="UpdateShippingMethod" disableMode>
                               <Button

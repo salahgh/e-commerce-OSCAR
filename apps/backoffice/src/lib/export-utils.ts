@@ -196,8 +196,8 @@ export const generateInvoiceHTML = (order: {
           <td>${line.productVariant.name}</td>
           <td>${line.productVariant.sku}</td>
           <td class="text-right">${line.quantity}</td>
-          <td class="text-right">${formatPrice(line.unitPriceWithTax)}</td>
-          <td class="text-right">${formatPrice(line.linePriceWithTax)}</td>
+          <td class="text-right">${formatPrice(line.unitPriceWithTax / 100)}</td>
+          <td class="text-right">${formatPrice(line.linePriceWithTax / 100)}</td>
         </tr>
         `
           )
@@ -209,15 +209,15 @@ export const generateInvoiceHTML = (order: {
       <table>
         <tr>
           <td>Sous-total</td>
-          <td class="text-right">${formatPrice(order.subTotalWithTax)}</td>
+          <td class="text-right">${formatPrice(order.subTotalWithTax / 100)}</td>
         </tr>
         <tr>
           <td>Livraison</td>
-          <td class="text-right">${formatPrice(order.shippingWithTax)}</td>
+          <td class="text-right">${formatPrice(order.shippingWithTax / 100)}</td>
         </tr>
         <tr class="total-row">
           <td>Total TTC</td>
-          <td class="text-right">${formatPrice(order.totalWithTax)}</td>
+          <td class="text-right">${formatPrice(order.totalWithTax / 100)}</td>
         </tr>
       </table>
     </div>

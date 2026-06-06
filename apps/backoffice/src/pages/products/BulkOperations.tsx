@@ -335,7 +335,7 @@ export const BulkOperations: React.FC = () => {
                     </div>
                     <div className="text-right">
                       <p className="font-medium text-foreground">
-                        {formatPrice(variant?.price || 0)}
+                        {formatPrice((variant?.price || 0) / 100)}
                       </p>
                       <Badge variant={product.enabled ? 'success' : 'default'} className="text-xs">
                         {product.enabled ? 'Actif' : 'Inactif'}
