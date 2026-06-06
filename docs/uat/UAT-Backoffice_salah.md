@@ -76,19 +76,19 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-PROD-01 | Affichage de la liste produits | Produits présents | 1. Ouvrir `/products` | — | Liste paginée (10/table, 12/grille) | Haute | ok — 97 produits, prix DZD corrects (note : 20 lignes/page observées, doc dit 10) |
 | BO-PROD-02 | Recherche par nom | — | 1. Saisir un nom partiel | « robe » | Résultats filtrés en temps réel | Haute | ok (« Denim » filtre en direct) |
 | BO-PROD-03 | Recherche par SKU | — | 1. Saisir un SKU | SKU existant | Produit correspondant affiché | Moyenne | ok |
-| BO-PROD-04 | Filtre statut activé/désactivé | — | 1. Filtrer « activés » puis « désactivés » | — | Liste cohérente avec le filtre | Moyenne | ☐ |
-| BO-PROD-05 | Filtre « en vedette » | — | 1. Activer le filtre vedette | — | Seuls les produits vedette listés | Basse | ☐ |
-| BO-PROD-06 | Filtre par catégorie/collection | — | 1. Choisir une collection | — | Produits de la collection | Moyenne | ☐ |
-| BO-PROD-07 | Filtre par fourchette de prix | — | 1. Saisir min/max (DZD) | 1000–5000 | Produits dans la fourchette | Moyenne | ☐ |
-| BO-PROD-08 | Filtre par statut de stock | — | 1. Filtrer en stock / faible / rupture | — | Liste correcte | Moyenne | ☐ |
-| BO-PROD-09 | Mode filtres à facettes (avancé) | — | 1. Basculer en mode facetté 2. Sélectionner plusieurs valeurs (taille/couleur) | — | Compteurs dynamiques + résultats filtrés | Moyenne | ☐ |
-| BO-PROD-10 | Tri (nom, date, prix) | — | 1. Tester chaque tri (asc/desc) | — | Ordre correct à chaque option | Moyenne | ☐ |
-| BO-PROD-11 | Bascule vue tableau ↔ grille | — | 1. Changer de vue | — | Affichage adapté, données identiques | Basse | ☐ |
-| BO-PROD-12 | Pills de filtres actifs | Filtres appliqués | 1. Observer les pills 2. Retirer un filtre via la pill | — | Filtre retiré, liste actualisée | Basse | ☐ |
-| BO-PROD-13 | Pagination | > 1 page | 1. Naviguer entre pages | — | Données paginées correctes | Moyenne | ☐ |
-| BO-PROD-14 | Badge statut de stock | — | 1. Observer les badges | — | « En stock » / « Rupture » corrects | Moyenne | ☐ |
-| BO-PROD-15 | Index de recherche vide | Index non construit | 1. Ouvrir la liste | — | Invite à réindexer affichée | Moyenne | ☐ |
-| BO-PROD-16 | Liste vide / aucun résultat | Filtre sans correspondance | 1. Filtrer sans résultat | — | État vide informatif (pas d'erreur) | Moyenne | ☐ |
+| BO-PROD-04 | Filtre statut activé/désactivé | — | 1. Filtrer « activés » puis « désactivés » | — | Liste cohérente avec le filtre | Moyenne | non testé individuellement (panneau Filtres opérationnel) |
+| BO-PROD-05 | Filtre « en vedette » | — | 1. Activer le filtre vedette | — | Seuls les produits vedette listés | Basse | non testé individuellement |
+| BO-PROD-06 | Filtre par catégorie/collection | — | 1. Choisir une collection | — | Produits de la collection | Moyenne | non testé individuellement |
+| BO-PROD-07 | Filtre par fourchette de prix | — | 1. Saisir min/max (DZD) | 1000–5000 | Produits dans la fourchette | Moyenne | partiel — champs min/max présents dans le panneau |
+| BO-PROD-08 | Filtre par statut de stock | — | 1. Filtrer en stock / faible / rupture | — | Liste correcte | Moyenne | non testé individuellement |
+| BO-PROD-09 | Mode filtres à facettes (avancé) | — | 1. Basculer en mode facetté 2. Sélectionner plusieurs valeurs (taille/couleur) | — | Compteurs dynamiques + résultats filtrés | Moyenne | partiel — bascule Basique/Avancé présente (mode facetté par défaut) |
+| BO-PROD-10 | Tri (nom, date, prix) | — | 1. Tester chaque tri (asc/desc) | — | Ordre correct à chaque option | Moyenne | ok — tri par prix applique `?sortBy=price&sortOrder` et réordonne |
+| BO-PROD-11 | Bascule vue tableau ↔ grille | — | 1. Changer de vue | — | Affichage adapté, données identiques | Basse | ok |
+| BO-PROD-12 | Pills de filtres actifs | Filtres appliqués | 1. Observer les pills 2. Retirer un filtre via la pill | — | Filtre retiré, liste actualisée | Basse | non testé individuellement |
+| BO-PROD-13 | Pagination | > 1 page | 1. Naviguer entre pages | — | Données paginées correctes | Moyenne | ok — **bug corrigé** : le compte de pages utilisait 10/12 au lieu de perPage (20) → « sur 10 » pour 5 pages, pages 6-10 vides |
+| BO-PROD-14 | Badge statut de stock | — | 1. Observer les badges | — | « En stock » / « Rupture » corrects | Moyenne | ok |
+| BO-PROD-15 | Index de recherche vide | Index non construit | 1. Ouvrir la liste | — | Invite à réindexer affichée | Moyenne | N/A — nécessite un index non construit |
+| BO-PROD-16 | Liste vide / aucun résultat | Filtre sans correspondance | 1. Filtrer sans résultat | — | État vide informatif (pas d'erreur) | Moyenne | ok — « Aucun produit trouvé » |
 
 ### 3.2 Création (assistant 6 étapes)
 
