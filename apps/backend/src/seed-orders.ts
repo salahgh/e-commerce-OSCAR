@@ -163,7 +163,10 @@ async function seedOrders() {
       fulfillmentHandler: 'manual-fulfillment',
       checker: {
         code: defaultShippingEligibilityChecker.code,
-        arguments: [],
+        // Must supply orderMinimum, otherwise the checker compares against
+        // undefined and the method is ALWAYS ineligible — which silently blocks
+        // every order from leaving the cart (AddingItems) state.
+        arguments: [{ name: 'orderMinimum', value: '0' }],
       },
       calculator: {
         code: defaultShippingCalculator.code,
@@ -297,7 +300,15 @@ async function seedOrders() {
             try {
               // Create fulfillment
               const fulfillment = await orderService.createFulfillment(ctx, {
-                handler: { code: 'manual-fulfillment', arguments: [] },
+                // The manual-fulfillment handler requires a `method` argument;
+                // fulfillment.method is NOT NULL, so empty args throws.
+                handler: {
+                  code: 'manual-fulfillment',
+                  arguments: [
+                    { name: 'method', value: 'Standard Shipping' },
+                    { name: 'trackingCode', value: `DZ${String(order.id).padStart(6, '0')}` },
+                  ],
+                },
                 lines: currentOrder.lines.map(line => ({
                   orderLineId: line.id,
                   quantity: line.quantity,
