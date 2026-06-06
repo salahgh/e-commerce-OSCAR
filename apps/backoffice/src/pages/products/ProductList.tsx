@@ -57,11 +57,10 @@ export const ProductList: React.FC = () => {
   // Use the unified search hook for all filtering and search
   const search = useUnifiedSearch();
 
-  // Calculate page size based on view mode
-  const pageSize = viewMode === 'grid' ? 12 : 10;
-
-  // Calculate total pages
-  const totalPages = Math.ceil(search.totalItems / pageSize);
+  // Total pages must use the SAME page size the query actually fetches
+  // (search.state.perPage). Using a separate hardcoded value made the page
+  // count wrong (e.g. "sur 10" for 5 pages of data) and left trailing pages empty.
+  const totalPages = Math.ceil(search.totalItems / search.state.perPage);
 
   // Delete mutation
   const [deleteProduct, { loading: deleting }] = useMutation(DeleteProductDocument, {
