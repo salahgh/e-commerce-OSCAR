@@ -115,10 +115,10 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 
 | ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
-| BO-PROD-40 | Édition d'un produit existant | Produit existant | 1. `/products/:id/edit` 2. Modifier des champs 3. Enregistrer | — | Données pré-remplies, modifications sauvegardées | Haute | ☐ |
-| BO-PROD-41 | Consultation (lecture seule) | — | 1. Ouvrir `/products/:id` | — | Détails, galerie, variantes, collections affichés | Moyenne | ☐ |
-| BO-PROD-42 | Suppression avec confirmation | — | 1. Cliquer « Supprimer » 2. Confirmer | — | Dialogue de confirmation puis suppression + toast | Haute | ☐ |
-| BO-PROD-43 | Annulation de la suppression | — | 1. Ouvrir le dialogue 2. Annuler | — | Produit conservé | Moyenne | ☐ |
+| BO-PROD-40 | Édition d'un produit existant | Produit existant | 1. `/products/:id/edit` 2. Modifier des champs 3. Enregistrer | — | Données pré-remplies, modifications sauvegardées | Haute | ok — formulaire pré-rempli (nom/slug/description/activé) ; sauvegarde non exécutée pour ne pas altérer le catalogue |
+| BO-PROD-41 | Consultation (lecture seule) | — | 1. Ouvrir `/products/:id` | — | Détails, galerie, variantes, collections affichés | Moyenne | ok — nom, statut, slug, description, traductions FR/AR, variantes, catégories |
+| BO-PROD-42 | Suppression avec confirmation | — | 1. Cliquer « Supprimer » 2. Confirmer | — | Dialogue de confirmation puis suppression + toast | Haute | non confirmé en automatisation (bouton présent ; suppression volontairement non exécutée) |
+| BO-PROD-43 | Annulation de la suppression | — | 1. Ouvrir le dialogue 2. Annuler | — | Produit conservé | Moyenne | non confirmé en automatisation |
 | BO-PROD-44 | Sélection multiple (`/products/bulk`) | — | 1. Cocher plusieurs / tout sélectionner | — | Sélection reflétée, compteur correct | Moyenne | ☐ |
 | BO-PROD-45 | Activation/désactivation en masse | Sélection faite | 1. Action en masse « Activer » | — | Statut mis à jour pour tous, toast avec compte | Moyenne | ☐ |
 | BO-PROD-46 | Suppression en masse | Sélection faite | 1. Supprimer en masse 2. Confirmer | — | Confirmation avec compte, suppression effectuée | Moyenne | ☐ |
