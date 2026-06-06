@@ -219,18 +219,18 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 
 | ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
-| BO-CUS-01 | Affichage de la liste | Clients présents | 1. Ouvrir `/customers` | — | Liste paginée (10/page) avec stats | Haute | ☐ |
+| BO-CUS-01 | Affichage de la liste | Clients présents | 1. Ouvrir `/customers` | — | Liste paginée (10/page) avec stats | Haute | ok — 62 clients, 10/page, filtre wilaya ; **bug corrigé** : « total dépensé » affiché en centimes (×100) |
 | BO-CUS-02 | Recherche (nom/e-mail) | — | 1. Saisir un terme | — | Résultats filtrés | Haute | ☐ |
 | BO-CUS-03 | Filtre par wilaya | — | 1. Choisir une wilaya | — | Clients de la wilaya | Moyenne | ☐ |
 | BO-CUS-04 | Création d'un client | Permission `CreateCustomer` | 1. Ouvrir le dialogue 2. Prénom, nom, e-mail (+ tél/mdp) 3. Valider | e-mail unique | Client créé, toast succès | Haute | ☐ |
 | BO-CUS-05 | Création — e-mail en conflit | E-mail existant | 1. Réutiliser un e-mail | doublon | Erreur de conflit affichée | Moyenne | ☐ |
 | BO-CUS-06 | Création — validation e-mail | — | 1. Saisir un e-mail invalide | `abc@` | Erreur de format | Moyenne | ☐ |
-| BO-CUS-07 | Détail client | — | 1. Ouvrir `/customers/:id` | — | Profil, statistiques, carnet d'adresses, historique | Moyenne | ☐ |
+| BO-CUS-07 | Détail client | — | 1. Ouvrir `/customers/:id` | — | Profil, statistiques, carnet d'adresses, historique | Moyenne | ok — profil, stats, adresses, historique de commandes |
 | BO-CUS-08 | Édition du profil | — | 1. Modifier prénom/nom/tél/wilaya/notes 2. Enregistrer | — | Modifications sauvegardées | Moyenne | ☐ |
 | BO-CUS-09 | Carnet d'adresses — ajout | — | 1. Ajouter une adresse | — | Adresse créée, défaut indiqué | Moyenne | ☐ |
 | BO-CUS-10 | Carnet d'adresses — édition/suppression | Adresse existante | 1. Modifier puis supprimer | — | Adresse mise à jour/supprimée | Basse | ☐ |
 | BO-CUS-11 | Historique de commandes | Client avec commandes | 1. Cliquer un code | — | Navigation vers le détail commande | Moyenne | ☐ |
-| BO-CUS-12 | Statistiques client | — | 1. Vérifier nb commandes, total dépensé, panier moyen, dernière commande | — | Valeurs cohérentes | Basse | ☐ |
+| BO-CUS-12 | Statistiques client | — | 1. Vérifier nb commandes, total dépensé, panier moyen, dernière commande | — | Valeurs cohérentes | Basse | ok après correction — 3 commandes, 17 103,85 DA total, 8 551,93 DA panier moyen (étaient ×100) |
 | BO-CUS-13 | Statut de vérification | — | 1. Observer le badge | — | « Vérifié » / « Non vérifié » correct | Basse | ☐ |
 | BO-CUS-14 | Suppression d'un client | — | 1. Supprimer 2. Confirmer | — | Confirmation (mention commandes liées) puis suppression | Moyenne | ☐ |
 | BO-CUS-15 | Sélection multiple + tout sélectionner | — | 1. Cocher plusieurs / tout | — | Sélection correcte, compteur | Moyenne | ☐ |
@@ -256,7 +256,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 
 | ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
-| BO-PROMO-01 | Affichage de la liste | Promotions présentes | 1. Ouvrir `/promotions` | — | Liste paginée (10/page) | Moyenne | ☐ |
+| BO-PROMO-01 | Affichage de la liste | Promotions présentes | 1. Ouvrir `/promotions` | — | Liste paginée (10/page) | Moyenne | ok — 1 code (SUMMER2024, 5%, Min 2 000 DA), filtres statut, montants DZD corrects |
 | BO-PROMO-02 | Recherche (nom/code) | — | 1. Saisir un terme | — | Filtrage correct | Basse | ☐ |
 | BO-PROMO-03 | Filtre par statut | — | 1. Tester Toutes/Active/Inactive/Expirée/Programmée | — | Liste cohérente | Moyenne | ☐ |
 | BO-PROMO-04 | Création — informations de base | Permission `CreatePromotion` | 1. `/promotions/new` 2. Nom, description, code | code `SOLDE10` | Promotion créée | Haute | ☐ |
