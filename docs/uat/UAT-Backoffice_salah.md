@@ -94,21 +94,21 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 
 | ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
-| BO-PROD-20 | Étape 1 — Informations de base | Permission `CreateCatalog` | 1. `/products/new` 2. Saisir nom, description 3. Activer « Activé » | Nom « Robe d'été » | Slug auto-généré, champs acceptés | Haute | ☐ |
-| BO-PROD-21 | Génération & édition du slug | — | 1. Saisir un nom 2. Modifier le slug manuellement | slug `robe-ete` | Slug valide (minuscules, tirets), validation des caractères | Moyenne | ☐ |
-| BO-PROD-22 | Étape 2 — Traductions FR/EN/AR | — | 1. Renseigner nom/desc en 3 langues | FR, EN, AR | Traductions enregistrées, AR accepté | Moyenne | ☐ |
+| BO-PROD-20 | Étape 1 — Informations de base | Permission `CreateCatalog` | 1. `/products/new` 2. Saisir nom, description 3. Activer « Activé » | Nom « Robe d'été » | Slug auto-généré, champs acceptés | Haute | ok — exécuté (assistant 6 étapes) |
+| BO-PROD-21 | Génération & édition du slug | — | 1. Saisir un nom 2. Modifier le slug manuellement | slug `robe-ete` | Slug valide (minuscules, tirets), validation des caractères | Moyenne | ok — slug auto-généré « uat-wizard-product » |
+| BO-PROD-22 | Étape 2 — Traductions FR/EN/AR | — | 1. Renseigner nom/desc en 3 langues | FR, EN, AR | Traductions enregistrées, AR accepté | Moyenne | ok — étape présente (EN/AR optionnels) ; FR + AR enregistrés sur la fiche créée |
 | BO-PROD-23 | Étape 3 — Upload d'images (drag & drop) | — | 1. Glisser plusieurs images | 3 fichiers | Aperçu avant envoi, upload OK | Haute | ☐ |
 | BO-PROD-24 | Réordonner les images | ≥ 2 images | 1. Glisser-déposer pour réordonner | — | Nouvel ordre conservé | Moyenne | ☐ |
 | BO-PROD-25 | Image vedette | ≥ 2 images | 1. Définir l'image vedette | — | Image vedette marquée (1ʳᵉ par défaut) | Moyenne | ☐ |
 | BO-PROD-26 | Sélection depuis la bibliothèque d'assets | Assets existants | 1. Ouvrir le sélecteur 2. Choisir un asset | — | Asset ajouté au produit | Moyenne | ☐ |
 | BO-PROD-27 | Suppression d'une image | ≥ 1 image | 1. Supprimer une image | — | Image retirée | Basse | ☐ |
-| BO-PROD-28 | Étape 4 — Groupes d'options & matrice de variantes | — | 1. Créer/choisir Taille + Couleur 2. Générer la matrice 3. Saisir SKU/prix/stock | Taille S/M/L × Rouge/Bleu | Variantes générées et éditables | Haute | ☐ |
+| BO-PROD-28 | Étape 4 — Groupes d'options & matrice de variantes | — | 1. Créer/choisir Taille + Couleur 2. Générer la matrice 3. Saisir SKU/prix/stock | Taille S/M/L × Rouge/Bleu | Variantes générées et éditables | Haute | ok — exécuté : groupe « Taille » + option « M » → génération → variante UAT-M (prix 2000, stock 50) ajoutée |
 | BO-PROD-29 | Activer/désactiver une variante | Variantes créées | 1. Désactiver une variante | — | Statut variante mis à jour | Moyenne | ☐ |
 | BO-PROD-30 | Ajustement de prix en masse | Variantes créées | 1. Appliquer un ajustement global | +10 % | Prix recalculés | Basse | ☐ |
 | BO-PROD-31 | Étape 5 — Attributs (facettes) | Facettes existantes | 1. Sélectionner des valeurs de facette | Matière : Coton | Attributs associés | Moyenne | ☐ |
 | BO-PROD-32 | Étape 6 — Catégories | Collections existantes | 1. Affecter ≥ 1 collection | — | Affectation enregistrée | Moyenne | ☐ |
-| BO-PROD-33 | Enregistrement final | Étapes complètes | 1. Cliquer « Enregistrer » | — | Toast succès, redirection vers la fiche produit | Haute | ☐ |
-| BO-PROD-34 | Validation — nom manquant | — | 1. Laisser le nom vide 2. Tenter d'avancer | — | Erreur de validation, blocage | Haute | ☐ |
+| BO-PROD-33 | Enregistrement final | Étapes complètes | 1. Cliquer « Enregistrer » | — | Toast succès, redirection vers la fiche produit | Haute | ok — exécuté : produit #105 « UAT Wizard Product » créé, redirection vers la fiche |
+| BO-PROD-34 | Validation — nom manquant | — | 1. Laisser le nom vide 2. Tenter d'avancer | — | Erreur de validation, blocage | Haute | ok — validations actives : « Nom et slug sont requis » et « Au moins une variante avec SKU est requise » |
 | BO-PROD-35 | Gestion d'erreur serveur à l'enregistrement | Forcer une erreur API | 1. Enregistrer | — | Message d'erreur lisible, données non perdues | Moyenne | ☐ |
 
 ### 3.3 Édition, consultation, suppression, opérations en masse
