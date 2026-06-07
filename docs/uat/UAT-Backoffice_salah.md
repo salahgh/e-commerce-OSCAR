@@ -155,7 +155,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
 | BO-FAC-01 | Affichage de la liste | Facettes présentes | 1. Ouvrir `/facets` | — | Liste paginée (20/page) | Moyenne | ok — 3 attributs (Category 32 val., Color 12 val., Size) avec tri/visibilité |
 | BO-FAC-02 | Recherche / filtre visibilité / tri | — | 1. Rechercher, filtrer public/privé, trier | — | Comportements corrects | Basse | ☐ |
-| BO-FAC-03 | Création d'une facette | Permission `CreateFacet` | 1. `/facets/new` 2. Nom, code, description | « Matière » | Facette créée | Haute | ☐ |
+| BO-FAC-03 | Création d'une facette | Permission `CreateFacet` | 1. `/facets/new` 2. Nom, code, description | « Matière » | Facette créée | Haute | formulaire complet (nom, code auto, public, EN/AR, valeurs) ; création non confirmée en automatisation |
 | BO-FAC-04 | Ajout de valeurs de facette | Facette créée | 1. Ajouter plusieurs valeurs | Coton, Lin | Valeurs ajoutées | Haute | ☐ |
 | BO-FAC-05 | Facette couleur (color picker) | Facette de type couleur | 1. Ajouter une couleur via le sélecteur | #FF0000 | Pastille couleur + hex enregistrés | Moyenne | ☐ |
 | BO-FAC-06 | Traductions des valeurs (FR/EN/AR) | — | 1. Traduire chaque valeur | — | Traductions enregistrées | Moyenne | ☐ |
