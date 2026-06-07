@@ -163,7 +163,7 @@ export default function LoginScreen() {
                   disabled={isSubmitting}
                 >
                   <Text style={[styles.submitText, { fontFamily: fontFamily.medium }]}>
-                    {isSubmitting ? t('auth.loggingIn') : t('auth.clickToContinue')}
+                    {isSubmitting ? t('auth.loggingIn') : t('auth.signIn')}
                   </Text>
                 </TouchableOpacity>
 

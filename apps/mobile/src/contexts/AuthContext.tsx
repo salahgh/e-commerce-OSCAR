@@ -1,8 +1,7 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { useMutation, useLazyQuery } from '@apollo/client/react';
-import * as SecureStore from 'expo-secure-store';
 import { apolloClient, VENDURE_TOKEN_KEY, purgeApolloCache } from '../apollo/client';
-import { Storage, STORAGE_KEYS } from '../utils/storage';
+import { Storage, SecureStorage, STORAGE_KEYS } from '../utils/storage';
 import {
   ShopLoginMutation,
   ShopLoginMutationVariables,
@@ -88,7 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clearAuth = async () => {
     await Promise.all([
-      SecureStore.deleteItemAsync(VENDURE_TOKEN_KEY),
+      SecureStorage.removeItem(VENDURE_TOKEN_KEY),
       Storage.removeItem(STORAGE_KEYS.USER_DATA),
     ]);
     setAuthState({
@@ -101,7 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loadStoredAuth = async () => {
     try {
       const [vendureToken, userDataStr] = await Promise.all([
-        SecureStore.getItemAsync(VENDURE_TOKEN_KEY),
+        SecureStorage.getItem(VENDURE_TOKEN_KEY),
         Storage.getItem(STORAGE_KEYS.USER_DATA),
       ]);
 

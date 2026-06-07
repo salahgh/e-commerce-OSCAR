@@ -83,7 +83,7 @@ export function MiniCartSheet() {
                   </Text>
                 </View>
                 <Text style={[styles.rowPrice, { fontFamily: fontFamily.semiBold }]}>
-                  {item.linePrice}
+                  {item.linePrice.toLocaleString()} DZD
                 </Text>
               </View>
             ))}
@@ -95,7 +95,7 @@ export function MiniCartSheet() {
                 {t('miniCart.subtotal')}
               </Text>
               <Text style={[styles.subtotalValue, { fontFamily: fontFamily.bold }]}>
-                {subTotal}
+                {subTotal.toLocaleString()} DZD
               </Text>
             </View>
             <Button title={t('miniCart.checkout')} onPress={() => go('/checkout')} />

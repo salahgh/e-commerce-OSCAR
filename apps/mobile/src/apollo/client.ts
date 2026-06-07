@@ -34,11 +34,21 @@ const httpLink = createHttpLink({
   credentials: 'include',
 });
 
-// Auth Link - Add vendure-token header for session authentication
+// Resolve the active language as a Vendure LanguageCode (en/fr/ar). Vendure reads content
+// translations (product/collection names…) from the `languageCode` URL param — NOT the
+// Accept-Language header — so without this everything falls back to the default (English).
+function activeLanguageCode(): 'en' | 'fr' | 'ar' {
+  const base = (i18n.language || 'fr').split('-')[0];
+  return base === 'en' || base === 'ar' ? base : 'fr';
+}
+
+// Auth Link - Add vendure-token header + languageCode URL param for translated content
 const authLink = setContext(async (_, { headers }) => {
+  const uri = `${GRAPHQL_URI}?languageCode=${activeLanguageCode()}`;
   try {
     const token = await tokenStorage.getItem(VENDURE_TOKEN_KEY);
     return {
+      uri,
       headers: {
         ...headers,
         'Accept-Language': i18n.language || 'fr',
@@ -47,7 +57,7 @@ const authLink = setContext(async (_, { headers }) => {
     };
   } catch (error) {
     console.error('Error getting vendure token from secure store:', error);
-    return { headers };
+    return { uri, headers };
   }
 });
 
