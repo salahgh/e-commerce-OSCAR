@@ -261,9 +261,9 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-PROMO-03 | Filtre par statut | — | 1. Tester Toutes/Active/Inactive/Expirée/Programmée | — | Liste cohérente | Moyenne | ☐ |
 | BO-PROMO-04 | Création — informations de base | Permission `CreatePromotion` | 1. `/promotions/new` 2. Nom, description, code | code `SOLDE10` | Promotion créée | Haute | ok — exécuté : promotion créée (toast « créée »), redirection vers la liste |
 | BO-PROMO-05 | Génération automatique de code | — | 1. Cliquer « Générer » | — | Code aléatoire inséré | Basse | ☐ |
-| BO-PROMO-06 | Type de remise — pourcentage | — | 1. Choisir « pourcentage » 2. Valeur | 10 % | UI adaptée, valeur acceptée | Haute | ☐ |
-| BO-PROMO-07 | Type de remise — montant fixe | — | 1. Choisir « montant fixe » | 500 DZD | UI adaptée | Moyenne | ☐ |
-| BO-PROMO-08 | Type — livraison gratuite | — | 1. Choisir « livraison gratuite » | — | Configuration acceptée | Moyenne | ☐ |
+| BO-PROMO-06 | Type de remise — pourcentage | — | 1. Choisir « pourcentage » 2. Valeur | 10 % | UI adaptée, valeur acceptée | Haute | N/A (impl.) — une seule action configurée : « Remise par collection » (% dérivé du slug, format discount-XX). Pas de sélecteur de type pourcentage générique |
+| BO-PROMO-07 | Type de remise — montant fixe | — | 1. Choisir « montant fixe » | 500 DZD | UI adaptée | Moyenne | N/A (impl.) — action « montant fixe » non disponible (seule l'action collection-pourcentage est câblée) |
+| BO-PROMO-08 | Type — livraison gratuite | — | 1. Choisir « livraison gratuite » | — | Configuration acceptée | Moyenne | N/A (impl.) — action « livraison gratuite » non disponible |
 | BO-PROMO-09 | Conditions d'éligibilité | — | 1. Ajouter min. commande / groupe client / produits / collections / facettes | min 5000 DZD | Conditions cumulables, suppression possible | Moyenne | ☐ |
 | BO-PROMO-10 | Plage de dates | — | 1. Définir début/fin | — | Dates enregistrées | Moyenne | ☐ |
 | BO-PROMO-11 | Sans date de fin | — | 1. Retirer la date de fin | — | Promotion sans expiration | Basse | ☐ |
@@ -279,7 +279,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
 | BO-USR-01 | Liste des administrateurs | Permission `ReadAdministrator` | 1. Ouvrir `/users` | — | Liste paginée (10/page) avec rôles | Haute | ok — 2 admins (superadmin, tt test/Role Test) avec rôles et statut |
 | BO-USR-02 | Recherche (nom/e-mail) | — | 1. Saisir un terme | — | Filtrage correct | Basse | ☐ |
-| BO-USR-03 | Création d'un administrateur | Permission `CreateAdministrator` | 1. `/users/new` 2. Prénom, nom, e-mail, mot de passe 3. Affecter des rôles 4. Enregistrer | — | Admin créé, toast | Haute | ☐ |
+| BO-USR-03 | Création d'un administrateur | Permission `CreateAdministrator` | 1. `/users/new` 2. Prénom, nom, e-mail, mot de passe 3. Affecter des rôles 4. Enregistrer | — | Admin créé, toast | Haute | ok — exécuté : admin créé (toast « créé avec succès »), redirection vers /users |
 | BO-USR-04 | Validation e-mail | — | 1. E-mail invalide | `abc@` | Erreur de format | Moyenne | ☐ |
 | BO-USR-05 | Affectation de rôles | Rôles existants | 1. Sélectionner plusieurs rôles | — | Rôles affectés (badges colorés) | Moyenne | ☐ |
 | BO-USR-06 | Permissions personnalisées | Si autorisé | 1. Cocher des permissions par catégorie | CRUD Produits | Permissions enregistrées | Moyenne | ☐ |
