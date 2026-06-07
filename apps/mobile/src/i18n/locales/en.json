@@ -29,7 +29,8 @@
     "errorEyebrow": "Something went wrong",
     "errorBoundaryTitle": "Unexpected error",
     "errorBoundaryMessage": "The app ran into a problem. You can try again or go back home.",
-    "goHome": "Go home"
+    "goHome": "Go home",
+    "clearAll": "Clear All"
   },
   "address": {
     "title": "My Addresses",
@@ -162,7 +163,8 @@
       "popular": "Popular",
       "priceAsc": "Price: Low to High",
       "priceDesc": "Price: High to Low"
-    }
+    },
+    "selectOption": "Select {{option}}"
   },
   "cart": {
     "title": "Cart",
@@ -227,7 +229,28 @@
     "shipping": "Shipping",
     "addressError": "Failed to set shipping address",
     "shippingMethodError": "Failed to set shipping method",
-    "orderError": "Failed to place order"
+    "orderError": "Failed to place order",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "John Doe",
+    "phoneNumber": "Phone Number",
+    "address": "Address",
+    "addressPlaceholder": "Street address, apartment number",
+    "city": "City",
+    "cityPlaceholder": "Algiers",
+    "postalCode": "Postal Code",
+    "notes": "Delivery Notes",
+    "notesPlaceholder": "Optional delivery instructions",
+    "continue": "Continue",
+    "shippingAddressSubtitle": "Where should we deliver your order?",
+    "orderSummary": "Order Summary",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "qty": "Qty",
+    "size": "Size",
+    "color": "Color",
+    "orderPlacedMessage": "Thank you for your order. We will send you a confirmation email shortly.",
+    "trackingInfo": "You can track your order status in the \"My Orders\" section of your profile.",
+    "goHome": "Go to Home"
   },
   "info": {
     "indexTitle": "Help & info",
@@ -378,7 +401,11 @@
     "messageSent": "Message sent",
     "messageSentConfirm": "We'll get back to you as soon as possible.",
     "cannotSend": "Unable to send message",
-    "messagePlaceholder": "Write your message here"
+    "messagePlaceholder": "Write your message here",
+    "languageDesc": "Select your preferred language",
+    "orderUpdates": "Order Updates",
+    "promotions": "Promotions & Offers",
+    "newsletter": "Newsletter"
   },
   "orders": {
     "title": "My Orders",
@@ -403,6 +430,32 @@
       "shipped": "Shipped",
       "delivered": "Delivered",
       "cancelled": "Cancelled"
+    },
+    "itemCount": "{{count}} items",
+    "orderCount": "{{count}} orders",
+    "lastUpdated": "Last updated",
+    "shippingInformation": "Shipping Information",
+    "trackingNumber": "Tracking",
+    "paymentInformation": "Payment Information",
+    "paidOn": "Paid on",
+    "orderItems": "Order Items",
+    "orderSummary": "Order Summary",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "free": "Free",
+    "qty": "Qty",
+    "states": {
+      "AddingItems": "Draft",
+      "ArrangingPayment": "Awaiting Payment",
+      "PaymentAuthorized": "Payment Authorized",
+      "PaymentSettled": "Paid",
+      "PartiallyShipped": "Partially Shipped",
+      "Shipped": "Shipped",
+      "PartiallyDelivered": "Partially Delivered",
+      "Delivered": "Delivered",
+      "Modifying": "Modifying",
+      "ArrangingAdditionalPayment": "Additional Payment Required",
+      "Cancelled": "Cancelled"
     }
   },
   "errors": {
@@ -442,5 +495,41 @@
     "priceRange": "Price (DZD)",
     "from": "From",
     "to": "to"
+  },
+  "validation": {
+    "emailInvalid": "Invalid email address",
+    "emailRequired": "Email is required",
+    "passwordMin": "Password must be at least {{n}} characters",
+    "passwordRequired": "Password is required",
+    "confirmPasswordMatch": "Passwords must match",
+    "confirmPasswordRequired": "Please confirm your password",
+    "firstNameMin": "First name must be at least {{n}} characters",
+    "firstNameRequired": "First name is required",
+    "lastNameMin": "Last name must be at least {{n}} characters",
+    "lastNameRequired": "Last name is required",
+    "phoneDigits": "Phone number must be 10 digits",
+    "phoneRequired": "Phone number is required",
+    "fieldRequired": "{{field}} is required",
+    "currentPasswordRequired": "Current password is required",
+    "fullNameMin": "Full name must be at least {{n}} characters",
+    "fullNameRequired": "Full name is required",
+    "addressMin": "Address must be at least {{n}} characters",
+    "addressRequired": "Address is required",
+    "cityMin": "City must be at least {{n}} characters",
+    "cityRequired": "City is required",
+    "wilayaRequired": "Wilaya is required",
+    "postalCodeDigits": "Postal code must be 5 digits",
+    "postalCodeRequired": "Postal code is required",
+    "notesMax": "Notes must be less than {{n}} characters"
+  },
+  "search": {
+    "recentSearches": "Recent Searches",
+    "popularSearches": "Popular Searches",
+    "searching": "Searching...",
+    "noResults": "No results found",
+    "noResultsMessage": "No products found for \"{{query}}\". Try a different search term.",
+    "results": "results",
+    "resultsFor": "{{count}} results for \"{{query}}\"",
+    "placeholder": "Search products..."
   }
 }

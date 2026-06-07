@@ -282,7 +282,7 @@ export default function ProductDetailScreen() {
 
           {/* Price */}
           <View style={styles.priceContainer}>
-            <Text style={[styles.price, { fontFamily: fontFamily.bold }]}>{price} DZD</Text>
+            <Text style={[styles.price, { fontFamily: fontFamily.bold }]}>{price.toLocaleString()} DZD</Text>
           </View>
 
           {/* Stock Status */}
@@ -301,7 +301,7 @@ export default function ProductDetailScreen() {
           )}
 
           {/* Description */}
-          {product.description && (
+          {product.description ? (
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, { fontFamily: fontFamily.semiBold }]}>
                 {t('products.description', 'Description')}
@@ -310,7 +310,7 @@ export default function ProductDetailScreen() {
                 {product.description}
               </Text>
             </View>
-          )}
+          ) : null}
 
           {/* Option Selection (Size, Color, etc.) */}
           {optionGroups.map((group) => {
@@ -319,7 +319,7 @@ export default function ProductDetailScreen() {
               <View key={group.name} style={styles.section}>
                 <View style={styles.sectionHeaderRow}>
                   <Text style={[styles.sectionTitle, { fontFamily: fontFamily.semiBold }]}>
-                    {t(`products.select${group.name}`, `Select ${group.name}`)}
+                    {t('products.selectOption', { option: group.name, defaultValue: `Select ${group.name}` })}
                   </Text>
                   {isSize && (
                     <TouchableOpacity onPress={() => setSizeGuideOpen(true)}>

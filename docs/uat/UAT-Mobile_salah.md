@@ -40,6 +40,77 @@ exige un appareil/émulateur réel.
 
 ---
 
+## Synthèse — 2ᵉ passe approfondie (2026-06-07, Expo Web :3002 + Playwright)
+
+**Méthode :** parcours complet **authentifié** piloté par Playwright sur le build web (`:3002`, backend
+Vendure local `:8085`). Compte de test créé via l'app (`mobuat1@oscar.test`), **commande COD réelle
+passée** (n° `UMH7XF9EDJP1TD5U`), parcours profil/adresses/commandes exercé. Backend **inchangé**
+(périmètre mobile-only).
+
+### Bilan
+- ✅ **107/107 tests Jest** verts (21 suites) après corrections — aucune régression.
+- ✅ **0 nouvelle erreur TypeScript** introduite (baseline pré-existante ~154 inchangée ; CI type-check non bloquant).
+- ✅ Parcours d'achat **de bout en bout validé** : inscription → auto-login → PDP variantes → panier →
+  checkout (adresse sauvegardée + wilaya + livraison + COD + revue) → **commande passée** → confirmation
+  → détail commande.
+
+### Bugs trouvés ET corrigés (cette passe)
+
+| # | Sévérité | Problème | Correctif |
+|---|----------|----------|-----------|
+| 1 | Moyenne | **Messages de validation Yup en anglais** (login, register, reset, profil, adresse, checkout) dans une app FR | `src/utils/validation.ts` réécrit : messages résolus via i18n **au moment de la validation** (clés `validation.*` ajoutées en fr/en/ar) — suivent la langue active |
+| 2 | Moyenne | **Libellés du formulaire d'adresse en anglais** ("Full Name", "Phone Number", "Address", "City", "Postal Code") — clés `checkout.*` manquantes (fallback EN) | Clés `checkout.fullName/phoneNumber/address/city/postalCode/...` ajoutées (fr/en/ar) — corrige aussi le checkout |
+| 3 | Faible | **Prix sans séparateur de milliers** : « Vus récemment » / produits associés (`3150 DZD` au lieu de `3 150 DZD`) | `HorizontalProductRow.tsx` → `toLocaleString()` |
+| 4 | Faible | **Prix PDP non formaté** (`3395 DZD`) | `app/products/[slug].tsx` → `toLocaleString()` |
+| 5 | Faible | **Libellés PDP « Select Taille » / « Select Couleur »** ("Select" jamais traduit — clé dynamique impossible) | Clé interpolée `products.selectOption` (`{{option}}`) en fr/en/ar |
+| 6 | Moyenne | **Prix panier non formatés** (lignes, Total, Total après réduction) | `app/(tabs)/cart.tsx` → `toLocaleString()` partout |
+| 7 | Faible | **Coupon non normalisé** : `solde10` envoyé tel quel (devrait être MAJUSCULES) | `cart.tsx` → `.trim().toUpperCase()` |
+| 8 | **Haute** | **Crash potentiel natif** : `{method.description && (…)}` rend un nœud texte si `description === ""` → « Unexpected text node … in `<View>` » (erreur dure sur natif) | `checkout/index.tsx` (livraison + paiement + éligibilité) et `[slug].tsx` (description) → ternaires `? … : null` |
+| 9 | Moyenne | **Revue checkout (`OrderSummary`)** : prix ligne **vide** (lisait `item.subtotal` au lieu de `linePrice`), libellés EN ("Order Summary", "Qty:", "Size/Color"), format `6790.00` | `OrderSummary.tsx` corrigé (champ `linePrice`/`imageUrl`/`variantName`, `toLocaleString`, clés `checkout.orderSummary/subtotal/total/qty/size/color`) + `CartItem.tsx` (type étendu) |
+| 10 | Moyenne | **Écran confirmation partiellement EN** ("Thank you for your order", "You can track…", "Go to Home") — clés manquantes | Clés `checkout.orderPlacedMessage/trackingInfo/goHome` ajoutées |
+| 11 | **Haute** | **Liste + détail des commandes massivement en anglais** : statuts ("Payment Authorized"), « X orders », « X items », "Shipping/Payment Information", "Order Items/Summary", "Subtotal/Shipping/Total", "Qty:", "Last updated", "Paid on" + prix non formatés | `app/(tabs)/orders.tsx` & `app/orders/[id].tsx` : `getOrderStateInfo` localisé via `t` ; clés `orders.*` + `orders.states.*` (fr/en/ar) ; `toLocaleString()` partout |
+| 12 | Faible | **Écran Paramètres** : "Select your preferred language", "Order Updates", "Promotions & Offers" en EN | Clés `profile.languageDesc/orderUpdates/promotions/newsletter` |
+| 13 | Moyenne | **Écran Recherche entièrement en anglais** (anomalie A1 de la passe natif du 06-06) : "Search products…", "Recent/Popular Searches", "N results for …" + "for" codé en dur | Namespace `search.*` complet (fr/en/ar) + `common.clearAll` ; ligne résultats → `search.resultsFor` interpolée (`{{count}}`, `{{query}}`) |
+| 14 | Faible | **Faute FR** « Tout les articles » (Explore) | `explore.allItems` → « Tous les articles » |
+
+### Cas vérifiés ✅ sur web (par section)
+- **§2 Auth :** MOB-AUTH-01 (login), -03 (validation FR), -04 (identifiants invalides → bannière),
+  -05 (inscription), -06 (auto-login), -19 (route protégée → login), -20.
+- **§3 Accueil/§4 Catalogue :** MOB-HOME-01/02/03/04/07/08, MOB-BR-01/02 (grille, filtre catégorie),
+  -09/-10 (Explore + sous-catégories), -12/-13/-15/-16 (recherche FR).
+- **§5 PDP :** MOB-PDP-01/04/05 (variantes taille+couleur, SKU/prix mis à jour), -06, -07 (MiniCart), -11.
+- **§6 Panier :** MOB-CART-01 (MiniCart DZD), -02, -03 (vide), -04 (qté), -08 (coupon invalide FR),
+  -09 (normalisation), -12 (→ checkout).
+- **§7 Checkout :** MOB-CHK-01..24 (étapes, adresse sauvegardée auto, wilaya, livraison, COD, CIB/Baridimob
+  « Bientôt », revue avec wilaya, **commande passée**).
+- **§8 Confirmation :** MOB-CONF-01/02/03 (n° commande, lien détail).
+- **§9 Commandes :** MOB-ORD-01..04, -07/-08/-09 (détail, statut localisé, paiement).
+- **§10 Profil/Adresses/Paramètres :** MOB-PROF-01/02/03/04 (édition), -06/-07/-08/-09 (adresses CRUD),
+  -12 (validation FR), -13 (changement de langue FR↔AR↔EN en direct).
+- **§12 Transverse :** MOB-SYS-01 (i18n FR/AR/EN), -06 (DZD), -07 (états vides).
+
+### Limites du harnais web (à exécuter sur appareil — voir SIGN-OFF)
+- **`Alert.alert` est un no-op sur react-native-web** → confirmations non testables sur web :
+  **reorder** (MOB-REORD-01..04), **déconnexion** (MOB-AUTH-15/17), **suppression d'adresse** (MOB-PROF-10).
+  La logique sous-jacente (`handleReorder`/`summarizeReorder`, `clearAuth`, delete mutation) est correcte
+  et couverte par les tests unitaires.
+- **RTL (MOB-SYS-02)** : le texte AR s'affiche bien, mais `I18nManager.forceRTL` ne **bascule pas la
+  mise en page** sans reload sur web (en dev). Le miroir RTL a été **confirmé sur natif** (passe du 06-06).
+- **Persistance de session (MOB-AUTH-14)** : sur natif OK (SecureStore + header `vendure-token` lisible) ;
+  sur web le header custom n'est pas exposé en CORS → non persisté après reload (limite harnais, pas un bug app).
+- **Routage web** : un deep-link direct vers `/login` ou une route protégée redirige vers l'accueil
+  (quirk expo-router web) — contourné en naviguant par l'UI.
+
+### Restant data/natif (non couvert)
+- **MOB-CART-07 (coupon valide)** : aucun code promo seedé → mécanisme validé via le chemin invalide.
+- **Couleurs (White/Blue/Navy)** & noms de méthode (« Standard Shipping », « cash-on-delivery ») : valeurs
+  d'option/back-office non traduites — nécessiterait une table de correspondance (hors périmètre mobile-only).
+- Splash animé, onboarding (routes désactivées), deep links reset/verify, KeyboardAvoidingView,
+  pull-to-refresh, safe-area/encoche, partage natif, offline/réseau, retour matériel Android, gestes,
+  toasts/animations natifs, thème système OS.
+
+---
+
 ## 🔒 SIGN-OFF — Exécution sur appareil physique + Maestro (requis avant release)
 
 Cette campagne a été menée en **Expo Web** pour l'automatisation. **React Native Web ≠ natif** :

@@ -11,9 +11,12 @@ export interface CartItemData {
   productImage?: string | null;
   selectedSize?: string | null;
   selectedColor?: string | null;
+  variantName?: string | null;
+  imageUrl?: string | null;
   price?: number;
   quantity?: number;
   subtotal?: number;
+  linePrice?: number;
 }
 
 interface CartItemProps {

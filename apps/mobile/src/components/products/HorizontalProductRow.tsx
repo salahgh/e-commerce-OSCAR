@@ -61,7 +61,7 @@ export function HorizontalProductRow({
               {item.name}
             </Text>
             <Text style={[styles.cardPrice, { fontFamily: fontFamily.semiBold }]}>
-              {item.price} {item.currencyCode}
+              {item.price.toLocaleString()} {item.currencyCode}
             </Text>
           </Pressable>
         )}

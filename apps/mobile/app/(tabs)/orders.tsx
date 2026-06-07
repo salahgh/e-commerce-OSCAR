@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { EmptyState, ErrorState, LoadingSpinner, Badge } from '../../src/components/ui';
 import { useGetMyOrdersQuery } from '../../src/graphql/generated/graphql';
@@ -16,24 +17,26 @@ import {
 import { formatPrice } from '../../src/utils/vendureAdapters';
 import { useAppFont } from '../../src/hooks/useAppFont';
 
-// Map Vendure order states to display info (palette-aware so colors theme correctly)
-function getOrderStateInfo(state: string, colors: ColorPalette) {
+// Map Vendure order states to display info (palette-aware so colors theme correctly).
+// Labels resolve through i18n at call time so they follow the active language.
+function getOrderStateInfo(state: string, colors: ColorPalette, t: TFunction) {
+  const label = (s: string, fallback: string) => t(`orders.states.${s}`, fallback) as string;
   const orderStateMap: Record<string, { label: string; color: string; icon: string }> = {
-    AddingItems: { label: 'Draft', color: colors.text.tertiary, icon: 'cart-outline' },
-    ArrangingPayment: { label: 'Awaiting Payment', color: colors.warning, icon: 'time-outline' },
-    PaymentAuthorized: { label: 'Payment Authorized', color: colors.info, icon: 'card-outline' },
-    PaymentSettled: { label: 'Paid', color: colors.success, icon: 'checkmark-circle-outline' },
-    PartiallyShipped: { label: 'Partially Shipped', color: colors.info, icon: 'cube-outline' },
-    Shipped: { label: 'Shipped', color: colors.info, icon: 'airplane-outline' },
-    PartiallyDelivered: { label: 'Partially Delivered', color: colors.info, icon: 'cube-outline' },
-    Delivered: { label: 'Delivered', color: colors.success, icon: 'checkmark-done-outline' },
-    Modifying: { label: 'Modifying', color: colors.warning, icon: 'create-outline' },
+    AddingItems: { label: label('AddingItems', 'Draft'), color: colors.text.tertiary, icon: 'cart-outline' },
+    ArrangingPayment: { label: label('ArrangingPayment', 'Awaiting Payment'), color: colors.warning, icon: 'time-outline' },
+    PaymentAuthorized: { label: label('PaymentAuthorized', 'Payment Authorized'), color: colors.info, icon: 'card-outline' },
+    PaymentSettled: { label: label('PaymentSettled', 'Paid'), color: colors.success, icon: 'checkmark-circle-outline' },
+    PartiallyShipped: { label: label('PartiallyShipped', 'Partially Shipped'), color: colors.info, icon: 'cube-outline' },
+    Shipped: { label: label('Shipped', 'Shipped'), color: colors.info, icon: 'airplane-outline' },
+    PartiallyDelivered: { label: label('PartiallyDelivered', 'Partially Delivered'), color: colors.info, icon: 'cube-outline' },
+    Delivered: { label: label('Delivered', 'Delivered'), color: colors.success, icon: 'checkmark-done-outline' },
+    Modifying: { label: label('Modifying', 'Modifying'), color: colors.warning, icon: 'create-outline' },
     ArrangingAdditionalPayment: {
-      label: 'Additional Payment Required',
+      label: label('ArrangingAdditionalPayment', 'Additional Payment Required'),
       color: colors.warning,
       icon: 'card-outline',
     },
-    Cancelled: { label: 'Cancelled', color: colors.error, icon: 'close-circle-outline' },
+    Cancelled: { label: label('Cancelled', 'Cancelled'), color: colors.error, icon: 'close-circle-outline' },
   };
   return (
     orderStateMap[state] || {
@@ -86,7 +89,7 @@ function OrderItem({ order, onPress }: OrderItemProps) {
   const colors = useThemeColors();
   const styles = useStyles();
   const { fontFamily } = useAppFont();
-  const stateInfo = getOrderStateInfo(order.state, colors);
+  const stateInfo = getOrderStateInfo(order.state, colors, t);
 
   // Get first product image
   const firstLine = order.lines[0];
@@ -123,7 +126,7 @@ function OrderItem({ order, onPress }: OrderItemProps) {
             {t('orders.total', 'Total')}:
           </Text>
           <Text style={[styles.orderTotalValue, { fontFamily: fontFamily.bold }]}>
-            {formatPrice(order.totalWithTax)} DZD
+            {formatPrice(order.totalWithTax).toLocaleString()} DZD
           </Text>
         </View>
       </View>

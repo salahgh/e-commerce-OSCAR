@@ -1,37 +1,46 @@
 import * as Yup from 'yup';
+import i18n from '../i18n';
+
+// Resolve a validation message through i18n at *validation time* (not schema-build time),
+// so messages follow the active language and react to language changes. Yup accepts a
+// function for every message slot and calls it lazily when an error is produced.
+const tr = (key: string, opts?: Record<string, unknown>): string => i18n.t(key, opts) as string;
 
 // Common validation rules
 export const validationRules = {
   email: Yup.string()
-    .email('Invalid email address')
-    .required('Email is required')
+    .email(() => tr('validation.emailInvalid'))
+    .required(() => tr('validation.emailRequired'))
     .trim()
     .lowercase(),
 
   password: Yup.string()
-    .min(6, 'Password must be at least 6 characters')
-    .required('Password is required'),
+    .min(6, ({ min }) => tr('validation.passwordMin', { n: min }))
+    .required(() => tr('validation.passwordRequired')),
 
   confirmPassword: (fieldName: string = 'password') =>
     Yup.string()
-      .oneOf([Yup.ref(fieldName)], 'Passwords must match')
-      .required('Please confirm your password'),
+      .oneOf([Yup.ref(fieldName)], () => tr('validation.confirmPasswordMatch'))
+      .required(() => tr('validation.confirmPasswordRequired')),
 
   firstName: Yup.string()
-    .min(2, 'First name must be at least 2 characters')
-    .required('First name is required')
+    .min(2, ({ min }) => tr('validation.firstNameMin', { n: min }))
+    .required(() => tr('validation.firstNameRequired'))
     .trim(),
 
   lastName: Yup.string()
-    .min(2, 'Last name must be at least 2 characters')
-    .required('Last name is required')
+    .min(2, ({ min }) => tr('validation.lastNameMin', { n: min }))
+    .required(() => tr('validation.lastNameRequired'))
     .trim(),
 
   phone: Yup.string()
-    .matches(/^[0-9]{10}$/, 'Phone number must be 10 digits')
-    .required('Phone number is required'),
+    .matches(/^[0-9]{10}$/, () => tr('validation.phoneDigits'))
+    .required(() => tr('validation.phoneRequired')),
 
-  required: (fieldName: string) => Yup.string().required(`${fieldName} is required`).trim(),
+  required: (fieldName: string) =>
+    Yup.string()
+      .required(() => tr('validation.fieldRequired', { field: fieldName }))
+      .trim(),
 };
 
 // Login Schema
@@ -62,7 +71,7 @@ export const resetPasswordSchema = Yup.object().shape({
 
 // Change Password Schema
 export const changePasswordSchema = Yup.object().shape({
-  currentPassword: Yup.string().required('Current password is required'),
+  currentPassword: Yup.string().required(() => tr('validation.currentPasswordRequired')),
   newPassword: validationRules.password,
   confirmPassword: validationRules.confirmPassword('newPassword'),
 });
@@ -79,25 +88,32 @@ export const updateProfileSchema = Yup.object().shape({
 export const makeShippingAddressSchema = (includeEmail: boolean) =>
   Yup.object().shape({
     fullName: Yup.string()
-      .min(3, 'Full name must be at least 3 characters')
-      .required('Full name is required')
+      .min(3, ({ min }) => tr('validation.fullNameMin', { n: min }))
+      .required(() => tr('validation.fullNameRequired'))
       .trim(),
     phoneNumber: validationRules.phone,
     address: Yup.string()
-      .min(10, 'Address must be at least 10 characters')
-      .required('Address is required')
+      .min(10, ({ min }) => tr('validation.addressMin', { n: min }))
+      .required(() => tr('validation.addressRequired'))
       .trim(),
     city: Yup.string()
-      .min(2, 'City must be at least 2 characters')
-      .required('City is required')
+      .min(2, ({ min }) => tr('validation.cityMin', { n: min }))
+      .required(() => tr('validation.cityRequired'))
       .trim(),
-    wilayaCode: Yup.string().required('Wilaya is required'),
+    wilayaCode: Yup.string().required(() => tr('validation.wilayaRequired')),
     postalCode: Yup.string()
-      .matches(/^[0-9]{5}$/, 'Postal code must be 5 digits')
-      .required('Postal code is required'),
-    notes: Yup.string().max(500, 'Notes must be less than 500 characters').optional(),
+      .matches(/^[0-9]{5}$/, () => tr('validation.postalCodeDigits'))
+      .required(() => tr('validation.postalCodeRequired')),
+    notes: Yup.string()
+      .max(500, ({ max }) => tr('validation.notesMax', { n: max }))
+      .optional(),
     ...(includeEmail
-      ? { email: Yup.string().email('Invalid email address').required('Email is required').trim() }
+      ? {
+          email: Yup.string()
+            .email(() => tr('validation.emailInvalid'))
+            .required(() => tr('validation.emailRequired'))
+            .trim(),
+        }
       : {}),
   });
 
@@ -106,12 +122,23 @@ export const shippingAddressSchema = makeShippingAddressSchema(false);
 
 // Address-book form schema (profile/addresses)
 export const addressFormSchema = Yup.object().shape({
-  fullName: Yup.string().min(3, 'Full name must be at least 3 characters').required('Full name is required').trim(),
+  fullName: Yup.string()
+    .min(3, ({ min }) => tr('validation.fullNameMin', { n: min }))
+    .required(() => tr('validation.fullNameRequired'))
+    .trim(),
   phoneNumber: validationRules.phone,
-  streetLine1: Yup.string().min(5, 'Address must be at least 5 characters').required('Address is required').trim(),
+  streetLine1: Yup.string()
+    .min(5, ({ min }) => tr('validation.addressMin', { n: min }))
+    .required(() => tr('validation.addressRequired'))
+    .trim(),
   streetLine2: Yup.string().optional(),
-  city: Yup.string().min(2, 'City must be at least 2 characters').required('City is required').trim(),
-  wilayaCode: Yup.string().required('Wilaya is required'),
-  postalCode: Yup.string().matches(/^[0-9]{5}$/, 'Postal code must be 5 digits').required('Postal code is required'),
+  city: Yup.string()
+    .min(2, ({ min }) => tr('validation.cityMin', { n: min }))
+    .required(() => tr('validation.cityRequired'))
+    .trim(),
+  wilayaCode: Yup.string().required(() => tr('validation.wilayaRequired')),
+  postalCode: Yup.string()
+    .matches(/^[0-9]{5}$/, () => tr('validation.postalCodeDigits'))
+    .required(() => tr('validation.postalCodeRequired')),
   defaultShippingAddress: Yup.boolean(),
 });

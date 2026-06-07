@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } fr
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { Button, Divider, LoadingSpinner, ErrorState, Badge } from '../../src/components/ui';
 import { useGetOrderByCodeQuery } from '../../src/graphql/generated/graphql';
 import {
@@ -18,24 +19,26 @@ import { useToast } from '../../src/components/ui';
 import { summarizeReorder } from '../../src/utils/reorder';
 import { useAppFont } from '../../src/hooks/useAppFont';
 
-// Map Vendure order states to display info (palette-aware so colors theme correctly)
-function getOrderStateInfo(state: string, colors: ColorPalette) {
+// Map Vendure order states to display info (palette-aware so colors theme correctly).
+// Labels resolve through i18n at call time so they follow the active language.
+function getOrderStateInfo(state: string, colors: ColorPalette, t: TFunction) {
+  const label = (s: string, fallback: string) => t(`orders.states.${s}`, fallback) as string;
   const orderStateMap: Record<string, { label: string; color: string; icon: string }> = {
-    AddingItems: { label: 'Draft', color: colors.text.tertiary, icon: 'cart-outline' },
-    ArrangingPayment: { label: 'Awaiting Payment', color: colors.warning, icon: 'time-outline' },
-    PaymentAuthorized: { label: 'Payment Authorized', color: colors.info, icon: 'card-outline' },
-    PaymentSettled: { label: 'Paid', color: colors.success, icon: 'checkmark-circle-outline' },
-    PartiallyShipped: { label: 'Partially Shipped', color: colors.info, icon: 'cube-outline' },
-    Shipped: { label: 'Shipped', color: colors.info, icon: 'airplane-outline' },
-    PartiallyDelivered: { label: 'Partially Delivered', color: colors.info, icon: 'cube-outline' },
-    Delivered: { label: 'Delivered', color: colors.success, icon: 'checkmark-done-outline' },
-    Modifying: { label: 'Modifying', color: colors.warning, icon: 'create-outline' },
+    AddingItems: { label: label('AddingItems', 'Draft'), color: colors.text.tertiary, icon: 'cart-outline' },
+    ArrangingPayment: { label: label('ArrangingPayment', 'Awaiting Payment'), color: colors.warning, icon: 'time-outline' },
+    PaymentAuthorized: { label: label('PaymentAuthorized', 'Payment Authorized'), color: colors.info, icon: 'card-outline' },
+    PaymentSettled: { label: label('PaymentSettled', 'Paid'), color: colors.success, icon: 'checkmark-circle-outline' },
+    PartiallyShipped: { label: label('PartiallyShipped', 'Partially Shipped'), color: colors.info, icon: 'cube-outline' },
+    Shipped: { label: label('Shipped', 'Shipped'), color: colors.info, icon: 'airplane-outline' },
+    PartiallyDelivered: { label: label('PartiallyDelivered', 'Partially Delivered'), color: colors.info, icon: 'cube-outline' },
+    Delivered: { label: label('Delivered', 'Delivered'), color: colors.success, icon: 'checkmark-done-outline' },
+    Modifying: { label: label('Modifying', 'Modifying'), color: colors.warning, icon: 'create-outline' },
     ArrangingAdditionalPayment: {
-      label: 'Additional Payment Required',
+      label: label('ArrangingAdditionalPayment', 'Additional Payment Required'),
       color: colors.warning,
       icon: 'card-outline',
     },
-    Cancelled: { label: 'Cancelled', color: colors.error, icon: 'close-circle-outline' },
+    Cancelled: { label: label('Cancelled', 'Cancelled'), color: colors.error, icon: 'close-circle-outline' },
   };
   return (
     orderStateMap[state] || {
@@ -150,7 +153,7 @@ export default function OrderDetailScreen() {
     );
   }
 
-  const stateInfo = getOrderStateInfo(order.state, colors);
+  const stateInfo = getOrderStateInfo(order.state, colors, t);
   const shippingCost = order.shippingWithTax || 0;
   const subTotal = order.subTotalWithTax || 0;
   const totalAmount = order.totalWithTax || 0;
@@ -320,15 +323,15 @@ export default function OrderDetailScreen() {
                       )}
                     <View style={styles.itemPriceRow}>
                       <Text style={[styles.itemQuantity, { fontFamily: fontFamily.regular }]}>
-                        Qty: {line.quantity}
+                        {t('orders.qty', 'Qty')}: {line.quantity}
                       </Text>
                       <Text style={[styles.itemPrice, { fontFamily: fontFamily.medium }]}>
-                        {formatPrice(line.unitPriceWithTax)} DZD
+                        {formatPrice(line.unitPriceWithTax).toLocaleString()} DZD
                       </Text>
                     </View>
                   </View>
                   <Text style={[styles.itemSubtotal, { fontFamily: fontFamily.semiBold }]}>
-                    {formatPrice(line.linePriceWithTax)} DZD
+                    {formatPrice(line.linePriceWithTax).toLocaleString()} DZD
                   </Text>
                 </View>
               );
@@ -347,7 +350,7 @@ export default function OrderDetailScreen() {
                 {t('orders.subtotal', 'Subtotal')}
               </Text>
               <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
-                {formatPrice(subTotal)} DZD
+                {formatPrice(subTotal).toLocaleString()} DZD
               </Text>
             </View>
             <View style={styles.summaryRow}>
@@ -355,7 +358,7 @@ export default function OrderDetailScreen() {
                 {t('orders.shipping', 'Shipping')}
               </Text>
               <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
-                {shippingCost > 0 ? `${formatPrice(shippingCost)} DZD` : t('orders.free', 'Free')}
+                {shippingCost > 0 ? `${formatPrice(shippingCost).toLocaleString()} DZD` : t('orders.free', 'Free')}
               </Text>
             </View>
             <Divider style={styles.divider} />
@@ -364,7 +367,7 @@ export default function OrderDetailScreen() {
                 {t('orders.total', 'Total')}
               </Text>
               <Text style={[styles.totalValue, { fontFamily: fontFamily.bold }]}>
-                {formatPrice(totalAmount)} DZD
+                {formatPrice(totalAmount).toLocaleString()} DZD
               </Text>
             </View>
           </View>

@@ -29,7 +29,8 @@
     "errorEyebrow": "حدث خطأ ما",
     "errorBoundaryTitle": "خطأ غير متوقع",
     "errorBoundaryMessage": "واجه التطبيق مشكلة. يمكنك إعادة المحاولة أو العودة إلى الرئيسية.",
-    "goHome": "الرئيسية"
+    "goHome": "الرئيسية",
+    "clearAll": "مسح الكل"
   },
   "address": {
     "title": "عناويني",
@@ -162,7 +163,8 @@
       "popular": "الأكثر شعبية",
       "priceAsc": "السعر: من الأقل للأعلى",
       "priceDesc": "السعر: من الأعلى للأقل"
-    }
+    },
+    "selectOption": "اختر {{option}}"
   },
   "cart": {
     "title": "السلة",
@@ -227,7 +229,28 @@
     "shipping": "الشحن",
     "addressError": "خطأ في حفظ العنوان",
     "shippingMethodError": "خطأ في اختيار طريقة التوصيل",
-    "orderError": "خطأ في تقديم الطلب"
+    "orderError": "خطأ في تقديم الطلب",
+    "fullName": "الاسم الكامل",
+    "fullNamePlaceholder": "مثال: محمد أمين",
+    "phoneNumber": "رقم الهاتف",
+    "address": "العنوان",
+    "addressPlaceholder": "الشارع، رقم الشقة",
+    "city": "المدينة",
+    "cityPlaceholder": "الجزائر",
+    "postalCode": "الرمز البريدي",
+    "notes": "ملاحظات التوصيل",
+    "notesPlaceholder": "تعليمات التوصيل (اختياري)",
+    "continue": "متابعة",
+    "shippingAddressSubtitle": "أين يجب أن نوصل طلبك؟",
+    "orderSummary": "ملخص الطلب",
+    "subtotal": "المجموع الفرعي",
+    "total": "الإجمالي",
+    "qty": "الكمية",
+    "size": "المقاس",
+    "color": "اللون",
+    "orderPlacedMessage": "شكرًا لطلبك. سنرسل لك بريدًا إلكترونيًا للتأكيد قريبًا.",
+    "trackingInfo": "يمكنك تتبع حالة طلبك في قسم «طلباتي» من ملفك الشخصي.",
+    "goHome": "الذهاب إلى الرئيسية"
   },
   "info": {
     "indexTitle": "المساعدة والمعلومات",
@@ -378,7 +401,11 @@
     "messageSent": "تم إرسال الرسالة",
     "messageSentConfirm": "سنرد عليك في أقرب وقت ممكن.",
     "cannotSend": "تعذر إرسال الرسالة",
-    "messagePlaceholder": "اكتب رسالتك هنا"
+    "messagePlaceholder": "اكتب رسالتك هنا",
+    "languageDesc": "اختر لغتك المفضلة",
+    "orderUpdates": "تحديثات الطلبات",
+    "promotions": "العروض والتخفيضات",
+    "newsletter": "النشرة الإخبارية"
   },
   "orders": {
     "title": "طلباتي",
@@ -403,6 +430,32 @@
       "shipped": "تم الشحن",
       "delivered": "تم التوصيل",
       "cancelled": "ملغى"
+    },
+    "itemCount": "{{count}} منتج",
+    "orderCount": "{{count}} طلب",
+    "lastUpdated": "آخر تحديث",
+    "shippingInformation": "معلومات التوصيل",
+    "trackingNumber": "التتبع",
+    "paymentInformation": "معلومات الدفع",
+    "paidOn": "تم الدفع في",
+    "orderItems": "عناصر الطلب",
+    "orderSummary": "ملخص الطلب",
+    "subtotal": "المجموع الفرعي",
+    "shipping": "التوصيل",
+    "free": "مجاني",
+    "qty": "الكمية",
+    "states": {
+      "AddingItems": "مسودة",
+      "ArrangingPayment": "بانتظار الدفع",
+      "PaymentAuthorized": "تم تفويض الدفع",
+      "PaymentSettled": "مدفوعة",
+      "PartiallyShipped": "مشحونة جزئيًا",
+      "Shipped": "تم الشحن",
+      "PartiallyDelivered": "مُسلّمة جزئيًا",
+      "Delivered": "تم التسليم",
+      "Modifying": "قيد التعديل",
+      "ArrangingAdditionalPayment": "مطلوب دفع إضافي",
+      "Cancelled": "ملغاة"
     }
   },
   "errors": {
@@ -442,5 +495,41 @@
     "priceRange": "السعر (دج)",
     "from": "من",
     "to": "إلى"
+  },
+  "validation": {
+    "emailInvalid": "عنوان بريد إلكتروني غير صالح",
+    "emailRequired": "البريد الإلكتروني مطلوب",
+    "passwordMin": "يجب أن تتكون كلمة المرور من {{n}} أحرف على الأقل",
+    "passwordRequired": "كلمة المرور مطلوبة",
+    "confirmPasswordMatch": "كلمتا المرور غير متطابقتين",
+    "confirmPasswordRequired": "يرجى تأكيد كلمة المرور",
+    "firstNameMin": "يجب أن يتكون الاسم الأول من {{n}} أحرف على الأقل",
+    "firstNameRequired": "الاسم الأول مطلوب",
+    "lastNameMin": "يجب أن يتكون اسم العائلة من {{n}} أحرف على الأقل",
+    "lastNameRequired": "اسم العائلة مطلوب",
+    "phoneDigits": "يجب أن يتكون رقم الهاتف من 10 أرقام",
+    "phoneRequired": "رقم الهاتف مطلوب",
+    "fieldRequired": "{{field}} مطلوب",
+    "currentPasswordRequired": "كلمة المرور الحالية مطلوبة",
+    "fullNameMin": "يجب أن يتكون الاسم الكامل من {{n}} أحرف على الأقل",
+    "fullNameRequired": "الاسم الكامل مطلوب",
+    "addressMin": "يجب أن يتكون العنوان من {{n}} أحرف على الأقل",
+    "addressRequired": "العنوان مطلوب",
+    "cityMin": "يجب أن تتكون المدينة من {{n}} أحرف على الأقل",
+    "cityRequired": "المدينة مطلوبة",
+    "wilayaRequired": "الولاية مطلوبة",
+    "postalCodeDigits": "يجب أن يتكون الرمز البريدي من 5 أرقام",
+    "postalCodeRequired": "الرمز البريدي مطلوب",
+    "notesMax": "يجب أن تحتوي الملاحظات على أقل من {{n}} حرف"
+  },
+  "search": {
+    "recentSearches": "عمليات البحث الأخيرة",
+    "popularSearches": "عمليات البحث الشائعة",
+    "searching": "جارٍ البحث...",
+    "noResults": "لا توجد نتائج",
+    "noResultsMessage": "لم يتم العثور على منتجات لـ « {{query}} ». جرّب مصطلحًا آخر.",
+    "results": "نتائج",
+    "resultsFor": "{{count}} نتيجة لـ « {{query}} »",
+    "placeholder": "ابحث عن المنتجات..."
   }
 }

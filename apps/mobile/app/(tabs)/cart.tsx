@@ -67,7 +67,7 @@ export default function CartScreen() {
     setPromoError(null);
     try {
       const { data } = await applyCoupon({
-        variables: { couponCode: promoCode.trim() },
+        variables: { couponCode: promoCode.trim().toUpperCase() },
         refetchQueries: ['GetActiveOrder'],
       });
       if (data?.applyCouponCode && 'errorCode' in data.applyCouponCode) {
@@ -148,11 +148,11 @@ export default function CartScreen() {
             {/* Strikethrough original price if discount exists */}
             {discount > 0 && (
               <Text style={[styles.originalPrice, { fontFamily: fontFamily.regular }]}>
-                {item.unitPrice} DZD
+                {item.unitPrice.toLocaleString()} DZD
               </Text>
             )}
             <Text style={[styles.salePrice, { fontFamily: fontFamily.bold }]}>
-              {item.unitPrice} DZD
+              {item.unitPrice.toLocaleString()} DZD
             </Text>
           </View>
 
@@ -241,7 +241,7 @@ export default function CartScreen() {
             {t('cart.total')}:
           </Text>
           <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
-            {subTotal} DZD
+            {subTotal.toLocaleString()} DZD
           </Text>
         </View>
         <View style={styles.summaryRow}>
@@ -249,14 +249,14 @@ export default function CartScreen() {
             {t('cart.reduction')}:
           </Text>
           <Text style={[styles.reductionValue, { fontFamily: fontFamily.regular }]}>
-            {discount > 0 ? `-${discount} DZD` : '--'}
+            {discount > 0 ? `-${discount.toLocaleString()} DZD` : '--'}
           </Text>
         </View>
         <View style={[styles.summaryRow, styles.totalAfterRow]}>
           <Text style={[styles.totalLabel, { fontFamily: fontFamily.bold }]}>
             {t('cart.totalAfterDiscount')}:
           </Text>
-          <Text style={[styles.totalValue, { fontFamily: fontFamily.bold }]}>{total} DZD</Text>
+          <Text style={[styles.totalValue, { fontFamily: fontFamily.bold }]}>{total.toLocaleString()} DZD</Text>
         </View>
 
         {/* Checkout Button */}

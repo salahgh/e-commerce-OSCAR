@@ -157,9 +157,9 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
           {items.map((item) => (
             <View key={item.id} style={styles.item}>
               <View style={styles.itemImageContainer}>
-                {item.productImage ? (
+                {item.productImage || item.imageUrl ? (
                   <Image
-                    source={{ uri: item.productImage }}
+                    source={{ uri: (item.productImage || item.imageUrl) as string }}
                     style={styles.itemImage}
                     resizeMode="cover"
                   />
@@ -178,27 +178,33 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
                   {item.productName}
                 </Text>
 
-                {(item.selectedSize || item.selectedColor) && (
+                {item.variantName ? (
                   <View style={styles.itemAttributes}>
-                    {item.selectedSize && (
-                      <Text style={[styles.itemAttribute, { fontFamily: fontFamily.regular }]}>
-                        Size: {item.selectedSize}
-                      </Text>
-                    )}
-                    {item.selectedColor && (
-                      <Text style={[styles.itemAttribute, { fontFamily: fontFamily.regular }]}>
-                        Color: {item.selectedColor}
-                      </Text>
-                    )}
+                    <Text style={[styles.itemAttribute, { fontFamily: fontFamily.regular }]}>
+                      {item.variantName}
+                    </Text>
                   </View>
-                )}
+                ) : item.selectedSize || item.selectedColor ? (
+                  <View style={styles.itemAttributes}>
+                    {item.selectedSize ? (
+                      <Text style={[styles.itemAttribute, { fontFamily: fontFamily.regular }]}>
+                        {t('checkout.size', 'Size')}: {item.selectedSize}
+                      </Text>
+                    ) : null}
+                    {item.selectedColor ? (
+                      <Text style={[styles.itemAttribute, { fontFamily: fontFamily.regular }]}>
+                        {t('checkout.color', 'Color')}: {item.selectedColor}
+                      </Text>
+                    ) : null}
+                  </View>
+                ) : null}
 
                 <View style={styles.itemPriceRow}>
                   <Text style={[styles.itemQuantity, { fontFamily: fontFamily.regular }]}>
-                    Qty: {item.quantity}
+                    {t('checkout.qty', 'Qty')}: {item.quantity}
                   </Text>
                   <Text style={[styles.itemPrice, { fontFamily: fontFamily.semiBold }]}>
-                    {item.subtotal?.toFixed(2)} DZD
+                    {(item.subtotal ?? item.linePrice ?? 0).toLocaleString()} DZD
                   </Text>
                 </View>
               </View>
@@ -224,7 +230,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
             {t('checkout.subtotal', 'Subtotal')}
           </Text>
           <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
-            {subtotal.toFixed(2)} DZD
+            {subtotal.toLocaleString()} DZD
           </Text>
         </View>
 
@@ -233,7 +239,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
             {t('checkout.shipping', 'Shipping')}
           </Text>
           <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
-            {shippingCost > 0 ? `${shippingCost.toFixed(2)} DZD` : t('checkout.free', 'Free')}
+            {shippingCost > 0 ? `${shippingCost.toLocaleString()} DZD` : t('checkout.free', 'Free')}
           </Text>
         </View>
 
@@ -244,7 +250,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
             {t('checkout.total', 'Total')}
           </Text>
           <Text style={[styles.totalValue, { fontFamily: fontFamily.bold }]}>
-            {total.toFixed(2)} DZD
+            {total.toLocaleString()} DZD
           </Text>
         </View>
       </View>

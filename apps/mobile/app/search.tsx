@@ -294,10 +294,10 @@ export default function SearchScreen() {
         <EmptyState
           icon="search-outline"
           title={t('search.noResults', 'No results found')}
-          message={t(
-            'search.noResultsMessage',
-            `No products found for "${debouncedQuery}". Try a different search term.`
-          )}
+          message={t('search.noResultsMessage', {
+            query: debouncedQuery,
+            defaultValue: `No products found for "${debouncedQuery}". Try a different search term.`,
+          })}
         />
       );
     }
@@ -307,7 +307,11 @@ export default function SearchScreen() {
         {/* Results Header */}
         <View style={styles.resultsHeader}>
           <Text style={styles.resultsCount}>
-            {searchResults.length} {t('search.results', 'results')} for &quot;{debouncedQuery}&quot;
+            {t('search.resultsFor', {
+              count: searchResults.length,
+              query: debouncedQuery,
+              defaultValue: `${searchResults.length} results for "${debouncedQuery}"`,
+            })}
           </Text>
           <TouchableOpacity onPress={handleViewAllResults}>
             <Text style={styles.viewAllText}>{t('common.viewAll', 'View All')}</Text>

@@ -29,7 +29,8 @@
     "errorEyebrow": "Une erreur est survenue",
     "errorBoundaryTitle": "Erreur inattendue",
     "errorBoundaryMessage": "L'application a rencontré un problème. Vous pouvez réessayer ou revenir à l'accueil.",
-    "goHome": "Accueil"
+    "goHome": "Accueil",
+    "clearAll": "Tout effacer"
   },
   "address": {
     "title": "Mes adresses",
@@ -132,7 +133,7 @@
   },
   "explore": {
     "searchPlaceholder": "Rechercher dans Oscar",
-    "allItems": "Tout les articles",
+    "allItems": "Tous les articles",
     "noSubcategories": "Aucune sous-catégorie"
   },
   "a11y": {
@@ -162,7 +163,8 @@
       "popular": "Populaire",
       "priceAsc": "Prix croissant",
       "priceDesc": "Prix décroissant"
-    }
+    },
+    "selectOption": "Sélectionner {{option}}"
   },
   "cart": {
     "title": "Panier",
@@ -227,7 +229,28 @@
     "shipping": "Expédition",
     "addressError": "Erreur lors de l'enregistrement de l'adresse",
     "shippingMethodError": "Erreur lors du choix de la livraison",
-    "orderError": "Erreur lors de la commande"
+    "orderError": "Erreur lors de la commande",
+    "fullName": "Nom complet",
+    "fullNamePlaceholder": "Ex. : Mohamed Amine",
+    "phoneNumber": "Numéro de téléphone",
+    "address": "Adresse",
+    "addressPlaceholder": "Rue, numéro d'appartement",
+    "city": "Ville",
+    "cityPlaceholder": "Alger",
+    "postalCode": "Code postal",
+    "notes": "Notes de livraison",
+    "notesPlaceholder": "Instructions de livraison (facultatif)",
+    "continue": "Continuer",
+    "shippingAddressSubtitle": "Où devons-nous livrer votre commande ?",
+    "orderSummary": "Récapitulatif de la commande",
+    "subtotal": "Sous-total",
+    "total": "Total",
+    "qty": "Qté",
+    "size": "Taille",
+    "color": "Couleur",
+    "orderPlacedMessage": "Merci pour votre commande. Nous vous enverrons un e-mail de confirmation sous peu.",
+    "trackingInfo": "Vous pouvez suivre l'état de votre commande dans la section « Mes commandes » de votre profil.",
+    "goHome": "Aller à l'accueil"
   },
   "info": {
     "indexTitle": "Aide & infos",
@@ -378,7 +401,11 @@
     "messageSent": "Message envoyé",
     "messageSentConfirm": "Nous vous répondrons dans les plus brefs délais.",
     "cannotSend": "Impossible d'envoyer le message",
-    "messagePlaceholder": "Écrivez vos messages ici"
+    "messagePlaceholder": "Écrivez vos messages ici",
+    "languageDesc": "Choisissez votre langue préférée",
+    "orderUpdates": "Mises à jour des commandes",
+    "promotions": "Promotions et offres",
+    "newsletter": "Newsletter"
   },
   "orders": {
     "title": "Mes commandes",
@@ -403,6 +430,32 @@
       "shipped": "Expédiée",
       "delivered": "Livrée",
       "cancelled": "Annulée"
+    },
+    "itemCount": "{{count}} article(s)",
+    "orderCount": "{{count}} commande(s)",
+    "lastUpdated": "Dernière mise à jour",
+    "shippingInformation": "Informations de livraison",
+    "trackingNumber": "Suivi",
+    "paymentInformation": "Informations de paiement",
+    "paidOn": "Payé le",
+    "orderItems": "Articles",
+    "orderSummary": "Récapitulatif",
+    "subtotal": "Sous-total",
+    "shipping": "Livraison",
+    "free": "Gratuit",
+    "qty": "Qté",
+    "states": {
+      "AddingItems": "Brouillon",
+      "ArrangingPayment": "En attente de paiement",
+      "PaymentAuthorized": "Paiement autorisé",
+      "PaymentSettled": "Payée",
+      "PartiallyShipped": "Partiellement expédiée",
+      "Shipped": "Expédiée",
+      "PartiallyDelivered": "Partiellement livrée",
+      "Delivered": "Livrée",
+      "Modifying": "En modification",
+      "ArrangingAdditionalPayment": "Paiement supplémentaire requis",
+      "Cancelled": "Annulée"
     }
   },
   "errors": {
@@ -442,5 +495,41 @@
     "priceRange": "Prix (DZD)",
     "from": "A partir de",
     "to": "à"
+  },
+  "validation": {
+    "emailInvalid": "Adresse e-mail invalide",
+    "emailRequired": "L'e-mail est requis",
+    "passwordMin": "Le mot de passe doit contenir au moins {{n}} caractères",
+    "passwordRequired": "Le mot de passe est requis",
+    "confirmPasswordMatch": "Les mots de passe ne correspondent pas",
+    "confirmPasswordRequired": "Veuillez confirmer votre mot de passe",
+    "firstNameMin": "Le prénom doit contenir au moins {{n}} caractères",
+    "firstNameRequired": "Le prénom est requis",
+    "lastNameMin": "Le nom doit contenir au moins {{n}} caractères",
+    "lastNameRequired": "Le nom est requis",
+    "phoneDigits": "Le numéro de téléphone doit comporter 10 chiffres",
+    "phoneRequired": "Le numéro de téléphone est requis",
+    "fieldRequired": "{{field}} est requis",
+    "currentPasswordRequired": "Le mot de passe actuel est requis",
+    "fullNameMin": "Le nom complet doit contenir au moins {{n}} caractères",
+    "fullNameRequired": "Le nom complet est requis",
+    "addressMin": "L'adresse doit contenir au moins {{n}} caractères",
+    "addressRequired": "L'adresse est requise",
+    "cityMin": "La ville doit contenir au moins {{n}} caractères",
+    "cityRequired": "La ville est requise",
+    "wilayaRequired": "La wilaya est requise",
+    "postalCodeDigits": "Le code postal doit comporter 5 chiffres",
+    "postalCodeRequired": "Le code postal est requis",
+    "notesMax": "Les notes doivent contenir moins de {{n}} caractères"
+  },
+  "search": {
+    "recentSearches": "Recherches récentes",
+    "popularSearches": "Recherches populaires",
+    "searching": "Recherche en cours...",
+    "noResults": "Aucun résultat",
+    "noResultsMessage": "Aucun produit trouvé pour « {{query}} ». Essayez un autre terme.",
+    "results": "résultats",
+    "resultsFor": "{{count}} résultat(s) pour « {{query}} »",
+    "placeholder": "Rechercher des produits..."
   }
 }

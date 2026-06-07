@@ -409,11 +409,11 @@ export default function CheckoutScreen() {
                     <Text style={[styles.methodName, { fontFamily: fontFamily.semiBold }]}>
                       {method.name}
                     </Text>
-                    {method.description && (
+                    {method.description ? (
                       <Text style={[styles.methodDescription, { fontFamily: fontFamily.regular }]}>
                         {method.description}
                       </Text>
-                    )}
+                    ) : null}
                   </View>
                   <Text style={[styles.methodPrice, { fontFamily: fontFamily.bold }]}>
                     {method.priceWithTax === 0
@@ -480,16 +480,16 @@ export default function CheckoutScreen() {
                     >
                       {method.name}
                     </Text>
-                    {method.description && (
+                    {method.description ? (
                       <Text style={[styles.methodDescription, { fontFamily: fontFamily.regular }]}>
                         {method.description}
                       </Text>
-                    )}
-                    {!method.isEligible && method.eligibilityMessage && (
+                    ) : null}
+                    {!method.isEligible && method.eligibilityMessage ? (
                       <Text style={[styles.eligibilityMessage, { fontFamily: fontFamily.regular }]}>
                         {method.eligibilityMessage}
                       </Text>
-                    )}
+                    ) : null}
                   </View>
                 </TouchableOpacity>
               ))
