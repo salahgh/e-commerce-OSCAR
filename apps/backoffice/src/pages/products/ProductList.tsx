@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
-import { DeleteProductDocument, AdminSearchProductsDocument, ReindexDocument } from '../../graphql/generated/graphql';
+import { DeleteProductDocument, ReindexDocument } from '../../graphql/generated/graphql';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { formatDate } from '../../lib/utils';
 import { useUnifiedSearch, type SortByField } from '../../hooks/useUnifiedSearch';
@@ -64,7 +64,11 @@ export const ProductList: React.FC = () => {
 
   // Delete mutation
   const [deleteProduct, { loading: deleting }] = useMutation(DeleteProductDocument, {
-    refetchQueries: [{ query: AdminSearchProductsDocument }],
+    // Refetch by operation NAME so Apollo reuses the active query's current
+    // variables. Passing { query: Document } re-ran it with no $input (a required
+    // SearchInput!), which failed silently and left the deleted product in the list.
+    refetchQueries: ['AdminSearchProducts'],
+    awaitRefetchQueries: true,
   });
 
   // Reindex mutation
