@@ -11,11 +11,22 @@ import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import { RetryLink } from '@apollo/client/link/retry';
 
-function makeClient() {
-  const httpLink = new HttpLink({
-    uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8085/shop-api',
-    credentials: 'include',
-  });
+function makeClient(locale: string) {
+  const baseUri = process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8085/shop-api';
+
+  // Vendure resolves content translations (product/collection names, descriptions…)
+  // from the `languageCode` URL param — NOT the Accept-Language header. On the client the
+  // locale can change via SPA navigation, so resolve it per request from the URL; on the
+  // server use the locale passed down from the [locale] layout.
+  const resolveLocale = () => {
+    if (typeof window !== 'undefined') {
+      const seg = window.location.pathname.split('/')[1];
+      return seg === 'ar' || seg === 'en' ? seg : 'fr';
+    }
+    return locale;
+  };
+
+  const httpLink = new HttpLink({ uri: baseUri, credentials: 'include' });
 
   const authLink = setContext((_, { headers }) => {
     let token: string | null = null;
@@ -23,6 +34,7 @@ function makeClient() {
       token = localStorage.getItem('token');
     }
     return {
+      uri: `${baseUri}?languageCode=${resolveLocale()}`,
       headers: {
         ...headers,
         authorization: token ? `Bearer ${token}` : '',
@@ -109,6 +121,8 @@ function makeClient() {
   });
 }
 
-export function ApolloWrapper({ children }: React.PropsWithChildren) {
-  return <ApolloNextAppProvider makeClient={makeClient}>{children}</ApolloNextAppProvider>;
+export function ApolloWrapper({ children, locale }: React.PropsWithChildren<{ locale: string }>) {
+  return (
+    <ApolloNextAppProvider makeClient={() => makeClient(locale)}>{children}</ApolloNextAppProvider>
+  );
 }

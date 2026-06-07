@@ -33,7 +33,7 @@ export function LocaleSwitcher({ className }: { className?: string }) {
         className="inline-flex h-10 items-center gap-2 rounded px-3 text-14 font-medium text-content transition-colors hover:bg-bg-subtle"
       >
         <Globe className="h-4 w-4" />
-        <span>{localeNames[currentLocale]}</span>
+        <span className="hidden sm:inline">{localeNames[currentLocale]}</span>
         <ChevronDown className={cn('h-4 w-4 transition-transform', open && 'rotate-180')} />
       </button>
       {open && (

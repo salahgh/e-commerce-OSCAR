@@ -99,7 +99,7 @@ export default async function LocaleLayout({
       <body className="bg-bg-base text-content font-sans antialiased">
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-          <ApolloWrapper>
+          <ApolloWrapper locale={locale}>
             <NextIntlClientProvider locale={locale} messages={messages}>
               <ToastProvider>
                 <AuthProvider>

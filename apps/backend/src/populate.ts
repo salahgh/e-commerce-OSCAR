@@ -240,190 +240,301 @@ function generateProducts(): ProductDef[] {
   });
 
   // Men's Formal Shirts (6)
-  ['Classic White Dress Shirt', 'French Cuff Shirt', 'Spread Collar Shirt', 'Slim Fit Dress Shirt', 'Pinstripe Dress Shirt', 'Herringbone Shirt'].forEach((n, i) => {
+  [
+    { en: 'Classic White Dress Shirt', fr: 'Chemise Habillée Blanche Classique', ar: 'قميص أبيض كلاسيكي أنيق' },
+    { en: 'French Cuff Shirt', fr: 'Chemise à Poignets Mousquetaire', ar: 'قميص بأساور فرنسية' },
+    { en: 'Spread Collar Shirt', fr: 'Chemise à Col Italien', ar: 'قميص بياقة عريضة' },
+    { en: 'Slim Fit Dress Shirt', fr: 'Chemise Habillée Ajustée', ar: 'قميص أنيق ضيق' },
+    { en: 'Pinstripe Dress Shirt', fr: 'Chemise Habillée à Rayures', ar: 'قميص مخطط أنيق' },
+    { en: 'Herringbone Shirt', fr: 'Chemise à Chevrons', ar: 'قميص بنقشة عظم السمك' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `men-formal-shirt-${i + 1}`,
-      description: `Elegant ${n.toLowerCase()} for business.`, descriptionFr: `${n} élégante.`, descriptionAr: `${n} أنيق.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `men-formal-shirt-${i + 1}`,
+      description: `Elegant ${n.en.toLowerCase()} for business.`, descriptionFr: `${n.fr} élégante pour le travail.`, descriptionAr: `${n.ar} أنيق للعمل.`,
       basePrice: 450000 + (i * 30000), category: 'men-formal-shirts',
       sizes: ['S', 'M', 'L', 'XL'], colors: ['White', 'Blue', 'Gray'], isFeatured: i === 0, weightKg: 0.30,
     });
   });
 
   // Men's Polo Shirts (6)
-  ['Classic Piqué Polo', 'Performance Polo', 'Long Sleeve Polo', 'Slim Fit Polo', 'Striped Polo', 'Contrast Collar Polo'].forEach((n, i) => {
+  [
+    { en: 'Classic Piqué Polo', fr: 'Polo Piqué Classique', ar: 'بولو بيكيه كلاسيكي' },
+    { en: 'Performance Polo', fr: 'Polo Performance', ar: 'بولو رياضي' },
+    { en: 'Long Sleeve Polo', fr: 'Polo à Manches Longues', ar: 'بولو بأكمام طويلة' },
+    { en: 'Slim Fit Polo', fr: 'Polo Ajusté', ar: 'بولو ضيق' },
+    { en: 'Striped Polo', fr: 'Polo Rayé', ar: 'بولو مخطط' },
+    { en: 'Contrast Collar Polo', fr: 'Polo à Col Contrasté', ar: 'بولو بياقة مغايرة' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `men-polo-${i + 1}`,
-      description: `Comfortable ${n.toLowerCase()}.`, descriptionFr: `${n} confortable.`, descriptionAr: `${n} مريح.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `men-polo-${i + 1}`,
+      description: `Comfortable ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} confortable.`, descriptionAr: `${n.ar} مريح.`,
       basePrice: 280000 + (i * 20000), category: 'men-polo-shirts',
       sizes: ['S', 'M', 'L', 'XL', '2XL'], colors: ['Navy', 'White', 'Black', 'Red'], isFeatured: i < 2, weightKg: 0.28,
     });
   });
 
   // Men's Jeans (6)
-  ['Slim Fit Jeans', 'Straight Fit Jeans', 'Relaxed Fit Jeans', 'Stretch Denim Jeans', 'Dark Wash Jeans', 'Distressed Jeans'].forEach((n, i) => {
+  [
+    { en: 'Slim Fit Jeans', fr: 'Jean Coupe Ajustée', ar: 'جينز ضيق' },
+    { en: 'Straight Fit Jeans', fr: 'Jean Coupe Droite', ar: 'جينز مستقيم' },
+    { en: 'Relaxed Fit Jeans', fr: 'Jean Coupe Décontractée', ar: 'جينز واسع' },
+    { en: 'Stretch Denim Jeans', fr: 'Jean Denim Extensible', ar: 'جينز مطاطي' },
+    { en: 'Dark Wash Jeans', fr: 'Jean Délavé Foncé', ar: 'جينز داكن' },
+    { en: 'Distressed Jeans', fr: 'Jean Déchiré', ar: 'جينز ممزق' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `men-jeans-${i + 1}`,
-      description: `Premium denim ${n.toLowerCase()}.`, descriptionFr: `${n} en denim premium.`, descriptionAr: `${n} من الدنيم الفاخر.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `men-jeans-${i + 1}`,
+      description: `Premium denim ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} en denim premium.`, descriptionAr: `${n.ar} من الدنيم الفاخر.`,
       basePrice: 420000 + (i * 25000), category: 'men-jeans',
       sizes: ['S', 'M', 'L', 'XL', '2XL'], colors: ['Blue', 'Black', 'Gray'], isFeatured: i === 0, weightKg: 0.65,
     });
   });
 
   // Men's Chinos (4)
-  ['Classic Chinos', 'Slim Chinos', 'Stretch Chinos', 'Pleated Chinos'].forEach((n, i) => {
+  [
+    { en: 'Classic Chinos', fr: 'Chino Classique', ar: 'شينو كلاسيكي' },
+    { en: 'Slim Chinos', fr: 'Chino Ajusté', ar: 'شينو ضيق' },
+    { en: 'Stretch Chinos', fr: 'Chino Extensible', ar: 'شينو مطاطي' },
+    { en: 'Pleated Chinos', fr: 'Chino à Pinces', ar: 'شينو بكسرات' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `men-chinos-${i + 1}`,
-      description: `Versatile ${n.toLowerCase()}.`, descriptionFr: `${n} polyvalent.`, descriptionAr: `${n} متعدد الاستخدامات.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `men-chinos-${i + 1}`,
+      description: `Versatile ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} polyvalent.`, descriptionAr: `${n.ar} متعدد الاستخدامات.`,
       basePrice: 380000 + (i * 20000), category: 'men-chinos',
       sizes: ['S', 'M', 'L', 'XL'], colors: ['Beige', 'Navy', 'Gray', 'Brown'], weightKg: 0.45,
     });
   });
 
   // Men's T-Shirts (8)
-  ['Essential Crew Neck', 'V-Neck T-Shirt', 'Henley T-Shirt', 'Graphic Print T-Shirt', 'Longline T-Shirt', 'Pocket T-Shirt', 'Striped T-Shirt', 'Organic Cotton T-Shirt'].forEach((n, i) => {
+  [
+    { en: 'Essential Crew Neck', fr: 'T-Shirt Col Rond Essentiel', ar: 'تي شيرت برقبة دائرية' },
+    { en: 'V-Neck T-Shirt', fr: 'T-Shirt Col V', ar: 'تي شيرت برقبة V' },
+    { en: 'Henley T-Shirt', fr: 'T-Shirt Henley', ar: 'تي شيرت هينلي' },
+    { en: 'Graphic Print T-Shirt', fr: 'T-Shirt Imprimé', ar: 'تي شيرت مطبوع' },
+    { en: 'Longline T-Shirt', fr: 'T-Shirt Long', ar: 'تي شيرت طويل' },
+    { en: 'Pocket T-Shirt', fr: 'T-Shirt à Poche', ar: 'تي شيرت بجيب' },
+    { en: 'Striped T-Shirt', fr: 'T-Shirt Rayé', ar: 'تي شيرت مخطط' },
+    { en: 'Organic Cotton T-Shirt', fr: 'T-Shirt Coton Bio', ar: 'تي شيرت قطن عضوي' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `men-tshirt-${i + 1}`,
-      description: `Soft ${n.toLowerCase()}.`, descriptionFr: `${n} doux.`, descriptionAr: `${n} ناعم.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `men-tshirt-${i + 1}`,
+      description: `Soft ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} doux.`, descriptionAr: `${n.ar} ناعم.`,
       basePrice: 180000 + (i * 15000), category: 'men-tshirts',
       sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL'], colors: ['Black', 'White', 'Navy', 'Gray', 'Red', 'Blue'], isFeatured: i < 3, weightKg: 0.22,
     });
   });
 
   // Men's Jackets (4)
-  ['Bomber Jacket', 'Denim Jacket', 'Leather Jacket', 'Harrington Jacket'].forEach((n, i) => {
+  [
+    { en: 'Bomber Jacket', fr: 'Blouson Bomber', ar: 'جاكيت بومبر' },
+    { en: 'Denim Jacket', fr: 'Veste en Jean', ar: 'جاكيت جينز' },
+    { en: 'Leather Jacket', fr: 'Veste en Cuir', ar: 'جاكيت جلد' },
+    { en: 'Harrington Jacket', fr: 'Veste Harrington', ar: 'جاكيت هارينغتون' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `men-jacket-${i + 1}`,
-      description: `Stylish ${n.toLowerCase()}.`, descriptionFr: `${n} élégant.`, descriptionAr: `${n} أنيق.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `men-jacket-${i + 1}`,
+      description: `Stylish ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} élégant.`, descriptionAr: `${n.ar} أنيق.`,
       basePrice: 680000 + (i * 80000), category: 'men-jackets',
       sizes: ['S', 'M', 'L', 'XL'], colors: ['Black', 'Navy', 'Brown'], isFeatured: i === 2, weightKg: 0.85,
     });
   });
 
   // Women's Casual Dresses (6)
-  ['Maxi Dress', 'Midi Dress', 'Wrap Dress', 'Shirt Dress', 'A-Line Dress', 'Sundress'].forEach((n, i) => {
+  [
+    { en: 'Maxi Dress', fr: 'Robe Longue', ar: 'فستان طويل' },
+    { en: 'Midi Dress', fr: 'Robe Mi-Longue', ar: 'فستان متوسط الطول' },
+    { en: 'Wrap Dress', fr: 'Robe Portefeuille', ar: 'فستان ملفوف' },
+    { en: 'Shirt Dress', fr: 'Robe Chemise', ar: 'فستان قميص' },
+    { en: 'A-Line Dress', fr: 'Robe Trapèze', ar: 'فستان على شكل حرف A' },
+    { en: 'Sundress', fr: "Robe d'Été", ar: 'فستان صيفي' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `women-casual-dress-${i + 1}`,
-      description: `Beautiful ${n.toLowerCase()}.`, descriptionFr: `Belle ${n.toLowerCase()}.`, descriptionAr: `${n} جميل.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `women-casual-dress-${i + 1}`,
+      description: `Beautiful ${n.en.toLowerCase()}.`, descriptionFr: `Belle ${n.fr.toLowerCase()}.`, descriptionAr: `${n.ar} جميل.`,
       basePrice: 450000 + (i * 35000), category: 'women-casual-dresses',
       sizes: ['XS', 'S', 'M', 'L', 'XL'], colors: ['Black', 'Navy', 'Red', 'Pink', 'Beige', 'White'], isFeatured: i < 2, weightKg: 0.40,
     });
   });
 
   // Women's Evening Dresses (4)
-  ['Cocktail Dress', 'Gala Dress', 'Sequin Dress', 'Velvet Dress'].forEach((n, i) => {
+  [
+    { en: 'Cocktail Dress', fr: 'Robe de Cocktail', ar: 'فستان كوكتيل' },
+    { en: 'Gala Dress', fr: 'Robe de Gala', ar: 'فستان سهرة' },
+    { en: 'Sequin Dress', fr: 'Robe à Paillettes', ar: 'فستان بترتر' },
+    { en: 'Velvet Dress', fr: 'Robe en Velours', ar: 'فستان مخملي' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `women-evening-dress-${i + 1}`,
-      description: `Elegant ${n.toLowerCase()}.`, descriptionFr: `${n} élégante.`, descriptionAr: `${n} أنيق.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `women-evening-dress-${i + 1}`,
+      description: `Elegant ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} élégante.`, descriptionAr: `${n.ar} أنيق.`,
       basePrice: 850000 + (i * 100000), category: 'women-evening-dresses',
       sizes: ['XS', 'S', 'M', 'L'], colors: ['Black', 'Red', 'Navy', 'Purple'], isFeatured: i === 0, weightKg: 0.55,
     });
   });
 
   // Women's Blouses (6)
-  ['Silk Blouse', 'Peplum Top', 'Off-Shoulder Blouse', 'Bow Tie Blouse', 'Ruffle Blouse', 'Lace Blouse'].forEach((n, i) => {
+  [
+    { en: 'Silk Blouse', fr: 'Chemisier en Soie', ar: 'بلوزة حرير' },
+    { en: 'Peplum Top', fr: 'Top Péplum', ar: 'بلوزة بيبلوم' },
+    { en: 'Off-Shoulder Blouse', fr: 'Chemisier Épaules Dénudées', ar: 'بلوزة بأكتاف مكشوفة' },
+    { en: 'Bow Tie Blouse', fr: 'Chemisier à Nœud', ar: 'بلوزة بربطة عنق' },
+    { en: 'Ruffle Blouse', fr: 'Chemisier à Volants', ar: 'بلوزة بكشكش' },
+    { en: 'Lace Blouse', fr: 'Chemisier en Dentelle', ar: 'بلوزة دانتيل' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `women-blouse-${i + 1}`,
-      description: `Feminine ${n.toLowerCase()}.`, descriptionFr: `${n} féminin.`, descriptionAr: `${n} أنثوي.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `women-blouse-${i + 1}`,
+      description: `Feminine ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} féminin.`, descriptionAr: `${n.ar} أنثوي.`,
       basePrice: 320000 + (i * 25000), category: 'women-blouses',
       sizes: ['XS', 'S', 'M', 'L', 'XL'], colors: ['White', 'Pink', 'Beige', 'Black', 'Navy'], isFeatured: i === 0, weightKg: 0.25,
     });
   });
 
   // Women's T-Shirts (4)
-  ['Basic T-Shirt', 'Crop Top', 'Oversized T-Shirt', 'Embroidered T-Shirt'].forEach((n, i) => {
+  [
+    { en: 'Basic T-Shirt', fr: 'T-Shirt Basique', ar: 'تي شيرت أساسي' },
+    { en: 'Crop Top', fr: 'Top Court', ar: 'توب قصير' },
+    { en: 'Oversized T-Shirt', fr: 'T-Shirt Oversize', ar: 'تي شيرت واسع' },
+    { en: 'Embroidered T-Shirt', fr: 'T-Shirt Brodé', ar: 'تي شيرت مطرز' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `women-tshirt-${i + 1}`,
-      description: `Comfortable ${n.toLowerCase()}.`, descriptionFr: `${n} confortable.`, descriptionAr: `${n} مريح.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `women-tshirt-${i + 1}`,
+      description: `Comfortable ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} confortable.`, descriptionAr: `${n.ar} مريح.`,
       basePrice: 150000 + (i * 15000), category: 'women-tshirts',
       sizes: ['XS', 'S', 'M', 'L', 'XL'], colors: ['White', 'Black', 'Pink', 'Gray', 'Red'], weightKg: 0.18,
     });
   });
 
   // Women's Skirts (4)
-  ['Pencil Skirt', 'Pleated Skirt', 'Denim Skirt', 'Maxi Skirt'].forEach((n, i) => {
+  [
+    { en: 'Pencil Skirt', fr: 'Jupe Crayon', ar: 'تنورة بنسل' },
+    { en: 'Pleated Skirt', fr: 'Jupe Plissée', ar: 'تنورة بكسرات' },
+    { en: 'Denim Skirt', fr: 'Jupe en Jean', ar: 'تنورة جينز' },
+    { en: 'Maxi Skirt', fr: 'Jupe Longue', ar: 'تنورة طويلة' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `women-skirt-${i + 1}`,
-      description: `Versatile ${n.toLowerCase()}.`, descriptionFr: `${n} polyvalente.`, descriptionAr: `${n} متعددة الاستخدامات.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `women-skirt-${i + 1}`,
+      description: `Versatile ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} polyvalente.`, descriptionAr: `${n.ar} متعددة الاستخدامات.`,
       basePrice: 280000 + (i * 20000), category: 'women-skirts',
       sizes: ['XS', 'S', 'M', 'L'], colors: ['Black', 'Navy', 'Beige', 'Blue'], weightKg: 0.30,
     });
   });
 
   // Women's Hijabs (6)
-  ['Chiffon Hijab', 'Jersey Hijab', 'Silk Hijab', 'Cotton Hijab', 'Instant Hijab', 'Printed Hijab'].forEach((n, i) => {
+  [
+    { en: 'Chiffon Hijab', fr: 'Hijab en Mousseline', ar: 'حجاب شيفون' },
+    { en: 'Jersey Hijab', fr: 'Hijab en Jersey', ar: 'حجاب جيرسيه' },
+    { en: 'Silk Hijab', fr: 'Hijab en Soie', ar: 'حجاب حرير' },
+    { en: 'Cotton Hijab', fr: 'Hijab en Coton', ar: 'حجاب قطن' },
+    { en: 'Instant Hijab', fr: 'Hijab Prêt-à-Porter', ar: 'حجاب جاهز' },
+    { en: 'Printed Hijab', fr: 'Hijab Imprimé', ar: 'حجاب مطبوع' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `women-hijab-${i + 1}`,
-      description: `Beautiful ${n.toLowerCase()}.`, descriptionFr: `${n} magnifique.`, descriptionAr: `${n} جميل.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `women-hijab-${i + 1}`,
+      description: `Beautiful ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} magnifique.`, descriptionAr: `${n.ar} جميل.`,
       basePrice: 120000 + (i * 20000), category: 'women-hijabs',
       sizes: ['One Size'], colors: ['Black', 'Navy', 'Beige', 'White', 'Pink', 'Purple', 'Brown', 'Gray'], isFeatured: i < 2, weightKg: 0.08,
     });
   });
 
   // Women's Abayas (4)
-  ['Classic Black Abaya', 'Embroidered Abaya', 'Open Front Abaya', 'Kimono Abaya'].forEach((n, i) => {
+  [
+    { en: 'Classic Black Abaya', fr: 'Abaya Noire Classique', ar: 'عباءة سوداء كلاسيكية' },
+    { en: 'Embroidered Abaya', fr: 'Abaya Brodée', ar: 'عباءة مطرزة' },
+    { en: 'Open Front Abaya', fr: 'Abaya Ouverte', ar: 'عباءة مفتوحة' },
+    { en: 'Kimono Abaya', fr: 'Abaya Kimono', ar: 'عباءة كيمونو' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `women-abaya-${i + 1}`,
-      description: `Elegant ${n.toLowerCase()}.`, descriptionFr: `${n} élégante.`, descriptionAr: `${n} أنيقة.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `women-abaya-${i + 1}`,
+      description: `Elegant ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} élégante.`, descriptionAr: `${n.ar} أنيقة.`,
       basePrice: 580000 + (i * 60000), category: 'women-abayas',
       sizes: ['S', 'M', 'L', 'XL'], colors: ['Black', 'Navy', 'Brown', 'Beige'], isFeatured: i === 1, weightKg: 0.50,
     });
   });
 
   // Kids - Boys Shirts (4)
-  ['Boys Polo Shirt', 'Boys Oxford Shirt', 'Boys T-Shirt', 'Boys Checked Shirt'].forEach((n, i) => {
+  [
+    { en: 'Boys Polo Shirt', fr: 'Polo Garçon', ar: 'بولو ولادي' },
+    { en: 'Boys Oxford Shirt', fr: 'Chemise Oxford Garçon', ar: 'قميص أوكسفورد ولادي' },
+    { en: 'Boys T-Shirt', fr: 'T-Shirt Garçon', ar: 'تي شيرت ولادي' },
+    { en: 'Boys Checked Shirt', fr: 'Chemise à Carreaux Garçon', ar: 'قميص مربعات ولادي' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `boys-shirt-${i + 1}`,
-      description: `Comfortable ${n.toLowerCase()}.`, descriptionFr: `${n} confortable.`, descriptionAr: `${n} مريح.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `boys-shirt-${i + 1}`,
+      description: `Comfortable ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} confortable.`, descriptionAr: `${n.ar} مريح.`,
       basePrice: 180000 + (i * 15000), category: 'boys-shirts',
       sizes: ['XS', 'S', 'M', 'L'], colors: ['Navy', 'White', 'Blue', 'Red'], weightKg: 0.18,
     });
   });
 
   // Kids - Boys Pants (4)
-  ['Boys Jeans', 'Boys Chinos', 'Boys Joggers', 'Boys Shorts'].forEach((n, i) => {
+  [
+    { en: 'Boys Jeans', fr: 'Jean Garçon', ar: 'جينز ولادي' },
+    { en: 'Boys Chinos', fr: 'Chino Garçon', ar: 'شينو ولادي' },
+    { en: 'Boys Joggers', fr: 'Jogging Garçon', ar: 'سروال رياضي ولادي' },
+    { en: 'Boys Shorts', fr: 'Short Garçon', ar: 'شورت ولادي' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `boys-pants-${i + 1}`,
-      description: `Durable ${n.toLowerCase()}.`, descriptionFr: `${n} durable.`, descriptionAr: `${n} متين.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `boys-pants-${i + 1}`,
+      description: `Durable ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} durable.`, descriptionAr: `${n.ar} متين.`,
       basePrice: 220000 + (i * 15000), category: 'boys-pants',
       sizes: ['XS', 'S', 'M', 'L'], colors: ['Navy', 'Black', 'Gray', 'Blue'], weightKg: 0.35,
     });
   });
 
   // Kids - Girls Dresses (4)
-  ['Girls Party Dress', 'Girls Sundress', 'Girls Casual Dress', 'Girls Denim Dress'].forEach((n, i) => {
+  [
+    { en: 'Girls Party Dress', fr: 'Robe de Fête Fille', ar: 'فستان حفلة بناتي' },
+    { en: 'Girls Sundress', fr: "Robe d'Été Fille", ar: 'فستان صيفي بناتي' },
+    { en: 'Girls Casual Dress', fr: 'Robe Décontractée Fille', ar: 'فستان كاجوال بناتي' },
+    { en: 'Girls Denim Dress', fr: 'Robe en Jean Fille', ar: 'فستان جينز بناتي' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `girls-dress-${i + 1}`,
-      description: `Adorable ${n.toLowerCase()}.`, descriptionFr: `${n} adorable.`, descriptionAr: `${n} رائع.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `girls-dress-${i + 1}`,
+      description: `Adorable ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} adorable.`, descriptionAr: `${n.ar} رائع.`,
       basePrice: 280000 + (i * 25000), category: 'girls-dresses',
       sizes: ['XS', 'S', 'M', 'L'], colors: ['Pink', 'White', 'Blue', 'Red', 'Purple'], isFeatured: i === 0, weightKg: 0.25,
     });
   });
 
   // Accessories - Bags (4)
-  ['Leather Tote Bag', 'Crossbody Bag', 'Backpack', 'Clutch Bag'].forEach((n, i) => {
+  [
+    { en: 'Leather Tote Bag', fr: 'Sac Cabas en Cuir', ar: 'حقيبة جلد كبيرة' },
+    { en: 'Crossbody Bag', fr: 'Sac Bandoulière', ar: 'حقيبة كروس' },
+    { en: 'Backpack', fr: 'Sac à Dos', ar: 'حقيبة ظهر' },
+    { en: 'Clutch Bag', fr: 'Pochette', ar: 'حقيبة يد صغيرة' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `bag-${i + 1}`,
-      description: `Stylish ${n.toLowerCase()}.`, descriptionFr: `${n} élégant.`, descriptionAr: `${n} أنيق.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `bag-${i + 1}`,
+      description: `Stylish ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} élégant.`, descriptionAr: `${n.ar} أنيق.`,
       basePrice: 380000 + (i * 50000), category: 'bags',
       sizes: ['One Size'], colors: ['Black', 'Brown', 'Beige', 'Navy'], isFeatured: i === 0, weightKg: 0.45,
     });
   });
 
   // Accessories - Belts (4)
-  ['Leather Belt', 'Braided Belt', 'Canvas Belt', 'Reversible Belt'].forEach((n, i) => {
+  [
+    { en: 'Leather Belt', fr: 'Ceinture en Cuir', ar: 'حزام جلد' },
+    { en: 'Braided Belt', fr: 'Ceinture Tressée', ar: 'حزام مجدول' },
+    { en: 'Canvas Belt', fr: 'Ceinture en Toile', ar: 'حزام قماش' },
+    { en: 'Reversible Belt', fr: 'Ceinture Réversible', ar: 'حزام قابل للعكس' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `belt-${i + 1}`,
-      description: `Quality ${n.toLowerCase()}.`, descriptionFr: `${n} de qualité.`, descriptionAr: `${n} عالي الجودة.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `belt-${i + 1}`,
+      description: `Quality ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} de qualité.`, descriptionAr: `${n.ar} عالي الجودة.`,
       basePrice: 150000 + (i * 20000), category: 'belts',
       sizes: ['S', 'M', 'L', 'XL'], colors: ['Black', 'Brown', 'Navy'], weightKg: 0.15,
     });
   });
 
   // Accessories - Scarves (4)
-  ['Wool Scarf', 'Silk Scarf', 'Cashmere Scarf', 'Cotton Scarf'].forEach((n, i) => {
+  [
+    { en: 'Wool Scarf', fr: 'Écharpe en Laine', ar: 'وشاح صوف' },
+    { en: 'Silk Scarf', fr: 'Écharpe en Soie', ar: 'وشاح حرير' },
+    { en: 'Cashmere Scarf', fr: 'Écharpe en Cachemire', ar: 'وشاح كشمير' },
+    { en: 'Cotton Scarf', fr: 'Écharpe en Coton', ar: 'وشاح قطن' },
+  ].forEach((n, i) => {
     products.push({
-      name: n, nameFr: n, nameAr: n, slug: `scarf-${i + 1}`,
-      description: `Elegant ${n.toLowerCase()}.`, descriptionFr: `${n} élégante.`, descriptionAr: `${n} أنيق.`,
+      name: n.en, nameFr: n.fr, nameAr: n.ar, slug: `scarf-${i + 1}`,
+      description: `Elegant ${n.en.toLowerCase()}.`, descriptionFr: `${n.fr} élégante.`, descriptionAr: `${n.ar} أنيق.`,
       basePrice: 180000 + (i * 40000), category: 'scarves',
       sizes: ['One Size'], colors: ['Gray', 'Navy', 'Beige', 'Red', 'Black'], weightKg: 0.12,
     });
@@ -463,16 +574,24 @@ async function seed() {
 
   // OSCAR Fashion is an Algerian marketplace: ensure the default channel is priced in DZD.
   // Must run before any ProductVariant is created so prices are stored in DZD, not the
-  // Vendure default (USD). Re-fetch the channel + ctx so variant creation sees the new currency.
-  if (channel.defaultCurrencyCode !== CurrencyCode.DZD) {
+  // Vendure default (USD). Also register fr/ar as available channel languages — the search
+  // index only indexes the channel's availableLanguageCodes, so without this French/Arabic
+  // search terms (e.g. "robe") return nothing. Re-fetch the channel + ctx afterwards so
+  // variant creation sees the new currency.
+  const needsCurrency = channel.defaultCurrencyCode !== CurrencyCode.DZD;
+  const needsLanguages = !(['fr', 'ar'] as const).every((l) =>
+    (channel.availableLanguageCodes ?? []).includes(l as any),
+  );
+  if (needsCurrency || needsLanguages) {
     await channelService.update(ctx, {
       id: channel.id,
       defaultCurrencyCode: CurrencyCode.DZD,
       availableCurrencyCodes: [CurrencyCode.DZD],
+      availableLanguageCodes: [LanguageCode.en, LanguageCode.fr, LanguageCode.ar],
     });
     channel = await channelService.getDefaultChannel();
     ctx = new RequestContext({ channel, apiType: 'admin', isAuthorized: true, authorizedAsOwnerOnly: false });
-    console.log('  💱 Default channel currency set to DZD\n');
+    console.log('  💱 Channel set to DZD + languages [en, fr, ar]\n');
   }
 
   console.log('📦 Creating Size and Color Facets...\n');

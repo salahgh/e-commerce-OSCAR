@@ -55,7 +55,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main id="main" className="mx-auto grid w-full max-w-7xl flex-1 gap-8 px-6 py-10 lg:grid-cols-[240px_1fr]">
+      <main id="main" className="mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 gap-8 px-6 py-10 lg:grid-cols-[240px_minmax(0,1fr)]">
         <aside className="flex flex-col gap-2">
           <h1 className="mb-2 text-18 font-bold text-content-strong">{t('title')}</h1>
           <nav aria-label={t('title')}>

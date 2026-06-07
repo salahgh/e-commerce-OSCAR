@@ -49,7 +49,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="mx-auto grid max-w-7xl gap-8 px-6 py-12 lg:grid-cols-[1fr_380px]">
+    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-6 py-12 lg:grid-cols-[minmax(0,1fr)_380px]">
       {/* Line items */}
       <section aria-labelledby="cart-title" className="flex flex-col gap-4">
         <h1 id="cart-title" className="text-32 font-bold text-content-strong">
@@ -65,17 +65,17 @@ export default function CartPage() {
                     <img src={item.imageUrl} alt={item.productName} className="h-full w-full object-cover" />
                   )}
                 </div>
-                <div className="flex flex-1 flex-col justify-between gap-3 md:flex-row md:items-center">
-                  <div className="flex flex-col gap-1">
+                <div className="flex min-w-0 flex-1 flex-col justify-between gap-3 md:flex-row md:items-center">
+                  <div className="flex min-w-0 flex-col gap-1">
                     <Link
                       href={`/products/${item.productSlug ?? ''}`}
                       className="text-16 font-medium text-content-strong hover:underline"
                     >
                       {item.productName}
                     </Link>
-                    <p className="text-12 text-content-muted">{item.variantName} · {item.sku}</p>
+                    <p className="break-words text-12 text-content-muted">{item.variantName} · {item.sku}</p>
                   </div>
-                  <div className="flex items-center justify-between gap-4 md:justify-end">
+                  <div className="flex items-center justify-between gap-2 sm:gap-4 md:justify-end">
                     <QuantityStepper
                       value={item.quantity}
                       onChange={(q) => updateQuantity(item.id, q)}
@@ -83,7 +83,7 @@ export default function CartPage() {
                       max={99}
                       size="sm"
                     />
-                    <span className="min-w-[6rem] text-end text-16 font-bold text-content-strong">
+                    <span className="min-w-0 text-end text-16 font-bold text-content-strong sm:min-w-[6rem]">
                       {formatPrice(item.linePrice * 100, cart.currencyCode)}
                     </span>
                     <IconButton
@@ -194,7 +194,7 @@ function CouponField({
         <input
           name="coupon"
           placeholder={placeholder}
-          className="flex-1 rounded border border-border-input bg-bg-base px-3 text-14 focus:border-border-focus focus:outline-none"
+          className="min-w-0 flex-1 rounded border border-border-input bg-bg-base px-3 text-14 focus:border-border-focus focus:outline-none"
         />
         <Button intent="secondary" type="submit">{applyLabel}</Button>
       </form>
