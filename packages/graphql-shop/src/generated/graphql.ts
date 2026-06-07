@@ -2744,7 +2744,7 @@ export type Product = Node & {
   assets: Array<Asset>;
   collections: Array<Collection>;
   createdAt: Scalars["DateTime"]["output"];
-  customFields?: Maybe<Scalars["JSON"]["output"]>;
+  customFields?: Maybe<ProductCustomFields>;
   description: Scalars["String"]["output"];
   enabled: Scalars["Boolean"]["output"];
   facetValues: Array<FacetValue>;
@@ -2766,6 +2766,12 @@ export type ProductVariantListArgs = {
   options?: InputMaybe<ProductVariantListOptions>;
 };
 
+export type ProductCustomFields = {
+  __typename?: "ProductCustomFields";
+  isFeatured?: Maybe<Scalars["Boolean"]["output"]>;
+  viewCount?: Maybe<Scalars["Int"]["output"]>;
+};
+
 export type ProductFilterParameter = {
   _and?: InputMaybe<Array<ProductFilterParameter>>;
   _or?: InputMaybe<Array<ProductFilterParameter>>;
@@ -2773,10 +2779,12 @@ export type ProductFilterParameter = {
   description?: InputMaybe<StringOperators>;
   enabled?: InputMaybe<BooleanOperators>;
   id?: InputMaybe<IdOperators>;
+  isFeatured?: InputMaybe<BooleanOperators>;
   languageCode?: InputMaybe<StringOperators>;
   name?: InputMaybe<StringOperators>;
   slug?: InputMaybe<StringOperators>;
   updatedAt?: InputMaybe<DateOperators>;
+  viewCount?: InputMaybe<NumberOperators>;
 };
 
 export type ProductList = PaginatedList & {
@@ -2847,9 +2855,11 @@ export type ProductSortParameter = {
   createdAt?: InputMaybe<SortOrder>;
   description?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
+  isFeatured?: InputMaybe<SortOrder>;
   name?: InputMaybe<SortOrder>;
   slug?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
+  viewCount?: InputMaybe<SortOrder>;
 };
 
 export type ProductTranslation = {
@@ -2889,7 +2899,9 @@ export type ProductVariant = Node & {
 
 export type ProductVariantCustomFields = {
   __typename?: "ProductVariantCustomFields";
+  discountPercent?: Maybe<Scalars["Int"]["output"]>;
   minStockAlert?: Maybe<Scalars["Int"]["output"]>;
+  originalPrice?: Maybe<Scalars["Int"]["output"]>;
 };
 
 export type ProductVariantFilterParameter = {
@@ -2897,10 +2909,12 @@ export type ProductVariantFilterParameter = {
   _or?: InputMaybe<Array<ProductVariantFilterParameter>>;
   createdAt?: InputMaybe<DateOperators>;
   currencyCode?: InputMaybe<StringOperators>;
+  discountPercent?: InputMaybe<NumberOperators>;
   id?: InputMaybe<IdOperators>;
   languageCode?: InputMaybe<StringOperators>;
   minStockAlert?: InputMaybe<NumberOperators>;
   name?: InputMaybe<StringOperators>;
+  originalPrice?: InputMaybe<NumberOperators>;
   price?: InputMaybe<NumberOperators>;
   priceWithTax?: InputMaybe<NumberOperators>;
   productId?: InputMaybe<IdOperators>;
@@ -2930,9 +2944,11 @@ export type ProductVariantListOptions = {
 
 export type ProductVariantSortParameter = {
   createdAt?: InputMaybe<SortOrder>;
+  discountPercent?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   minStockAlert?: InputMaybe<SortOrder>;
   name?: InputMaybe<SortOrder>;
+  originalPrice?: InputMaybe<SortOrder>;
   price?: InputMaybe<SortOrder>;
   priceWithTax?: InputMaybe<SortOrder>;
   productId?: InputMaybe<SortOrder>;
@@ -6467,6 +6483,7 @@ export type GetMyOrdersQuery = {
   __typename?: "Query";
   activeCustomer?: {
     __typename?: "Customer";
+    id: string;
     orders: {
       __typename?: "OrderList";
       totalItems: number;
@@ -6485,14 +6502,24 @@ export type GetMyOrdersQuery = {
           quantity: number;
           productVariant: {
             __typename?: "ProductVariant";
+            id: string;
             name: string;
             product: {
               __typename?: "Product";
+              id: string;
               name: string;
-              featuredAsset?: { __typename?: "Asset"; preview: string } | null;
+              featuredAsset?: {
+                __typename?: "Asset";
+                id: string;
+                preview: string;
+              } | null;
             };
           };
-          featuredAsset?: { __typename?: "Asset"; preview: string } | null;
+          featuredAsset?: {
+            __typename?: "Asset";
+            id: string;
+            preview: string;
+          } | null;
         }>;
       }>;
     };
@@ -10242,6 +10269,7 @@ export type RemoveCouponCodeMutationOptions = Apollo.BaseMutationOptions<
 export const GetMyOrdersDocument = gql`
   query GetMyOrders($options: OrderListOptions) {
     activeCustomer {
+      id
       orders(options: $options) {
         items {
           id
@@ -10255,15 +10283,19 @@ export const GetMyOrdersDocument = gql`
             id
             quantity
             productVariant {
+              id
               name
               product {
+                id
                 name
                 featuredAsset {
+                  id
                   preview
                 }
               }
             }
             featuredAsset {
+              id
               preview
             }
           }

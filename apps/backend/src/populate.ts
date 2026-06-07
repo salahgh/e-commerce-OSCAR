@@ -1,10 +1,13 @@
 import 'dotenv/config';
 import {
   LanguageCode,
+  CurrencyCode,
   FacetService,
   FacetValueService,
   ProductService,
   ProductVariantService,
+  ProductOptionGroupService,
+  ProductOptionService,
   CollectionService,
   TaxCategoryService,
   ChannelService,
@@ -445,16 +448,32 @@ async function seed() {
   const facetValueService = app.get(FacetValueService);
   const productService = app.get(ProductService);
   const productVariantService = app.get(ProductVariantService);
+  const productOptionGroupService = app.get(ProductOptionGroupService);
+  const productOptionService = app.get(ProductOptionService);
   const collectionService = app.get(CollectionService);
   const taxCategoryService = app.get(TaxCategoryService);
 
-  const channel = await channelService.getDefaultChannel();
-  const ctx = new RequestContext({
+  let channel = await channelService.getDefaultChannel();
+  let ctx = new RequestContext({
     channel,
     apiType: 'admin',
     isAuthorized: true,
     authorizedAsOwnerOnly: false,
   });
+
+  // OSCAR Fashion is an Algerian marketplace: ensure the default channel is priced in DZD.
+  // Must run before any ProductVariant is created so prices are stored in DZD, not the
+  // Vendure default (USD). Re-fetch the channel + ctx so variant creation sees the new currency.
+  if (channel.defaultCurrencyCode !== CurrencyCode.DZD) {
+    await channelService.update(ctx, {
+      id: channel.id,
+      defaultCurrencyCode: CurrencyCode.DZD,
+      availableCurrencyCodes: [CurrencyCode.DZD],
+    });
+    channel = await channelService.getDefaultChannel();
+    ctx = new RequestContext({ channel, apiType: 'admin', isAuthorized: true, authorizedAsOwnerOnly: false });
+    console.log('  💱 Default channel currency set to DZD\n');
+  }
 
   console.log('📦 Creating Size and Color Facets...\n');
 
@@ -628,6 +647,44 @@ async function seed() {
       },
     });
 
+    // Create per-product Size and Color option groups so variants are selectable on the PDP.
+    // (The Size/Color *facets* above drive faceted search; these *option groups* drive variant
+    // selection — a product needs option groups to hold more than one variant.)
+    const sizeGroup = await productOptionGroupService.create(ctx, {
+      code: `${productDef.slug}-size`,
+      translations: [
+        { languageCode: LanguageCode.en, name: 'Size' },
+        { languageCode: LanguageCode.fr, name: 'Taille' },
+        { languageCode: LanguageCode.ar, name: 'المقاس' },
+      ],
+    });
+    const colorGroup = await productOptionGroupService.create(ctx, {
+      code: `${productDef.slug}-color`,
+      translations: [
+        { languageCode: LanguageCode.en, name: 'Color' },
+        { languageCode: LanguageCode.fr, name: 'Couleur' },
+        { languageCode: LanguageCode.ar, name: 'اللون' },
+      ],
+    });
+
+    const sizeOptions = new Map<string, any>();
+    for (const size of productDef.sizes) {
+      sizeOptions.set(size, await productOptionService.create(ctx, sizeGroup.id, {
+        code: `${productDef.slug}-size-${size}`.toLowerCase().replace(/[^a-z0-9-]/g, ''),
+        translations: [{ languageCode: LanguageCode.en, name: size }],
+      }));
+    }
+    const colorOptions = new Map<string, any>();
+    for (const color of productDef.colors) {
+      colorOptions.set(color, await productOptionService.create(ctx, colorGroup.id, {
+        code: `${productDef.slug}-color-${color}`.toLowerCase().replace(/[^a-z0-9-]/g, ''),
+        translations: [{ languageCode: LanguageCode.en, name: color }],
+      }));
+    }
+
+    await productService.addOptionGroupToProduct(ctx, product.id, sizeGroup.id);
+    await productService.addOptionGroupToProduct(ctx, product.id, colorGroup.id);
+
     for (const size of productDef.sizes) {
       for (const color of productDef.colors) {
         const sizeIndex = sizes.indexOf(size);
@@ -635,10 +692,12 @@ async function seed() {
         const colorMultiplier = color === 'Black' || color === 'White' ? 1 : 1.05;
         const finalPrice = Math.round(productDef.basePrice * sizeMultiplier * colorMultiplier);
 
-        const sku = `${productDef.slug.toUpperCase().substring(0, 10)}-${size}-${color.substring(0, 3).toUpperCase()}`.replace(/[^A-Z0-9-]/g, '');
+        const sku = `${productDef.slug}-${size}-${color}`.toUpperCase().replace(/[^A-Z0-9-]/g, '');
 
         const sizeFv = sizeFacetValues.get(size);
         const colorFv = colorFacetValues.get(color);
+        const sizeOpt = sizeOptions.get(size);
+        const colorOpt = colorOptions.get(color);
 
         try {
           await productVariantService.create(ctx, [{
@@ -646,6 +705,7 @@ async function seed() {
             sku,
             price: finalPrice,
             taxCategoryId: defaultTaxCategory.id,
+            optionIds: [sizeOpt?.id, colorOpt?.id].filter(Boolean),
             facetValueIds: [sizeFv?.id, colorFv?.id].filter(Boolean),
             translations: [{ languageCode: LanguageCode.en, name: `${productDef.name} - ${size} / ${color}` }],
             stockOnHand: 10 + Math.floor(Math.random() * 90),
@@ -654,7 +714,7 @@ async function seed() {
           }]);
           variantCount++;
         } catch (e: any) {
-          // Skip if variant combination already exists or SKU is duplicate
+          console.log(`     ⚠️  Variant ${sku} skipped: ${e.message}`);
           if (e.code === 'USER_INPUT_ERROR') {
             continue;
           }

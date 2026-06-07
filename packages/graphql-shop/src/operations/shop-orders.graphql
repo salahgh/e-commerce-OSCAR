@@ -90,6 +90,7 @@ fragment CustomerOrderFields on Order {
 # Get customer's order history
 query GetMyOrders($options: OrderListOptions) {
   activeCustomer {
+    id
     orders(options: $options) {
       items {
         id
@@ -103,15 +104,19 @@ query GetMyOrders($options: OrderListOptions) {
           id
           quantity
           productVariant {
+            id
             name
             product {
+              id
               name
               featuredAsset {
+                id
                 preview
               }
             }
           }
           featuredAsset {
+            id
             preview
           }
         }

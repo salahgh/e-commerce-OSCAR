@@ -117,7 +117,13 @@ export default function CartPage() {
           />
 
           <dl className="flex flex-col gap-2 border-t border-border pt-4 text-14">
-            <Row label={tSummary('subtotal')} value={formatPrice(cart.subTotal * 100, cart.currencyCode)} />
+            <Row
+              label={tSummary('subtotal')}
+              value={formatPrice(
+                (cart.subTotal + cart.discounts.reduce((sum, d) => sum + Math.abs(d.amountWithTax), 0)) * 100,
+                cart.currencyCode,
+              )}
+            />
             <Row
               label={tSummary('shipping')}
               value={cart.shipping > 0 ? formatPrice(cart.shipping * 100, cart.currencyCode) : tSummary('shippingTbd')}

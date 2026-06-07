@@ -210,7 +210,7 @@ export const config: VendureConfig = {
       globalTemplateVars: {
         fromAddress: '"OSCAR Fashion" <noreply@oscarfashion.dz>',
         verifyEmailAddressUrl: 'http://localhost:3000/verify',
-        passwordResetUrl: 'http://localhost:3000/password-reset',
+        passwordResetUrl: 'http://localhost:3000/reset-password',
         changeEmailAddressUrl: 'http://localhost:3000/verify-email-address-change',
       },
     }),

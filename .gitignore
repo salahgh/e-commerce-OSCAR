@@ -47,3 +47,6 @@ storybook-static
 
 # pnpm
 pnpm-debug.log*
+
+# Playwright MCP browser snapshots (test artifacts)
+.playwright-mcp/

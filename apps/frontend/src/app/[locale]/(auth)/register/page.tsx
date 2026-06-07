@@ -7,10 +7,13 @@ import { useToast } from '@/components/ui/Toast';
 import { useRouter, Link } from '@/i18n/routing';
 import { Alert, Button, Card, Field, Input } from '@/components/ui';
 
+const MIN_PASSWORD_LENGTH = 8;
+
 export default function RegisterPage() {
   const tFields = useTranslations('auth.fields');
   const tPlaceholders = useTranslations('auth.placeholders');
   const tRegister = useTranslations('auth.register');
+  const tValidation = useTranslations('auth.validation');
   const { register } = useAuth();
   const router = useRouter();
   const toast = useToast();
@@ -26,8 +29,12 @@ export default function RegisterPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitting(true);
     setError(null);
+    if (form.password.length < MIN_PASSWORD_LENGTH) {
+      setError(tValidation('passwordMin'));
+      return;
+    }
+    setSubmitting(true);
     try {
       const result = await register({
         firstName: form.firstName,
@@ -90,6 +97,7 @@ export default function RegisterPage() {
           <Input
             type="password"
             required
+            minLength={MIN_PASSWORD_LENGTH}
             autoComplete="new-password"
             value={form.password}
             onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}

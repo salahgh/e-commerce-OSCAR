@@ -464,7 +464,13 @@ export default function CheckoutPage() {
             {tSummary('items')} · {cart.totalQuantity}
           </p>
           <dl className="flex flex-col gap-1 border-t border-border pt-3 text-14">
-            <Row label={tSummary('subtotal')} value={formatPrice(cart.subTotal * 100, cart.currencyCode)} />
+            <Row
+              label={tSummary('subtotal')}
+              value={formatPrice(
+                (cart.subTotal + cart.discounts.reduce((sum, d) => sum + Math.abs(d.amountWithTax), 0)) * 100,
+                cart.currencyCode,
+              )}
+            />
             <Row
               label={tSummary('shipping')}
               value={
@@ -473,6 +479,13 @@ export default function CheckoutPage() {
                   : tSummary('shippingTbd')
               }
             />
+            {cart.discounts.map((d, i) => (
+              <Row
+                key={i}
+                label={d.description}
+                value={`- ${formatPrice(Math.abs(d.amountWithTax) * 100, cart.currencyCode)}`}
+              />
+            ))}
           </dl>
           <div className="flex items-baseline justify-between border-t border-border pt-3">
             <span className="text-14 font-medium text-content-strong">{tSummary('total')}</span>
