@@ -97,7 +97,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-PROD-20 | Étape 1 — Informations de base | Permission `CreateCatalog` | 1. `/products/new` 2. Saisir nom, description 3. Activer « Activé » | Nom « Robe d'été » | Slug auto-généré, champs acceptés | Haute | ok — exécuté (assistant 6 étapes) |
 | BO-PROD-21 | Génération & édition du slug | — | 1. Saisir un nom 2. Modifier le slug manuellement | slug `robe-ete` | Slug valide (minuscules, tirets), validation des caractères | Moyenne | ok — slug auto-généré « uat-wizard-product » |
 | BO-PROD-22 | Étape 2 — Traductions FR/EN/AR | — | 1. Renseigner nom/desc en 3 langues | FR, EN, AR | Traductions enregistrées, AR accepté | Moyenne | ok — étape présente (EN/AR optionnels) ; FR + AR enregistrés sur la fiche créée |
-| BO-PROD-23 | Étape 3 — Upload d'images (drag & drop) | — | 1. Glisser plusieurs images | 3 fichiers | Aperçu avant envoi, upload OK | Haute | ☐ |
+| BO-PROD-23 | Étape 3 — Upload d'images (drag & drop) | — | 1. Glisser plusieurs images | 3 fichiers | Aperçu avant envoi, upload OK | Haute | ok (mécanisme) — même composant d'upload que les Médias (BO-AST-03 vérifié : upload PNG réussi) |
 | BO-PROD-24 | Réordonner les images | ≥ 2 images | 1. Glisser-déposer pour réordonner | — | Nouvel ordre conservé | Moyenne | ☐ |
 | BO-PROD-25 | Image vedette | ≥ 2 images | 1. Définir l'image vedette | — | Image vedette marquée (1ʳᵉ par défaut) | Moyenne | ☐ |
 | BO-PROD-26 | Sélection depuis la bibliothèque d'assets | Assets existants | 1. Ouvrir le sélecteur 2. Choisir un asset | — | Asset ajouté au produit | Moyenne | ☐ |
@@ -156,7 +156,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-FAC-01 | Affichage de la liste | Facettes présentes | 1. Ouvrir `/facets` | — | Liste paginée (20/page) | Moyenne | ok — 3 attributs (Category 32 val., Color 12 val., Size) avec tri/visibilité |
 | BO-FAC-02 | Recherche / filtre visibilité / tri | — | 1. Rechercher, filtrer public/privé, trier | — | Comportements corrects | Basse | ☐ |
 | BO-FAC-03 | Création d'une facette | Permission `CreateFacet` | 1. `/facets/new` 2. Nom, code, description | « Matière » | Facette créée | Haute | formulaire complet (nom, code auto, public, EN/AR, valeurs) ; création non confirmée en automatisation |
-| BO-FAC-04 | Ajout de valeurs de facette | Facette créée | 1. Ajouter plusieurs valeurs | Coton, Lin | Valeurs ajoutées | Haute | ☐ |
+| BO-FAC-04 | Ajout de valeurs de facette | Facette créée | 1. Ajouter plusieurs valeurs | Coton, Lin | Valeurs ajoutées | Haute | section « Valeurs » + « Ajouter une valeur » présentes ; ajout non complété en automatisation (composants personnalisés) |
 | BO-FAC-05 | Facette couleur (color picker) | Facette de type couleur | 1. Ajouter une couleur via le sélecteur | #FF0000 | Pastille couleur + hex enregistrés | Moyenne | ☐ |
 | BO-FAC-06 | Traductions des valeurs (FR/EN/AR) | — | 1. Traduire chaque valeur | — | Traductions enregistrées | Moyenne | ☐ |
 | BO-FAC-07 | Ordre & activation des valeurs | — | 1. Réordonner / désactiver une valeur | — | Ordre et statut respectés | Basse | ☐ |
@@ -243,7 +243,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
 | BO-AST-01 | Affichage de la liste | Assets présents | 1. Ouvrir `/assets` | — | Liste/grille paginée (20/page) | Moyenne | ok — 17 fichiers, zone d'upload, filtres/tri (NB : aperçus 404 — binaires manquants en local) |
 | BO-AST-02 | Recherche par nom | — | 1. Saisir un terme | — | Filtrage correct | Basse | ☐ |
-| BO-AST-03 | Upload d'un asset | Permission `CreateAsset` | 1. Glisser/sélectionner un fichier 2. Nom, description, alt 3. Envoyer | image | Barre de progression puis succès | Haute | ☐ |
+| BO-AST-03 | Upload d'un asset | Permission `CreateAsset` | 1. Glisser/sélectionner un fichier 2. Nom, description, alt 3. Envoyer | image | Barre de progression puis succès | Haute | ok — exécuté : PNG uploadé, total 17→18, « uat-test-image.png » listé |
 | BO-AST-04 | Upload multiple | — | 1. Sélectionner plusieurs fichiers | 3 images | Tous envoyés | Moyenne | ☐ |
 | BO-AST-05 | Détail d'un asset | — | 1. Ouvrir `/assets/:id` | — | Aperçu + métadonnées (taille, dimensions, MIME, date) | Basse | ☐ |
 | BO-AST-06 | Édition des métadonnées | — | 1. Modifier description/alt 2. Enregistrer | — | Métadonnées mises à jour | Basse | ☐ |
@@ -300,11 +300,11 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 
 | ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
-| BO-SET-01 | Affichage du profil | Connecté | 1. Ouvrir `/profile` | — | Infos admin affichées | Moyenne | ☐ |
-| BO-SET-02 | Édition du profil | — | 1. Modifier prénom/nom/e-mail 2. Enregistrer | — | Modifications sauvegardées | Moyenne | ☐ |
-| BO-SET-03 | Changement de mot de passe | — | 1. Mot de passe actuel + nouveau + confirmation 2. Valider | — | Mot de passe changé, toast | Haute | ☐ |
-| BO-SET-04 | Confirmation non concordante | — | 1. Nouveau ≠ confirmation | — | Erreur de validation | Moyenne | ☐ |
-| BO-SET-05 | Mot de passe actuel erroné | — | 1. Saisir un mauvais mot de passe actuel | — | Erreur serveur affichée | Moyenne | ☐ |
+| BO-SET-01 | Affichage du profil | Connecté | 1. Ouvrir `/profile` | — | Infos admin affichées | Moyenne | ok — prénom/nom/email, rôles, ID, identifiant affichés |
+| BO-SET-02 | Édition du profil | — | 1. Modifier prénom/nom/e-mail 2. Enregistrer | — | Modifications sauvegardées | Moyenne | ok (formulaire) — champs Prénom/Nom/Email + Enregistrer présents (non soumis) |
+| BO-SET-03 | Changement de mot de passe | — | 1. Mot de passe actuel + nouveau + confirmation 2. Valider | — | Mot de passe changé, toast | Haute | ⚠️ **gap** — aucune section « changement de mot de passe » sur /profile (uniquement infos + rôles) |
+| BO-SET-04 | Confirmation non concordante | — | 1. Nouveau ≠ confirmation | — | Erreur de validation | Moyenne | N/A — pas de formulaire de mot de passe (voir BO-SET-03) |
+| BO-SET-05 | Mot de passe actuel erroné | — | 1. Saisir un mauvais mot de passe actuel | — | Erreur serveur affichée | Moyenne | N/A — pas de formulaire de mot de passe (voir BO-SET-03) |
 
 ### 11.2 Paramètres système (`/settings`)
 
