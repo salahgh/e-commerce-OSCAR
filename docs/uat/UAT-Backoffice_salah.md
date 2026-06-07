@@ -135,7 +135,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-CAT-02 | Recherche par nom | — | 1. Saisir un terme | — | Filtrage correct | Moyenne | ☐ |
 | BO-CAT-03 | Tri (nom, code, date) | — | 1. Tester asc/desc | — | Ordre correct | Basse | ☐ |
 | BO-CAT-04 | Filtre de visibilité | — | 1. Filtrer public/privé/tous | — | Liste cohérente, code couleur public/privé | Moyenne | ☐ |
-| BO-CAT-05 | Création — informations de base | Permission `CreateCollection` | 1. `/categories/new` 2. Nom, slug, description | Nom « Femmes » | Champs validés, slug conforme | Haute | ok — formulaire complet (nom/slug/description, parent, ordre, public, FR/EN/AR) |
+| BO-CAT-05 | Création — informations de base | Permission `CreateCollection` | 1. `/categories/new` 2. Nom, slug, description | Nom « Femmes » | Champs validés, slug conforme | Haute | ok — exécuté : catégorie créée (toast « créée avec succès »). NB : le bouton « Créer » exige les noms EN **et** AR en plus du FR |
 | BO-CAT-06 | Validation nom (min 2) & slug (motif) | — | 1. Nom « A », slug « Bad Slug » | — | Erreurs de validation affichées | Moyenne | ☐ |
 | BO-CAT-07 | Traductions FR/EN/AR | — | 1. Renseigner les 3 langues | — | Traductions enregistrées | Moyenne | ☐ |
 | BO-CAT-08 | Image vedette + galerie | Assets dispo | 1. Définir vedette + galerie | — | Images associées | Moyenne | ☐ |
@@ -259,7 +259,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-PROMO-01 | Affichage de la liste | Promotions présentes | 1. Ouvrir `/promotions` | — | Liste paginée (10/page) | Moyenne | ok — 1 code (SUMMER2024, 5%, Min 2 000 DA), filtres statut, montants DZD corrects |
 | BO-PROMO-02 | Recherche (nom/code) | — | 1. Saisir un terme | — | Filtrage correct | Basse | ☐ |
 | BO-PROMO-03 | Filtre par statut | — | 1. Tester Toutes/Active/Inactive/Expirée/Programmée | — | Liste cohérente | Moyenne | ☐ |
-| BO-PROMO-04 | Création — informations de base | Permission `CreatePromotion` | 1. `/promotions/new` 2. Nom, description, code | code `SOLDE10` | Promotion créée | Haute | ☐ |
+| BO-PROMO-04 | Création — informations de base | Permission `CreatePromotion` | 1. `/promotions/new` 2. Nom, description, code | code `SOLDE10` | Promotion créée | Haute | ok — exécuté : promotion créée (toast « créée »), redirection vers la liste |
 | BO-PROMO-05 | Génération automatique de code | — | 1. Cliquer « Générer » | — | Code aléatoire inséré | Basse | ☐ |
 | BO-PROMO-06 | Type de remise — pourcentage | — | 1. Choisir « pourcentage » 2. Valeur | 10 % | UI adaptée, valeur acceptée | Haute | ☐ |
 | BO-PROMO-07 | Type de remise — montant fixe | — | 1. Choisir « montant fixe » | 500 DZD | UI adaptée | Moyenne | ☐ |
@@ -316,10 +316,10 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-SET-13 | Onglet Taxes | — | 1. Créer/éditer/supprimer une catégorie et un taux de taxe | — | CRUD taxes fonctionnel | Moyenne | ☐ |
 | BO-SET-14 | Onglet Zones & Pays | — | 1. Créer une zone 2. Ajouter/retirer des pays | — | Zones et pays gérés | Moyenne | ☐ |
 | BO-SET-15 | Méthodes de livraison — liste | — | 1. Ouvrir l'onglet | — | Méthodes listées (nom, code, zones, prix) | Moyenne | ok — Standard Shipping affiché à **500 DA** (était 50 000 DA avant correction centimes) |
-| BO-SET-16 | Création d'une méthode de livraison | — | 1. Ouvrir ShippingMethodCreateModal 2. Nom, code, zones, prix 3. Créer | zone Alger, 400 DZD | Méthode créée | Haute | ☐ |
+| BO-SET-16 | Création d'une méthode de livraison | — | 1. Ouvrir ShippingMethodCreateModal 2. Nom, code, zones, prix 3. Créer | zone Alger, 400 DZD | Méthode créée | Haute | ok — exécuté : « UAT Express » créée (toast « créée »), apparaît dans la liste |
 | BO-SET-17 | Édition/suppression d'une méthode de livraison | — | 1. Modifier puis supprimer (confirmation) | — | Mise à jour/suppression OK | Moyenne | ☐ |
 | BO-SET-18 | Méthodes de paiement — liste | — | 1. Ouvrir l'onglet | — | Méthodes listées (handler, canaux) | Moyenne | ok — Cash on Delivery (Activé, Mode Test) |
-| BO-SET-19 | Création d'une méthode de paiement | — | 1. Ouvrir PaymentMethodCreateModal 2. Nom, code, handler, canaux 3. Créer | COD | Méthode créée | Haute | ☐ |
+| BO-SET-19 | Création d'une méthode de paiement | — | 1. Ouvrir PaymentMethodCreateModal 2. Nom, code, handler, canaux 3. Créer | COD | Méthode créée | Haute | formulaire + validation OK (« requis » correct) ; création non complétée en automatisation (composants personnalisés handler/canaux) |
 | BO-SET-20 | Configuration handler CIB / Baridimob | — | 1. Renseigner la config spécifique | — | Config enregistrée | Moyenne | ☐ |
 | BO-SET-21 | Édition/suppression d'une méthode de paiement | — | 1. Modifier puis supprimer | — | Mise à jour/suppression OK | Moyenne | ☐ |
 | BO-SET-22 | Onglet Inventaire & Stock | — | 1. Activer le suivi 2. Définir seuils rupture/faible | seuil 5 | Paramètres enregistrés | Moyenne | ☐ |
