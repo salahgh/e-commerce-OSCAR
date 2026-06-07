@@ -172,7 +172,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
 | BO-ORD-01 | Affichage de la liste | Commandes présentes | 1. Ouvrir `/orders` | — | Liste paginée (15/page) + statistiques | Haute | ok — 103 commandes, 15/page, bandeau stats (valeur/panier/en attente/expédiées), montants DZD corrects |
-| BO-ORD-02 | Recherche par code ou client | — | 1. Saisir un code / un nom | — | Résultats filtrés | Haute | ☐ |
+| BO-ORD-02 | Recherche par code ou client | — | 1. Saisir un code / un nom | — | Résultats filtrés | Haute | ok après correction — **bug corrigé** : la recherche ne filtrait que par code (pas par client) ; « Saidi » renvoie maintenant 14 commandes, recherche par code OK |
 | BO-ORD-03 | Filtre multi-statuts | — | 1. Sélectionner plusieurs statuts | Payée + Expédiée | Liste filtrée | Moyenne | ☐ |
 | BO-ORD-04 | Filtre par période (presets) | — | 1. Tester Aujourd'hui, Hier, 7/30 j, ce mois, mois dernier | — | Plages correctes (fin de journée incluse) | Moyenne | ☐ |
 | BO-ORD-05 | Filtre par période personnalisée | — | 1. Choisir une plage personnalisée | — | Filtrage exact | Moyenne | ☐ |
@@ -220,7 +220,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
 |----|-------|---------------|--------|-----------------|------------------|----------|--------|
 | BO-CUS-01 | Affichage de la liste | Clients présents | 1. Ouvrir `/customers` | — | Liste paginée (10/page) avec stats | Haute | ok — 62 clients, 10/page, filtre wilaya ; **bug corrigé** : « total dépensé » affiché en centimes (×100) |
-| BO-CUS-02 | Recherche (nom/e-mail) | — | 1. Saisir un terme | — | Résultats filtrés | Haute | ☐ |
+| BO-CUS-02 | Recherche (nom/e-mail) | — | 1. Saisir un terme | — | Résultats filtrés | Haute | ok — « Brahimi » → 6, email « nadia.brahimi » → 1 |
 | BO-CUS-03 | Filtre par wilaya | — | 1. Choisir une wilaya | — | Clients de la wilaya | Moyenne | ☐ |
 | BO-CUS-04 | Création d'un client | Permission `CreateCustomer` | 1. Ouvrir le dialogue 2. Prénom, nom, e-mail (+ tél/mdp) 3. Valider | e-mail unique | Client créé, toast succès | Haute | ok — exécuté : client créé, toast « créé » |
 | BO-CUS-05 | Création — e-mail en conflit | E-mail existant | 1. Réutiliser un e-mail | doublon | Erreur de conflit affichée | Moyenne | ☐ |
@@ -292,7 +292,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-USR-13 | Recherche de permissions | Beaucoup de permissions | 1. Filtrer par mot-clé | « order » | Permissions filtrées | Basse | ☐ |
 | BO-USR-14 | Édition d'un rôle | — | 1. Modifier les permissions 2. Enregistrer | — | Permissions mises à jour | Moyenne | ☐ |
 | BO-USR-15 | Suppression d'un rôle | Rôle non super-admin | 1. Supprimer 2. Confirmer | — | Avertissement puis suppression | Moyenne | ☐ |
-| BO-USR-16 | Vérification effective des droits | Rôle limité fraîchement créé | 1. Se connecter avec un admin portant ce rôle 2. Tester accès autorisés/refusés | — | Comportement conforme aux permissions définies | Haute | ☐ |
+| BO-USR-16 | Vérification effective des droits | Rôle limité fraîchement créé | 1. Se connecter avec un admin portant ce rôle 2. Tester accès autorisés/refusés | — | Comportement conforme aux permissions définies | Haute | ok — connecté en « Role Test » : menu restreint (pas de Médias/Promos/Admins/Paramètres), /users & /settings → /access-denied, /products accessible |
 
 ## 11. Profil admin & Paramètres système — `BO-SET`
 
@@ -337,7 +337,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-UX-01 | Bascule de thème clair/sombre | Connecté | 1. Basculer le thème | — | Thème appliqué et persistant (localStorage) | Basse | ☐ |
 | BO-UX-02 | Sidebar repliable / overlay mobile | — | 1. Réduire la sidebar / tester en mobile | — | Comportement responsive correct | Moyenne | ☐ |
 | BO-UX-03 | Toasts (succès/erreur/avertissement/info) | — | 1. Déclencher chaque type | — | Toast correct, auto-disparition + fermeture manuelle | Moyenne | ☐ |
-| BO-UX-04 | Dialogues de confirmation | — | 1. Déclencher une action destructive | — | Confirmation avant action, état de chargement sur le bouton | Haute | ☐ |
+| BO-UX-04 | Dialogues de confirmation | — | 1. Déclencher une action destructive | — | Confirmation avant action, état de chargement sur le bouton | Haute | ok — confirmations vérifiées (suppression produit, annulation/remboursement commande, désactivation en masse) |
 | BO-UX-05 | Fermeture modale (Échap / clic extérieur / X) | Modale ouverte | 1. Tester chaque fermeture | — | Modale fermée correctement | Basse | ☐ |
 | BO-UX-06 | États de chargement | — | 1. Observer pendant le fetch | — | Spinners / squelettes, boutons désactivés | Moyenne | ☐ |
 | BO-UX-07 | États d'erreur réseau + réessai | Couper l'API | 1. Déclencher une opération | — | Message d'erreur + bouton « Réessayer » | Moyenne | ☐ |
