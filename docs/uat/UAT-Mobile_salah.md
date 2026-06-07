@@ -72,6 +72,7 @@ passée** (n° `UMH7XF9EDJP1TD5U`), parcours profil/adresses/commandes exercé. 
 | 12 | Faible | **Écran Paramètres** : "Select your preferred language", "Order Updates", "Promotions & Offers" en EN | Clés `profile.languageDesc/orderUpdates/promotions/newsletter` |
 | 13 | Moyenne | **Écran Recherche entièrement en anglais** (anomalie A1 de la passe natif du 06-06) : "Search products…", "Recent/Popular Searches", "N results for …" + "for" codé en dur | Namespace `search.*` complet (fr/en/ar) + `common.clearAll` ; ligne résultats → `search.resultsFor` interpolée (`{{count}}`, `{{query}}`) |
 | 14 | Faible | **Faute FR** « Tout les articles » (Explore) | `explore.allItems` → « Tous les articles » |
+| 15 | Faible | **Prix wishlist non formaté** (`1598 DZD`) | `app/profile/wishlist.tsx` → `toLocaleString()` |
 
 ### Cas vérifiés ✅ sur web (par section)
 - **§2 Auth :** MOB-AUTH-01 (login), -03 (validation FR), -04 (identifiants invalides → bannière),
@@ -87,7 +88,8 @@ passée** (n° `UMH7XF9EDJP1TD5U`), parcours profil/adresses/commandes exercé. 
 - **§9 Commandes :** MOB-ORD-01..04, -07/-08/-09 (détail, statut localisé, paiement).
 - **§10 Profil/Adresses/Paramètres :** MOB-PROF-01/02/03/04 (édition), -06/-07/-08/-09 (adresses CRUD),
   -12 (validation FR), -13 (changement de langue FR↔AR↔EN en direct).
-- **§12 Transverse :** MOB-SYS-01 (i18n FR/AR/EN), -06 (DZD), -07 (états vides).
+- **§11 Wishlist :** MOB-WL-01 (affichage), -02 (retrait), -03 (état vide), -06 (vus récemment).
+- **§12 Transverse :** MOB-SYS-01 (i18n FR/AR/EN), -06 (DZD), -07 (états vides — panier/wishlist/commandes).
 
 ### Limites du harnais web (à exécuter sur appareil — voir SIGN-OFF)
 - **`Alert.alert` est un no-op sur react-native-web** → confirmations non testables sur web :

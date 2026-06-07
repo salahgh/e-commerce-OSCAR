@@ -33,7 +33,7 @@ export default function WishlistScreen() {
         </Text>
         {item.price !== undefined && (
           <Text style={[styles.cardPrice, { fontFamily: fontFamily.regular }]}>
-            {item.price} {item.currencyCode ?? 'DZD'}
+            {item.price.toLocaleString()} {item.currencyCode ?? 'DZD'}
           </Text>
         )}
       </View>
