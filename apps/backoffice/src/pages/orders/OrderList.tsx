@@ -300,14 +300,27 @@ export const OrderList: React.FC = () => {
   const amountFilter = buildAmountFilter();
   const currentSort = SORT_OPTIONS.find((s) => s.value === sortOption) || SORT_OPTIONS[0];
 
+  // Vendure applies a single filterOperator to the whole filter object. To honour
+  // the placeholder ("code de commande, client") we search code OR customer name
+  // when no other filters are active; when combined with status/date/amount we keep
+  // AND semantics and search by code only (those other filters would otherwise be OR'd).
+  const hasStructuredFilters =
+    statusFilter.length > 0 || !!dateFilter || !!amountFilter;
+  const searchOnly = !!searchTerm && !hasStructuredFilters;
+
   const { data, loading, error } = useQuery(AdminOrdersDocument, {
     variables: {
       options: {
         skip: currentPage * pageSize,
         take: pageSize,
         sort: { [currentSort.field]: currentSort.direction as any },
+        ...(searchOnly && { filterOperator: 'OR' as any }),
         filter: {
-          ...(searchTerm && { code: { contains: searchTerm } }),
+          ...(searchOnly && {
+            code: { contains: searchTerm },
+            customerLastName: { contains: searchTerm },
+          }),
+          ...(searchTerm && !searchOnly && { code: { contains: searchTerm } }),
           ...(statusFilter.length === 1 && { state: { eq: statusFilter[0] } }),
           ...(statusFilter.length > 1 && { state: { in: statusFilter } }),
           ...(dateFilter && { orderPlacedAt: dateFilter }),
