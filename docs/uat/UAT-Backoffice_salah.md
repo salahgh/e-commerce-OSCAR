@@ -195,18 +195,18 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-ORD-23 | Adresses de facturation/livraison | — | 1. Vérifier les deux adresses | — | Affichées (peuvent différer), wilaya correcte | Moyenne | ok — adresse livraison + wilaya affichées |
 | BO-ORD-24 | Édition d'une adresse | — | 1. Modifier l'adresse de livraison 2. Enregistrer | — | Adresse mise à jour | Moyenne | non testé (mutation) |
 | BO-ORD-25 | Lignes de commande | — | 1. Vérifier produit/SKU/quantité/prix | — | Détails corrects, variantes affichées | Haute | ok — produit/SKU/prix unitaire × qté = total ligne corrects |
-| BO-ORD-26 | Transition de statut | Statut transitionnable | 1. Cliquer une transition disponible 2. Confirmer | — | Statut mis à jour, historique enregistré | Haute | partiel — boutons de transition présents ; non exécuté (mutation) |
+| BO-ORD-26 | Transition de statut | Statut transitionnable | 1. Cliquer une transition disponible 2. Confirmer | — | Statut mis à jour, historique enregistré | Haute | ok — exécuté : « Marquer expédié » a fait passer la commande de Payé → Expédié |
 | BO-ORD-27 | Transition invalide masquée | — | 1. Observer les boutons | — | Seules les transitions valides sont proposées | Moyenne | ok — pour « Payé » : seules Expédié/Part. expédié/Annuler proposées |
 | BO-ORD-28 | Ajout d'un paiement manuel | — | 1. Ouvrir « Paiement manuel » 2. Montant + méthode 3. Valider | — | Paiement ajouté, statut mis à jour | Moyenne | partiel — bouton « + Paiement » présent ; non exécuté |
 | BO-ORD-29 | Encaissement (settle) | Paiement autorisé | 1. Cliquer « Encaisser » | — | Paiement réglé | Moyenne | non testé (mutation) |
-| BO-ORD-30 | Remboursement total | Paiement réglé | 1. Ouvrir RefundDialog 2. Montant total + motif 3. Valider | — | Remboursement enregistré | Haute | partiel — dialogue OK, montant pré-rempli au total (DZD) ; non validé (mutation) |
-| BO-ORD-31 | Remboursement partiel | Paiement réglé | 1. Montant < total + motif | — | Remboursement partiel correct | Moyenne | non testé (mutation) |
+| BO-ORD-30 | Remboursement total | Paiement réglé | 1. Ouvrir RefundDialog 2. Montant total + motif 3. Valider | — | Remboursement enregistré | Haute | **2 bugs front corrigés** (max=0 DA à l'ouverture ; faux toast de succès). ⚠️ **Bug back restant** : refundOrder échoue en base — `refund.shipping` NOT NULL non renseigné par l'API par montant (Vendure core / migration) |
+| BO-ORD-31 | Remboursement partiel | Paiement réglé | 1. Montant < total + motif | — | Remboursement partiel correct | Moyenne | dialogue OK après correction ; bloqué par le même bug back (refund.shipping) |
 | BO-ORD-32 | Remboursement > montant payé (limite) | — | 1. Saisir un montant excessif | > payé | Champ borné au max, erreur si dépassement | Moyenne | ok — champ `max=11224.7` (borné au total payé, en DZD) |
-| BO-ORD-33 | Création d'un fulfillment | Commande payée | 1. Ouvrir FulfillmentDialog 2. Sélectionner les articles 3. N° de suivi 4. Valider | suivi `DZ123` | Fulfillment créé, statut « Expédié » | Haute | partiel — bouton « Créer une expédition » présent ; non exécuté |
+| BO-ORD-33 | Création d'un fulfillment | Commande payée | 1. Ouvrir FulfillmentDialog 2. Sélectionner les articles 3. N° de suivi 4. Valider | suivi `DZ123` | Fulfillment créé, statut « Expédié » | Haute | ok — exécuté : expédition créée (Pending → « Marquer expédié » → Shipped). NB : n° de suivi affiché « Non défini » après création (à vérifier) |
 | BO-ORD-34 | Mise à jour du n° de suivi | Fulfillment existant | 1. Modifier le suivi | — | Suivi mis à jour | Basse | ☐ |
 | BO-ORD-35 | Expédition partielle | Plusieurs lignes | 1. Expédier une partie des articles | — | Statut « Partiellement expédié » | Moyenne | ☐ |
 | BO-ORD-36 | Modification de commande | État « modifiable » | 1. Ouvrir ModifyOrderDialog 2. Ajuster qté/prix/ligne 3. Valider | — | Commande recalculée | Moyenne | ☐ |
-| BO-ORD-37 | Annulation avec motif | — | 1. Annuler 2. Saisir motif 3. Confirmer | « rupture » | Commande annulée, motif consigné | Haute | partiel — bouton « Annuler » présent ; non exécuté (mutation) |
+| BO-ORD-37 | Annulation avec motif | — | 1. Annuler 2. Saisir motif 3. Confirmer | « rupture » | Commande annulée, motif consigné | Haute | ok — exécuté : commande #GMBJZC… passée à « Annulé » avec motif |
 | BO-ORD-38 | Notes administrateur | — | 1. Ajouter une note 2. Enregistrer | — | Note avec auteur + horodatage | Basse | ☐ |
 | BO-ORD-39 | Édition/suppression d'une note | Note existante | 1. Modifier puis supprimer | — | Note mise à jour/supprimée | Basse | ☐ |
 | BO-ORD-40 | Onglet Historique | — | 1. Ouvrir l'historique | — | Chronologie des transitions/paiements/fulfillments | Moyenne | ok — onglets Articles/Historique/Notes présents |
@@ -222,7 +222,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-CUS-01 | Affichage de la liste | Clients présents | 1. Ouvrir `/customers` | — | Liste paginée (10/page) avec stats | Haute | ok — 62 clients, 10/page, filtre wilaya ; **bug corrigé** : « total dépensé » affiché en centimes (×100) |
 | BO-CUS-02 | Recherche (nom/e-mail) | — | 1. Saisir un terme | — | Résultats filtrés | Haute | ☐ |
 | BO-CUS-03 | Filtre par wilaya | — | 1. Choisir une wilaya | — | Clients de la wilaya | Moyenne | ☐ |
-| BO-CUS-04 | Création d'un client | Permission `CreateCustomer` | 1. Ouvrir le dialogue 2. Prénom, nom, e-mail (+ tél/mdp) 3. Valider | e-mail unique | Client créé, toast succès | Haute | ☐ |
+| BO-CUS-04 | Création d'un client | Permission `CreateCustomer` | 1. Ouvrir le dialogue 2. Prénom, nom, e-mail (+ tél/mdp) 3. Valider | e-mail unique | Client créé, toast succès | Haute | ok — exécuté : client créé, toast « créé » |
 | BO-CUS-05 | Création — e-mail en conflit | E-mail existant | 1. Réutiliser un e-mail | doublon | Erreur de conflit affichée | Moyenne | ☐ |
 | BO-CUS-06 | Création — validation e-mail | — | 1. Saisir un e-mail invalide | `abc@` | Erreur de format | Moyenne | ☐ |
 | BO-CUS-07 | Détail client | — | 1. Ouvrir `/customers/:id` | — | Profil, statistiques, carnet d'adresses, historique | Moyenne | ok — profil, stats, adresses, historique de commandes |
@@ -287,7 +287,7 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-USR-08 | Édition d'un administrateur | — | 1. `/users/:id/edit` 2. Modifier 3. Enregistrer | — | Modifications sauvegardées | Moyenne | ☐ |
 | BO-USR-09 | Suppression d'un administrateur | — | 1. Supprimer 2. Confirmer | — | Avertissement puis suppression | Moyenne | ☐ |
 | BO-USR-10 | Liste des rôles | — | 1. Ouvrir `/users/roles` | — | Liste paginée (20/page), nb permissions + nb utilisateurs | Moyenne | ok — 3 rôles (Role Test 33 perms, Customer, Super Admin 91 perms) |
-| BO-USR-11 | Création d'un rôle | — | 1. `/users/roles/new` 2. Nom, code, description 3. Cocher des permissions par catégorie 4. Enregistrer | rôle « Gestionnaire commandes » | Rôle créé | Haute | ok — formulaire OK (code/description + permissions groupées par catégorie). NB : l'erreur 500 vue plus tôt était un rechargement HMR transitoire |
+| BO-USR-11 | Création d'un rôle | — | 1. `/users/roles/new` 2. Nom, code, description 3. Cocher des permissions par catégorie 4. Enregistrer | rôle « Gestionnaire commandes » | Rôle créé | Haute | ok — exécuté : rôle « UAT Test Role » (3 permissions) créé et listé. NB : l'erreur 500 vue plus tôt était un rechargement HMR transitoire |
 | BO-USR-12 | « Tout sélectionner » dans une catégorie | — | 1. Cliquer « tout sélectionner » sur une catégorie | — | Toutes les permissions de la catégorie cochées | Basse | ok — case « tout sélectionner » + compteur par catégorie présents |
 | BO-USR-13 | Recherche de permissions | Beaucoup de permissions | 1. Filtrer par mot-clé | « order » | Permissions filtrées | Basse | ☐ |
 | BO-USR-14 | Édition d'un rôle | — | 1. Modifier les permissions 2. Enregistrer | — | Permissions mises à jour | Moyenne | ☐ |
@@ -324,8 +324,8 @@ composants transverses (modales, toasts, pagination, thème, états vides/erreur
 | BO-SET-21 | Édition/suppression d'une méthode de paiement | — | 1. Modifier puis supprimer | — | Mise à jour/suppression OK | Moyenne | ☐ |
 | BO-SET-22 | Onglet Inventaire & Stock | — | 1. Activer le suivi 2. Définir seuils rupture/faible | seuil 5 | Paramètres enregistrés | Moyenne | ☐ |
 | BO-SET-23 | Emplacements de stock (multi-localisation) | Si activé | 1. Créer/éditer/supprimer un emplacement | — | CRUD emplacements OK | Basse | ☐ |
-| BO-SET-24 | Réindexation de la recherche | — | 1. Onglet Index 2. Cliquer « Réindexer » | — | Progression affichée puis index reconstruit | Haute | ☐ |
-| BO-SET-25 | Suivi de la file de jobs | Réindexation lancée | 1. Observer jobs en attente/en cours/terminés | — | États et progression visibles | Moyenne | ☐ |
+| BO-SET-24 | Réindexation de la recherche | — | 1. Onglet Index 2. Cliquer « Réindexer » | — | Progression affichée puis index reconstruit | Haute | ok — exécuté : onglet Systeme → « Reconstruire l'index » ; job `update-search-index` lancé |
+| BO-SET-25 | Suivi de la file de jobs | Réindexation lancée | 1. Observer jobs en attente/en cours/terminés | — | États et progression visibles | Moyenne | ok — « Historique des tâches » liste les jobs (queue, statut, progrès, durée) |
 | BO-SET-26 | Annulation d'un job | Job en cours | 1. Annuler le job | — | Job annulé | Basse | ☐ |
 | BO-SET-27 | Onglet E-mail / SMTP | Si disponible | 1. Renseigner SMTP (hôte, port, identifiants, expéditeur) 2. Envoyer un e-mail de test | — | E-mail de test envoyé, notification de succès/échec | Moyenne | ☐ |
 | BO-SET-28 | Onglet Paramètres globaux | — | 1. Modifier devise/langue/fuseau/formats 2. Enregistrer | — | Paramètres globaux appliqués | Basse | ☐ |
