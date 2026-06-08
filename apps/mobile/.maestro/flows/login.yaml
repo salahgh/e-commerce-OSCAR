@@ -1,0 +1,35 @@
+appId: com.oscar.fashion
+name: Log in with UAT test account
+---
+- openLink: "oscar-fashion://expo-development-client/?url=http://localhost:8081"
+- extendedWaitUntil:
+    visible:
+      id: ".*"
+    timeout: 60000
+# Navigate to login: tap the Profile tab -> guest screen -> Login button
+- tapOn:
+    text: "الملف|Profil|Profile|Compte|Account"
+- tapOn:
+    text: "تسجيل الدخول|Se connecter|Sign in|Connexion|Login"
+- takeScreenshot: 00-login-form
+# Email field (matches FR/EN/AR placeholders)
+- tapOn:
+    text: ".*(بريدك|e-?mail|E-mail|email).*"
+    index: 0
+- inputText: "uat.maestro@oscar.test"
+- hideKeyboard
+# Password field
+- tapOn:
+    text: ".*(كلمة المرور|mot de passe|password|Password).*"
+    index: 0
+- inputText: "Test1234!"
+- hideKeyboard
+- takeScreenshot: 01-login-filled
+# Submit
+- tapOn:
+    text: "تسجيل الدخول|Se connecter|Sign in|Connexion|Login"
+- extendedWaitUntil:
+    notVisible:
+      text: "تسجيل الدخول|Se connecter|Sign in"
+    timeout: 20000
+- takeScreenshot: 02-after-login

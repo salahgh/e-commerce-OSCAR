@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Swipeable, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { CartItemData } from './CartItem';
 import { CartItemContent, useCartItemStyles } from './CartItemContent';
@@ -24,6 +25,7 @@ export const SwipeableCartItem: React.FC<SwipeableCartItemProps> = ({
   const styles = useStyles();
   const colors = useThemeColors();
   const cartItemStyles = useCartItemStyles();
+  const { t } = useTranslation();
 
   const swipeableRef = useRef<Swipeable>(null);
 
@@ -61,7 +63,7 @@ export const SwipeableCartItem: React.FC<SwipeableCartItemProps> = ({
       >
         <TouchableOpacity style={styles.deleteButton} onPress={handleRemove} activeOpacity={0.7}>
           <Ionicons name="trash-outline" size={24} color={colors.text.inverse} />
-          <Text style={styles.deleteText}>Delete</Text>
+          <Text style={styles.deleteText}>{t('common.delete')}</Text>
         </TouchableOpacity>
       </Animated.View>
     );

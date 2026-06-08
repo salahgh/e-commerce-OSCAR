@@ -1,0 +1,44 @@
+appId: com.oscar.fashion
+name: FR full tour in one session (i18n fixes render natively)
+---
+# Start from whatever screen is foreground; skip onboarding if shown.
+- runFlow:
+    when:
+      visible:
+        text: "Passer|Skip"
+    commands:
+      - tapOn:
+          text: "Passer|Skip"
+# HOME — verify the See All -> "Voir tout" fix
+- extendedWaitUntil:
+    visible:
+      text: "Voir tout"
+    timeout: 40000
+- assertVisible:
+    text: "Voir tout"
+- takeScreenshot: t01-home-fr
+# Open a product (PDP)
+- tapOn:
+    text: "Cashmere Scarf|Wool Scarf|Leather Belt|Backpack"
+    index: 0
+- extendedWaitUntil:
+    visible:
+      text: "Ajouter au panier|Ajouter|Taille|Couleur"
+    timeout: 20000
+- takeScreenshot: t02-pdp-fr
+# Back to home
+- back
+# Cart tab
+- tapOn:
+    text: "Panier|السلة"
+    optional: true
+- takeScreenshot: t03-cart-fr
+# Explore tab -> open Filters (the big FilterBottomSheet i18n fix)
+- tapOn:
+    text: "Explorer|Catégories|الفئات"
+    optional: true
+- takeScreenshot: t04-explore-fr
+- tapOn:
+    text: "Filtres|Filtrer|Filters"
+    optional: true
+- takeScreenshot: t05-filters-fr

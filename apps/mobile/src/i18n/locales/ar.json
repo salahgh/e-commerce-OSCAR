@@ -30,7 +30,11 @@
     "errorBoundaryTitle": "خطأ غير متوقع",
     "errorBoundaryMessage": "واجه التطبيق مشكلة. يمكنك إعادة المحاولة أو العودة إلى الرئيسية.",
     "goHome": "الرئيسية",
-    "clearAll": "مسح الكل"
+    "clearAll": "مسح الكل",
+    "yes": "نعم",
+    "no": "لا",
+    "ok": "حسناً",
+    "noOptionsFound": "لا توجد خيارات"
   },
   "address": {
     "title": "عناويني",
@@ -107,7 +111,14 @@
     "checkEmail": "تحقق من بريدك الإلكتروني",
     "resetEmailSent": "لقد أرسلنا تعليمات إعادة التعيين إلى بريدك الإلكتروني.",
     "checkSpam": "لم تستلم البريد؟ تحقق من مجلد البريد العشوائي.",
-    "failedToSendReset": "فشل الإرسال. يرجى المحاولة مرة أخرى."
+    "failedToSendReset": "فشل الإرسال. يرجى المحاولة مرة أخرى.",
+    "invalidToken": "رابط غير صالح أو منتهي الصلاحية",
+    "passwordChanged": "تم تغيير كلمة المرور",
+    "redirecting": "جارٍ التحويل…",
+    "resetPassword": "إعادة تعيين كلمة المرور",
+    "resetPasswordDesc": "أدخل كلمة المرور الجديدة.",
+    "resetPasswordTitle": "كلمة مرور جديدة",
+    "verifySuccess": "تم التحقق من البريد الإلكتروني"
   },
   "tabs": {
     "home": "الرئيسية",
@@ -164,7 +175,11 @@
       "priceAsc": "السعر: من الأقل للأعلى",
       "priceDesc": "السعر: من الأعلى للأقل"
     },
-    "selectOption": "اختر {{option}}"
+    "selectOption": "اختر {{option}}",
+    "allCategories": "الكل",
+    "lowStock": "مخزون منخفض",
+    "notFound": "المنتج غير موجود",
+    "pinchToZoom": "اضغط بإصبعين للتكبير"
   },
   "cart": {
     "title": "السلة",
@@ -181,7 +196,9 @@
     "totalAfterDiscount": "الإجمالي بعد الخصم",
     "startShopping": "ابدأ التسوق",
     "empty": "سلتك فارغة",
-    "invalidCode": "رمز غير صالح"
+    "invalidCode": "رمز غير صالح",
+    "addToCartError": "فشل إضافة العنصر إلى السلة",
+    "addedToCart": "تمت الإضافة إلى السلة"
   },
   "checkout": {
     "title": "الطلب",
@@ -250,7 +267,16 @@
     "color": "اللون",
     "orderPlacedMessage": "شكرًا لطلبك. سنرسل لك بريدًا إلكترونيًا للتأكيد قريبًا.",
     "trackingInfo": "يمكنك تتبع حالة طلبك في قسم «طلباتي» من ملفك الشخصي.",
-    "goHome": "الذهاب إلى الرئيسية"
+    "goHome": "الذهاب إلى الرئيسية",
+    "emptyCartMessage": "أضف بعض العناصر للمتابعة",
+    "itemsCount": "{{count}} عنصر",
+    "noPaymentMethods": "لا توجد طرق دفع متاحة",
+    "noShippingMethods": "لا توجد طرق توصيل متاحة",
+    "paymentMethodSubtitle": "كيف ترغب في الدفع؟",
+    "cibCardDescription": "ادفع بأمان باستخدام بطاقة CIB",
+    "baridimobDescription": "ادفع عبر محفظة بريدي موب",
+    "cashOnDelivery": "الدفع عند الاستلام",
+    "cashOnDeliveryDescription": "ادفع عند استلام طلبك"
   },
   "info": {
     "indexTitle": "المساعدة والمعلومات",
@@ -405,7 +431,21 @@
     "languageDesc": "اختر لغتك المفضلة",
     "orderUpdates": "تحديثات الطلبات",
     "promotions": "العروض والتخفيضات",
-    "newsletter": "النشرة الإخبارية"
+    "newsletter": "النشرة الإخبارية",
+    "changePassword": "تغيير كلمة المرور",
+    "currentPassword": "كلمة المرور الحالية",
+    "currentPasswordPlaceholder": "أدخل كلمة المرور الحالية",
+    "newPassword": "كلمة المرور الجديدة",
+    "newPasswordPlaceholder": "أدخل كلمة المرور الجديدة",
+    "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
+    "confirmNewPasswordPlaceholder": "أكد كلمة المرور الجديدة",
+    "passwordRequirements": "يجب أن تتكوّن كلمة المرور من 6 أحرف على الأقل",
+    "passwordChanged": "تم تغيير كلمة المرور",
+    "passwordChangedMessage": "تم تغيير كلمة المرور بنجاح",
+    "passwordChangeError": "فشل تغيير كلمة المرور",
+    "orderUpdatesDesc": "احصل على إشعارات بتغيّر حالة الطلب",
+    "promotionsDesc": "احصل على تحديثات حول التخفيضات والعروض الخاصة",
+    "newsletterDesc": "نصائح وأحدث صيحات الموضة أسبوعياً"
   },
   "orders": {
     "title": "طلباتي",
@@ -429,7 +469,8 @@
       "processing": "قيد المعالجة",
       "shipped": "تم الشحن",
       "delivered": "تم التوصيل",
-      "cancelled": "ملغى"
+      "cancelled": "ملغى",
+      "confirmed": "مؤكدة"
     },
     "itemCount": "{{count}} منتج",
     "orderCount": "{{count}} طلب",
@@ -456,6 +497,25 @@
       "Modifying": "قيد التعديل",
       "ArrangingAdditionalPayment": "مطلوب دفع إضافي",
       "Cancelled": "ملغاة"
+    },
+    "item": "عنصر",
+    "items": "عناصر",
+    "noAddress": "لم يتم تقديم عنوان",
+    "notFound": "الطلب غير موجود",
+    "notPaid": "لم يُدفع بعد",
+    "viewDetails": "عرض التفاصيل",
+    "timeline": {
+      "title": "تتبع الطلب",
+      "orderPlaced": "تم تقديم الطلب",
+      "orderPlacedDesc": "تم استلام طلبك",
+      "orderConfirmed": "تم تأكيد الطلب",
+      "orderConfirmedDesc": "يتم تحضير طلبك",
+      "orderShipped": "تم شحن الطلب",
+      "orderShippedDesc": "طلبك في الطريق",
+      "orderDelivered": "تم توصيل الطلب",
+      "orderDeliveredDesc": "تم توصيل طلبك",
+      "orderCancelled": "تم إلغاء الطلب",
+      "orderCancelledDesc": "تم إلغاء هذا الطلب"
     }
   },
   "errors": {
@@ -494,7 +554,22 @@
     "reset": "إعادة تعيين",
     "priceRange": "السعر (دج)",
     "from": "من",
-    "to": "إلى"
+    "to": "إلى",
+    "title": "الفلاتر",
+    "sortBy": "ترتيب حسب",
+    "categories": "الفئات",
+    "other": "أخرى",
+    "inStockOnly": "المتوفر فقط",
+    "onSale": "في التخفيضات",
+    "apply": "تطبيق الفلاتر",
+    "applyWithCount": "تطبيق الفلاتر ({{count}})",
+    "sortNewest": "الأحدث",
+    "sortOldest": "الأقدم",
+    "sortNameAsc": "الاسم: أ إلى ي",
+    "sortNameDesc": "الاسم: ي إلى أ",
+    "priceUnder": "أقل من {{max}} دج",
+    "priceBetween": "{{min}} – {{max}} دج",
+    "priceOver": "أكثر من {{min}} دج"
   },
   "validation": {
     "emailInvalid": "عنوان بريد إلكتروني غير صالح",
@@ -531,5 +606,37 @@
     "results": "نتائج",
     "resultsFor": "{{count}} نتيجة لـ « {{query}} »",
     "placeholder": "ابحث عن المنتجات..."
+  },
+  "payment": {
+    "success": {
+      "title": "تم الدفع بنجاح!"
+    },
+    "failure": {
+      "title": "فشل الدفع"
+    },
+    "cancelled": {
+      "title": "تم إلغاء الدفع"
+    },
+    "unknown": {
+      "title": "حالة غير معروفة",
+      "message": "حالة الدفع غير معروفة."
+    },
+    "viewOrder": "عرض الطلب",
+    "continueShopping": "متابعة التسوق",
+    "goHome": "الذهاب إلى الرئيسية",
+    "tryAgain": "إعادة المحاولة",
+    "contactSupport": "تواصل مع الدعم",
+    "completePayment": "إتمام الدفع",
+    "cancelPayment": "إلغاء الدفع",
+    "cancelPaymentMessage": "هل أنت متأكد أنك تريد إلغاء هذه العملية؟",
+    "error": "خطأ في الدفع",
+    "initError": "تعذّر تهيئة الدفع. حاول مرة أخرى.",
+    "missingParams": "معلومات الدفع ناقصة.",
+    "loadError": "خطأ في بوابة الدفع",
+    "loadErrorMessage": "تعذّر تحميل بوابة الدفع. حاول مرة أخرى.",
+    "loadingGateway": "جارٍ تحميل بوابة الدفع…",
+    "orderNumber": "رقم الطلب",
+    "transactionId": "معرّف المعاملة",
+    "paymentMethod": "طريقة الدفع"
   }
 }

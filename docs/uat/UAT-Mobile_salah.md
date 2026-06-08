@@ -144,6 +144,53 @@ toute vérification de **toasts natifs, animations, et safe-area**.
 > En résumé : le web a permis de **dérisquer la logique** rapidement et de corriger 2 bugs de support
 > web ; **la validation de release reste conditionnée à un passage Maestro + manuel sur appareils réels.**
 
+## Synthèse — 3ᵉ passe : appareil/émulateur natif + Maestro (2026-06-08)
+
+**Méthode :** exécution **native** réelle (pas web). Maestro 2.6.0 pilote l'app **dev-client**
+`com.oscar.fashion`. L'appareil physique (OnePlus PLC110) **bloque le driver d'instrumentation
+Maestro** (analyseur de risque d'installation OnePlus) → bascule sur **émulateur Android x86_64
+(API 36)**. Backend Vendure local `:8085`, `adb reverse 8085/8081`, Metro dev-client.
+
+> Note build : l'APK debug pré-existant ne contenait que `arm64-v8a` → **crash** sur émulateur
+> x86_64 (`UnsatisfiedLinkError` dans `MainApplication.onCreate`). Recompilé en x86_64
+> (`gradlew :app:assembleDebug -PreactNativeArchitectures=x86_64`).
+
+### Audit i18n statique exhaustif — bugs trouvés ET corrigés (mobile)
+
+Détection par scan automatisé : (a) toutes les clés `t('…')` utilisées dans le code vs présentes
+dans `fr/ar/en.json` ; (b) littéraux codés en dur dans `<Text>`, `placeholder`, `title`, `label`.
+
+| # | Sévérité | Problème | Correctif |
+|---|----------|----------|-----------|
+| 1 | **Haute** | **74 clés `t()` manquantes** dans les 3 locales → l'app affichait le **fallback anglais** en FR et AR. Modules entiers non traduits : **paiement** (namespace `payment` inexistant, ~25 clés), **timeline/cartes de commande** (~15), **changement de mot de passe** (~12), reset/verify, checkout (cas limites), descriptions de notifications, `common.yes/no/ok`. | +95 clés FR/AR/EN ajoutées (parité 560 = 560 = 560). Scan « clés manquantes » : **0**. |
+| 2 | **Haute** | **`FilterBottomSheet` entièrement en anglais** (non traduit) : titres de sections (Filters, Sort By, Price Range, Size, Color, Other), libellés de tri (Newest First…), tranches de prix, cases « In Stock Only »/« On Sale », bouton « Apply Filters ». | Câblé sur `t()` (clés `filters.*` + interpolation des tranches de prix). |
+| 3 | Moyenne | Littéraux codés en dur : « See All » (×2 home), « Delete » (swipe panier), « Out of Stock », « Pinch to zoom », « No options found » + placeholder « Search… »/« Select an option » (`Select`), titres d'en-tête auth. | Remplacés par `common.viewAll/delete/search`, `products.outOfStock/pinchToZoom`, etc. |
+| 4 | **Haute** | **Changement de langue non persisté + RTL non appliqué** : `settings.tsx` appelait `i18n.changeLanguage()` **brut** (commentaire « // Optionally save to storage ») au lieu du wrapper `changeLanguage` de `src/i18n` qui écrit dans AsyncStorage **et** gère `forceRTL`+reload. La langue se réinitialisait au redémarrage et l'arabe ne basculait pas en RTL depuis les Paramètres. | `settings.tsx` utilise le wrapper ; le wrapper reload aussi en dev (`DevSettings.reload`) + `allowRTL`. |
+| 5 | Moyenne | Messages `AuthContext` (succès/échec inscription, reset, vérif, renvoi) **codés en anglais** ; écrasaient le fallback localisé des écrans (`result.message ?? t(...)`). | Localisés via l'instance `i18n.t()`. |
+
+> **Limite data connue (inchangée)** : noms de **produits** en anglais même en AR/FR — le client
+> Apollo envoie pourtant `?languageCode=` ; c'est le **catalogue Vendure** qui n'a pas de traductions
+> produit AR/FR (problème de seed, hors périmètre i18n UI). Les **catégories** sont traduites.
+
+> **Note** : `FilterBottomSheet` (corrigé ci-dessus, bug #2) n'est **monté nulle part** dans les
+> écrans (`<FilterBottomSheet` absent de `app/`) — c'est du code mort ; le filtre **réel** à l'écran
+> est la barre de chips inline de `app/products/index.tsx` (`filters.classement/prix/taille`),
+> déjà traduite. Le correctif reste valable si le composant est un jour monté.
+
+### Résultats exécution émulateur (Maestro 2.6.0 + captures)
+
+- ✅ **107/107 tests Jest** verts (21 suites) après tous les correctifs i18n — **0 régression**.
+- ✅ Scans statiques : **0 clé `t()` manquante**, **0 littéral codé en dur**, parité locales 560=560=560.
+- ✅ **Rendu natif vérifié (FR)** : onboarding (4 slides traduits + « Commencer »), accueil
+  (« Rechercher dans OSCAR », « Nouvel arrivage », **« Voir tout »** = correctif #3, chips catégories
+  « Tout/femme/homme/enfant »), **prix DZD formatés** (« 2 730 DZD »), écran login **intégralement
+  traduit** y compris le message d'erreur d'identifiants. Logo OSCAR stylisé = branding (pas un bug).
+- ⏳ **Device-pending** (vérifié statiquement, non rejoué visuellement) : écrans **authentifiés**
+  (paramètres/langue, paiement, commandes, changement de mot de passe) et **passage RTL arabe** —
+  bloqués par (a) l'analyseur de risque OnePlus qui empêche le driver Maestro sur l'appareil physique,
+  (b) la corruption de `inputText` Maestro sur les `TextInput` RN (login non automatisable de façon
+  fiable). Les clés AR existent (parité) ; `forceRTL` validé précédemment sur appareil physique.
+
 ## Périmètre
 
 Splash & onboarding, authentification & gestion de session (récupération de session
@@ -178,7 +225,7 @@ adresses, paramètres (langue/thème), wishlist & récemment consultés, et tran
 | MOB-ONB-05 | Bouton « Commencer » (slide 4) | — | 1. Cliquer « Commencer » | — | Flag enregistré (AsyncStorage), accès aux tabs | Haute | ☐ |
 | MOB-ONB-06 | « Passer » (Skip) | — | 1. Cliquer « Passer » | — | Onboarding ignoré, accès aux tabs | Moyenne | ☐ |
 | MOB-ONB-07 | Onboarding non rejoué | Flag présent | 1. Relancer l'app | — | Splash → tabs directement (pas d'onboarding) | Haute | ☐ |
-| MOB-ONB-08 | Textes localisés | Langue ≠ FR | 1. Changer la langue puis relancer | EN / AR | Onboarding traduit | Basse | ☐ |
+| MOB-ONB-08 | Textes localisés | Langue ≠ FR | 1. Changer la langue puis relancer | EN / AR | Onboarding traduit | Basse | ✅ FR vérifié (4 slides : Découvrez la mode / Paiement sécurisé / Livraison rapide + « Commencer ») ; EN/AR ⏳ |
 
 ## 2. Authentification & gestion de session — `MOB-AUTH`
 
@@ -388,6 +435,50 @@ adresses, paramètres (langue/thème), wishlist & récemment consultés, et tran
 | MOB-SYS-11 | Error boundary global | Forcer une erreur composant | 1. Déclencher | — | UI de repli + « Réessayer » (AppErrorBoundary) | Basse | ☐ |
 | MOB-SYS-12 | Bouton retour matériel (Android) | Android | 1. Appuyer « retour » à divers endroits | — | Comportement cohérent (canGoBack avant back) | Moyenne | ☐ |
 | MOB-SYS-13 | Gestes (swipe carrousels) | — | 1. Balayer onboarding/images produit | — | Gestes fluides (gesture-handler) | Basse | ☐ |
+
+---
+
+## 13. i18n granulaire par écran (FR/AR/EN) & UI/UX natif — `MOB-I18N` / `MOB-UX`
+
+> Nouvelle section (passe 2026-06-08). Cible : **complétude i18n par écran dans les 3 langues**
+> et **fidélité UI/UX native** (RTL miroir, formatage, états, safe-area). Exécution : émulateur
+> + Maestro (captures comparées) sauf mention « manuel ».
+
+### 13.1 Complétude i18n par écran — aucune chaîne anglaise codée en dur (FR & AR)
+
+| ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
+|----|-------|---------------|--------|-----------------|------------------|----------|--------|
+| MOB-I18N-01 | Accueil — « Voir tout » traduit | Langue FR puis AR | 1. Ouvrir l'accueil 2. Observer les en-têtes de sections | FR / AR | « Voir tout » / « عرض الكل » (jamais « See All ») | Haute | ✅ FR (émulateur, capture `t01-home-fr`) ; AR ⏳ |
+| MOB-I18N-02 | Filtres — panneau 100 % traduit | Écran Explore/Produits | 1. Ouvrir le panneau Filtres 2. Parcourir toutes les sections | FR / AR | Titres, options de tri, tranches de prix, « En stock uniquement », « En promotion », bouton Appliquer — tous traduits | Haute | ☐ |
+| MOB-I18N-03 | PDP — « Rupture de stock » / « Pincez pour zoomer » | Produit en rupture / galerie | 1. Ouvrir un PDP 2. Zoomer la galerie | FR / AR | Libellés traduits (pas « Out of Stock »/« Pinch to zoom ») | Moyenne | ☐ |
+| MOB-I18N-04 | Panier — swipe « Supprimer » traduit | Panier non vide | 1. Balayer un article | FR / AR | « Supprimer » / « حذف » | Moyenne | ☐ |
+| MOB-I18N-05 | Paiement — écrans statut/passerelle traduits | Tunnel paiement CIB/Baridimob | 1. Lancer un paiement 2. Parcourir succès/échec/annulé | FR / AR | Titres et boutons (« Réessayer », « Voir la commande »…) traduits (namespace `payment`) | Haute | ☐ |
+| MOB-I18N-06 | Commandes — timeline & cartes traduites | Commande existante | 1. Ouvrir le détail d'une commande | FR / AR | « Suivi de la commande », étapes (Passée/Confirmée/Expédiée/Livrée), « Voir les détails » traduits | Haute | ☐ |
+| MOB-I18N-07 | Changement de mot de passe — formulaire traduit | Connecté | 1. Profil → Changer le mot de passe | FR / AR | Tous les libellés/placeholders + règles traduits | Moyenne | ☐ |
+| MOB-I18N-08 | Paramètres — descriptions notifications traduites | Connecté | 1. Profil → Paramètres | FR / AR | « Mises à jour de commande », « Promotions », « Newsletter » + descriptions traduites | Basse | ☐ |
+| MOB-I18N-09 | Sélecteur de paiement — descriptions traduites | Checkout, étape paiement | 1. Observer CIB/BaridiMob/COD | FR / AR | Descriptions traduites (`checkout.*Description`) | Moyenne | ☐ |
+| MOB-I18N-10 | Auth — titres/messages d'erreur traduits | Déconnecté | 1. Reset/verify avec token invalide | FR / AR | Messages localisés (pas « Invalid or expired link »/« Verification failed ») | Moyenne | ☐ |
+
+### 13.2 Changement de langue & RTL
+
+| ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
+|----|-------|---------------|--------|-----------------|------------------|----------|--------|
+| MOB-I18N-11 | Bascule de langue depuis Paramètres | Connecté | 1. Paramètres 2. Choisir EN puis AR puis FR | — | UI re-rendue dans la langue ; passage AR ⇄ LTR déclenche un reload | Haute | ☐ |
+| MOB-I18N-12 | **Persistance** de la langue au redémarrage | Langue changée vers AR | 1. Changer en AR 2. Tuer + relancer l'app | — | App **rouvre en AR** (régression du bug #4 corrigé) | Haute | ☐ |
+| MOB-I18N-13 | RTL — miroir de mise en page | Langue AR | 1. Parcourir accueil/PDP/panier/profil | — | Alignements, nav, chevrons, marges **inversés** ; pas de texte tronqué/chevauché | Haute | ☐ |
+| MOB-I18N-14 | RTL — barre d'onglets inversée | Langue AR | 1. Observer la tab bar | — | Ordre des onglets miroir (Accueil à droite) | Moyenne | ☐ |
+
+### 13.3 UI/UX natif (formatage, états, safe-area, gestes)
+
+| ID | Titre | Préconditions | Étapes | Données de test | Résultat attendu | Priorité | Statut |
+|----|-------|---------------|--------|-----------------|------------------|----------|--------|
+| MOB-UX-01 | Prix DZD formatés partout | — | 1. Accueil, PDP, panier, MiniCart, checkout, commandes | — | Séparateur de milliers + « DZD » cohérent (pas « 3290 ») | Haute | ✅ accueil FR (« 2 730 DZD », « 1 890 DZD ») ; autres écrans ⏳ |
+| MOB-UX-02 | États vides (panier/commandes/wishlist) | Listes vides | 1. Ouvrir chaque liste vide | — | EmptyState illustré + CTA | Moyenne | ☐ |
+| MOB-UX-03 | Skeletons de chargement | Réseau lent | 1. Ouvrir accueil/PDP | — | Skeletons puis contenu (pas d'écran vide) | Basse | ☐ |
+| MOB-UX-04 | Safe-area / encoche | Émulateur sans barre matérielle | 1. Vérifier en-têtes & tab bar | — | Pas de contenu sous la barre d'état / gestes | Moyenne | ☐ |
+| MOB-UX-05 | Bouton retour matériel Android | Android | 1. Naviguer puis « retour » | — | Retour cohérent (canGoBack) | Moyenne | ☐ |
+| MOB-UX-06 | Logo OSCAR sur écrans auth | Écran login | 1. Observer le logo | — | Logo rendu correctement (pas de lettres chevauchées) | Basse | ☐ |
+| MOB-UX-07 | Saisie clavier (login/checkout) | Formulaires | 1. Focus champs | — | KeyboardAvoidingView, pas de champ masqué | Moyenne | ☐ |
 
 ---
 

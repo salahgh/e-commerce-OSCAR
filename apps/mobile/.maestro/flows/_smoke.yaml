@@ -1,0 +1,11 @@
+appId: com.oscar.fashion
+name: Smoke - app launches and connects to Metro
+---
+# Dev-client launch via deep link so it reconnects to the Metro bundle
+# (plain launchApp would land on the Expo dev-launcher screen).
+- openLink: "oscar-fashion://expo-development-client/?url=http://localhost:8081"
+- extendedWaitUntil:
+    visible:
+      id: ".*"
+    timeout: 60000
+- takeScreenshot: smoke-home

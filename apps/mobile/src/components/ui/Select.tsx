@@ -10,6 +10,7 @@ import {
   TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { makeThemedStyles, useThemeColors, spacing, typography } from '../../theme';
 
 export interface SelectOption {
@@ -34,7 +35,7 @@ interface SelectProps {
 
 export const Select: React.FC<SelectProps> = ({
   label,
-  placeholder = 'Select an option',
+  placeholder,
   options,
   value,
   onChange,
@@ -47,9 +48,11 @@ export const Select: React.FC<SelectProps> = ({
 }) => {
   const styles = useStyles();
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const resolvedPlaceholder = placeholder ?? t('products.selectOption');
   const selectedOption = options.find((opt) => opt.value === value);
   const hasError = !!error;
 
@@ -111,7 +114,7 @@ export const Select: React.FC<SelectProps> = ({
         activeOpacity={0.7}
       >
         <Text style={[styles.selectText, !selectedOption && styles.placeholderText]}>
-          {selectedOption ? selectedOption.label : placeholder}
+          {selectedOption ? selectedOption.label : resolvedPlaceholder}
         </Text>
         <Ionicons
           name="chevron-down"
@@ -134,7 +137,7 @@ export const Select: React.FC<SelectProps> = ({
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>{label || 'Select Option'}</Text>
+                <Text style={styles.modalTitle}>{label || t('products.selectOption')}</Text>
                 <TouchableOpacity onPress={() => setIsOpen(false)}>
                   <Ionicons name="close" size={24} color={colors.text.primary} />
                 </TouchableOpacity>
@@ -145,7 +148,7 @@ export const Select: React.FC<SelectProps> = ({
                   <Ionicons name="search" size={20} color={colors.text.tertiary} />
                   <TextInput
                     style={styles.searchInput}
-                    placeholder="Search..."
+                    placeholder={`${t('common.search')}…`}
                     placeholderTextColor={colors.text.tertiary}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
@@ -162,7 +165,7 @@ export const Select: React.FC<SelectProps> = ({
                 style={styles.optionsList}
                 ListEmptyComponent={
                   <View style={styles.emptyContainer}>
-                    <Text style={styles.emptyText}>No options found</Text>
+                    <Text style={styles.emptyText}>{t('common.noOptionsFound')}</Text>
                   </View>
                 }
               />

@@ -13,6 +13,7 @@ import {
   Text,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { spacing, makeThemedStyles, useThemeColors } from '../../theme';
 import { ZoomableImage } from './ZoomableImage';
 
@@ -44,6 +45,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
   const modalFlatListRef = useRef<FlatList>(null);
   const colors = useThemeColors();
   const styles = useStyles();
+  const { t } = useTranslation();
 
   // Auto play functionality
   React.useEffect(() => {
@@ -193,7 +195,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
           {!isZoomed && (
             <View style={styles.zoomHint}>
               <Ionicons name="expand-outline" size={16} color={colors.white} />
-              <Text style={styles.zoomHintText}>Pinch to zoom</Text>
+              <Text style={styles.zoomHintText}>{t('products.pinchToZoom')}</Text>
             </View>
           )}
 

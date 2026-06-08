@@ -8,6 +8,7 @@ import {
   Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '../../theme';
 
@@ -34,6 +35,7 @@ export const CategoryScroll: React.FC<CategoryScrollProps> = ({
   onSeeAll,
 }) => {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handleCategoryPress = (category: Category) => {
     router.push(`/products?category=${encodeURIComponent(category.slug)}`);
@@ -46,7 +48,7 @@ export const CategoryScroll: React.FC<CategoryScrollProps> = ({
           <Text style={styles.title}>{title}</Text>
           {showSeeAll && onSeeAll && (
             <TouchableOpacity onPress={onSeeAll}>
-              <Text style={styles.seeAll}>See All</Text>
+              <Text style={styles.seeAll}>{t('common.viewAll')}</Text>
             </TouchableOpacity>
           )}
         </View>

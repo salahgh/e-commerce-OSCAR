@@ -30,7 +30,11 @@
     "errorBoundaryTitle": "Erreur inattendue",
     "errorBoundaryMessage": "L'application a rencontré un problème. Vous pouvez réessayer ou revenir à l'accueil.",
     "goHome": "Accueil",
-    "clearAll": "Tout effacer"
+    "clearAll": "Tout effacer",
+    "yes": "Oui",
+    "no": "Non",
+    "ok": "OK",
+    "noOptionsFound": "Aucune option trouvée"
   },
   "address": {
     "title": "Mes adresses",
@@ -107,7 +111,14 @@
     "checkEmail": "Vérifiez votre email",
     "resetEmailSent": "Nous avons envoyé les instructions de réinitialisation à votre adresse email.",
     "checkSpam": "Vous n'avez pas reçu l'email? Vérifiez votre dossier spam.",
-    "failedToSendReset": "Échec de l'envoi. Veuillez réessayer."
+    "failedToSendReset": "Échec de l'envoi. Veuillez réessayer.",
+    "invalidToken": "Lien invalide ou expiré",
+    "passwordChanged": "Mot de passe modifié",
+    "redirecting": "Redirection…",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "resetPasswordDesc": "Saisissez votre nouveau mot de passe.",
+    "resetPasswordTitle": "Nouveau mot de passe",
+    "verifySuccess": "E-mail vérifié"
   },
   "tabs": {
     "home": "Accueil",
@@ -164,7 +175,11 @@
       "priceAsc": "Prix croissant",
       "priceDesc": "Prix décroissant"
     },
-    "selectOption": "Sélectionner {{option}}"
+    "selectOption": "Sélectionner {{option}}",
+    "allCategories": "Tous",
+    "lowStock": "Stock faible",
+    "notFound": "Produit introuvable",
+    "pinchToZoom": "Pincez pour zoomer"
   },
   "cart": {
     "title": "Panier",
@@ -181,7 +196,9 @@
     "totalAfterDiscount": "Total après réduction",
     "startShopping": "Commencer vos achats",
     "empty": "Votre panier est vide",
-    "invalidCode": "Code invalide"
+    "invalidCode": "Code invalide",
+    "addToCartError": "Échec de l'ajout au panier",
+    "addedToCart": "Ajouté au panier"
   },
   "checkout": {
     "title": "Commander",
@@ -250,7 +267,16 @@
     "color": "Couleur",
     "orderPlacedMessage": "Merci pour votre commande. Nous vous enverrons un e-mail de confirmation sous peu.",
     "trackingInfo": "Vous pouvez suivre l'état de votre commande dans la section « Mes commandes » de votre profil.",
-    "goHome": "Aller à l'accueil"
+    "goHome": "Aller à l'accueil",
+    "emptyCartMessage": "Ajoutez des articles pour commander",
+    "itemsCount": "{{count}} article(s)",
+    "noPaymentMethods": "Aucun mode de paiement disponible",
+    "noShippingMethods": "Aucun mode de livraison disponible",
+    "paymentMethodSubtitle": "Comment souhaitez-vous payer ?",
+    "cibCardDescription": "Payez en toute sécurité avec votre carte CIB",
+    "baridimobDescription": "Payez avec le portefeuille mobile BaridiMob",
+    "cashOnDelivery": "Paiement à la livraison",
+    "cashOnDeliveryDescription": "Payez à la réception de votre commande"
   },
   "info": {
     "indexTitle": "Aide & infos",
@@ -405,7 +431,21 @@
     "languageDesc": "Choisissez votre langue préférée",
     "orderUpdates": "Mises à jour des commandes",
     "promotions": "Promotions et offres",
-    "newsletter": "Newsletter"
+    "newsletter": "Newsletter",
+    "changePassword": "Changer le mot de passe",
+    "currentPassword": "Mot de passe actuel",
+    "currentPasswordPlaceholder": "Saisissez le mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "newPasswordPlaceholder": "Saisissez le nouveau mot de passe",
+    "confirmNewPassword": "Confirmer le nouveau mot de passe",
+    "confirmNewPasswordPlaceholder": "Confirmez le nouveau mot de passe",
+    "passwordRequirements": "Le mot de passe doit comporter au moins 6 caractères",
+    "passwordChanged": "Mot de passe modifié",
+    "passwordChangedMessage": "Votre mot de passe a été modifié avec succès",
+    "passwordChangeError": "Échec du changement de mot de passe",
+    "orderUpdatesDesc": "Soyez informé des changements de statut de commande",
+    "promotionsDesc": "Recevez des nouvelles des soldes et offres spéciales",
+    "newsletterDesc": "Conseils mode et tendances chaque semaine"
   },
   "orders": {
     "title": "Mes commandes",
@@ -429,7 +469,8 @@
       "processing": "En cours",
       "shipped": "Expédiée",
       "delivered": "Livrée",
-      "cancelled": "Annulée"
+      "cancelled": "Annulée",
+      "confirmed": "Confirmée"
     },
     "itemCount": "{{count}} article(s)",
     "orderCount": "{{count}} commande(s)",
@@ -456,6 +497,25 @@
       "Modifying": "En modification",
       "ArrangingAdditionalPayment": "Paiement supplémentaire requis",
       "Cancelled": "Annulée"
+    },
+    "item": "article",
+    "items": "articles",
+    "noAddress": "Aucune adresse fournie",
+    "notFound": "Commande introuvable",
+    "notPaid": "Pas encore payé",
+    "viewDetails": "Voir les détails",
+    "timeline": {
+      "title": "Suivi de la commande",
+      "orderPlaced": "Commande passée",
+      "orderPlacedDesc": "Votre commande a été reçue",
+      "orderConfirmed": "Commande confirmée",
+      "orderConfirmedDesc": "Votre commande est en préparation",
+      "orderShipped": "Commande expédiée",
+      "orderShippedDesc": "Votre commande est en route",
+      "orderDelivered": "Commande livrée",
+      "orderDeliveredDesc": "Votre commande a été livrée",
+      "orderCancelled": "Commande annulée",
+      "orderCancelledDesc": "Cette commande a été annulée"
     }
   },
   "errors": {
@@ -494,7 +554,22 @@
     "reset": "Réinitialiser",
     "priceRange": "Prix (DZD)",
     "from": "A partir de",
-    "to": "à"
+    "to": "à",
+    "title": "Filtres",
+    "sortBy": "Trier par",
+    "categories": "Catégories",
+    "other": "Autres",
+    "inStockOnly": "En stock uniquement",
+    "onSale": "En promotion",
+    "apply": "Appliquer les filtres",
+    "applyWithCount": "Appliquer les filtres ({{count}})",
+    "sortNewest": "Plus récent",
+    "sortOldest": "Plus ancien",
+    "sortNameAsc": "Nom : A à Z",
+    "sortNameDesc": "Nom : Z à A",
+    "priceUnder": "Moins de {{max}} DZD",
+    "priceBetween": "{{min}} – {{max}} DZD",
+    "priceOver": "Plus de {{min}} DZD"
   },
   "validation": {
     "emailInvalid": "Adresse e-mail invalide",
@@ -531,5 +606,37 @@
     "results": "résultats",
     "resultsFor": "{{count}} résultat(s) pour « {{query}} »",
     "placeholder": "Rechercher des produits..."
+  },
+  "payment": {
+    "success": {
+      "title": "Paiement réussi !"
+    },
+    "failure": {
+      "title": "Échec du paiement"
+    },
+    "cancelled": {
+      "title": "Paiement annulé"
+    },
+    "unknown": {
+      "title": "Statut inconnu",
+      "message": "Le statut du paiement est inconnu."
+    },
+    "viewOrder": "Voir la commande",
+    "continueShopping": "Continuer vos achats",
+    "goHome": "Aller à l'accueil",
+    "tryAgain": "Réessayer",
+    "contactSupport": "Contacter le support",
+    "completePayment": "Finaliser le paiement",
+    "cancelPayment": "Annuler le paiement",
+    "cancelPaymentMessage": "Êtes-vous sûr de vouloir annuler ce paiement ?",
+    "error": "Erreur de paiement",
+    "initError": "Impossible d'initialiser le paiement. Veuillez réessayer.",
+    "missingParams": "Informations de paiement manquantes.",
+    "loadError": "Erreur de la passerelle de paiement",
+    "loadErrorMessage": "Impossible de charger la passerelle de paiement. Veuillez réessayer.",
+    "loadingGateway": "Chargement de la passerelle de paiement…",
+    "orderNumber": "Numéro de commande",
+    "transactionId": "ID de transaction",
+    "paymentMethod": "Mode de paiement"
   }
 }

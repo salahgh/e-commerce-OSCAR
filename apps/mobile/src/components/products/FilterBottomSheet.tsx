@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   View,
   Text,
@@ -56,22 +57,7 @@ interface FilterBottomSheetProps {
   colorFacets?: ColorFacetOption[];
 }
 
-const sortOptions = [
-  { value: 'newest', label: 'Newest First' },
-  { value: 'oldest', label: 'Oldest First' },
-  { value: 'price_low', label: 'Price: Low to High' },
-  { value: 'price_high', label: 'Price: High to Low' },
-  { value: 'name_asc', label: 'Name: A to Z' },
-  { value: 'name_desc', label: 'Name: Z to A' },
-];
-
-const priceRanges = [
-  { min: 0, max: 2000, label: 'Under 2,000 DZD' },
-  { min: 2000, max: 5000, label: '2,000 - 5,000 DZD' },
-  { min: 5000, max: 10000, label: '5,000 - 10,000 DZD' },
-  { min: 10000, max: 20000, label: '10,000 - 20,000 DZD' },
-  { min: 20000, max: Infinity, label: 'Over 20,000 DZD' },
-];
+const groupNum = (n: number) => n.toLocaleString('en-US');
 
 export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
   visible,
@@ -95,6 +81,24 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
   const insets = useSafeAreaInsets();
   const translateY = useSharedValue(0);
   const styles = useStyles();
+  const { t } = useTranslation();
+
+  const sortOptions = [
+    { value: 'newest', label: t('filters.sortNewest') },
+    { value: 'oldest', label: t('filters.sortOldest') },
+    { value: 'price_low', label: t('filters.priceLowHigh') },
+    { value: 'price_high', label: t('filters.priceHighLow') },
+    { value: 'name_asc', label: t('filters.sortNameAsc') },
+    { value: 'name_desc', label: t('filters.sortNameDesc') },
+  ];
+
+  const priceRanges = [
+    { min: 0, max: 2000, label: t('filters.priceUnder', { max: groupNum(2000) }) },
+    { min: 2000, max: 5000, label: t('filters.priceBetween', { min: groupNum(2000), max: groupNum(5000) }) },
+    { min: 5000, max: 10000, label: t('filters.priceBetween', { min: groupNum(5000), max: groupNum(10000) }) },
+    { min: 10000, max: 20000, label: t('filters.priceBetween', { min: groupNum(10000), max: groupNum(20000) }) },
+    { min: 20000, max: Infinity, label: t('filters.priceOver', { min: groupNum(20000) }) },
+  ];
 
   const [filters, setFilters] = useState<FilterOptions>(initialFilters);
 
@@ -186,10 +190,10 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
 
             {/* Header */}
             <View style={styles.header}>
-              <Text style={styles.title}>Filters</Text>
+              <Text style={styles.title}>{t('filters.title')}</Text>
               {activeFiltersCount > 0 ? (
                 <TouchableOpacity onPress={handleReset}>
-                  <Text style={styles.resetText}>Reset All</Text>
+                  <Text style={styles.resetText}>{t('common.clearAll')}</Text>
                 </TouchableOpacity>
               ) : null}
             </View>
@@ -201,7 +205,7 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
             >
               {/* Sort By */}
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Sort By</Text>
+                <Text style={styles.sectionTitle}>{t('filters.sortBy')}</Text>
                 <View style={styles.chipContainer}>
                   {sortOptions.map((option) => (
                     <Chip
@@ -222,7 +226,7 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
               {/* Categories */}
               {availableCategories.length > 0 ? (
                 <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Categories</Text>
+                  <Text style={styles.sectionTitle}>{t('filters.categories')}</Text>
                   <View style={styles.chipContainer}>
                     {availableCategories.map((category) => (
                       <Chip
@@ -238,7 +242,7 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
 
               {/* Price Range */}
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Price Range</Text>
+                <Text style={styles.sectionTitle}>{t('filters.priceRange')}</Text>
                 <View style={styles.chipContainer}>
                   {priceRanges.map((range, index) => (
                     <Chip
@@ -256,7 +260,7 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
 
               {/* Sizes */}
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Size</Text>
+                <Text style={styles.sectionTitle}>{t('products.size')}</Text>
                 <View style={styles.chipContainer}>
                   {availableSizes.map((size) => (
                     <Chip
@@ -271,7 +275,7 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
 
               {/* Colors */}
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Color</Text>
+                <Text style={styles.sectionTitle}>{t('products.color')}</Text>
                 <View style={styles.chipContainer}>
                   {colorEntries.map((c) => (
                     <Chip
@@ -286,16 +290,16 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
 
               {/* Additional Filters */}
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Other</Text>
+                <Text style={styles.sectionTitle}>{t('filters.other')}</Text>
                 <Checkbox
                   checked={filters.inStock || false}
                   onChange={(checked) => setFilters({ ...filters, inStock: checked })}
-                  label="In Stock Only"
+                  label={t('filters.inStockOnly')}
                 />
                 <Checkbox
                   checked={filters.onSale || false}
                   onChange={(checked) => setFilters({ ...filters, onSale: checked })}
-                  label="On Sale"
+                  label={t('filters.onSale')}
                 />
               </View>
             </ScrollView>
@@ -303,7 +307,11 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
             {/* Footer */}
             <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>
               <Button
-                title={`Apply Filters${activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}`}
+                title={
+                  activeFiltersCount > 0
+                    ? t('filters.applyWithCount', { count: activeFiltersCount })
+                    : t('filters.apply')
+                }
                 onPress={handleApply}
                 fullWidth
               />

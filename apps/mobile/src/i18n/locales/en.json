@@ -30,7 +30,11 @@
     "errorBoundaryTitle": "Unexpected error",
     "errorBoundaryMessage": "The app ran into a problem. You can try again or go back home.",
     "goHome": "Go home",
-    "clearAll": "Clear All"
+    "clearAll": "Clear All",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "noOptionsFound": "No options found"
   },
   "address": {
     "title": "My Addresses",
@@ -107,7 +111,14 @@
     "checkEmail": "Check your email",
     "resetEmailSent": "We've sent password reset instructions to your email address.",
     "checkSpam": "Didn't receive the email? Check your spam folder.",
-    "failedToSendReset": "Failed to send. Please try again."
+    "failedToSendReset": "Failed to send. Please try again.",
+    "invalidToken": "Invalid or expired link",
+    "passwordChanged": "Password changed",
+    "redirecting": "Redirecting…",
+    "resetPassword": "Reset password",
+    "resetPasswordDesc": "Enter your new password.",
+    "resetPasswordTitle": "New password",
+    "verifySuccess": "Email verified"
   },
   "tabs": {
     "home": "Home",
@@ -164,7 +175,11 @@
       "priceAsc": "Price: Low to High",
       "priceDesc": "Price: High to Low"
     },
-    "selectOption": "Select {{option}}"
+    "selectOption": "Select {{option}}",
+    "allCategories": "All",
+    "lowStock": "Low Stock",
+    "notFound": "Product not found",
+    "pinchToZoom": "Pinch to zoom"
   },
   "cart": {
     "title": "Cart",
@@ -181,7 +196,9 @@
     "totalAfterDiscount": "Total after discount",
     "startShopping": "Start shopping",
     "empty": "Your cart is empty",
-    "invalidCode": "Invalid code"
+    "invalidCode": "Invalid code",
+    "addToCartError": "Failed to add item to cart",
+    "addedToCart": "Added to Cart"
   },
   "checkout": {
     "title": "Order",
@@ -250,7 +267,16 @@
     "color": "Color",
     "orderPlacedMessage": "Thank you for your order. We will send you a confirmation email shortly.",
     "trackingInfo": "You can track your order status in the \"My Orders\" section of your profile.",
-    "goHome": "Go to Home"
+    "goHome": "Go to Home",
+    "emptyCartMessage": "Add some items to checkout",
+    "itemsCount": "{{count}} item(s)",
+    "noPaymentMethods": "No payment methods available",
+    "noShippingMethods": "No delivery methods available",
+    "paymentMethodSubtitle": "How would you like to pay?",
+    "cibCardDescription": "Pay securely with your CIB card",
+    "baridimobDescription": "Pay with BaridiMob mobile wallet",
+    "cashOnDelivery": "Cash on Delivery",
+    "cashOnDeliveryDescription": "Pay when you receive your order"
   },
   "info": {
     "indexTitle": "Help & info",
@@ -405,7 +431,21 @@
     "languageDesc": "Select your preferred language",
     "orderUpdates": "Order Updates",
     "promotions": "Promotions & Offers",
-    "newsletter": "Newsletter"
+    "newsletter": "Newsletter",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "currentPasswordPlaceholder": "Enter current password",
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "Enter new password",
+    "confirmNewPassword": "Confirm New Password",
+    "confirmNewPasswordPlaceholder": "Confirm new password",
+    "passwordRequirements": "Password must be at least 6 characters long",
+    "passwordChanged": "Password Changed",
+    "passwordChangedMessage": "Your password has been changed successfully",
+    "passwordChangeError": "Failed to change password",
+    "orderUpdatesDesc": "Get notified about order status changes",
+    "promotionsDesc": "Receive updates about sales and special offers",
+    "newsletterDesc": "Weekly fashion tips and trends"
   },
   "orders": {
     "title": "My Orders",
@@ -429,7 +469,8 @@
       "processing": "Processing",
       "shipped": "Shipped",
       "delivered": "Delivered",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "confirmed": "Confirmed"
     },
     "itemCount": "{{count}} items",
     "orderCount": "{{count}} orders",
@@ -456,6 +497,25 @@
       "Modifying": "Modifying",
       "ArrangingAdditionalPayment": "Additional Payment Required",
       "Cancelled": "Cancelled"
+    },
+    "item": "item",
+    "items": "items",
+    "noAddress": "No address provided",
+    "notFound": "Order not found",
+    "notPaid": "Not paid yet",
+    "viewDetails": "View Details",
+    "timeline": {
+      "title": "Order Timeline",
+      "orderPlaced": "Order Placed",
+      "orderPlacedDesc": "Your order has been received",
+      "orderConfirmed": "Order Confirmed",
+      "orderConfirmedDesc": "Your order is being prepared",
+      "orderShipped": "Order Shipped",
+      "orderShippedDesc": "Your order is on its way",
+      "orderDelivered": "Order Delivered",
+      "orderDeliveredDesc": "Your order has been delivered",
+      "orderCancelled": "Order Cancelled",
+      "orderCancelledDesc": "This order has been cancelled"
     }
   },
   "errors": {
@@ -494,7 +554,22 @@
     "reset": "Reset",
     "priceRange": "Price (DZD)",
     "from": "From",
-    "to": "to"
+    "to": "to",
+    "title": "Filters",
+    "sortBy": "Sort By",
+    "categories": "Categories",
+    "other": "Other",
+    "inStockOnly": "In Stock Only",
+    "onSale": "On Sale",
+    "apply": "Apply Filters",
+    "applyWithCount": "Apply Filters ({{count}})",
+    "sortNewest": "Newest First",
+    "sortOldest": "Oldest First",
+    "sortNameAsc": "Name: A to Z",
+    "sortNameDesc": "Name: Z to A",
+    "priceUnder": "Under {{max}} DZD",
+    "priceBetween": "{{min}} – {{max}} DZD",
+    "priceOver": "Over {{min}} DZD"
   },
   "validation": {
     "emailInvalid": "Invalid email address",
@@ -531,5 +606,37 @@
     "results": "results",
     "resultsFor": "{{count}} results for \"{{query}}\"",
     "placeholder": "Search products..."
+  },
+  "payment": {
+    "success": {
+      "title": "Payment Successful!"
+    },
+    "failure": {
+      "title": "Payment Failed"
+    },
+    "cancelled": {
+      "title": "Payment Cancelled"
+    },
+    "unknown": {
+      "title": "Unknown Status",
+      "message": "Payment status is unknown."
+    },
+    "viewOrder": "View Order",
+    "continueShopping": "Continue Shopping",
+    "goHome": "Go to Home",
+    "tryAgain": "Try Again",
+    "contactSupport": "Contact Support",
+    "completePayment": "Complete Payment",
+    "cancelPayment": "Cancel Payment",
+    "cancelPaymentMessage": "Are you sure you want to cancel this payment?",
+    "error": "Payment Error",
+    "initError": "Unable to initialize payment. Please try again.",
+    "missingParams": "Missing payment information.",
+    "loadError": "Payment Gateway Error",
+    "loadErrorMessage": "Unable to load the payment gateway. Please try again.",
+    "loadingGateway": "Loading payment gateway…",
+    "orderNumber": "Order Number",
+    "transactionId": "Transaction ID",
+    "paymentMethod": "Payment Method"
   }
 }

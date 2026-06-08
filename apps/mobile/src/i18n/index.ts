@@ -59,17 +59,19 @@ export const changeLanguage = async (language: Language) => {
     // Change i18n language
     await i18n.changeLanguage(language);
 
-    // Handle RTL for Arabic
+    // Handle RTL for Arabic. Changing layout direction only takes effect after
+    // a reload, so force the direction then restart the JS runtime.
     const isRTL = language === LANGUAGES.AR;
     if (I18nManager.isRTL !== isRTL) {
+      I18nManager.allowRTL(isRTL);
       I18nManager.forceRTL(isRTL);
-      // Restart app to apply RTL changes
-      if (!__DEV__) {
-        await Updates.reloadAsync();
+      if (__DEV__) {
+        // In a dev/dev-client build, Updates.reloadAsync() is unavailable;
+        // use DevSettings to reload so the new layout direction applies.
+        const { DevSettings } = require('react-native');
+        DevSettings.reload();
       } else {
-        console.warn(
-          'RTL change requires app restart. In development, please reload the app manually.'
-        );
+        await Updates.reloadAsync();
       }
     }
   } catch (error) {

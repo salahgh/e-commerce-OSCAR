@@ -1,0 +1,61 @@
+appId: com.oscar.fashion
+name: Login -> Settings -> switch language (FR->EN) in one session
+---
+# Skip onboarding if present
+- runFlow:
+    when:
+      visible:
+        text: "Passer|Skip"
+    commands:
+      - tapOn:
+          text: "Passer|Skip"
+- extendedWaitUntil:
+    visible:
+      text: "Voir tout|Accueil"
+    timeout: 40000
+# Profile tab -> guest -> Se connecter
+- tapOn:
+    text: "Profil"
+- tapOn:
+    text: "Se connecter"
+- extendedWaitUntil:
+    visible:
+      text: "Entrez votre email"
+    timeout: 20000
+- tapOn:
+    text: "Entrez votre email"
+- inputText: "uat.maestro@oscar.test"
+- hideKeyboard
+- tapOn:
+    text: "Entrez votre mot de passe"
+- inputText: "Test1234!"
+- hideKeyboard
+- takeScreenshot: s01-login-filled
+- tapOn:
+    text: "Se connecter"
+# Wait until back on the profile (authenticated) screen
+- extendedWaitUntil:
+    visible:
+      text: "Paramètres"
+    timeout: 25000
+- takeScreenshot: s02-profile-authed
+# Open Settings
+- tapOn:
+    text: "Paramètres"
+- extendedWaitUntil:
+    visible:
+      text: "Langue"
+    timeout: 15000
+- takeScreenshot: s03-settings-fr
+- assertVisible:
+    text: "Langue"
+# Switch language FR -> EN (LTR, no reload). Verifies the language-switch fix.
+- tapOn:
+    text: "English"
+- extendedWaitUntil:
+    visible:
+      text: "Language"
+    timeout: 15000
+- assertVisible:
+    text: "Language"
+- takeScreenshot: s04-settings-en

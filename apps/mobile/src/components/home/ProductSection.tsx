@@ -9,6 +9,7 @@ import {
   Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { ProductCard, SimpleProduct } from '../products/ProductCard';
 import { colors, spacing, typography } from '../../theme';
 
@@ -30,6 +31,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   loading = false,
 }) => {
   const router = useRouter();
+  const { t } = useTranslation();
 
   if (products.length === 0 && !loading) return null;
 
@@ -52,7 +54,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
         <Text style={styles.title}>{title}</Text>
         {showSeeAll && onSeeAll && (
           <TouchableOpacity onPress={onSeeAll} activeOpacity={0.7}>
-            <Text style={styles.seeAll}>See All</Text>
+            <Text style={styles.seeAll}>{t('common.viewAll')}</Text>
           </TouchableOpacity>
         )}
       </View>

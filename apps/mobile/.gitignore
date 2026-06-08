@@ -44,3 +44,7 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Maestro test screenshots
+.maestro/**/*.png
+*.maestro-screenshot.png

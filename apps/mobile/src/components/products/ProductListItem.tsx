@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { SimpleProduct } from './ProductCard';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
@@ -21,6 +22,7 @@ export const ProductListItem: React.FC<ProductListItemProps> = ({
   const router = useRouter();
   const colors = useThemeColors();
   const styles = useStyles();
+  const { t } = useTranslation();
 
   const handlePress = () => {
     if (onPress) {
@@ -48,7 +50,7 @@ export const ProductListItem: React.FC<ProductListItemProps> = ({
         {/* Out of Stock Overlay */}
         {isOutOfStock && (
           <View style={styles.stockOverlay}>
-            <Text style={styles.stockText}>Out of Stock</Text>
+            <Text style={styles.stockText}>{t('products.outOfStock')}</Text>
           </View>
         )}
       </View>

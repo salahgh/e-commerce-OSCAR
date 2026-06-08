@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { changeLanguage, type Language } from '../../src/i18n';
 import { SettingsItem } from '../../src/components/profile';
 import { useThemeMode, ThemeMode } from '../../src/contexts/ThemeContext';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
@@ -28,8 +29,9 @@ export default function SettingsScreen() {
   ];
 
   const handleLanguageChange = async (languageCode: string) => {
-    await i18n.changeLanguage(languageCode);
-    // Optionally save to storage
+    // Use the shared wrapper so the choice is persisted (AsyncStorage) and
+    // RTL/LTR layout direction is applied (with reload) when needed.
+    await changeLanguage(languageCode as Language);
   };
 
   const getCurrentLanguage = () => {

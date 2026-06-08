@@ -1,0 +1,24 @@
+appId: com.oscar.fashion
+name: Complete onboarding and reach home (FR)
+---
+- openLink: "oscar-fashion://expo-development-client/?url=http://localhost:8081"
+- extendedWaitUntil:
+    visible:
+      id: ".*"
+    timeout: 60000
+# Onboarding may or may not show (depends on persisted flag). Skip if present.
+- runFlow:
+    when:
+      visible:
+        text: "Passer|Skip|تخطّي"
+    commands:
+      - tapOn:
+          text: "Passer|Skip|تخطّي"
+# Wait for the home content to finish loading (auth spinner -> tabs -> products)
+- extendedWaitUntil:
+    visible:
+      text: "Voir tout|عرض الكل|See All"
+    timeout: 45000
+- takeScreenshot: home-loaded
+- assertVisible:
+    text: "Voir tout|عرض الكل|See All"

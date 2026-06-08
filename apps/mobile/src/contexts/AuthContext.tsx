@@ -20,6 +20,7 @@ import {
   useVerifyCustomerAccountMutation,
   useRefreshVerificationMutation,
 } from '../graphql/generated/graphql';
+import i18n from '../i18n';
 
 interface User {
   id: string;
@@ -215,7 +216,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         if (!result?.registerCustomerAccount) {
-          throw new Error('Registration failed');
+          throw new Error(i18n.t('errors.genericError'));
         }
 
         const registerResult = result.registerCustomerAccount;
@@ -225,10 +226,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return { success: false, message: errorResult.message };
         }
 
-        return { success: true, message: 'Registration successful. Please verify your email.' };
+        return { success: true, message: i18n.t('auth.registerSuccess') };
       } catch (error) {
         console.error('Registration error:', error);
-        const message = error instanceof Error ? error.message : 'Registration failed';
+        const message = error instanceof Error ? error.message : i18n.t('errors.genericError');
         return { success: false, message };
       }
     },
@@ -257,7 +258,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         if (!data?.requestPasswordReset) {
-          return { success: false, message: 'Password reset request failed' };
+          return { success: false, message: i18n.t('auth.failedToSendReset') };
         }
 
         const result = data.requestPasswordReset;
@@ -267,10 +268,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return { success: false, message: errorResult.message };
         }
 
-        return { success: true, message: 'Password reset email sent' };
+        return { success: true, message: i18n.t('auth.resetEmailSent') };
       } catch (error) {
         console.error('Password reset error:', error);
-        const message = error instanceof Error ? error.message : 'Password reset failed';
+        const message = error instanceof Error ? error.message : i18n.t('auth.failedToSendReset');
         return { success: false, message };
       }
     },
@@ -282,14 +283,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const { data } = await resetPasswordMutation({ variables: { token, password } });
         const result = data?.resetPassword as any;
-        if (!result) return { success: false, message: 'Password reset failed' };
+        if (!result) return { success: false, message: i18n.t('auth.failedToSendReset') };
         if (result.__typename === 'CurrentUser') {
           await refetchUser();
           return { success: true };
         }
-        return { success: false, message: result.message ?? 'Invalid or expired link' };
+        return { success: false, message: result.message ?? i18n.t('auth.invalidToken') };
       } catch (err) {
-        return { success: false, message: err instanceof Error ? err.message : 'Password reset failed' };
+        return { success: false, message: err instanceof Error ? err.message : i18n.t('auth.failedToSendReset') };
       }
     },
     [resetPasswordMutation],
@@ -300,14 +301,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const { data } = await verifyAccountMutation({ variables: { token, password } });
         const result = data?.verifyCustomerAccount as any;
-        if (!result) return { success: false, message: 'Verification failed' };
+        if (!result) return { success: false, message: i18n.t('errors.genericError') };
         if (result.__typename === 'CurrentUser') {
           await refetchUser();
           return { success: true };
         }
-        return { success: false, message: result.message ?? 'Invalid or expired link' };
+        return { success: false, message: result.message ?? i18n.t('auth.invalidToken') };
       } catch (err) {
-        return { success: false, message: err instanceof Error ? err.message : 'Verification failed' };
+        return { success: false, message: err instanceof Error ? err.message : i18n.t('errors.genericError') };
       }
     },
     [verifyAccountMutation],
@@ -318,11 +319,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const { data } = await refreshVerificationMutation({ variables: { emailAddress: email } });
         const result = data?.refreshCustomerVerification as any;
-        if (!result) return { success: false, message: 'Failed to resend' };
+        if (!result) return { success: false, message: i18n.t('auth.failedToSendReset') };
         if (result.__typename === 'Success') return { success: true };
-        return { success: false, message: result.message ?? 'Failed to resend' };
+        return { success: false, message: result.message ?? i18n.t('auth.failedToSendReset') };
       } catch (err) {
-        return { success: false, message: err instanceof Error ? err.message : 'Failed to resend' };
+        return { success: false, message: err instanceof Error ? err.message : i18n.t('auth.failedToSendReset') };
       }
     },
     [refreshVerificationMutation],
