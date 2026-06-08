@@ -1,0 +1,17 @@
+appId: com.oscar.fashion
+name: Capture login email screen (no reload, from current state)
+---
+# App is already loaded on Home — navigate without an openLink reload
+- tapOn:
+    text: "Profil"
+- extendedWaitUntil:
+    visible:
+      text: "تسجيل الدخول|Se connecter|Sign in|Connexion|Login"
+    timeout: 15000
+- tapOn:
+    text: "تسجيل الدخول|Se connecter|Sign in|Connexion|Login"
+- extendedWaitUntil:
+    visible:
+      text: ".*(Entrez votre email|بريدك|e-?mail|E-mail|email).*"
+    timeout: 15000
+- takeScreenshot: email-check
