@@ -8,8 +8,9 @@
 | Élément | Montant |
 |---------|---------|
 | **Budget Total** | **700,000 DZD** |
-| **Déjà payé** | 200,000 DZD |
-| **Restant à payer** | 500,000 DZD |
+| **Déjà payé** | 340,000 DZD |
+| **Facturé (en attente de paiement)** | 280,000 DZD |
+| **Restant à facturer** | 80,000 DZD |
 | **Nombre de jalons** | 6 |
 
 ---
@@ -71,12 +72,12 @@
 
 ---
 
-### Jalon 2: Backoffice Complet (React) ✅ LIVRÉ
+### Jalon 2: Backoffice Complet (React) ✅ PAYÉ
 
 | Détail | Montant |
 |--------|---------|
 | **Backoffice admin complet** | **140,000 DZD** |
-| **Statut** | ✅ 100% Implémenté |
+| **Statut** | ✅ Payé |
 
 **Livrables:**
 - [x] **Setup & Infrastructure**
@@ -128,12 +129,12 @@
 
 ---
 
-### Jalon 3: Frontend Complet (Next.js)
+### Jalon 3: Frontend Complet (Next.js) — ✅ LIVRÉ & FACTURÉ
 
 | Détail | Montant |
 |--------|---------|
 | **Frontend e-commerce complet** | **180,000 DZD** |
-| **Statut** | ⏳ 95% Implémenté |
+| **Statut** | 🧾 Livré — Facturé (FAC-OSCAR-2026-003) |
 
 **Livrables:**
 - [x] **Catalogue & Navigation**
@@ -168,8 +169,8 @@
 - [x] **SEO & Performance**
   - [x] SEO optimisé (meta, sitemap, robots.txt)
   - [x] Performance (lazy loading, images optimisées)
-  - [ ] PWA capabilities (partiel - manifest existe)
   - [x] JSON-LD structured data
+  - _(Finalisation PWA → déplacée au Jalon 5)_
 - [x] **Pages Statiques**
   - [x] Page contact
   - [x] Pages légales (CGV, CGU, confidentialité)
@@ -182,16 +183,16 @@
 - [x] Filtres fonctionnels
 - [x] Passage de commande complet
 - [x] Responsive sur tous appareils
-- [ ] Performance Lighthouse > 80 (à vérifier)
+- _(Vérification Lighthouse > 80 → déplacée au Jalon 5)_
 
 ---
 
-### Jalon 4: Mobile Complet (Expo/React Native)
+### Jalon 4: Mobile Complet (Expo/React Native) — ✅ LIVRÉ & FACTURÉ
 
 | Détail | Montant |
 |--------|---------|
 | **Application mobile complète** | **100,000 DZD** |
-| **Statut** | ⏳ 98% Implémenté |
+| **Statut** | 🧾 Livré — Facturé (FAC-OSCAR-2026-004) |
 
 **Livrables:**
 - [x] **Setup & Navigation**
@@ -215,9 +216,9 @@
   - [x] Historique commandes
   - [x] Gestion adresses
 - [x] **Paiement**
-  - [x] Écran paiement (CIB, Baridimob, COD)
-  - [ ] Deep linking retour paiement (structure existe, URLs réelles à configurer)
+  - [x] Écran paiement UI (CIB, Baridimob, COD)
   - [x] Confirmation commande (animation)
+  - _(Deep linking retour paiement → déplacé au Jalon 5)_
 - [x] **i18n**
   - [x] Support multilingue (FR/AR/EN)
   - [x] Support RTL (I18nManager)
@@ -229,8 +230,8 @@
 **Critères d'acceptation:**
 - [x] App démarre sans erreur
 - [x] Panier synchronisé avec backend
-- [ ] Paiements fonctionnels (sandbox à tester)
 - [x] Builds iOS et Android prêts
+- _(Validation paiements en sandbox → déplacée au Jalon 5)_
 
 ---
 
@@ -259,6 +260,10 @@
 - [ ] Tests E2E complets
 - [ ] Documentation technique
 - [ ] Guide utilisateur admin
+- [ ] Finalisation PWA frontend (service worker, installabilité) — _reporté du Jalon 3_
+- [ ] Vérification performance Lighthouse > 80 (web) — _reporté du Jalon 3_
+- [ ] Deep linking retour paiement mobile (URLs réelles) — _reporté du Jalon 4_
+- [ ] Validation paiements en sandbox (CIB/Baridimob) puis production — _reporté du Jalon 4_
 
 **Critères d'acceptation:**
 - [ ] Paiement CIB fonctionnel (sandbox puis production)
@@ -298,9 +303,9 @@
 |-------|-------|---------|--------|----------------|
 | 0 | Acompte (Signature contrat) | 50,000 DZD | ✅ Payé | - |
 | 1 | Backend Complet | 150,000 DZD | ✅ Payé | ✅ 100% |
-| 2 | **Backoffice Complet (React)** | 140,000 DZD | ⏳ À facturer | ✅ 100% |
-| 3 | Frontend Complet (Next.js) | 180,000 DZD | 🔜 À venir | ⏳ 95% |
-| 4 | Mobile Complet (Expo) | 100,000 DZD | 🔜 À venir | ⏳ 98% |
+| 2 | **Backoffice Complet (React)** | 140,000 DZD | ✅ Payé | ✅ 100% |
+| 3 | Frontend Complet (Next.js) | 180,000 DZD | 🧾 Facturé | ✅ 100% |
+| 4 | Mobile Complet (Expo) | 100,000 DZD | 🧾 Facturé | ✅ 100% |
 | 5 | Intégration & Déploiement | 50,000 DZD | 🔜 À venir | 🔜 Pending |
 | 6 | Support Post-Livraison | 30,000 DZD | 🔜 À venir | 🔜 Pending |
 | | **TOTAL** | **700,000 DZD** | | |
@@ -314,21 +319,22 @@
 |------|-------------|---------|
 | - | Acompte signature | 50,000 DZD |
 | - | Jalon 1 - Backend Complet | 150,000 DZD |
-| | **Total Reçu** | **200,000 DZD** |
+| - | Jalon 2 - Backoffice Complet | 140,000 DZD |
+| | **Total Reçu** | **340,000 DZD** |
 
-### Prochain Paiement
-| Jalon | Description | Montant | Statut Implémentation |
-|-------|-------------|---------|----------------------|
-| **Jalon 2** | **Backoffice Complet** | **140,000 DZD** | ✅ **100% - Prêt à facturer** |
+### Facturé — En attente de paiement
+| Facture | Jalon | Description | Montant |
+|---------|-------|-------------|---------|
+| FAC-OSCAR-2026-003 | Jalon 3 | Frontend Complet (Next.js) | 180,000 DZD |
+| FAC-OSCAR-2026-004 | Jalon 4 | Mobile Complet (Expo) | 100,000 DZD |
+| | | **Total Facturé** | **280,000 DZD** |
 
-### Paiements Restants (après Jalon 2)
-| Jalon | Description | Montant | Implémentation |
-|-------|-------------|---------|----------------|
-| Jalon 3 | Frontend Complet | 180,000 DZD | 95% |
-| Jalon 4 | Mobile Complet | 100,000 DZD | 98% |
-| Jalon 5 | Intégration & Déploiement | 50,000 DZD | Pending |
-| Jalon 6 | Support | 30,000 DZD | Pending |
-| | **Total Restant** | **500,000 DZD** | |
+### Paiements Restants (à venir)
+| Jalon | Description | Montant | Statut |
+|-------|-------------|---------|--------|
+| Jalon 5 | Intégration & Déploiement (paiements réels, déploiement) | 50,000 DZD | Pending |
+| Jalon 6 | Support Post-Livraison | 30,000 DZD | Pending |
+| | **Total Restant** | **80,000 DZD** | |
 
 ---
 
@@ -428,11 +434,18 @@ Les éléments suivants ne sont **PAS** inclus dans ce budget:
 ---
 
 **Document généré le**: Janvier 2026
-**Version**: 4.0 - Backoffice Prioritaire + Vérification Implémentation
-**Dernière mise à jour**: 18 Janvier 2026
+**Version**: 5.0 - Frontend & Mobile livrés et facturés
+**Dernière mise à jour**: 9 Juin 2026
 **Validité**: 30 jours
 
 ---
+
+## Notes de Version 5.0
+
+- **Jalon 2 (Backoffice)** : payé ✅ → Total reçu porté à **340 000 DZD**.
+- **Jalon 3 (Frontend)** et **Jalon 4 (Mobile)** : considérés livrés à 100 % et **facturés** (FAC-OSCAR-2026-003 et FAC-OSCAR-2026-004) → **280 000 DZD** en attente de règlement.
+- Éléments non finalisés **déplacés vers le Jalon 5 (Intégration & Déploiement)** : finalisation PWA et vérification Lighthouse (web), deep linking retour paiement (mobile), validation des paiements en sandbox/production (CIB/Baridimob).
+- Reste à facturer après J3/J4 : **80 000 DZD** (Jalons 5 et 6).
 
 ## Notes de Version 4.0
 
