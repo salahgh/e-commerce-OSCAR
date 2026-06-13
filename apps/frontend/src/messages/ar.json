@@ -366,7 +366,10 @@
     "sizeGuideHeaderChest": "الصدر",
     "sizeGuideHeaderWaist": "الخصر",
     "sizeGuideHeaderHip": "الورك",
-    "sizeGuideFootnote": "نصيحة: قس قطعة تناسبك جيدا وقارنها."
+    "sizeGuideFootnote": "نصيحة: قس قطعة تناسبك جيدا وقارنها.",
+    "detailsTitle": "تفاصيل المنتج",
+    "buyNow": "اشتري الآن",
+    "viewAll": "عرض الكل"
   },
   "InfoPage": {
     "breadcrumbHome": "الرئيسية",

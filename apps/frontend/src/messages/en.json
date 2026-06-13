@@ -366,7 +366,10 @@
     "sizeGuideHeaderChest": "Chest",
     "sizeGuideHeaderWaist": "Waist",
     "sizeGuideHeaderHip": "Hip",
-    "sizeGuideFootnote": "Tip: measure a garment that fits you well and compare."
+    "sizeGuideFootnote": "Tip: measure a garment that fits you well and compare.",
+    "detailsTitle": "Product details",
+    "buyNow": "Buy now",
+    "viewAll": "View all"
   },
   "InfoPage": {
     "breadcrumbHome": "Home",

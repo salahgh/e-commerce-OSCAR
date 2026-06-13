@@ -3,7 +3,8 @@
 import * as React from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { ShoppingBag, Heart, Share2, ZoomIn } from 'lucide-react';
+import { Heart, Minus, Plus, ChevronDown } from 'lucide-react';
+import { formatPrice } from '@oscar/shared';
 import {
   useGetProductBySlugQuery,
   useGetCollectionWithProductsQuery,
@@ -11,49 +12,47 @@ import {
 } from '@oscar/graphql-shop/generated';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/components/ui/Toast';
-import {
-  Alert,
-  Breadcrumb,
-  Button,
-  ColorSwatchGroup,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-  IconButton,
-  PriceDisplay,
-  QuantityStepper,
-  SizeButtonGroup,
-  Skeleton,
-  StockIndicator,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui';
-import {
-  ProductCard,
-  ProductCardSkeleton,
-  ProductGrid,
-  SizeGuideDialog,
-  type ProductCardData,
-} from '@/components/patterns';
+import { Alert, Skeleton } from '@/components/ui';
+import { ProductCard, type ProductCardData } from '@/components/patterns';
+import { SectionHeader } from '@/components/home';
+import { cn } from '@/lib/utils/cn';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { productSchema, breadcrumbSchema } from '@/lib/seo/schema';
 
+/** Size / colour selector chip — black when selected, outlined otherwise (Figma "متغيرات الأوسمة"). */
+function VariantChip({
+  selected,
+  children,
+  onClick,
+}: {
+  selected: boolean;
+  children: React.ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      className={cn(
+        'flex w-[131px] items-center justify-center rounded-lg border px-[26px] py-2 text-14 font-medium transition-colors',
+        selected
+          ? 'border-accent bg-accent text-content-inverse'
+          : 'border-[#e5e7eb] bg-white text-[#010b38] hover:border-[#c8c9cc]',
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
 export default function ProductPage() {
   const t = useTranslations('ProductPage');
-  const tTabs = useTranslations('ProductPage.tabs');
   const params = useParams<{ slug: string; locale: string }>();
   const slug = params?.slug as string;
 
-  const { data, loading, error } = useGetProductBySlugQuery({
-    variables: { slug },
-    skip: !slug,
-  });
+  const { data, loading, error } = useGetProductBySlugQuery({ variables: { slug }, skip: !slug });
 
-  // Related: products from this product's first collection if any, otherwise
-  // fall back to "recently added" (seed data has no collections assigned).
   const collectionSlug = data?.product?.collections?.[0]?.slug ?? '';
   const { data: collectionRelated } = useGetCollectionWithProductsQuery({
     variables: { slug: collectionSlug, take: 12, skip: 0 },
@@ -71,10 +70,9 @@ export default function ProductPage() {
   const [selectedColor, setSelectedColor] = React.useState<string>();
   const [selectedSize, setSelectedSize] = React.useState<string>();
   const [activeImage, setActiveImage] = React.useState(0);
+  const [detailsOpen, setDetailsOpen] = React.useState(true);
 
-  if (loading) {
-    return <PdpSkeleton />;
-  }
+  if (loading) return <PdpSkeleton />;
 
   if (error || !data?.product) {
     return (
@@ -90,7 +88,7 @@ export default function ProductPage() {
   const variants = product.variants;
   const images = product.assets.length > 0 ? product.assets : product.featuredAsset ? [product.featuredAsset] : [];
 
-  // Derive option groups
+  // Derive option groups (size / colour) from variants.
   const optionGroups = new Map<string, { code: string; name: string; values: Map<string, { code: string; name: string }> }>();
   for (const v of variants) {
     for (const opt of v.options) {
@@ -102,61 +100,45 @@ export default function ProductPage() {
   const colorGroup = Array.from(optionGroups.values()).find((g) => /couleur|color|لون/i.test(g.code) || /couleur|color|لون/i.test(g.name));
   const sizeGroup = Array.from(optionGroups.values()).find((g) => /taille|size|مقاس/i.test(g.code) || /taille|size|مقاس/i.test(g.name));
 
-  // Resolve selected variant
-  const selectedVariant = variants.find((v) => {
-    const matches = v.options.every((o) => {
-      if (colorGroup && o.group.code === colorGroup.code) return o.code === selectedColor;
-      if (sizeGroup && o.group.code === sizeGroup.code) return o.code === selectedSize;
-      return true;
-    });
-    return matches;
-  }) ?? variants[0];
+  const selectedVariant =
+    variants.find((v) =>
+      v.options.every((o) => {
+        if (colorGroup && o.group.code === colorGroup.code) return o.code === selectedColor;
+        if (sizeGroup && o.group.code === sizeGroup.code) return o.code === selectedSize;
+        return true;
+      }),
+    ) ?? variants[0];
 
-  const stockLevel = selectedVariant?.stockLevel;
-  const stockNumeric = stockLevel === 'IN_STOCK' ? 99 : stockLevel === 'OUT_OF_STOCK' ? 0 : stockLevel === 'LOW_STOCK' ? 3 : null;
+  const currency = selectedVariant?.currencyCode ?? 'DZD';
+  const price = selectedVariant?.priceWithTax ?? 0;
 
-  // Related products: prefer collection siblings, fall back to recent.
-  // Dedupe by product id, drop current product, cap at 4.
+  // Related products: collection siblings, else recent; dedupe + drop current.
   const relatedSource = collectionSlug
-    ? (collectionRelated?.collection?.productVariants.items ?? []).flatMap((v) =>
-        v.product ? [v.product] : [],
-      )
-    : recentRelated?.products.items ?? [];
+    ? (collectionRelated?.collection?.productVariants.items ?? []).flatMap((v) => (v.product ? [v.product] : []))
+    : (recentRelated?.products.items ?? []);
   const relatedSeen = new Set<string>([product.id]);
   const relatedProducts = relatedSource
-    .filter((p) => {
-      if (relatedSeen.has(p.id)) return false;
-      relatedSeen.add(p.id);
-      return true;
-    })
-    .slice(0, 4);
+    .filter((p) => (relatedSeen.has(p.id) ? false : (relatedSeen.add(p.id), true)))
+    .slice(0, 8);
 
   async function handleAddToCart() {
     if (!selectedVariant) return;
-    if (colorGroup && !selectedColor) {
-      toast.error(t('selectColor'));
-      return;
-    }
-    if (sizeGroup && !selectedSize) {
-      toast.error(t('selectSize'));
-      return;
-    }
+    if (colorGroup && !selectedColor) return toast.error(t('selectColor'));
+    if (sizeGroup && !selectedSize) return toast.error(t('selectSize'));
     await addToCart(selectedVariant.id, quantity);
   }
 
   const localePath = (path: string) =>
     params?.locale && params.locale !== 'fr' ? `/${params.locale}${path}` : path;
   const ldImage = images[0]?.preview ?? product.featuredAsset?.preview ?? undefined;
-  const brandName = product.facetValues.find((f) => /brand|marque/i.test(f.facet?.name ?? ''))?.name;
   const productLd = productSchema({
     name: product.name,
     description: product.description?.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() || undefined,
     image: ldImage,
     url: localePath(`/products/${slug}`),
     sku: selectedVariant?.sku,
-    brandName,
-    price: (selectedVariant?.priceWithTax ?? variants[0]?.priceWithTax ?? 0) / 100,
-    priceCurrency: selectedVariant?.currencyCode ?? 'DZD',
+    price: price / 100,
+    priceCurrency: currency,
     inStock: (selectedVariant?.stockLevel ?? 'IN_STOCK') !== 'OUT_OF_STOCK',
   });
   const breadcrumbLd = breadcrumbSchema([
@@ -166,197 +148,189 @@ export default function ProductPage() {
   ]);
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-8">
+    <div className="px-6 py-8">
       <JsonLd data={[productLd, breadcrumbLd]} />
-      <Breadcrumb
-        items={[
-          { label: t('breadcrumbHome'), href: '/' },
-          { label: t('breadcrumbProducts'), href: '/products' },
-          { label: product.name },
-        ]}
-      />
-
-      <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
-        {/* Gallery */}
-        <div className="flex flex-col gap-4 lg:flex-row-reverse">
-          <Dialog>
-            <DialogTrigger asChild>
-              <button
-                type="button"
-                aria-label={t('zoomAria')}
-                className="group relative aspect-square w-full overflow-hidden rounded border border-border bg-bg-muted lg:flex-1"
-              >
-                {images[activeImage] && (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={images[activeImage].preview}
-                    alt={product.name}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                  />
-                )}
-                <span className="absolute end-3 bottom-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-bg-elevated/90 text-content-strong opacity-0 transition-opacity group-hover:opacity-100">
-                  <ZoomIn className="h-5 w-5" />
-                </span>
-              </button>
-            </DialogTrigger>
-            <DialogContent
-              className="flex max-w-5xl items-center justify-center bg-transparent p-2 shadow-none"
-              hideClose
-            >
-              <DialogTitle className="sr-only">{t('zoomAria')}</DialogTitle>
+      <div className="mx-auto flex max-w-[1392px] flex-col gap-12">
+        {/* Detail row: gallery (right in RTL) + info (left in RTL) */}
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+          {/* Gallery */}
+          <div className="flex w-full gap-[23px] lg:w-[755px]">
+            {images.length > 1 && (
+              <div className="flex w-[88px] shrink-0 flex-col gap-4 sm:w-[126px] lg:gap-8">
+                {images.slice(0, 4).map((img, i) => (
+                  <button
+                    key={img.id}
+                    type="button"
+                    onClick={() => setActiveImage(i)}
+                    aria-label={t('viewLabel', { n: i + 1 })}
+                    className={cn(
+                      'relative aspect-[126/140] overflow-hidden rounded-[2px] border bg-bg-muted',
+                      i === activeImage ? 'border-accent' : 'border-transparent',
+                    )}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img.preview} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="relative aspect-[606/714] flex-1 overflow-hidden rounded-[2px] bg-bg-muted lg:h-[714px] lg:aspect-auto">
               {images[activeImage] && (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={images[activeImage].preview}
                   alt={product.name}
-                  className="max-h-[85vh] w-auto object-contain"
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
               )}
-            </DialogContent>
-          </Dialog>
-          {images.length > 1 && (
-            <ul className="flex gap-3 lg:flex-col">
-              {images.map((img, i) => (
-                <li key={img.id}>
-                  <button
-                    type="button"
-                    onClick={() => setActiveImage(i)}
-                    aria-label={t('viewLabel', { n: i + 1 })}
-                    className={`relative h-20 w-20 overflow-hidden rounded border-2 ${
-                      i === activeImage ? 'border-accent' : 'border-border hover:border-border-strong'
-                    }`}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.preview} alt="" className="h-full w-full object-cover" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Details */}
-        <div className="flex flex-col gap-6">
-          <header className="flex flex-col gap-3">
-            <h1 className="text-32 font-bold text-content-strong">{product.name}</h1>
-            <PriceDisplay
-              amount={selectedVariant?.priceWithTax ?? 0}
-              currencyCode={selectedVariant?.currencyCode ?? 'DZD'}
-              size="xl"
-            />
-            <StockIndicator stock={stockNumeric} />
-          </header>
-
-          {colorGroup && (
-            <div className="flex flex-col gap-2">
-              <p className="text-14 font-medium text-content-strong">{t('color')}</p>
-              <ColorSwatchGroup
-                value={selectedColor}
-                onValueChange={setSelectedColor}
-                options={Array.from(colorGroup.values.values()).map((v) => ({
-                  value: v.code,
-                  name: v.name,
-                  hex: /^#[0-9a-fA-F]{3,8}$/.test(v.code) ? v.code : '#999999',
-                }))}
-              />
             </div>
-          )}
+          </div>
 
-          {sizeGroup && (
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-14 font-medium text-content-strong">{t('size')}</p>
-                <SizeGuideDialog />
+          {/* Info */}
+          <div className="flex w-full flex-col gap-9 lg:w-[557px]">
+            <h1 className="w-full text-right font-dm text-36 font-bold leading-[1.5] text-accent">{product.name}</h1>
+
+            {/* Price */}
+            <div className="flex w-full items-center justify-end gap-4">
+              <span className="font-dm text-36 font-bold text-accent">{formatPrice(price, currency)}</span>
+            </div>
+
+            {/* Size */}
+            {sizeGroup && (
+              <div className="flex w-full flex-col items-end gap-3">
+                <p className="w-full text-right text-24 font-[600] leading-8 text-accent">{t('size')}</p>
+                <div className="flex w-full flex-wrap items-center justify-end gap-3">
+                  {Array.from(sizeGroup.values.values()).map((v) => (
+                    <VariantChip key={v.code} selected={selectedSize === v.code} onClick={() => setSelectedSize(v.code)}>
+                      {v.name}
+                    </VariantChip>
+                  ))}
+                </div>
               </div>
-              <SizeButtonGroup
-                value={selectedSize}
-                onValueChange={setSelectedSize}
-                options={Array.from(sizeGroup.values.values()).map((v) => ({
-                  value: v.code,
-                  label: v.name,
-                }))}
-              />
+            )}
+
+            {/* Colour */}
+            {colorGroup && (
+              <div className="flex w-full flex-col items-end gap-3">
+                <p className="w-full text-right text-24 font-[600] leading-8 text-accent">{t('color')}</p>
+                <div className="flex w-full flex-wrap items-center justify-end gap-3">
+                  {Array.from(colorGroup.values.values()).map((v) => (
+                    <VariantChip key={v.code} selected={selectedColor === v.code} onClick={() => setSelectedColor(v.code)}>
+                      {v.name}
+                    </VariantChip>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity */}
+            <div className="flex w-full flex-col items-end gap-3">
+              <p className="w-full text-right text-24 font-[600] leading-8 text-accent">{t('quantity')}</p>
+              <div className="flex w-full items-center justify-center gap-4 rounded-lg border border-[#e5e7eb] bg-white p-2">
+                <button
+                  type="button"
+                  aria-label="-"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="flex size-6 items-center justify-center text-[#010b38]"
+                >
+                  <Minus className="size-5" strokeWidth={1.75} />
+                </button>
+                <span className="flex-1 text-center text-18 text-[#010b38]">{quantity}</span>
+                <button
+                  type="button"
+                  aria-label="+"
+                  onClick={() => setQuantity((q) => Math.min(10, q + 1))}
+                  className="flex size-6 items-center justify-center text-[#010b38]"
+                >
+                  <Plus className="size-5" strokeWidth={1.75} />
+                </button>
+              </div>
             </div>
-          )}
 
-          <div className="flex flex-col gap-2">
-            <p className="text-14 font-medium text-content-strong">{t('quantity')}</p>
-            <QuantityStepper value={quantity} onChange={setQuantity} min={1} max={10} />
+            {/* Actions */}
+            <div className="flex w-full flex-col gap-4">
+              <div className="flex w-full items-stretch gap-4">
+                <button
+                  type="button"
+                  aria-label={t('wishlistAria')}
+                  className="flex size-12 shrink-0 items-center justify-center rounded-lg border border-[#c8c9cc] bg-white text-accent"
+                >
+                  <Heart className="size-6" strokeWidth={1.5} />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  className="flex flex-1 items-center justify-center rounded-lg bg-accent px-4 py-2 text-18 font-medium text-content-inverse"
+                >
+                  {t('addToCart')}
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                className="flex w-full items-center justify-center rounded-lg border border-[#c8c9cc] bg-white px-4 py-2 text-18 font-medium text-[#010b38]"
+              >
+                {t('buyNow')}
+              </button>
+            </div>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3 pt-4">
-            <Button size="lg" onClick={handleAddToCart} leadingIcon={<ShoppingBag className="h-5 w-5" />}>
-              {t('addToCart')}
-            </Button>
-            <IconButton aria-label={t('wishlistAria')} intent="secondary" size="lg">
-              <Heart className="h-5 w-5" />
-            </IconButton>
-            <IconButton aria-label={t('shareAria')} intent="ghost" size="lg">
-              <Share2 className="h-5 w-5" />
-            </IconButton>
-          </div>
-
-          <Tabs defaultValue="description" className="mt-4">
-            <TabsList>
-              <TabsTrigger value="description">{tTabs('description')}</TabsTrigger>
-              <TabsTrigger value="details">{tTabs('details')}</TabsTrigger>
-              <TabsTrigger value="shipping">{tTabs('shipping')}</TabsTrigger>
-            </TabsList>
-            <TabsContent value="description">
-              <p className="text-14 text-content-muted">{product.description}</p>
-            </TabsContent>
-            <TabsContent value="details">
-              <ul className="grid grid-cols-1 gap-2 text-14 md:grid-cols-2">
-                <li className="flex justify-between border-b border-border py-2">
-                  <span className="text-content-muted">{t('reference')}</span>
-                  <span className="font-medium text-content">{selectedVariant?.sku ?? '—'}</span>
-                </li>
-                {product.facetValues.slice(0, 4).map((f) => (
-                  <li key={f.id} className="flex justify-between border-b border-border py-2">
-                    <span className="text-content-muted">{f.facet.name}</span>
-                    <span className="font-medium text-content">{f.name}</span>
-                  </li>
-                ))}
-              </ul>
-            </TabsContent>
-            <TabsContent value="shipping">
-              <p className="text-14 text-content-muted">{t('shippingBody')}</p>
-            </TabsContent>
-          </Tabs>
         </div>
-      </div>
 
-      {relatedProducts.length > 0 && (
-        <section className="mt-8 border-t border-border pt-8">
-          <h2 className="mb-4 text-20 font-bold text-content-strong">{t('related')}</h2>
-          <ProductGrid columns={4}>
-            {relatedProducts.map((p) => {
-              const card: ProductCardData = {
-                slug: p.slug,
-                name: p.name,
-                imageUrl: p.featuredAsset?.preview ?? null,
-                price: p.variants[0]?.priceWithTax ?? 0,
-                currencyCode: p.variants[0]?.currencyCode ?? 'DZD',
-              };
-              return <ProductCard key={p.id} product={card} />;
-            })}
-          </ProductGrid>
-        </section>
-      )}
+        {/* Product details (collapsible) */}
+        <div className="border-y border-hairline">
+          <button
+            type="button"
+            onClick={() => setDetailsOpen((v) => !v)}
+            aria-expanded={detailsOpen}
+            className="flex w-full items-center justify-between gap-2 py-4 text-right"
+          >
+            <ChevronDown className={cn('size-6 shrink-0 text-accent transition-transform', !detailsOpen && 'rotate-180')} />
+            <span className="flex-1 text-right text-24 font-[600] leading-8 text-accent">{t('detailsTitle')}</span>
+          </button>
+          {detailsOpen && product.description && (
+            <div
+              className="pb-6 text-right text-16 leading-[30px] text-content-muted"
+              dir="auto"
+              dangerouslySetInnerHTML={{ __html: product.description }}
+            />
+          )}
+        </div>
+
+        {/* Related */}
+        {relatedProducts.length > 0 && (
+          <section className="flex flex-col gap-6">
+            <SectionHeader title={t('related')} viewAllHref="/products" viewAllLabel={t('viewAll')} />
+            <div className="-mx-1 flex gap-4 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {relatedProducts.map((p) => {
+                const card: ProductCardData = {
+                  slug: p.slug,
+                  name: p.name,
+                  imageUrl: p.featuredAsset?.preview ?? null,
+                  price: p.variants[0]?.priceWithTax ?? 0,
+                  currencyCode: p.variants[0]?.currencyCode ?? 'DZD',
+                };
+                return <ProductCard key={p.id} product={card} className="w-[260px] shrink-0" />;
+              })}
+            </div>
+          </section>
+        )}
+      </div>
     </div>
   );
 }
 
 function PdpSkeleton() {
   return (
-    <div className="mx-auto grid max-w-7xl gap-8 px-6 py-8 lg:grid-cols-2">
-      <Skeleton className="aspect-square w-full" />
-      <div className="flex flex-col gap-4">
-        <Skeleton className="h-10 w-3/4" />
-        <Skeleton className="h-8 w-1/3" />
-        <Skeleton className="h-6 w-full" />
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-12 w-1/2" />
+    <div className="px-6 py-8">
+      <div className="mx-auto flex max-w-[1392px] flex-col gap-8 lg:flex-row lg:items-start">
+        <Skeleton className="aspect-[606/714] w-full lg:w-[755px]" />
+        <div className="flex w-full flex-col gap-6 lg:w-[557px]">
+          <Skeleton className="h-12 w-3/4 self-end" />
+          <Skeleton className="h-9 w-1/3 self-end" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-12 w-full" />
+        </div>
       </div>
     </div>
   );

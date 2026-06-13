@@ -366,7 +366,10 @@
     "sizeGuideHeaderChest": "Poitrine",
     "sizeGuideHeaderWaist": "Tour de taille",
     "sizeGuideHeaderHip": "Hanches",
-    "sizeGuideFootnote": "Astuce : mesurez un vêtement qui vous va bien et comparez."
+    "sizeGuideFootnote": "Astuce : mesurez un vêtement qui vous va bien et comparez.",
+    "detailsTitle": "Détails du produit",
+    "buyNow": "Acheter maintenant",
+    "viewAll": "Voir tout"
   },
   "InfoPage": {
     "breadcrumbHome": "Accueil",
