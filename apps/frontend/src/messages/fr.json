@@ -333,7 +333,22 @@
     "sortNameAsc": "Nom (A → Z)",
     "sortNameDesc": "Nom (Z → A)",
     "errorTitle": "Erreur de chargement",
-    "empty": "Aucun produit trouvé."
+    "empty": "Aucun produit trouvé.",
+    "filterSize": "Taille",
+    "filterPrice": "Prix",
+    "filterSort": "Trier",
+    "priceTitle": "Prix (DZD)",
+    "from": "De",
+    "to": "À",
+    "reset": "Réinitialiser",
+    "save": "Enregistrer",
+    "sortTitle": "Trier par",
+    "sortPopular": "Les plus populaires",
+    "sortNewest": "Les plus récents",
+    "sortTopRated": "Les mieux notés",
+    "sortPriceAsc": "Prix croissant",
+    "sortPriceDesc": "Prix décroissant",
+    "clearAll": "Tout effacer"
   },
   "ProductPage": {
     "errorTitle": "Produit introuvable",

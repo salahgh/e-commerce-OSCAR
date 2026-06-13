@@ -333,7 +333,22 @@
     "sortNameAsc": "Name (A → Z)",
     "sortNameDesc": "Name (Z → A)",
     "errorTitle": "Failed to load",
-    "empty": "No products found."
+    "empty": "No products found.",
+    "filterSize": "Size",
+    "filterPrice": "Price",
+    "filterSort": "Sort",
+    "priceTitle": "Price (DZD)",
+    "from": "From",
+    "to": "To",
+    "reset": "Reset",
+    "save": "Save",
+    "sortTitle": "Sort by",
+    "sortPopular": "Most popular",
+    "sortNewest": "Newest",
+    "sortTopRated": "Top rated",
+    "sortPriceAsc": "Price: low to high",
+    "sortPriceDesc": "Price: high to low",
+    "clearAll": "Clear all"
   },
   "ProductPage": {
     "errorTitle": "Product not found",
