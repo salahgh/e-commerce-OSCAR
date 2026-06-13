@@ -115,14 +115,14 @@ export default function ProductsPage() {
       <div className="mx-auto flex max-w-[1392px] flex-col gap-6">
         <CategoryCircles size={78} align="end" limit={6} />
 
-        {/* Toolbar: filters (left) + title (right) */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+        {/* Toolbar: filters + title. Stacked on mobile (title above), row on desktop. */}
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <SizeFilter sizes={sizes} selected={selectedSizes} onApply={setSelectedSizes} />
             <PriceFilter bounds={bounds} value={priceRange} onApply={setPriceRange} />
             <SortMenu value={sortKey} onApply={setSortKey} />
           </div>
-          <h1 className="text-32 font-medium text-accent">{t('title')}</h1>
+          <h1 className="w-full text-right text-24 font-medium text-accent sm:w-auto sm:text-32">{t('title')}</h1>
         </div>
 
         {error && (
