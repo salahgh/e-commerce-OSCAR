@@ -149,8 +149,14 @@
       "wilaya": "الولاية",
       "postalCode": "الرمز البريدي",
       "phone": "الهاتف",
-      "selectWilaya": "اختر ولاية",
-      "useShippingForBilling": "استخدم هذا العنوان للفوترة"
+      "selectWilaya": "اختر الولاية",
+      "useShippingForBilling": "استخدم هذا العنوان للفوترة",
+      "phone2": "رقم الهاتف اضافي",
+      "commune": "البلدية",
+      "selectCommune": "اختر البلدية",
+      "fullNamePh": "أدخل الاسم الكامل",
+      "phonePh": "أدخل رقم الهاتف",
+      "phone2Ph": "أدخل رقم الهاتف اضافي"
     },
     "shipping": {
       "loading": "جاري تحميل خيارات التوصيل...",
@@ -177,7 +183,13 @@
       "placing": "جاري التأكيد...",
       "continue": "متابعة",
       "saving": "جاري الحفظ...",
-      "termsNotice": "بتأكيد الطلب، أنت توافق على شروط البيع."
+      "termsNotice": "بتأكيد الطلب، أنت توافق على شروط البيع.",
+      "orderSummary": "ملخص الطلبية",
+      "totalCount": "المبلغ الإجمالي ({count} منتج)",
+      "shippingFee": "رسوم التوصيل",
+      "grandTotal": "المبلغ الإجمالي",
+      "discountCode": "كود الحصم",
+      "apply": "طبق"
     },
     "errors": {
       "addressFailed": "تعذّر حفظ العنوان.",
@@ -188,7 +200,11 @@
       "staleSessionTitle": "انتهت الجلسة",
       "staleSessionBody": "جلستك لم تعد صالحة. يرجى إعادة إنشاء السلة لمتابعة الطلب.",
       "staleSessionReset": "إعادة تعيين الجلسة"
-    }
+    },
+    "backToCart": "انتقل إلى السلة",
+    "sectionShipping": "1. تفاصيل الشحن",
+    "sectionDelivery": "2. طريقة التوصيل",
+    "sectionPayment": "3. طريقة الدفع"
   },
   "CheckoutConfirmationPage": {
     "title": "شكرا لك على طلبك!",

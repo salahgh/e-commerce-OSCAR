@@ -40,7 +40,7 @@ export function CustomerReviews() {
           aria-label={t('prev')}
           className="inline-flex h-9 w-9 items-center justify-center text-content-muted transition-colors hover:text-content-strong"
         >
-          <ArrowRight className="h-5 w-5" />
+          <ArrowLeft className="h-5 w-5" />
         </button>
         <SliderDots count={5} active={0} />
         <button
@@ -48,7 +48,7 @@ export function CustomerReviews() {
           aria-label={t('next')}
           className="inline-flex h-9 w-9 items-center justify-center text-content-muted transition-colors hover:text-content-strong"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowRight className="h-5 w-5" />
         </button>
       </div>
     </section>

@@ -149,8 +149,14 @@
       "wilaya": "Wilaya",
       "postalCode": "Postal code",
       "phone": "Phone",
-      "selectWilaya": "Select a wilaya",
-      "useShippingForBilling": "Use this address for billing"
+      "selectWilaya": "Select wilaya",
+      "useShippingForBilling": "Use this address for billing",
+      "phone2": "Additional phone",
+      "commune": "Commune",
+      "selectCommune": "Select commune",
+      "fullNamePh": "Enter full name",
+      "phonePh": "Enter phone",
+      "phone2Ph": "Additional phone"
     },
     "shipping": {
       "loading": "Loading shipping options...",
@@ -177,7 +183,13 @@
       "placing": "Placing order...",
       "continue": "Continue",
       "saving": "Saving...",
-      "termsNotice": "By placing the order you accept our terms of sale."
+      "termsNotice": "By placing the order you accept our terms of sale.",
+      "orderSummary": "Order summary",
+      "totalCount": "Total ({count} items)",
+      "shippingFee": "Shipping fee",
+      "grandTotal": "Total",
+      "discountCode": "Discount code",
+      "apply": "Apply"
     },
     "errors": {
       "addressFailed": "Could not save the address.",
@@ -188,7 +200,11 @@
       "staleSessionTitle": "Session expired",
       "staleSessionBody": "Your session is no longer valid. Please restart your cart to place an order.",
       "staleSessionReset": "Reset session"
-    }
+    },
+    "backToCart": "Back to cart",
+    "sectionShipping": "1. Shipping details",
+    "sectionDelivery": "2. Delivery method",
+    "sectionPayment": "3. Payment method"
   },
   "CheckoutConfirmationPage": {
     "title": "Thank you for your order!",

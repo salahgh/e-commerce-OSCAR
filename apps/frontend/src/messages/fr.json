@@ -149,8 +149,14 @@
       "wilaya": "Wilaya",
       "postalCode": "Code postal",
       "phone": "Téléphone",
-      "selectWilaya": "Sélectionnez une wilaya",
-      "useShippingForBilling": "Utiliser cette adresse pour la facturation"
+      "selectWilaya": "Choisir la wilaya",
+      "useShippingForBilling": "Utiliser cette adresse pour la facturation",
+      "phone2": "Téléphone supplémentaire",
+      "commune": "Commune",
+      "selectCommune": "Choisir la commune",
+      "fullNamePh": "Entrez le nom complet",
+      "phonePh": "Entrez le téléphone",
+      "phone2Ph": "Téléphone supplémentaire"
     },
     "shipping": {
       "loading": "Chargement des options de livraison...",
@@ -177,7 +183,13 @@
       "placing": "Validation en cours...",
       "continue": "Continuer",
       "saving": "Enregistrement...",
-      "termsNotice": "En passant commande, vous acceptez nos conditions de vente."
+      "termsNotice": "En passant commande, vous acceptez nos conditions de vente.",
+      "orderSummary": "Résumé de la commande",
+      "totalCount": "Montant total ({count} produits)",
+      "shippingFee": "Frais de livraison",
+      "grandTotal": "Montant total",
+      "discountCode": "Code promo",
+      "apply": "Appliquer"
     },
     "errors": {
       "addressFailed": "Impossible d'enregistrer l'adresse.",
@@ -188,7 +200,11 @@
       "staleSessionTitle": "Session expirée",
       "staleSessionBody": "Votre session n'est plus valide. Veuillez recommencer le panier pour passer commande.",
       "staleSessionReset": "Réinitialiser la session"
-    }
+    },
+    "backToCart": "Retour au panier",
+    "sectionShipping": "1. Détails de livraison",
+    "sectionDelivery": "2. Mode de livraison",
+    "sectionPayment": "3. Mode de paiement"
   },
   "CheckoutConfirmationPage": {
     "title": "Merci pour votre commande !",
