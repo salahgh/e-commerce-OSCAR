@@ -5,3 +5,10 @@ node_modules
 .turbo
 *.log
 tsconfig.tsbuildinfo
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/.playwright-mcp/
+.last-run.json
