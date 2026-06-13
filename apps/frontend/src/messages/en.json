@@ -243,7 +243,7 @@
     "errorBody": "This order doesn't exist or doesn't belong to you."
   },
   "WishlistPage": {
-    "title": "My wishlist",
+    "title": "My favorites",
     "subtitle": "Products you've saved for later.",
     "empty": "Your wishlist is empty.",
     "shopCta": "Browse products",
