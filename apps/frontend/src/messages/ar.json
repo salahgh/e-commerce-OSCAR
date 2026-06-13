@@ -7,7 +7,8 @@
       "title": "مرحباً بك في OSCAR NAJAR",
       "subtitle": "اكتشف تشكيلتنا: أناقة جزائرية، جودة حرفية، وتوصيل خلال 48 ساعة إلى جميع الولايات.",
       "ctaShop": "تسوّق الآن",
-      "ctaCategories": "كل الفئات"
+      "ctaCategories": "كل الفئات",
+      "alt": "أوسكار فاشن — كل شي في بلاصة وحدة"
     },
     "featured": {
       "eyebrow": "المنتجات المميّزة",
@@ -25,6 +26,18 @@
       "title": "كل الولايات، خلال 48-72 ساعة",
       "body": "CIB أو Baridimob أو الدفع عند الاستلام. اختر ما يناسبك.",
       "cta": "اعرف المزيد"
+    },
+    "newArrivals": "وصل حديثاً",
+    "bestSellers": "الأكثر مبيعاً",
+    "viewAll": "عرض الكل",
+    "promo": {
+      "alt": "أناقة... ثقة... حضور"
+    },
+    "reviews": {
+      "title": "آراء عملائنا",
+      "subtitle": "نفخر بثقة عملائنا ونسعى دائمًا لتقديم تجربة تسوق مميزة تلبي توقعاتهم وتفوقها.",
+      "prev": "السابق",
+      "next": "التالي"
     }
   },
   "Common": {
@@ -56,8 +69,9 @@
       "openMenu": "فتح القائمة",
       "wishlistAria": "المفضلة",
       "cartAria": "{count, plural, other {السلة (# عنصر)}}",
-      "searchPlaceholder": "ابحث في المتجر…",
-      "searchAria": "بحث"
+      "searchPlaceholder": "البحث في أوسكار",
+      "searchAria": "بحث",
+      "promo": "شحن مجاني للطلبات التي تزيد قيمتها عن 12000 دينار جزائري"
     },
     "account": {
       "signIn": "تسجيل الدخول",
@@ -69,7 +83,7 @@
     "footer": {
       "tagline": "الموضة الأنيقة في قلب الجزائر. توصيل إلى جميع الولايات.",
       "contact": "اتصل بنا",
-      "address": "الجزائر العاصمة، الجزائر",
+      "address": "شارع ديدوش مراد، الجزائر العاصمة 16000",
       "help": "المساعدة",
       "shipping": "التوصيل",
       "returns": "الإرجاع",
@@ -81,7 +95,15 @@
       "contactLink": "اتصل بنا",
       "terms": "الشروط والأحكام",
       "privacy": "سياسة الخصوصية",
-      "copyright": "© {year} OSCAR Najar — جميع الحقوق محفوظة."
+      "copyright": "© {year} OSCAR Fashion",
+      "findUs": "ستجدنا على",
+      "app": "تطبيقنا",
+      "contactsTitle": "تواصل معنا",
+      "navHome": "الرئيسية",
+      "navProducts": "منتجاتنا",
+      "navWishlist": "المفضلة",
+      "navCart": "السلة",
+      "rights": "جميع الحقوق محفوظة"
     },
     "authLayout": {
       "backToShop": "العودة إلى المتجر"
@@ -100,7 +122,14 @@
       "previous": "السابق",
       "next": "التالي"
     },
-    "skipToContent": "تخطي إلى المحتوى الرئيسي"
+    "skipToContent": "تخطي إلى المحتوى الرئيسي",
+    "categoryNav": {
+      "ariaLabel": "الفئات",
+      "women": "نساء",
+      "men": "رجال",
+      "kids": "أطفال",
+      "accessories": "إكسسوارات"
+    }
   },
   "CheckoutPage": {
     "title": "إتمام الطلب",

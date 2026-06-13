@@ -44,6 +44,14 @@
   --color-warning-orange: #FFBC1F;
   --color-warning-6: #B28416;
 
+  /* ---------- Home / marketing palette (Figma SVomYJvoIIvYat5YNWNVM3) ---------- */
+  --color-rating: #F2C94C;        /* product rating stars */
+  --color-logo-slate: #364153;    /* OSCAR logo secondary tone */
+  --color-link-accent: #4A3AFF;   /* footer legal links */
+  --color-ink-heading: #170F49;   /* footer "Contacts us" heading */
+  --color-ink-muted: #6F6C90;     /* footer body copy */
+  --color-hairline: #D1D5DC;      /* product card / search field borders */
+
   /* ---------- Semantic colors (what components use) ---------- */
   --bg-base: var(--color-gray-white);
   --bg-subtle: var(--color-gray-1);
@@ -87,6 +95,8 @@
   /* ---------- Typography ---------- */
   --font-sans: 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
   --font-arabic: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  /* Latin display/numeric face used by prices & footer (Figma uses DM Sans) */
+  --font-latin: var(--font-dm-sans), 'DM Sans', system-ui, sans-serif;
 
   --fs-12: 0.75rem;   /* 12px */
   --fs-14: 0.875rem;  /* 14px */

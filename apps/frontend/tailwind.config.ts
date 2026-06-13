@@ -54,11 +54,20 @@ const config: Config = {
         'warning-border': 'var(--state-warning-border)',
         'warning-content': 'var(--state-warning-content)',
       },
+
+      /* Home / marketing palette */
+      rating: 'var(--color-rating)',
+      'logo-slate': 'var(--color-logo-slate)',
+      link: 'var(--color-link-accent)',
+      'ink-heading': 'var(--color-ink-heading)',
+      'ink-muted': 'var(--color-ink-muted)',
+      hairline: 'var(--color-hairline)',
     },
 
     fontFamily: {
       sans: ['var(--font-sans)'],
       arabic: ['var(--font-arabic)'],
+      dm: ['var(--font-latin)'],
     },
 
     fontSize: {
@@ -66,14 +75,18 @@ const config: Config = {
       '14': ['var(--fs-14)', { lineHeight: 'var(--lh-24)' }],
       '16': ['var(--fs-16)', { lineHeight: 'var(--lh-24)' }],
       '18': ['var(--fs-18)', { lineHeight: 'var(--lh-32)' }],
+      '20': ['1.25rem', { lineHeight: '1.5' }],
       '24': ['var(--fs-24)', { lineHeight: 'var(--lh-32)' }],
       '32': ['var(--fs-32)', { lineHeight: 'var(--lh-48)' }],
       '36': ['var(--fs-36)', { lineHeight: 'var(--lh-48)' }],
+      '40': ['2.5rem', { lineHeight: '1.1' }],
+      '48': ['var(--fs-48)', { lineHeight: 'var(--lh-48)' }],
     },
 
     fontWeight: {
       medium: '500',
       bold: '700',
+      extrabold: '800',
     },
 
     spacing: {

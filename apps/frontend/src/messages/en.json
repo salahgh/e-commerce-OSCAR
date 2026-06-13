@@ -7,7 +7,8 @@
       "title": "Welcome to OSCAR NAJAR",
       "subtitle": "Discover the collection: Algerian elegance, artisan quality, 48-hour delivery to every wilaya.",
       "ctaShop": "Shop now",
-      "ctaCategories": "All categories"
+      "ctaCategories": "All categories",
+      "alt": "OSCAR Fashion — everything in one place"
     },
     "featured": {
       "eyebrow": "Selection",
@@ -25,6 +26,18 @@
       "title": "Every wilaya, in 48-72h",
       "body": "CIB, Baridimob, or cash on delivery. Pick what works for you.",
       "cta": "Learn more"
+    },
+    "newArrivals": "New arrivals",
+    "bestSellers": "Best sellers",
+    "viewAll": "View all",
+    "promo": {
+      "alt": "Elegance, confidence, presence"
+    },
+    "reviews": {
+      "title": "Our customers' reviews",
+      "subtitle": "We take pride in our customers' trust and always strive to deliver an outstanding shopping experience that exceeds their expectations.",
+      "prev": "Previous",
+      "next": "Next"
     }
   },
   "Common": {
@@ -56,8 +69,9 @@
       "openMenu": "Open menu",
       "wishlistAria": "My wishlist",
       "cartAria": "{count, plural, one {Cart (# item)} other {Cart (# items)}}",
-      "searchPlaceholder": "Search the store…",
-      "searchAria": "Search"
+      "searchPlaceholder": "Search OSCAR…",
+      "searchAria": "Search",
+      "promo": "Free shipping on orders over 12,000 DZD"
     },
     "account": {
       "signIn": "Sign in",
@@ -69,7 +83,7 @@
     "footer": {
       "tagline": "Elegant fashion at the heart of Algeria. Delivery across every wilaya.",
       "contact": "Contact",
-      "address": "Algiers, Algeria",
+      "address": "Didouche Mourad St, Algiers 16000",
       "help": "Help",
       "shipping": "Shipping",
       "returns": "Returns",
@@ -81,7 +95,15 @@
       "contactLink": "Contact",
       "terms": "Terms of service",
       "privacy": "Privacy policy",
-      "copyright": "© {year} OSCAR Najar — All rights reserved."
+      "copyright": "Copyright © {year} OSCAR Fashion",
+      "findUs": "Find us on",
+      "app": "Our app",
+      "contactsTitle": "Contact us",
+      "navHome": "Home",
+      "navProducts": "Our products",
+      "navWishlist": "Wishlist",
+      "navCart": "Cart",
+      "rights": "All rights reserved"
     },
     "authLayout": {
       "backToShop": "Back to shop"
@@ -100,7 +122,14 @@
       "previous": "Previous",
       "next": "Next"
     },
-    "skipToContent": "Skip to main content"
+    "skipToContent": "Skip to main content",
+    "categoryNav": {
+      "ariaLabel": "Categories",
+      "women": "Women",
+      "men": "Men",
+      "kids": "Kids",
+      "accessories": "Accessories"
+    }
   },
   "CheckoutPage": {
     "title": "Checkout",

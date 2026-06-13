@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
-import { IBM_Plex_Sans_Arabic } from 'next/font/google';
+import { IBM_Plex_Sans_Arabic, DM_Sans } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { ApolloWrapper } from '@/lib/apollo/apollo-wrapper';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -23,6 +23,14 @@ const plexArabic = IBM_Plex_Sans_Arabic({
   weight: ['400', '500', '700'],
   display: 'swap',
   variable: '--font-plex-arabic',
+});
+
+// Latin display/numeric face — used by prices and footer Latin copy (Figma uses DM Sans)
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '700', '800'],
+  display: 'swap',
+  variable: '--font-dm-sans',
 });
 
 export function generateStaticParams() {
@@ -95,7 +103,7 @@ export default async function LocaleLayout({
   const dir = localeDirection[locale as Locale];
 
   return (
-    <html lang={locale} dir={dir} className={plexArabic.variable} suppressHydrationWarning>
+    <html lang={locale} dir={dir} className={`${plexArabic.variable} ${dmSans.variable}`} suppressHydrationWarning>
       <body className="bg-bg-base text-content font-sans antialiased">
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>

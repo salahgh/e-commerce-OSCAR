@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Instagram, Twitter, Youtube, Linkedin } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Logo } from './Logo';
@@ -6,95 +6,116 @@ import { Logo } from './Logo';
 export function Footer() {
   const t = useTranslations('Layout.footer');
   const year = new Date().getFullYear();
+
   return (
-    <footer className="border-t border-border bg-bg-elevated">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-6 py-12 md:grid-cols-4">
-        <div className="flex flex-col gap-4">
-          <Logo size="lg" />
-          <p className="text-14 text-content-muted">{t('tagline')}</p>
+    <footer className="px-6 pb-6 pt-12">
+      <div className="mx-auto flex max-w-[1392px] flex-col gap-7 rounded-[20px] border-[0.5px] border-border bg-bg-elevated px-6 py-8 shadow-sm">
+        {/* Top: brand / contacts */}
+        <div className="flex flex-col-reverse items-stretch justify-between gap-10 md:flex-row md:items-start">
+          {/* Brand column */}
+          <div className="flex flex-1 flex-col items-start gap-8">
+            <Logo size="lg" />
+
+            <div className="flex flex-wrap items-start gap-10">
+              {/* Find us on */}
+              <div className="flex flex-col items-start gap-4">
+                <p className="text-18 text-ink-muted">{t('findUs')}</p>
+                <div className="flex items-center gap-7 text-content-strong">
+                  <SocialLink href="https://facebook.com" label="Facebook"><Facebook className="h-6 w-6 fill-current" stroke="none" /></SocialLink>
+                  <SocialLink href="https://twitter.com" label="Twitter"><Twitter className="h-6 w-6 fill-current" stroke="none" /></SocialLink>
+                  <SocialLink href="https://instagram.com" label="Instagram"><Instagram className="h-6 w-6" strokeWidth={1.75} /></SocialLink>
+                  <SocialLink href="https://linkedin.com" label="LinkedIn"><Linkedin className="h-6 w-6 fill-current" stroke="none" /></SocialLink>
+                  <SocialLink href="https://youtube.com" label="YouTube"><Youtube className="h-6 w-6 fill-current" stroke="none" /></SocialLink>
+                </div>
+              </div>
+
+              {/* Our app */}
+              <div className="flex flex-col items-start gap-4">
+                <p className="text-18 text-ink-muted">{t('app')}</p>
+                <div className="flex items-center gap-7">
+                  <AppLink href="https://apps.apple.com" label="App Store" src="/images/home/icon-apple.svg" />
+                  <AppLink href="https://play.google.com" label="Google Play" src="/images/home/icon-googleplay.svg" />
+                </div>
+              </div>
+            </div>
+
+            {/* Quick nav */}
+            <nav className="flex flex-wrap items-center gap-x-12 gap-y-3 text-16 text-accent">
+              <Link href="/" className="transition-opacity hover:opacity-70">{t('navHome')}</Link>
+              <Link href="/products" className="transition-opacity hover:opacity-70">{t('navProducts')}</Link>
+              <Link href="/user/wishlist" className="transition-opacity hover:opacity-70">{t('navWishlist')}</Link>
+              <Link href="/cart" className="transition-opacity hover:opacity-70">{t('navCart')}</Link>
+            </nav>
+          </div>
+
+          {/* Contacts column */}
+          <div className="flex flex-col items-start gap-8 md:w-[406px]">
+            <p className="font-dm text-20 font-bold text-ink-heading">{t('contactsTitle')}</p>
+            <ul className="flex flex-col items-start gap-5 font-dm text-18 text-ink-muted">
+              <li className="flex items-center gap-2">
+                <Mail className="h-5 w-5 shrink-0" strokeWidth={1.75} />
+                <a href="mailto:contact@oscarfashion.dz" className="transition-colors hover:text-content-strong">
+                  contact@oscarfashion.dz
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <Phone className="h-5 w-5 shrink-0" strokeWidth={1.75} />
+                <a href="tel:+213555000000" className="transition-colors hover:text-content-strong">
+                  +213 555 000 000
+                </a>
+              </li>
+              <li className="flex items-start gap-2">
+                <MapPin className="mt-1 h-5 w-5 shrink-0" strokeWidth={1.75} />
+                <span className="leading-relaxed">{t('address')}</span>
+              </li>
+            </ul>
+          </div>
         </div>
 
-        <div className="flex flex-col gap-3">
-          <p className="text-14 font-bold text-content-strong">{t('contact')}</p>
-          <ul className="flex flex-col gap-2 text-14 text-content-muted">
-            <li className="inline-flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              <a href="mailto:contact@oscarnajar.dz" className="hover:text-content-strong">
-                contact@oscarnajar.dz
-              </a>
-            </li>
-            <li className="inline-flex items-center gap-2">
-              <Phone className="h-4 w-4" />
-              <a href="tel:+213555000000" className="hover:text-content-strong">
-                +213 555 000 000
-              </a>
-            </li>
-            <li className="inline-flex items-start gap-2">
-              <MapPin className="mt-1 h-4 w-4" />
-              <span>{t('address')}</span>
-            </li>
-          </ul>
-        </div>
+        {/* Divider */}
+        <div className="h-px w-full bg-border" />
 
-        <div className="flex flex-col gap-3">
-          <p className="text-14 font-bold text-content-strong">{t('help')}</p>
-          <ul className="flex flex-col gap-2 text-14">
-            <FooterLink href="/shipping">{t('shipping')}</FooterLink>
-            <FooterLink href="/returns">{t('returns')}</FooterLink>
-            <FooterLink href="/size-guide">{t('sizeGuide')}</FooterLink>
-            <FooterLink href="/faq">{t('faq')}</FooterLink>
-          </ul>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <p className="text-14 font-bold text-content-strong">{t('company')}</p>
-          <ul className="flex flex-col gap-2 text-14">
-            <FooterLink href="/about">{t('about')}</FooterLink>
-            <FooterLink href="/careers">{t('careers')}</FooterLink>
-            <FooterLink href="/contact">{t('contactLink')}</FooterLink>
-            <FooterLink href="/legal/terms">{t('terms')}</FooterLink>
-            <FooterLink href="/legal/privacy">{t('privacy')}</FooterLink>
-          </ul>
-        </div>
-      </div>
-
-      <div className="border-t border-border">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-6 md:flex-row">
-          <p className="text-12 text-content-muted">{t('copyright', { year })}</p>
-          <ul className="flex items-center gap-3 text-content-muted">
-            <SocialIcon href="https://facebook.com" label="Facebook"><Facebook className="h-5 w-5" /></SocialIcon>
-            <SocialIcon href="https://instagram.com" label="Instagram"><Instagram className="h-5 w-5" /></SocialIcon>
-            <SocialIcon href="https://twitter.com" label="Twitter"><Twitter className="h-5 w-5" /></SocialIcon>
-            <SocialIcon href="https://youtube.com" label="YouTube"><Youtube className="h-5 w-5" /></SocialIcon>
-          </ul>
+        {/* Legal bar */}
+        <div className="flex flex-col items-center justify-between gap-3 font-dm text-18 text-ink-muted md:flex-row">
+          <p className="flex flex-wrap items-center gap-1">
+            <span>{t('rights')}</span>
+            <span>|</span>
+            <Link href="/legal/terms" className="text-link underline">{t('terms')}</Link>
+            <span>|</span>
+            <Link href="/legal/privacy" className="text-link underline">{t('privacy')}</Link>
+          </p>
+          <p>{t('copyright', { year })}</p>
         </div>
       </div>
     </footer>
   );
 }
 
-function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
+function SocialLink({ href, label, children }: { href: string; label: string; children: React.ReactNode }) {
   return (
-    <li>
-      <Link href={href} className="text-content-muted transition-colors hover:text-content-strong">
-        {children}
-      </Link>
-    </li>
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={label}
+      className="inline-flex items-center justify-center transition-opacity hover:opacity-70"
+    >
+      {children}
+    </a>
   );
 }
 
-function SocialIcon({ href, label, children }: { href: string; label: string; children: React.ReactNode }) {
+function AppLink({ href, label, src }: { href: string; label: string; src: string }) {
   return (
-    <li>
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={label}
-        className="inline-flex h-9 w-9 items-center justify-center rounded transition-colors hover:bg-bg-subtle hover:text-content-strong"
-      >
-        {children}
-      </a>
-    </li>
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={label}
+      className="inline-flex items-center justify-center transition-opacity hover:opacity-70"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt={label} className="h-7 w-auto" />
+    </a>
   );
 }

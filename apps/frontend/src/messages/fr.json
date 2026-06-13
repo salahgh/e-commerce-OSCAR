@@ -7,7 +7,8 @@
       "title": "Bienvenue chez OSCAR NAJAR",
       "subtitle": "Découvrez la collection : élégance algérienne, qualité artisanale, livraison sous 48h dans toutes les wilayas.",
       "ctaShop": "Acheter maintenant",
-      "ctaCategories": "Toutes les catégories"
+      "ctaCategories": "Toutes les catégories",
+      "alt": "OSCAR Fashion — tout au même endroit"
     },
     "featured": {
       "eyebrow": "Sélection",
@@ -25,6 +26,18 @@
       "title": "Toutes les wilayas, sous 48-72h",
       "body": "CIB, Baridimob, ou paiement à la livraison. Vous choisissez ce qui vous convient.",
       "cta": "En savoir plus"
+    },
+    "newArrivals": "Nouveautés",
+    "bestSellers": "Meilleures ventes",
+    "viewAll": "Voir tout",
+    "promo": {
+      "alt": "Élégance, confiance, présence"
+    },
+    "reviews": {
+      "title": "Avis de nos clients",
+      "subtitle": "Nous sommes fiers de la confiance de nos clients et nous nous efforçons toujours d'offrir une expérience d'achat exceptionnelle qui dépasse leurs attentes.",
+      "prev": "Précédent",
+      "next": "Suivant"
     }
   },
   "Common": {
@@ -56,8 +69,9 @@
       "openMenu": "Ouvrir le menu",
       "wishlistAria": "Mes favoris",
       "cartAria": "{count, plural, one {Panier (# article)} other {Panier (# articles)}}",
-      "searchPlaceholder": "Rechercher dans la boutique…",
-      "searchAria": "Recherche"
+      "searchPlaceholder": "Rechercher sur OSCAR…",
+      "searchAria": "Recherche",
+      "promo": "Livraison gratuite pour les commandes de plus de 12 000 DA"
     },
     "account": {
       "signIn": "Se connecter",
@@ -69,7 +83,7 @@
     "footer": {
       "tagline": "La mode élégante au cœur de l'Algérie. Livraison à travers toutes les wilayas.",
       "contact": "Contact",
-      "address": "Alger, Algérie",
+      "address": "Rue Didouche Mourad, Alger 16000",
       "help": "Aide",
       "shipping": "Livraison",
       "returns": "Retours",
@@ -81,7 +95,15 @@
       "contactLink": "Contact",
       "terms": "Conditions générales",
       "privacy": "Confidentialité",
-      "copyright": "© {year} OSCAR Najar — Tous droits réservés."
+      "copyright": "Copyright © {year} OSCAR Fashion",
+      "findUs": "Suivez-nous",
+      "app": "Notre application",
+      "contactsTitle": "Nous contacter",
+      "navHome": "Accueil",
+      "navProducts": "Nos produits",
+      "navWishlist": "Favoris",
+      "navCart": "Panier",
+      "rights": "Tous droits réservés"
     },
     "authLayout": {
       "backToShop": "Retour à la boutique"
@@ -100,7 +122,14 @@
       "previous": "Précédent",
       "next": "Suivant"
     },
-    "skipToContent": "Aller au contenu principal"
+    "skipToContent": "Aller au contenu principal",
+    "categoryNav": {
+      "ariaLabel": "Catégories",
+      "women": "Femmes",
+      "men": "Hommes",
+      "kids": "Enfants",
+      "accessories": "Accessoires"
+    }
   },
   "CheckoutPage": {
     "title": "Validation de la commande",

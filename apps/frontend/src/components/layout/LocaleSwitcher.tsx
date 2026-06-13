@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useParams } from 'next/navigation';
-import { ChevronDown, Globe } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { usePathname, useRouter } from '@/i18n/routing';
 import { localeNames, locales, type Locale } from '@/i18n/config';
 import { cn } from '@/lib/utils/cn';
@@ -30,16 +30,22 @@ export function LocaleSwitcher({ className }: { className?: string }) {
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="inline-flex h-10 items-center gap-2 rounded px-3 text-14 font-medium text-content transition-colors hover:bg-bg-subtle"
+        className="inline-flex items-center gap-1.5 rounded-full border border-bg-muted bg-bg-elevated p-2 text-16 text-content-strong transition-colors hover:bg-bg-subtle"
       >
-        <Globe className="h-4 w-4" />
-        <span className="hidden sm:inline">{localeNames[currentLocale]}</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/home/flag-dz.png"
+          alt=""
+          aria-hidden="true"
+          className="h-[22px] w-[22px] rounded-full object-cover shadow-sm"
+        />
+        <span>{localeNames[currentLocale]}</span>
         <ChevronDown className={cn('h-4 w-4 transition-transform', open && 'rotate-180')} />
       </button>
       {open && (
         <ul
           role="listbox"
-          className="absolute end-0 z-dropdown mt-2 min-w-[160px] rounded border border-border bg-bg-elevated p-1 shadow-overlay"
+          className="absolute end-0 z-dropdown mt-2 min-w-[160px] rounded-md border border-border bg-bg-elevated p-1 shadow-overlay"
         >
           {locales.map((locale) => (
             <li key={locale}>
