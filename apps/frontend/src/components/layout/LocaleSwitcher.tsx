@@ -7,6 +7,13 @@ import { usePathname, useRouter } from '@/i18n/routing';
 import { localeNames, locales, type Locale } from '@/i18n/config';
 import { cn } from '@/lib/utils/cn';
 
+/** Flag per language (Algerian store: Arabic→DZ, French→FR, English→GB). */
+const localeFlags: Record<Locale, string> = {
+  ar: '/images/home/flag-dz.png',
+  fr: '/images/home/flag-fr.svg',
+  en: '/images/home/flag-gb.svg',
+};
+
 export function LocaleSwitcher({ className }: { className?: string }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -34,7 +41,7 @@ export function LocaleSwitcher({ className }: { className?: string }) {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/images/home/flag-dz.png"
+          src={localeFlags[currentLocale]}
           alt=""
           aria-hidden="true"
           className="h-[22px] w-[22px] rounded-full object-cover shadow-sm"
@@ -58,10 +65,17 @@ export function LocaleSwitcher({ className }: { className?: string }) {
                   setOpen(false);
                 }}
                 className={cn(
-                  'flex w-full items-center px-3 py-2 text-start text-14 transition-colors hover:bg-bg-subtle',
+                  'flex w-full items-center gap-2 px-3 py-2 text-start text-14 transition-colors hover:bg-bg-subtle',
                   locale === currentLocale && 'font-medium text-content-strong',
                 )}
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={localeFlags[locale]}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-5 w-5 rounded-full object-cover shadow-sm"
+                />
                 {localeNames[locale]}
               </button>
             </li>
