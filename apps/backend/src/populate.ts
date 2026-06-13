@@ -1,5 +1,8 @@
 import 'dotenv/config';
+import fs from 'fs';
+import path from 'path';
 import {
+  AssetService,
   LanguageCode,
   CurrencyCode,
   FacetService,
@@ -16,6 +19,39 @@ import {
   JobQueueService,
 } from '@vendure/core';
 import { config } from './vendure-config';
+
+// Production-safety guards (mirrors @scc/backend populate):
+//   SEED_DRY_RUN=true   preview without DB writes
+//   SEED_CONFIRM=yes    required for any write
+const DRY_RUN = process.env.SEED_DRY_RUN === 'true';
+const CONFIRMED = process.env.SEED_CONFIRM === 'yes';
+
+if (!DRY_RUN && !CONFIRMED) {
+  console.error('Refusing to run. Set SEED_CONFIRM=yes to commit, or SEED_DRY_RUN=true to preview.');
+  process.exit(2);
+}
+
+// Optional fashion product imagery. Fashion seed images must be added to
+// apps/backend/static/seed-images/ to populate product assets; until then asset
+// upload is skipped (the directory does not yet exist and degrades gracefully).
+// A product's featuredImage filename is matched by `${slug}.{jpg,jpeg,png,webp}`.
+const SEED_IMAGES_DIR = path.resolve(__dirname, '../static/seed-images');
+const SEED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
+
+/**
+ * Resolve the on-disk seed image for a product by slug, trying each supported
+ * extension. Returns the absolute path if a file exists, otherwise undefined.
+ * Degrades gracefully: a missing directory or missing file simply yields
+ * undefined (no throw), so seeding proceeds without product assets.
+ */
+function resolveSeedImage(slug: string): string | undefined {
+  if (!fs.existsSync(SEED_IMAGES_DIR)) return undefined;
+  for (const ext of SEED_IMAGE_EXTENSIONS) {
+    const candidate = path.join(SEED_IMAGES_DIR, `${slug}${ext}`);
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return undefined;
+}
 
 /**
  * OSCAR Fashion - Vendure Seed Script
@@ -548,8 +584,20 @@ function generateProducts(): ProductDef[] {
 // =====================================================
 
 async function seed() {
-  console.log('🚀 Starting OSCAR Fashion Vendure seed...\n');
+  const banner = DRY_RUN ? '[DRY RUN] ' : '';
+  console.log(`🚀 ${banner}Starting OSCAR Fashion Vendure seed...\n`);
   console.log('⚠️  Make sure the main Vendure server is STOPPED before running this script.\n');
+  if (DRY_RUN) {
+    console.log('🧪 DRY RUN: no database writes will be performed.\n');
+  }
+
+  // Notify once if the seed-images directory is absent so the missing-asset
+  // skips below are understood as expected, not silent failures.
+  if (!fs.existsSync(SEED_IMAGES_DIR)) {
+    console.log(
+      `ℹ️  Seed image directory not found (${SEED_IMAGES_DIR}); product asset upload will be skipped.\n`,
+    );
+  }
 
   // Use bootstrapWorker which doesn't start HTTP server
   const { app } = await bootstrapWorker(config);
@@ -563,6 +611,7 @@ async function seed() {
   const productOptionService = app.get(ProductOptionService);
   const collectionService = app.get(CollectionService);
   const taxCategoryService = app.get(TaxCategoryService);
+  const assetService = app.get(AssetService);
 
   let channel = await channelService.getDefaultChannel();
   let ctx = new RequestContext({
@@ -583,15 +632,19 @@ async function seed() {
     (channel.availableLanguageCodes ?? []).includes(l as any),
   );
   if (needsCurrency || needsLanguages) {
-    await channelService.update(ctx, {
-      id: channel.id,
-      defaultCurrencyCode: CurrencyCode.DZD,
-      availableCurrencyCodes: [CurrencyCode.DZD],
-      availableLanguageCodes: [LanguageCode.en, LanguageCode.fr, LanguageCode.ar],
-    });
-    channel = await channelService.getDefaultChannel();
-    ctx = new RequestContext({ channel, apiType: 'admin', isAuthorized: true, authorizedAsOwnerOnly: false });
-    console.log('  💱 Channel set to DZD + languages [en, fr, ar]\n');
+    if (DRY_RUN) {
+      console.log('  💱 [would set] Channel to DZD + languages [en, fr, ar]\n');
+    } else {
+      await channelService.update(ctx, {
+        id: channel.id,
+        defaultCurrencyCode: CurrencyCode.DZD,
+        availableCurrencyCodes: [CurrencyCode.DZD],
+        availableLanguageCodes: [LanguageCode.en, LanguageCode.fr, LanguageCode.ar],
+      });
+      channel = await channelService.getDefaultChannel();
+      ctx = new RequestContext({ channel, apiType: 'admin', isAuthorized: true, authorizedAsOwnerOnly: false });
+      console.log('  💱 Channel set to DZD + languages [en, fr, ar]\n');
+    }
   }
 
   console.log('📦 Creating Size and Color Facets...\n');
@@ -599,16 +652,20 @@ async function seed() {
   // Create or find Size Facet
   let sizeFacet = await facetService.findByCode(ctx, 'size', LanguageCode.en);
   if (!sizeFacet) {
-    sizeFacet = await facetService.create(ctx, {
-      code: 'size',
-      isPrivate: false,
-      translations: [
-        { languageCode: LanguageCode.en, name: 'Size' },
-        { languageCode: LanguageCode.fr, name: 'Taille' },
-        { languageCode: LanguageCode.ar, name: 'المقاس' },
-      ],
-    });
-    console.log('  ✅ Created Size facet');
+    if (DRY_RUN) {
+      console.log('  🧪 [would create] Size facet');
+    } else {
+      sizeFacet = await facetService.create(ctx, {
+        code: 'size',
+        isPrivate: false,
+        translations: [
+          { languageCode: LanguageCode.en, name: 'Size' },
+          { languageCode: LanguageCode.fr, name: 'Taille' },
+          { languageCode: LanguageCode.ar, name: 'المقاس' },
+        ],
+      });
+      console.log('  ✅ Created Size facet');
+    }
   } else {
     console.log('  ⏭️  Size facet already exists');
   }
@@ -616,18 +673,58 @@ async function seed() {
   // Create or find Color Facet
   let colorFacet = await facetService.findByCode(ctx, 'color', LanguageCode.en);
   if (!colorFacet) {
-    colorFacet = await facetService.create(ctx, {
-      code: 'color',
-      isPrivate: false,
-      translations: [
-        { languageCode: LanguageCode.en, name: 'Color' },
-        { languageCode: LanguageCode.fr, name: 'Couleur' },
-        { languageCode: LanguageCode.ar, name: 'اللون' },
-      ],
-    });
-    console.log('  ✅ Created Color facet');
+    if (DRY_RUN) {
+      console.log('  🧪 [would create] Color facet');
+    } else {
+      colorFacet = await facetService.create(ctx, {
+        code: 'color',
+        isPrivate: false,
+        translations: [
+          { languageCode: LanguageCode.en, name: 'Color' },
+          { languageCode: LanguageCode.fr, name: 'Couleur' },
+          { languageCode: LanguageCode.ar, name: 'اللون' },
+        ],
+      });
+      console.log('  ✅ Created Color facet');
+    }
   } else {
     console.log('  ⏭️  Color facet already exists');
+  }
+
+  // DRY RUN: stop before any write loop. We have already reported which facets
+  // would be created; now enumerate the collections/products/variants/assets that
+  // a real run would create, then exit without touching the database. This is the
+  // simplest way to guarantee zero DB writes across the many nested create() calls
+  // below (facet values, collections, option groups, options, variants).
+  if (DRY_RUN) {
+    const plannedProducts = generateProducts();
+    let plannedVariants = 0;
+    let plannedAssets = 0;
+    for (const p of plannedProducts) {
+      plannedVariants += p.sizes.length * p.colors.length;
+      if (resolveSeedImage(p.slug)) plannedAssets++;
+    }
+    function countCategories(cats: CategoryDef[]): number {
+      return cats.reduce((n, c) => n + 1 + (c.children ? countCategories(c.children) : 0), 0);
+    }
+    console.log('\n🧪 DRY RUN summary (no database writes performed):');
+    console.log(`   Collections that would be ensured: ${countCategories(categories)}`);
+    console.log(`   Products that would be created:     ${plannedProducts.length}`);
+    console.log(`   Variants that would be created:     ${plannedVariants}`);
+    console.log(
+      `   Product images that would be uploaded: ${plannedAssets} ` +
+        `(remaining products have no matching file in static/seed-images/)`,
+    );
+    console.log('\n   Re-run with SEED_CONFIRM=yes to commit these changes.\n');
+    await app.close();
+    process.exit(0);
+  }
+
+  // Past this point we are committing (not DRY_RUN), so the Size/Color facets were
+  // either found or just created above; assert that for both runtime safety and to
+  // narrow the types for the write loops below.
+  if (!sizeFacet || !colorFacet) {
+    throw new Error('Size/Color facet missing after creation step — cannot seed.');
   }
 
   // Get existing facet values
@@ -735,6 +832,51 @@ async function seed() {
   const products = generateProducts();
   let productCount = 0;
   let variantCount = 0;
+  let assetCount = 0;
+
+  // Asset upload helper with name-based idempotency. Resolves `static/seed-images/<slug>.<ext>`
+  // and uploads it via AssetService.createFromFileStream, returning the asset id to use as the
+  // product's featuredAssetId. Degrades gracefully: when no image file exists for the product
+  // (e.g. the seed-images directory has not been populated yet) it returns undefined and logs a
+  // concise notice WITHOUT throwing, so the product is still created — just without an image.
+  // Fashion seed images must be added to apps/backend/static/seed-images/ (named `<product-slug>.<jpg|jpeg|png|webp>`)
+  // to populate product assets; until then asset upload is skipped.
+  const assetIdBySlug = new Map<string, any>();
+  async function ensureProductAsset(slug: string, productName: string): Promise<any | undefined> {
+    if (assetIdBySlug.has(slug)) return assetIdBySlug.get(slug);
+
+    const imagePath = resolveSeedImage(slug);
+    if (!imagePath) {
+      // No matching image on disk — skip asset upload for this product (no throw).
+      return undefined;
+    }
+
+    const filename = path.basename(imagePath);
+    // Reuse an existing asset with the same name to avoid duplicates on re-runs.
+    const existing = await assetService.findAll(ctx, { filter: { name: { eq: filename } } });
+    if (existing.items.length > 0) {
+      const id = existing.items[0].id;
+      assetIdBySlug.set(slug, id);
+      return id;
+    }
+
+    try {
+      const stream = fs.createReadStream(imagePath);
+      const result: any = await (assetService as any).createFromFileStream(stream, filename, ctx);
+      if (result && 'id' in result) {
+        assetIdBySlug.set(slug, result.id);
+        assetCount++;
+        console.log(`  🖼️  Uploaded asset for ${productName}: ${filename}`);
+        return result.id;
+      }
+      console.log(`  ⚠️  Asset upload returned no id for ${productName} (${filename}); skipping image.`);
+      return undefined;
+    } catch (e: any) {
+      // Never let an image problem abort the whole seed — log and continue imageless.
+      console.log(`  ⚠️  Asset upload failed for ${productName} (${filename}): ${e?.message ?? e}; skipping image.`);
+      return undefined;
+    }
+  }
 
   for (const productDef of products) {
     const existingProduct = await productService.findOneBySlug(ctx, productDef.slug);
@@ -750,6 +892,10 @@ async function seed() {
       continue;
     }
 
+    // Resolve + upload the product's featured image if one exists on disk.
+    // Returns undefined (and the product is created imageless) when no file is found.
+    const featuredAssetId = await ensureProductAsset(productDef.slug, productDef.name);
+
     const product = await productService.create(ctx, {
       translations: [
         { languageCode: LanguageCode.en, name: productDef.name, slug: productDef.slug, description: productDef.description },
@@ -757,6 +903,9 @@ async function seed() {
         { languageCode: LanguageCode.ar, name: productDef.nameAr, slug: productDef.slug, description: productDef.descriptionAr },
       ],
       facetValueIds: [],
+      // Only attach asset fields when an image was actually uploaded; spreading {} when
+      // featuredAssetId is undefined keeps the create input clean for imageless products.
+      ...(featuredAssetId ? { featuredAssetId, assetIds: [featuredAssetId] } : {}),
       // Only the restored/backed Product custom fields are written. The previously
       // removed fields (nameFr/nameAr/descriptionFr/descriptionAr/weightKg/availableSizes/
       // availableColors) have no DB column — FR/AR names+descriptions flow through translations[].
@@ -850,6 +999,13 @@ async function seed() {
   console.log(`   Collections: ${collectionCount}`);
   console.log(`   Products: ${productCount}`);
   console.log(`   Variants: ${variantCount}`);
+  console.log(`   Assets uploaded: ${assetCount}`);
+  if (assetCount === 0) {
+    console.log(
+      '   ℹ️  No product images uploaded. Add files to apps/backend/static/seed-images/ ' +
+        '(named <product-slug>.{jpg,jpeg,png,webp}) to populate product assets.',
+    );
+  }
 
   // Reindex search index
   console.log('\n🔍 Search index will be rebuilt automatically on next server start.');

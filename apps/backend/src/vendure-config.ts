@@ -36,6 +36,7 @@ const parseDatabaseUrl = () => {
   const url = process.env.DATABASE_URL;
   if (!url) return null;
   const parsed = new URL(url);
+  const sslmode = parsed.searchParams.get('sslmode');
   return {
     host: parsed.hostname,
     port: Number(parsed.port) || 5432,
@@ -43,6 +44,7 @@ const parseDatabaseUrl = () => {
     username: parsed.username,
     password: parsed.password,
     schema: parsed.searchParams.get('schema') || 'public',
+    ssl: sslmode === 'require' || sslmode === 'verify-ca' || sslmode === 'verify-full',
   };
 };
 
@@ -85,6 +87,7 @@ export const config: VendureConfig = {
     cors: {
       origin: getCorsOrigins(),
       credentials: true,
+      exposedHeaders: ['vendure-auth-token'],
     },
     // The following options are useful in development mode,
     // but should be disabled in production for security reasons.
@@ -112,6 +115,11 @@ export const config: VendureConfig = {
   },
   dbConnectionOptions: (() => {
     const dbUrl = parseDatabaseUrl();
+    // Enable TLS when the DATABASE_URL sslmode requires it (parsed above) or when
+    // DB_SSL is explicitly set. Managed Postgres (Railway, Render, etc.) needs this.
+    const sslEnabled =
+      dbUrl?.ssl === true ||
+      ['true', 'require', '1'].includes((process.env.DB_SSL || '').toLowerCase());
     return {
       type: 'postgres' as const,
       synchronize: IS_DEV, // dev only; production relies on migrations (migration:run)
@@ -123,6 +131,7 @@ export const config: VendureConfig = {
       port: dbUrl?.port || +process.env.DB_PORT!,
       username: dbUrl?.username || process.env.DB_USERNAME!,
       password: dbUrl?.password || process.env.DB_PASSWORD!,
+      ...(sslEnabled ? { ssl: { rejectUnauthorized: false } } : {}),
     };
   })(),
   paymentOptions: {

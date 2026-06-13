@@ -9,7 +9,7 @@
     "start": "node ./dist/index.js",
     "seed-initial": "ts-node ./src/seed-initial.ts",
     "populate": "ts-node ./src/populate.ts",
-    "seed": "ts-node ./src/seed-initial.ts && ts-node ./src/populate.ts && ts-node ./src/link-products-to-collections.ts",
+    "seed": "cross-env SEED_CONFIRM=yes ts-node ./src/seed-initial.ts && cross-env SEED_CONFIRM=yes ts-node ./src/populate.ts && cross-env SEED_CONFIRM=yes ts-node ./src/link-products-to-collections.ts",
     "seed-orders": "ts-node ./src/seed-orders.ts",
     "link-products": "ts-node ./src/link-products-to-collections.ts",
     "reindex": "ts-node ./src/reindex.ts",
@@ -46,6 +46,7 @@
     "typescript": "^5.8.3"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1"
+    "@types/node": "^24.10.1",
+    "cross-env": "^7.0.3"
   }
 }

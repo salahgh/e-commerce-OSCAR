@@ -3,6 +3,7 @@ import { OscarService } from './services/oscar.service';
 import { DashboardService } from './services/dashboard.service';
 import { OscarAdminResolver } from './api/oscar-admin.resolver';
 import { OscarShopResolver } from './api/oscar-shop.resolver';
+import { HealthController } from './api/health.controller';
 import { adminApiExtensions, shopApiExtensions } from './api/api-extensions';
 
 /**
@@ -17,6 +18,7 @@ import { adminApiExtensions, shopApiExtensions } from './api/api-extensions';
 @VendurePlugin({
   imports: [PluginCommonModule],
   providers: [OscarService, DashboardService],
+  controllers: [HealthController],
   adminApiExtensions: {
     schema: adminApiExtensions,
     resolvers: [OscarAdminResolver],

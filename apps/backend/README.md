@@ -94,6 +94,7 @@ oscar-vendure/
 │           └── payment/      # Payment handlers
 ├── static/
 │   ├── assets/              # Uploaded assets
+│   ├── seed-images/         # (optional) Fashion product seed images for populate
 │   └── email/               # Email templates
 ├── package.json
 ├── tsconfig.json
@@ -203,6 +204,9 @@ Algeria Post mobile payment. Customers pay via their Baridimob app.
 | `npm run dev` | Start development server |
 | `npm run build` | Build for production |
 | `npm start` | Run production server |
+| `npm run populate` | Seed catalog (`SEED_CONFIRM=yes` to commit, `SEED_DRY_RUN=true` to preview) |
+
+> Fashion seed images must be added to `apps/backend/static/seed-images/` (named `<product-slug>.{jpg,jpeg,png,webp}`) to populate product assets; until then asset upload is skipped.
 
 ## Migration from Spring Boot
 
