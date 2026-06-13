@@ -509,13 +509,15 @@
       "shipping": "Shipping",
       "shippingTbd": "To be calculated",
       "total": "Total",
-      "checkout": "Checkout"
+      "checkout": "Checkout",
+      "totalCount": "Total ({count} items)"
     },
     "promo": {
       "placeholder": "Promo code",
       "apply": "Apply",
       "remove": "Remove"
-    }
+    },
+    "removeItem": "Remove"
   },
   "auth": {
     "fields": {

@@ -509,13 +509,15 @@
       "shipping": "Livraison",
       "shippingTbd": "À calculer",
       "total": "Total",
-      "checkout": "Passer la commande"
+      "checkout": "Passer la commande",
+      "totalCount": "Montant total ({count} produits)"
     },
     "promo": {
       "placeholder": "Code promo",
       "apply": "Appliquer",
       "remove": "Retirer"
-    }
+    },
+    "removeItem": "Supprimer"
   },
   "auth": {
     "fields": {

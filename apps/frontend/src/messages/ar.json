@@ -509,13 +509,15 @@
       "shipping": "التوصيل",
       "shippingTbd": "سيتم احتسابه",
       "total": "الإجمالي",
-      "checkout": "تأكيد الطلب"
+      "checkout": "تأكيد الطلب",
+      "totalCount": "المبلغ الإجمالي ({count} منتج)"
     },
     "promo": {
       "placeholder": "رمز الخصم",
       "apply": "تطبيق",
       "remove": "إزالة"
-    }
+    },
+    "removeItem": "حذف"
   },
   "auth": {
     "fields": {
