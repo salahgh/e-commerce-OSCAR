@@ -91,7 +91,20 @@ function makeClient(locale: string) {
       },
       Product: { keyFields: ['id'], fields: { variants: { merge: false } } },
       ProductVariant: { keyFields: ['id'] },
-      Collection: { keyFields: ['id'] },
+      Collection: {
+        keyFields: ['id'],
+        fields: {
+          // Infinite scroll: accumulate productVariants pages (skip-based).
+          // Different collections are separate cache entries (keyed by id).
+          productVariants: {
+            keyArgs: false,
+            merge(existing: any, incoming: any, { args }: any) {
+              if (!existing || (args?.options?.skip ?? 0) === 0) return incoming;
+              return { ...incoming, items: [...(existing.items || []), ...(incoming.items || [])] };
+            },
+          },
+        },
+      },
       Order: { keyFields: ['id'], fields: { lines: { merge: false } } },
       OrderLine: { keyFields: ['id'] },
       Customer: {

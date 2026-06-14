@@ -321,6 +321,8 @@
     "breadcrumbHome": "Accueil",
     "breadcrumbCategories": "Catégories",
     "subcategories": "Sous-catégories",
+    "loadMore": "Voir plus",
+    "loading": "Chargement…",
     "products": "Produits",
     "empty": "Aucun produit dans cette catégorie.",
     "errorTitle": "Catégorie introuvable",
@@ -338,6 +340,8 @@
     "errorTitle": "Erreur de recherche",
     "filtersTitle": "Filtres",
     "clearFilters": "Effacer les filtres",
+    "loadMore": "Voir plus",
+    "loading": "Chargement…",
     "showFilters": "Afficher les filtres",
     "hideFilters": "Masquer les filtres"
   },

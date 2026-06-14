@@ -321,6 +321,8 @@
     "breadcrumbHome": "الرئيسية",
     "breadcrumbCategories": "الفئات",
     "subcategories": "الفئات الفرعية",
+    "loadMore": "عرض المزيد",
+    "loading": "جارٍ التحميل…",
     "products": "المنتجات",
     "empty": "لا توجد منتجات في هذه الفئة.",
     "errorTitle": "الفئة غير موجودة",
@@ -338,6 +340,8 @@
     "errorTitle": "فشل البحث",
     "filtersTitle": "الفلاتر",
     "clearFilters": "مسح الفلاتر",
+    "loadMore": "عرض المزيد",
+    "loading": "جارٍ التحميل…",
     "showFilters": "إظهار الفلاتر",
     "hideFilters": "إخفاء الفلاتر"
   },

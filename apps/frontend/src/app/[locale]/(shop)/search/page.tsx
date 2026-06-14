@@ -14,13 +14,14 @@ import {
   serializeSearchParams,
   type FacetGroup,
 } from '@oscar/shared';
-import { Alert, Button, Pagination, Skeleton } from '@/components/ui';
+import { Alert, Button, Skeleton } from '@/components/ui';
 import { PageHeader } from '@/components/layout';
 import {
   FacetFilters,
   ProductCard,
   ProductCardSkeleton,
   ProductGrid,
+  LoadMore,
   type ProductCardData,
 } from '@/components/patterns';
 
@@ -35,15 +36,15 @@ export default function SearchPage() {
   const state = React.useMemo(() => parseSearchParams(new URLSearchParams(sp.toString())), [sp]);
   const query = state.searchTerm ?? '';
   const selectedIds = React.useMemo(() => new Set(state.facetValueIds ?? []), [state.facetValueIds]);
-  const page = state.page ?? 1;
+  const [loadingMore, setLoadingMore] = React.useState(false);
 
-  // First fetch — get facetValues to build groups
-  const { data, loading, error } = useSearchProductsWithFacetsQuery({
+  // First fetch — get facetValues to build groups. Subsequent pages append via fetchMore.
+  const { data, loading, error, fetchMore } = useSearchProductsWithFacetsQuery({
     variables: {
       input: {
         term: query,
         take: PER_PAGE,
-        skip: (page - 1) * PER_PAGE,
+        skip: 0,
         groupByProduct: true,
         facetValueFilters: buildFacetValueFilters([...selectedIds], []),
       },
@@ -53,7 +54,22 @@ export default function SearchPage() {
 
   const items = data?.search.items ?? [];
   const total = data?.search.totalItems ?? 0;
-  const pageCount = Math.max(1, Math.ceil(total / PER_PAGE));
+  const hasMore = items.length < total;
+
+  const onLoadMore = React.useCallback(() => {
+    setLoadingMore(true);
+    fetchMore({
+      variables: {
+        input: {
+          term: query,
+          take: PER_PAGE,
+          skip: items.length,
+          groupByProduct: true,
+          facetValueFilters: buildFacetValueFilters([...selectedIds], []),
+        },
+      },
+    }).finally(() => setLoadingMore(false));
+  }, [fetchMore, query, items.length, selectedIds]);
 
   // Build FacetGroup[] from the search response
   const groups: FacetGroup[] = React.useMemo(() => {
@@ -93,11 +109,6 @@ export default function SearchPage() {
 
   function onClearFilters() {
     const next = serializeSearchParams({ ...state, facetValueIds: [], page: 1 }, groups);
-    pushUrl(next);
-  }
-
-  function onPageChange(p: number) {
-    const next = serializeSearchParams({ ...state, page: p }, groups);
     pushUrl(next);
   }
 
@@ -179,11 +190,13 @@ export default function SearchPage() {
                   })}
             </ProductGrid>
 
-            {pageCount > 1 && (
-              <div className="pt-4">
-                <Pagination page={page} pageCount={pageCount} onPageChange={onPageChange} />
-              </div>
-            )}
+            <LoadMore
+              hasMore={hasMore}
+              loading={loadingMore}
+              onLoadMore={onLoadMore}
+              label={t('loadMore')}
+              loadingLabel={t('loading')}
+            />
           </section>
         </div>
       )}

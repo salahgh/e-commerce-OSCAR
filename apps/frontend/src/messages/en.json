@@ -321,6 +321,8 @@
     "breadcrumbHome": "Home",
     "breadcrumbCategories": "Categories",
     "subcategories": "Subcategories",
+    "loadMore": "Load more",
+    "loading": "Loading…",
     "products": "Products",
     "empty": "No products in this category.",
     "errorTitle": "Category not found",
@@ -338,6 +340,8 @@
     "errorTitle": "Search failed",
     "filtersTitle": "Filters",
     "clearFilters": "Clear filters",
+    "loadMore": "Load more",
+    "loading": "Loading…",
     "showFilters": "Show filters",
     "hideFilters": "Hide filters"
   },

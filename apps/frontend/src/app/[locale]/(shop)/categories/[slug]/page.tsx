@@ -4,13 +4,14 @@ import * as React from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useGetCollectionWithProductsQuery } from '@oscar/graphql-shop/generated';
-import { Alert, Pagination, Skeleton } from '@/components/ui';
+import { Alert, Skeleton } from '@/components/ui';
 import { PageHeader } from '@/components/layout';
 import {
   ProductCard,
   ProductCardSkeleton,
   ProductGrid,
   CategoryCircles,
+  LoadMore,
   type ProductCardData,
 } from '@/components/patterns';
 
@@ -37,17 +38,24 @@ export default function CategoryDetailPage() {
   const params = useParams<{ slug: string; locale: string }>();
   const slug = params?.slug as string;
 
-  const [page, setPage] = React.useState(1);
+  const [loadingMore, setLoadingMore] = React.useState(false);
 
-  const { data, loading, error } = useGetCollectionWithProductsQuery({
-    variables: { slug, take: PER_PAGE, skip: (page - 1) * PER_PAGE },
+  const { data, loading, error, fetchMore } = useGetCollectionWithProductsQuery({
+    variables: { slug, take: PER_PAGE, skip: 0 },
     skip: !slug,
   });
 
   const collection = data?.collection;
   const productsRaw = collection?.productVariants.items ?? [];
   const total = collection?.productVariants.totalItems ?? 0;
-  const pageCount = Math.max(1, Math.ceil(total / PER_PAGE));
+  const hasMore = productsRaw.length < total;
+
+  const onLoadMore = React.useCallback(() => {
+    setLoadingMore(true);
+    fetchMore({ variables: { slug, take: PER_PAGE, skip: productsRaw.length } }).finally(() =>
+      setLoadingMore(false),
+    );
+  }, [fetchMore, slug, productsRaw.length]);
 
   // Dedupe products (variants → product collection may include duplicates)
   const seen = new Set<string>();
@@ -115,11 +123,13 @@ export default function CategoryDetailPage() {
             <p className="py-12 text-center text-content-muted">{t('empty')}</p>
           )}
 
-          {pageCount > 1 && (
-            <div className="mt-10">
-              <Pagination page={page} pageCount={pageCount} onPageChange={setPage} />
-            </div>
-          )}
+          <LoadMore
+            hasMore={hasMore}
+            loading={loadingMore}
+            onLoadMore={onLoadMore}
+            label={t('loadMore')}
+            loadingLabel={t('loading')}
+          />
         </section>
       </div>
     </div>
