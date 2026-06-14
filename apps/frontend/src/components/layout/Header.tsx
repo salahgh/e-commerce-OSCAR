@@ -1,3 +1,5 @@
+'use client';
+
 import { useTranslations } from 'next-intl';
 import { Logo } from './Logo';
 import { SearchBar } from './SearchBar';
@@ -5,15 +7,18 @@ import { CartButton } from './CartButton';
 import { WishlistButton } from './WishlistButton';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { CategoryNav } from './CategoryNav';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 
 export function Header() {
   const t = useTranslations('Layout.header');
+  const settings = useSiteSettings();
+  const promo = settings?.promoText || t('promo');
   return (
     <header className="px-6 pt-6">
       <div className="mx-auto flex max-w-[1392px] flex-col gap-4 rounded-[20px] border-[0.5px] border-border bg-bg-elevated px-4 py-4 shadow-sm sm:gap-5 sm:px-6 sm:py-5">
         {/* Free-shipping announcement */}
         <div className="flex items-center justify-center rounded-sm bg-accent px-4 py-3 text-center text-12 text-content-inverse sm:px-6 sm:py-4 sm:text-16">
-          {t('promo')}
+          {promo}
         </div>
 
         {/*

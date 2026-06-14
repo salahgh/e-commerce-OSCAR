@@ -1,11 +1,29 @@
+'use client';
+
 import { Mail, Phone, MapPin, Facebook, Instagram, Twitter, Youtube, Linkedin } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Logo } from './Logo';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 
 export function Footer() {
   const t = useTranslations('Layout.footer');
+  const s = useSiteSettings();
   const year = new Date().getFullYear();
+
+  const email = s?.contactEmail || 'contact@oscarfashion.dz';
+  const phone = s?.contactPhone || '+213 555 000 000';
+  const telHref = `tel:${phone.replace(/\s+/g, '')}`;
+  const address = s?.footerAddress || t('address');
+  const copyright = s?.copyrightText || t('copyright', { year });
+
+  const socials = [
+    { href: s?.social.facebook || 'https://facebook.com', label: 'Facebook', icon: <Facebook className="h-6 w-6 fill-current" stroke="none" /> },
+    { href: s?.social.twitter || 'https://twitter.com', label: 'Twitter', icon: <Twitter className="h-6 w-6 fill-current" stroke="none" /> },
+    { href: s?.social.instagram || 'https://instagram.com', label: 'Instagram', icon: <Instagram className="h-6 w-6" strokeWidth={1.75} /> },
+    { href: s?.social.linkedin || 'https://linkedin.com', label: 'LinkedIn', icon: <Linkedin className="h-6 w-6 fill-current" stroke="none" /> },
+    { href: s?.social.youtube || 'https://youtube.com', label: 'YouTube', icon: <Youtube className="h-6 w-6 fill-current" stroke="none" /> },
+  ];
 
   return (
     <footer className="px-6 pb-6 pt-12">
@@ -21,11 +39,9 @@ export function Footer() {
               <div className="flex flex-col items-start gap-4">
                 <p className="text-18 text-ink-muted">{t('findUs')}</p>
                 <div className="flex items-center gap-7 text-content-strong">
-                  <SocialLink href="https://facebook.com" label="Facebook"><Facebook className="h-6 w-6 fill-current" stroke="none" /></SocialLink>
-                  <SocialLink href="https://twitter.com" label="Twitter"><Twitter className="h-6 w-6 fill-current" stroke="none" /></SocialLink>
-                  <SocialLink href="https://instagram.com" label="Instagram"><Instagram className="h-6 w-6" strokeWidth={1.75} /></SocialLink>
-                  <SocialLink href="https://linkedin.com" label="LinkedIn"><Linkedin className="h-6 w-6 fill-current" stroke="none" /></SocialLink>
-                  <SocialLink href="https://youtube.com" label="YouTube"><Youtube className="h-6 w-6 fill-current" stroke="none" /></SocialLink>
+                  {socials.map((sl) => (
+                    <SocialLink key={sl.label} href={sl.href} label={sl.label}>{sl.icon}</SocialLink>
+                  ))}
                 </div>
               </div>
 
@@ -33,8 +49,8 @@ export function Footer() {
               <div className="flex flex-col items-start gap-4">
                 <p className="text-18 text-ink-muted">{t('app')}</p>
                 <div className="flex items-center gap-7">
-                  <AppLink href="https://apps.apple.com" label="App Store" src="/images/home/icon-apple.svg" />
-                  <AppLink href="https://play.google.com" label="Google Play" src="/images/home/icon-googleplay.svg" />
+                  <AppLink href={s?.app.appStore || 'https://apps.apple.com'} label="App Store" src="/images/home/icon-apple.svg" />
+                  <AppLink href={s?.app.googlePlay || 'https://play.google.com'} label="Google Play" src="/images/home/icon-googleplay.svg" />
                 </div>
               </div>
             </div>
@@ -54,19 +70,19 @@ export function Footer() {
             <ul className="flex flex-col items-start gap-5 font-dm text-18 text-ink-muted">
               <li className="flex items-center gap-2">
                 <Mail className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-                <a href="mailto:contact@oscarfashion.dz" className="transition-colors hover:text-content-strong">
-                  contact@oscarfashion.dz
+                <a href={`mailto:${email}`} className="transition-colors hover:text-content-strong">
+                  {email}
                 </a>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-                <a href="tel:+213555000000" className="transition-colors hover:text-content-strong">
-                  +213 555 000 000
+                <a href={telHref} className="transition-colors hover:text-content-strong">
+                  {phone}
                 </a>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="mt-1 h-5 w-5 shrink-0" strokeWidth={1.75} />
-                <span className="leading-relaxed">{t('address')}</span>
+                <span className="leading-relaxed">{address}</span>
               </li>
             </ul>
           </div>
@@ -84,7 +100,7 @@ export function Footer() {
             <span>|</span>
             <Link href="/legal/privacy" className="text-link underline">{t('privacy')}</Link>
           </p>
-          <p>{t('copyright', { year })}</p>
+          <p>{copyright}</p>
         </div>
       </div>
     </footer>

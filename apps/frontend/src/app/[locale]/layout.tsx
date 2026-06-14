@@ -8,6 +8,7 @@ import { ApolloWrapper } from '@/lib/apollo/apollo-wrapper';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { WishlistProvider } from '@/contexts/WishlistContext';
+import { SiteSettingsProvider } from '@/contexts/SiteSettingsContext';
 import { MiniCart, SkipToContent } from '@/components/layout';
 import { ToastProvider } from '@/components/ui/Toast';
 import { routing } from '@/i18n/routing';
@@ -109,6 +110,7 @@ export default async function LocaleLayout({
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <ApolloWrapper locale={locale}>
             <NextIntlClientProvider locale={locale} messages={messages}>
+              <SiteSettingsProvider>
               <ToastProvider>
                 <AuthProvider>
                   <CartProvider>
@@ -122,6 +124,7 @@ export default async function LocaleLayout({
                   </CartProvider>
                 </AuthProvider>
               </ToastProvider>
+              </SiteSettingsProvider>
             </NextIntlClientProvider>
           </ApolloWrapper>
         </ThemeProvider>
