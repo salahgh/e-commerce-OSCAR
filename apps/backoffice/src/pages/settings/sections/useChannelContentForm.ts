@@ -64,6 +64,9 @@ const SECTION_KEYS: Record<'localized' | 'store' | 'social', string[]> = {
 type MediaState = { hero: PickedAsset | null; banners: PickedAsset[]; reviews: PickedAsset[] };
 const EMPTY_MEDIA: MediaState = { hero: null, banners: [], reviews: [] };
 
+const idsEqual = (a: PickedAsset[], b: PickedAsset[]) =>
+  a.length === b.length && a.every((x, i) => x.id === b[i].id);
+
 export function useChannelContentForm() {
   const dispatch = useDispatch();
   const { data, loading } = useQuery(ActiveChannelContentDocument, { fetchPolicy: 'network-only' });
@@ -108,9 +111,6 @@ export function useChannelContentForm() {
   const setBanners = (banners: PickedAsset[]) => setMedia((m) => ({ ...m, banners }));
   const setReviews = (reviews: PickedAsset[]) => setMedia((m) => ({ ...m, reviews }));
 
-  const idsEqual = (a: PickedAsset[], b: PickedAsset[]) =>
-    a.length === b.length && a.every((x, i) => x.id === b[i].id);
-
   const dirtyFor = (section: SectionId): boolean => {
     if (section === 'media') {
       return (
@@ -123,6 +123,7 @@ export function useChannelContentForm() {
   };
 
   const saveSection = async (section: SectionId) => {
+    if (!channelId) return;
     setSavingSection(section);
     try {
       const customFields: Record<string, unknown> = {};
