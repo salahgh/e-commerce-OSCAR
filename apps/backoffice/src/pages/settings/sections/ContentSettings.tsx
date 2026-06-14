@@ -148,6 +148,7 @@ export const ContentSettings: React.FC = () => {
       </SettingsSection>
 
       <AssetPickerModal
+        key={picker ?? 'none'}
         isOpen={picker !== null}
         onClose={() => setPicker(null)}
         multiple={picker !== 'hero'}
