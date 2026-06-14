@@ -417,7 +417,7 @@ export type Channel = Node & {
   createdAt: Scalars['DateTime']['output'];
   /** @deprecated Use defaultCurrencyCode instead */
   currencyCode: CurrencyCode;
-  customFields?: Maybe<Scalars['JSON']['output']>;
+  customFields?: Maybe<ChannelCustomFields>;
   defaultCurrencyCode: CurrencyCode;
   defaultLanguageCode: LanguageCode;
   defaultShippingZone?: Maybe<Zone>;
@@ -431,6 +431,38 @@ export type Channel = Node & {
   /** Not yet used - will be implemented in a future release. */
   trackInventory?: Maybe<Scalars['Boolean']['output']>;
   updatedAt: Scalars['DateTime']['output'];
+};
+
+export type ChannelCustomFields = {
+  __typename?: 'ChannelCustomFields';
+  appAppStore?: Maybe<Scalars['String']['output']>;
+  appGooglePlay?: Maybe<Scalars['String']['output']>;
+  bannerImages?: Maybe<Array<Asset>>;
+  contactEmail?: Maybe<Scalars['String']['output']>;
+  contactPhone?: Maybe<Scalars['String']['output']>;
+  copyrightTextAr?: Maybe<Scalars['String']['output']>;
+  copyrightTextEn?: Maybe<Scalars['String']['output']>;
+  copyrightTextFr?: Maybe<Scalars['String']['output']>;
+  footerAddressAr?: Maybe<Scalars['String']['output']>;
+  footerAddressEn?: Maybe<Scalars['String']['output']>;
+  footerAddressFr?: Maybe<Scalars['String']['output']>;
+  freeShippingThreshold?: Maybe<Scalars['Int']['output']>;
+  heroImage?: Maybe<Asset>;
+  promoTextAr?: Maybe<Scalars['String']['output']>;
+  promoTextEn?: Maybe<Scalars['String']['output']>;
+  promoTextFr?: Maybe<Scalars['String']['output']>;
+  reviewImages?: Maybe<Array<Asset>>;
+  reviewsSubtitleAr?: Maybe<Scalars['String']['output']>;
+  reviewsSubtitleEn?: Maybe<Scalars['String']['output']>;
+  reviewsSubtitleFr?: Maybe<Scalars['String']['output']>;
+  reviewsTitleAr?: Maybe<Scalars['String']['output']>;
+  reviewsTitleEn?: Maybe<Scalars['String']['output']>;
+  reviewsTitleFr?: Maybe<Scalars['String']['output']>;
+  socialFacebook?: Maybe<Scalars['String']['output']>;
+  socialInstagram?: Maybe<Scalars['String']['output']>;
+  socialLinkedin?: Maybe<Scalars['String']['output']>;
+  socialTwitter?: Maybe<Scalars['String']['output']>;
+  socialYoutube?: Maybe<Scalars['String']['output']>;
 };
 
 /**
@@ -448,14 +480,39 @@ export type ChannelDefaultLanguageError = ErrorResult & {
 export type ChannelFilterParameter = {
   _and?: InputMaybe<Array<ChannelFilterParameter>>;
   _or?: InputMaybe<Array<ChannelFilterParameter>>;
+  appAppStore?: InputMaybe<StringOperators>;
+  appGooglePlay?: InputMaybe<StringOperators>;
   code?: InputMaybe<StringOperators>;
+  contactEmail?: InputMaybe<StringOperators>;
+  contactPhone?: InputMaybe<StringOperators>;
+  copyrightTextAr?: InputMaybe<StringOperators>;
+  copyrightTextEn?: InputMaybe<StringOperators>;
+  copyrightTextFr?: InputMaybe<StringOperators>;
   createdAt?: InputMaybe<DateOperators>;
   currencyCode?: InputMaybe<StringOperators>;
   defaultCurrencyCode?: InputMaybe<StringOperators>;
   defaultLanguageCode?: InputMaybe<StringOperators>;
+  footerAddressAr?: InputMaybe<StringOperators>;
+  footerAddressEn?: InputMaybe<StringOperators>;
+  footerAddressFr?: InputMaybe<StringOperators>;
+  freeShippingThreshold?: InputMaybe<NumberOperators>;
   id?: InputMaybe<IdOperators>;
   outOfStockThreshold?: InputMaybe<NumberOperators>;
   pricesIncludeTax?: InputMaybe<BooleanOperators>;
+  promoTextAr?: InputMaybe<StringOperators>;
+  promoTextEn?: InputMaybe<StringOperators>;
+  promoTextFr?: InputMaybe<StringOperators>;
+  reviewsSubtitleAr?: InputMaybe<StringOperators>;
+  reviewsSubtitleEn?: InputMaybe<StringOperators>;
+  reviewsSubtitleFr?: InputMaybe<StringOperators>;
+  reviewsTitleAr?: InputMaybe<StringOperators>;
+  reviewsTitleEn?: InputMaybe<StringOperators>;
+  reviewsTitleFr?: InputMaybe<StringOperators>;
+  socialFacebook?: InputMaybe<StringOperators>;
+  socialInstagram?: InputMaybe<StringOperators>;
+  socialLinkedin?: InputMaybe<StringOperators>;
+  socialTwitter?: InputMaybe<StringOperators>;
+  socialYoutube?: InputMaybe<StringOperators>;
   token?: InputMaybe<StringOperators>;
   trackInventory?: InputMaybe<BooleanOperators>;
   updatedAt?: InputMaybe<DateOperators>;
@@ -481,10 +538,36 @@ export type ChannelListOptions = {
 };
 
 export type ChannelSortParameter = {
+  appAppStore?: InputMaybe<SortOrder>;
+  appGooglePlay?: InputMaybe<SortOrder>;
   code?: InputMaybe<SortOrder>;
+  contactEmail?: InputMaybe<SortOrder>;
+  contactPhone?: InputMaybe<SortOrder>;
+  copyrightTextAr?: InputMaybe<SortOrder>;
+  copyrightTextEn?: InputMaybe<SortOrder>;
+  copyrightTextFr?: InputMaybe<SortOrder>;
   createdAt?: InputMaybe<SortOrder>;
+  footerAddressAr?: InputMaybe<SortOrder>;
+  footerAddressEn?: InputMaybe<SortOrder>;
+  footerAddressFr?: InputMaybe<SortOrder>;
+  freeShippingThreshold?: InputMaybe<SortOrder>;
+  heroImage?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   outOfStockThreshold?: InputMaybe<SortOrder>;
+  promoTextAr?: InputMaybe<SortOrder>;
+  promoTextEn?: InputMaybe<SortOrder>;
+  promoTextFr?: InputMaybe<SortOrder>;
+  reviewsSubtitleAr?: InputMaybe<SortOrder>;
+  reviewsSubtitleEn?: InputMaybe<SortOrder>;
+  reviewsSubtitleFr?: InputMaybe<SortOrder>;
+  reviewsTitleAr?: InputMaybe<SortOrder>;
+  reviewsTitleEn?: InputMaybe<SortOrder>;
+  reviewsTitleFr?: InputMaybe<SortOrder>;
+  socialFacebook?: InputMaybe<SortOrder>;
+  socialInstagram?: InputMaybe<SortOrder>;
+  socialLinkedin?: InputMaybe<SortOrder>;
+  socialTwitter?: InputMaybe<SortOrder>;
+  socialYoutube?: InputMaybe<SortOrder>;
   token?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
 };
@@ -792,11 +875,42 @@ export type CreateAssetInput = {
 
 export type CreateAssetResult = Asset | MimeTypeError;
 
+export type CreateChannelCustomFieldsInput = {
+  appAppStore?: InputMaybe<Scalars['String']['input']>;
+  appGooglePlay?: InputMaybe<Scalars['String']['input']>;
+  bannerImagesIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  contactEmail?: InputMaybe<Scalars['String']['input']>;
+  contactPhone?: InputMaybe<Scalars['String']['input']>;
+  copyrightTextAr?: InputMaybe<Scalars['String']['input']>;
+  copyrightTextEn?: InputMaybe<Scalars['String']['input']>;
+  copyrightTextFr?: InputMaybe<Scalars['String']['input']>;
+  footerAddressAr?: InputMaybe<Scalars['String']['input']>;
+  footerAddressEn?: InputMaybe<Scalars['String']['input']>;
+  footerAddressFr?: InputMaybe<Scalars['String']['input']>;
+  freeShippingThreshold?: InputMaybe<Scalars['Int']['input']>;
+  heroImageId?: InputMaybe<Scalars['ID']['input']>;
+  promoTextAr?: InputMaybe<Scalars['String']['input']>;
+  promoTextEn?: InputMaybe<Scalars['String']['input']>;
+  promoTextFr?: InputMaybe<Scalars['String']['input']>;
+  reviewImagesIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  reviewsSubtitleAr?: InputMaybe<Scalars['String']['input']>;
+  reviewsSubtitleEn?: InputMaybe<Scalars['String']['input']>;
+  reviewsSubtitleFr?: InputMaybe<Scalars['String']['input']>;
+  reviewsTitleAr?: InputMaybe<Scalars['String']['input']>;
+  reviewsTitleEn?: InputMaybe<Scalars['String']['input']>;
+  reviewsTitleFr?: InputMaybe<Scalars['String']['input']>;
+  socialFacebook?: InputMaybe<Scalars['String']['input']>;
+  socialInstagram?: InputMaybe<Scalars['String']['input']>;
+  socialLinkedin?: InputMaybe<Scalars['String']['input']>;
+  socialTwitter?: InputMaybe<Scalars['String']['input']>;
+  socialYoutube?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type CreateChannelInput = {
   availableCurrencyCodes?: InputMaybe<Array<CurrencyCode>>;
   availableLanguageCodes?: InputMaybe<Array<LanguageCode>>;
   code: Scalars['String']['input'];
-  customFields?: InputMaybe<Scalars['JSON']['input']>;
+  customFields?: InputMaybe<CreateChannelCustomFieldsInput>;
   defaultCurrencyCode?: InputMaybe<CurrencyCode>;
   defaultLanguageCode: LanguageCode;
   defaultShippingZoneId: Scalars['ID']['input'];
@@ -909,9 +1023,14 @@ export type CreatePaymentMethodInput = {
   translations: Array<PaymentMethodTranslationInput>;
 };
 
+export type CreateProductCustomFieldsInput = {
+  isFeatured?: InputMaybe<Scalars['Boolean']['input']>;
+  viewCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type CreateProductInput = {
   assetIds?: InputMaybe<Array<Scalars['ID']['input']>>;
-  customFields?: InputMaybe<Scalars['JSON']['input']>;
+  customFields?: InputMaybe<CreateProductCustomFieldsInput>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
   facetValueIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   featuredAssetId?: InputMaybe<Scalars['ID']['input']>;
@@ -2348,12 +2467,13 @@ export type KpiMetrics = {
   activeProducts: Scalars['Int']['output'];
   averageOrderValue: Scalars['Float']['output'];
   cancelledOrders: Scalars['Int']['output'];
-  conversionRate: Scalars['Float']['output'];
   deliveredOrders: Scalars['Int']['output'];
   lowStockProducts: Scalars['Int']['output'];
   newCustomersThisMonth: Scalars['Int']['output'];
   newCustomersThisWeek: Scalars['Int']['output'];
   newCustomersToday: Scalars['Int']['output'];
+  /** Placed orders ÷ total customers. NOT a conversion rate (no traffic data). */
+  ordersPerCustomer: Scalars['Float']['output'];
   ordersThisMonth: Scalars['Int']['output'];
   ordersThisWeek: Scalars['Int']['output'];
   ordersToday: Scalars['Int']['output'];
@@ -2361,10 +2481,10 @@ export type KpiMetrics = {
   pendingOrders: Scalars['Int']['output'];
   processingOrders: Scalars['Int']['output'];
   revenueGrowth: Scalars['Float']['output'];
-  revenueLastMonth: Scalars['Int']['output'];
-  revenueThisMonth: Scalars['Int']['output'];
-  revenueThisWeek: Scalars['Int']['output'];
-  revenueToday: Scalars['Int']['output'];
+  revenueLastMonth: Scalars['Float']['output'];
+  revenueThisMonth: Scalars['Float']['output'];
+  revenueThisWeek: Scalars['Float']['output'];
+  revenueToday: Scalars['Float']['output'];
   shippedOrders: Scalars['Int']['output'];
   totalCustomers: Scalars['Int']['output'];
   totalOrders: Scalars['Int']['output'];
@@ -4885,7 +5005,7 @@ export type Product = Node & {
   channels: Array<Channel>;
   collections: Array<Collection>;
   createdAt: Scalars['DateTime']['output'];
-  customFields?: Maybe<Scalars['JSON']['output']>;
+  customFields?: Maybe<ProductCustomFields>;
   description: Scalars['String']['output'];
   enabled: Scalars['Boolean']['output'];
   facetValues: Array<FacetValue>;
@@ -4908,6 +5028,12 @@ export type ProductVariantListArgs = {
   options?: InputMaybe<ProductVariantListOptions>;
 };
 
+export type ProductCustomFields = {
+  __typename?: 'ProductCustomFields';
+  isFeatured?: Maybe<Scalars['Boolean']['output']>;
+  viewCount?: Maybe<Scalars['Int']['output']>;
+};
+
 export type ProductFilterParameter = {
   _and?: InputMaybe<Array<ProductFilterParameter>>;
   _or?: InputMaybe<Array<ProductFilterParameter>>;
@@ -4916,11 +5042,13 @@ export type ProductFilterParameter = {
   enabled?: InputMaybe<BooleanOperators>;
   facetValueId?: InputMaybe<IdOperators>;
   id?: InputMaybe<IdOperators>;
+  isFeatured?: InputMaybe<BooleanOperators>;
   languageCode?: InputMaybe<StringOperators>;
   name?: InputMaybe<StringOperators>;
   sku?: InputMaybe<StringOperators>;
   slug?: InputMaybe<StringOperators>;
   updatedAt?: InputMaybe<DateOperators>;
+  viewCount?: InputMaybe<NumberOperators>;
 };
 
 export type ProductList = PaginatedList & {
@@ -5053,9 +5181,11 @@ export type ProductSortParameter = {
   createdAt?: InputMaybe<SortOrder>;
   description?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
+  isFeatured?: InputMaybe<SortOrder>;
   name?: InputMaybe<SortOrder>;
   slug?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
+  viewCount?: InputMaybe<SortOrder>;
 };
 
 export type ProductTranslation = {
@@ -5869,7 +5999,8 @@ export type RecentOrderItem = {
   id: Scalars['ID']['output'];
   itemCount: Scalars['Int']['output'];
   state: Scalars['String']['output'];
-  total: Scalars['Int']['output'];
+  /** Order total with tax, in cents. Float to avoid Int32 overflow. */
+  total: Scalars['Float']['output'];
 };
 
 /** Recently created product summary */
@@ -6076,7 +6207,8 @@ export type RevenueByCategoryDataPoint = {
   categoryId: Scalars['ID']['output'];
   categoryName: Scalars['String']['output'];
   percentage: Scalars['Float']['output'];
-  revenue: Scalars['Int']['output'];
+  /** Revenue in cents (ex-tax, listPrice × quantity). Float to avoid Int32 overflow. */
+  revenue: Scalars['Float']['output'];
 };
 
 export type Role = Node & {
@@ -6143,7 +6275,8 @@ export type SalesTrendDataPoint = {
   __typename?: 'SalesTrendDataPoint';
   date: Scalars['String']['output'];
   orders: Scalars['Int']['output'];
-  revenue: Scalars['Int']['output'];
+  /** Revenue in cents. Float to avoid Int32 overflow on high-volume days. */
+  revenue: Scalars['Float']['output'];
 };
 
 export type ScheduledTask = {
@@ -6871,7 +7004,8 @@ export type TopSellingProduct = {
   productId: Scalars['ID']['output'];
   productName: Scalars['String']['output'];
   quantitySold: Scalars['Int']['output'];
-  revenue: Scalars['Int']['output'];
+  /** Revenue in cents (ex-tax, listPrice × quantity). Float to avoid Int32 overflow. */
+  revenue: Scalars['Float']['output'];
   sku: Scalars['String']['output'];
   variantId: Scalars['ID']['output'];
   variantName: Scalars['String']['output'];
@@ -6932,11 +7066,42 @@ export type UpdateAssetInput = {
   tags?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
+export type UpdateChannelCustomFieldsInput = {
+  appAppStore?: InputMaybe<Scalars['String']['input']>;
+  appGooglePlay?: InputMaybe<Scalars['String']['input']>;
+  bannerImagesIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  contactEmail?: InputMaybe<Scalars['String']['input']>;
+  contactPhone?: InputMaybe<Scalars['String']['input']>;
+  copyrightTextAr?: InputMaybe<Scalars['String']['input']>;
+  copyrightTextEn?: InputMaybe<Scalars['String']['input']>;
+  copyrightTextFr?: InputMaybe<Scalars['String']['input']>;
+  footerAddressAr?: InputMaybe<Scalars['String']['input']>;
+  footerAddressEn?: InputMaybe<Scalars['String']['input']>;
+  footerAddressFr?: InputMaybe<Scalars['String']['input']>;
+  freeShippingThreshold?: InputMaybe<Scalars['Int']['input']>;
+  heroImageId?: InputMaybe<Scalars['ID']['input']>;
+  promoTextAr?: InputMaybe<Scalars['String']['input']>;
+  promoTextEn?: InputMaybe<Scalars['String']['input']>;
+  promoTextFr?: InputMaybe<Scalars['String']['input']>;
+  reviewImagesIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  reviewsSubtitleAr?: InputMaybe<Scalars['String']['input']>;
+  reviewsSubtitleEn?: InputMaybe<Scalars['String']['input']>;
+  reviewsSubtitleFr?: InputMaybe<Scalars['String']['input']>;
+  reviewsTitleAr?: InputMaybe<Scalars['String']['input']>;
+  reviewsTitleEn?: InputMaybe<Scalars['String']['input']>;
+  reviewsTitleFr?: InputMaybe<Scalars['String']['input']>;
+  socialFacebook?: InputMaybe<Scalars['String']['input']>;
+  socialInstagram?: InputMaybe<Scalars['String']['input']>;
+  socialLinkedin?: InputMaybe<Scalars['String']['input']>;
+  socialTwitter?: InputMaybe<Scalars['String']['input']>;
+  socialYoutube?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type UpdateChannelInput = {
   availableCurrencyCodes?: InputMaybe<Array<CurrencyCode>>;
   availableLanguageCodes?: InputMaybe<Array<LanguageCode>>;
   code?: InputMaybe<Scalars['String']['input']>;
-  customFields?: InputMaybe<Scalars['JSON']['input']>;
+  customFields?: InputMaybe<UpdateChannelCustomFieldsInput>;
   defaultCurrencyCode?: InputMaybe<CurrencyCode>;
   defaultLanguageCode?: InputMaybe<LanguageCode>;
   defaultShippingZoneId?: InputMaybe<Scalars['ID']['input']>;
@@ -7087,9 +7252,14 @@ export type UpdatePaymentMethodInput = {
   translations?: InputMaybe<Array<PaymentMethodTranslationInput>>;
 };
 
+export type UpdateProductCustomFieldsInput = {
+  isFeatured?: InputMaybe<Scalars['Boolean']['input']>;
+  viewCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type UpdateProductInput = {
   assetIds?: InputMaybe<Array<Scalars['ID']['input']>>;
-  customFields?: InputMaybe<Scalars['JSON']['input']>;
+  customFields?: InputMaybe<UpdateProductCustomFieldsInput>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
   facetValueIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   featuredAssetId?: InputMaybe<Scalars['ID']['input']>;
@@ -7643,7 +7813,7 @@ export type DeleteCustomerNoteMutation = { __typename?: 'Mutation', deleteCustom
 export type DashboardKpiMetricsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DashboardKpiMetricsQuery = { __typename?: 'Query', dashboardKpiMetrics: { __typename?: 'KpiMetrics', revenueToday: number, revenueThisWeek: number, revenueThisMonth: number, revenueLastMonth: number, revenueGrowth: number, ordersToday: number, ordersThisWeek: number, ordersThisMonth: number, totalOrders: number, pendingOrders: number, processingOrders: number, shippedOrders: number, deliveredOrders: number, cancelledOrders: number, newCustomersToday: number, newCustomersThisWeek: number, newCustomersThisMonth: number, totalCustomers: number, totalProducts: number, activeProducts: number, lowStockProducts: number, outOfStockProducts: number, averageOrderValue: number, conversionRate: number } };
+export type DashboardKpiMetricsQuery = { __typename?: 'Query', dashboardKpiMetrics: { __typename?: 'KpiMetrics', revenueToday: number, revenueThisWeek: number, revenueThisMonth: number, revenueLastMonth: number, revenueGrowth: number, ordersToday: number, ordersThisWeek: number, ordersThisMonth: number, totalOrders: number, pendingOrders: number, processingOrders: number, shippedOrders: number, deliveredOrders: number, cancelledOrders: number, newCustomersToday: number, newCustomersThisWeek: number, newCustomersThisMonth: number, totalCustomers: number, totalProducts: number, activeProducts: number, lowStockProducts: number, outOfStockProducts: number, averageOrderValue: number, ordersPerCustomer: number } };
 
 export type DashboardSalesTrendQueryVariables = Exact<{
   days?: InputMaybe<Scalars['Int']['input']>;
@@ -8428,6 +8598,21 @@ export type UpdateChannelMutation = { __typename?: 'Mutation', updateChannel:
     | { __typename?: 'LanguageNotAvailableError', errorCode: ErrorCode, message: string }
    };
 
+export type ActiveChannelContentQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ActiveChannelContentQuery = { __typename?: 'Query', activeChannel: { __typename?: 'Channel', id: string, customFields?: { __typename?: 'ChannelCustomFields', promoTextAr?: string | null, promoTextFr?: string | null, promoTextEn?: string | null, freeShippingThreshold?: number | null, contactEmail?: string | null, contactPhone?: string | null, footerAddressAr?: string | null, footerAddressFr?: string | null, footerAddressEn?: string | null, socialFacebook?: string | null, socialInstagram?: string | null, socialTwitter?: string | null, socialLinkedin?: string | null, socialYoutube?: string | null, appAppStore?: string | null, appGooglePlay?: string | null, reviewsTitleAr?: string | null, reviewsTitleFr?: string | null, reviewsTitleEn?: string | null, reviewsSubtitleAr?: string | null, reviewsSubtitleFr?: string | null, reviewsSubtitleEn?: string | null, copyrightTextAr?: string | null, copyrightTextFr?: string | null, copyrightTextEn?: string | null, heroImage?: { __typename?: 'Asset', id: string, preview: string } | null, bannerImages?: Array<{ __typename?: 'Asset', id: string, preview: string }> | null, reviewImages?: Array<{ __typename?: 'Asset', id: string, preview: string }> | null } | null } };
+
+export type UpdateChannelContentMutationVariables = Exact<{
+  input: UpdateChannelInput;
+}>;
+
+
+export type UpdateChannelContentMutation = { __typename?: 'Mutation', updateChannel:
+    | { __typename?: 'Channel', id: string }
+    | { __typename?: 'LanguageNotAvailableError', errorCode: ErrorCode, message: string }
+   };
+
 export type ZonesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -8750,7 +8935,7 @@ export const UpdateCustomerAddressDocument = {"kind":"Document","definitions":[{
 export const DeleteCustomerAddressDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteCustomerAddress"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteCustomerAddress"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}}]}}]}}]} as unknown as DocumentNode<DeleteCustomerAddressMutation, DeleteCustomerAddressMutationVariables>;
 export const AddNoteToCustomerDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AddNoteToCustomer"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AddNoteToCustomerInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"addNoteToCustomer"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<AddNoteToCustomerMutation, AddNoteToCustomerMutationVariables>;
 export const DeleteCustomerNoteDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteCustomerNote"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteCustomerNote"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"result"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<DeleteCustomerNoteMutation, DeleteCustomerNoteMutationVariables>;
-export const DashboardKpiMetricsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DashboardKpiMetrics"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"dashboardKpiMetrics"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"revenueToday"}},{"kind":"Field","name":{"kind":"Name","value":"revenueThisWeek"}},{"kind":"Field","name":{"kind":"Name","value":"revenueThisMonth"}},{"kind":"Field","name":{"kind":"Name","value":"revenueLastMonth"}},{"kind":"Field","name":{"kind":"Name","value":"revenueGrowth"}},{"kind":"Field","name":{"kind":"Name","value":"ordersToday"}},{"kind":"Field","name":{"kind":"Name","value":"ordersThisWeek"}},{"kind":"Field","name":{"kind":"Name","value":"ordersThisMonth"}},{"kind":"Field","name":{"kind":"Name","value":"totalOrders"}},{"kind":"Field","name":{"kind":"Name","value":"pendingOrders"}},{"kind":"Field","name":{"kind":"Name","value":"processingOrders"}},{"kind":"Field","name":{"kind":"Name","value":"shippedOrders"}},{"kind":"Field","name":{"kind":"Name","value":"deliveredOrders"}},{"kind":"Field","name":{"kind":"Name","value":"cancelledOrders"}},{"kind":"Field","name":{"kind":"Name","value":"newCustomersToday"}},{"kind":"Field","name":{"kind":"Name","value":"newCustomersThisWeek"}},{"kind":"Field","name":{"kind":"Name","value":"newCustomersThisMonth"}},{"kind":"Field","name":{"kind":"Name","value":"totalCustomers"}},{"kind":"Field","name":{"kind":"Name","value":"totalProducts"}},{"kind":"Field","name":{"kind":"Name","value":"activeProducts"}},{"kind":"Field","name":{"kind":"Name","value":"lowStockProducts"}},{"kind":"Field","name":{"kind":"Name","value":"outOfStockProducts"}},{"kind":"Field","name":{"kind":"Name","value":"averageOrderValue"}},{"kind":"Field","name":{"kind":"Name","value":"conversionRate"}}]}}]}}]} as unknown as DocumentNode<DashboardKpiMetricsQuery, DashboardKpiMetricsQueryVariables>;
+export const DashboardKpiMetricsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DashboardKpiMetrics"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"dashboardKpiMetrics"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"revenueToday"}},{"kind":"Field","name":{"kind":"Name","value":"revenueThisWeek"}},{"kind":"Field","name":{"kind":"Name","value":"revenueThisMonth"}},{"kind":"Field","name":{"kind":"Name","value":"revenueLastMonth"}},{"kind":"Field","name":{"kind":"Name","value":"revenueGrowth"}},{"kind":"Field","name":{"kind":"Name","value":"ordersToday"}},{"kind":"Field","name":{"kind":"Name","value":"ordersThisWeek"}},{"kind":"Field","name":{"kind":"Name","value":"ordersThisMonth"}},{"kind":"Field","name":{"kind":"Name","value":"totalOrders"}},{"kind":"Field","name":{"kind":"Name","value":"pendingOrders"}},{"kind":"Field","name":{"kind":"Name","value":"processingOrders"}},{"kind":"Field","name":{"kind":"Name","value":"shippedOrders"}},{"kind":"Field","name":{"kind":"Name","value":"deliveredOrders"}},{"kind":"Field","name":{"kind":"Name","value":"cancelledOrders"}},{"kind":"Field","name":{"kind":"Name","value":"newCustomersToday"}},{"kind":"Field","name":{"kind":"Name","value":"newCustomersThisWeek"}},{"kind":"Field","name":{"kind":"Name","value":"newCustomersThisMonth"}},{"kind":"Field","name":{"kind":"Name","value":"totalCustomers"}},{"kind":"Field","name":{"kind":"Name","value":"totalProducts"}},{"kind":"Field","name":{"kind":"Name","value":"activeProducts"}},{"kind":"Field","name":{"kind":"Name","value":"lowStockProducts"}},{"kind":"Field","name":{"kind":"Name","value":"outOfStockProducts"}},{"kind":"Field","name":{"kind":"Name","value":"averageOrderValue"}},{"kind":"Field","name":{"kind":"Name","value":"ordersPerCustomer"}}]}}]}}]} as unknown as DocumentNode<DashboardKpiMetricsQuery, DashboardKpiMetricsQueryVariables>;
 export const DashboardSalesTrendDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DashboardSalesTrend"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"days"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"dashboardSalesTrend"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"days"},"value":{"kind":"Variable","name":{"kind":"Name","value":"days"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"date"}},{"kind":"Field","name":{"kind":"Name","value":"revenue"}},{"kind":"Field","name":{"kind":"Name","value":"orders"}}]}}]}}]} as unknown as DocumentNode<DashboardSalesTrendQuery, DashboardSalesTrendQueryVariables>;
 export const DashboardOrdersByStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DashboardOrdersByStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"days"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"dashboardOrdersByStatus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"days"},"value":{"kind":"Variable","name":{"kind":"Name","value":"days"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"date"}},{"kind":"Field","name":{"kind":"Name","value":"pending"}},{"kind":"Field","name":{"kind":"Name","value":"processing"}},{"kind":"Field","name":{"kind":"Name","value":"shipped"}},{"kind":"Field","name":{"kind":"Name","value":"delivered"}},{"kind":"Field","name":{"kind":"Name","value":"cancelled"}}]}}]}}]} as unknown as DocumentNode<DashboardOrdersByStatusQuery, DashboardOrdersByStatusQueryVariables>;
 export const DashboardRevenueByCategoryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DashboardRevenueByCategory"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"dashboardRevenueByCategory"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"categoryId"}},{"kind":"Field","name":{"kind":"Name","value":"categoryName"}},{"kind":"Field","name":{"kind":"Name","value":"revenue"}},{"kind":"Field","name":{"kind":"Name","value":"percentage"}}]}}]}}]} as unknown as DocumentNode<DashboardRevenueByCategoryQuery, DashboardRevenueByCategoryQueryVariables>;
@@ -8852,6 +9037,8 @@ export const TaxRatesDocument = {"kind":"Document","definitions":[{"kind":"Opera
 export const ChannelsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Channels"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"channels"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"defaultLanguageCode"}},{"kind":"Field","name":{"kind":"Name","value":"currencyCode"}},{"kind":"Field","name":{"kind":"Name","value":"pricesIncludeTax"}},{"kind":"Field","name":{"kind":"Name","value":"defaultShippingZone"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"defaultTaxZone"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<ChannelsQuery, ChannelsQueryVariables>;
 export const ActiveChannelDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ActiveChannel"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"activeChannel"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"defaultLanguageCode"}},{"kind":"Field","name":{"kind":"Name","value":"currencyCode"}},{"kind":"Field","name":{"kind":"Name","value":"pricesIncludeTax"}},{"kind":"Field","name":{"kind":"Name","value":"defaultShippingZone"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"defaultTaxZone"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"seller"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<ActiveChannelQuery, ActiveChannelQueryVariables>;
 export const UpdateChannelDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateChannel"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateChannelInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateChannel"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Channel"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"LanguageNotAvailableError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]}}]} as unknown as DocumentNode<UpdateChannelMutation, UpdateChannelMutationVariables>;
+export const ActiveChannelContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ActiveChannelContent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"activeChannel"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"promoTextAr"}},{"kind":"Field","name":{"kind":"Name","value":"promoTextFr"}},{"kind":"Field","name":{"kind":"Name","value":"promoTextEn"}},{"kind":"Field","name":{"kind":"Name","value":"freeShippingThreshold"}},{"kind":"Field","name":{"kind":"Name","value":"contactEmail"}},{"kind":"Field","name":{"kind":"Name","value":"contactPhone"}},{"kind":"Field","name":{"kind":"Name","value":"footerAddressAr"}},{"kind":"Field","name":{"kind":"Name","value":"footerAddressFr"}},{"kind":"Field","name":{"kind":"Name","value":"footerAddressEn"}},{"kind":"Field","name":{"kind":"Name","value":"socialFacebook"}},{"kind":"Field","name":{"kind":"Name","value":"socialInstagram"}},{"kind":"Field","name":{"kind":"Name","value":"socialTwitter"}},{"kind":"Field","name":{"kind":"Name","value":"socialLinkedin"}},{"kind":"Field","name":{"kind":"Name","value":"socialYoutube"}},{"kind":"Field","name":{"kind":"Name","value":"appAppStore"}},{"kind":"Field","name":{"kind":"Name","value":"appGooglePlay"}},{"kind":"Field","name":{"kind":"Name","value":"reviewsTitleAr"}},{"kind":"Field","name":{"kind":"Name","value":"reviewsTitleFr"}},{"kind":"Field","name":{"kind":"Name","value":"reviewsTitleEn"}},{"kind":"Field","name":{"kind":"Name","value":"reviewsSubtitleAr"}},{"kind":"Field","name":{"kind":"Name","value":"reviewsSubtitleFr"}},{"kind":"Field","name":{"kind":"Name","value":"reviewsSubtitleEn"}},{"kind":"Field","name":{"kind":"Name","value":"copyrightTextAr"}},{"kind":"Field","name":{"kind":"Name","value":"copyrightTextFr"}},{"kind":"Field","name":{"kind":"Name","value":"copyrightTextEn"}},{"kind":"Field","name":{"kind":"Name","value":"heroImage"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}}]}},{"kind":"Field","name":{"kind":"Name","value":"bannerImages"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}}]}},{"kind":"Field","name":{"kind":"Name","value":"reviewImages"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"preview"}}]}}]}}]}}]}}]} as unknown as DocumentNode<ActiveChannelContentQuery, ActiveChannelContentQueryVariables>;
+export const UpdateChannelContentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateChannelContent"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateChannelInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateChannel"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Channel"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ErrorResult"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]}}]} as unknown as DocumentNode<UpdateChannelContentMutation, UpdateChannelContentMutationVariables>;
 export const ZonesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Zones"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"zones"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"members"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<ZonesQuery, ZonesQueryVariables>;
 export const ShippingZonesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ShippingZones"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"zones"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"members"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<ShippingZonesQuery, ShippingZonesQueryVariables>;
 export const UpdateShippingMethodFullDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateShippingMethodFull"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateShippingMethodInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateShippingMethod"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ShippingMethod"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"fulfillmentHandlerCode"}},{"kind":"Field","name":{"kind":"Name","value":"checker"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"args"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"calculator"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"args"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<UpdateShippingMethodFullMutation, UpdateShippingMethodFullMutationVariables>;

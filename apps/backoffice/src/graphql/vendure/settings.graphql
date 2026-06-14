@@ -219,6 +219,63 @@ mutation UpdateChannel($input: UpdateChannelInput!) {
   }
 }
 
+query ActiveChannelContent {
+  activeChannel {
+    id
+    customFields {
+      promoTextAr
+      promoTextFr
+      promoTextEn
+      freeShippingThreshold
+      contactEmail
+      contactPhone
+      footerAddressAr
+      footerAddressFr
+      footerAddressEn
+      socialFacebook
+      socialInstagram
+      socialTwitter
+      socialLinkedin
+      socialYoutube
+      appAppStore
+      appGooglePlay
+      reviewsTitleAr
+      reviewsTitleFr
+      reviewsTitleEn
+      reviewsSubtitleAr
+      reviewsSubtitleFr
+      reviewsSubtitleEn
+      copyrightTextAr
+      copyrightTextFr
+      copyrightTextEn
+      heroImage {
+        id
+        preview
+      }
+      bannerImages {
+        id
+        preview
+      }
+      reviewImages {
+        id
+        preview
+      }
+    }
+  }
+}
+
+mutation UpdateChannelContent($input: UpdateChannelInput!) {
+  updateChannel(input: $input) {
+    ... on Channel {
+      id
+    }
+    ... on ErrorResult {
+      errorCode
+      message
+    }
+  }
+}
+
 query Zones {
   zones {
     items {

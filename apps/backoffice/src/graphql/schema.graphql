@@ -824,7 +824,7 @@ input CreateChannelInput {
   defaultTaxZoneId: ID!
   defaultShippingZoneId: ID!
   sellerId: ID
-  customFields: JSON
+  customFields: CreateChannelCustomFieldsInput
 }
 
 input UpdateChannelInput {
@@ -841,7 +841,7 @@ input UpdateChannelInput {
   defaultTaxZoneId: ID
   defaultShippingZoneId: ID
   sellerId: ID
-  customFields: JSON
+  customFields: UpdateChannelCustomFieldsInput
 }
 
 """
@@ -2039,7 +2039,7 @@ type Product implements Node {
   facetValues: [FacetValue!]!
   translations: [ProductTranslation!]!
   collections: [Collection!]!
-  customFields: JSON
+  customFields: ProductCustomFields
 }
 
 type ProductVariantPrice {
@@ -2220,6 +2220,8 @@ input ProductFilterParameter {
   enabled: BooleanOperators
   _and: [ProductFilterParameter!]
   _or: [ProductFilterParameter!]
+  isFeatured: BooleanOperators
+  viewCount: NumberOperators
 }
 
 input ProductVariantListOptions {
@@ -2282,7 +2284,7 @@ input CreateProductInput {
   assetIds: [ID!]
   facetValueIds: [ID!]
   translations: [ProductTranslationInput!]!
-  customFields: JSON
+  customFields: CreateProductCustomFieldsInput
 }
 
 input UpdateProductInput {
@@ -2292,7 +2294,7 @@ input UpdateProductInput {
   assetIds: [ID!]
   facetValueIds: [ID!]
   translations: [ProductTranslationInput!]
-  customFields: JSON
+  customFields: UpdateProductCustomFieldsInput
 }
 
 input ProductVariantTranslationInput {
@@ -3112,7 +3114,7 @@ type Channel implements Node {
   outOfStockThreshold: Int
   pricesIncludeTax: Boolean!
   seller: Seller
-  customFields: JSON
+  customFields: ChannelCustomFields
 }
 
 type CollectionBreadcrumb {
@@ -5904,10 +5906,10 @@ input MetricSummaryInput {
 
 """Comprehensive KPI metrics for the dashboard"""
 type KpiMetrics {
-  revenueToday: Int!
-  revenueThisWeek: Int!
-  revenueThisMonth: Int!
-  revenueLastMonth: Int!
+  revenueToday: Float!
+  revenueThisWeek: Float!
+  revenueThisMonth: Float!
+  revenueLastMonth: Float!
   revenueGrowth: Float!
   ordersToday: Int!
   ordersThisWeek: Int!
@@ -5927,13 +5929,19 @@ type KpiMetrics {
   lowStockProducts: Int!
   outOfStockProducts: Int!
   averageOrderValue: Float!
-  conversionRate: Float!
+
+  """
+  Placed orders ÷ total customers. NOT a conversion rate (no traffic data).
+  """
+  ordersPerCustomer: Float!
 }
 
 """Sales trend data point for line chart"""
 type SalesTrendDataPoint {
   date: String!
-  revenue: Int!
+
+  """Revenue in cents. Float to avoid Int32 overflow on high-volume days."""
+  revenue: Float!
   orders: Int!
 }
 
@@ -5951,7 +5959,11 @@ type OrdersChartDataPoint {
 type RevenueByCategoryDataPoint {
   categoryId: ID!
   categoryName: String!
-  revenue: Int!
+
+  """
+  Revenue in cents (ex-tax, listPrice × quantity). Float to avoid Int32 overflow.
+  """
+  revenue: Float!
   percentage: Float!
 }
 
@@ -5961,7 +5973,9 @@ type RecentOrderItem {
   code: String!
   customerName: String!
   customerEmail: String!
-  total: Int!
+
+  """Order total with tax, in cents. Float to avoid Int32 overflow."""
+  total: Float!
   state: String!
   itemCount: Int!
   createdAt: DateTime!
@@ -5986,7 +6000,11 @@ type TopSellingProduct {
   variantName: String!
   sku: String!
   quantitySold: Int!
-  revenue: Int!
+
+  """
+  Revenue in cents (ex-tax, listPrice × quantity). Float to avoid Int32 overflow.
+  """
+  revenue: Float!
   imageUrl: String
 }
 
@@ -6108,6 +6126,31 @@ input ChannelFilterParameter {
   pricesIncludeTax: BooleanOperators
   _and: [ChannelFilterParameter!]
   _or: [ChannelFilterParameter!]
+  promoTextAr: StringOperators
+  promoTextFr: StringOperators
+  promoTextEn: StringOperators
+  freeShippingThreshold: NumberOperators
+  contactEmail: StringOperators
+  contactPhone: StringOperators
+  footerAddressAr: StringOperators
+  footerAddressFr: StringOperators
+  footerAddressEn: StringOperators
+  socialFacebook: StringOperators
+  socialInstagram: StringOperators
+  socialTwitter: StringOperators
+  socialLinkedin: StringOperators
+  socialYoutube: StringOperators
+  appAppStore: StringOperators
+  appGooglePlay: StringOperators
+  reviewsTitleAr: StringOperators
+  reviewsTitleFr: StringOperators
+  reviewsTitleEn: StringOperators
+  reviewsSubtitleAr: StringOperators
+  reviewsSubtitleFr: StringOperators
+  reviewsSubtitleEn: StringOperators
+  copyrightTextAr: StringOperators
+  copyrightTextFr: StringOperators
+  copyrightTextEn: StringOperators
 }
 
 input ChannelSortParameter {
@@ -6117,6 +6160,32 @@ input ChannelSortParameter {
   code: SortOrder
   token: SortOrder
   outOfStockThreshold: SortOrder
+  promoTextAr: SortOrder
+  promoTextFr: SortOrder
+  promoTextEn: SortOrder
+  freeShippingThreshold: SortOrder
+  contactEmail: SortOrder
+  contactPhone: SortOrder
+  footerAddressAr: SortOrder
+  footerAddressFr: SortOrder
+  footerAddressEn: SortOrder
+  socialFacebook: SortOrder
+  socialInstagram: SortOrder
+  socialTwitter: SortOrder
+  socialLinkedin: SortOrder
+  socialYoutube: SortOrder
+  appAppStore: SortOrder
+  appGooglePlay: SortOrder
+  reviewsTitleAr: SortOrder
+  reviewsTitleFr: SortOrder
+  reviewsTitleEn: SortOrder
+  reviewsSubtitleAr: SortOrder
+  reviewsSubtitleFr: SortOrder
+  reviewsSubtitleEn: SortOrder
+  copyrightTextAr: SortOrder
+  copyrightTextFr: SortOrder
+  copyrightTextEn: SortOrder
+  heroImage: SortOrder
 }
 
 input CollectionFilterParameter {
@@ -6342,6 +6411,8 @@ input ProductSortParameter {
   name: SortOrder
   slug: SortOrder
   description: SortOrder
+  isFeatured: SortOrder
+  viewCount: SortOrder
 }
 
 input PromotionFilterParameter {
@@ -6545,6 +6616,99 @@ input HistoryEntrySortParameter {
   updatedAt: SortOrder
 }
 
+type ChannelCustomFields {
+  promoTextAr: String
+  promoTextFr: String
+  promoTextEn: String
+  freeShippingThreshold: Int
+  contactEmail: String
+  contactPhone: String
+  footerAddressAr: String
+  footerAddressFr: String
+  footerAddressEn: String
+  socialFacebook: String
+  socialInstagram: String
+  socialTwitter: String
+  socialLinkedin: String
+  socialYoutube: String
+  appAppStore: String
+  appGooglePlay: String
+  reviewsTitleAr: String
+  reviewsTitleFr: String
+  reviewsTitleEn: String
+  reviewsSubtitleAr: String
+  reviewsSubtitleFr: String
+  reviewsSubtitleEn: String
+  copyrightTextAr: String
+  copyrightTextFr: String
+  copyrightTextEn: String
+  heroImage: Asset
+  bannerImages: [Asset!]
+  reviewImages: [Asset!]
+}
+
+input CreateChannelCustomFieldsInput {
+  promoTextAr: String
+  promoTextFr: String
+  promoTextEn: String
+  freeShippingThreshold: Int
+  contactEmail: String
+  contactPhone: String
+  footerAddressAr: String
+  footerAddressFr: String
+  footerAddressEn: String
+  socialFacebook: String
+  socialInstagram: String
+  socialTwitter: String
+  socialLinkedin: String
+  socialYoutube: String
+  appAppStore: String
+  appGooglePlay: String
+  reviewsTitleAr: String
+  reviewsTitleFr: String
+  reviewsTitleEn: String
+  reviewsSubtitleAr: String
+  reviewsSubtitleFr: String
+  reviewsSubtitleEn: String
+  copyrightTextAr: String
+  copyrightTextFr: String
+  copyrightTextEn: String
+  heroImageId: ID
+  bannerImagesIds: [ID!]
+  reviewImagesIds: [ID!]
+}
+
+input UpdateChannelCustomFieldsInput {
+  promoTextAr: String
+  promoTextFr: String
+  promoTextEn: String
+  freeShippingThreshold: Int
+  contactEmail: String
+  contactPhone: String
+  footerAddressAr: String
+  footerAddressFr: String
+  footerAddressEn: String
+  socialFacebook: String
+  socialInstagram: String
+  socialTwitter: String
+  socialLinkedin: String
+  socialYoutube: String
+  appAppStore: String
+  appGooglePlay: String
+  reviewsTitleAr: String
+  reviewsTitleFr: String
+  reviewsTitleEn: String
+  reviewsSubtitleAr: String
+  reviewsSubtitleFr: String
+  reviewsSubtitleEn: String
+  copyrightTextAr: String
+  copyrightTextFr: String
+  copyrightTextEn: String
+  heroImageId: ID
+  bannerImagesIds: [ID!]
+  reviewImagesIds: [ID!]
+}
+
 type CollectionCustomFields {
   displayOrder: Int
 }
@@ -6601,6 +6765,21 @@ input UpdateOrderCustomFieldsInput {
   trackingNumber: String
   wilaya: String
   cancellationReason: String
+}
+
+type ProductCustomFields {
+  isFeatured: Boolean
+  viewCount: Int
+}
+
+input CreateProductCustomFieldsInput {
+  isFeatured: Boolean
+  viewCount: Int
+}
+
+input UpdateProductCustomFieldsInput {
+  isFeatured: Boolean
+  viewCount: Int
 }
 
 type ProductVariantCustomFields {

@@ -73,6 +73,7 @@ import { formatPrice } from '../../lib/utils';
 import { TaxSettings } from './sections/TaxSettings';
 import { ZoneSettings } from './sections/ZoneSettings';
 import { ChannelSettings } from './sections/ChannelSettings';
+import { ContentSettings } from './sections/ContentSettings';
 import { ShippingMethodCreateModal } from './sections/ShippingMethodCreateModal';
 import { PaymentMethodCreateModal } from './sections/PaymentMethodCreateModal';
 import { PermissionGate } from '../../components/auth/PermissionGate';
@@ -987,6 +988,12 @@ export const Settings: React.FC = () => {
       label: 'Canaux',
       icon: <Building className="h-4 w-4" />,
       content: <ChannelSettings />,
+    },
+    {
+      id: 'content',
+      label: 'Contenu',
+      icon: <FileText className="h-4 w-4" />,
+      content: <ContentSettings />,
     },
     {
       id: 'email',
