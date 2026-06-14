@@ -31,6 +31,7 @@ export const ContentSettings: React.FC = () => {
 
   const [activeLang, setActiveLang] = useState<LangCode>('Fr');
   const [picker, setPicker] = useState<null | 'hero' | 'banners' | 'reviews'>(null);
+  const localizedDir = activeLang === 'Ar' ? 'rtl' : 'ltr';
 
   if (loading) return <Spinner />;
 
@@ -38,8 +39,8 @@ export const ContentSettings: React.FC = () => {
     <div className="space-y-6">
       {/* Localized text */}
       <SettingsSection
-        title="Localized text"
-        description="Storefront copy shown per language (French, Arabic, English)."
+        title="Textes localisés"
+        description="Textes de la boutique affichés par langue (français, arabe, anglais)."
         dirty={dirtyFor('localized')}
         saving={savingSection === 'localized'}
         onSave={() => saveSection('localized')}
@@ -66,9 +67,18 @@ export const ContentSettings: React.FC = () => {
             <div key={key} className="space-y-1">
               <label className="block text-sm font-medium text-foreground">{label}</label>
               {textarea ? (
-                <TextArea rows={2} value={form[key] ?? ''} onChange={(e) => setField(key, e.target.value)} />
+                <TextArea
+                  rows={2}
+                  dir={localizedDir}
+                  value={form[key] ?? ''}
+                  onChange={(e) => setField(key, e.target.value)}
+                />
               ) : (
-                <Input value={form[key] ?? ''} onChange={(e) => setField(key, e.target.value)} />
+                <Input
+                  dir={localizedDir}
+                  value={form[key] ?? ''}
+                  onChange={(e) => setField(key, e.target.value)}
+                />
               )}
             </div>
           );
@@ -77,8 +87,8 @@ export const ContentSettings: React.FC = () => {
 
       {/* Store & contact */}
       <SettingsSection
-        title="Store & contact"
-        description="Free-shipping threshold and customer contact details."
+        title="Boutique et contact"
+        description="Seuil de livraison gratuite et coordonnées de contact."
         dirty={dirtyFor('store')}
         saving={savingSection === 'store'}
         onSave={() => saveSection('store')}
@@ -99,8 +109,8 @@ export const ContentSettings: React.FC = () => {
 
       {/* Social & app links */}
       <SettingsSection
-        title="Social & app links"
-        description="Social media profiles and mobile app store links."
+        title="Réseaux sociaux et applications"
+        description="Profils de réseaux sociaux et liens des applications mobiles."
         dirty={dirtyFor('social')}
         saving={savingSection === 'social'}
         onSave={() => saveSection('social')}
@@ -121,26 +131,26 @@ export const ContentSettings: React.FC = () => {
 
       {/* Media */}
       <SettingsSection
-        title="Media"
-        description="Hero image, marketing banners, and review carousel images."
+        title="Médias"
+        description="Image principale, bannières marketing et images du carrousel d'avis."
         dirty={dirtyFor('media')}
         saving={savingSection === 'media'}
         onSave={() => saveSection('media')}
       >
         <ImageField
-          label="Hero image"
+          label="Image principale"
           assets={media.hero ? [media.hero] : []}
           onPick={() => setPicker('hero')}
           onClear={() => setHero(null)}
         />
         <ImageField
-          label="Marketing banners"
+          label="Bannières marketing"
           assets={media.banners}
           onPick={() => setPicker('banners')}
           onClear={() => setBanners([])}
         />
         <ImageField
-          label="Review carousel images"
+          label="Images du carrousel d'avis"
           assets={media.reviews}
           onPick={() => setPicker('reviews')}
           onClear={() => setReviews([])}
@@ -190,18 +200,18 @@ function ImageField({
         <label className="text-sm font-medium text-foreground">{label}</label>
         <div className="flex gap-2">
           <Button type="button" variant="secondary" onClick={onPick}>
-            Choose
+            Choisir
           </Button>
           {assets.length > 0 && (
             <Button type="button" variant="secondary" onClick={onClear}>
-              Clear
+              Effacer
             </Button>
           )}
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
         {assets.length === 0 ? (
-          <span className="text-sm text-muted-foreground">No image selected</span>
+          <span className="text-sm text-muted-foreground">Aucune image sélectionnée</span>
         ) : (
           assets.map((a) => (
             <img key={a.id} src={a.preview} alt="" className="h-20 w-20 rounded border object-cover" />

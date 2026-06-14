@@ -27,9 +27,11 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
       </div>
       <CardContent className="space-y-4">{children}</CardContent>
       <CardFooter className="flex items-center justify-end gap-3">
-        {dirty && <span className="text-sm text-muted-foreground">Unsaved changes</span>}
+        {dirty && (
+          <span className="text-sm text-muted-foreground">Modifications non enregistrées</span>
+        )}
         <Button onClick={onSave} loading={saving} disabled={!dirty || saving}>
-          Save
+          Enregistrer
         </Button>
       </CardFooter>
     </Card>

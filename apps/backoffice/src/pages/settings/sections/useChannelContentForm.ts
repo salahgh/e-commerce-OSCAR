@@ -19,34 +19,34 @@ export type LangCode = (typeof LANGS)[number]['code'];
 
 export type LocaleField = { base: string; label: string; textarea?: boolean };
 export const LOCALE_FIELDS: LocaleField[] = [
-  { base: 'promoText', label: 'Promo banner text' },
-  { base: 'footerAddress', label: 'Footer address' },
-  { base: 'reviewsTitle', label: 'Reviews section title' },
-  { base: 'reviewsSubtitle', label: 'Reviews section subtitle', textarea: true },
-  { base: 'copyrightText', label: 'Footer copyright line' },
+  { base: 'promoText', label: 'Texte de la bannière promo' },
+  { base: 'footerAddress', label: 'Adresse (pied de page)' },
+  { base: 'reviewsTitle', label: 'Titre de la section avis' },
+  { base: 'reviewsSubtitle', label: 'Sous-titre de la section avis', textarea: true },
+  { base: 'copyrightText', label: 'Ligne de copyright (pied de page)' },
 ];
 
 export type ScalarField = { name: string; label: string; type?: string };
 export const STORE_FIELDS: ScalarField[] = [
-  { name: 'freeShippingThreshold', label: 'Free shipping threshold (DZD)', type: 'number' },
-  { name: 'contactEmail', label: 'Contact email' },
-  { name: 'contactPhone', label: 'Contact phone' },
+  { name: 'freeShippingThreshold', label: 'Seuil de livraison gratuite (DZD)', type: 'number' },
+  { name: 'contactEmail', label: 'E-mail de contact' },
+  { name: 'contactPhone', label: 'Téléphone de contact' },
 ];
 export const SOCIAL_FIELDS: ScalarField[] = [
-  { name: 'socialFacebook', label: 'Facebook URL' },
-  { name: 'socialInstagram', label: 'Instagram URL' },
-  { name: 'socialTwitter', label: 'Twitter URL' },
-  { name: 'socialLinkedin', label: 'LinkedIn URL' },
-  { name: 'socialYoutube', label: 'YouTube URL' },
-  { name: 'appAppStore', label: 'App Store URL' },
-  { name: 'appGooglePlay', label: 'Google Play URL' },
+  { name: 'socialFacebook', label: 'URL Facebook' },
+  { name: 'socialInstagram', label: 'URL Instagram' },
+  { name: 'socialTwitter', label: 'URL Twitter' },
+  { name: 'socialLinkedin', label: 'URL LinkedIn' },
+  { name: 'socialYoutube', label: 'URL YouTube' },
+  { name: 'appAppStore', label: 'URL App Store' },
+  { name: 'appGooglePlay', label: 'URL Google Play' },
 ];
 
 const SECTION_LABEL: Record<SectionId, string> = {
-  localized: 'Localized text',
-  store: 'Store & contact',
-  social: 'Social & app links',
-  media: 'Media',
+  localized: 'Textes localisés',
+  store: 'Boutique et contact',
+  social: 'Réseaux sociaux et applications',
+  media: 'Médias',
 };
 
 function localizedKeys(): string[] {
@@ -155,9 +155,9 @@ export function useChannelContentForm() {
           return nextB;
         });
       }
-      dispatch(addToast({ type: 'success', message: `${SECTION_LABEL[section]} saved` }));
+      dispatch(addToast({ type: 'success', message: `Section « ${SECTION_LABEL[section]} » enregistrée` }));
     } catch (e) {
-      dispatch(addToast({ type: 'error', message: (e as Error).message || 'Save failed' }));
+      dispatch(addToast({ type: 'error', message: (e as Error).message || "Échec de l'enregistrement" }));
     } finally {
       setSavingSection(null);
     }
