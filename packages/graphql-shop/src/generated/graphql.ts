@@ -189,7 +189,7 @@ export type Channel = Node & {
   createdAt: Scalars["DateTime"]["output"];
   /** @deprecated Use defaultCurrencyCode instead */
   currencyCode: CurrencyCode;
-  customFields?: Maybe<Scalars["JSON"]["output"]>;
+  customFields?: Maybe<ChannelCustomFields>;
   defaultCurrencyCode: CurrencyCode;
   defaultLanguageCode: LanguageCode;
   defaultShippingZone?: Maybe<Zone>;
@@ -203,6 +203,38 @@ export type Channel = Node & {
   /** Not yet used - will be implemented in a future release. */
   trackInventory?: Maybe<Scalars["Boolean"]["output"]>;
   updatedAt: Scalars["DateTime"]["output"];
+};
+
+export type ChannelCustomFields = {
+  __typename?: "ChannelCustomFields";
+  appAppStore?: Maybe<Scalars["String"]["output"]>;
+  appGooglePlay?: Maybe<Scalars["String"]["output"]>;
+  bannerImages?: Maybe<Array<Asset>>;
+  contactEmail?: Maybe<Scalars["String"]["output"]>;
+  contactPhone?: Maybe<Scalars["String"]["output"]>;
+  copyrightTextAr?: Maybe<Scalars["String"]["output"]>;
+  copyrightTextEn?: Maybe<Scalars["String"]["output"]>;
+  copyrightTextFr?: Maybe<Scalars["String"]["output"]>;
+  footerAddressAr?: Maybe<Scalars["String"]["output"]>;
+  footerAddressEn?: Maybe<Scalars["String"]["output"]>;
+  footerAddressFr?: Maybe<Scalars["String"]["output"]>;
+  freeShippingThreshold?: Maybe<Scalars["Int"]["output"]>;
+  heroImage?: Maybe<Asset>;
+  promoTextAr?: Maybe<Scalars["String"]["output"]>;
+  promoTextEn?: Maybe<Scalars["String"]["output"]>;
+  promoTextFr?: Maybe<Scalars["String"]["output"]>;
+  reviewImages?: Maybe<Array<Asset>>;
+  reviewsSubtitleAr?: Maybe<Scalars["String"]["output"]>;
+  reviewsSubtitleEn?: Maybe<Scalars["String"]["output"]>;
+  reviewsSubtitleFr?: Maybe<Scalars["String"]["output"]>;
+  reviewsTitleAr?: Maybe<Scalars["String"]["output"]>;
+  reviewsTitleEn?: Maybe<Scalars["String"]["output"]>;
+  reviewsTitleFr?: Maybe<Scalars["String"]["output"]>;
+  socialFacebook?: Maybe<Scalars["String"]["output"]>;
+  socialInstagram?: Maybe<Scalars["String"]["output"]>;
+  socialLinkedin?: Maybe<Scalars["String"]["output"]>;
+  socialTwitter?: Maybe<Scalars["String"]["output"]>;
+  socialYoutube?: Maybe<Scalars["String"]["output"]>;
 };
 
 export type Collection = Node & {
@@ -7777,6 +7809,55 @@ export type GetRootCollectionsQuery = {
   };
 };
 
+export type GetSiteSettingsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetSiteSettingsQuery = {
+  __typename?: "Query";
+  activeChannel: {
+    __typename?: "Channel";
+    id: string;
+    customFields?: {
+      __typename?: "ChannelCustomFields";
+      promoTextAr?: string | null;
+      promoTextFr?: string | null;
+      promoTextEn?: string | null;
+      freeShippingThreshold?: number | null;
+      contactEmail?: string | null;
+      contactPhone?: string | null;
+      footerAddressAr?: string | null;
+      footerAddressFr?: string | null;
+      footerAddressEn?: string | null;
+      socialFacebook?: string | null;
+      socialInstagram?: string | null;
+      socialTwitter?: string | null;
+      socialLinkedin?: string | null;
+      socialYoutube?: string | null;
+      appAppStore?: string | null;
+      appGooglePlay?: string | null;
+      reviewsTitleAr?: string | null;
+      reviewsTitleFr?: string | null;
+      reviewsTitleEn?: string | null;
+      reviewsSubtitleAr?: string | null;
+      reviewsSubtitleFr?: string | null;
+      reviewsSubtitleEn?: string | null;
+      copyrightTextAr?: string | null;
+      copyrightTextFr?: string | null;
+      copyrightTextEn?: string | null;
+      heroImage?: { __typename?: "Asset"; id: string; preview: string } | null;
+      bannerImages?: Array<{
+        __typename?: "Asset";
+        id: string;
+        preview: string;
+      }> | null;
+      reviewImages?: Array<{
+        __typename?: "Asset";
+        id: string;
+        preview: string;
+      }> | null;
+    } | null;
+  };
+};
+
 export const CurrentUserFieldsFragmentDoc = gql`
   fragment CurrentUserFields on CurrentUser {
     id
@@ -12203,4 +12284,141 @@ export type GetRootCollectionsSuspenseQueryHookResult = ReturnType<
 export type GetRootCollectionsQueryResult = Apollo.QueryResult<
   GetRootCollectionsQuery,
   GetRootCollectionsQueryVariables
+>;
+export const GetSiteSettingsDocument = gql`
+  query GetSiteSettings {
+    activeChannel {
+      id
+      customFields {
+        promoTextAr
+        promoTextFr
+        promoTextEn
+        freeShippingThreshold
+        contactEmail
+        contactPhone
+        footerAddressAr
+        footerAddressFr
+        footerAddressEn
+        socialFacebook
+        socialInstagram
+        socialTwitter
+        socialLinkedin
+        socialYoutube
+        appAppStore
+        appGooglePlay
+        reviewsTitleAr
+        reviewsTitleFr
+        reviewsTitleEn
+        reviewsSubtitleAr
+        reviewsSubtitleFr
+        reviewsSubtitleEn
+        copyrightTextAr
+        copyrightTextFr
+        copyrightTextEn
+        heroImage {
+          id
+          preview
+        }
+        bannerImages {
+          id
+          preview
+        }
+        reviewImages {
+          id
+          preview
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * __useGetSiteSettingsQuery__
+ *
+ * To run a query within a React component, call `useGetSiteSettingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetSiteSettingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetSiteSettingsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetSiteSettingsQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    GetSiteSettingsQuery,
+    GetSiteSettingsQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<GetSiteSettingsQuery, GetSiteSettingsQueryVariables>(
+    GetSiteSettingsDocument,
+    options,
+  );
+}
+export function useGetSiteSettingsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    GetSiteSettingsQuery,
+    GetSiteSettingsQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<
+    GetSiteSettingsQuery,
+    GetSiteSettingsQueryVariables
+  >(GetSiteSettingsDocument, options);
+}
+// @ts-ignore
+export function useGetSiteSettingsSuspenseQuery(
+  baseOptions?: Apollo.SuspenseQueryHookOptions<
+    GetSiteSettingsQuery,
+    GetSiteSettingsQueryVariables
+  >,
+): Apollo.UseSuspenseQueryResult<
+  GetSiteSettingsQuery,
+  GetSiteSettingsQueryVariables
+>;
+export function useGetSiteSettingsSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<
+        GetSiteSettingsQuery,
+        GetSiteSettingsQueryVariables
+      >,
+): Apollo.UseSuspenseQueryResult<
+  GetSiteSettingsQuery | undefined,
+  GetSiteSettingsQueryVariables
+>;
+export function useGetSiteSettingsSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<
+        GetSiteSettingsQuery,
+        GetSiteSettingsQueryVariables
+      >,
+) {
+  const options =
+    baseOptions === Apollo.skipToken
+      ? baseOptions
+      : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<
+    GetSiteSettingsQuery,
+    GetSiteSettingsQueryVariables
+  >(GetSiteSettingsDocument, options);
+}
+export type GetSiteSettingsQueryHookResult = ReturnType<
+  typeof useGetSiteSettingsQuery
+>;
+export type GetSiteSettingsLazyQueryHookResult = ReturnType<
+  typeof useGetSiteSettingsLazyQuery
+>;
+export type GetSiteSettingsSuspenseQueryHookResult = ReturnType<
+  typeof useGetSiteSettingsSuspenseQuery
+>;
+export type GetSiteSettingsQueryResult = Apollo.QueryResult<
+  GetSiteSettingsQuery,
+  GetSiteSettingsQueryVariables
 >;
