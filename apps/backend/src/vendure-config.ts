@@ -234,7 +234,7 @@ export const config: VendureConfig = {
       { name: 'copyrightTextFr', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Copyright line (FR)' }] },
       { name: 'copyrightTextEn', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Copyright line (EN)' }] },
       // Images
-      { name: 'heroImage', type: 'relation', entity: Asset, nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Hero image' }] },
+      { name: 'heroImages', type: 'relation', entity: Asset, list: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Hero images' }] },
       { name: 'bannerImages', type: 'relation', entity: Asset, list: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Marketing banner images' }] },
       { name: 'reviewImages', type: 'relation', entity: Asset, list: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Review carousel images' }] },
     ],

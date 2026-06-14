@@ -76,8 +76,10 @@ export async function seedSiteContent(
       copyrightTextAr: 'OSCAR Fashion 2026 ©',
       copyrightTextFr: 'OSCAR Fashion 2026 ©',
       copyrightTextEn: 'OSCAR Fashion 2026 ©',
-      ...(heroId ? { heroImageId: heroId } : {}),
-      ...(bannerId ? { bannerImagesIds: [bannerId] } : {}),
+      // Hero & banner are both multi-image carousels — seed 2 each (reusing the
+      // two available large images) so the carousels are demonstrable.
+      ...(heroId || bannerId ? { heroImagesIds: [heroId, bannerId].filter(Boolean) } : {}),
+      ...(bannerId || heroId ? { bannerImagesIds: [bannerId, heroId].filter(Boolean) } : {}),
       ...(reviewIds.length ? { reviewImagesIds: reviewIds } : {}),
     } as any,
   });
