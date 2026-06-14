@@ -6,6 +6,7 @@ import {
   DefaultSchedulerPlugin,
   VendureConfig,
   LanguageCode,
+  Asset,
 } from '@vendure/core';
 import { defaultEmailHandlers, EmailPlugin } from '@vendure/email-plugin';
 import { AssetServerPlugin } from '@vendure/asset-server-plugin';
@@ -197,6 +198,45 @@ export const config: VendureConfig = {
     ],
     FacetValue: [
       { name: 'colorHex', type: 'string', nullable: true, label: [{ languageCode: LanguageCode.en, value: 'Color Hex Code' }] },
+    ],
+    // Per-channel site content, editable from the back-office "Content" tab and
+    // exposed to the storefront via shop-api `activeChannel.customFields`.
+    // NB: Channel is not translatable, so multilingual text uses explicit
+    // per-language string fields (…Ar/…Fr/…En) rather than localeString.
+    Channel: [
+      // Header — promo text per language + threshold
+      { name: 'promoTextAr', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Promo banner text (AR)' }] },
+      { name: 'promoTextFr', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Promo banner text (FR)' }] },
+      { name: 'promoTextEn', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Promo banner text (EN)' }] },
+      { name: 'freeShippingThreshold', type: 'int', nullable: true, defaultValue: 12000, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Free shipping threshold (DZD)' }] },
+      // Footer contact
+      { name: 'contactEmail', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Contact email' }] },
+      { name: 'contactPhone', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Contact phone' }] },
+      { name: 'footerAddressAr', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Footer address (AR)' }] },
+      { name: 'footerAddressFr', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Footer address (FR)' }] },
+      { name: 'footerAddressEn', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Footer address (EN)' }] },
+      // Social + app links
+      { name: 'socialFacebook', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Facebook URL' }] },
+      { name: 'socialInstagram', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Instagram URL' }] },
+      { name: 'socialTwitter', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Twitter URL' }] },
+      { name: 'socialLinkedin', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'LinkedIn URL' }] },
+      { name: 'socialYoutube', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'YouTube URL' }] },
+      { name: 'appAppStore', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'App Store URL' }] },
+      { name: 'appGooglePlay', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Google Play URL' }] },
+      // Testimonials + legal (per language)
+      { name: 'reviewsTitleAr', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Reviews title (AR)' }] },
+      { name: 'reviewsTitleFr', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Reviews title (FR)' }] },
+      { name: 'reviewsTitleEn', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Reviews title (EN)' }] },
+      { name: 'reviewsSubtitleAr', type: 'text', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Reviews subtitle (AR)' }] },
+      { name: 'reviewsSubtitleFr', type: 'text', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Reviews subtitle (FR)' }] },
+      { name: 'reviewsSubtitleEn', type: 'text', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Reviews subtitle (EN)' }] },
+      { name: 'copyrightTextAr', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Copyright line (AR)' }] },
+      { name: 'copyrightTextFr', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Copyright line (FR)' }] },
+      { name: 'copyrightTextEn', type: 'string', nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Copyright line (EN)' }] },
+      // Images
+      { name: 'heroImage', type: 'relation', entity: Asset, nullable: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Hero image' }] },
+      { name: 'bannerImages', type: 'relation', entity: Asset, list: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Marketing banner images' }] },
+      { name: 'reviewImages', type: 'relation', entity: Asset, list: true, public: true, ui: { tab: 'Site Content' }, label: [{ languageCode: LanguageCode.en, value: 'Review carousel images' }] },
     ],
   },
   plugins: [
