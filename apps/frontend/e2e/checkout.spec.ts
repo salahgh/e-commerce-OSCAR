@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const PRODUCT_AR = '/ar/products/lancome-absolue-foundation';
+const PRODUCT_AR = '/ar/products/men-casual-shirt-4';
 const CHECKOUT_AR = '/ar/checkout';
 
 // Full order completion (address → shipping → COD → confirmation) was verified

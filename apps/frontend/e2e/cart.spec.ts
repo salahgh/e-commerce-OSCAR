@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { stabilize } from './utils';
 
-const PRODUCT_AR = '/ar/products/lancome-absolue-foundation';
+const PRODUCT_AR = '/ar/products/men-casual-shirt-4';
 const CART_AR = '/ar/cart';
 
 async function addItemAndOpenCart(page: import('@playwright/test').Page) {

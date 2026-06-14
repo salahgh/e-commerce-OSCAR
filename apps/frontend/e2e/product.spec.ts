@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { stabilize } from './utils';
 
-// A stable seed product (perfume catalogue). Single-variant, so size/colour
-// chips do not render — only the universal PDP chrome is asserted here.
-const PRODUCT_AR = '/ar/products/lancome-absolue-foundation';
+// A stable OSCAR seed product. Only the universal PDP chrome is asserted here
+// (title, actions, related rail) so the spec is robust to variant/option shape.
+const PRODUCT_AR = '/ar/products/men-casual-shirt-4';
 
 async function gotoProduct(page: import('@playwright/test').Page) {
   await page.goto(PRODUCT_AR);
