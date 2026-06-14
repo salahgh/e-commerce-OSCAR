@@ -248,7 +248,7 @@ query ActiveChannelContent {
       copyrightTextAr
       copyrightTextFr
       copyrightTextEn
-      heroImage {
+      heroImages {
         id
         preview
       }

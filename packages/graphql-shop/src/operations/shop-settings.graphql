@@ -29,7 +29,7 @@ query GetSiteSettings {
       copyrightTextAr
       copyrightTextFr
       copyrightTextEn
-      heroImage {
+      heroImages {
         id
         preview
       }

@@ -6185,7 +6185,6 @@ input ChannelSortParameter {
   copyrightTextAr: SortOrder
   copyrightTextFr: SortOrder
   copyrightTextEn: SortOrder
-  heroImage: SortOrder
 }
 
 input CollectionFilterParameter {
@@ -6642,7 +6641,7 @@ type ChannelCustomFields {
   copyrightTextAr: String
   copyrightTextFr: String
   copyrightTextEn: String
-  heroImage: Asset
+  heroImages: [Asset!]
   bannerImages: [Asset!]
   reviewImages: [Asset!]
 }
@@ -6673,7 +6672,7 @@ input CreateChannelCustomFieldsInput {
   copyrightTextAr: String
   copyrightTextFr: String
   copyrightTextEn: String
-  heroImageId: ID
+  heroImagesIds: [ID!]
   bannerImagesIds: [ID!]
   reviewImagesIds: [ID!]
 }
@@ -6704,7 +6703,7 @@ input UpdateChannelCustomFieldsInput {
   copyrightTextAr: String
   copyrightTextFr: String
   copyrightTextEn: String
-  heroImageId: ID
+  heroImagesIds: [ID!]
   bannerImagesIds: [ID!]
   reviewImagesIds: [ID!]
 }

@@ -219,7 +219,7 @@ export type ChannelCustomFields = {
   footerAddressEn?: Maybe<Scalars["String"]["output"]>;
   footerAddressFr?: Maybe<Scalars["String"]["output"]>;
   freeShippingThreshold?: Maybe<Scalars["Int"]["output"]>;
-  heroImage?: Maybe<Asset>;
+  heroImages?: Maybe<Array<Asset>>;
   promoTextAr?: Maybe<Scalars["String"]["output"]>;
   promoTextEn?: Maybe<Scalars["String"]["output"]>;
   promoTextFr?: Maybe<Scalars["String"]["output"]>;
@@ -7843,7 +7843,11 @@ export type GetSiteSettingsQuery = {
       copyrightTextAr?: string | null;
       copyrightTextFr?: string | null;
       copyrightTextEn?: string | null;
-      heroImage?: { __typename?: "Asset"; id: string; preview: string } | null;
+      heroImages?: Array<{
+        __typename?: "Asset";
+        id: string;
+        preview: string;
+      }> | null;
       bannerImages?: Array<{
         __typename?: "Asset";
         id: string;
@@ -12315,7 +12319,7 @@ export const GetSiteSettingsDocument = gql`
         copyrightTextAr
         copyrightTextFr
         copyrightTextEn
-        heroImage {
+        heroImages {
           id
           preview
         }
