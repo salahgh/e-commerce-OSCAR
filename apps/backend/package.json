@@ -19,7 +19,8 @@
     "migration:generate": "ts-node ./node_modules/.bin/typeorm migration:generate -d ./src/vendure-config.ts",
     "migration:run": "ts-node ./node_modules/.bin/typeorm migration:run -d ./src/vendure-config.ts",
     "migration:revert": "ts-node ./node_modules/.bin/typeorm migration:revert -d ./src/vendure-config.ts",
-    "migration:gen": "ts-node ./src/generate-migration.ts"
+    "migration:gen": "ts-node ./src/generate-migration.ts",
+    "seed:site-content": "ts-node ./src/seed-site-content.ts"
   },
   "keywords": [
     "e-commerce",

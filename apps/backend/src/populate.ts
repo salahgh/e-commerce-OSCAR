@@ -19,6 +19,7 @@ import {
   JobQueueService,
 } from '@vendure/core';
 import { config } from './vendure-config';
+import { seedSiteContent } from './seed-site-content';
 
 // Production-safety guards (mirrors @scc/backend populate):
 //   SEED_DRY_RUN=true   preview without DB writes
@@ -1010,6 +1011,10 @@ async function seed() {
   // Reindex search index
   console.log('\n🔍 Search index will be rebuilt automatically on next server start.');
   console.log('  💡 You can also rebuild it manually from the Vendure Admin UI: Settings > Job Queue > Reindex');
+
+  // --- Site content (header / footer / home) on the default channel ---
+  console.log('\n🎨 Seeding site content…');
+  await seedSiteContent(ctx, channelService, assetService);
 
   console.log('\n✨ Seed completed successfully!\n');
 
