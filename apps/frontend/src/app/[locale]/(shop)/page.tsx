@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { SortOrder } from '@oscar/graphql-shop/generated';
 import {
-  MarketingBanner,
+  BannerCarousel,
   CategoryCircles,
   ProductRail,
   ProductGridSection,
@@ -15,7 +15,7 @@ export default function HomePage() {
     <div className="px-6 pb-20 pt-8">
       <div className="mx-auto flex w-full max-w-[1392px] flex-col gap-[68px]">
         {/* Hero */}
-        <MarketingBanner settingKey="hero" src="/images/home/hero-1.png" alt={t('hero.alt')} priority />
+        <BannerCarousel settingKey="hero" fallbackSrcs={['/images/home/hero-1.png']} alt={t('hero.alt')} priority />
 
         {/* Shop by category */}
         <CategoryCircles />
@@ -35,7 +35,7 @@ export default function HomePage() {
         />
 
         {/* Promo banner */}
-        <MarketingBanner settingKey="banner" src="/images/home/banner-1.png" alt={t('promo.alt')} />
+        <BannerCarousel settingKey="banner" fallbackSrcs={['/images/home/banner-1.png']} alt={t('promo.alt')} />
 
         {/* Product grid */}
         <ProductGridSection />

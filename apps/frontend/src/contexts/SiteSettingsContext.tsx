@@ -22,7 +22,7 @@ export interface SiteSettings {
   reviewsTitle: string | null;
   reviewsSubtitle: string | null;
   copyrightText: string | null;
-  heroImage: string | null;
+  heroImages: string[];
   bannerImages: string[];
   reviewImages: string[];
 }
@@ -63,7 +63,7 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
       reviewsTitle: text('reviewsTitle'),
       reviewsSubtitle: text('reviewsSubtitle'),
       copyrightText: text('copyrightText'),
-      heroImage: (cf.heroImage as { preview: string } | null)?.preview ?? null,
+      heroImages: assetUrls('heroImages'),
       bannerImages: assetUrls('bannerImages'),
       reviewImages: assetUrls('reviewImages'),
     };

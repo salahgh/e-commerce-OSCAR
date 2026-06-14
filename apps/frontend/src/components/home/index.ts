@@ -1,4 +1,4 @@
-export { MarketingBanner } from './MarketingBanner';
+export { BannerCarousel } from './BannerCarousel';
 export { SliderDots } from './SliderDots';
 export { SectionHeader } from './SectionHeader';
 export { CategoryCircles } from './CategoryCircles';

@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { SliderDots } from './SliderDots';
+import { useCarousel } from './useCarousel';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 
 /** Phone-mockup positions for the review coverflow (center largest). */
@@ -25,9 +26,17 @@ const SIZE_CLS = [
 export function CustomerReviews() {
   const t = useTranslations('HomePage.reviews');
   const s = useSiteSettings();
-  const images = (s?.reviewImages.length ? s.reviewImages : FALLBACK_REVIEWS).slice(0, 5);
+  const images = s?.reviewImages.length ? s.reviewImages : FALLBACK_REVIEWS;
   const title = s?.reviewsTitle || t('title');
   const subtitle = s?.reviewsSubtitle || t('subtitle');
+  const { index, next, prev, goTo } = useCarousel(images.length);
+
+  // Coverflow window of 5, centered on the active index (wraps around).
+  const view = Array.from(
+    { length: 5 },
+    (_, p) => images[(((index - 2 + p) % images.length) + images.length) % images.length],
+  );
+
   return (
     <section className="flex flex-col items-center gap-12">
       <div className="flex flex-col items-center gap-4 text-center">
@@ -36,7 +45,7 @@ export function CustomerReviews() {
       </div>
 
       <div className="flex w-full items-center justify-center gap-4 overflow-hidden">
-        {images.map((src, i) => (
+        {view.map((src, i) => (
           <div
             key={i}
             className={`relative shrink-0 overflow-hidden rounded-[39px] border border-border bg-bg-elevated shadow-card ${SIZE_CLS[i]}`}
@@ -50,14 +59,16 @@ export function CustomerReviews() {
         <button
           type="button"
           aria-label={t('prev')}
+          onClick={prev}
           className="inline-flex h-9 w-9 items-center justify-center text-content-muted transition-colors hover:text-content-strong"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <SliderDots count={5} active={0} />
+        <SliderDots count={images.length} active={index} onDotClick={goTo} />
         <button
           type="button"
           aria-label={t('next')}
+          onClick={next}
           className="inline-flex h-9 w-9 items-center justify-center text-content-muted transition-colors hover:text-content-strong"
         >
           <ArrowRight className="h-5 w-5" />
