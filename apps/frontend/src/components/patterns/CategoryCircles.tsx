@@ -5,6 +5,13 @@ import { useGetRootCollectionsQuery } from '@oscar/graphql-shop/generated';
 import { Link } from '@/i18n/routing';
 import { cn } from '@/lib/utils/cn';
 
+export type CategoryCircleItem = {
+  id: string;
+  name: string;
+  slug: string;
+  featuredAsset?: { preview: string } | null;
+};
+
 interface CategoryCirclesProps {
   /** Diameter of each circle in px (Figma: 120 on home, ~78 on the listing toolbar). */
   size?: number;
@@ -12,20 +19,51 @@ interface CategoryCirclesProps {
   align?: 'center' | 'end';
   /** Max number of categories to show. */
   limit?: number;
+  /**
+   * Explicit categories to render (e.g. a collection's children). When omitted,
+   * the component fetches collections from the backend itself.
+   */
+  items?: ReadonlyArray<CategoryCircleItem>;
+  /**
+   * Self-fetch mode (ignored when `items` is provided):
+   * - 'children' (default): sub-categories, as on the Figma home page.
+   * - 'roots': top-level categories.
+   */
+  source?: 'children' | 'roots';
 }
 
-export function CategoryCircles({ size = 120, align = 'center', limit = 12 }: CategoryCirclesProps) {
-  const { data, loading } = useGetRootCollectionsQuery();
+/**
+ * Backend-driven category circles — the single category component used across the
+ * storefront (home, products toolbar, categories page, header sub-nav, and a
+ * collection's sub-categories). Each circle links to `/categories/{slug}`.
+ */
+export function CategoryCircles({
+  size = 120,
+  align = 'center',
+  limit = 12,
+  items,
+  source = 'children',
+}: CategoryCirclesProps) {
+  const selfFetch = items === undefined;
+  const { data, loading } = useGetRootCollectionsQuery({ skip: !selfFetch });
   const roots = data?.collections.items ?? [];
-  // Prefer sub-categories (shirts, abayas, dresses…) as in the Figma; fall back to top-level.
-  const children = roots.flatMap((c) => c.children ?? []);
-  const collections = children.length > 0 ? children : roots;
+  const fetched: ReadonlyArray<CategoryCircleItem> =
+    source === 'roots'
+      ? roots
+      : (() => {
+          const children = roots.flatMap((c) => c.children ?? []);
+          return children.length > 0 ? children : roots;
+        })();
+  const collections = items ?? fetched;
+  const isLoading = selfFetch && loading;
 
-  if (!loading && collections.length === 0) return null;
+  if (!isLoading && collections.length === 0) return null;
 
   return (
-    <section className={cn('flex flex-wrap gap-x-9 gap-y-8', align === 'end' ? 'justify-end' : 'justify-center')}>
-      {loading
+    <section
+      className={cn('flex flex-wrap gap-x-9 gap-y-8', align === 'end' ? 'justify-end' : 'justify-center')}
+    >
+      {isLoading
         ? Array.from({ length: limit }).map((_, i) => (
             <div key={i} className="flex flex-col items-center gap-3" style={{ width: size }}>
               <div className="animate-pulse rounded-full bg-bg-muted" style={{ height: size, width: size }} />

@@ -6,8 +6,7 @@ import { ChevronDown, ArrowDownUp, Check } from 'lucide-react';
 import { useGetProductsQuery, SortOrder } from '@oscar/graphql-shop/generated';
 import { Alert } from '@/components/ui';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/Dialog';
-import { ProductCard, ProductCardSkeleton, type ProductCardData } from '@/components/patterns';
-import { CategoryCircles } from '@/components/home';
+import { ProductCard, ProductCardSkeleton, CategoryCircles, type ProductCardData } from '@/components/patterns';
 import { cn } from '@/lib/utils/cn';
 
 const TAKE = 48;

@@ -2,11 +2,11 @@ import { useTranslations } from 'next-intl';
 import { SortOrder } from '@oscar/graphql-shop/generated';
 import {
   BannerCarousel,
-  CategoryCircles,
   ProductRail,
   ProductGridSection,
   CustomerReviews,
 } from '@/components/home';
+import { CategoryCircles } from '@/components/patterns';
 
 export default function HomePage() {
   const t = useTranslations('HomePage');

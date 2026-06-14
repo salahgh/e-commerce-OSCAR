@@ -4,10 +4,15 @@ import * as React from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useGetCollectionWithProductsQuery } from '@oscar/graphql-shop/generated';
-import { Link } from '@/i18n/routing';
 import { Alert, Pagination, Skeleton } from '@/components/ui';
 import { PageHeader } from '@/components/layout';
-import { ProductCard, ProductCardSkeleton, ProductGrid, type ProductCardData } from '@/components/patterns';
+import {
+  ProductCard,
+  ProductCardSkeleton,
+  ProductGrid,
+  CategoryCircles,
+  type ProductCardData,
+} from '@/components/patterns';
 
 const PER_PAGE = 12;
 
@@ -52,19 +57,19 @@ export default function CategoryDetailPage() {
     return [v.product];
   });
 
-  const breadcrumbs = collection
-    ? [
-        { label: t('breadcrumbHome'), href: '/' },
-        { label: t('breadcrumbCategories'), href: '/categories' },
-        ...(collection.parent && collection.parent.slug !== '__root_collection__'
-          ? [{ label: collection.parent.name, href: `/categories/${collection.parent.slug}` }]
-          : []),
-        { label: collection.name },
-      ]
-    : [
-        { label: t('breadcrumbHome'), href: '/' },
-        { label: t('breadcrumbCategories'), href: '/categories' },
-      ];
+  // Breadcrumb is driven by Vendure's collection.breadcrumbs (full ancestor chain),
+  // excluding the synthetic root collection. The last crumb (current category) has no link.
+  const ROOT_SLUG = '__root_collection__';
+  const categoryCrumbs = (collection?.breadcrumbs ?? [])
+    .filter((b) => b.slug !== ROOT_SLUG)
+    .map((b, i, arr) =>
+      i === arr.length - 1 ? { label: b.name } : { label: b.name, href: `/categories/${b.slug}` },
+    );
+  const breadcrumbs = [
+    { label: t('breadcrumbHome'), href: '/' },
+    { label: t('breadcrumbCategories'), href: '/categories' },
+    ...categoryCrumbs,
+  ];
 
   if (!loading && (error || !collection)) {
     return (
@@ -88,28 +93,7 @@ export default function CategoryDetailPage() {
         {collection && (collection.children?.length ?? 0) > 0 && (
           <section className="mb-10">
             <h2 className="mb-4 text-18 font-bold text-content-strong">{t('subcategories')}</h2>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              {collection.children!.map((child) => (
-                <Link
-                  key={child.id}
-                  href={`/categories/${child.slug}`}
-                  className="group relative aspect-[3/2] overflow-hidden rounded border border-border bg-bg-muted"
-                >
-                  {child.featuredAsset?.preview && (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={child.featuredAsset.preview}
-                      alt={child.name}
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-slow group-hover:scale-105"
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-content-strong/70 to-transparent" />
-                  <span className="absolute inset-x-3 bottom-3 text-14 font-bold text-content-inverse">
-                    {child.name}
-                  </span>
-                </Link>
-              ))}
-            </div>
+            <CategoryCircles items={collection.children ?? []} size={96} align="center" />
           </section>
         )}
 
