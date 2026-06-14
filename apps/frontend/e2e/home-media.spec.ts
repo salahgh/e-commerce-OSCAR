@@ -22,9 +22,12 @@ test.describe('Home media carousels', () => {
     await expect(dots.first()).toBeVisible({ timeout: 15_000 });
     expect(await dots.count()).toBeGreaterThan(1);
 
-    const before = await heroImg.getAttribute('src');
+    // The slide track keeps the first <img> mounted, so assert navigation via the
+    // active dot (aria-current moves to the clicked slide).
+    await expect(dots.first()).toHaveAttribute('aria-current', 'true');
     await dots.nth(1).click();
-    await expect(heroImg).not.toHaveAttribute('src', before ?? '');
+    await expect(dots.nth(1)).toHaveAttribute('aria-current', 'true');
+    await expect(dots.first()).toHaveAttribute('aria-current', 'false');
   });
 
   test('reviews carousel renders the configured set and navigates via dots', async ({ page }) => {

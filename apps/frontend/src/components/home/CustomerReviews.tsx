@@ -50,7 +50,7 @@ export function CustomerReviews() {
             key={i}
             className={`relative shrink-0 overflow-hidden rounded-[39px] border border-border bg-bg-elevated shadow-card ${SIZE_CLS[i]}`}
           >
-            <Image src={src} alt="" fill sizes="390px" className="object-cover" />
+            <Image key={src} src={src} alt="" fill sizes="390px" className="object-cover animate-fade-in" />
           </div>
         ))}
       </div>
