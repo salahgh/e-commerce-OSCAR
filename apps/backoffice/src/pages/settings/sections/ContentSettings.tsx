@@ -21,7 +21,7 @@ export const ContentSettings: React.FC = () => {
     form,
     setField,
     media,
-    setHero,
+    setHeroes,
     setBanners,
     setReviews,
     dirtyFor,
@@ -138,10 +138,10 @@ export const ContentSettings: React.FC = () => {
         onSave={() => saveSection('media')}
       >
         <ImageField
-          label="Image principale"
-          assets={media.hero ? [media.hero] : []}
+          label="Images principales"
+          assets={media.heroes}
           onPick={() => setPicker('hero')}
-          onClear={() => setHero(null)}
+          onClear={() => setHeroes([])}
         />
         <ImageField
           label="Bannières marketing"
@@ -161,19 +161,17 @@ export const ContentSettings: React.FC = () => {
         key={picker ?? 'none'}
         isOpen={picker !== null}
         onClose={() => setPicker(null)}
-        multiple={picker !== 'hero'}
+        multiple
         selectedIds={
           picker === 'hero'
-            ? media.hero
-              ? [media.hero.id]
-              : []
+            ? media.heroes.map((a) => a.id)
             : picker === 'banners'
               ? media.banners.map((a) => a.id)
               : media.reviews.map((a) => a.id)
         }
         onSelect={(assets) => {
           const picked = assets.map((a) => ({ id: a.id, preview: a.preview }));
-          if (picker === 'hero') setHero(picked[0] ?? null);
+          if (picker === 'hero') setHeroes(picked);
           else if (picker === 'banners') setBanners(picked);
           else if (picker === 'reviews') setReviews(picked);
           setPicker(null);

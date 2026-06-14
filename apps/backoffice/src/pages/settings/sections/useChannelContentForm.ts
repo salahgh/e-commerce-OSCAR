@@ -61,8 +61,8 @@ const SECTION_KEYS: Record<'localized' | 'store' | 'social', string[]> = {
   social: SOCIAL_FIELDS.map((f) => f.name),
 };
 
-type MediaState = { hero: PickedAsset | null; banners: PickedAsset[]; reviews: PickedAsset[] };
-const EMPTY_MEDIA: MediaState = { hero: null, banners: [], reviews: [] };
+type MediaState = { heroes: PickedAsset[]; banners: PickedAsset[]; reviews: PickedAsset[] };
+const EMPTY_MEDIA: MediaState = { heroes: [], banners: [], reviews: [] };
 
 const idsEqual = (a: PickedAsset[], b: PickedAsset[]) =>
   a.length === b.length && a.every((x, i) => x.id === b[i].id);
@@ -95,7 +95,7 @@ export function useChannelContentForm() {
     for (const { name } of [...STORE_FIELDS, ...SOCIAL_FIELDS])
       next[name] = cf[name] == null ? '' : String(cf[name]);
     const m: MediaState = {
-      hero: (cf.heroImage as PickedAsset) ?? null,
+      heroes: ((cf.heroImages as PickedAsset[]) ?? []).map((a) => ({ id: a.id, preview: a.preview })),
       banners: ((cf.bannerImages as PickedAsset[]) ?? []).map((a) => ({ id: a.id, preview: a.preview })),
       reviews: ((cf.reviewImages as PickedAsset[]) ?? []).map((a) => ({ id: a.id, preview: a.preview })),
     };
@@ -107,14 +107,14 @@ export function useChannelContentForm() {
   }, [data, cf]);
 
   const setField = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
-  const setHero = (hero: PickedAsset | null) => setMedia((m) => ({ ...m, hero }));
+  const setHeroes = (heroes: PickedAsset[]) => setMedia((m) => ({ ...m, heroes }));
   const setBanners = (banners: PickedAsset[]) => setMedia((m) => ({ ...m, banners }));
   const setReviews = (reviews: PickedAsset[]) => setMedia((m) => ({ ...m, reviews }));
 
   const dirtyFor = (section: SectionId): boolean => {
     if (section === 'media') {
       return (
-        (media.hero?.id ?? null) !== (mediaBaseline.hero?.id ?? null) ||
+        !idsEqual(media.heroes, mediaBaseline.heroes) ||
         !idsEqual(media.banners, mediaBaseline.banners) ||
         !idsEqual(media.reviews, mediaBaseline.reviews)
       );
@@ -136,7 +136,7 @@ export function useChannelContentForm() {
       } else if (section === 'social') {
         for (const { name } of SOCIAL_FIELDS) customFields[name] = form[name] || null;
       } else {
-        customFields.heroImageId = media.hero?.id ?? null;
+        customFields.heroImagesIds = media.heroes.map((a) => a.id);
         customFields.bannerImagesIds = media.banners.map((a) => a.id);
         customFields.reviewImagesIds = media.reviews.map((a) => a.id);
       }
@@ -168,7 +168,7 @@ export function useChannelContentForm() {
     form,
     setField,
     media,
-    setHero,
+    setHeroes,
     setBanners,
     setReviews,
     dirtyFor,
