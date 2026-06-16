@@ -71,14 +71,17 @@ function makeClient(locale: string) {
           products: {
             keyArgs: ['options', ['filter', 'sort']],
             merge(existing, incoming, { args }: any) {
-              if (!existing || args?.options?.skip === 0) return incoming;
+              // Replace (not append) on the first page. `skip` is undefined for
+              // non-paginated callers (home grid/rails), so treat missing as 0 —
+              // otherwise a cache-and-network refetch concatenates onto itself.
+              if (!existing || (args?.options?.skip ?? 0) === 0) return incoming;
               return { ...incoming, items: [...(existing.items || []), ...(incoming.items || [])] };
             },
           },
           search: {
             keyArgs: ['input', ['term', 'facetValueFilters', 'sort']],
             merge(existing, incoming, { args }: any) {
-              if (!existing || args?.input?.skip === 0) return incoming;
+              if (!existing || (args?.input?.skip ?? 0) === 0) return incoming;
               return { ...incoming, items: [...(existing.items || []), ...(incoming.items || [])] };
             },
           },
