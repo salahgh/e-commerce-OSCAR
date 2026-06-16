@@ -8,6 +8,14 @@ import { Link } from '@/i18n/routing';
 import { Alert, Button, Card } from '@/components/ui';
 
 export default function VerificationPendingPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <VerificationPendingPageContent />
+    </React.Suspense>
+  );
+}
+
+function VerificationPendingPageContent() {
   const t = useTranslations('auth.verificationPending');
   const tLogin = useTranslations('auth.login');
 

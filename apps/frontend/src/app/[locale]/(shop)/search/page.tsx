@@ -28,6 +28,14 @@ import {
 const PER_PAGE = 12;
 
 export default function SearchPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <SearchPageContent />
+    </React.Suspense>
+  );
+}
+
+function SearchPageContent() {
   const t = useTranslations('SearchPage');
   const router = useRouter();
   const pathname = usePathname();

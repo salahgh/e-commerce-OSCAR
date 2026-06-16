@@ -8,6 +8,14 @@ import { useRouter, Link } from '@/i18n/routing';
 import { Alert, Card, Spinner } from '@/components/ui';
 
 export default function VerifyEmailPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <VerifyEmailPageContent />
+    </React.Suspense>
+  );
+}
+
+function VerifyEmailPageContent() {
   const t = useTranslations('auth.verifyEmail');
   const tErrors = useTranslations('auth.errors');
   const tLogin = useTranslations('auth.login');

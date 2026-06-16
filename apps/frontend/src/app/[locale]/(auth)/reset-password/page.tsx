@@ -8,6 +8,14 @@ import { useRouter, Link } from '@/i18n/routing';
 import { Alert, Button, Card, Field, Input } from '@/components/ui';
 
 export default function ResetPasswordPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <ResetPasswordPageContent />
+    </React.Suspense>
+  );
+}
+
+function ResetPasswordPageContent() {
   const t = useTranslations('auth.resetPassword');
   const tFields = useTranslations('auth.fields');
   const tErrors = useTranslations('auth.errors');
