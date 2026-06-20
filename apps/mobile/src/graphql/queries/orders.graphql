@@ -98,6 +98,11 @@ query GetMyOrders($options: OrderListOptions) {
         totalWithTax
         currencyCode
         totalQuantity
+        payments {
+          id
+          method
+          state
+        }
         lines {
           id
           quantity

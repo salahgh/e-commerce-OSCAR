@@ -5,10 +5,9 @@ export interface CheckoutAddressValues {
   fullName: string;
   phoneNumber: string;
   address: string;
-  city: string;
-  postalCode?: string;
   notes?: string;
   wilayaCode: string;
+  communeCode: string;
   email?: string;
 }
 
@@ -35,18 +34,23 @@ export function resolveWilayaName(wilayaCode: string, wilayas: Wilaya[]): string
   return wilayas.find((w) => w.code === wilayaCode)?.name ?? wilayaCode;
 }
 
-/** Build the Vendure shipping-address input, setting province to the wilaya name. */
+/**
+ * Build the Vendure shipping-address input, setting province to the wilaya name and
+ * deriving city + postalCode from the selected commune (the commune IS the locality).
+ */
 export function buildShippingAddressInput(
   values: CheckoutAddressValues,
   wilayas: Wilaya[]
 ): ShippingAddressInput {
+  const wilaya = wilayas.find((w) => w.code === values.wilayaCode);
+  const commune = wilaya?.communes.find((c) => c.code === values.communeCode);
   return {
     fullName: values.fullName,
     streetLine1: values.address,
     streetLine2: values.notes || '',
-    city: values.city,
+    city: commune?.name ?? '',
     province: resolveWilayaName(values.wilayaCode, wilayas),
-    postalCode: values.postalCode || '',
+    postalCode: commune?.postalCode || '',
     countryCode: 'DZ',
     phoneNumber: values.phoneNumber,
   };

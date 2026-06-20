@@ -31,6 +31,34 @@ export function isSelectableMethod(method: { code: string; isEligible: boolean }
   return method.isEligible && getPaymentAvailability(method.code) === 'available';
 }
 
+/**
+ * Cash-on-Delivery detection from an order's payments.
+ *
+ * The backend COD handler (apps/backend/.../payment/cash-on-delivery-handler.ts)
+ * uses method code `cash-on-delivery` and auto-authorizes/settles the payment,
+ * so a COD order can reach `PaymentSettled` without money ever changing hands.
+ * We match case-insensitively and tolerate substring variants ("cash", "delivery",
+ * "cod") so display logic never wrongly reads COD as "Paid".
+ */
+export function isCashOnDeliveryMethod(method?: string | null): boolean {
+  if (!method) return false;
+  const m = method.toLowerCase();
+  return (
+    m.includes('cash-on-delivery') ||
+    m.includes('cash') ||
+    m.includes('delivery') ||
+    m === 'cod'
+  );
+}
+
+export function isCashOnDelivery(order?: {
+  payments?: Array<{ method?: string | null }> | null;
+} | null): boolean {
+  const payments = order?.payments;
+  if (!payments?.length) return false;
+  return payments.some((p) => isCashOnDeliveryMethod(p?.method));
+}
+
 export function partitionPaymentMethods<T extends { code: string }>(
   eligible: T[],
 ): { available: T[]; comingSoon: ComingSoonPayment[] } {

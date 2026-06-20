@@ -10,6 +10,7 @@ import { useActiveCustomerQuery } from '../../src/graphql/generated/graphql';
 import { LoadingSpinner } from '../../src/components/ui';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
 import { useAppFont } from '../../src/hooks/useAppFont';
+import { rtlIcon } from '../../src/utils/rtl';
 
 interface MenuItem {
   icon: keyof typeof Ionicons.glyphMap;
@@ -131,9 +132,9 @@ export default function ProfileScreen() {
         {/* Avatar + Name */}
         <View style={styles.profileSection}>
           <View style={styles.avatar}>
-            {customer?.customFields?.avatar ? (
+            {customer?.customFields?.avatar?.preview ? (
               <Image
-                source={{ uri: customer.customFields.avatar }}
+                source={{ uri: customer.customFields.avatar.preview }}
                 style={styles.avatarImage}
                 contentFit="cover"
               />
@@ -166,7 +167,7 @@ export default function ProfileScreen() {
                   {item.label}
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={colors.text.tertiary} />
+              <Ionicons name={rtlIcon('chevron-forward')} size={20} color={colors.text.tertiary} />
             </TouchableOpacity>
           ))}
         </View>

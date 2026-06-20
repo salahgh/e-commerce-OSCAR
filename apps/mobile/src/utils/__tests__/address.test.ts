@@ -1,5 +1,6 @@
 import {
   resolveWilayaCode,
+  resolveCommuneCode,
   buildCreateAddressInput,
   buildUpdateAddressInput,
   addressToFormValues,
@@ -8,7 +9,16 @@ import {
 import type { Wilaya } from '../../data/wilayas';
 
 const WILAYAS = [
-  { code: '16', name: 'Alger', nameAr: 'الجزائر', shippingZone: 1, communes: [] },
+  {
+    code: '16',
+    name: 'Alger',
+    nameAr: 'الجزائر',
+    shippingZone: 1,
+    communes: [
+      { code: '1601', name: 'Alger Centre', nameAr: 'الجزائر الوسطى', postalCode: '16000' },
+      { code: '1602', name: 'Bab El Oued', nameAr: 'باب الوادي', postalCode: '16002' },
+    ],
+  },
   { code: '31', name: 'Oran', nameAr: 'وهران', shippingZone: 2, communes: [] },
 ] as unknown as Wilaya[];
 
@@ -16,10 +26,8 @@ const FORM = {
   fullName: 'Sara Ben Ali',
   phoneNumber: '0551234567',
   streetLine1: '12 Rue Didouche',
-  streetLine2: 'Apt 4',
-  city: 'Alger Centre',
   wilayaCode: '16',
-  postalCode: '16000',
+  communeCode: '1601',
   defaultShippingAddress: true,
 };
 
@@ -53,12 +61,29 @@ describe('resolveWilayaCode', () => {
   });
 });
 
+describe('resolveCommuneCode', () => {
+  it('maps a city (commune name) back to its commune code within the wilaya', () => {
+    expect(resolveCommuneCode('16', 'Alger Centre', WILAYAS)).toBe('1601');
+  });
+  it('matches the Arabic commune name', () => {
+    expect(resolveCommuneCode('16', 'باب الوادي', WILAYAS)).toBe('1602');
+  });
+  it('matches case-insensitively and trims surrounding whitespace', () => {
+    expect(resolveCommuneCode('16', '  alger centre ', WILAYAS)).toBe('1601');
+  });
+  it('returns empty string for an unknown commune', () => {
+    expect(resolveCommuneCode('16', 'Nowhere', WILAYAS)).toBe('');
+  });
+  it('returns empty string when the wilaya code is blank', () => {
+    expect(resolveCommuneCode('', 'Alger Centre', WILAYAS)).toBe('');
+  });
+});
+
 describe('buildCreateAddressInput', () => {
-  it('builds a CreateAddressInput with province=name, countryCode DZ, default flag', () => {
+  it('derives city + postalCode from the commune; province=name, countryCode DZ, default flag', () => {
     expect(buildCreateAddressInput(FORM, WILAYAS)).toEqual({
       fullName: 'Sara Ben Ali',
       streetLine1: '12 Rue Didouche',
-      streetLine2: 'Apt 4',
       city: 'Alger Centre',
       province: 'Alger',
       postalCode: '16000',
@@ -67,9 +92,9 @@ describe('buildCreateAddressInput', () => {
       defaultShippingAddress: true,
     });
   });
-  it('maps empty optional streetLine2/postalCode to undefined', () => {
-    const out = buildCreateAddressInput({ ...FORM, streetLine2: '', postalCode: '' }, WILAYAS);
-    expect(out.streetLine2).toBeUndefined();
+  it('yields empty city and undefined postalCode for an unknown commune', () => {
+    const out = buildCreateAddressInput({ ...FORM, communeCode: 'XXXX' }, WILAYAS);
+    expect(out.city).toBe('');
     expect(out.postalCode).toBeUndefined();
   });
 });
@@ -84,15 +109,13 @@ describe('buildUpdateAddressInput', () => {
 });
 
 describe('addressToFormValues', () => {
-  it('round-trips a saved address into form values (province name -> code, default flag)', () => {
+  it('round-trips a saved address into form values (province -> code, city -> communeCode)', () => {
     expect(addressToFormValues(SAVED, WILAYAS)).toEqual({
       fullName: 'Sara Ben Ali',
       phoneNumber: '0551234567',
       streetLine1: '12 Rue Didouche',
-      streetLine2: 'Apt 4',
-      city: 'Alger Centre',
       wilayaCode: '16',
-      postalCode: '16000',
+      communeCode: '1601',
       defaultShippingAddress: true,
     });
   });
@@ -102,15 +125,14 @@ describe('addressToFormValues', () => {
 });
 
 describe('addressToCheckoutValues', () => {
-  it('maps a saved address to checkout form fields (streetLine1->address, streetLine2->notes)', () => {
+  it('maps a saved address to checkout form fields (streetLine1->address, city->communeCode)', () => {
     expect(addressToCheckoutValues(SAVED, WILAYAS)).toEqual({
       fullName: 'Sara Ben Ali',
       phoneNumber: '0551234567',
       address: '12 Rue Didouche',
       notes: 'Apt 4',
-      city: 'Alger Centre',
       wilayaCode: '16',
-      postalCode: '16000',
+      communeCode: '1601',
     });
   });
   it('yields an empty wilayaCode for an unknown province', () => {

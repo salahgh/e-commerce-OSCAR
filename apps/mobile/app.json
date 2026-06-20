@@ -7,9 +7,15 @@
     "icon": "./assets/images/icon.png",
     "scheme": "oscar-fashion",
     "userInterfaceStyle": "automatic",
+    "updates": {
+      "enabled": false
+    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.oscar.fashion"
+      "bundleIdentifier": "com.oscar.fashion",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow OSCAR Fashion to access your photos so you can set a profile picture."
+      }
     },
     "android": {
       "package": "com.oscar.fashion",
@@ -22,7 +28,9 @@
       },
       "predictiveBackGestureEnabled": true,
       "permissions": [
-        "INTERNET"
+        "INTERNET",
+        "READ_MEDIA_IMAGES",
+        "READ_EXTERNAL_STORAGE"
       ]
     },
     "web": {
@@ -31,6 +39,12 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow OSCAR Fashion to access your photos so you can set a profile picture."
+        }
+      ],
       [
         "expo-splash-screen",
         {

@@ -4,6 +4,7 @@ import { Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { Input, Button } from '../ui';
 import { WilayaPicker } from './WilayaPicker';
+import { CommunePicker } from './CommunePicker';
 import { spacing, typography, makeThemedStyles } from '../../theme';
 import { makeShippingAddressSchema, shippingAddressSchema } from '../../utils/validation';
 import { useAppFont } from '../../hooks/useAppFont';
@@ -12,11 +13,10 @@ export interface ShippingAddressFormValues {
   fullName: string;
   phoneNumber: string;
   address: string;
-  city: string;
-  postalCode: string;
   notes?: string;
   email: string;
   wilayaCode: string;
+  communeCode: string;
 }
 
 interface ShippingAddressFormProps {
@@ -32,11 +32,10 @@ const defaultInitialValues: ShippingAddressFormValues = {
   fullName: '',
   phoneNumber: '',
   address: '',
-  city: '',
-  postalCode: '',
   notes: '',
   email: '',
   wilayaCode: '',
+  communeCode: '',
 };
 
 const useStyles = makeThemedStyles((colors) =>
@@ -165,36 +164,20 @@ export const ShippingAddressForm: React.FC<ShippingAddressFormProps> = ({
                 required
               />
 
-              <View style={styles.row}>
-                <Input
-                  label={t('checkout.city', 'City')}
-                  placeholder={t('checkout.cityPlaceholder', 'Algiers')}
-                  value={values.city}
-                  onChangeText={handleChange('city')}
-                  onBlur={handleBlur('city')}
-                  error={touched.city && errors.city ? errors.city : undefined}
-                  containerStyle={styles.halfWidth}
-                  required
-                />
-
-                <Input
-                  label={t('checkout.postalCode', 'Postal Code')}
-                  placeholder="16000"
-                  value={values.postalCode}
-                  onChangeText={handleChange('postalCode')}
-                  onBlur={handleBlur('postalCode')}
-                  error={touched.postalCode && errors.postalCode ? errors.postalCode : undefined}
-                  keyboardType="number-pad"
-                  maxLength={5}
-                  containerStyle={styles.halfWidth}
-                  required
-                />
-              </View>
-
               <WilayaPicker
                 value={values.wilayaCode}
-                onSelect={(code) => setFieldValue('wilayaCode', code)}
+                onSelect={(code) => {
+                  setFieldValue('wilayaCode', code);
+                  setFieldValue('communeCode', '');
+                }}
                 error={touched.wilayaCode && errors.wilayaCode ? errors.wilayaCode : undefined}
+              />
+
+              <CommunePicker
+                wilayaCode={values.wilayaCode}
+                value={values.communeCode}
+                onSelect={(code) => setFieldValue('communeCode', code)}
+                error={touched.communeCode && errors.communeCode ? errors.communeCode : undefined}
               />
 
               <Input

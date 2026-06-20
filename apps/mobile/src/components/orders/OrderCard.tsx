@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { OrderStatusBadge, OrderStatus } from './OrderStatusBadge';
 import { colors, spacing, typography } from '../../theme';
+import { rtlIcon } from '../../utils/rtl';
 
 interface OrderItem {
   id: number;
@@ -106,7 +107,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         </View>
         <View style={styles.viewButton}>
           <Text style={styles.viewButtonText}>{t('orders.viewDetails', 'View Details')}</Text>
-          <Ionicons name="chevron-forward" size={16} color={colors.primary} />
+          <Ionicons name={rtlIcon('chevron-forward')} size={16} color={colors.primary} />
         </View>
       </View>
     </TouchableOpacity>

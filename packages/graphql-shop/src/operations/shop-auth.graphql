@@ -42,6 +42,10 @@ fragment CustomerFields on Customer {
   customFields {
     wilaya
     city
+    avatar {
+      id
+      preview
+    }
   }
 }
 
@@ -202,6 +206,19 @@ mutation ResetPassword($token: String!, $password: String!) {
 mutation UpdateCustomerProfile($input: UpdateCustomerInput!) {
   updateCustomer(input: $input) {
     ...CustomerFields
+  }
+}
+
+# Upload / replace the customer's avatar image (multipart Upload)
+mutation UpdateCustomerAvatar($file: Upload!) {
+  updateCustomerAvatar(file: $file) {
+    id
+    customFields {
+      avatar {
+        id
+        preview
+      }
+    }
   }
 }
 

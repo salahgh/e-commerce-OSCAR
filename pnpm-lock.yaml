@@ -214,6 +214,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.14)(react@19.2.0)
+      apollo-upload-client:
+        specifier: ^17.0.0
+        version: 17.0.0(@apollo/client@3.14.1(@types/react@19.2.14)(graphql-ws@6.0.7(graphql@16.13.2)(ws@8.20.0))(graphql@16.13.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(subscriptions-transport-ws@0.11.0(graphql@16.13.2)))(graphql@16.13.2)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1

@@ -625,6 +625,7 @@
     "profile": {
       "title": "ملفي الشخصي",
       "personalInfo": "المعلومات الشخصية",
+      "changeAvatar": "تغيير الصورة",
       "security": "الأمان",
       "addresses": "العناوين",
       "updateProfile": "تحديث",

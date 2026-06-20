@@ -1,0 +1,16 @@
+- the mobile icon is not set
+- i need avatar upload for the profile (front end and mobile)
+- phone numbers should be validated to algerian phone numbers
+- remove code pastal ; remove appartement / compl"ment 
+- algeria have 69 wilayas update the list
+- dynamic list of communes besed on the selected wialaya
+- on mobile the screensd are not safe (butons overlap)
+- the commnad number is too big (takes space and makes the chip looks close )
+- cash on deliverè show wrong payé
+- mobile wishlist is not working
+- aide et support send (how it works ?)
+- arabic profile arrows inverted pointing right
+- profile language should be removed
+- orders page (in arabic) inverted arrrow direction
+- i think the arrows are inverted everywhere
+- 

@@ -25,6 +25,12 @@ fragment CustomerFields on Customer {
     defaultShippingAddress
     defaultBillingAddress
   }
+  customFields {
+    avatar {
+      id
+      preview
+    }
+  }
 }
 
 # Get the currently logged-in customer

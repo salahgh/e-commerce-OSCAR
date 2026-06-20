@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 import { useAppFont } from '../../hooks/useAppFont';
 import { productAccessibilityLabel } from '../../utils/a11y';
+import { useWishlist } from '../../contexts/WishlistContext';
 
 export interface FigmaProduct {
   id: string;
@@ -40,6 +41,9 @@ export const ProductCardFigma: React.FC<ProductCardFigmaProps> = ({
   const imageSize = width - 15;
   const colors = useThemeColors();
   const styles = useStyles();
+  const wishlist = useWishlist();
+
+  const isFavorite = wishlist.has(product.id);
 
   const handlePress = () => {
     if (onPress) {
@@ -50,7 +54,22 @@ export const ProductCardFigma: React.FC<ProductCardFigmaProps> = ({
   };
 
   const handleWishlist = () => {
-    onWishlistPress?.(product);
+    // Allow callers to override the default behavior; otherwise toggle the
+    // shared wishlist directly so the heart works everywhere this card is used.
+    if (onWishlistPress) {
+      onWishlistPress(product);
+      return;
+    }
+    const numericPrice =
+      typeof product.price === 'number' ? product.price : Number(product.price);
+    wishlist.toggle({
+      productId: product.id,
+      slug: product.slug,
+      name: product.name,
+      imageUrl: product.imageUrl ?? null,
+      price: Number.isFinite(numericPrice) ? numericPrice : undefined,
+      currencyCode: 'DZD',
+    });
   };
 
   const hasDiscount = product.discountPercent && product.discountPercent > 0;
@@ -95,8 +114,14 @@ export const ProductCardFigma: React.FC<ProductCardFigmaProps> = ({
           onPress={handleWishlist}
           activeOpacity={0.7}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityState={{ selected: isFavorite }}
         >
-          <Ionicons name="heart-outline" size={12} color={colors.text.primary} />
+          <Ionicons
+            name={isFavorite ? 'heart' : 'heart-outline'}
+            size={12}
+            color={isFavorite ? colors.error : colors.text.primary}
+          />
         </TouchableOpacity>
       </View>
 

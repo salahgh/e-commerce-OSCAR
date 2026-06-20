@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Keyboard, Linking } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { makeThemedStyles, useThemeColors, spacing, typography } from '../../src/theme';
 import { useAppFont } from '../../src/hooks/useAppFont';
+import { rtlIcon } from '../../src/utils/rtl';
 
 export default function SupportScreen() {
   const { t } = useTranslation();
@@ -22,9 +23,15 @@ export default function SupportScreen() {
 
     setSending(true);
     try {
-      // TODO: Send support message via API or email
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      Alert.alert(t('profile.messageSent'), t('profile.messageSentConfirm'));
+      // Open the user's mail app pre-filled to the support address.
+      const email = t('contactPage.emailValue');
+      const subject = t('profile.helpSupport', 'Help & Support');
+      const url = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
+        message.trim()
+      )}`;
+      const canOpen = await Linking.canOpenURL(url);
+      if (!canOpen) throw new Error('no-mail-client');
+      await Linking.openURL(url);
       setMessage('');
       router.back();
     } catch {
@@ -39,7 +46,7 @@ export default function SupportScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+          <Ionicons name={rtlIcon('arrow-back')} size={24} color={colors.text.primary} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { fontFamily: fontFamily.medium }]}>
           {t('profile.helpSupport')}

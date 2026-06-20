@@ -1,6 +1,10 @@
-import { ApolloClient, ApolloLink, InMemoryCache, Observable, createHttpLink, from } from '@apollo/client';
+import { ApolloClient, ApolloLink, InMemoryCache, Observable, from } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
+// createUploadLink is a drop-in replacement for createHttpLink that emits
+// multipart/form-data when a request contains File/Blob/ReactNativeFile variables,
+// and falls back to a normal POST otherwise.
+import { createUploadLink } from 'apollo-upload-client';
 import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
@@ -29,7 +33,10 @@ const tokenStorage = {
 // HTTP Link
 const GRAPHQL_URI = process.env.EXPO_PUBLIC_GRAPHQL_URL || Constants.expoConfig?.extra?.graphqlUrl || 'http://leqta.com:8085/shop-api';
 
-const httpLink = createHttpLink({
+// Upload-capable terminal link. Behaves exactly like an HttpLink for normal operations
+// but switches to a multipart request (graphql-multipart-request-spec) when variables
+// contain a file, which is required for the updateCustomerAvatar mutation.
+const httpLink = createUploadLink({
   uri: GRAPHQL_URI,
   credentials: 'include',
 });

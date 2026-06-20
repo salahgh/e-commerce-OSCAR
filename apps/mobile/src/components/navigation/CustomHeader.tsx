@@ -13,6 +13,7 @@ import { useRouter, useSegments } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '../../theme';
 import { CartBadge } from '../cart/CartBadge';
+import { rtlIcon } from '../../utils/rtl';
 
 interface CustomHeaderProps {
   title?: string;
@@ -84,7 +85,7 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Ionicons
-            name="arrow-back"
+            name={rtlIcon('arrow-back')}
             size={24}
             color={transparent ? colors.text.inverse : colors.text.primary}
           />

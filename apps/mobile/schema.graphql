@@ -381,6 +381,7 @@ type Customer implements Node {
 
 type CustomerCustomFields {
     adminNotes: String
+    avatar: Asset
     city: String
     wilaya: String
 }
@@ -805,6 +806,8 @@ type Mutation {
     setOrderShippingMethod(shippingMethodId: [ID!]!): SetOrderShippingMethodResult!
     "Track product view for analytics"
     trackProductView(productId: ID!): Boolean!
+    "Upload (or replace) the active customer's avatar image."
+    updateCustomerAvatar(file: Upload!): Customer!
     "Transitions an Order to a new state. Valid next states can be found by querying `nextOrderStates`"
     transitionOrderToState(state: String!): TransitionOrderToStateResult
     "Unsets the billing address for the active Order. Available since version 3.1.0"

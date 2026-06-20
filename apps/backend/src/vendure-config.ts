@@ -188,6 +188,16 @@ export const config: VendureConfig = {
       { name: 'wilaya', type: 'string', label: [{ languageCode: LanguageCode.en, value: 'Wilaya' }] },
       { name: 'city', type: 'string', label: [{ languageCode: LanguageCode.en, value: 'City' }] },
       { name: 'adminNotes', type: 'text', label: [{ languageCode: LanguageCode.en, value: 'Admin Notes' }] },
+      {
+        name: 'avatar',
+        type: 'relation',
+        entity: Asset,
+        graphQLType: 'Asset',
+        nullable: true,
+        public: true,
+        eager: false,
+        label: [{ languageCode: LanguageCode.en, value: 'Avatar' }],
+      },
     ],
     Order: [
       { name: 'customerNotes', type: 'text', label: [{ languageCode: LanguageCode.en, value: 'Customer Notes' }] },

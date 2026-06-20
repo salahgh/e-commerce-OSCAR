@@ -18,11 +18,24 @@ import { useCart } from '../../src/contexts/CartContext';
 import { useToast } from '../../src/components/ui';
 import { summarizeReorder } from '../../src/utils/reorder';
 import { useAppFont } from '../../src/hooks/useAppFont';
+import { isCashOnDelivery } from '../../src/utils/payment';
 
 // Map Vendure order states to display info (palette-aware so colors theme correctly).
 // Labels resolve through i18n at call time so they follow the active language.
-function getOrderStateInfo(state: string, colors: ColorPalette, t: TFunction) {
+//
+// COD orders are auto-settled by the backend handler, so they reach
+// `PaymentSettled` without the money being collected. When `isCod` is set we
+// surface a neutral "Cash on delivery" status instead of the green "Paid",
+// until the order actually reaches a delivered state.
+function getOrderStateInfo(state: string, colors: ColorPalette, t: TFunction, isCod = false) {
   const label = (s: string, fallback: string) => t(`orders.states.${s}`, fallback) as string;
+  if (isCod && state === 'PaymentSettled') {
+    return {
+      label: t('orders.codPending', 'Cash on delivery') as string,
+      color: colors.info,
+      icon: 'cash-outline',
+    };
+  }
   const orderStateMap: Record<string, { label: string; color: string; icon: string }> = {
     AddingItems: { label: label('AddingItems', 'Draft'), color: colors.text.tertiary, icon: 'cart-outline' },
     ArrangingPayment: { label: label('ArrangingPayment', 'Awaiting Payment'), color: colors.warning, icon: 'time-outline' },
@@ -153,7 +166,8 @@ export default function OrderDetailScreen() {
     );
   }
 
-  const stateInfo = getOrderStateInfo(order.state, colors, t);
+  const isCod = isCashOnDelivery(order);
+  const stateInfo = getOrderStateInfo(order.state, colors, t, isCod);
   const shippingCost = order.shippingWithTax || 0;
   const subTotal = order.subTotalWithTax || 0;
   const totalAmount = order.totalWithTax || 0;
@@ -272,13 +286,22 @@ export default function OrderDetailScreen() {
                 {paymentMethod}
               </Text>
             </View>
-            {paidAt && (
+            {isCod ? (
               <View style={styles.infoRow}>
-                <Ionicons name="checkmark-circle-outline" size={20} color={colors.success} />
+                <Ionicons name="cash-outline" size={20} color={colors.info} />
                 <Text style={[styles.infoText, { fontFamily: fontFamily.regular }]}>
-                  {t('orders.paidOn', 'Paid on')} {formatDate(paidAt)}
+                  {t('orders.codPending', 'Cash on delivery')}
                 </Text>
               </View>
+            ) : (
+              paidAt && (
+                <View style={styles.infoRow}>
+                  <Ionicons name="checkmark-circle-outline" size={20} color={colors.success} />
+                  <Text style={[styles.infoText, { fontFamily: fontFamily.regular }]}>
+                    {t('orders.paidOn', 'Paid on')} {formatDate(paidAt)}
+                  </Text>
+                </View>
+              )
             )}
           </View>
         </View>

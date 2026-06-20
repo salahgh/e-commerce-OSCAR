@@ -57,6 +57,12 @@ export const shopApiExtensions = gql`
     Track product view for analytics
     """
     trackProductView(productId: ID!): Boolean!
+
+    """
+    Upload (or replace) the active customer's avatar image.
+    Accepts a multipart file upload and returns the updated customer.
+    """
+    updateCustomerAvatar(file: Upload!): Customer!
   }
 `;
 

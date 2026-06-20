@@ -9,7 +9,28 @@ export default function ProfilePage() {
   const t = useTranslations('ProfilePage');
   const tFields = useTranslations('auth.fields');
   const tProfile = useTranslations('auth.profile');
-  const { customer, updateProfile, changePassword } = useAuth();
+  const { customer, updateProfile, uploadAvatar, changePassword } = useAuth();
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [avatarUploading, setAvatarUploading] = React.useState(false);
+  const [avatarMsg, setAvatarMsg] = React.useState<{ intent: 'success' | 'danger'; text: string } | null>(null);
+  const avatarPreview = customer?.customFields?.avatar?.preview ?? null;
+
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file
+    if (!file) return;
+    setAvatarMsg(null);
+    setAvatarUploading(true);
+    try {
+      await uploadAvatar(file);
+      setAvatarMsg({ intent: 'success', text: t('saved') });
+    } catch (err) {
+      setAvatarMsg({ intent: 'danger', text: err instanceof Error ? err.message : t('errorTitle') });
+    } finally {
+      setAvatarUploading(false);
+    }
+  }
 
   const [profile, setProfile] = React.useState({
     firstName: customer?.firstName ?? '',
@@ -78,6 +99,40 @@ export default function ProfilePage() {
         <h1 className="text-24 font-bold text-content-strong">{t('title')}</h1>
         <p className="text-14 text-content-muted">{t('subtitle')}</p>
       </header>
+
+      <section className="flex items-center gap-5">
+        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full bg-surface-muted">
+          {avatarPreview ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatarPreview} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-content-muted">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.5-6 8-6s8 2 8 6" />
+              </svg>
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
+          <Button
+            type="button"
+            intent="secondary"
+            loading={avatarUploading}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {avatarUploading ? t('saving') : tProfile('changeAvatar')}
+          </Button>
+          {avatarMsg && <Alert intent={avatarMsg.intent}>{avatarMsg.text}</Alert>}
+        </div>
+      </section>
 
       <section>
         <h2 className="mb-4 text-18 font-bold text-content-strong">{tProfile('personalInfo')}</h2>

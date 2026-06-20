@@ -6,8 +6,24 @@ Logger.info('Starting OSCAR Vendure Server...', 'Bootstrap');
 Logger.info(`DATABASE_URL is ${process.env.DATABASE_URL ? 'SET' : 'NOT SET'}`, 'Bootstrap');
 Logger.info(`DB_HOST is ${process.env.DB_HOST || 'NOT SET'}`, 'Bootstrap');
 
+// Auto-run pending DB migrations on every startup (idempotent — TypeORM tracks applied
+// migrations in the `migrations` table and runs each only once). This is what makes a
+// production deploy self-migrate: push new migration files, restart, they apply on boot.
+//
+// Caveat: Vendure's runMigrations() does NOT throw when invoked outside its CLI — on a
+// failed migration it logs the error, sets process.exitCode = 1, and resolves. In dev
+// that's fine (synchronize builds the schema, so a fresh-DB migration error is harmless).
+// In production synchronize is OFF, so we must NOT boot on a half-migrated schema: fail
+// fast instead, letting the deploy/healthcheck catch it rather than serving bad data.
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
 runMigrations(config)
-  .then(() => bootstrap(config))
+  .then(() => {
+    if (IS_PRODUCTION && process.exitCode === 1) {
+      throw new Error('Database migrations failed — aborting startup (see errors above).');
+    }
+    return bootstrap(config);
+  })
   .then(async (app) => {
     // Normalize backslashes in asset URLs (Windows path fix)
     const expressApp = app.getHttpAdapter().getInstance();

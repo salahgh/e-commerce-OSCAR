@@ -8,7 +8,13 @@ import {
 import type { Wilaya } from '../../data/wilayas';
 
 const WILAYAS = [
-  { code: '16', name: 'Alger', nameAr: '', shippingZone: 1, communes: [] },
+  {
+    code: '16',
+    name: 'Alger',
+    nameAr: '',
+    shippingZone: 1,
+    communes: [{ code: '1601', name: 'Alger Centre', nameAr: '', postalCode: '16000' }],
+  },
   { code: '31', name: 'Oran', nameAr: '', shippingZone: 2, communes: [] },
 ] as unknown as Wilaya[];
 
@@ -16,10 +22,9 @@ const VALUES = {
   fullName: 'Sara Ben Ali',
   phoneNumber: '0551234567',
   address: '12 Rue Didouche',
-  city: 'Alger Centre',
-  postalCode: '16000',
   notes: 'Ring twice',
   wilayaCode: '16',
+  communeCode: '1601',
   email: 'sara@example.com',
 };
 
@@ -48,10 +53,15 @@ describe('buildShippingAddressInput', () => {
   it('never emits an empty province for a known wilaya', () => {
     expect(buildShippingAddressInput(VALUES, WILAYAS).province).not.toBe('');
   });
-  it('defaults optional streetLine2/postalCode to empty strings', () => {
-    const v = { ...VALUES, notes: undefined, postalCode: undefined };
+  it('defaults streetLine2 to empty string when notes is absent', () => {
+    const v = { ...VALUES, notes: undefined };
     const out = buildShippingAddressInput(v, WILAYAS);
     expect(out.streetLine2).toBe('');
+  });
+  it('yields empty city + postalCode for an unknown commune', () => {
+    const v = { ...VALUES, communeCode: 'XXXX' };
+    const out = buildShippingAddressInput(v, WILAYAS);
+    expect(out.city).toBe('');
     expect(out.postalCode).toBe('');
   });
 });

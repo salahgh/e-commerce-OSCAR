@@ -36,14 +36,19 @@ describe('makeShippingAddressSchema', () => {
     fullName: 'Sara Ben Ali',
     phoneNumber: '0551234567',
     address: '12 Rue Didouche',
-    city: 'Alger',
-    postalCode: '16000',
     wilayaCode: '16',
+    communeCode: '1601',
   };
 
   it('requires wilayaCode', async () => {
     await expect(
       makeShippingAddressSchema(false).validate({ ...base, wilayaCode: '' })
+    ).rejects.toBeInstanceOf(Yup.ValidationError);
+  });
+
+  it('requires communeCode', async () => {
+    await expect(
+      makeShippingAddressSchema(false).validate({ ...base, communeCode: '' })
     ).rejects.toBeInstanceOf(Yup.ValidationError);
   });
 
@@ -75,9 +80,8 @@ describe('addressFormSchema', () => {
     fullName: 'Sara Ben Ali',
     phoneNumber: '0551234567',
     streetLine1: '12 Rue Didouche',
-    city: 'Alger',
     wilayaCode: '16',
-    postalCode: '16000',
+    communeCode: '1601',
     defaultShippingAddress: false,
   };
   it('accepts a valid address', async () => {
@@ -86,7 +90,7 @@ describe('addressFormSchema', () => {
   it('requires wilayaCode', async () => {
     await expect(addressFormSchema.validate({ ...base, wilayaCode: '' })).rejects.toBeInstanceOf(Yup.ValidationError);
   });
-  it('requires a 5-digit postalCode', async () => {
-    await expect(addressFormSchema.validate({ ...base, postalCode: '1' })).rejects.toBeInstanceOf(Yup.ValidationError);
+  it('requires communeCode', async () => {
+    await expect(addressFormSchema.validate({ ...base, communeCode: '' })).rejects.toBeInstanceOf(Yup.ValidationError);
   });
 });

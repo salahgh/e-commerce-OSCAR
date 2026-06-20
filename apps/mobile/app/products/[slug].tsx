@@ -27,6 +27,7 @@ import { useCart } from '../../src/contexts/CartContext';
 import { useWishlist } from '../../src/contexts/WishlistContext';
 import { useRecentlyViewed } from '../../src/contexts/RecentlyViewedContext';
 import { formatPrice } from '../../src/utils/vendureAdapters';
+import { rtlIcon } from '../../src/utils/rtl';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -228,7 +229,7 @@ export default function ProductDetailScreen() {
       {/* Floating Header */}
       <View style={[styles.floatingHeader, { top: insets.top + spacing.sm }]}>
         <TouchableOpacity style={styles.floatingButton} onPress={handleGoBack} activeOpacity={0.8}>
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+          <Ionicons name={rtlIcon('arrow-back')} size={24} color={colors.text.primary} />
         </TouchableOpacity>
 
         <View style={styles.floatingActions}>

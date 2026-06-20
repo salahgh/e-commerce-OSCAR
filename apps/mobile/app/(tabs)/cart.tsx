@@ -22,6 +22,7 @@ import {
   useApplyCouponCodeMutation,
   useRemoveCouponCodeMutation,
 } from '../../src/graphql/generated/graphql';
+import { rtlIcon } from '../../src/utils/rtl';
 
 export default function CartScreen() {
   const { t } = useTranslation();
@@ -94,7 +95,7 @@ export default function CartScreen() {
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+            <Ionicons name={rtlIcon('arrow-back')} size={24} color={colors.text.primary} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { fontFamily: fontFamily.medium }]}>
             {t('cart.title')}
@@ -187,7 +188,7 @@ export default function CartScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+          <Ionicons name={rtlIcon('arrow-back')} size={24} color={colors.text.primary} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { fontFamily: fontFamily.medium }]}>
           {t('cart.title')}
@@ -268,7 +269,7 @@ export default function CartScreen() {
           <Text style={[styles.checkoutButtonText, { fontFamily: fontFamily.medium }]}>
             {t('common.continue')}
           </Text>
-          <Ionicons name="arrow-forward" size={20} color={colors.text.inverse} />
+          <Ionicons name={rtlIcon('arrow-forward')} size={20} color={colors.text.inverse} />
         </TouchableOpacity>
       </View>
     </View>

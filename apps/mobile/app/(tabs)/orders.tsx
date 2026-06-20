@@ -16,11 +16,26 @@ import {
 } from '../../src/theme';
 import { formatPrice } from '../../src/utils/vendureAdapters';
 import { useAppFont } from '../../src/hooks/useAppFont';
+import { rtlIcon } from '../../src/utils/rtl';
+import { isCashOnDelivery } from '../../src/utils/payment';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Map Vendure order states to display info (palette-aware so colors theme correctly).
 // Labels resolve through i18n at call time so they follow the active language.
-function getOrderStateInfo(state: string, colors: ColorPalette, t: TFunction) {
+//
+// COD orders are auto-settled by the backend handler, so they reach
+// `PaymentSettled` without the money being collected. When `isCod` is set we
+// surface a neutral "Cash on delivery" status instead of the green "Paid",
+// until the order actually reaches a delivered state.
+function getOrderStateInfo(state: string, colors: ColorPalette, t: TFunction, isCod = false) {
   const label = (s: string, fallback: string) => t(`orders.states.${s}`, fallback) as string;
+  if (isCod && state === 'PaymentSettled') {
+    return {
+      label: t('orders.codPending', 'Cash on delivery') as string,
+      color: colors.info,
+      icon: 'cash-outline',
+    };
+  }
   const orderStateMap: Record<string, { label: string; color: string; icon: string }> = {
     AddingItems: { label: label('AddingItems', 'Draft'), color: colors.text.tertiary, icon: 'cart-outline' },
     ArrangingPayment: { label: label('ArrangingPayment', 'Awaiting Payment'), color: colors.warning, icon: 'time-outline' },
@@ -64,6 +79,10 @@ interface OrderItemProps {
     createdAt: string;
     totalWithTax: number;
     totalQuantity: number;
+    payments?: Array<{
+      method?: string | null;
+      state?: string | null;
+    }> | null;
     lines: Array<{
       id: string;
       quantity: number;
@@ -89,7 +108,7 @@ function OrderItem({ order, onPress }: OrderItemProps) {
   const colors = useThemeColors();
   const styles = useStyles();
   const { fontFamily } = useAppFont();
-  const stateInfo = getOrderStateInfo(order.state, colors, t);
+  const stateInfo = getOrderStateInfo(order.state, colors, t, isCashOnDelivery(order));
 
   // Get first product image
   const firstLine = order.lines[0];
@@ -99,8 +118,14 @@ function OrderItem({ order, onPress }: OrderItemProps) {
   return (
     <TouchableOpacity style={styles.orderCard} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.orderHeader}>
-        <View>
-          <Text style={[styles.orderNumber, { fontFamily: fontFamily.bold }]}>#{order.code}</Text>
+        <View style={styles.orderHeaderLeft}>
+          <Text
+            style={[styles.orderNumber, { fontFamily: fontFamily.bold }]}
+            numberOfLines={1}
+            ellipsizeMode="middle"
+          >
+            #{order.code}
+          </Text>
           <Text style={[styles.orderDate, { fontFamily: fontFamily.regular }]}>
             {formatDate(order.createdAt)}
           </Text>
@@ -140,7 +165,7 @@ function OrderItem({ order, onPress }: OrderItemProps) {
             {stateInfo.label}
           </Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color={colors.text.tertiary} />
+        <Ionicons name={rtlIcon('chevron-forward')} size={20} color={colors.text.tertiary} />
       </View>
     </TouchableOpacity>
   );
@@ -152,6 +177,7 @@ export default function OrdersScreen() {
   const colors = useThemeColors();
   const styles = useStyles();
   const { fontFamily } = useAppFont();
+  const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
 
   const { data, loading, error, refetch } = useGetMyOrdersQuery({
@@ -182,7 +208,7 @@ export default function OrdersScreen() {
   if (!isAuthenticated) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
           <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
             {t('orders.title', 'My Orders')}
           </Text>
@@ -211,7 +237,7 @@ export default function OrdersScreen() {
   if (loading && !data) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
           <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
             {t('orders.title', 'My Orders')}
           </Text>
@@ -227,7 +253,7 @@ export default function OrdersScreen() {
   if (error) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
           <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
             {t('orders.title', 'My Orders')}
           </Text>
@@ -246,7 +272,7 @@ export default function OrdersScreen() {
   if (orders.length === 0) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
           <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
             {t('orders.title', 'My Orders')}
           </Text>
@@ -268,7 +294,7 @@ export default function OrdersScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
         <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
           {t('orders.title', 'My Orders')}
         </Text>
@@ -344,8 +370,12 @@ const useStyles = makeThemedStyles((colors) =>
       alignItems: 'flex-start',
       marginBottom: spacing.md,
     },
+    orderHeaderLeft: {
+      flex: 1,
+      marginRight: spacing.sm,
+    },
     orderNumber: {
-      ...typography.styles.h4,
+      ...typography.styles.body,
       color: colors.text.primary,
       fontWeight: typography.fontWeight.bold,
     },

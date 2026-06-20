@@ -33,8 +33,11 @@ export const validationRules = {
     .required(() => tr('validation.lastNameRequired'))
     .trim(),
 
+  // Algerian phone number: mobile 0[5-7]XXXXXXXX or +213[5-7]XXXXXXXX.
+  // Spaces, dots and dashes are stripped before matching.
   phone: Yup.string()
-    .matches(/^[0-9]{10}$/, () => tr('validation.phoneDigits'))
+    .transform((v) => (typeof v === 'string' ? v.replace(/[\s.\-()]/g, '') : v))
+    .matches(/^(?:\+213|0)[5-7]\d{8}$/, () => tr('validation.phoneAlgerian'))
     .required(() => tr('validation.phoneRequired')),
 
   required: (fieldName: string) =>
@@ -96,14 +99,8 @@ export const makeShippingAddressSchema = (includeEmail: boolean) =>
       .min(10, ({ min }) => tr('validation.addressMin', { n: min }))
       .required(() => tr('validation.addressRequired'))
       .trim(),
-    city: Yup.string()
-      .min(2, ({ min }) => tr('validation.cityMin', { n: min }))
-      .required(() => tr('validation.cityRequired'))
-      .trim(),
     wilayaCode: Yup.string().required(() => tr('validation.wilayaRequired')),
-    postalCode: Yup.string()
-      .matches(/^[0-9]{5}$/, () => tr('validation.postalCodeDigits'))
-      .required(() => tr('validation.postalCodeRequired')),
+    communeCode: Yup.string().required(() => tr('validation.communeRequired')),
     notes: Yup.string()
       .max(500, ({ max }) => tr('validation.notesMax', { n: max }))
       .optional(),
@@ -131,14 +128,7 @@ export const addressFormSchema = Yup.object().shape({
     .min(5, ({ min }) => tr('validation.addressMin', { n: min }))
     .required(() => tr('validation.addressRequired'))
     .trim(),
-  streetLine2: Yup.string().optional(),
-  city: Yup.string()
-    .min(2, ({ min }) => tr('validation.cityMin', { n: min }))
-    .required(() => tr('validation.cityRequired'))
-    .trim(),
   wilayaCode: Yup.string().required(() => tr('validation.wilayaRequired')),
-  postalCode: Yup.string()
-    .matches(/^[0-9]{5}$/, () => tr('validation.postalCodeDigits'))
-    .required(() => tr('validation.postalCodeRequired')),
+  communeCode: Yup.string().required(() => tr('validation.communeRequired')),
   defaultShippingAddress: Yup.boolean(),
 });

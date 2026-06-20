@@ -625,6 +625,7 @@
     "profile": {
       "title": "Mon profil",
       "personalInfo": "Informations personnelles",
+      "changeAvatar": "Changer la photo",
       "security": "Sécurité",
       "addresses": "Adresses",
       "updateProfile": "Mettre à jour",

@@ -10,6 +10,9 @@ import {
 import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import { RetryLink } from '@apollo/client/link/retry';
+// createUploadLink is a drop-in HttpLink replacement that emits multipart/form-data when a
+// request carries a File, required for the UpdateCustomerAvatar mutation.
+import { createUploadLink } from 'apollo-upload-client';
 
 function makeClient(locale: string) {
   const baseUri = process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8085/shop-api';
@@ -26,7 +29,13 @@ function makeClient(locale: string) {
     return locale;
   };
 
+  // Plain HttpLink for SSR; upload-capable link for the browser (file uploads only
+  // happen client-side). createUploadLink falls back to a normal POST when no File is present.
   const httpLink = new HttpLink({ uri: baseUri, credentials: 'include' });
+  const clientTerminalLink =
+    typeof window === 'undefined'
+      ? httpLink
+      : (createUploadLink({ uri: baseUri, credentials: 'include' }) as unknown as typeof httpLink);
 
   const authLink = setContext((_, { headers }) => {
     let token: string | null = null;
@@ -124,7 +133,7 @@ function makeClient(locale: string) {
   const linkChain =
     typeof window === 'undefined'
       ? from([new SSRMultipartLink({ stripDefer: true }), errorLink, authLink, httpLink])
-      : from([errorLink, retryLink, authLink, httpLink]);
+      : from([errorLink, retryLink, authLink, clientTerminalLink]);
 
   return new NextSSRApolloClient({
     cache,

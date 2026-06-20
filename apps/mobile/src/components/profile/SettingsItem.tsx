@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 import { useAppFont } from '../../hooks/useAppFont';
+import { rtlIcon } from '../../utils/rtl';
 
 interface SettingsItemProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -72,7 +73,7 @@ export const SettingsItem: React.FC<SettingsItemProps> = ({
           thumbColor={switchValue ? colors.primary : colors.text.tertiary}
         />
       ) : (
-        showChevron && <Ionicons name="chevron-forward" size={20} color={colors.text.tertiary} />
+        showChevron && <Ionicons name={rtlIcon('chevron-forward')} size={20} color={colors.text.tertiary} />
       )}
     </TouchableOpacity>
   );

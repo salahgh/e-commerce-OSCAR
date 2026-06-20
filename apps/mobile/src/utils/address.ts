@@ -5,17 +5,14 @@ export interface AddressFormValues {
   fullName: string;
   phoneNumber: string;
   streetLine1: string;
-  streetLine2?: string;
-  city: string;
   wilayaCode: string;
-  postalCode?: string;
+  communeCode: string;
   defaultShippingAddress: boolean;
 }
 
 export interface CreateAddressInputShape {
   fullName: string;
   streetLine1: string;
-  streetLine2?: string;
   city: string;
   province: string;
   postalCode?: string;
@@ -55,14 +52,38 @@ export function resolveWilayaCode(provinceName: string, wilayas: Wilaya[]): stri
   );
 }
 
+/**
+ * Reverse-resolve a saved `city` to a commune code within the already-resolved wilaya.
+ * Matches the commune's French `name` OR Arabic `nameAr`, case-insensitively and trimmed,
+ * so addresses saved with either language (or casing variance) still re-select the commune.
+ */
+export function resolveCommuneCode(
+  wilayaCode: string,
+  city: string,
+  wilayas: Wilaya[]
+): string {
+  const needle = city.trim().toLowerCase();
+  if (!wilayaCode || !needle) return '';
+  const wilaya = wilayas.find((w) => w.code === wilayaCode);
+  if (!wilaya) return '';
+  return (
+    wilaya.communes.find((c) => {
+      const name = c.name.trim().toLowerCase();
+      const nameAr = (c.nameAr ?? '').trim().toLowerCase();
+      return name === needle || (nameAr !== '' && nameAr === needle);
+    })?.code ?? ''
+  );
+}
+
 export function buildCreateAddressInput(values: AddressFormValues, wilayas: Wilaya[]): CreateAddressInputShape {
+  const wilaya = wilayas.find((w) => w.code === values.wilayaCode);
+  const commune = wilaya?.communes.find((c) => c.code === values.communeCode);
   return {
     fullName: values.fullName,
     streetLine1: values.streetLine1,
-    streetLine2: values.streetLine2 || undefined,
-    city: values.city,
+    city: commune?.name ?? '',
     province: resolveWilayaName(values.wilayaCode, wilayas),
-    postalCode: values.postalCode || undefined,
+    postalCode: commune?.postalCode || undefined,
     countryCode: 'DZ',
     phoneNumber: values.phoneNumber,
     defaultShippingAddress: values.defaultShippingAddress,
@@ -74,27 +95,26 @@ export function buildUpdateAddressInput(id: string, values: AddressFormValues, w
 }
 
 export function addressToFormValues(a: SavedAddress, wilayas: Wilaya[]): AddressFormValues {
+  const wilayaCode = resolveWilayaCode(a.province ?? '', wilayas);
   return {
     fullName: a.fullName ?? '',
     phoneNumber: a.phoneNumber ?? '',
     streetLine1: a.streetLine1 ?? '',
-    streetLine2: a.streetLine2 ?? '',
-    city: a.city ?? '',
-    wilayaCode: resolveWilayaCode(a.province ?? '', wilayas),
-    postalCode: a.postalCode ?? '',
+    wilayaCode,
+    communeCode: resolveCommuneCode(wilayaCode, a.city ?? '', wilayas),
     defaultShippingAddress: !!a.defaultShippingAddress,
   };
 }
 
 /** Map a saved address to the checkout ShippingAddressForm field names (no email). */
 export function addressToCheckoutValues(a: SavedAddress, wilayas: Wilaya[]) {
+  const wilayaCode = resolveWilayaCode(a.province ?? '', wilayas);
   return {
     fullName: a.fullName ?? '',
     phoneNumber: a.phoneNumber ?? '',
     address: a.streetLine1 ?? '',
     notes: a.streetLine2 ?? '',
-    city: a.city ?? '',
-    wilayaCode: resolveWilayaCode(a.province ?? '', wilayas),
-    postalCode: a.postalCode ?? '',
+    wilayaCode,
+    communeCode: resolveCommuneCode(wilayaCode, a.city ?? '', wilayas),
   };
 }

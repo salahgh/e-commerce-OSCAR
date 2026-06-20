@@ -4,6 +4,7 @@ schema: schema.graphql
 # schema: "http://localhost:8085/shop-api"
 documents:
   - "src/graphql/**/*.{ts,tsx,graphql}"
+  - "!src/graphql/generated/**"
 generates:
   src/graphql/generated/graphql.ts:
     plugins:

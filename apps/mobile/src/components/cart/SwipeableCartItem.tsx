@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { CartItemData } from './CartItem';
 import { CartItemContent, useCartItemStyles } from './CartItemContent';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
+import { rtlIcon } from '../../utils/rtl';
 
 const DELETE_BUTTON_WIDTH = 80;
 
@@ -81,7 +82,7 @@ export const SwipeableCartItem: React.FC<SwipeableCartItemProps> = ({
         <CartItemContent item={item} onUpdateQuantity={onUpdateQuantity} loading={loading} />
 
         <View style={styles.swipeHint}>
-          <Ionicons name="chevron-back" size={16} color={colors.text.tertiary} />
+          <Ionicons name={rtlIcon('chevron-back')} size={16} color={colors.text.tertiary} />
         </View>
       </View>
     </Swipeable>

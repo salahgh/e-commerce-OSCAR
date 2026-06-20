@@ -34,6 +34,7 @@ import { wilayas } from '../../src/data/wilayas';
 import { addressToCheckoutValues, SavedAddress } from '../../src/utils/address';
 import { SavedAddressPicker } from '../../src/components/checkout/SavedAddressPicker';
 import { partitionPaymentMethods } from '../../src/utils/payment';
+import { rtlIcon } from '../../src/utils/rtl';
 
 type CheckoutStep = 'shipping' | 'shippingMethod' | 'payment' | 'review';
 
@@ -305,7 +306,7 @@ export default function CheckoutScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={goBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+          <Ionicons name={rtlIcon('arrow-back')} size={24} color={colors.text.primary} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
           {t('checkout.title', 'Checkout')}
@@ -568,10 +569,17 @@ export default function CheckoutScreen() {
                 <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
                   {shippingAddress.address}
                 </Text>
-                <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
-                  {shippingAddress.city}
-                  {shippingAddress.postalCode && `, ${shippingAddress.postalCode}`}
-                </Text>
+                {(() => {
+                  const w = wilayas.find((x) => x.code === shippingAddress.wilayaCode);
+                  const commune = w?.communes.find((c) => c.code === shippingAddress.communeCode);
+                  if (!commune) return null;
+                  return (
+                    <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
+                      {commune.name}
+                      {commune.postalCode ? `, ${commune.postalCode}` : ''}
+                    </Text>
+                  );
+                })()}
                 {shippingAddress.wilayaCode ? (
                   <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
                     {resolveWilayaName(shippingAddress.wilayaCode, wilayas)}

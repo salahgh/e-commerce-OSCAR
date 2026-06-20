@@ -9,6 +9,7 @@ import { useRouter, useSegments } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing } from '../../theme';
 import { useTranslation } from 'react-i18next';
+import { rtlIcon } from '../../utils/rtl';
 
 interface BackButtonProps {
   onPress?: () => void;
@@ -76,7 +77,7 @@ export const BackButton: React.FC<BackButtonProps> = ({
       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
     >
       <Ionicons
-        name={Platform.OS === 'ios' ? 'chevron-back' : 'arrow-back'}
+        name={rtlIcon(Platform.OS === 'ios' ? 'chevron-back' : 'arrow-back')}
         size={size}
         color={disabled ? colors.text.disabled : color}
       />
@@ -171,7 +172,7 @@ export const FloatingBackButton: React.FC<FloatingBackButtonProps> = ({
       activeOpacity={0.8}
     >
       <Ionicons
-        name={Platform.OS === 'ios' ? 'chevron-back' : 'arrow-back'}
+        name={rtlIcon(Platform.OS === 'ios' ? 'chevron-back' : 'arrow-back')}
         size={24}
         color={colors.text.primary}
       />
