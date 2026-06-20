@@ -36,22 +36,36 @@ export function SplashOverlay({ onFinish }: { onFinish: () => void }) {
   const taglineOpacity = useRef(new Animated.Value(0)).current;
   const exitOpacity = useRef(new Animated.Value(1)).current;
 
-  // Decide the destination once, up front, so any onboarding redirect happens while
-  // the overlay still fully covers the screen.
+  // Decide the destination ONCE, up front, while the overlay still fully covers
+  // the screen. This must fire exactly once: `router` is not a stable dependency
+  // in expo-router, so keying the effect on it (or letting it re-run) turns the
+  // onboarding redirect into an infinite replace→re-render→replace loop — which
+  // showed up as the whole splash flickering forever on first launch (the only
+  // time onboarding is incomplete and the redirect actually runs). A ref guard +
+  // run-once effect makes the redirect idempotent.
+  const didRedirect = useRef(false);
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      if (didRedirect.current) return;
+      let done: string | null = null;
       try {
-        const done = await AsyncStorage.getItem(ONBOARDING_KEY);
-        if (!cancelled && done !== 'true') router.replace('/onboarding');
+        done = await AsyncStorage.getItem(ONBOARDING_KEY);
       } catch {
-        if (!cancelled) router.replace('/onboarding');
+        done = null;
+      }
+      if (cancelled || didRedirect.current) return;
+      if (done !== 'true') {
+        didRedirect.current = true;
+        router.replace('/onboarding');
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [router]);
+    // Run once on mount — see comment above; `router` intentionally omitted.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     Animated.sequence([
