@@ -30,12 +30,14 @@ import { RecentlyViewedProvider } from '@/src/contexts/RecentlyViewedContext';
 import { ThemeProvider, useThemeMode } from '@/src/contexts/ThemeContext';
 import { ToastProvider , LoadingSpinner } from '@/src/components/ui';
 import { MiniCartSheet } from '@/src/components/cart';
+import * as NativeSplash from 'expo-splash-screen';
+import { SplashOverlay } from '@/src/components/SplashOverlay';
 
 export { AppErrorBoundary as ErrorBoundary } from '@/src/components/AppErrorBoundary';
 
-export const unstable_settings = {
-  initialRouteName: 'splash',
-};
+// Hold the native splash until JS has loaded fonts/lang/cache and the branded
+// SplashOverlay has painted — prevents the bare-spinner / home-screen flash.
+NativeSplash.preventAutoHideAsync().catch(() => {});
 
 // Routes that require authentication
 const PROTECTED_ROUTES = ['checkout', 'orders', 'profile', 'payment'];
@@ -50,11 +52,10 @@ function RootNavigator() {
 
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboarding = segments[0] === 'onboarding';
-    const inSplash = segments[0] === 'splash';
     const currentRoute = segments[0] as string;
 
-    // Don't redirect if in splash or onboarding
-    if (inSplash || inOnboarding) return;
+    // Don't redirect while onboarding is showing
+    if (inOnboarding) return;
 
     // Only redirect to login if accessing a protected route without authentication
     if (!isAuthenticated && PROTECTED_ROUTES.includes(currentRoute)) {
@@ -71,7 +72,6 @@ function RootNavigator() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="splash" options={{ headerShown: false, animation: 'none' }} />
       {/*<Stack.Screen name="onboarding" options={{ headerShown: false, animation: 'fade' }} />*/}
       {/*<Stack.Screen name="(auth)" options={{ headerShown: false }} />*/}
       {/*<Stack.Screen name="(tabs)" options={{ headerShown: false }} />*/}
@@ -96,6 +96,7 @@ function NavigationThemeBridge({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout() {
   const [languageLoaded, setLanguageLoaded] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
 
   const [fontsLoaded] = useFonts({
     Gabarito_400Regular,
@@ -117,13 +118,9 @@ export default function RootLayout() {
   const cacheRestored = useApolloPersistence();
 
   if (!languageLoaded || !fontsLoaded || !cacheRestored) {
-    // ThemeProvider must wrap the loading state too: LoadingSpinner uses themed
-    // styles (useThemeColors), which throw outside a ThemeProvider.
-    return (
-      <ThemeProvider>
-        <LoadingSpinner />
-      </ThemeProvider>
-    );
+    // Render nothing so the native splash screen stays up (held via
+    // preventAutoHideAsync) — no themed spinner flash before the branded overlay.
+    return null;
   }
 
   return (
@@ -139,6 +136,7 @@ export default function RootLayout() {
                       <ToastProvider>
                         <RootNavigator />
                         <MiniCartSheet />
+                        {showSplash && <SplashOverlay onFinish={() => setShowSplash(false)} />}
                         <StatusBar style="auto" />
                       </ToastProvider>
                     </NavigationThemeBridge>
