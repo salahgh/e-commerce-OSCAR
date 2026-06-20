@@ -27,8 +27,12 @@ export function SplashOverlay({ onFinish }: { onFinish: () => void }) {
   const { t } = useTranslation();
   const styles = useStyles();
 
-  const logoOpacity = useRef(new Animated.Value(0)).current;
-  const logoScale = useRef(new Animated.Value(0.8)).current;
+  // Logo starts FULLY VISIBLE so the overlay is pixel-identical to the native
+  // splash at the hand-off moment — animating it in from opacity:0/scale:0.8
+  // made the logo blink out and fade back in right after `hideAsync()`, which
+  // read as the splash "flickering". Only the tagline animates in now.
+  const logoOpacity = useRef(new Animated.Value(1)).current;
+  const logoScale = useRef(new Animated.Value(1)).current;
   const taglineOpacity = useRef(new Animated.Value(0)).current;
   const exitOpacity = useRef(new Animated.Value(1)).current;
 
@@ -51,10 +55,6 @@ export function SplashOverlay({ onFinish }: { onFinish: () => void }) {
 
   useEffect(() => {
     Animated.sequence([
-      Animated.parallel([
-        Animated.timing(logoOpacity, { toValue: 1, duration: 600, useNativeDriver: true }),
-        Animated.spring(logoScale, { toValue: 1, friction: 8, tension: 40, useNativeDriver: true }),
-      ]),
       Animated.timing(taglineOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
       Animated.delay(900),
       Animated.timing(exitOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
