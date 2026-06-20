@@ -194,25 +194,21 @@ CANCELLED  CANCELLED  CANCELLED   RETURNED
 
 ---
 
-## 2.5 Module Reporting & PDF
+## 2.5 Module Reporting
 
 ### 2.5.1 Rapports Disponibles
 
 | Rapport | Description | Format |
 |---------|-------------|--------|
-| **Ventes journalières** | Résumé des ventes du jour | Dashboard + PDF |
-| **Ventes période** | Ventes sur période personnalisée | Dashboard + PDF |
-| **Top produits** | Produits les plus vendus | Dashboard + PDF |
+| **Ventes journalières** | Résumé des ventes du jour | Dashboard + export CSV |
+| **Ventes période** | Ventes sur période personnalisée | Dashboard + export CSV |
+| **Top produits** | Produits les plus vendus | Dashboard + export CSV |
 | **Clients actifs** | Analyse comportement clients | Dashboard |
 | **Stock faible** | Alertes rupture de stock | Dashboard |
 
 ### 2.5.2 Documents PDF Générés
 
-| Document | Contenu | Déclencheur |
-|----------|---------|-------------|
-| **Facture** | Détails commande, TVA, total | Commande confirmée |
-| **Bon de livraison** | Adresse, articles, quantités | Expédition |
-| **Rapport ventes** | Statistiques période | Export admin |
+> _Hors périmètre — non inclus dans la livraison._
 
 ---
 
@@ -243,10 +239,10 @@ CANCELLED  CANCELLED  CANCELLED   RETURNED
 | **Dashboard** | KPIs temps réel, graphiques ventes, alertes |
 | **Produits** | CRUD, import/export, gestion images |
 | **Catégories** | Gestion hiérarchique, drag & drop |
-| **Commandes** | Liste, détail, changement statut, PDF |
+| **Commandes** | Liste, détail, changement statut |
 | **Clients** | Liste, détail, historique, blocage |
 | **Promotions** | CRUD codes promo, validité |
-| **Rapports** | Génération, export PDF |
+| **Rapports** | Génération, export CSV |
 | **Utilisateurs** | CRUD admins, rôles, permissions |
 | **Paramètres** | Configuration système, intégrations |
 
@@ -523,11 +519,11 @@ CANCELLED  CANCELLED  CANCELLED   RETURNED
 | `/products/:id/edit` | ProductForm (edit mode) |
 | `/categories` | CategoriesTree, CategoryForm |
 | `/orders` | OrdersTable, OrderFilters |
-| `/orders/:id` | OrderDetail, StatusUpdater, PDFGenerator |
+| `/orders/:id` | OrderDetail, StatusUpdater |
 | `/customers` | CustomersTable |
 | `/customers/:id` | CustomerDetail, OrderHistory |
 | `/promotions` | PromosTable, PromoForm |
-| `/reports` | ReportsFilters, ChartsDisplay, PDFExport |
+| `/reports` | ReportsFilters, ChartsDisplay, CSVExport |
 | `/users` | AdminsTable, AdminForm |
 | `/settings` | SettingsTabs (Store, SMTP, Payments, Sync) |
 

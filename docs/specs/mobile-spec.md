@@ -1128,7 +1128,7 @@ const styles = StyleSheet.create({
 - Informations livraison
 - Articles commandés
 - Récapitulatif prix
-- Boutons: Télécharger facture, Contacter support
+- Boutons: Contacter support
 
 ---
 

@@ -48,7 +48,7 @@
       "typedRoutes": true
     },
     "extra": {
-      "graphqlUrl": "https://YOUR-RAILWAY-BACKEND.up.railway.app/shop-api",
+      "graphqlUrl": "https://api.oscarfashion.dz/shop-api",
       "router": {},
       "eas": {
         "projectId": "d1a1d5e3-7361-4b7f-9388-ce1a3419706f"

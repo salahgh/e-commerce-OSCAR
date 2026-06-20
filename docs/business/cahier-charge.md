@@ -2,7 +2,7 @@
 
 ## 1\. Introduction
 
-Ce document détaille les spécifications techniques et fonctionnelles pour le développement d'une plateforme web et d'une application mobile dédiées à OSCAR Fashion. Il vise à fournir une feuille de route claire pour la conception, le développement et le déploiement de solutions numériques qui renforceront la présence en ligne de la marque, amélioreront l'expérience client et optimiseront la gestion des opérations. Les nouvelles exigences incluent une approche unifiée pour la plateforme web et l'application mobile, l'intégration de systèmes de paiement locaux, une personnalisation avancée de l'expérience utilisateur, et une synchronisation en temps réel avec les systèmes de gestion des stocks et des produits.
+Ce document détaille les spécifications techniques et fonctionnelles pour le développement d'une plateforme web et d'une application mobile dédiées à OSCAR Fashion. Il vise à fournir une feuille de route claire pour la conception, le développement et le déploiement de solutions numériques qui renforceront la présence en ligne de la marque, amélioreront l'expérience client et optimiseront la gestion des opérations. Les nouvelles exigences incluent une approche unifiée pour la plateforme web et l'application mobile, l'intégration de systèmes de paiement locaux et une personnalisation avancée de l'expérience utilisateur.
 
 ## 2\. Objectifs du Projet
 
@@ -13,7 +13,6 @@ Les objectifs principaux de ce projet sont les suivants :
 - **Optimiser les ventes en ligne :** Mettre en place un système de commande efficace avec authentification obligatoire pour les achats.
 - **Intégrer les méthodes de paiement locales :** Permettre aux clients algériens d'utiliser les options de paiement courantes telles que CIB, Baridimob et le paiement à la livraison.
 - **Personnaliser l'expérience utilisateur :** Développer une page d'accueil intelligente affichant des produits et promotions personnalisés.
-- **Automatiser la gestion des stocks et produits :** Assurer une synchronisation en temps réel entre la plateforme/application et les systèmes de gestion internes d'OSCAR Fashion.
 - **Faciliter la gestion administrative :** Fournir un tableau de bord d'administration complet pour la gestion des produits, des commandes, des promotions et des utilisateurs.
 - **Mettre en place un système de notification :** Informer les utilisateurs des promotions, du statut des commandes et des nouveautés.
 
@@ -48,7 +47,7 @@ Les fonctionnalités suivantes seront implémentées et partagées entre la plat
 Une interface d'administration sécurisée pour la gestion complète de la plateforme et de l'application, incluant :
 
 - **Gestion des Produits :** Ajout, modification, suppression de produits, gestion des catégories, des attributs (tailles, couleurs).
-- **Gestion des Stocks :** Synchronisation en temps réel avec les systèmes de gestion existants d'OSCAR Fashion.
+- **Gestion des Stocks :** Suivi et mise à jour des niveaux de stock directement depuis le tableau de bord d'administration.
 - **Gestion des Commandes :** Suivi, mise à jour du statut, historique des commandes.
 - **Gestion des Utilisateurs :** Consultation et gestion des comptes clients.
 - **Gestion des Promotions :** Création, modification et planification des offres spéciales et des bannières.
@@ -68,7 +67,6 @@ Une interface d'administration sécurisée pour la gestion complète de la plate
 ### 4.2. Catalogue Produits
 
 - **Affichage Détaillé :** Chaque produit doit avoir une page dédiée avec plusieurs images de haute qualité (zoomable), une description complète, les tailles et couleurs disponibles, le prix et la disponibilité en stock.
-- **Synchronisation en Temps Réel :** Le catalogue produits doit être synchronisé en temps réel avec le système de gestion des stocks d'OSCAR Fashion. Toute modification (ajout, suppression, mise à jour de stock) dans le système de gestion doit se refléter instantanément sur la plateforme et l'application.
 - **Gestion des Attributs :** Possibilité de gérer des attributs complexes pour les produits (ex: taille, couleur, matière) et leurs variations de stock/prix.
 
 ### 4.3. Page d'Accueil Intelligente
@@ -100,10 +98,7 @@ Une interface d'administration sécurisée pour la gestion complète de la plate
 
 ### 4.7. Synchronisation avec les Systèmes de Gestion
 
-- **API d'Intégration :** Développement d'une API robuste pour permettre la communication bidirectionnelle entre la plateforme/application et les systèmes de gestion (ERP, WMS, POS) d'OSCAR Fashion.
-- **Synchronisation des Stocks :** Mise à jour automatique des niveaux de stock sur la plateforme et l'application dès qu'une modification est effectuée dans le système de gestion interne.
-- **Synchronisation des Produits :** Ajout, modification ou suppression de produits dans le système de gestion interne doit automatiquement mettre à jour le catalogue en ligne.
-- **Synchronisation des Commandes :** Les commandes passées en ligne doivent être automatiquement transmises au système de gestion des commandes d'OSCAR Fashion.
+> _Hors périmètre — non inclus dans la livraison._
 
 ## 5\. Exigences Non Fonctionnelles
 

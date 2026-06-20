@@ -33,7 +33,6 @@ Développement d'une **solution e-commerce complète** pour la marque OSCAR Fash
 
 - Offrir une expérience client moderne et fluide
 - Intégrer les paiements locaux algériens (CIB, Baridimob)
-- Synchronisation en temps réel avec systèmes existants (ERP/WMS)
 - Support multilingue (Arabe RTL, Français, Anglais)
 - Reporting et analytics avancés
 - Notifications multi-canaux (Email, SMS, Push)
@@ -42,7 +41,7 @@ Développement d'une **solution e-commerce complète** pour la marque OSCAR Fash
 
 | Composant | Technologies Principales |
 |-----------|--------------------------|
-| **Backend** | Spring Boot, PostgreSQL, Jasper Reports, JWT, Redis |
+| **Backend** | Spring Boot, PostgreSQL, JWT, Redis |
 | **Frontend Web** | React.js, Material-UI, Redux Toolkit, React Query, TypeScript |
 | **Back-Office** | React.js, MUI DataGrid, MUI X Charts, Redux Toolkit |
 | **Mobile** | React Native, React Navigation, Firebase (FCM), TypeScript |
@@ -64,8 +63,7 @@ Développement d'une **solution e-commerce complète** pour la marque OSCAR Fash
 - Gestion commandes et paiements
 - Intégration CIB, Baridimob
 - Notifications (Email, SMS, Push)
-- Reporting (Jasper Reports)
-- Synchronisation ERP/WMS
+- Reporting (analytics)
 
 **Voir détails**: [Backend (apps/backend)](../../apps/backend/README.md)
 
@@ -104,7 +102,6 @@ Développement d'une **solution e-commerce complète** pour la marque OSCAR Fash
 - Gestion commandes et statuts
 - Gestion clients
 - Rapports et statistiques
-- Génération PDF (factures)
 - Gestion utilisateurs admin
 - Configuration système
 
@@ -259,8 +256,7 @@ Mobile:      23% █████████████
 - Expertise Spring Boot, Java 17+
 - PostgreSQL, JPA/Hibernate
 - Spring Security, JWT
-- Jasper Reports
-- Intégrations API (ERP, banques)
+- Intégrations API (banques)
 
 #### Frontend Team
 - Expertise React.js, TypeScript
@@ -316,7 +312,6 @@ Conception UX/UI (Sem 3-4)
 
 | Dépendance | Impact | Délai Obtention | Mitigation |
 |------------|--------|-----------------|------------|
-| **API ERP/WMS** | Élevé | Semaine 1-2 | Développer mocks, adapter si nécessaire |
 | **Credentials CIB** | Élevé | Semaine 8-10 | Contact précoce banque, sandbox dès que possible |
 | **Credentials Baridimob** | Élevé | Semaine 8-10 | Contact précoce, tests en sandbox |
 | **Gateway SMS Algérien** | Moyen | Semaine 12 | Identifier fournisseur tôt, configuration simple |
@@ -332,10 +327,8 @@ Conception UX/UI (Sem 3-4)
 
 | Risque | Probabilité | Impact | Mitigation |
 |--------|-------------|--------|------------|
-| **API ERP non disponible/documentée** | Moyenne | Élevé | Développer wrapper API, planifier 2 sem buffer, mocks |
 | **Retard intégration CIB/Baridimob** | Élevée | Élevé | Contact précoce banques, tests sandbox précoces, buffer 2 sem |
 | **Problèmes performance** | Moyenne | Moyen | Tests de charge dès sem 10, optimisation continue |
-| **Complexité synchronisation temps réel** | Moyenne | Moyen | Architecture robuste, retry mechanism, logs détaillés |
 | **Problèmes WebView mobile (paiements)** | Moyenne | Moyen | Tests précoces iOS/Android, fallback strategies |
 | **Rejection App Store/Play Store** | Faible | Élevé | Respect strict guidelines, tests approfondis, privacy policy |
 
@@ -520,15 +513,18 @@ Inclus:
 
 ### 11.1 Hypothèses du Projet
 
-1. **API ERP/WMS** documentée et accessible fournie par le client
-2. **Credentials bancaires** (CIB, Baridimob) fournis par le client sous 2 semaines
-3. **Contenu** (photos produits, descriptions, textes) fourni par le client selon planning
-4. **Validation client** sous 2-3 jours ouvrables maximum
-5. **Environnement production** (serveurs, domaines, SSL) fourni par le client ou coût séparé
-6. **Équipe disponible** à 100% (pas de turn-over majeur)
-7. **Scope stable** (changements majeurs = avenant)
+1. **Credentials bancaires** (CIB, Baridimob) fournis par le client sous 2 semaines
+2. **Contenu** (photos produits, descriptions, textes) fourni par le client selon planning
+3. **Validation client** sous 2-3 jours ouvrables maximum
+4. **Environnement production** (serveurs, domaines, SSL) fourni par le client ou coût séparé
+5. **Équipe disponible** à 100% (pas de turn-over majeur)
+6. **Scope stable** (changements majeurs = avenant)
 
 ### 11.2 Exclusions (Non Inclus)
+
+**Fonctionnalités hors périmètre**:
+- Génération de documents PDF (factures, bons de livraison)
+- Synchronisation / intégration avec systèmes de gestion externes (ERP, WMS, POS)
 
 **Infrastructure Production**:
 - Serveurs de production (backend, frontend, BDD)
@@ -545,7 +541,6 @@ Inclus:
 - Shooting photo
 
 **Services Tiers Payants** (production):
-- Licences Jasper Reports (si commercial)
 - MUI X DataGrid Pro (si nécessaire)
 - Services SMS (frais SMS)
 - Services Email (frais envoi)
@@ -626,7 +621,6 @@ Inclus:
 - ✅ Performance: API < 500ms, Web < 3s, Mobile fluide
 - ✅ Sécurité: Audit OWASP basique passé
 - ✅ Paiements: CIB + Baridimob fonctionnels en production
-- ✅ Synchronisation ERP/WMS opérationnelle
 - ✅ Apps mobiles approuvées sur App Store & Play Store
 - ✅ Support multilingue (AR RTL, FR, EN) fonctionnel
 - ✅ Documentation complète livrée
@@ -639,7 +633,6 @@ Inclus:
 - ✅ Paiements en ligne (CIB, Baridimob) et à la livraison
 - ✅ Notifications (Email, SMS, Push) opérationnelles
 - ✅ Back-office: Gestion produits, commandes, clients, rapports
-- ✅ Génération factures PDF fonctionnelle
 - ✅ Mobile: App iOS et Android fonctionnelles et publiées
 
 ### 13.3 Critères Acceptance

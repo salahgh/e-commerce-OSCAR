@@ -11,7 +11,7 @@ Le back-office est l'interface d'administration développée en **React.js** ave
 - Fournir une interface d'administration complète et intuitive
 - Centraliser la gestion via GraphQL API
 - Offrir des tableaux de bord avec **MUI X Charts**
-- Permettre la génération de rapports et documents (PDF via backend)
+- Permettre la génération de rapports (export CSV)
 - Gérer les utilisateurs et les permissions
 - Design moderne avec **Tailwind CSS**
 

@@ -64,10 +64,6 @@
   - [ ] Baridimob API documentation
   - [ ] Define payment flow diagrams
   - [ ] Plan sandbox testing strategy
-- [ ] External system integration
-  - [ ] ERP/WMS API analysis (if applicable)
-  - [ ] Define sync frequency and methods
-  - [ ] Plan error handling and retry logic
 - [ ] Notification services
   - [ ] Select SMS provider for Algeria
   - [ ] Configure email service (SMTP/SendGrid)
@@ -142,7 +138,6 @@
   - [ ] Order list with filters
   - [ ] Order detail view
   - [ ] Status update interface
-  - [ ] PDF invoice preview
 - [ ] Customer management
   - [ ] Customer list
   - [ ] Customer detail with order history
@@ -405,36 +400,16 @@
   - [ ] COD confirmation on delivery
   - [ ] COD limits (if any)
 
-## 2.5 PDF Generation
+## 2.5 Reports
 
-### 2.5.1 Invoice Generation
-- [ ] Invoice template
-  - [ ] Design invoice layout
-  - [ ] Include company logo
-  - [ ] Order details section
-  - [ ] Line items table
-  - [ ] Tax breakdown
-  - [ ] Total section
-  - [ ] Footer with terms
-- [ ] Invoice features
-  - [ ] Arabic/French support
-  - [ ] RTL layout for Arabic
-  - [ ] PDF download endpoint
-  - [ ] Email attachment
+> _PDF document generation (invoices, delivery notes) is **out of scope**._
 
-### 2.5.2 Delivery Note
-- [ ] Delivery note template
-  - [ ] Shipping address
-  - [ ] Order items list
-  - [ ] Quantity and descriptions
-  - [ ] Barcode/QR for tracking
-
-### 2.5.3 Reports
+### 2.5.1 Reports
 - [ ] Sales reports
   - [ ] Daily sales summary
   - [ ] Period-based reports
   - [ ] Product performance
-  - [ ] Export to PDF
+  - [ ] Export to CSV
 
 ---
 
@@ -628,7 +603,6 @@
   - [ ] Order items list
   - [ ] Order timeline/status
   - [ ] Tracking information
-  - [ ] Download invoice
   - [ ] Reorder button
   - [ ] Cancel order (if applicable)
 
@@ -1020,7 +994,6 @@
   - [ ] Status update dropdown
   - [ ] Add tracking number
   - [ ] Order notes
-  - [ ] Generate invoice PDF
   - [ ] Print shipping label
   - [ ] Cancel order
   - [ ] Refund (if applicable)
@@ -1058,7 +1031,7 @@
   - [ ] Sales by period chart
   - [ ] Sales by category
   - [ ] Top products table
-  - [ ] Export to PDF/Excel
+  - [ ] Export to CSV/Excel
 - [ ] Customer reports
   - [ ] New vs returning
   - [ ] Customer acquisition
@@ -1141,22 +1114,7 @@
 ## 6.2 External Integrations
 
 ### 6.2.1 ERP/WMS Synchronization
-- [ ] Integration architecture
-  - [ ] Define sync endpoints
-  - [ ] Authentication mechanism
-  - [ ] Error handling strategy
-- [ ] Product sync
-  - [ ] Import products from ERP
-  - [ ] Export product changes
-  - [ ] Handle conflicts
-- [ ] Stock sync
-  - [ ] Real-time stock updates
-  - [ ] Low stock alerts
-  - [ ] Multi-location stock
-- [ ] Order sync
-  - [ ] Export orders to ERP
-  - [ ] Import order status updates
-  - [ ] Invoice sync
+> _**Out of scope** — not included in delivery._
 
 ### 6.2.2 Analytics Integration
 - [ ] Google Analytics
@@ -1178,7 +1136,6 @@
 - [ ] Backend translations
   - [ ] Error messages
   - [ ] Email templates
-  - [ ] PDF documents
 - [ ] Content translations
   - [ ] Product content
   - [ ] Category content
@@ -1427,9 +1384,8 @@
 
 ## Critical Dependencies
 1. **Payment Credentials** - CIB and Baridimob credentials must be obtained early
-2. **ERP/WMS API** - If integration required, API documentation needed in Phase 1
-3. **Content** - Product photos and descriptions needed before frontend completion
-4. **Apple/Google Accounts** - Developer accounts needed before mobile development
+2. **Content** - Product photos and descriptions needed before frontend completion
+3. **Apple/Google Accounts** - Developer accounts needed before mobile development
 
 ## Risk Mitigation
 - 10% contingency buffer built into timeline

@@ -6,7 +6,7 @@
     "start": "expo start --clear",
     "dev": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
+    "android": "expo run:android",
     "android_clear": "expo start --clear --android",
     "android__": "npx expo run:android",
     "android_": "expo start --clear --android",
