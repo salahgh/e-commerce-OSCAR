@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -29,7 +30,11 @@ import { isCashOnDelivery } from '../../src/utils/payment';
 // until the order actually reaches a delivered state.
 function getOrderStateInfo(state: string, colors: ColorPalette, t: TFunction, isCod = false) {
   const label = (s: string, fallback: string) => t(`orders.states.${s}`, fallback) as string;
-  if (isCod && state === 'PaymentSettled') {
+  // COD payments are auto-authorized by the backend handler (and may later be
+  // settled by the courier), so a COD order reaches PaymentAuthorized/PaymentSettled
+  // without money actually changing hands. Surface a neutral "Cash on delivery"
+  // status for BOTH states so it never wrongly reads as "Paid".
+  if (isCod && (state === 'PaymentAuthorized' || state === 'PaymentSettled')) {
     return {
       label: t('orders.codPending', 'Cash on delivery') as string,
       color: colors.info,
@@ -70,6 +75,7 @@ export default function OrderDetailScreen() {
   const colors = useThemeColors();
   const styles = useStyles();
   const { fontFamily } = useAppFont();
+  const insets = useSafeAreaInsets();
 
   const { data, loading, error, refetch } = useGetOrderByCodeQuery({
     variables: { code: orderCode },
@@ -197,9 +203,13 @@ export default function OrderDetailScreen() {
   const trackingCode = order.fulfillments?.[0]?.trackingCode;
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: insets.bottom + spacing.lg }}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
@@ -452,7 +462,7 @@ const useStyles = makeThemedStyles((colors) =>
       marginLeft: spacing.sm,
     },
     orderNumber: {
-      ...typography.styles.h4,
+      ...typography.styles.body,
       fontWeight: typography.fontWeight.bold,
       color: colors.text.primary,
       marginBottom: spacing.xs,

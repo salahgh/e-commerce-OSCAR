@@ -103,6 +103,10 @@ export const ShippingAddressForm: React.FC<ShippingAddressFormProps> = ({
         <Formik
           initialValues={{ ...defaultInitialValues, ...initialValues }}
           enableReinitialize
+          // Validate on mount so `isValid` reflects prefilled/saved-address values
+          // immediately — the Continue button is enabled when the form is already
+          // valid, instead of staying disabled until the user touches a field.
+          validateOnMount
           validationSchema={validationSchema ?? shippingAddressSchema}
           onSubmit={onSubmit}
         >

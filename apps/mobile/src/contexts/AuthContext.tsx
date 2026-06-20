@@ -131,10 +131,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
             await Storage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(updatedUser));
           } else {
+            // Definitive: the server says there is no active customer for this
+            // token → the session is truly invalid, so clear it.
             await clearAuth();
           }
-        } catch {
-          await clearAuth();
+        } catch (err) {
+          // Transient/network failure (e.g. the brief window right after an RTL
+          // language switch reloads the JS runtime) must NOT log the user out.
+          // Keep the restored session and let later requests refresh it.
+          console.warn('[auth] activeCustomer refresh failed; keeping stored session', err);
+          setAuthState({ user, isAuthenticated: true, isLoading: false });
         }
       } else {
         setAuthState((prev) => ({ ...prev, isLoading: false }));

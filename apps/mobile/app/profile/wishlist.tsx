@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter, Stack } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useWishlist, WishlistEntry } from '../../src/contexts/WishlistContext';
@@ -15,6 +16,7 @@ export default function WishlistScreen() {
   const styles = useStyles();
   const colors = useThemeColors();
   const { fontFamily } = useAppFont();
+  const insets = useSafeAreaInsets();
   const { items, remove } = useWishlist();
 
   const renderItem = ({ item }: { item: WishlistEntry }) => (
@@ -63,7 +65,7 @@ export default function WishlistScreen() {
           data={items}
           keyExtractor={(it) => it.productId}
           renderItem={renderItem}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + spacing.lg }]}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
       )}

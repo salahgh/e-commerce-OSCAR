@@ -29,7 +29,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // until the order actually reaches a delivered state.
 function getOrderStateInfo(state: string, colors: ColorPalette, t: TFunction, isCod = false) {
   const label = (s: string, fallback: string) => t(`orders.states.${s}`, fallback) as string;
-  if (isCod && state === 'PaymentSettled') {
+  // COD payments are auto-authorized by the backend handler (and may later be
+  // settled by the courier), so a COD order reaches PaymentAuthorized/PaymentSettled
+  // without money actually changing hands. Surface a neutral "Cash on delivery"
+  // status for BOTH states so it never wrongly reads as "Paid".
+  if (isCod && (state === 'PaymentAuthorized' || state === 'PaymentSettled')) {
     return {
       label: t('orders.codPending', 'Cash on delivery') as string,
       color: colors.info,
@@ -375,7 +379,7 @@ const useStyles = makeThemedStyles((colors) =>
       marginRight: spacing.sm,
     },
     orderNumber: {
-      ...typography.styles.body,
+      ...typography.styles.bodySmall,
       color: colors.text.primary,
       fontWeight: typography.fontWeight.bold,
     },

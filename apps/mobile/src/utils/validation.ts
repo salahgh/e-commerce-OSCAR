@@ -6,6 +6,21 @@ import i18n from '../i18n';
 // function for every message slot and calls it lazily when an error is produced.
 const tr = (key: string, opts?: Record<string, unknown>): string => i18n.t(key, opts) as string;
 
+// Single source of truth for Algerian mobile numbers (mobile prefixes 5/6/7).
+export const ALGERIAN_PHONE_REGEX = /^(?:\+213|0)[5-7]\d{8}$/;
+
+/**
+ * Normalize user-entered Algerian phone input to the canonical `0XXXXXXXXX` form.
+ * Strips spaces/dots/dashes/parens, then — when only the 9-digit national part was
+ * captured (UI shows a separate `+213` prefix) — restores the leading `0` so a
+ * single regex validates every entry form (register, checkout, address book…).
+ */
+export const normalizeAlgerianPhone = (v: unknown): unknown => {
+  if (typeof v !== 'string') return v;
+  const s = v.replace(/[\s.\-()]/g, '');
+  return /^[5-7]\d{8}$/.test(s) ? `0${s}` : s;
+};
+
 // Common validation rules
 export const validationRules = {
   email: Yup.string()
@@ -34,10 +49,13 @@ export const validationRules = {
     .trim(),
 
   // Algerian phone number: mobile 0[5-7]XXXXXXXX or +213[5-7]XXXXXXXX.
-  // Spaces, dots and dashes are stripped before matching.
+  // Spaces, dots and dashes are stripped before matching, and a bare 9-digit
+  // national number (when the UI shows the +213 prefix separately, e.g. the
+  // create-account form) is canonicalised to 0XXXXXXXXX — so every phone field
+  // in the app validates against the SAME rule regardless of input layout.
   phone: Yup.string()
-    .transform((v) => (typeof v === 'string' ? v.replace(/[\s.\-()]/g, '') : v))
-    .matches(/^(?:\+213|0)[5-7]\d{8}$/, () => tr('validation.phoneAlgerian'))
+    .transform((v) => normalizeAlgerianPhone(v))
+    .matches(ALGERIAN_PHONE_REGEX, () => tr('validation.phoneAlgerian'))
     .required(() => tr('validation.phoneRequired')),
 
   required: (fieldName: string) =>
@@ -57,6 +75,19 @@ export const registerSchema = Yup.object().shape({
   firstName: validationRules.firstName,
   lastName: validationRules.lastName,
   email: validationRules.email,
+  password: validationRules.password,
+  confirmPassword: validationRules.confirmPassword(),
+});
+
+// Create-account form schema — matches the mobile register screen fields
+// (fullName + phone, unlike the firstName/lastName `registerSchema` above).
+export const registerFormSchema = Yup.object().shape({
+  fullName: Yup.string()
+    .min(3, ({ min }) => tr('validation.fullNameMin', { n: min }))
+    .required(() => tr('validation.fullNameRequired'))
+    .trim(),
+  email: validationRules.email,
+  phone: validationRules.phone,
   password: validationRules.password,
   confirmPassword: validationRules.confirmPassword(),
 });

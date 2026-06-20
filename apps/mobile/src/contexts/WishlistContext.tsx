@@ -1,7 +1,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from './AuthContext';
 
-const STORAGE_KEY = 'oscar.wishlist.v1';
+// Wishlist is stored per-account so it follows the logged-in user instead of
+// leaking across users that share the same device. Signed-out browsing uses a
+// separate "guest" bucket.
+const STORAGE_PREFIX = 'oscar.wishlist.v1';
+const storageKeyFor = (userId?: string | null) => `${STORAGE_PREFIX}:${userId ?? 'guest'}`;
 
 export interface WishlistEntry {
   productId: string;
@@ -28,15 +33,21 @@ interface WishlistContextValue {
 const WishlistContext = createContext<WishlistContextValue | undefined>(undefined);
 
 export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  const storageKey = storageKeyFor(user?.id);
   const [items, setItems] = useState<WishlistEntry[]>([]);
   const [hydrating, setHydrating] = useState(true);
 
-  // Hydrate from disk on mount.
+  // (Re)hydrate from disk whenever the active account changes — so logging in,
+  // out, or switching users loads that user's own wishlist instead of the
+  // previous one. Reset to empty first so stale items never flash through.
   useEffect(() => {
     let alive = true;
+    setHydrating(true);
+    setItems([]);
     (async () => {
       try {
-        const raw = await AsyncStorage.getItem(STORAGE_KEY);
+        const raw = await AsyncStorage.getItem(storageKey);
         if (!alive) return;
         if (raw) {
           const parsed = JSON.parse(raw);
@@ -51,16 +62,16 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return () => {
       alive = false;
     };
-  }, []);
+  }, [storageKey]);
 
   // Persist on every change AFTER hydration completes (avoid wiping the
   // saved list with the empty initial state).
   useEffect(() => {
     if (hydrating) return;
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(items)).catch((err) => {
+    AsyncStorage.setItem(storageKey, JSON.stringify(items)).catch((err) => {
       console.warn('[wishlist] persist failed', err);
     });
-  }, [items, hydrating]);
+  }, [items, hydrating, storageKey]);
 
   const has = useCallback(
     (productId: string) => items.some((i) => i.productId === productId),

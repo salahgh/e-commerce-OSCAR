@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import {
@@ -43,6 +44,7 @@ export default function CheckoutScreen() {
   const colors = useThemeColors();
   const { fontFamily } = useAppFont();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { order, items, subTotal, shipping, total, refetchCart } = useCart();
   const { user, isAuthenticated, logout } = useAuth();
 
@@ -304,7 +306,7 @@ export default function CheckoutScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
         <TouchableOpacity onPress={goBack} style={styles.backButton}>
           <Ionicons name={rtlIcon('arrow-back')} size={24} color={colors.text.primary} />
         </TouchableOpacity>
@@ -346,7 +348,11 @@ export default function CheckoutScreen() {
       </View>
 
       {/* Content */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={{ paddingBottom: insets.bottom + spacing.xl }}
+        showsVerticalScrollIndicator={false}
+      >
         {currentStep === 'shipping' && (
           <>
             {isAuthenticated && (
