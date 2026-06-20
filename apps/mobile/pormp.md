@@ -1,16 +1,11 @@
-- the mobile icon is not set
-- i need avatar upload for the profile (front end and mobile)
-- phone numbers should be validated to algerian phone numbers
-- remove code pastal ; remove appartement / compl"ment 
-- algeria have 69 wilayas update the list
-- dynamic list of communes besed on the selected wialaya
-- on mobile the screensd are not safe (butons overlap)
+- create account phone number validation is not working
+- all phone number should use the same algerian nubmers validation 
+- audit all pages against safe area (adresses is under the nav buttons on android , add to caret ,order page , overview page , succesful screen , wichlist )
+- continue to delivery button state is desactivated until one of the fields is touched (should be enable when the fields are initially valid)
+- audit caret , wishlist , and orders againt the logged in user
+- the logged in user get disconnected when changing the language
 - the commnad number is too big (takes space and makes the chip looks close )
 - cash on deliverè show wrong payé
 - mobile wishlist is not working
 - aide et support send (how it works ?)
-- arabic profile arrows inverted pointing right
-- profile language should be removed
-- orders page (in arabic) inverted arrrow direction
-- i think the arrows are inverted everywhere
-- 
+- profile my orders return button go to products and not return to profile
