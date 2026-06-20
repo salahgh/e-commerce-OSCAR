@@ -75,7 +75,7 @@ export default function EditProfileScreen() {
     const picked = result.assets[0];
     setUploadingAvatar(true);
     try {
-      // React Native file shape for graphql multipart upload. apollo-upload-client
+      // React Native file shape for graphql multipart upload. The Apollo upload link
       // detects this object (has `uri`) and streams it as a multipart file part.
       const name = picked.fileName || `avatar-${Date.now()}.jpg`;
       const type = picked.mimeType || 'image/jpeg';
