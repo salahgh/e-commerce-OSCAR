@@ -17,6 +17,10 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      // Return to the previously focused tab on back (e.g. Profile → Orders → back
+      // lands back on Profile), instead of the default "firstRoute" which always
+      // jumped to Home/Explore.
+      backBehavior="history"
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.text.tertiary,

@@ -18,7 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../src/theme';
 import { useAppFont } from '../../src/hooks/useAppFont';
-import { registerSchema } from '../../src/utils/validation';
+import { registerFormSchema } from '../../src/utils/validation';
 import Logo from '../../assets/images/logooscarsvg1.svg';
 
 interface RegisterFormValues {
@@ -103,9 +103,10 @@ export default function RegisterScreen() {
         {/* Form */}
         <Formik
           initialValues={{ fullName: '', email: '', phone: '', password: '', confirmPassword: '' }}
+          validationSchema={registerFormSchema}
           onSubmit={handleRegister}
         >
-          {({ values, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
             <View style={styles.form}>
               {/* Full Name */}
               <View style={styles.fieldGroup}>
@@ -121,6 +122,11 @@ export default function RegisterScreen() {
                   onBlur={handleBlur('fullName')}
                   autoCapitalize="words"
                 />
+                {touched.fullName && errors.fullName ? (
+                  <Text style={[styles.fieldError, { fontFamily: fontFamily.regular }]}>
+                    {errors.fullName}
+                  </Text>
+                ) : null}
               </View>
 
               {/* Email */}
@@ -139,6 +145,11 @@ export default function RegisterScreen() {
                   autoCapitalize="none"
                   autoComplete="email"
                 />
+                {touched.email && errors.email ? (
+                  <Text style={[styles.fieldError, { fontFamily: fontFamily.regular }]}>
+                    {errors.email}
+                  </Text>
+                ) : null}
               </View>
 
               {/* Phone */}
@@ -174,6 +185,11 @@ export default function RegisterScreen() {
                     maxLength={12}
                   />
                 </View>
+                {touched.phone && errors.phone ? (
+                  <Text style={[styles.fieldError, { fontFamily: fontFamily.regular }]}>
+                    {errors.phone}
+                  </Text>
+                ) : null}
               </View>
 
               {/* Password */}
@@ -200,6 +216,11 @@ export default function RegisterScreen() {
                     />
                   </TouchableOpacity>
                 </View>
+                {touched.password && errors.password ? (
+                  <Text style={[styles.fieldError, { fontFamily: fontFamily.regular }]}>
+                    {errors.password}
+                  </Text>
+                ) : null}
               </View>
 
               {/* Confirm Password */}
@@ -226,6 +247,11 @@ export default function RegisterScreen() {
                     />
                   </TouchableOpacity>
                 </View>
+                {touched.confirmPassword && errors.confirmPassword ? (
+                  <Text style={[styles.fieldError, { fontFamily: fontFamily.regular }]}>
+                    {errors.confirmPassword}
+                  </Text>
+                ) : null}
               </View>
 
               {/* Submit */}
@@ -311,6 +337,11 @@ const useStyles = makeThemedStyles((colors) =>
     fieldLabel: {
       fontSize: 13,
       color: colors.text.primary,
+    },
+    fieldError: {
+      fontSize: 12,
+      color: colors.error,
+      marginTop: 2,
     },
     input: {
       height: 48,

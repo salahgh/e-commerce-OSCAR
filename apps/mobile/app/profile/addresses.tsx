@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Stack } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import {
@@ -30,6 +31,7 @@ export default function AddressesScreen() {
   const [mode, setMode] = useState<Mode>({ kind: 'list' });
   const colors = useThemeColors();
   const styles = useStyles();
+  const insets = useSafeAreaInsets();
 
   const { data, loading } = useActiveCustomerQuery({ fetchPolicy: 'cache-and-network' });
   const [createAddress, { loading: creating }] = useCreateCustomerAddressMutation();
@@ -149,7 +151,7 @@ export default function AddressesScreen() {
           />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.list}>
+        <ScrollView contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + spacing.lg }]}>
           {addresses.map((a) => (
             <AddressCard
               key={a.id}
