@@ -2,14 +2,15 @@
 
 import { useParams } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { formatPrice } from '@oscar/shared';
+import { useTranslations, useLocale } from 'next-intl';
+import { formatDzdTotal } from '@/lib/format/price';
 import { useGetOrderByCodeQuery } from '@oscar/graphql-shop/generated';
 import { Link } from '@/i18n/routing';
 import { Alert, Button, Card, Skeleton } from '@/components/ui';
 
 export default function ConfirmationPage() {
   const t = useTranslations('CheckoutConfirmationPage');
+  const locale = useLocale();
   const params = useParams<{ code: string; locale: string }>();
   const code = params?.code ?? '';
 
@@ -54,7 +55,7 @@ export default function ConfirmationPage() {
           <dd className="font-mono text-end text-content-strong">{order.code}</dd>
           <dt className="text-content-muted">Total</dt>
           <dd className="text-end font-bold text-content-strong">
-            {formatPrice(order.totalWithTax, order.currencyCode)}
+            {formatDzdTotal(order.totalWithTax, locale)}
           </dd>
         </dl>
       </Card>

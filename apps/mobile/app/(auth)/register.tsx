@@ -81,7 +81,7 @@ export default function RegisterScreen() {
       >
         {/* Logo */}
         <View style={styles.logoContainer}>
-          <Logo width={120} height={92} />
+          <Logo width={108} height={83} />
         </View>
 
         {/* Header */}
@@ -303,15 +303,15 @@ const useStyles = makeThemedStyles((colors) =>
       marginBottom: spacing['3xl'],
     },
     title: {
-      fontSize: 26,
+      fontSize: 28,
       color: colors.text.primary,
       marginBottom: spacing.sm,
     },
     subtitle: {
-      fontSize: 15,
+      fontSize: 16,
       color: colors.text.secondary,
       marginBottom: spacing['2xl'],
-      lineHeight: 22,
+      lineHeight: 24,
     },
     errorBanner: {
       flexDirection: 'row',
@@ -335,7 +335,7 @@ const useStyles = makeThemedStyles((colors) =>
       gap: spacing.xs,
     },
     fieldLabel: {
-      fontSize: 13,
+      fontSize: 12,
       color: colors.text.primary,
     },
     fieldError: {

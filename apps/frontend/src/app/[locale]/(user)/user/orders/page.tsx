@@ -1,7 +1,7 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { formatPrice } from '@oscar/shared';
+import { useTranslations, useLocale } from 'next-intl';
+import { formatDzdTotal } from '@/lib/format/price';
 import { useGetMyOrdersQuery, SortOrder } from '@oscar/graphql-shop/generated';
 import { Link } from '@/i18n/routing';
 import { Alert, Badge, Button, Skeleton } from '@/components/ui';
@@ -28,8 +28,11 @@ function dateFmt(iso: string, locale = 'fr-DZ') {
 
 export default function OrdersPage() {
   const t = useTranslations('OrdersPage');
+  const locale = useLocale();
+  const dateLocale = locale === 'ar' ? 'ar-DZ' : locale === 'en' ? 'en-GB' : 'fr-DZ';
   const { data, loading, error } = useGetMyOrdersQuery({
-    variables: { options: { take: 50, sort: { createdAt: SortOrder.Desc } } },
+    // Exclude the active cart (state AddingItems) from order history.
+    variables: { options: { take: 50, sort: { createdAt: SortOrder.Desc }, filter: { active: { eq: false } } } },
     fetchPolicy: 'cache-and-network',
   });
 
@@ -81,12 +84,14 @@ export default function OrdersPage() {
               {orders.map((o) => (
                 <tr key={o.id}>
                   <td className="px-4 py-3 font-mono text-12 text-content-strong">{o.code}</td>
-                  <td className="px-4 py-3 text-content-muted">{dateFmt(o.createdAt)}</td>
+                  <td className="px-4 py-3 text-content-muted">{dateFmt(o.createdAt, dateLocale)}</td>
                   <td className="px-4 py-3">
-                    <Badge intent={stateIntent[o.state] ?? 'info'}>{o.state}</Badge>
+                    <Badge intent={stateIntent[o.state] ?? 'info'}>
+                      {t.has(`states.${o.state}`) ? t(`states.${o.state}`) : o.state}
+                    </Badge>
                   </td>
                   <td className="px-4 py-3 text-end font-medium text-content-strong">
-                    {formatPrice(o.totalWithTax, o.currencyCode)}
+                    {formatDzdTotal(o.totalWithTax, locale)}
                   </td>
                   <td className="px-4 py-3 text-end">
                     <Link

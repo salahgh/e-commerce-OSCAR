@@ -66,13 +66,13 @@ function getOrderStateInfo(state: string, colors: ColorPalette, t: TFunction, is
   );
 }
 
+// DD/MM/YYYY to match the design (and the Algerian date convention). Formatted
+// manually so it stays stable regardless of the active locale.
 function formatDate(dateString: string) {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  return `${dd}/${mm}/${date.getFullYear()}`;
 }
 
 interface OrderItemProps {
@@ -155,7 +155,7 @@ function OrderItem({ order, onPress }: OrderItemProps) {
             {t('orders.total', 'Total')}:
           </Text>
           <Text style={[styles.orderTotalValue, { fontFamily: fontFamily.bold }]}>
-            {formatPrice(order.totalWithTax).toLocaleString()} DZD
+            {formatPrice(order.totalWithTax).toLocaleString()} {t('common.currency', 'DZD')}
           </Text>
         </View>
       </View>
@@ -177,7 +177,7 @@ function OrderItem({ order, onPress }: OrderItemProps) {
 
 export default function OrdersScreen() {
   const { t } = useTranslation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const colors = useThemeColors();
   const styles = useStyles();
   const { fontFamily } = useAppFont();
@@ -207,6 +207,25 @@ export default function OrdersScreen() {
   const handleOrderPress = (orderCode: string) => {
     router.push(`/orders/${orderCode}`);
   };
+
+  // While auth is rehydrating from storage (notably the brief window after a
+  // language-switch DevSettings.reload()), don't flash the "login required"
+  // prompt — wait for the restored session to settle.
+  if (authLoading) {
+    return (
+      <View style={styles.container}>
+        <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
+          <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
+            {t('orders.title', 'My Orders')}
+          </Text>
+          <Text style={[styles.headerSubtitle, { fontFamily: fontFamily.regular }]}>
+            {t('orders.subtitle', 'Track and manage your orders')}
+          </Text>
+        </View>
+        <LoadingSpinner />
+      </View>
+    );
+  }
 
   // Not authenticated - show login prompt
   if (!isAuthenticated) {

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { StyleSheet, Animated } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { useRouter } from 'expo-router';
+import { useRouter, useRootNavigationState } from 'expo-router';
 import * as NativeSplash from 'expo-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,14 @@ import { spacing, typography, makeThemedStyles } from '../theme';
 import Logo from '../../assets/images/logooscarsvg1.svg';
 
 const ONBOARDING_KEY = '@oscar_onboarding_complete';
+
+// MODULE-LEVEL, not a component ref: the onboarding redirect must fire at most
+// ONCE per app process. A per-instance `useRef` does not survive a root-layout
+// remount, so calling `router.replace('/onboarding')` (which itself remounts the
+// gated root) handed each fresh SplashOverlay a fresh ref → the redirect re-fired
+// every remount → the splash logo flickered forever and never advanced. A
+// module-scoped flag is immune to remounts and breaks that cycle.
+let onboardingRedirectFired = false;
 
 /**
  * Branded launch splash, rendered as a full-screen OVERLAY on top of the navigator
@@ -27,6 +35,12 @@ export function SplashOverlay({ onFinish }: { onFinish: () => void }) {
   const { t } = useTranslation();
   const styles = useStyles();
 
+  // The root navigator must be fully mounted before we navigate. `key` is
+  // undefined until the <Stack> has committed; redirecting before then is what
+  // remounted the gated root layout and started the flicker loop.
+  const navState = useRootNavigationState();
+  const navReady = !!navState?.key;
+
   // Logo starts FULLY VISIBLE so the overlay is pixel-identical to the native
   // splash at the hand-off moment — animating it in from opacity:0/scale:0.8
   // made the logo blink out and fade back in right after `hideAsync()`, which
@@ -36,36 +50,33 @@ export function SplashOverlay({ onFinish }: { onFinish: () => void }) {
   const taglineOpacity = useRef(new Animated.Value(0)).current;
   const exitOpacity = useRef(new Animated.Value(1)).current;
 
-  // Decide the destination ONCE, up front, while the overlay still fully covers
-  // the screen. This must fire exactly once: `router` is not a stable dependency
-  // in expo-router, so keying the effect on it (or letting it re-run) turns the
-  // onboarding redirect into an infinite replace→re-render→replace loop — which
-  // showed up as the whole splash flickering forever on first launch (the only
-  // time onboarding is incomplete and the redirect actually runs). A ref guard +
-  // run-once effect makes the redirect idempotent.
-  const didRedirect = useRef(false);
+  // Decide the destination while the overlay still fully covers the screen, but
+  // only AFTER the navigator is ready and only ONCE per app process (see the
+  // module-level guard above). Both conditions are load-bearing: navigating too
+  // early remounts the gated root, and a non-process-scoped guard re-fires across
+  // remounts — either one reintroduces the infinite splash-flicker loop.
   useEffect(() => {
+    if (!navReady || onboardingRedirectFired) return;
     let cancelled = false;
     (async () => {
-      if (didRedirect.current) return;
       let done: string | null = null;
       try {
         done = await AsyncStorage.getItem(ONBOARDING_KEY);
       } catch {
         done = null;
       }
-      if (cancelled || didRedirect.current) return;
+      if (cancelled || onboardingRedirectFired) return;
       if (done !== 'true') {
-        didRedirect.current = true;
+        onboardingRedirectFired = true;
         router.replace('/onboarding');
       }
     })();
     return () => {
       cancelled = true;
     };
-    // Run once on mount — see comment above; `router` intentionally omitted.
+    // `router` intentionally omitted (unstable identity in expo-router).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [navReady]);
 
   useEffect(() => {
     Animated.sequence([
@@ -116,7 +127,10 @@ const useStyles = makeThemedStyles((colors) =>
       ...typography.styles.h4,
       fontSize: typography.fontSize.xl,
       fontWeight: typography.fontWeight.medium,
-      color: colors.text.secondary,
+      // Figma splash (node 7:52) specifies gray-600 #4A5565 for the tagline, a
+      // neutral slate rather than the navy-tinted text.secondary. Splash is
+      // always light, so the literal is safe.
+      color: '#4A5565',
       textAlign: 'center',
       width: 315,
     },

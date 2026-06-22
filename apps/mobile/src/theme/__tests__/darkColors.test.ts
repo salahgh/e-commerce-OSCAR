@@ -27,13 +27,14 @@ describe('darkColors', () => {
     expect(darkColors.success).toBe('#2FD976');
     expect(darkColors.error).toBe('#EB3E3E');
     expect(darkColors.warning).toBe('#FFBC1F');
-    expect(darkColors.info).toBe('#11CAEF');
+    // info is the Figma link/accent blue (lightened for dark-mode contrast)
+    expect(darkColors.info).toBe('#4D6BFF');
   });
 
   it('darkens the pale status tint backgrounds', () => {
     expect(darkColors.successLight).toBe('#12301E');
     expect(darkColors.errorLight).toBe('#3A1717');
     expect(darkColors.warningLight).toBe('#3A2E12');
-    expect(darkColors.infoLight).toBe('#12303A');
+    expect(darkColors.infoLight).toBe('#1A2240');
   });
 });

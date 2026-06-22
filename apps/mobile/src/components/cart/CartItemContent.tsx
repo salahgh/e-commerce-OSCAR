@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { CartItemData } from './CartItem';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 import { useAppFont } from '../../hooks/useAppFont';
@@ -20,6 +21,7 @@ export const CartItemContent: React.FC<CartItemContentProps> = ({
   const styles = useStyles();
   const colors = useThemeColors();
   const { fontFamily } = useAppFont();
+  const { t } = useTranslation();
 
   const handleProductPress = () => {
     if (item.productId) {
@@ -74,7 +76,7 @@ export const CartItemContent: React.FC<CartItemContentProps> = ({
         )}
 
         <Text style={[styles.price, { fontFamily: fontFamily.semiBold }]}>
-          {item.price?.toFixed(2)} DZD
+          {item.price?.toFixed(2)} {t('common.currency', 'DZD')}
         </Text>
 
         <View style={styles.quantityRow}>
@@ -108,7 +110,7 @@ export const CartItemContent: React.FC<CartItemContentProps> = ({
           </View>
 
           <Text style={[styles.subtotal, { fontFamily: fontFamily.bold }]}>
-            {item.subtotal?.toFixed(2)} DZD
+            {item.subtotal?.toFixed(2)} {t('common.currency', 'DZD')}
           </Text>
         </View>
       </View>

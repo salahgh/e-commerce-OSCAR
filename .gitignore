@@ -50,3 +50,6 @@ pnpm-debug.log*
 
 # Playwright MCP browser snapshots (test artifacts)
 .playwright-mcp/
+
+# Figma design-reference scratch (exports + working trackers)
+_figma/

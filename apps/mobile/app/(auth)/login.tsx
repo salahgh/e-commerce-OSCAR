@@ -60,7 +60,7 @@ export default function LoginScreen() {
       >
         {/* Logo */}
         <View style={styles.logoContainer}>
-          <Logo width={120} height={92} />
+          <Logo width={108} height={83} />
         </View>
 
         {/* Header */}
@@ -223,12 +223,12 @@ const useStyles = makeThemedStyles((colors) =>
       marginBottom: 50,
     },
     title: {
-      fontSize: 26,
+      fontSize: 28,
       color: colors.text.primary,
       marginBottom: spacing.sm,
     },
     subtitle: {
-      fontSize: 15,
+      fontSize: 16,
       color: colors.text.secondary,
     },
     // Error
@@ -255,7 +255,7 @@ const useStyles = makeThemedStyles((colors) =>
       gap: spacing.sm,
     },
     fieldLabel: {
-      fontSize: 13,
+      fontSize: 12,
       color: colors.text.primary,
     },
     input: {

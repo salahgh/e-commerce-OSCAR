@@ -204,7 +204,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
                     {t('checkout.qty', 'Qty')}: {item.quantity}
                   </Text>
                   <Text style={[styles.itemPrice, { fontFamily: fontFamily.semiBold }]}>
-                    {(item.subtotal ?? item.linePrice ?? 0).toLocaleString()} DZD
+                    {(item.subtotal ?? item.linePrice ?? 0).toLocaleString()} {t('common.currency', 'DZD')}
                   </Text>
                 </View>
               </View>
@@ -230,7 +230,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
             {t('checkout.subtotal', 'Subtotal')}
           </Text>
           <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
-            {subtotal.toLocaleString()} DZD
+            {subtotal.toLocaleString()} {t('common.currency', 'DZD')}
           </Text>
         </View>
 
@@ -239,7 +239,9 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
             {t('checkout.shipping', 'Shipping')}
           </Text>
           <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
-            {shippingCost > 0 ? `${shippingCost.toLocaleString()} DZD` : t('checkout.free', 'Free')}
+            {shippingCost > 0
+              ? `${shippingCost.toLocaleString()} ${t('common.currency', 'DZD')}`
+              : t('checkout.free', 'Free')}
           </Text>
         </View>
 
@@ -250,7 +252,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
             {t('checkout.total', 'Total')}
           </Text>
           <Text style={[styles.totalValue, { fontFamily: fontFamily.bold }]}>
-            {total.toLocaleString()} DZD
+            {total.toLocaleString()} {t('common.currency', 'DZD')}
           </Text>
         </View>
       </View>

@@ -33,6 +33,9 @@ interface CartItem {
   sku: string;
   quantity: number;
   unitPrice: number;
+  /** Pre-discount list price, set only when the line carries a real per-item
+   * discount (original > charged unit price); null otherwise. */
+  originalUnitPrice: number | null;
   linePrice: number;
   imageUrl: string | null;
 }
@@ -222,7 +225,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     variantName: line.productVariant?.name || '',
     sku: line.productVariant?.sku || '',
     quantity: line.quantity,
-    unitPrice: formatPrice(line.unitPriceWithTax),
+    unitPrice: formatPrice(line.discountedUnitPriceWithTax ?? line.unitPriceWithTax),
+    originalUnitPrice:
+      line.discountedUnitPriceWithTax != null &&
+      line.discountedUnitPriceWithTax < line.unitPriceWithTax
+        ? formatPrice(line.unitPriceWithTax)
+        : null,
     linePrice: formatPrice(line.linePriceWithTax),
     imageUrl: line.featuredAsset?.preview || line.productVariant?.product?.featuredAsset?.preview || null,
   }));

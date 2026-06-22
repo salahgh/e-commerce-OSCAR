@@ -7,9 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   ShippingAddressForm,
   ShippingAddressFormValues,
-  OrderSummary,
 } from '../../src/components/checkout';
-import { Button, LoadingSpinner } from '../../src/components/ui';
+import { Button } from '../../src/components/ui';
 import { useCart } from '../../src/contexts/CartContext';
 import {
   useGetEligibleShippingMethodsQuery,
@@ -28,16 +27,20 @@ import { formatPrice } from '../../src/utils/vendureAdapters';
 import {
   submitCheckoutAddress,
   STALE_SESSION_ERROR,
-  resolveWilayaName,
 } from '../../src/utils/checkout';
 import { makeShippingAddressSchema } from '../../src/utils/validation';
 import { wilayas } from '../../src/data/wilayas';
 import { addressToCheckoutValues, SavedAddress } from '../../src/utils/address';
 import { SavedAddressPicker } from '../../src/components/checkout/SavedAddressPicker';
-import { partitionPaymentMethods } from '../../src/utils/payment';
+import { partitionPaymentMethods, getPaymentAvailability } from '../../src/utils/payment';
 import { rtlIcon } from '../../src/utils/rtl';
 
-type CheckoutStep = 'shipping' | 'shippingMethod' | 'payment' | 'review';
+// The Figma checkout (node 84:10030 / 84:10255) is a single "ملخص الطلب" screen
+// combining the order summary, payment-method selection and the confirm button.
+// Vendure still requires a shipping address + shipping method before payment, so
+// the address form is kept as the preceding step (the design assumes an address
+// already exists); everything after it lives on one consolidated summary screen.
+type CheckoutStep = 'shipping' | 'summary';
 
 export default function CheckoutScreen() {
   const styles = useStyles();
@@ -53,25 +56,23 @@ export default function CheckoutScreen() {
   const [shippingAddress, setShippingAddress] = useState<ShippingAddressFormValues | null>(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<string | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
+  const [placingOrder, setPlacingOrder] = useState(false);
 
   // GraphQL Mutations
   const [setShippingAddressMutation, { loading: settingAddress }] =
     useSetOrderShippingAddressMutation();
-  const [setShippingMethodMutation, { loading: settingShipping }] =
-    useSetOrderShippingMethodMutation();
-  const [transitionOrderMutation, { loading: transitioning }] = useTransitionOrderToStateMutation();
-  const [addPaymentMutation, { loading: addingPayment }] = useAddPaymentToOrderMutation();
+  const [setShippingMethodMutation] = useSetOrderShippingMethodMutation();
+  const [transitionOrderMutation] = useTransitionOrderToStateMutation();
+  const [addPaymentMutation] = useAddPaymentToOrderMutation();
   const [setCustomerMutation, { loading: settingCustomer }] = useSetCustomerForOrderMutation();
 
-  // Queries
-  const { data: shippingMethodsData, loading: loadingShippingMethods } =
-    useGetEligibleShippingMethodsQuery({
-      skip: currentStep !== 'shippingMethod',
-    });
-
+  // Eligible methods are needed once the shopper reaches the summary screen.
+  const { data: shippingMethodsData } = useGetEligibleShippingMethodsQuery({
+    skip: currentStep !== 'summary',
+  });
   const { data: paymentMethodsData, loading: loadingPaymentMethods } =
     useGetEligiblePaymentMethodsQuery({
-      skip: currentStep !== 'payment',
+      skip: currentStep !== 'summary',
     });
 
   // Prefill the address form for logged-in customers (mirrors the frontend checkout).
@@ -110,19 +111,20 @@ export default function CheckoutScreen() {
   const shippingMethods = shippingMethodsData?.eligibleShippingMethods || [];
   const paymentMethods = paymentMethodsData?.eligiblePaymentMethods || [];
 
-  const { available: availablePaymentMethods, comingSoon: comingSoonPayments } =
-    partitionPaymentMethods(paymentMethods);
+  const { available: availablePaymentMethods } = partitionPaymentMethods(paymentMethods);
 
-  // Auto-select first shipping method if only one
+  // On the summary screen, apply the (single) delivery method so the delivery fee
+  // and total reflect it. Guard with selectedShippingMethod so it runs at most once.
   useEffect(() => {
-    if (shippingMethods.length === 1 && !selectedShippingMethod) {
-      setSelectedShippingMethod(shippingMethods[0].id);
-    }
-  }, [shippingMethods]);
+    if (currentStep !== 'summary' || selectedShippingMethod || shippingMethods.length === 0) return;
+    const first = shippingMethods[0].id;
+    setSelectedShippingMethod(first);
+    setShippingMethodMutation({ variables: { shippingMethodId: [first] } })
+      .then(() => refetchCart())
+      .catch((e) => console.warn('Auto-apply shipping method failed:', e));
+  }, [currentStep, shippingMethods, selectedShippingMethod]);
 
   // Default the payment selection to COD (or the first available method).
-  // availablePaymentMethods is a fresh array each render; the !selectedPaymentMethod
-  // guard ensures setSelectedPaymentMethod fires at most once (no re-select churn).
   useEffect(() => {
     if (!selectedPaymentMethod && availablePaymentMethods.length > 0) {
       const cod = availablePaymentMethods.find((m) => m.code === 'cash-on-delivery');
@@ -144,7 +146,7 @@ export default function CheckoutScreen() {
       });
 
       setShippingAddress(values);
-      setCurrentStep('shippingMethod');
+      setCurrentStep('summary');
       refetchCart();
     } catch (error: any) {
       const isStaleSession = error?.message === STALE_SESSION_ERROR;
@@ -172,119 +174,94 @@ export default function CheckoutScreen() {
     }
   };
 
-  const handleShippingMethodSelect = async () => {
-    if (!selectedShippingMethod) return;
-
+  // Confirm the order from the consolidated summary screen: make sure the delivery
+  // method is applied, transition to ArrangingPayment, then add the payment.
+  const handleConfirmOrder = async () => {
+    if (!selectedPaymentMethod) return;
+    setPlacingOrder(true);
     try {
-      const { data } = await setShippingMethodMutation({
-        variables: {
-          shippingMethodId: [selectedShippingMethod],
-        },
-      });
-
-      if (data?.setOrderShippingMethod) {
-        const result = data.setOrderShippingMethod;
-        if ('errorCode' in result) {
-          const errorResult = result as { message: string };
-          throw new Error(errorResult.message);
-        }
+      if (selectedShippingMethod) {
+        const { data: smData } = await setShippingMethodMutation({
+          variables: { shippingMethodId: [selectedShippingMethod] },
+        });
+        const sm = smData?.setOrderShippingMethod;
+        if (sm && 'errorCode' in sm) throw new Error((sm as { message: string }).message);
       }
 
-      setCurrentStep('payment');
-      refetchCart();
-    } catch (error: any) {
-      console.error('Set shipping method error:', error);
-      Alert.alert(
-        t('common.error', 'Error'),
-        error.message || t('checkout.shippingMethodError', 'Failed to set shipping method')
-      );
-    }
-  };
-
-  const handlePaymentMethodSelect = async () => {
-    if (!selectedPaymentMethod) return;
-    setCurrentStep('review');
-  };
-
-  const handlePlaceOrder = async () => {
-    if (!selectedPaymentMethod) return;
-
-    try {
-      // Transition order to ArrangingPayment state
       const transitionResult = await transitionOrderMutation({
-        variables: {
-          state: 'ArrangingPayment',
-        },
+        variables: { state: 'ArrangingPayment' },
       });
-
-      if (transitionResult.data?.transitionOrderToState) {
-        const result = transitionResult.data.transitionOrderToState;
-        if ('errorCode' in result) {
-          const errorResult = result as { message: string };
-          throw new Error(errorResult.message);
-        }
+      const transitioned = transitionResult.data?.transitionOrderToState;
+      if (transitioned && 'errorCode' in transitioned) {
+        throw new Error((transitioned as { message: string }).message);
       }
 
-      // Find the payment method code
       const paymentMethod = paymentMethods.find((m) => m.id === selectedPaymentMethod);
       const paymentMethodCode = paymentMethod?.code || 'cash-on-delivery';
 
-      // Add payment to order
       const { data } = await addPaymentMutation({
-        variables: {
-          input: {
-            method: paymentMethodCode,
-            metadata: {},
-          },
-        },
+        variables: { input: { method: paymentMethodCode, metadata: {} } },
       });
-
-      if (data?.addPaymentToOrder) {
-        const result = data.addPaymentToOrder;
-        if ('errorCode' in result) {
-          const errorResult = result as { message: string };
-          throw new Error(errorResult.message);
-        }
-
-        // Success - navigate to confirmation
-        const orderCode = 'code' in result ? result.code : '';
-        const orderId = 'id' in result ? result.id : '';
-
-        router.replace({
-          pathname: '/checkout/confirmation',
-          params: {
-            orderNumber: orderCode,
-            orderId: orderId,
-          },
-        });
+      const result = data?.addPaymentToOrder;
+      if (result && 'errorCode' in result) {
+        throw new Error((result as { message: string }).message);
       }
+
+      const orderCode = result && 'code' in result ? result.code : '';
+      const orderId = result && 'id' in result ? result.id : '';
+      router.replace({
+        pathname: '/checkout/confirmation',
+        params: { orderNumber: orderCode, orderId },
+      });
     } catch (error: any) {
       console.error('Place order error:', error);
       Alert.alert(
         t('common.error', 'Error'),
         error.message || t('checkout.orderError', 'Failed to place order')
       );
+    } finally {
+      setPlacingOrder(false);
     }
   };
 
   const goBack = () => {
-    if (currentStep === 'shippingMethod') {
+    if (currentStep === 'summary') {
       setCurrentStep('shipping');
-    } else if (currentStep === 'payment') {
-      setCurrentStep('shippingMethod');
-    } else if (currentStep === 'review') {
-      setCurrentStep('payment');
     } else {
       router.back();
     }
   };
 
-  const isLoading =
-    settingAddress || settingShipping || transitioning || addingPayment || settingCustomer;
+  // Order-level discount for the summary (subtotal + delivery − total), clamped.
+  const discount = Math.max(0, subTotal + shipping - total);
+
+  // Localised payment label, falling back to the backend method name.
+  const paymentLabel = (code: string, name: string) => {
+    const c = code.toLowerCase();
+    if (c.includes('cash') || c.includes('delivery') || c === 'cod')
+      return t('checkout.cashOnDelivery', 'Cash on delivery');
+    if (c.includes('cib')) return t('checkout.cibFull', 'Pay by CIB bank card');
+    if (c.includes('barid')) return t('checkout.baridimobFull', 'Pay via the BaridiMob app');
+    return name;
+  };
+
+  const selectedMethodCode =
+    paymentMethods.find((m) => m.id === selectedPaymentMethod)?.code?.toLowerCase() ?? '';
+  const showSecureRedirect =
+    selectedMethodCode.includes('cib') || selectedMethodCode.includes('barid');
 
   if (items.length === 0) {
     return (
       <View style={styles.container}>
+        <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name={rtlIcon('arrow-back')} size={24} color={colors.text.primary} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
+            {t('checkout.orderSummary', 'Order Summary')}
+          </Text>
+          <View style={styles.placeholder} />
+        </View>
         <View style={styles.emptyContainer}>
           <Ionicons name="cart-outline" size={64} color={colors.text.tertiary} />
           <Text style={[styles.emptyTitle, { fontFamily: fontFamily.bold }]}>
@@ -303,6 +280,41 @@ export default function CheckoutScreen() {
     );
   }
 
+  // Renders one payment radio row matching the Figma layout (label + circular radio).
+  const renderPaymentOption = (
+    id: string,
+    label: string,
+    opts: { selectable: boolean; selected: boolean; comingSoon?: boolean }
+  ) => (
+    <TouchableOpacity
+      key={id}
+      style={styles.paymentRow}
+      activeOpacity={opts.selectable ? 0.7 : 1}
+      disabled={!opts.selectable}
+      onPress={() => opts.selectable && setSelectedPaymentMethod(id)}
+    >
+      <View style={styles.paymentLabelWrap}>
+        <Text
+          style={[
+            styles.paymentLabel,
+            !opts.selectable && styles.paymentLabelDisabled,
+            { fontFamily: fontFamily.medium },
+          ]}
+        >
+          {label}
+        </Text>
+        {opts.comingSoon && (
+          <Text style={[styles.comingSoonTag, { fontFamily: fontFamily.regular }]}>
+            {t('checkout.comingSoon', 'Coming soon')}
+          </Text>
+        )}
+      </View>
+      <View style={[styles.radioOuter, opts.selected && styles.radioOuterSelected]}>
+        {opts.selected && <View style={styles.radioInner} />}
+      </View>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -311,43 +323,13 @@ export default function CheckoutScreen() {
           <Ionicons name={rtlIcon('arrow-back')} size={24} color={colors.text.primary} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { fontFamily: fontFamily.bold }]}>
-          {t('checkout.title', 'Checkout')}
+          {currentStep === 'summary'
+            ? t('checkout.orderSummary', 'Order Summary')
+            : t('checkout.shippingAddress', 'Shipping Address')}
         </Text>
         <View style={styles.placeholder} />
       </View>
 
-      {/* Step Indicator */}
-      <View style={styles.stepIndicator}>
-        <StepItem
-          number={1}
-          label={t('checkout.shipping', 'Shipping')}
-          isActive={currentStep === 'shipping'}
-          isComplete={currentStep !== 'shipping'}
-        />
-        <View style={styles.stepLine} />
-        <StepItem
-          number={2}
-          label={t('checkout.delivery', 'Delivery')}
-          isActive={currentStep === 'shippingMethod'}
-          isComplete={currentStep === 'payment' || currentStep === 'review'}
-        />
-        <View style={styles.stepLine} />
-        <StepItem
-          number={3}
-          label={t('checkout.payment', 'Payment')}
-          isActive={currentStep === 'payment'}
-          isComplete={currentStep === 'review'}
-        />
-        <View style={styles.stepLine} />
-        <StepItem
-          number={4}
-          label={t('checkout.review', 'Review')}
-          isActive={currentStep === 'review'}
-          isComplete={false}
-        />
-      </View>
-
-      {/* Content */}
       <ScrollView
         style={styles.content}
         contentContainerStyle={{ paddingBottom: insets.bottom + spacing.xl }}
@@ -375,348 +357,108 @@ export default function CheckoutScreen() {
               showEmail={!isAuthenticated}
               validationSchema={makeShippingAddressSchema(!isAuthenticated)}
               onSubmit={handleShippingSubmit}
-              submitButtonText={t('checkout.continueToDelivery', 'Continue to Delivery')}
+              submitButtonText={t('checkout.continue', 'Continue')}
             />
           </>
         )}
 
-        {currentStep === 'shippingMethod' && (
-          <View style={styles.stepContent}>
-            <Text style={[styles.sectionTitle, { fontFamily: fontFamily.semiBold }]}>
-              {t('checkout.selectShippingMethod', 'Select Delivery Method')}
-            </Text>
+        {currentStep === 'summary' && (
+          <View style={styles.summary}>
+            {/* Summary rows */}
+            <View style={styles.summaryRows}>
+              <View style={styles.summaryRow}>
+                <Text style={[styles.summaryLabel, { fontFamily: fontFamily.medium }]}>
+                  {t('checkout.subtotal', 'Subtotal')}:
+                </Text>
+                <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
+                  {subTotal.toLocaleString()} {t('common.currency', 'DZD')}
+                </Text>
+              </View>
 
-            {loadingShippingMethods ? (
-              <LoadingSpinner />
-            ) : shippingMethods.length === 0 ? (
-              <Text style={[styles.noMethodsText, { fontFamily: fontFamily.regular }]}>
-                {t('checkout.noShippingMethods', 'No delivery methods available')}
+              <View style={styles.summaryRow}>
+                <Text style={[styles.summaryMuted, { fontFamily: fontFamily.medium }]}>
+                  {t('checkout.discount', 'Discount')}:
+                </Text>
+                <Text style={[styles.summaryMuted, { fontFamily: fontFamily.medium }]}>
+                  {discount > 0 ? `${discount.toLocaleString()} ${t('common.currency', 'DZD')}` : '--'}
+                </Text>
+              </View>
+
+              <View style={styles.summaryRow}>
+                <Text style={[styles.summaryLabel, { fontFamily: fontFamily.medium }]}>
+                  {t('checkout.deliveryFee', 'Delivery fee')}:
+                </Text>
+                <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
+                  {shipping > 0
+                    ? `${shipping.toLocaleString()} ${t('common.currency', 'DZD')}`
+                    : t('checkout.free', 'Free')}
+                </Text>
+              </View>
+
+              <View style={styles.summaryRow}>
+                <Text style={[styles.summaryLabel, { fontFamily: fontFamily.medium }]}>
+                  {t('checkout.total', 'Total')}:
+                </Text>
+                <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
+                  {total.toLocaleString()} {t('common.currency', 'DZD')}
+                </Text>
+              </View>
+            </View>
+
+            {/* Payment method */}
+            <View style={styles.paymentSection}>
+              <Text style={[styles.paymentHeading, { fontFamily: fontFamily.medium }]}>
+                {t('checkout.paymentMethod', 'Payment method')}
               </Text>
-            ) : (
-              shippingMethods.map((method) => (
-                <TouchableOpacity
-                  key={method.id}
-                  style={[
-                    styles.methodCard,
-                    selectedShippingMethod === method.id && styles.methodCardSelected,
-                  ]}
-                  onPress={() => setSelectedShippingMethod(method.id)}
-                >
-                  <View style={styles.methodRadio}>
-                    <View
-                      style={[
-                        styles.radioOuter,
-                        selectedShippingMethod === method.id && styles.radioOuterSelected,
-                      ]}
-                    >
-                      {selectedShippingMethod === method.id && <View style={styles.radioInner} />}
-                    </View>
-                  </View>
-                  <View style={styles.methodInfo}>
-                    <Text style={[styles.methodName, { fontFamily: fontFamily.semiBold }]}>
-                      {method.name}
-                    </Text>
-                    {method.description ? (
-                      <Text style={[styles.methodDescription, { fontFamily: fontFamily.regular }]}>
-                        {method.description}
-                      </Text>
-                    ) : null}
-                  </View>
-                  <Text style={[styles.methodPrice, { fontFamily: fontFamily.bold }]}>
-                    {method.priceWithTax === 0
-                      ? t('checkout.free', 'Free')
-                      : `${formatPrice(method.priceWithTax)} DZD`}
-                  </Text>
-                </TouchableOpacity>
-              ))
-            )}
 
-            <Button
-              title={t('checkout.continueToPayment', 'Continue to Payment')}
-              onPress={handleShippingMethodSelect}
-              disabled={!selectedShippingMethod || isLoading}
-              loading={settingShipping}
-              fullWidth
-              style={styles.continueButton}
-            />
-          </View>
-        )}
-
-        {currentStep === 'payment' && (
-          <View style={styles.stepContent}>
-            <Text style={[styles.sectionTitle, { fontFamily: fontFamily.semiBold }]}>
-              {t('checkout.selectPaymentMethod', 'Select Payment Method')}
-            </Text>
-
-            {loadingPaymentMethods ? (
-              <LoadingSpinner />
-            ) : availablePaymentMethods.length === 0 ? (
-              <Text style={[styles.noMethodsText, { fontFamily: fontFamily.regular }]}>
-                {t('checkout.noPaymentMethods', 'No payment methods available')}
-              </Text>
-            ) : (
-              availablePaymentMethods.map((method) => (
-                <TouchableOpacity
-                  key={method.id}
-                  style={[
-                    styles.methodCard,
-                    selectedPaymentMethod === method.id && styles.methodCardSelected,
-                    !method.isEligible && styles.methodCardDisabled,
-                  ]}
-                  onPress={() => method.isEligible && setSelectedPaymentMethod(method.id)}
-                  disabled={!method.isEligible}
-                >
-                  <View style={styles.methodRadio}>
-                    <View
-                      style={[
-                        styles.radioOuter,
-                        selectedPaymentMethod === method.id && styles.radioOuterSelected,
-                        !method.isEligible && styles.radioOuterDisabled,
-                      ]}
-                    >
-                      {selectedPaymentMethod === method.id && <View style={styles.radioInner} />}
-                    </View>
-                  </View>
-                  <View style={styles.methodInfo}>
-                    <Text
-                      style={[
-                        styles.methodName,
-                        !method.isEligible && styles.methodNameDisabled,
-                        { fontFamily: fontFamily.semiBold },
-                      ]}
-                    >
-                      {method.name}
-                    </Text>
-                    {method.description ? (
-                      <Text style={[styles.methodDescription, { fontFamily: fontFamily.regular }]}>
-                        {method.description}
-                      </Text>
-                    ) : null}
-                    {!method.isEligible && method.eligibilityMessage ? (
-                      <Text style={[styles.eligibilityMessage, { fontFamily: fontFamily.regular }]}>
-                        {method.eligibilityMessage}
-                      </Text>
-                    ) : null}
-                  </View>
-                </TouchableOpacity>
-              ))
-            )}
-
-            {!loadingPaymentMethods && comingSoonPayments.length > 0 && (
-              <View style={styles.comingSoonSection}>
-                <Text style={[styles.comingSoonSectionTitle, { fontFamily: fontFamily.semiBold }]}>
-                  {t('checkout.comingSoonPayments', 'Online payment — coming soon')}
-                </Text>
-                {comingSoonPayments.map((entry) => (
-                  <View key={entry.code} style={[styles.methodCard, styles.methodCardDisabled]}>
-                    <Ionicons
-                      name={entry.icon as keyof typeof Ionicons.glyphMap}
-                      size={22}
-                      color={colors.text.tertiary}
-                      style={styles.comingSoonIcon}
-                    />
-                    <View style={styles.methodInfo}>
-                      <Text
-                        style={[
-                          styles.methodName,
-                          styles.methodNameDisabled,
-                          { fontFamily: fontFamily.semiBold },
-                        ]}
-                      >
-                        {t(entry.labelKey, entry.labelFallback)}
-                      </Text>
-                    </View>
-                    <View style={styles.comingSoonBadge}>
-                      <Text style={[styles.comingSoonBadgeText, { fontFamily: fontFamily.medium }]}>
-                        {t('checkout.comingSoon', 'Coming soon')}
-                      </Text>
-                    </View>
-                  </View>
-                ))}
-                <Text style={[styles.comingSoonNote, { fontFamily: fontFamily.regular }]}>
-                  {t(
-                    'checkout.onlinePaymentSoonNote',
-                    'CIB and BaridiMob online payment will be available soon. For now, pay cash on delivery.'
-                  )}
-                </Text>
-              </View>
-            )}
-            <Button
-              title={t('checkout.continueToReview', 'Continue to Review')}
-              onPress={handlePaymentMethodSelect}
-              disabled={!selectedPaymentMethod || isLoading}
-              fullWidth
-              style={styles.continueButton}
-            />
-          </View>
-        )}
-
-        {currentStep === 'review' && shippingAddress && (
-          <View style={styles.stepContent}>
-            {/* Shipping Address Review */}
-            <View style={styles.reviewSection}>
-              <View style={styles.reviewHeader}>
-                <Text style={[styles.reviewTitle, { fontFamily: fontFamily.semiBold }]}>
-                  {t('checkout.shippingAddress', 'Shipping Address')}
-                </Text>
-                <TouchableOpacity onPress={() => setCurrentStep('shipping')}>
-                  <Text style={[styles.editButton, { fontFamily: fontFamily.medium }]}>
-                    {t('common.edit', 'Edit')}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.reviewContent}>
-                <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
-                  {shippingAddress.fullName}
-                </Text>
-                <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
-                  {shippingAddress.phoneNumber}
-                </Text>
-                <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
-                  {shippingAddress.address}
-                </Text>
-                {(() => {
-                  const w = wilayas.find((x) => x.code === shippingAddress.wilayaCode);
-                  const commune = w?.communes.find((c) => c.code === shippingAddress.communeCode);
-                  if (!commune) return null;
-                  return (
-                    <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
-                      {commune.name}
-                      {commune.postalCode ? `, ${commune.postalCode}` : ''}
-                    </Text>
-                  );
-                })()}
-                {shippingAddress.wilayaCode ? (
-                  <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
-                    {resolveWilayaName(shippingAddress.wilayaCode, wilayas)}
-                  </Text>
-                ) : null}
-                {shippingAddress.notes && (
-                  <Text style={[styles.reviewTextSecondary, { fontFamily: fontFamily.regular }]}>
-                    Notes: {shippingAddress.notes}
-                  </Text>
-                )}
-              </View>
-            </View>
-
-            {/* Shipping Method Review */}
-            <View style={styles.reviewSection}>
-              <View style={styles.reviewHeader}>
-                <Text style={[styles.reviewTitle, { fontFamily: fontFamily.semiBold }]}>
-                  {t('checkout.deliveryMethod', 'Delivery Method')}
-                </Text>
-                <TouchableOpacity onPress={() => setCurrentStep('shippingMethod')}>
-                  <Text style={[styles.editButton, { fontFamily: fontFamily.medium }]}>
-                    {t('common.edit', 'Edit')}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.reviewContent}>
-                <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
-                  {shippingMethods.find((m) => m.id === selectedShippingMethod)?.name || ''}
-                </Text>
-              </View>
-            </View>
-
-            {/* Payment Method Review */}
-            <View style={styles.reviewSection}>
-              <View style={styles.reviewHeader}>
-                <Text style={[styles.reviewTitle, { fontFamily: fontFamily.semiBold }]}>
-                  {t('checkout.paymentMethod', 'Payment Method')}
-                </Text>
-                <TouchableOpacity onPress={() => setCurrentStep('payment')}>
-                  <Text style={[styles.editButton, { fontFamily: fontFamily.medium }]}>
-                    {t('common.edit', 'Edit')}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.reviewContent}>
-                <Text style={[styles.reviewText, { fontFamily: fontFamily.regular }]}>
-                  {paymentMethods.find((m) => m.id === selectedPaymentMethod)?.name || ''}
-                </Text>
-              </View>
-            </View>
-
-            {/* Order Summary */}
-            <OrderSummary
-              items={items}
-              subtotal={subTotal}
-              shippingCost={shipping}
-              total={total}
-              showItems={true}
-            />
-
-            {/* Place Order Button */}
-            <Button
-              title={t('checkout.placeOrder', 'Place Order')}
-              onPress={handlePlaceOrder}
-              loading={isLoading}
-              disabled={isLoading}
-              fullWidth
-              style={styles.placeOrderButton}
-            />
-
-            {/* Terms */}
-            <Text style={[styles.terms, { fontFamily: fontFamily.regular }]}>
-              {t(
-                'checkout.terms',
-                'By placing your order, you agree to our Terms & Conditions and Privacy Policy'
+              {availablePaymentMethods.map((method) =>
+                renderPaymentOption(method.id, paymentLabel(method.code, method.name), {
+                  selectable: method.isEligible,
+                  selected: selectedPaymentMethod === method.id,
+                })
               )}
-            </Text>
+
+              {/* CIB / BaridiMob are backend-blocked for now — shown but non-selectable. */}
+              {!loadingPaymentMethods &&
+                paymentMethods
+                  .filter((m) => getPaymentAvailability(m.code) === 'coming-soon')
+                  .map((method) =>
+                    renderPaymentOption(method.id, paymentLabel(method.code, method.name), {
+                      selectable: false,
+                      selected: false,
+                      comingSoon: true,
+                    })
+                  )}
+            </View>
+
+            {/* Secure-redirect note (shown for online gateways, per design 84:10255) */}
+            {showSecureRedirect && (
+              <View style={styles.noticeBanner}>
+                <Ionicons
+                  name="information-circle-outline"
+                  size={20}
+                  color={colors.warning ?? colors.text.secondary}
+                />
+                <Text style={[styles.noticeText, { fontFamily: fontFamily.regular }]}>
+                  {t('checkout.secureRedirectNote', "You'll be redirected to complete payment securely")}
+                </Text>
+              </View>
+            )}
+
+            {/* Confirm */}
+            <TouchableOpacity
+              style={[styles.confirmButton, (placingOrder || !selectedPaymentMethod) && styles.confirmButtonDisabled]}
+              onPress={handleConfirmOrder}
+              disabled={placingOrder || !selectedPaymentMethod}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.confirmButtonText, { fontFamily: fontFamily.medium }]}>
+                {t('checkout.placeOrder', 'Confirm order')}
+              </Text>
+            </TouchableOpacity>
           </View>
         )}
       </ScrollView>
-    </View>
-  );
-}
-
-// Step Item Component
-function StepItem({
-  number,
-  label,
-  isActive,
-  isComplete,
-}: {
-  number: number;
-  label: string;
-  isActive: boolean;
-  isComplete: boolean;
-}) {
-  const styles = useStyles();
-  const colors = useThemeColors();
-  const { fontFamily } = useAppFont();
-  return (
-    <View style={styles.stepItem}>
-      <View
-        style={[
-          styles.stepCircle,
-          isActive && styles.stepCircleActive,
-          isComplete && styles.stepCircleComplete,
-        ]}
-      >
-        {isComplete ? (
-          <Ionicons name="checkmark" size={14} color={colors.surface} />
-        ) : (
-          <Text
-            style={[
-              styles.stepNumber,
-              (isActive || isComplete) && styles.stepNumberActive,
-              { fontFamily: fontFamily.bold },
-            ]}
-          >
-            {number}
-          </Text>
-        )}
-      </View>
-      <Text
-        style={[
-          styles.stepLabel,
-          isActive && styles.stepLabelActive,
-          { fontFamily: isActive ? fontFamily.medium : fontFamily.regular },
-        ]}
-      >
-        {label}
-      </Text>
     </View>
   );
 }
@@ -751,90 +493,68 @@ const useStyles = makeThemedStyles((colors) =>
     placeholder: {
       width: 40,
     },
-    stepIndicator: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: spacing.md,
-      backgroundColor: colors.surface,
-    },
-    stepItem: {
-      alignItems: 'center',
-      gap: 4,
-    },
-    stepCircle: {
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      backgroundColor: colors.border,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    stepCircleActive: {
-      backgroundColor: colors.primary,
-    },
-    stepCircleComplete: {
-      backgroundColor: colors.success,
-    },
-    stepNumber: {
-      fontSize: 12,
-      color: colors.text.tertiary,
-      fontWeight: typography.fontWeight.bold,
-    },
-    stepNumberActive: {
-      color: colors.surface,
-    },
-    stepLabel: {
-      fontSize: 10,
-      color: colors.text.tertiary,
-    },
-    stepLabelActive: {
-      color: colors.primary,
-      fontWeight: typography.fontWeight.medium,
-    },
-    stepLine: {
-      flex: 1,
-      height: 2,
-      backgroundColor: colors.border,
-      marginHorizontal: 4,
-    },
     content: {
       flex: 1,
       padding: spacing.lg,
     },
-    stepContent: {
+    // Summary screen
+    summary: {
+      gap: spacing['2xl'],
+      paddingTop: spacing.lg,
+    },
+    summaryRows: {
+      gap: spacing.lg,
+    },
+    summaryRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    summaryLabel: {
+      fontSize: 16,
+      color: colors.text.primary,
+    },
+    summaryValue: {
+      fontSize: 16,
+      color: colors.text.primary,
+    },
+    summaryMuted: {
+      fontSize: 16,
+      color: colors.text.secondary,
+    },
+    // Payment
+    paymentSection: {
       gap: spacing.md,
     },
-    sectionTitle: {
-      ...typography.styles.h4,
+    paymentHeading: {
+      fontSize: 16,
+      lineHeight: 24,
       color: colors.text.primary,
-      fontWeight: typography.fontWeight.semiBold,
-      marginBottom: spacing.sm,
     },
-    noMethodsText: {
-      ...typography.styles.body,
-      color: colors.text.secondary,
-      textAlign: 'center',
-      padding: spacing.xl,
-    },
-    methodCard: {
+    paymentRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.surface,
-      borderRadius: 12,
-      padding: spacing.md,
-      marginBottom: spacing.sm,
-      borderWidth: 2,
-      borderColor: 'transparent',
+      justifyContent: 'space-between',
+      gap: spacing.sm,
     },
-    methodCardSelected: {
-      borderColor: colors.primary,
+    paymentLabelWrap: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      flexWrap: 'wrap',
     },
-    methodCardDisabled: {
-      opacity: 0.5,
+    paymentLabel: {
+      fontSize: 16,
+      lineHeight: 24,
+      color: colors.text.primary,
     },
-    methodRadio: {
-      marginRight: spacing.md,
+    paymentLabelDisabled: {
+      color: colors.text.tertiary,
+    },
+    comingSoonTag: {
+      fontSize: 12,
+      color: colors.text.tertiary,
     },
     radioOuter: {
       width: 22,
@@ -848,115 +568,44 @@ const useStyles = makeThemedStyles((colors) =>
     radioOuterSelected: {
       borderColor: colors.primary,
     },
-    radioOuterDisabled: {
-      borderColor: colors.text.tertiary,
-    },
     radioInner: {
-      width: 12,
-      height: 12,
-      borderRadius: 6,
+      width: 10,
+      height: 10,
+      borderRadius: 5,
       backgroundColor: colors.primary,
     },
-    methodInfo: {
-      flex: 1,
-    },
-    methodName: {
-      ...typography.styles.body,
-      color: colors.text.primary,
-      fontWeight: typography.fontWeight.semiBold,
-    },
-    methodNameDisabled: {
-      color: colors.text.tertiary,
-    },
-    methodDescription: {
-      ...typography.styles.bodySmall,
-      color: colors.text.secondary,
-      marginTop: 2,
-    },
-    eligibilityMessage: {
-      ...typography.styles.caption,
-      color: colors.error,
-      marginTop: 4,
-    },
-    methodPrice: {
-      ...typography.styles.body,
-      color: colors.primary,
-      fontWeight: typography.fontWeight.bold,
-    },
-    continueButton: {
-      marginTop: spacing.lg,
-    },
-    comingSoonSection: {
-      marginTop: spacing.xl,
-    },
-    comingSoonSectionTitle: {
-      ...typography.styles.bodySmall,
-      color: colors.text.secondary,
-      fontWeight: typography.fontWeight.semiBold,
-      marginBottom: spacing.sm,
-    },
-    comingSoonIcon: {
-      marginRight: spacing.md,
-    },
-    comingSoonBadge: {
-      backgroundColor: colors.border,
-      borderRadius: 12,
-      paddingHorizontal: spacing.sm,
-      paddingVertical: 2,
-    },
-    comingSoonBadgeText: {
-      ...typography.styles.caption,
-      color: colors.text.secondary,
-      fontWeight: typography.fontWeight.medium,
-    },
-    comingSoonNote: {
-      ...typography.styles.caption,
-      color: colors.text.tertiary,
-      marginTop: spacing.sm,
-    },
-    reviewSection: {
-      backgroundColor: colors.surface,
-      borderRadius: 12,
-      padding: spacing.md,
-      marginBottom: spacing.md,
-    },
-    reviewHeader: {
+    // Secure-redirect notice
+    noticeBanner: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: spacing.sm,
+      gap: spacing.sm,
+      backgroundColor: colors.warningLight ?? colors.surface,
+      borderWidth: 1,
+      borderColor: colors.warning ?? colors.border,
+      borderRadius: 8,
+      padding: spacing.md,
     },
-    reviewTitle: {
-      ...typography.styles.body,
-      fontWeight: typography.fontWeight.semiBold,
+    noticeText: {
+      flex: 1,
+      fontSize: 13,
       color: colors.text.primary,
     },
-    editButton: {
-      ...typography.styles.body,
-      color: colors.primary,
-      fontWeight: typography.fontWeight.medium,
+    // Confirm button
+    confirmButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+      paddingVertical: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
-    reviewContent: {
-      gap: spacing.xs,
+    confirmButtonDisabled: {
+      opacity: 0.6,
     },
-    reviewText: {
-      ...typography.styles.body,
-      color: colors.text.primary,
+    confirmButtonText: {
+      fontSize: 16,
+      color: colors.text.inverse,
     },
-    reviewTextSecondary: {
-      ...typography.styles.bodySmall,
-      color: colors.text.secondary,
-      fontStyle: 'italic',
-    },
-    placeOrderButton: {
-      marginTop: spacing.lg,
-    },
-    terms: {
-      ...typography.styles.caption,
-      color: colors.text.tertiary,
-      textAlign: 'center',
-      marginTop: spacing.md,
-    },
+    // Empty state
     emptyContainer: {
       flex: 1,
       justifyContent: 'center',

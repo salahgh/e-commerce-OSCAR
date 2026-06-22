@@ -1,8 +1,8 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { formatPrice } from '@oscar/shared';
+import { useTranslations, useLocale } from 'next-intl';
+import { formatDzd, formatDzdTotal } from '@/lib/format/price';
 import { useGetOrderByCodeQuery } from '@oscar/graphql-shop/generated';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from '@/i18n/routing';
@@ -18,6 +18,9 @@ function dateFmt(iso: string, locale = 'fr-DZ') {
 
 export default function OrderDetailPage() {
   const t = useTranslations('OrderPage');
+  const tStates = useTranslations('OrdersPage.states');
+  const locale = useLocale();
+  const dateLocale = locale === 'ar' ? 'ar-DZ' : locale === 'en' ? 'en-GB' : 'fr-DZ';
   const { isAuthenticated } = useAuth();
   const params = useParams<{ code: string; locale: string }>();
   const code = params?.code ?? '';
@@ -71,10 +74,10 @@ export default function OrderDetailPage() {
             {t('title', { code: order.code })}
           </h1>
           <p className="text-12 text-content-muted">
-            {t('placedOn')} {dateFmt(order.createdAt)}
+            {t('placedOn')} {dateFmt(order.createdAt, dateLocale)}
           </p>
         </div>
-        <Badge intent="info">{order.state}</Badge>
+        <Badge intent="info">{tStates.has(order.state) ? tStates(order.state) : order.state}</Badge>
       </header>
 
       <section>
@@ -108,7 +111,7 @@ export default function OrderDetailPage() {
                     </p>
                   </div>
                   <span className="text-14 font-bold text-content-strong">
-                    {formatPrice(line.linePriceWithTax, order.currencyCode)}
+                    {formatDzd(line.linePriceWithTax)}
                   </span>
                 </div>
               </Card>
@@ -122,12 +125,12 @@ export default function OrderDetailPage() {
           <h3 className="text-14 font-bold text-content-strong">{t('totals')}</h3>
           <dl className="grid grid-cols-2 gap-y-1 text-14">
             <dt className="text-content-muted">{t('subtotal')}</dt>
-            <dd className="text-end">{formatPrice(order.subTotalWithTax, order.currencyCode)}</dd>
+            <dd className="text-end">{formatDzdTotal(order.subTotalWithTax, locale)}</dd>
             <dt className="text-content-muted">{t('shipping')}</dt>
-            <dd className="text-end">{formatPrice(order.shippingWithTax, order.currencyCode)}</dd>
+            <dd className="text-end">{formatDzdTotal(order.shippingWithTax, locale)}</dd>
             <dt className="pt-2 font-bold text-content-strong">{t('total')}</dt>
             <dd className="pt-2 text-end font-bold text-content-strong">
-              {formatPrice(order.totalWithTax, order.currencyCode)}
+              {formatDzdTotal(order.totalWithTax, locale)}
             </dd>
           </dl>
         </Card>

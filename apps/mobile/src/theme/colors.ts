@@ -99,8 +99,10 @@ export const colors = {
     6: '#B28416',
   },
 
-  info: '#11CAEF',
-  infoLight: '#E5FBFF',
+  // Figma design-system link/accent blue (#183DE5). Used for links (auth, "view
+  // details") and info/status semantics. Replaced the previous cyan #11CAEF.
+  info: '#183DE5',
+  infoLight: '#E8ECFC',
   infoScale: {
     1: '#E5FBFF',
     2: '#99EEFF',

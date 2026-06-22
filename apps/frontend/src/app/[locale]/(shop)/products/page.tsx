@@ -7,6 +7,7 @@ import { useGetProductsQuery, SortOrder } from '@oscar/graphql-shop/generated';
 import { Alert } from '@/components/ui';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/Dialog';
 import { ProductCard, ProductCardSkeleton, CategoryCircles, type ProductCardData } from '@/components/patterns';
+import { variantDiscount } from '@/lib/format/discount';
 import { cn } from '@/lib/utils/cn';
 
 const TAKE = 48;
@@ -27,8 +28,8 @@ function toCardData(p: Item): ProductCardData {
     slug: p.slug,
     name: p.name,
     imageUrl: p.featuredAsset?.preview ?? null,
-    price: v?.priceWithTax ?? 0,
     currencyCode: v?.currencyCode ?? 'DZD',
+    ...variantDiscount(v),
   };
 }
 
@@ -48,7 +49,7 @@ function ToolbarButton({
     <button
       type="button"
       onClick={onClick}
-      className="flex h-12 items-center justify-center gap-2 rounded-lg border border-[#e5e7eb] bg-white px-3 text-18 font-medium text-[#010b38] transition-colors hover:border-[#c8c9cc]"
+      className="flex h-12 items-center justify-center gap-2 rounded-lg border border-border bg-white px-3 text-18 font-medium text-content-strong transition-colors hover:border-border-strong"
     >
       {icon}
       <span>{label}</span>
@@ -75,17 +76,23 @@ export default function ProductsPage() {
   const [priceRange, setPriceRange] = React.useState<[number, number] | null>(null);
   const [selectedSizes, setSelectedSizes] = React.useState<string[]>([]);
 
-  // Available sizes across the loaded products.
+  // Available sizes across the loaded products — deduped by NAME (each product has
+  // its own size-option codes, so keying by code yields one chip per product).
   const sizes = React.useMemo(() => {
-    const map = new Map<string, string>();
+    const order = ['XS', 'S', 'M', 'L', 'XL', '2XL', 'XXL', '3XL', 'XXXL', 'ONE SIZE'];
+    const names = new Set<string>();
     for (const p of items) {
       for (const v of p.variants) {
         for (const o of v.options) {
-          if (/taille|size|مقاس/i.test(o.group.code) || /taille|size|مقاس/i.test(o.group.name)) map.set(o.code, o.name);
+          if (/taille|size|مقاس/i.test(o.group.code) || /taille|size|مقاس/i.test(o.group.name)) names.add(o.name);
         }
       }
     }
-    return Array.from(map, ([code, name]) => ({ code, name }));
+    const rank = (n: string) => {
+      const i = order.indexOf(n.trim().toUpperCase());
+      return i === -1 ? order.length : i;
+    };
+    return Array.from(names, (name) => ({ code: name, name })).sort((a, b) => rank(a.name) - rank(b.name));
   }, [items]);
 
   const shown = React.useMemo(() => {
@@ -93,7 +100,7 @@ export default function ProductsPage() {
     if (priceRange) list = list.filter((p) => minPriceOf(p) >= priceRange[0] && minPriceOf(p) <= priceRange[1]);
     if (selectedSizes.length > 0) {
       list = list.filter((p) =>
-        p.variants.some((v) => v.options.some((o) => selectedSizes.includes(o.code))),
+        p.variants.some((v) => v.options.some((o) => selectedSizes.includes(o.name))),
       );
     }
     switch (sortKey) {
@@ -147,7 +154,7 @@ export default function ProductsPage() {
 function ModalActions({ onReset, resetLabel, count, saveLabel }: { onReset: () => void; resetLabel: string; count: number; saveLabel: string }) {
   return (
     <div className="mt-6 flex items-center gap-3">
-      <button type="button" onClick={onReset} className="flex-1 rounded-lg border border-[#c8c9cc] bg-white px-4 py-2 text-16 font-medium text-[#010b38]">
+      <button type="button" onClick={onReset} className="flex-1 rounded-lg border border-border-strong bg-white px-4 py-2 text-16 font-medium text-content-strong">
         {resetLabel}
       </button>
       <button type="submit" className="flex-1 rounded-lg bg-accent px-4 py-2 text-16 font-medium text-content-inverse">
@@ -174,7 +181,7 @@ function PriceFilter({ bounds, value, onApply }: { bounds: [number, number]; val
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button type="button" className="flex h-12 items-center justify-center gap-2 rounded-lg border border-[#e5e7eb] bg-white px-3 text-18 font-medium text-[#010b38] transition-colors hover:border-[#c8c9cc]">
+        <button type="button" className="flex h-12 items-center justify-center gap-2 rounded-lg border border-border bg-white px-3 text-18 font-medium text-content-strong transition-colors hover:border-border-strong">
           <ChevronDown className="size-5" strokeWidth={1.75} />
           <span>{t('filterPrice')}</span>
         </button>
@@ -190,7 +197,7 @@ function PriceFilter({ bounds, value, onApply }: { bounds: [number, number]; val
           className="mt-6 flex flex-col gap-6"
         >
           <div className="relative h-6">
-            <div className="absolute top-1/2 h-1 w-full -translate-y-1/2 rounded-full bg-[#e5e7eb]" />
+            <div className="absolute top-1/2 h-1 w-full -translate-y-1/2 rounded-full bg-border" />
             <div className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-accent" style={{ insetInlineStart: `${pct(lo)}%`, width: `${Math.max(0, pct(hi) - pct(lo))}%` }} />
             <input type="range" min={bounds[0]} max={bounds[1]} value={lo} onChange={(e) => setLo(Math.min(Number(e.target.value), hi))} className="pointer-events-none absolute inset-0 w-full appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent" aria-label={t('from')} />
             <input type="range" min={bounds[0]} max={bounds[1]} value={hi} onChange={(e) => setHi(Math.max(Number(e.target.value), lo))} className="pointer-events-none absolute inset-0 w-full appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent" aria-label={t('to')} />
@@ -198,11 +205,11 @@ function PriceFilter({ bounds, value, onApply }: { bounds: [number, number]; val
           <div className="flex items-center gap-4">
             <label className="flex flex-1 flex-col gap-1 text-right">
               <span className="text-14 text-content-muted">{t('to')}</span>
-              <span className="rounded-lg border border-[#e5e7eb] px-3 py-2 text-16 text-[#010b38]">{dzd(hi)}</span>
+              <span className="rounded-lg border border-border px-3 py-2 text-16 text-content-strong">{dzd(hi)}</span>
             </label>
             <label className="flex flex-1 flex-col gap-1 text-right">
               <span className="text-14 text-content-muted">{t('from')}</span>
-              <span className="rounded-lg border border-[#e5e7eb] px-3 py-2 text-16 text-[#010b38]">{dzd(lo)}</span>
+              <span className="rounded-lg border border-border px-3 py-2 text-16 text-content-strong">{dzd(lo)}</span>
             </label>
           </div>
           <ModalActions onReset={() => { setLo(bounds[0]); setHi(bounds[1]); }} resetLabel={t('reset')} count={1} saveLabel={t('save')} />
@@ -229,7 +236,7 @@ function SortMenu({ value, onApply }: { value: SortKey; onApply: (v: SortKey) =>
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button type="button" className="flex h-12 items-center justify-center gap-2 rounded-lg border border-[#c8c9cc] bg-white px-3 text-18 font-medium text-[#010b38] transition-colors hover:border-[#646466]">
+        <button type="button" className="flex h-12 items-center justify-center gap-2 rounded-lg border border-border-strong bg-white px-3 text-18 font-medium text-content-strong transition-colors hover:border-[#646466]">
           <ArrowDownUp className="size-5" strokeWidth={1.75} />
           <span>{t('filterSort')}</span>
         </button>
@@ -250,10 +257,10 @@ function SortMenu({ value, onApply }: { value: SortKey; onApply: (v: SortKey) =>
                 <button
                   type="button"
                   onClick={() => setDraft(o.key)}
-                  className="flex w-full flex-row-reverse items-center justify-between gap-2 py-3 text-right text-18 text-[#010b38]"
+                  className="flex w-full items-center justify-between gap-2 py-3 text-right text-18 text-content-strong"
                 >
                   <span>{o.label}</span>
-                  <span className={cn('flex size-5 items-center justify-center rounded-full border', draft === o.key ? 'border-accent bg-accent text-content-inverse' : 'border-[#c8c9cc]')}>
+                  <span className={cn('flex size-5 items-center justify-center rounded-full border', draft === o.key ? 'border-accent bg-accent text-content-inverse' : 'border-border-strong')}>
                     {draft === o.key && <Check className="size-3.5" strokeWidth={3} />}
                   </span>
                 </button>
@@ -278,7 +285,7 @@ function SizeFilter({ sizes, selected, onApply }: { sizes: Array<{ code: string;
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button type="button" className="flex h-12 items-center justify-center gap-2 rounded-lg border border-[#e5e7eb] bg-white px-3 text-18 font-medium text-[#010b38] transition-colors hover:border-[#c8c9cc]">
+        <button type="button" className="flex h-12 items-center justify-center gap-2 rounded-lg border border-border bg-white px-3 text-18 font-medium text-content-strong transition-colors hover:border-border-strong">
           <ChevronDown className="size-5" strokeWidth={1.75} />
           <span>{t('filterSize')}</span>
         </button>
@@ -296,21 +303,27 @@ function SizeFilter({ sizes, selected, onApply }: { sizes: Array<{ code: string;
           {sizes.length === 0 ? (
             <p className="py-4 text-right text-16 text-content-muted">{t('empty')}</p>
           ) : (
-            <div className="flex flex-wrap justify-end gap-3">
+            <ul className="flex flex-col">
               {sizes.map((s) => (
-                <button
-                  key={s.code}
-                  type="button"
-                  onClick={() => toggle(s.code)}
-                  className={cn(
-                    'flex w-[131px] items-center justify-center rounded-lg border px-[26px] py-2 text-14 font-medium transition-colors',
-                    draft.includes(s.code) ? 'border-accent bg-accent text-content-inverse' : 'border-[#e5e7eb] bg-white text-[#010b38]',
-                  )}
-                >
-                  {s.name}
-                </button>
+                <li key={s.code}>
+                  <button
+                    type="button"
+                    onClick={() => toggle(s.code)}
+                    className="flex w-full items-center justify-between gap-2 py-3 text-right text-18 text-content-strong"
+                  >
+                    <span>{s.name}</span>
+                    <span
+                      className={cn(
+                        'flex size-5 items-center justify-center rounded border',
+                        draft.includes(s.code) ? 'border-accent bg-accent text-content-inverse' : 'border-border-strong',
+                      )}
+                    >
+                      {draft.includes(s.code) && <Check className="size-3.5" strokeWidth={3} />}
+                    </span>
+                  </button>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
           <ModalActions onReset={() => setDraft([])} resetLabel={t('clearAll')} count={draft.length} saveLabel={t('save')} />
         </form>

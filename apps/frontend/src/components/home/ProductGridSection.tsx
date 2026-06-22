@@ -2,6 +2,7 @@
 
 import { useGetProductsQuery, SortOrder } from '@oscar/graphql-shop/generated';
 import { ProductCard, ProductCardSkeleton, type ProductCardData } from '@/components/patterns';
+import { variantDiscount } from '@/lib/format/discount';
 
 function toCardData(p: {
   slug: string;
@@ -14,8 +15,8 @@ function toCardData(p: {
     slug: p.slug,
     name: p.name,
     imageUrl: p.featuredAsset?.preview ?? null,
-    price: v?.priceWithTax ?? 0,
     currencyCode: v?.currencyCode ?? 'DZD',
+    ...variantDiscount(v),
   };
 }
 

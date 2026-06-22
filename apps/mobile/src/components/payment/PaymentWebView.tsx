@@ -131,7 +131,7 @@ export const PaymentWebView: React.FC<PaymentWebViewProps> = ({
             {t('payment.orderNumber', 'Order')} #{orderNumber}
           </Text>
         </View>
-        <Text style={styles.amount}>{amount.toFixed(2)} DZD</Text>
+        <Text style={styles.amount}>{amount.toFixed(2)} {t('common.currency', 'DZD')}</Text>
       </View>
 
       {/* WebView */}

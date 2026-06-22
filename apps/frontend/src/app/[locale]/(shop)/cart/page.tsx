@@ -1,8 +1,8 @@
 'use client';
 
 import { Trash2, Minus, Plus, ShoppingBag } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { formatPrice } from '@oscar/shared';
+import { useTranslations, useLocale } from 'next-intl';
+import { formatDzd, formatDzdTotal } from '@/lib/format/price';
 import { useCart } from '@/contexts/CartContext';
 import { Link } from '@/i18n/routing';
 import { Button, Skeleton } from '@/components/ui';
@@ -12,6 +12,7 @@ export default function CartPage() {
   const tSummary = useTranslations('CartPage.summary');
   const tEmpty = useTranslations('CartPage.empty');
   const { cart, loading, updateQuantity, removeItem } = useCart();
+  const locale = useLocale();
 
   if (loading && !cart) {
     return (
@@ -51,7 +52,7 @@ export default function CartPage() {
             {cart.items.map((item) => (
               <li
                 key={item.id}
-                className="flex items-start gap-5 border-b border-dashed border-[#d1d5dc] px-2.5 pb-4 pt-4"
+                className="flex items-start gap-5 border-b border-dashed border-hairline px-2.5 pb-4 pt-4"
               >
                 {/* image (right in RTL) */}
                 <div className="size-[100px] shrink-0 overflow-hidden rounded-[2px] bg-bg-muted">
@@ -72,7 +73,7 @@ export default function CartPage() {
                   <button
                     type="button"
                     onClick={() => removeItem(item.id)}
-                    className="flex items-center gap-2 text-16 text-[#6a7282] transition-colors hover:text-[#1e1e1e]"
+                    className="flex items-center gap-2 text-16 text-content-muted transition-colors hover:text-accent"
                   >
                     <span>{t('removeItem')}</span>
                     <Trash2 className="size-[18px]" strokeWidth={1.75} />
@@ -81,24 +82,24 @@ export default function CartPage() {
 
                 {/* price + quantity (left) */}
                 <div className="flex w-[179px] shrink-0 flex-col items-center gap-4">
-                  <span className="font-dm text-20 font-extrabold text-accent">
-                    {formatPrice(item.linePrice * 100, cart.currencyCode)}
+                  <span className="font-dm text-20 font-extrabold text-accent" dir="ltr">
+                    {formatDzd(item.linePrice * 100)}
                   </span>
                   <div className="flex w-full items-center justify-center gap-4 rounded-lg border border-[#f9fafb] bg-white p-2 shadow-sm">
                     <button
                       type="button"
                       aria-label="-"
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      className="flex size-5 items-center justify-center text-[#010b38]"
+                      className="flex size-5 items-center justify-center text-content-strong"
                     >
                       <Minus className="size-4" strokeWidth={1.75} />
                     </button>
-                    <span className="flex-1 text-center text-14 text-[#010b38]">{item.quantity}</span>
+                    <span className="flex-1 text-center text-14 text-content-strong">{item.quantity}</span>
                     <button
                       type="button"
                       aria-label="+"
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="flex size-5 items-center justify-center text-[#010b38]"
+                      className="flex size-5 items-center justify-center text-content-strong"
                     >
                       <Plus className="size-4" strokeWidth={1.75} />
                     </button>
@@ -114,7 +115,7 @@ export default function CartPage() {
           <h2 className="text-right text-32 font-medium text-accent">{tSummary('title')}</h2>
           <div className="flex items-center justify-between gap-4 text-20 font-medium text-accent">
             <span>{tSummary('totalCount', { count: cart.totalQuantity })}</span>
-            <span className="font-dm">{formatPrice(cart.total * 100, cart.currencyCode)}</span>
+            <span className="font-dm">{formatDzdTotal(cart.total * 100, locale)}</span>
           </div>
           <Link
             href="/checkout"

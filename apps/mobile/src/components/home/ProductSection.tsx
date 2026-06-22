@@ -94,6 +94,7 @@ export const CompactProductCard: React.FC<CompactProductCardProps> = ({
   onPress,
 }) => {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handlePress = () => {
     if (onPress) {
@@ -120,7 +121,7 @@ export const CompactProductCard: React.FC<CompactProductCardProps> = ({
         <Text style={styles.compactName} numberOfLines={1}>
           {product.name}
         </Text>
-        <Text style={styles.compactPrice}>{product.price} DZD</Text>
+        <Text style={styles.compactPrice}>{product.price} {t('common.currency', 'DZD')}</Text>
       </View>
     </TouchableOpacity>
   );

@@ -4,7 +4,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useSearchProductsQuery } from '../../src/graphql/generated/graphql';
+import { useSearchProductsQuery, SortOrder } from '../../src/graphql/generated/graphql';
 import { SimpleProduct } from '../../src/components/products/ProductCard';
 import { ProductGrid } from '../../src/components/products';
 import { SortSheet, SortValue } from '../../src/components/products/SortSheet';
@@ -39,11 +39,11 @@ export default function ProductsScreen() {
   const getSortParam = () => {
     switch (sortValue) {
       case 'price_asc':
-        return { price: 'ASC' as const };
+        return { price: SortOrder.Asc };
       case 'price_desc':
-        return { price: 'DESC' as const };
+        return { price: SortOrder.Desc };
       case 'recent':
-        return { name: 'ASC' as const };
+        return { name: SortOrder.Asc };
       default:
         return undefined;
     }
