@@ -77,7 +77,7 @@ export const PriceSheet: React.FC<PriceSheetProps> = ({
               placeholder="0"
               placeholderTextColor={colors.text.tertiary}
             />
-            <Text style={[styles.suffix, { fontFamily: fontFamily.regular }]}>DZD</Text>
+            <Text style={[styles.suffix, { fontFamily: fontFamily.regular }]}>{t('common.currency', 'DZD')}</Text>
           </View>
         </View>
 
@@ -96,7 +96,7 @@ export const PriceSheet: React.FC<PriceSheetProps> = ({
               placeholder="0"
               placeholderTextColor={colors.text.tertiary}
             />
-            <Text style={[styles.suffix, { fontFamily: fontFamily.regular }]}>DZD</Text>
+            <Text style={[styles.suffix, { fontFamily: fontFamily.regular }]}>{t('common.currency', 'DZD')}</Text>
           </View>
         </View>
       </View>

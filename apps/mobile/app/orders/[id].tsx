@@ -359,12 +359,12 @@ export default function OrderDetailScreen() {
                         {t('orders.qty', 'Qty')}: {line.quantity}
                       </Text>
                       <Text style={[styles.itemPrice, { fontFamily: fontFamily.medium }]}>
-                        {formatPrice(line.unitPriceWithTax).toLocaleString()} DZD
+                        {formatPrice(line.unitPriceWithTax).toLocaleString()} {t('common.currency', 'DZD')}
                       </Text>
                     </View>
                   </View>
                   <Text style={[styles.itemSubtotal, { fontFamily: fontFamily.semiBold }]}>
-                    {formatPrice(line.linePriceWithTax).toLocaleString()} DZD
+                    {formatPrice(line.linePriceWithTax).toLocaleString()} {t('common.currency', 'DZD')}
                   </Text>
                 </View>
               );
@@ -383,7 +383,7 @@ export default function OrderDetailScreen() {
                 {t('orders.subtotal', 'Subtotal')}
               </Text>
               <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
-                {formatPrice(subTotal).toLocaleString()} DZD
+                {formatPrice(subTotal).toLocaleString()} {t('common.currency', 'DZD')}
               </Text>
             </View>
             <View style={styles.summaryRow}>
@@ -391,7 +391,9 @@ export default function OrderDetailScreen() {
                 {t('orders.shipping', 'Shipping')}
               </Text>
               <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
-                {shippingCost > 0 ? `${formatPrice(shippingCost).toLocaleString()} DZD` : t('orders.free', 'Free')}
+                {shippingCost > 0
+                  ? `${formatPrice(shippingCost).toLocaleString()} ${t('common.currency', 'DZD')}`
+                  : t('orders.free', 'Free')}
               </Text>
             </View>
             <Divider style={styles.divider} />
@@ -400,7 +402,7 @@ export default function OrderDetailScreen() {
                 {t('orders.total', 'Total')}
               </Text>
               <Text style={[styles.totalValue, { fontFamily: fontFamily.bold }]}>
-                {formatPrice(totalAmount).toLocaleString()} DZD
+                {formatPrice(totalAmount).toLocaleString()} {t('common.currency', 'DZD')}
               </Text>
             </View>
           </View>

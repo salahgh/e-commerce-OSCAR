@@ -72,7 +72,7 @@ export const ProductListItem: React.FC<ProductListItemProps> = ({
         {/* Price Row */}
         <View style={styles.priceRow}>
           <View style={styles.priceContainer}>
-            <Text style={styles.price}>{product.price} DZD</Text>
+            <Text style={styles.price}>{product.price} {t('common.currency', 'DZD')}</Text>
           </View>
 
           {/* Add to Cart Button */}

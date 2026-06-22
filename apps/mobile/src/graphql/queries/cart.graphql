@@ -5,6 +5,7 @@ fragment OrderLineFields on OrderLine {
   quantity
   linePriceWithTax
   unitPriceWithTax
+  discountedUnitPriceWithTax
   productVariant {
     id
     name

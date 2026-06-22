@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 import { useAppFont } from '../../hooks/useAppFont';
@@ -37,6 +38,7 @@ export const ProductCardFigma: React.FC<ProductCardFigmaProps> = ({
   width = 170,
 }) => {
   const router = useRouter();
+  const { t } = useTranslation();
   const { fontFamily } = useAppFont();
   const imageSize = width - 15;
   const colors = useThemeColors();
@@ -146,14 +148,15 @@ export const ProductCardFigma: React.FC<ProductCardFigmaProps> = ({
       {/* Price */}
       <View style={styles.priceRow}>
         <Text style={[styles.price, { fontFamily: fontFamily.bold }]}>
-          {typeof product.price === 'number' ? product.price.toLocaleString() : product.price} DZD
+          {typeof product.price === 'number' ? product.price.toLocaleString() : product.price}{' '}
+          {t('common.currency', 'DZD')}
         </Text>
         {hasDiscount && product.originalPrice && (
           <Text style={styles.originalPrice}>
             {typeof product.originalPrice === 'number'
               ? product.originalPrice.toLocaleString()
               : product.originalPrice}{' '}
-            DZD
+            {t('common.currency', 'DZD')}
           </Text>
         )}
       </View>

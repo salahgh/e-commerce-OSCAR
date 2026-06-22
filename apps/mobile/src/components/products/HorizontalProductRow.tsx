@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { spacing, typography, makeThemedStyles } from '../../theme';
 import { productAccessibilityLabel } from '../../utils/a11y';
 import { useAppFont } from '../../hooks/useAppFont';
@@ -23,6 +24,7 @@ export function HorizontalProductRow({
   products: SimpleProduct[];
 }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const { fontFamily } = useAppFont();
   const styles = useStyles();
   if (products.length === 0) return null;
@@ -45,7 +47,7 @@ export function HorizontalProductRow({
             accessibilityLabel={productAccessibilityLabel({
               name: item.name,
               price: item.price,
-              currencyCode: item.currencyCode,
+              currencyCode: 'DZD',
             })}
           >
             <View style={styles.thumb}>
@@ -61,7 +63,7 @@ export function HorizontalProductRow({
               {item.name}
             </Text>
             <Text style={[styles.cardPrice, { fontFamily: fontFamily.semiBold }]}>
-              {item.price.toLocaleString()} {item.currencyCode}
+              {item.price.toLocaleString()} {t('common.currency', 'DZD')}
             </Text>
           </Pressable>
         )}

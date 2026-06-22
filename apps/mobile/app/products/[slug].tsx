@@ -283,7 +283,7 @@ export default function ProductDetailScreen() {
 
           {/* Price */}
           <View style={styles.priceContainer}>
-            <Text style={[styles.price, { fontFamily: fontFamily.bold }]}>{price.toLocaleString()} DZD</Text>
+            <Text style={[styles.price, { fontFamily: fontFamily.bold }]}>{price.toLocaleString()} {t('common.currency', 'DZD')}</Text>
           </View>
 
           {/* Stock Status */}
@@ -316,11 +316,20 @@ export default function ProductDetailScreen() {
           {/* Option Selection (Size, Color, etc.) */}
           {optionGroups.map((group) => {
             const isSize = /size|taille|مقاس/i.test(group.name);
+            const isColor = /colou?r|couleur|لون/i.test(group.name);
+            // Backend option-group names are only translated to French ("Taille"/
+            // "Couleur"); mirror the web frontend and show the locale label for the
+            // recognised size/colour groups instead of the raw backend name.
+            const groupLabel = isSize
+              ? t('products.size', 'Size')
+              : isColor
+                ? t('products.color', 'Color')
+                : group.name;
             return (
               <View key={group.name} style={styles.section}>
                 <View style={styles.sectionHeaderRow}>
                   <Text style={[styles.sectionTitle, { fontFamily: fontFamily.semiBold }]}>
-                    {t('products.selectOption', { option: group.name, defaultValue: `Select ${group.name}` })}
+                    {groupLabel}
                   </Text>
                   {isSize && (
                     <TouchableOpacity onPress={() => setSizeGuideOpen(true)}>

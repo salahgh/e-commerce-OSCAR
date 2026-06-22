@@ -207,6 +207,9 @@ export interface AppCartItem {
   productImage: string | null;
   quantity: number;
   unitPrice: number;
+  /** Pre-discount list price for the line, when the backend reports a per-item
+   * discount (original > charged unit price). Null when there is no line discount. */
+  originalUnitPrice: number | null;
   totalPrice: number;
   size: string | null;
   color: string | null;
@@ -218,6 +221,8 @@ export interface VendureOrderLine {
   quantity: number;
   linePriceWithTax: number;
   unitPriceWithTax: number;
+  /** After-promotion unit price. Optional until wired into the cart fragment. */
+  discountedUnitPriceWithTax?: number;
   productVariant: {
     id: string;
     sku: string;
@@ -246,7 +251,15 @@ export const adaptVendureOrderLine = (line: VendureOrderLine): AppCartItem => {
     productName: line.productVariant.product.name,
     productImage: line.productVariant.product.featuredAsset?.preview || null,
     quantity: line.quantity,
-    unitPrice: formatPrice(line.unitPriceWithTax),
+    // Charge the discounted unit price when the backend reports one; otherwise
+    // the plain unit price. originalUnitPrice carries the pre-discount list price
+    // (for the strikethrough) only when an actual discount applies.
+    unitPrice: formatPrice(line.discountedUnitPriceWithTax ?? line.unitPriceWithTax),
+    originalUnitPrice:
+      line.discountedUnitPriceWithTax != null &&
+      line.discountedUnitPriceWithTax < line.unitPriceWithTax
+        ? formatPrice(line.unitPriceWithTax)
+        : null,
     totalPrice: formatPrice(line.linePriceWithTax),
     size: sizeOption?.name || null,
     color: colorOption?.name || null,

@@ -55,6 +55,10 @@ export function makeOptimisticOrderLine(
     id: tempId,
     quantity,
     unitPriceWithTax: v.unitPriceWithTax,
+    // No promotion is known optimistically → discounted == unit price. Required
+    // so the optimistic write satisfies the OrderLineFields fragment (which now
+    // selects discountedUnitPriceWithTax).
+    discountedUnitPriceWithTax: v.unitPriceWithTax,
     linePriceWithTax: v.unitPriceWithTax * quantity,
     productVariant: {
       __typename: 'ProductVariant',

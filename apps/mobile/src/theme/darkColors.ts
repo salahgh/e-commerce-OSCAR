@@ -119,8 +119,8 @@ export const darkColors: ColorPalette = {
     6: '#B28416',
   },
 
-  info: '#11CAEF',
-  infoLight: '#12303A',
+  info: '#4D6BFF',
+  infoLight: '#1A2240',
   infoScale: {
     1: '#E5FBFF',
     2: '#99EEFF',

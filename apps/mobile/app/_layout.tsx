@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -94,11 +94,17 @@ function NavigationThemeBridge({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Hard ceiling on how long boot may wait for its async gates (fonts, language,
+// cache) before releasing anyway. Prevents a never-settling gate from leaving the
+// user stuck on the native-splash logo forever.
+const BOOT_FAILSAFE_MS = 6000;
+
 export default function RootLayout() {
   const [languageLoaded, setLanguageLoaded] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
+  const [bootTimedOut, setBootTimedOut] = useState(false);
 
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Gabarito_400Regular,
     Gabarito_500Medium,
     Gabarito_600SemiBold,
@@ -110,14 +116,51 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    loadSavedLanguage().then(() => {
+    // `.finally` (not `.then`) so the gate releases even if language loading ever
+    // rejects — a saved-language read must never permanently block boot.
+    loadSavedLanguage().finally(() => {
       setLanguageLoaded(true);
     });
   }, []);
 
   const cacheRestored = useApolloPersistence();
 
-  if (!languageLoaded || !fontsLoaded || !cacheRestored) {
+  // A font-load failure must never permanently hang boot: useFonts keeps `loaded`
+  // false forever on error, so treat an errored load as "ready" and fall back to
+  // the system font rather than deadlocking on the native splash.
+  const fontsReady = fontsLoaded || !!fontError;
+
+  useEffect(() => {
+    if (fontError) {
+      console.warn('[boot] font load failed, falling back to system font:', fontError);
+    }
+  }, [fontError]);
+
+  // Snapshot live gate state for the failsafe's diagnostic log (effect closure
+  // below captures mount-time values, which are always false).
+  const gateRef = useRef<{ languageLoaded: boolean; fontsReady: boolean; cacheRestored: boolean }>({
+    languageLoaded,
+    fontsReady,
+    cacheRestored,
+  });
+  gateRef.current = { languageLoaded, fontsReady, cacheRestored };
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      const g = gateRef.current;
+      if (g.languageLoaded && g.fontsReady && g.cacheRestored) return; // already booted cleanly
+      console.warn(
+        `[boot] failsafe release after ${BOOT_FAILSAFE_MS}ms — pending gates:`,
+        g,
+      );
+      setBootTimedOut(true);
+    }, BOOT_FAILSAFE_MS);
+    return () => clearTimeout(id);
+  }, []);
+
+  const bootReady = (languageLoaded && fontsReady && cacheRestored) || bootTimedOut;
+
+  if (!bootReady) {
     // Render nothing so the native splash screen stays up (held via
     // preventAutoHideAsync) — no themed spinner flash before the branded overlay.
     return null;

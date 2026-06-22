@@ -4089,6 +4089,7 @@ export type OrderLineFieldsFragment = {
   quantity: number;
   linePriceWithTax: number;
   unitPriceWithTax: number;
+  discountedUnitPriceWithTax: number;
   productVariant: {
     __typename?: 'ProductVariant';
     id: string;
@@ -4133,6 +4134,7 @@ export type OrderFieldsFragment = {
     quantity: number;
     linePriceWithTax: number;
     unitPriceWithTax: number;
+    discountedUnitPriceWithTax: number;
     productVariant: {
       __typename?: 'ProductVariant';
       id: string;
@@ -4225,6 +4227,7 @@ export type AddItemToOrderMutation = {
             quantity: number;
             linePriceWithTax: number;
             unitPriceWithTax: number;
+            discountedUnitPriceWithTax: number;
             productVariant: {
               __typename?: 'ProductVariant';
               id: string;
@@ -4310,6 +4313,7 @@ export type AddItemToOrderMutation = {
           quantity: number;
           linePriceWithTax: number;
           unitPriceWithTax: number;
+          discountedUnitPriceWithTax: number;
           productVariant: {
             __typename?: 'ProductVariant';
             id: string;
@@ -4406,6 +4410,7 @@ export type AdjustOrderLineMutation = {
             quantity: number;
             linePriceWithTax: number;
             unitPriceWithTax: number;
+            discountedUnitPriceWithTax: number;
             productVariant: {
               __typename?: 'ProductVariant';
               id: string;
@@ -4491,6 +4496,7 @@ export type AdjustOrderLineMutation = {
           quantity: number;
           linePriceWithTax: number;
           unitPriceWithTax: number;
+          discountedUnitPriceWithTax: number;
           productVariant: {
             __typename?: 'ProductVariant';
             id: string;
@@ -4581,6 +4587,7 @@ export type RemoveOrderLineMutation = {
           quantity: number;
           linePriceWithTax: number;
           unitPriceWithTax: number;
+          discountedUnitPriceWithTax: number;
           productVariant: {
             __typename?: 'ProductVariant';
             id: string;
@@ -4668,6 +4675,7 @@ export type RemoveAllOrderLinesMutation = {
           quantity: number;
           linePriceWithTax: number;
           unitPriceWithTax: number;
+          discountedUnitPriceWithTax: number;
           productVariant: {
             __typename?: 'ProductVariant';
             id: string;
@@ -4758,6 +4766,7 @@ export type SetOrderShippingAddressMutation = {
           quantity: number;
           linePriceWithTax: number;
           unitPriceWithTax: number;
+          discountedUnitPriceWithTax: number;
           productVariant: {
             __typename?: 'ProductVariant';
             id: string;
@@ -4846,6 +4855,7 @@ export type SetOrderBillingAddressMutation = {
           quantity: number;
           linePriceWithTax: number;
           unitPriceWithTax: number;
+          discountedUnitPriceWithTax: number;
           productVariant: {
             __typename?: 'ProductVariant';
             id: string;
@@ -4935,6 +4945,7 @@ export type SetOrderShippingMethodMutation = {
           quantity: number;
           linePriceWithTax: number;
           unitPriceWithTax: number;
+          discountedUnitPriceWithTax: number;
           productVariant: {
             __typename?: 'ProductVariant';
             id: string;
@@ -5023,6 +5034,7 @@ export type TransitionOrderToStateMutation = {
           quantity: number;
           linePriceWithTax: number;
           unitPriceWithTax: number;
+          discountedUnitPriceWithTax: number;
           productVariant: {
             __typename?: 'ProductVariant';
             id: string;
@@ -5121,6 +5133,7 @@ export type AddPaymentToOrderMutation = {
           quantity: number;
           linePriceWithTax: number;
           unitPriceWithTax: number;
+          discountedUnitPriceWithTax: number;
           productVariant: {
             __typename?: 'ProductVariant';
             id: string;
@@ -5248,6 +5261,7 @@ export type ApplyCouponCodeMutation = {
           quantity: number;
           linePriceWithTax: number;
           unitPriceWithTax: number;
+          discountedUnitPriceWithTax: number;
           productVariant: {
             __typename?: 'ProductVariant';
             id: string;
@@ -5334,6 +5348,7 @@ export type RemoveCouponCodeMutation = {
       quantity: number;
       linePriceWithTax: number;
       unitPriceWithTax: number;
+      discountedUnitPriceWithTax: number;
       productVariant: {
         __typename?: 'ProductVariant';
         id: string;
@@ -5425,6 +5440,7 @@ export type SetCustomerForOrderMutation = {
           quantity: number;
           linePriceWithTax: number;
           unitPriceWithTax: number;
+          discountedUnitPriceWithTax: number;
           productVariant: {
             __typename?: 'ProductVariant';
             id: string;
@@ -5544,6 +5560,7 @@ export type GetActiveOrderQuery = {
       quantity: number;
       linePriceWithTax: number;
       unitPriceWithTax: number;
+      discountedUnitPriceWithTax: number;
       productVariant: {
         __typename?: 'ProductVariant';
         id: string;
@@ -6748,6 +6765,7 @@ export const OrderLineFieldsFragmentDoc = gql`
     quantity
     linePriceWithTax
     unitPriceWithTax
+    discountedUnitPriceWithTax
     productVariant {
       id
       name

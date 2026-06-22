@@ -146,14 +146,15 @@ export default function CartScreen() {
         {/* Prices + Quantity */}
         <View style={styles.itemBottomRow}>
           <View>
-            {/* Strikethrough original price if discount exists */}
-            {discount > 0 && (
+            {/* Strikethrough original price only when the line has a genuine
+                per-item discount (original differs from the charged unit price). */}
+            {item.originalUnitPrice != null && item.originalUnitPrice > item.unitPrice && (
               <Text style={[styles.originalPrice, { fontFamily: fontFamily.regular }]}>
-                {item.unitPrice.toLocaleString()} DZD
+                {item.originalUnitPrice.toLocaleString()} {t('common.currency', 'DZD')}
               </Text>
             )}
             <Text style={[styles.salePrice, { fontFamily: fontFamily.bold }]}>
-              {item.unitPrice.toLocaleString()} DZD
+              {item.unitPrice.toLocaleString()} {t('common.currency', 'DZD')}
             </Text>
           </View>
 
@@ -242,7 +243,7 @@ export default function CartScreen() {
             {t('cart.total')}:
           </Text>
           <Text style={[styles.summaryValue, { fontFamily: fontFamily.medium }]}>
-            {subTotal.toLocaleString()} DZD
+            {subTotal.toLocaleString()} {t('common.currency', 'DZD')}
           </Text>
         </View>
         <View style={styles.summaryRow}>
@@ -250,14 +251,14 @@ export default function CartScreen() {
             {t('cart.reduction')}:
           </Text>
           <Text style={[styles.reductionValue, { fontFamily: fontFamily.regular }]}>
-            {discount > 0 ? `-${discount.toLocaleString()} DZD` : '--'}
+            {discount > 0 ? `-${discount.toLocaleString()} ${t('common.currency', 'DZD')}` : '--'}
           </Text>
         </View>
         <View style={[styles.summaryRow, styles.totalAfterRow]}>
           <Text style={[styles.totalLabel, { fontFamily: fontFamily.bold }]}>
             {t('cart.totalAfterDiscount')}:
           </Text>
-          <Text style={[styles.totalValue, { fontFamily: fontFamily.bold }]}>{total.toLocaleString()} DZD</Text>
+          <Text style={[styles.totalValue, { fontFamily: fontFamily.bold }]}>{total.toLocaleString()} {t('common.currency', 'DZD')}</Text>
         </View>
 
         {/* Checkout Button */}
@@ -267,7 +268,7 @@ export default function CartScreen() {
           activeOpacity={0.8}
         >
           <Text style={[styles.checkoutButtonText, { fontFamily: fontFamily.medium }]}>
-            {t('common.continue')}
+            {t('cart.continueToCheckout')}
           </Text>
           <Ionicons name={rtlIcon('arrow-forward')} size={20} color={colors.text.inverse} />
         </TouchableOpacity>

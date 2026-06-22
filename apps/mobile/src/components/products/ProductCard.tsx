@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { spacing, typography, makeThemedStyles } from '../../theme';
 import { useAppFont } from '../../hooks/useAppFont';
 
@@ -23,6 +24,7 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
   const router = useRouter();
+  const { t } = useTranslation();
   const { fontFamily } = useAppFont();
   const styles = useStyles();
 
@@ -70,7 +72,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) =>
 
         {/* Price */}
         <View style={styles.priceContainer}>
-          <Text style={[styles.price, { fontFamily: fontFamily.bold }]}>{product.price} DZD</Text>
+          <Text style={[styles.price, { fontFamily: fontFamily.bold }]}>{product.price} {t('common.currency', 'DZD')}</Text>
         </View>
       </View>
     </TouchableOpacity>

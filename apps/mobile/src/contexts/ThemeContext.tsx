@@ -19,7 +19,9 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const systemScheme = useColorScheme();
-  const [mode, setModeState] = useState<ThemeMode>('system');
+  // Light is the app's default theme. A returning user's saved choice (which may
+  // be 'system' or 'dark') is rehydrated from disk in the effect below.
+  const [mode, setModeState] = useState<ThemeMode>('light');
 
   // Hydrate from disk.
   useEffect(() => {

@@ -103,7 +103,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
           <Text style={styles.totalLabel}>{t('orders.total', 'Total')}:</Text>
-          <Text style={styles.totalAmount}>{totalAmount.toFixed(2)} DZD</Text>
+          <Text style={styles.totalAmount}>{totalAmount.toFixed(2)} {t('common.currency', 'DZD')}</Text>
         </View>
         <View style={styles.viewButton}>
           <Text style={styles.viewButtonText}>{t('orders.viewDetails', 'View Details')}</Text>

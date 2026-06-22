@@ -8,6 +8,7 @@ import {
   ScrollView,
   ViewStyle,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { spacing, typography, makeThemedStyles } from '../../theme';
 
 export interface Variant {
@@ -44,6 +45,7 @@ export const VariantPicker: React.FC<VariantPickerProps> = ({
   showPrice = false,
 }) => {
   const styles = useStyles();
+  const { t } = useTranslation();
   const renderColorVariant = (variant: Variant) => {
     const isSelected = selectedVariantId === variant.id;
     const isDisabled = variant.disabled || (variant.stock !== undefined && variant.stock <= 0);
@@ -131,7 +133,7 @@ export const VariantPicker: React.FC<VariantPickerProps> = ({
         </Text>
         {showPrice && variant.price !== undefined && (
           <Text style={[styles.variantPrice, isSelected && styles.variantPriceSelected]}>
-            {variant.price.toFixed(2)} DZD
+            {variant.price.toFixed(2)} {t('common.currency', 'DZD')}
           </Text>
         )}
       </TouchableOpacity>
