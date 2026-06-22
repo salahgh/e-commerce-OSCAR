@@ -237,7 +237,20 @@
     "tableActions": "Détails",
     "view": "Voir",
     "items": "{count, plural, one {# article} other {# articles}}",
-    "errorTitle": "Erreur de chargement"
+    "errorTitle": "Erreur de chargement",
+    "states": {
+      "AddingItems": "En cours",
+      "ArrangingPayment": "En attente de paiement",
+      "PaymentAuthorized": "Paiement autorisé",
+      "PaymentSettled": "Payé",
+      "PartiallyShipped": "Partiellement expédié",
+      "Shipped": "Expédié",
+      "PartiallyDelivered": "Partiellement livré",
+      "Delivered": "Livré",
+      "Modifying": "En modification",
+      "ArrangingAdditionalPayment": "Paiement supplémentaire requis",
+      "Cancelled": "Annulé"
+    }
   },
   "OrderPage": {
     "breadcrumbHome": "Accueil",

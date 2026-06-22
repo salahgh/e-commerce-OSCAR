@@ -4,16 +4,18 @@ import * as React from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Heart, Minus, Plus, ChevronDown } from 'lucide-react';
-import { formatPrice } from '@oscar/shared';
+import { formatDzd } from '@/lib/format/price';
 import {
   useGetProductBySlugQuery,
   useGetCollectionWithProductsQuery,
   useGetProductsQuery,
 } from '@oscar/graphql-shop/generated';
 import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 import { useToast } from '@/components/ui/Toast';
 import { Alert, Skeleton } from '@/components/ui';
 import { ProductCard, type ProductCardData } from '@/components/patterns';
+import { variantDiscount } from '@/lib/format/discount';
 import { SectionHeader } from '@/components/home';
 import { cn } from '@/lib/utils/cn';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -38,7 +40,7 @@ function VariantChip({
         'flex w-[131px] items-center justify-center rounded-lg border px-[26px] py-2 text-14 font-medium transition-colors',
         selected
           ? 'border-accent bg-accent text-content-inverse'
-          : 'border-[#e5e7eb] bg-white text-[#010b38] hover:border-[#c8c9cc]',
+          : 'border-border bg-white text-content-strong hover:border-border-strong',
       )}
     >
       {children}
@@ -65,6 +67,7 @@ export default function ProductPage() {
 
   const { addToCart } = useCart();
   const toast = useToast();
+  const wishlist = useWishlist();
 
   const [quantity, setQuantity] = React.useState(1);
   const [selectedColor, setSelectedColor] = React.useState<string>();
@@ -111,6 +114,10 @@ export default function ProductPage() {
 
   const currency = selectedVariant?.currencyCode ?? 'DZD';
   const price = selectedVariant?.priceWithTax ?? 0;
+  // Pre-discount price + percent come from the variant custom fields; the
+  // strike-through + "-N%" badge show only when a genuine discount is present.
+  const originalPrice = selectedVariant?.customFields?.originalPrice ?? null;
+  const onSale = originalPrice != null && originalPrice > price;
 
   // Related products: collection siblings, else recent; dedupe + drop current.
   const relatedSource = collectionSlug
@@ -191,8 +198,13 @@ export default function ProductPage() {
             <h1 className="w-full text-right font-dm text-36 font-bold leading-[1.5] text-accent">{product.name}</h1>
 
             {/* Price */}
-            <div className="flex w-full items-center justify-end gap-4">
-              <span className="font-dm text-36 font-bold text-accent">{formatPrice(price, currency)}</span>
+            <div className="flex w-full items-center justify-end gap-4" dir="ltr">
+              {onSale && (
+                <span className="font-dm text-24 font-medium text-content-muted line-through">
+                  {formatDzd(originalPrice!)}
+                </span>
+              )}
+              <span className="font-dm text-36 font-bold text-accent">{formatDzd(price)}</span>
             </div>
 
             {/* Size */}
@@ -226,21 +238,21 @@ export default function ProductPage() {
             {/* Quantity */}
             <div className="flex w-full flex-col items-end gap-3">
               <p className="w-full text-right text-24 font-[600] leading-8 text-accent">{t('quantity')}</p>
-              <div className="flex w-full items-center justify-center gap-4 rounded-lg border border-[#e5e7eb] bg-white p-2">
+              <div className="flex w-full items-center justify-center gap-4 rounded-lg border border-border bg-white p-2">
                 <button
                   type="button"
                   aria-label="-"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="flex size-6 items-center justify-center text-[#010b38]"
+                  className="flex size-6 items-center justify-center text-content-strong"
                 >
                   <Minus className="size-5" strokeWidth={1.75} />
                 </button>
-                <span className="flex-1 text-center text-18 text-[#010b38]">{quantity}</span>
+                <span className="flex-1 text-center text-18 text-content-strong">{quantity}</span>
                 <button
                   type="button"
                   aria-label="+"
                   onClick={() => setQuantity((q) => Math.min(10, q + 1))}
-                  className="flex size-6 items-center justify-center text-[#010b38]"
+                  className="flex size-6 items-center justify-center text-content-strong"
                 >
                   <Plus className="size-5" strokeWidth={1.75} />
                 </button>
@@ -253,9 +265,25 @@ export default function ProductPage() {
                 <button
                   type="button"
                   aria-label={t('wishlistAria')}
-                  className="flex size-12 shrink-0 items-center justify-center rounded-lg border border-[#c8c9cc] bg-white text-accent"
+                  aria-pressed={wishlist.has(product.slug)}
+                  onClick={() =>
+                    wishlist.toggle({
+                      slug: product.slug,
+                      name: product.name,
+                      imageUrl: images[0]?.preview ?? null,
+                      price,
+                      currencyCode: currency,
+                    })
+                  }
+                  className={cn(
+                    'flex size-12 shrink-0 items-center justify-center rounded-lg border border-border-strong bg-white transition-colors',
+                    wishlist.has(product.slug) ? 'text-state-danger-border' : 'text-accent',
+                  )}
                 >
-                  <Heart className="size-6" strokeWidth={1.5} />
+                  <Heart
+                    className={cn('size-6', wishlist.has(product.slug) && 'fill-current')}
+                    strokeWidth={1.5}
+                  />
                 </button>
                 <button
                   type="button"
@@ -268,7 +296,7 @@ export default function ProductPage() {
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="flex w-full items-center justify-center rounded-lg border border-[#c8c9cc] bg-white px-4 py-2 text-18 font-medium text-[#010b38]"
+                className="flex w-full items-center justify-center rounded-lg border border-border-strong bg-white px-4 py-2 text-18 font-medium text-content-strong"
               >
                 {t('buyNow')}
               </button>
@@ -306,8 +334,8 @@ export default function ProductPage() {
                   slug: p.slug,
                   name: p.name,
                   imageUrl: p.featuredAsset?.preview ?? null,
-                  price: p.variants[0]?.priceWithTax ?? 0,
                   currencyCode: p.variants[0]?.currencyCode ?? 'DZD',
+                  ...variantDiscount(p.variants[0]),
                 };
                 return <ProductCard key={p.id} product={card} className="w-[260px] shrink-0" />;
               })}

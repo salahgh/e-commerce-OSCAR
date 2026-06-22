@@ -237,7 +237,20 @@
     "tableActions": "Details",
     "view": "View",
     "items": "{count, plural, one {# item} other {# items}}",
-    "errorTitle": "Failed to load"
+    "errorTitle": "Failed to load",
+    "states": {
+      "AddingItems": "Draft",
+      "ArrangingPayment": "Awaiting payment",
+      "PaymentAuthorized": "Payment authorized",
+      "PaymentSettled": "Paid",
+      "PartiallyShipped": "Partially shipped",
+      "Shipped": "Shipped",
+      "PartiallyDelivered": "Partially delivered",
+      "Delivered": "Delivered",
+      "Modifying": "Modifying",
+      "ArrangingAdditionalPayment": "Additional payment required",
+      "Cancelled": "Cancelled"
+    }
   },
   "OrderPage": {
     "breadcrumbHome": "Home",

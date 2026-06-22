@@ -1,8 +1,8 @@
 'use client';
 
 import { ShoppingBag, Trash2 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { formatPrice } from '@oscar/shared';
+import { useTranslations, useLocale } from 'next-intl';
+import { formatDzd, formatDzdTotal } from '@/lib/format/price';
 import { useCart } from '@/contexts/CartContext';
 import { Link } from '@/i18n/routing';
 import {
@@ -18,6 +18,7 @@ import {
 export function MiniCart() {
   const t = useTranslations('MiniCart');
   const tCart = useTranslations('CartPage');
+  const locale = useLocale();
   const { cart, isMiniCartOpen, closeMiniCart, updateQuantity, removeItem } = useCart();
 
   return (
@@ -83,7 +84,7 @@ export function MiniCart() {
                         size="sm"
                       />
                       <span className="text-14 font-bold text-content-strong">
-                        {formatPrice(item.linePrice * 100, cart.currencyCode)}
+                        {formatDzd(item.linePrice * 100)}
                       </span>
                     </div>
                   </div>
@@ -103,7 +104,7 @@ export function MiniCart() {
               <div className="flex items-baseline justify-between">
                 <span className="text-14 text-content-muted">{t('subtotal')}</span>
                 <span className="text-18 font-bold text-content-strong">
-                  {formatPrice(cart.subTotal * 100, cart.currencyCode)}
+                  {formatDzdTotal(cart.subTotal * 100, locale)}
                 </span>
               </div>
               <div className="flex flex-col gap-2">

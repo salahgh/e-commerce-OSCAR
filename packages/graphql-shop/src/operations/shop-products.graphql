@@ -16,6 +16,10 @@ fragment ProductVariantFields on ProductVariant {
   priceWithTax
   currencyCode
   stockLevel
+  customFields {
+    originalPrice
+    discountPercent
+  }
   featuredAsset {
     ...AssetFields
   }

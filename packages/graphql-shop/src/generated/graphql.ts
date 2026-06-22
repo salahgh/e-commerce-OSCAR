@@ -6722,6 +6722,11 @@ export type ProductVariantFieldsFragment = {
   priceWithTax: number;
   currencyCode: CurrencyCode;
   stockLevel: string;
+  customFields?: {
+    __typename?: "ProductVariantCustomFields";
+    originalPrice?: number | null;
+    discountPercent?: number | null;
+  } | null;
   featuredAsset?: {
     __typename?: "Asset";
     id: string;
@@ -6777,6 +6782,11 @@ export type ProductFieldsFragment = {
     priceWithTax: number;
     currencyCode: CurrencyCode;
     stockLevel: string;
+    customFields?: {
+      __typename?: "ProductVariantCustomFields";
+      originalPrice?: number | null;
+      discountPercent?: number | null;
+    } | null;
     featuredAsset?: {
       __typename?: "Asset";
       id: string;
@@ -6890,6 +6900,11 @@ export type GetProductsQuery = {
         priceWithTax: number;
         currencyCode: CurrencyCode;
         stockLevel: string;
+        customFields?: {
+          __typename?: "ProductVariantCustomFields";
+          originalPrice?: number | null;
+          discountPercent?: number | null;
+        } | null;
         featuredAsset?: {
           __typename?: "Asset";
           id: string;
@@ -6967,6 +6982,11 @@ export type GetProductBySlugQuery = {
       priceWithTax: number;
       currencyCode: CurrencyCode;
       stockLevel: string;
+      customFields?: {
+        __typename?: "ProductVariantCustomFields";
+        originalPrice?: number | null;
+        discountPercent?: number | null;
+      } | null;
       featuredAsset?: {
         __typename?: "Asset";
         id: string;
@@ -7043,6 +7063,11 @@ export type GetProductByIdQuery = {
       priceWithTax: number;
       currencyCode: CurrencyCode;
       stockLevel: string;
+      customFields?: {
+        __typename?: "ProductVariantCustomFields";
+        originalPrice?: number | null;
+        discountPercent?: number | null;
+      } | null;
       featuredAsset?: {
         __typename?: "Asset";
         id: string;
@@ -7218,6 +7243,11 @@ export type GetCollectionBySlugQuery = {
             priceWithTax: number;
             currencyCode: CurrencyCode;
             stockLevel: string;
+            customFields?: {
+              __typename?: "ProductVariantCustomFields";
+              originalPrice?: number | null;
+              discountPercent?: number | null;
+            } | null;
             featuredAsset?: {
               __typename?: "Asset";
               id: string;
@@ -7341,6 +7371,11 @@ export type GetCollectionByIdQuery = {
             priceWithTax: number;
             currencyCode: CurrencyCode;
             stockLevel: string;
+            customFields?: {
+              __typename?: "ProductVariantCustomFields";
+              originalPrice?: number | null;
+              discountPercent?: number | null;
+            } | null;
             featuredAsset?: {
               __typename?: "Asset";
               id: string;
@@ -7551,6 +7586,11 @@ export type GetProductsByCollectionQuery = {
             priceWithTax: number;
             currencyCode: CurrencyCode;
             stockLevel: string;
+            customFields?: {
+              __typename?: "ProductVariantCustomFields";
+              originalPrice?: number | null;
+              discountPercent?: number | null;
+            } | null;
             featuredAsset?: {
               __typename?: "Asset";
               id: string;
@@ -7755,6 +7795,11 @@ export type GetCollectionWithProductsQuery = {
             priceWithTax: number;
             currencyCode: CurrencyCode;
             stockLevel: string;
+            customFields?: {
+              __typename?: "ProductVariantCustomFields";
+              originalPrice?: number | null;
+              discountPercent?: number | null;
+            } | null;
             featuredAsset?: {
               __typename?: "Asset";
               id: string;
@@ -8154,6 +8199,10 @@ export const ProductVariantFieldsFragmentDoc = gql`
     priceWithTax
     currencyCode
     stockLevel
+    customFields {
+      originalPrice
+      discountPercent
+    }
     featuredAsset {
       ...AssetFields
     }

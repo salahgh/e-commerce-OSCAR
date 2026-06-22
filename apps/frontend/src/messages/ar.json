@@ -237,7 +237,20 @@
     "tableActions": "التفاصيل",
     "view": "عرض",
     "items": "{count, plural, other {# عنصر}}",
-    "errorTitle": "فشل التحميل"
+    "errorTitle": "فشل التحميل",
+    "states": {
+      "AddingItems": "قيد الإنشاء",
+      "ArrangingPayment": "بانتظار الدفع",
+      "PaymentAuthorized": "تم تفويض الدفع",
+      "PaymentSettled": "مدفوع",
+      "PartiallyShipped": "تم شحن جزء",
+      "Shipped": "تم الشحن",
+      "PartiallyDelivered": "تم تسليم جزء",
+      "Delivered": "تم التسليم",
+      "Modifying": "قيد التعديل",
+      "ArrangingAdditionalPayment": "دفع إضافي مطلوب",
+      "Cancelled": "ملغى"
+    }
   },
   "OrderPage": {
     "breadcrumbHome": "الرئيسية",

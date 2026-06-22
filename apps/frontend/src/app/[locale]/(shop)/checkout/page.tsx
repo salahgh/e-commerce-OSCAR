@@ -4,7 +4,8 @@ import * as React from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ChevronDown, ArrowLeft, Check } from 'lucide-react';
-import { formatPrice, wilayas } from '@oscar/shared';
+import { wilayas } from '@oscar/shared';
+import { formatDzdTotal } from '@/lib/format/price';
 import {
   useSetCustomerForOrderMutation,
   useSetOrderShippingAddressMutation,
@@ -22,7 +23,7 @@ import { Alert, Button } from '@/components/ui';
 import { cn } from '@/lib/utils/cn';
 
 const inputCls =
-  'w-full rounded-lg border border-[#d0d5dd] bg-white px-3.5 py-2.5 text-right text-16 text-[#1e1e1e] shadow-sm placeholder:text-[#98a2b3] focus:border-accent focus:outline-none';
+  'w-full rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-right text-16 text-accent shadow-sm placeholder:text-content-subtle focus:border-accent focus:outline-none';
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
@@ -38,7 +39,7 @@ function Field({ label, required, children }: { label: string; required?: boolea
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-6 rounded-lg border border-[#d0d5dd] bg-white p-4">
+    <div className="flex flex-col gap-6 rounded-lg border border-hairline bg-white p-4">
       <h2 className="text-right text-24 font-medium text-accent">{title}</h2>
       {children}
     </div>
@@ -65,7 +66,7 @@ function ChoiceRow({
       disabled={disabled}
       className={cn(
         'flex w-full flex-row-reverse items-center justify-between gap-3 rounded-lg border p-3 text-right transition-colors',
-        checked ? 'border-accent' : 'border-[#d0d5dd] hover:border-[#c8c9cc]',
+        checked ? 'border-accent' : 'border-hairline hover:border-border-strong',
         disabled && 'cursor-not-allowed opacity-50',
       )}
     >
@@ -73,12 +74,12 @@ function ChoiceRow({
         <span
           className={cn(
             'flex size-5 shrink-0 items-center justify-center rounded-full border',
-            checked ? 'border-accent bg-accent text-content-inverse' : 'border-[#c8c9cc]',
+            checked ? 'border-accent bg-accent text-content-inverse' : 'border-border-strong',
           )}
         >
           {checked && <Check className="size-3.5" strokeWidth={3} />}
         </span>
-        <span className="text-16 text-[#010b38]">{label}</span>
+        <span className="text-16 text-content-strong">{label}</span>
       </span>
       {price && <span className="font-dm text-16 font-medium text-accent">{price}</span>}
     </button>
@@ -93,6 +94,7 @@ export default function CheckoutPage() {
   const tErrors = useTranslations('CheckoutPage.errors');
   const params = useParams<{ locale: string }>();
   const isAr = params?.locale === 'ar';
+  const locale = params?.locale ?? 'fr';
   const router = useRouter();
 
   const { cart, refetchCart } = useCart();
@@ -256,26 +258,26 @@ export default function CheckoutPage() {
 
           <div className="flex gap-2">
             <input className={cn(inputCls, 'flex-1')} placeholder={tSummary('discountCode')} aria-label={tSummary('discountCode')} />
-            <button type="button" className="rounded-lg border border-[#c8c9cc] bg-white px-4 text-16 font-medium text-[#010b38]">
+            <button type="button" className="rounded-lg border border-border-strong bg-white px-4 text-16 font-medium text-content-strong">
               {tSummary('apply')}
             </button>
           </div>
 
           <div className="flex flex-col gap-3 text-20 font-medium text-accent">
             <div className="flex items-center justify-between gap-4">
-              <span className="font-dm">{formatPrice(subtotal * 100, cart.currencyCode)}</span>
+              <span className="font-dm">{formatDzdTotal(subtotal * 100, locale)}</span>
               <span>{tSummary('totalCount', { count: cart.totalQuantity })}</span>
             </div>
             <div className="flex items-center justify-between gap-4">
               <span className="font-dm">
-                {cart.shipping > 0 ? formatPrice(cart.shipping * 100, cart.currencyCode) : tSummary('shippingTbd')}
+                {cart.shipping > 0 ? formatDzdTotal(cart.shipping * 100, locale) : tSummary('shippingTbd')}
               </span>
               <span>{tSummary('shippingFee')}</span>
             </div>
           </div>
 
           <div className="flex items-center justify-between gap-4 border-t border-hairline pt-4 text-20 font-bold text-accent">
-            <span className="font-dm">{formatPrice(cart.total * 100, cart.currencyCode)}</span>
+            <span className="font-dm">{formatDzdTotal(cart.total * 100, locale)}</span>
             <span>{tSummary('grandTotal')}</span>
           </div>
 
@@ -356,7 +358,7 @@ export default function CheckoutPage() {
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-[#98a2b3]" />
+                  <ChevronDown className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-content-subtle" />
                 </div>
               </Field>
               <Field label={tAddr('commune')} required>
@@ -374,7 +376,7 @@ export default function CheckoutPage() {
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-[#98a2b3]" />
+                  <ChevronDown className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-content-subtle" />
                 </div>
               </Field>
             </div>
@@ -390,7 +392,7 @@ export default function CheckoutPage() {
                   <ChoiceRow
                     key={m.id}
                     label={m.name}
-                    price={formatPrice(m.priceWithTax, cart.currencyCode)}
+                    price={formatDzdTotal(m.priceWithTax, locale)}
                     checked={selectedShipping === m.id}
                     onSelect={() => onSelectShipping(m.id)}
                   />

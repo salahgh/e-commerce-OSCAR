@@ -4,7 +4,7 @@ import * as React from 'react';
 import Image from 'next/image';
 import { Heart, Star } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { formatPrice } from '@oscar/shared';
+import { formatDzd } from '@/lib/format/price';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { Link } from '@/i18n/routing';
 import { cn } from '@/lib/utils/cn';
@@ -57,7 +57,10 @@ export function ProductCard({ product, hideWishlist, className }: ProductCardPro
         </Link>
 
         {discountPercent != null && discountPercent > 0 && (
-          <span className="pointer-events-none absolute end-3 top-3 rounded-md border-[1.5px] border-state-danger-border bg-state-danger-bg px-2.5 py-1 text-14 font-bold text-state-danger-content">
+          <span
+            dir="ltr"
+            className="pointer-events-none absolute end-3 top-3 rounded-md border-[1.5px] border-state-danger-border bg-state-danger-bg px-2.5 py-1 text-14 font-bold text-state-danger-content"
+          >
             -{discountPercent}%
           </span>
         )}
@@ -103,11 +106,11 @@ export function ProductCard({ product, hideWishlist, className }: ProductCardPro
       <div className="flex items-baseline gap-2" dir="ltr">
         {onSale && (
           <span className="font-dm text-14 font-medium text-content-muted line-through">
-            {formatPrice(originalPrice!, currencyCode)}
+            {formatDzd(originalPrice!)}
           </span>
         )}
         <span className="font-dm text-[22px] font-extrabold text-content-strong">
-          {formatPrice(price, currencyCode)}
+          {formatDzd(price)}
         </span>
       </div>
     </article>

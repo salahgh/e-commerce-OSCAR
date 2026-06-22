@@ -40,7 +40,7 @@ export function CustomerReviews() {
   return (
     <section className="flex flex-col items-center gap-12">
       <div className="flex flex-col items-center gap-4 text-center">
-        <h2 className="text-[40px] font-medium leading-tight text-accent">{title}</h2>
+        <h2 className="text-40 font-medium leading-tight text-accent">{title}</h2>
         <p className="max-w-3xl text-24 text-accent">{subtitle}</p>
       </div>
 
@@ -62,7 +62,7 @@ export function CustomerReviews() {
           onClick={prev}
           className="inline-flex h-9 w-9 items-center justify-center text-content-muted transition-colors hover:text-content-strong"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-5 w-5 rtl:rotate-180" />
         </button>
         <SliderDots count={images.length} active={index} onDotClick={goTo} />
         <button
@@ -71,7 +71,7 @@ export function CustomerReviews() {
           onClick={next}
           className="inline-flex h-9 w-9 items-center justify-center text-content-muted transition-colors hover:text-content-strong"
         >
-          <ArrowRight className="h-5 w-5" />
+          <ArrowRight className="h-5 w-5 rtl:rotate-180" />
         </button>
       </div>
     </section>
