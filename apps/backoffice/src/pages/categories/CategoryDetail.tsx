@@ -1046,63 +1046,64 @@ export const CategoryDetail: React.FC = () => {
                         )}
                       </div>
                     ) : (
-                      <div className="space-y-4">
-                        {/* Drag and drop zone */}
-                        <div
-                          onDrop={handleDrop}
-                          onDragOver={handleDragOver}
-                          onDragLeave={handleDragLeave}
-                          className={cn(
-                            'aspect-video rounded-xl border-2 border-dashed transition-all duration-300',
-                            'flex flex-col items-center justify-center gap-3',
-                            isDragging
-                              ? 'border-primary bg-primary/10 scale-[1.02]'
-                              : 'border-border'
-                          )}
-                        >
-                          <div
-                            className={cn(
-                              'p-3 rounded-full transition-colors',
-                              isDragging ? 'bg-primary/20' : 'bg-muted'
-                            )}
+                      // One cohesive dropzone: the whole area is click-to-upload
+                      // AND a drop target; the library option is a quiet strip
+                      // attached to the same container.
+                      <div
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        className={cn(
+                          'rounded-xl border-2 border-dashed overflow-hidden transition-all duration-300',
+                          isDragging
+                            ? 'border-primary bg-primary/10 scale-[1.01]'
+                            : 'border-border hover:border-muted-foreground'
+                        )}
+                      >
+                        {/* Primary: click anywhere in the zone to upload a file */}
+                        <PermissionGate anyOf={['CreateAsset', 'CreateCatalog']} disableMode>
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="w-full flex flex-col items-center justify-center gap-3 px-4 py-8 transition-colors hover:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40"
                           >
-                            <Upload
+                            <span
                               className={cn(
-                                'h-6 w-6 transition-colors',
-                                isDragging ? 'text-primary' : 'text-muted-foreground'
+                                'p-3 rounded-full transition-colors',
+                                isDragging ? 'bg-primary/20' : 'bg-muted'
                               )}
-                            />
-                          </div>
-                          <div className="text-center px-4">
-                            <p className="text-sm text-muted-foreground">
-                              {isDragging ? "Deposez l'image ici" : 'Glissez une image ici'}
-                            </p>
-                          </div>
-                        </div>
+                            >
+                              <Upload
+                                className={cn(
+                                  'h-6 w-6 transition-colors',
+                                  isDragging ? 'text-primary' : 'text-muted-foreground'
+                                )}
+                              />
+                            </span>
+                            <span className="text-center">
+                              <span className="block text-sm font-medium text-foreground">
+                                {isDragging
+                                  ? "Deposez l'image ici"
+                                  : 'Glissez une image ou cliquez pour la telecharger'}
+                              </span>
+                              <span className="mt-0.5 block text-xs text-muted-foreground">
+                                PNG ou JPG, max 5 Mo
+                              </span>
+                            </span>
+                          </button>
+                        </PermissionGate>
 
-                        {/* Action buttons */}
-                        <div className="grid grid-cols-2 gap-3">
-                          <PermissionGate anyOf={['CreateAsset', 'CreateCatalog']} disableMode>
-                            <button
-                              type="button"
-                              onClick={() => setShowAssetPicker(true)}
-                              className="flex flex-col items-center gap-2 p-4 bg-muted rounded-lg hover:bg-accent transition-colors border border-transparent hover:border-primary"
-                            >
-                              <FolderOpen className="h-6 w-6 text-primary" />
-                              <span className="text-sm font-medium text-foreground">Bibliotheque</span>
-                            </button>
-                          </PermissionGate>
-                          <PermissionGate anyOf={['CreateAsset', 'CreateCatalog']} disableMode>
-                            <button
-                              type="button"
-                              onClick={() => fileInputRef.current?.click()}
-                              className="flex flex-col items-center gap-2 p-4 bg-muted rounded-lg hover:bg-accent transition-colors border border-transparent hover:border-primary"
-                            >
-                              <Upload className="h-6 w-6 text-primary" />
-                              <span className="text-sm font-medium text-foreground">Telecharger</span>
-                            </button>
-                          </PermissionGate>
-                        </div>
+                        {/* Secondary: pick from the existing media library */}
+                        <PermissionGate anyOf={['CreateAsset', 'CreateCatalog']} disableMode>
+                          <button
+                            type="button"
+                            onClick={() => setShowAssetPicker(true)}
+                            className="w-full flex items-center justify-center gap-2 border-t border-border px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40"
+                          >
+                            <FolderOpen className="h-4 w-4" />
+                            Choisir depuis la bibliotheque
+                          </button>
+                        </PermissionGate>
                       </div>
                     )}
                     <input
