@@ -381,6 +381,18 @@ export const CategoryDetail: React.FC = () => {
       }
       // If featuredImage is null, no image (remove or none)
 
+      // Vendure requires the featured asset to be part of the entity's `assets`.
+      // Sending `assetIds: []` (no gallery images) clears the collection's assets
+      // AND nulls the featuredAsset — even when `featuredAssetId` is set in the same
+      // input — so the category image silently never persists. Always include the
+      // featured asset in the asset list to keep it.
+      const assetIds = Array.from(
+        new Set([
+          ...galleryAssets.map((a) => a.id),
+          ...(featuredAssetId ? [featuredAssetId] : []),
+        ])
+      );
+
       const baseInput = {
         translations: [
           // Primary language: French
@@ -420,7 +432,7 @@ export const CategoryDetail: React.FC = () => {
         isPrivate: values.isPrivate,
         inheritFilters: values.inheritFilters,
         featuredAssetId: featuredAssetId || null,
-        assetIds: galleryAssets.map((a) => a.id),
+        assetIds,
         customFields: {
           displayOrder: values.displayOrder,
         },

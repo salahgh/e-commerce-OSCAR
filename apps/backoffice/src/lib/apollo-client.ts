@@ -127,7 +127,18 @@ export const apolloClient = new ApolloClient({
       errorPolicy: 'all',
     },
     mutate: {
-      errorPolicy: 'all',
+      // Mutations must FAIL LOUDLY. With 'all', a GraphQL error (bad input,
+      // permission, etc.) resolves normally — tucked into result.errors — so a
+      // handler's try/catch never fires and a "success" toast shows for a write
+      // that never happened. 'none' rejects the promise on a GraphQL error so the
+      // existing try/catch blocks surface it.
+      //
+      // Note: Vendure business errors are union ErrorResult types returned in
+      // `data` (not `errors`), so they're unaffected — callers still branch on
+      // `__typename`. Queries deliberately keep 'all' (see errorLink note above):
+      // restricted-role admins fire queries they can't run and must get partial
+      // data instead of a hard failure / logout.
+      errorPolicy: 'none',
     },
   },
 });
