@@ -102,6 +102,23 @@ function generateTempId(prefix: string): string {
   return `${prefix}-${Date.now()}-${++tempIdCounter}`;
 }
 
+// Build a Vendure-safe code from a display name: transliterate accents instead of
+// dropping them ("Écru" → "ecru", not "cru") and never return an empty string
+// (an empty code makes createProductOption fail server-side).
+export function nameToCode(name: string): string {
+  const code = name
+    .toLowerCase()
+    .replace(/[àáâãäå]/g, 'a')
+    .replace(/[èéêë]/g, 'e')
+    .replace(/[ìíîï]/g, 'i')
+    .replace(/[òóôõö]/g, 'o')
+    .replace(/[ùúûü]/g, 'u')
+    .replace(/[ç]/g, 'c')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+  return code || `opt-${Date.now().toString(36)}`;
+}
+
 export const VariantManagerCreate: React.FC<VariantManagerCreateProps> = ({
   productName,
   allOptionGroups,
@@ -144,9 +161,19 @@ export const VariantManagerCreate: React.FC<VariantManagerCreateProps> = ({
     return allCombinations.filter((c) => !existingCombinationKeys.has([...c.optionIds].sort().join('-')));
   }, [allCombinations, existingCombinationKeys]);
 
+  // Vendure option groups belong to exactly ONE product, so "reusing" an existing
+  // group means CLONING it for this product. Groups are offered as templates,
+  // deduplicated by name (the catalog accumulates one group per product, e.g. 8× "Taille").
   const availableOptionGroups = useMemo(() => {
-    const selectedIds = new Set(selectedOptionGroups.map((g) => g.id));
-    return allOptionGroups.filter((g) => !selectedIds.has(g.id));
+    const selectedNames = new Set(selectedOptionGroups.map((g) => g.name.trim().toLowerCase()));
+    const byName = new Map<string, ExistingOptionGroup>();
+    for (const g of allOptionGroups) {
+      const key = g.name.trim().toLowerCase();
+      if (selectedNames.has(key)) continue;
+      const prev = byName.get(key);
+      if (!prev || g.options.length > prev.options.length) byName.set(key, g);
+    }
+    return Array.from(byName.values());
   }, [selectedOptionGroups, allOptionGroups]);
 
   // Handlers
@@ -165,12 +192,7 @@ export const VariantManagerCreate: React.FC<VariantManagerCreateProps> = ({
   const handleCreateOptionGroup = () => {
     if (!newOptionGroupName.trim()) return;
 
-    const code =
-      newOptionGroupCode.trim() ||
-      newOptionGroupName
-        .toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '');
+    const code = newOptionGroupCode.trim() || nameToCode(newOptionGroupName);
 
     const newGroup: LocalOptionGroup = {
       id: generateTempId('temp-group'),
@@ -191,16 +213,18 @@ export const VariantManagerCreate: React.FC<VariantManagerCreateProps> = ({
     const existingGroup = allOptionGroups.find((g) => g.id === groupId);
     if (!existingGroup) return;
 
+    // CLONE the group: Vendure forbids attaching a group that already belongs to
+    // another product ("already assigned" error), so reuse = copy as new entities.
     const localGroup: LocalOptionGroup = {
-      id: existingGroup.id,
+      id: generateTempId('temp-group'),
       code: existingGroup.code,
       name: existingGroup.name,
-      isNew: false,
+      isNew: true,
       options: existingGroup.options.map((o) => ({
-        id: o.id,
+        id: generateTempId('temp-option'),
         code: o.code,
         name: o.name,
-        isNew: false,
+        isNew: true,
       })),
     };
 
@@ -232,12 +256,7 @@ export const VariantManagerCreate: React.FC<VariantManagerCreateProps> = ({
   const handleCreateOption = (groupId: string) => {
     if (!newOptionName.trim()) return;
 
-    const code =
-      newOptionCode.trim() ||
-      newOptionName
-        .toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '');
+    const code = newOptionCode.trim() || nameToCode(newOptionName);
 
     const newOption: LocalOption = {
       id: generateTempId('temp-option'),

@@ -412,10 +412,8 @@ export const ProductCreate: React.FC = () => {
               input: {
                 code: group.code,
                 translations: [
-                  {
-                    languageCode: LanguageCode.En,
-                    name: group.name,
-                  },
+                  { languageCode: LanguageCode.Fr, name: group.name },
+                  { languageCode: LanguageCode.En, name: group.name },
                 ],
                 options: [], // We'll create options separately
               },
@@ -445,10 +443,8 @@ export const ProductCreate: React.FC = () => {
                   productOptionGroupId: realGroupId,
                   code: option.code,
                   translations: [
-                    {
-                      languageCode: LanguageCode.En,
-                      name: option.name,
-                    },
+                    { languageCode: LanguageCode.Fr, name: option.name },
+                    { languageCode: LanguageCode.En, name: option.name },
                   ],
                 },
               },
@@ -480,10 +476,8 @@ export const ProductCreate: React.FC = () => {
               .map((tempId) => optionIdMap.get(tempId) || tempId)
               .filter(Boolean),
             translations: [
-              {
-                languageCode: LanguageCode.En,
-                name: v.optionLabels || v.sku,
-              },
+              { languageCode: LanguageCode.Fr, name: v.optionLabels || v.sku },
+              { languageCode: LanguageCode.En, name: v.optionLabels || v.sku },
             ],
           }));
 

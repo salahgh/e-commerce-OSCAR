@@ -23,6 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { AssetPickerModal } from '../ui/AssetPickerModal';
 import { FacetSelector } from './FacetSelector';
+import { nameToCode } from './VariantManagerCreate';
 import { formatPrice } from '../../lib/utils';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
@@ -248,9 +249,22 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
     return allCombinations.filter(c => !existingCombinationKeys.has([...c.optionIds].sort().join('-')));
   }, [allCombinations, existingCombinationKeys]);
 
+  // Vendure option groups belong to exactly ONE product, so "reusing" a group from
+  // another product means CLONING it. Offer groups as templates, deduplicated by
+  // name (the catalog accumulates one group per product, e.g. 8× "Taille"), and
+  // exclude names already present on this product.
   const availableOptionGroups = useMemo(() => {
     const productGroupIds = new Set(optionGroups.map(g => g.id));
-    return allOptionGroups.filter(g => !productGroupIds.has(g.id));
+    const productGroupNames = new Set(optionGroups.map(g => g.name.trim().toLowerCase()));
+    const byName = new Map<string, OptionGroup>();
+    for (const g of allOptionGroups) {
+      if (productGroupIds.has(g.id)) continue;
+      const key = g.name.trim().toLowerCase();
+      if (productGroupNames.has(key)) continue;
+      const prev = byName.get(key);
+      if (!prev || g.options.length > prev.options.length) byName.set(key, g);
+    }
+    return Array.from(byName.values());
   }, [optionGroups, allOptionGroups]);
 
   // Paginated combinations
@@ -284,15 +298,17 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
       return;
     }
 
-    const code = newOptionGroupCode.trim() ||
-      newOptionGroupName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const code = newOptionGroupCode.trim() || nameToCode(newOptionGroupName);
 
     try {
       const result = await createOptionGroup({
         variables: {
           input: {
             code,
-            translations: [{ languageCode: LanguageCode.Fr, name: newOptionGroupName.trim() }],
+            translations: [
+              { languageCode: LanguageCode.Fr, name: newOptionGroupName.trim() },
+              { languageCode: LanguageCode.En, name: newOptionGroupName.trim() },
+            ],
             options: [],
           },
         },
@@ -327,9 +343,40 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
       return;
     }
 
+    const source = allOptionGroups.find(g => g.id === groupId);
+    if (!source) return;
+
     try {
+      // Vendure forbids attaching a group owned by another product ("already
+      // assigned" error), so reuse = CLONE: create a fresh group with the same
+      // name/code and options, then attach the clone to this product.
+      const cloneResult = await createOptionGroup({
+        variables: {
+          input: {
+            code: source.code,
+            translations: [
+              { languageCode: LanguageCode.Fr, name: source.name },
+              { languageCode: LanguageCode.En, name: source.name },
+            ],
+            options: source.options.map(o => ({
+              code: o.code,
+              translations: [
+                { languageCode: LanguageCode.Fr, name: o.name },
+                { languageCode: LanguageCode.En, name: o.name },
+              ],
+            })),
+          },
+        },
+        refetchQueries: [{ query: AdminProductOptionGroupsDocument }],
+      });
+
+      const newGroupId = cloneResult.data?.createProductOptionGroup?.id;
+      if (!newGroupId) {
+        throw new Error('Echec de la copie du groupe');
+      }
+
       const result = await addOptionGroupToProduct({
-        variables: { productId, optionGroupId: groupId },
+        variables: { productId, optionGroupId: newGroupId },
         refetchQueries: [
           { query: AdminProductDocument, variables: { id: productId } },
           { query: AdminProductOptionGroupsDocument },
@@ -345,15 +392,20 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
         return;
       }
 
-      dispatch(addToast({ message: "Groupe d'options ajouté!", type: 'success' }));
+      dispatch(addToast({
+        message: `Groupe "${source.name}" copié avec ${source.options.length} option(s)!`,
+        type: 'success',
+      }));
       // Expand the newly added group
-      setExpandedGroups(prev => new Set([...prev, groupId]));
+      setExpandedGroups(prev => new Set([...prev, newGroupId]));
       onRefetch();
     } catch (err: any) {
       const errorMessage = err?.graphQLErrors?.[0]?.message || err?.message || 'Erreur';
-      // Check if it's the "already assigned" error
       if (errorMessage.includes('already assigned')) {
-        dispatch(addToast({ message: "Ce groupe d'options est déjà assigné à ce produit", type: 'warning' }));
+        dispatch(addToast({
+          message: "Ce groupe appartient déjà à un autre produit et ne peut pas être partagé",
+          type: 'warning',
+        }));
       } else {
         dispatch(addToast({ message: errorMessage, type: 'error' }));
       }
@@ -387,8 +439,7 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
       return;
     }
 
-    const code = newOptionCode.trim() ||
-      newOptionName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const code = newOptionCode.trim() || nameToCode(newOptionName);
 
     try {
       await createOption({
@@ -396,7 +447,10 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
           input: {
             productOptionGroupId: groupId,
             code,
-            translations: [{ languageCode: LanguageCode.Fr, name: newOptionName.trim() }],
+            translations: [
+              { languageCode: LanguageCode.Fr, name: newOptionName.trim() },
+              { languageCode: LanguageCode.En, name: newOptionName.trim() },
+            ],
           },
         },
         refetchQueries: [
@@ -484,10 +538,10 @@ export const VariantManager: React.FC<VariantManagerProps> = ({
         price: Math.round(basePrice * 100),
         stockOnHand: baseStock,
         optionIds,
-        translations: [{
-          languageCode: LanguageCode.Fr,
-          name: combination?.label || `Variant ${index + 1}`,
-        }],
+        translations: [
+          { languageCode: LanguageCode.Fr, name: combination?.label || `Variant ${index + 1}` },
+          { languageCode: LanguageCode.En, name: combination?.label || `Variant ${index + 1}` },
+        ],
       };
     });
 
