@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useMutation } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { useNavigate, Link } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import {
@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
-import { DeleteProductDocument, ReindexDocument } from '../../graphql/generated/graphql';
+import { AdminProductsDocument, DeleteProductDocument, ReindexDocument } from '../../graphql/generated/graphql';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { formatDate } from '../../lib/utils';
 import { useUnifiedSearch, type SortByField } from '../../hooks/useUnifiedSearch';
@@ -56,6 +56,21 @@ export const ProductList: React.FC = () => {
 
   // Use the unified search hook for all filtering and search
   const search = useUnifiedSearch();
+
+  // The main list is search-index-based, and products WITHOUT variants are never
+  // indexed by Vendure — they would be invisible and impossible to complete.
+  // Fetch them directly from the products query and surface them separately.
+  const { data: allProductsData } = useQuery(AdminProductsDocument, {
+    variables: { options: { take: 100 } },
+    fetchPolicy: 'cache-and-network',
+  });
+  const incompleteProducts = useMemo(
+    () =>
+      (allProductsData?.products?.items ?? []).filter(
+        (p: any) => (p.variants?.length ?? 0) === 0
+      ),
+    [allProductsData]
+  );
 
   // Total pages must use the SAME page size the query actually fetches
   // (search.state.perPage). Using a separate hardcoded value made the page
@@ -218,6 +233,31 @@ export const ProductList: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Incomplete products — invisible to the search-based list below, so staff
+          could never find and finish them without this section */}
+      {incompleteProducts.length > 0 && (
+        <div className="bg-amber-500/10 border border-amber-500/40 rounded-lg p-4">
+          <p className="font-medium text-amber-600 dark:text-amber-400">
+            ⚠️ {incompleteProducts.length} produit{incompleteProducts.length > 1 ? 's' : ''} sans
+            variantes (invisible{incompleteProducts.length > 1 ? 's' : ''} dans la liste et la
+            boutique) — ajoutez variantes et prix pour les compléter :
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {incompleteProducts.map((p: any) => (
+              <Link
+                key={p.id}
+                to={`/products/${p.id}/edit`}
+                className="inline-flex items-center gap-1 px-2 py-1 bg-card border border-border rounded text-sm text-foreground hover:border-amber-500 transition-colors"
+              >
+                <Edit3 className="h-3 w-3" />
+                {p.name}
+                {!p.enabled && <span className="text-xs text-muted-foreground">(désactivé)</span>}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
