@@ -3,7 +3,11 @@
 import * as React from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useGetCollectionWithProductsQuery } from '@oscar/graphql-shop/generated';
+import {
+  useGetCollectionWithProductsQuery,
+  useSearchProductsWithFacetsQuery,
+  useGetProductsQuery,
+} from '@oscar/graphql-shop/generated';
 import { Alert, Skeleton } from '@/components/ui';
 import { PageHeader } from '@/components/layout';
 import {
@@ -41,30 +45,64 @@ export default function CategoryDetailPage() {
 
   const [loadingMore, setLoadingMore] = React.useState(false);
 
-  const { data, loading, error, fetchMore } = useGetCollectionWithProductsQuery({
-    variables: { slug, take: PER_PAGE, skip: 0 },
+  // Collection meta only (name, description, breadcrumbs, children). take: 1 keeps the
+  // variant payload minimal — product pagination is handled by the search query below,
+  // because collection.productVariants paginates VARIANTS: a page of 12 variants can
+  // collapse to a single product card once deduplicated (products here have 4-12
+  // variants each), which made infinite scroll surface ~1 product per request.
+  const { data, loading, error } = useGetCollectionWithProductsQuery({
+    variables: { slug, take: 1, skip: 0 },
     skip: !slug,
   });
-
   const collection = data?.collection;
-  const productsRaw = collection?.productVariants.items ?? [];
-  const total = collection?.productVariants.totalItems ?? 0;
-  const hasMore = productsRaw.length < total;
+
+  // Product-level pagination: `search` with groupByProduct pages over PRODUCTS,
+  // so every fetch yields PER_PAGE new cards and totalItems is a true product count.
+  const {
+    data: searchData,
+    loading: searchLoading,
+    fetchMore,
+  } = useSearchProductsWithFacetsQuery({
+    variables: {
+      input: { collectionSlug: slug, groupByProduct: true, take: PER_PAGE, skip: 0 },
+    },
+    skip: !slug,
+  });
+  const searchItems = searchData?.search.items ?? [];
+  const total = searchData?.search.totalItems ?? 0;
+  const hasMore = searchItems.length < total;
 
   const onLoadMore = React.useCallback(() => {
     setLoadingMore(true);
-    fetchMore({ variables: { slug, take: PER_PAGE, skip: productsRaw.length } }).finally(() =>
-      setLoadingMore(false),
-    );
-  }, [fetchMore, slug, productsRaw.length]);
+    fetchMore({
+      variables: {
+        input: {
+          collectionSlug: slug,
+          groupByProduct: true,
+          take: PER_PAGE,
+          skip: searchItems.length,
+        },
+      },
+    }).finally(() => setLoadingMore(false));
+  }, [fetchMore, slug, searchItems.length]);
 
-  // Dedupe products (variants → product collection may include duplicates)
-  const seen = new Set<string>();
-  const products = productsRaw.flatMap((v) => {
-    if (!v.product || seen.has(v.product.id)) return [];
-    seen.add(v.product.id);
-    return [v.product];
+  // Hydrate the loaded pages with full product data (variants carry the discount
+  // custom fields that search results lack), preserving the search result order.
+  const loadedIds = Array.from(new Set(searchItems.map((it) => it.productId)));
+  const { data: productsData, previousData: previousProductsData, loading: productsLoading } =
+    useGetProductsQuery({
+      variables: { options: { filter: { id: { in: loadedIds } }, take: loadedIds.length } },
+      skip: loadedIds.length === 0,
+    });
+  // While the next page hydrates, keep showing the previous set instead of skeletons.
+  const hydrated = productsData ?? previousProductsData;
+  const byId = new Map((hydrated?.products.items ?? []).map((p) => [p.id, p]));
+  const products = loadedIds.flatMap((id) => {
+    const p = byId.get(id);
+    return p ? [p] : [];
   });
+
+  const gridLoading = (loading || searchLoading || productsLoading) && products.length === 0;
 
   // Breadcrumb is driven by Vendure's collection.breadcrumbs (full ancestor chain),
   // excluding the synthetic root collection. The last crumb (current category) has no link.
@@ -115,12 +153,12 @@ export default function CategoryDetailPage() {
           </h2>
 
           <ProductGrid columns={4}>
-            {loading
+            {gridLoading
               ? Array.from({ length: PER_PAGE }).map((_, i) => <ProductCardSkeleton key={i} />)
               : products.map((p) => <ProductCard key={p.id} product={toCardData(p)} />)}
           </ProductGrid>
 
-          {!loading && products.length === 0 && (
+          {!gridLoading && !searchLoading && products.length === 0 && (
             <p className="py-12 text-center text-content-muted">{t('empty')}</p>
           )}
 

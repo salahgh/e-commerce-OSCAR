@@ -88,7 +88,13 @@ function makeClient(locale: string) {
             },
           },
           search: {
-            keyArgs: ['input', ['term', 'facetValueFilters', 'sort']],
+            // collectionSlug/collectionId and groupByProduct must be part of the cache
+            // key — category pages paginate search results per collection, and without
+            // them all collections would merge into one shared list.
+            keyArgs: [
+              'input',
+              ['term', 'facetValueFilters', 'sort', 'collectionSlug', 'collectionId', 'groupByProduct'],
+            ],
             merge(existing, incoming, { args }: any) {
               if (!existing || (args?.input?.skip ?? 0) === 0) return incoming;
               return { ...incoming, items: [...(existing.items || []), ...(incoming.items || [])] };
