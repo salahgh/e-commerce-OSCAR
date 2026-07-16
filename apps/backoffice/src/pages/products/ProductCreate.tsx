@@ -22,6 +22,7 @@ import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
 import {
   CreateProductDocument,
+  DeleteProductDocument,
   CreateProductVariantsDocument,
   CreateAssetsDocument,
   AdminCollectionsWithFiltersDocument,
@@ -106,6 +107,10 @@ export const ProductCreate: React.FC = () => {
   // Loading states
   const [creating, setCreating] = useState(false);
 
+  // Tracks whether the user manually edited each slug field, so auto-generation
+  // from the name keeps working until they take over
+  const [slugEdited, setSlugEdited] = useState({ fr: false, en: false, ar: false });
+
   // Fetch data
   const { data: collectionsData } = useQuery(AdminCollectionsWithFiltersDocument, {
     variables: { options: { take: 100 } },
@@ -114,6 +119,7 @@ export const ProductCreate: React.FC = () => {
 
   // Mutations
   const [createProduct] = useMutation(CreateProductDocument);
+  const [deleteProduct] = useMutation(DeleteProductDocument);
   const [createVariants] = useMutation(CreateProductVariantsDocument);
   const [createAssets] = useMutation(CreateAssetsDocument);
   const [updateCollectionFilters] = useMutation(UpdateCollectionFiltersDocument);
@@ -149,8 +155,13 @@ export const ProductCreate: React.FC = () => {
       [name]: type === 'checkbox' ? checked : value,
     }));
 
-    // Auto-generate slug when name changes
-    if (name === 'name' && !formData.slug) {
+    // A manual edit of a slug field stops auto-generation for that language
+    if (name === 'slug') setSlugEdited((prev) => ({ ...prev, fr: true }));
+    if (name === 'slugEn') setSlugEdited((prev) => ({ ...prev, en: true }));
+    if (name === 'slugAr') setSlugEdited((prev) => ({ ...prev, ar: true }));
+
+    // Auto-generate slug from the full name on every change until manually edited
+    if (name === 'name' && !slugEdited.fr) {
       setFormData((prev) => ({
         ...prev,
         slug: generateSlug(value),
@@ -284,7 +295,25 @@ export const ProductCreate: React.FC = () => {
       return;
     }
 
+    // Every variant must have a positive price — 0 DZD products must never reach the store
+    const zeroPriced = pendingVariants.filter(
+      (v) => v.sku.trim() && (!Number.isFinite(v.price) || v.price <= 0)
+    );
+    if (zeroPriced.length > 0) {
+      dispatch(
+        addToast({
+          message: `Prix manquant ou invalide pour ${zeroPriced.length} variante(s) — un prix supérieur à 0 est requis`,
+          type: 'error',
+        })
+      );
+      return;
+    }
+
     setCreating(true);
+
+    // Track the created product so we can roll it back if a later step fails —
+    // otherwise a variantless "orphan" product stays in the catalog
+    let createdProductId: string | undefined;
 
     try {
       // Step 1: Handle images - upload new files and collect library asset IDs
@@ -367,6 +396,7 @@ export const ProductCreate: React.FC = () => {
       if (!productId) {
         throw new Error('Echec de la creation du produit');
       }
+      createdProductId = productId;
 
       // Step 3: Process option groups and build ID mappings
       // Map temp IDs to real IDs for both groups and options
@@ -424,9 +454,12 @@ export const ProductCreate: React.FC = () => {
               },
             });
             const realOptionId = optionResult.data?.createProductOption?.id || '';
-            if (realOptionId) {
-              optionIdMap.set(option.id, realOptionId);
+            if (!realOptionId) {
+              // Failing silently here used to send temp IDs to createVariants,
+              // which crashed variant creation and left an orphan product
+              throw new Error(`Echec de la creation de l'option: ${option.name}`);
             }
+            optionIdMap.set(option.id, realOptionId);
           } else {
             // Existing option - ID stays the same
             optionIdMap.set(option.id, option.id);
@@ -498,7 +531,28 @@ export const ProductCreate: React.FC = () => {
       navigate(`/products/${productId}`);
     } catch (err: any) {
       console.error('Create product error:', err);
-      dispatch(addToast({ message: err.message || 'Erreur lors de la creation', type: 'error' }));
+
+      // Roll back the partially-created product so retrying doesn't pile up duplicates
+      if (createdProductId) {
+        try {
+          await deleteProduct({ variables: { id: createdProductId } });
+          dispatch(
+            addToast({
+              message: `${err.message || 'Erreur lors de la creation'} — le produit incomplet a été supprimé, corrigez puis réessayez`,
+              type: 'error',
+            })
+          );
+        } catch {
+          dispatch(
+            addToast({
+              message: `${err.message || 'Erreur lors de la creation'} — un produit incomplet a pu être créé, vérifiez la liste avant de réessayer`,
+              type: 'error',
+            })
+          );
+        }
+      } else {
+        dispatch(addToast({ message: err.message || 'Erreur lors de la creation', type: 'error' }));
+      }
     } finally {
       setCreating(false);
     }
@@ -608,8 +662,8 @@ export const ProductCreate: React.FC = () => {
                     value={formData.nameEn}
                     onChange={(e) => {
                       handleInputChange(e);
-                      // Auto-generate English slug if empty
-                      if (!formData.slugEn) {
+                      // Auto-generate English slug from the full name until manually edited
+                      if (!slugEdited.en) {
                         setFormData(prev => ({
                           ...prev,
                           slugEn: generateSlug(e.target.value),
@@ -1027,7 +1081,7 @@ export const ProductCreate: React.FC = () => {
               variant="primary"
               onClick={handleCreate}
               loading={creating}
-              disabled={!canProceed()}
+              disabled={!canProceed() || creating}
               icon={<Save className="h-4 w-4" />}
             >
               Creer le produit

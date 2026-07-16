@@ -50,6 +50,7 @@ function VariantChip({
 
 export default function ProductPage() {
   const t = useTranslations('ProductPage');
+  const tStock = useTranslations('StockIndicator');
   const params = useParams<{ slug: string; locale: string }>();
   const slug = params?.slug as string;
 
@@ -235,6 +236,14 @@ export default function ProductPage() {
               </div>
             )}
 
+            {/* Products without purchasable variants must not offer cart actions */}
+            {variants.length === 0 && (
+              <Alert intent="warning" className="w-full">
+                {tStock('outOfStock')}
+              </Alert>
+            )}
+
+            {variants.length > 0 && (<>
             {/* Quantity */}
             <div className="flex w-full flex-col items-end gap-3">
               <p className="w-full text-right text-24 font-[600] leading-8 text-accent">{t('quantity')}</p>
@@ -301,6 +310,7 @@ export default function ProductPage() {
                 {t('buyNow')}
               </button>
             </div>
+            </>)}
           </div>
         </div>
 
