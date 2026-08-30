@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { useTranslations } from 'next-intl';
 import { useAuth } from './AuthContext';
 import { useToast } from '@/components/ui/Toast';
+import { trackAddToCart } from '@/lib/analytics/meta-pixel';
 import {
   useGetActiveOrderQuery,
   useAddItemToOrderMutation,
@@ -142,7 +143,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       if ('id' in response) {
-        setCart(mapOrderToCart(response as OrderFieldsFragment));
+        const nextCart = mapOrderToCart(response as OrderFieldsFragment);
+        setCart(nextCart);
+        const line = nextCart.items.find((item) => item.productVariantId === productVariantId);
+        if (line) {
+          trackAddToCart({
+            sku: line.sku,
+            name: line.productName,
+            quantity,
+            value: line.unitPrice * quantity,
+            currency: nextCart.currencyCode,
+          });
+        }
         toast.success(tToasts('added'));
         // Auto-open the mini-cart so the user sees the new item — feels
         // more like adding to a real cart than a toast that vanishes.

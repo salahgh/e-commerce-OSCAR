@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
@@ -7,6 +8,7 @@ import { formatDzdTotal } from '@/lib/format/price';
 import { useGetOrderByCodeQuery } from '@oscar/graphql-shop/generated';
 import { Link } from '@/i18n/routing';
 import { Alert, Button, Card, Skeleton } from '@/components/ui';
+import { trackPurchase } from '@/lib/analytics/meta-pixel';
 
 export default function ConfirmationPage() {
   const t = useTranslations('CheckoutConfirmationPage');
@@ -20,6 +22,21 @@ export default function ConfirmationPage() {
     fetchPolicy: 'network-only',
   });
 
+  const order = data?.orderByCode;
+
+  useEffect(() => {
+    if (!order) return;
+    trackPurchase({
+      code: order.code,
+      value: order.totalWithTax / 100,
+      currency: order.currencyCode,
+      items: order.lines.map((line) => ({
+        sku: line.productVariant.sku,
+        quantity: line.quantity,
+      })),
+    });
+  }, [order]);
+
   if (loading) {
     return (
       <div className="mx-auto max-w-3xl px-6 py-16">
@@ -28,8 +45,6 @@ export default function ConfirmationPage() {
       </div>
     );
   }
-
-  const order = data?.orderByCode;
 
   if (error || !order) {
     return (

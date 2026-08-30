@@ -21,6 +21,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useRouter, Link } from '@/i18n/routing';
 import { Alert, Button } from '@/components/ui';
 import { cn } from '@/lib/utils/cn';
+import { trackInitiateCheckout } from '@/lib/analytics/meta-pixel';
 
 const inputCls =
   'w-full rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-right text-16 text-accent shadow-sm placeholder:text-content-subtle focus:border-accent focus:outline-none';
@@ -99,6 +100,19 @@ export default function CheckoutPage() {
 
   const { cart, refetchCart } = useCart();
   const { customer, isAuthenticated, logout } = useAuth();
+
+  // Once per checkout visit — the cart object keeps changing as shipping and
+  // payment are picked, but that's still the same funnel entry.
+  const checkoutTracked = React.useRef(false);
+  React.useEffect(() => {
+    if (!cart || cart.items.length === 0 || checkoutTracked.current) return;
+    checkoutTracked.current = true;
+    trackInitiateCheckout({
+      value: cart.total,
+      currency: cart.currencyCode,
+      items: cart.items.map((item) => ({ sku: item.sku, quantity: item.quantity })),
+    });
+  }, [cart]);
 
   const [setCustomer] = useSetCustomerForOrderMutation();
   const [setShipping] = useSetOrderShippingAddressMutation();

@@ -18,6 +18,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { organizationSchema, websiteSchema } from '@/lib/seo/schema';
 import { ServiceWorkerRegistrar } from '@/components/pwa/ServiceWorkerRegistrar';
 import { PWAInstallPrompt } from '@/components/pwa/PWAInstallPrompt';
+import { MetaPixel } from '@/components/analytics/MetaPixel';
 
 const plexArabic = IBM_Plex_Sans_Arabic({
   subsets: ['arabic', 'latin'],
@@ -120,6 +121,7 @@ export default async function LocaleLayout({
                       <MiniCart />
                       <ServiceWorkerRegistrar />
                       <PWAInstallPrompt />
+                      <MetaPixel />
                     </WishlistProvider>
                   </CartProvider>
                 </AuthProvider>

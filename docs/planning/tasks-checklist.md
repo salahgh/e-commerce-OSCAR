@@ -1121,10 +1121,10 @@
   - [ ] E-commerce tracking
   - [ ] Event tracking
   - [ ] Conversion goals
-- [ ] Facebook Pixel
-  - [ ] Page view tracking
-  - [ ] Add to cart events
-  - [ ] Purchase events
+- [x] Facebook Pixel
+  - [x] Page view tracking
+  - [x] Add to cart events
+  - [x] Purchase events
 
 ## 6.3 Multilingual Implementation
 

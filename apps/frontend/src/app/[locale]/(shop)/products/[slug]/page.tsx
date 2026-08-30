@@ -20,6 +20,7 @@ import { SectionHeader } from '@/components/home';
 import { cn } from '@/lib/utils/cn';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { productSchema, breadcrumbSchema } from '@/lib/seo/schema';
+import { trackViewContent } from '@/lib/analytics/meta-pixel';
 
 /** Size / colour selector chip — black when selected, outlined otherwise (Figma "متغيرات الأوسمة"). */
 function VariantChip({
@@ -76,9 +77,22 @@ export default function ProductPage() {
   const [activeImage, setActiveImage] = React.useState(0);
   const [detailsOpen, setDetailsOpen] = React.useState(true);
 
+  const product = data?.product;
+
+  React.useEffect(() => {
+    if (!product) return;
+    const variant = product.variants[0];
+    trackViewContent({
+      sku: variant?.sku ?? product.slug,
+      name: product.name,
+      value: (variant?.priceWithTax ?? 0) / 100,
+      currency: variant?.currencyCode ?? 'DZD',
+    });
+  }, [product]);
+
   if (loading) return <PdpSkeleton />;
 
-  if (error || !data?.product) {
+  if (error || !product) {
     return (
       <div className="mx-auto max-w-2xl px-6 py-24">
         <Alert intent="danger" title={t('errorTitle')}>
@@ -88,7 +102,6 @@ export default function ProductPage() {
     );
   }
 
-  const product = data.product;
   const variants = product.variants;
   const images = product.assets.length > 0 ? product.assets : product.featuredAsset ? [product.featuredAsset] : [];
 
