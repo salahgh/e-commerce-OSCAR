@@ -86,7 +86,6 @@ export default function ProductPage() {
       sku: variant?.sku ?? product.slug,
       name: product.name,
       value: (variant?.priceWithTax ?? 0) / 100,
-      currency: variant?.currencyCode ?? 'DZD',
     });
   }, [product]);
 

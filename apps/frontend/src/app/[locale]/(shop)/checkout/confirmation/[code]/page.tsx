@@ -29,7 +29,6 @@ export default function ConfirmationPage() {
     trackPurchase({
       code: order.code,
       value: order.totalWithTax / 100,
-      currency: order.currencyCode,
       items: order.lines.map((line) => ({
         sku: line.productVariant.sku,
         quantity: line.quantity,

@@ -60,6 +60,12 @@ function fbq(...args: unknown[]): void {
   window.fbq!(...args);
 }
 
+// The storefront trades exclusively in DZD (every price is rendered with the
+// shared DZD formatter), but the production channel's currencyCode is
+// currently misconfigured as USD. Report the currency customers actually pay
+// in rather than passing the channel value through.
+const CURRENCY = 'DZD';
+
 export function trackPageView(): void {
   fbq('track', 'PageView');
 }
@@ -67,23 +73,21 @@ export function trackPageView(): void {
 export function trackViewContent(item: {
   sku: string;
   name: string;
-  /** Price in currency units (not cents). */
+  /** Price in DZD units (not cents). */
   value: number;
-  currency: string;
 }): void {
   fbq('track', 'ViewContent', {
     content_ids: [item.sku],
     content_name: item.name,
     content_type: 'product',
     value: item.value,
-    currency: item.currency,
+    currency: CURRENCY,
   });
 }
 
 export function trackInitiateCheckout(cart: {
-  /** Cart total in currency units (not cents). */
+  /** Cart total in DZD units (not cents). */
   value: number;
-  currency: string;
   items: Array<{ sku: string; quantity: number }>;
 }): void {
   fbq('track', 'InitiateCheckout', {
@@ -92,7 +96,7 @@ export function trackInitiateCheckout(cart: {
     contents: cart.items.map((i) => ({ id: i.sku, quantity: i.quantity })),
     num_items: cart.items.reduce((sum, i) => sum + i.quantity, 0),
     value: cart.value,
-    currency: cart.currency,
+    currency: CURRENCY,
   });
 }
 
@@ -100,9 +104,8 @@ export function trackAddToCart(item: {
   sku: string;
   name: string;
   quantity: number;
-  /** Price of the added quantity, in currency units (not cents). */
+  /** Price of the added quantity, in DZD units (not cents). */
   value: number;
-  currency: string;
 }): void {
   fbq('track', 'AddToCart', {
     content_ids: [item.sku],
@@ -110,15 +113,14 @@ export function trackAddToCart(item: {
     content_type: 'product',
     contents: [{ id: item.sku, quantity: item.quantity }],
     value: item.value,
-    currency: item.currency,
+    currency: CURRENCY,
   });
 }
 
 export function trackPurchase(order: {
   code: string;
-  /** Order total in currency units (not cents). */
+  /** Order total in DZD units (not cents). */
   value: number;
-  currency: string;
   items: Array<{ sku: string; quantity: number }>;
 }): void {
   // The confirmation page can be reloaded or revisited from history —
@@ -137,6 +139,6 @@ export function trackPurchase(order: {
     contents: order.items.map((i) => ({ id: i.sku, quantity: i.quantity })),
     num_items: order.items.reduce((sum, i) => sum + i.quantity, 0),
     value: order.value,
-    currency: order.currency,
+    currency: CURRENCY,
   });
 }

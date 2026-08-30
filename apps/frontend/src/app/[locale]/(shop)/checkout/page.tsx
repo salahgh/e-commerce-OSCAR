@@ -109,7 +109,6 @@ export default function CheckoutPage() {
     checkoutTracked.current = true;
     trackInitiateCheckout({
       value: cart.total,
-      currency: cart.currencyCode,
       items: cart.items.map((item) => ({ sku: item.sku, quantity: item.quantity })),
     });
   }, [cart]);

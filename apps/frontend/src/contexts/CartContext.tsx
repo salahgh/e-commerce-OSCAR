@@ -152,7 +152,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             name: line.productName,
             quantity,
             value: line.unitPrice * quantity,
-            currency: nextCart.currencyCode,
           });
         }
         toast.success(tToasts('added'));
