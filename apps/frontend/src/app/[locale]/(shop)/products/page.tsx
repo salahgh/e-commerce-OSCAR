@@ -8,6 +8,7 @@ import { Alert } from '@/components/ui';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/Dialog';
 import { ProductCard, ProductCardSkeleton, CategoryCircles, type ProductCardData } from '@/components/patterns';
 import { variantDiscount } from '@/lib/format/discount';
+import { productOutOfStock } from '@/lib/format/stock';
 import { cn } from '@/lib/utils/cn';
 
 const TAKE = 48;
@@ -19,7 +20,7 @@ type Item = {
   slug: string;
   name: string;
   featuredAsset?: { preview: string } | null;
-  variants: Array<{ priceWithTax: number; currencyCode: string; options: Array<{ code: string; name: string; group: { code: string; name: string } }> }>;
+  variants: Array<{ priceWithTax: number; currencyCode: string; stockLevel: string; options: Array<{ code: string; name: string; group: { code: string; name: string } }> }>;
 };
 
 function toCardData(p: Item): ProductCardData {
@@ -29,6 +30,7 @@ function toCardData(p: Item): ProductCardData {
     name: p.name,
     imageUrl: p.featuredAsset?.preview ?? null,
     currencyCode: v?.currencyCode ?? 'DZD',
+    outOfStock: productOutOfStock(p.variants),
     ...variantDiscount(v),
   };
 }

@@ -16,6 +16,7 @@ import { useToast } from '@/components/ui/Toast';
 import { Alert, Skeleton } from '@/components/ui';
 import { ProductCard, type ProductCardData } from '@/components/patterns';
 import { variantDiscount } from '@/lib/format/discount';
+import { productOutOfStock } from '@/lib/format/stock';
 import { SectionHeader } from '@/components/home';
 import { cn } from '@/lib/utils/cn';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -357,6 +358,7 @@ export default function ProductPage() {
                   name: p.name,
                   imageUrl: p.featuredAsset?.preview ?? null,
                   currencyCode: p.variants[0]?.currencyCode ?? 'DZD',
+                  outOfStock: productOutOfStock(p.variants),
                   ...variantDiscount(p.variants[0]),
                 };
                 return <ProductCard key={p.id} product={card} className="w-[260px] shrink-0" />;
