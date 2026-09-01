@@ -14,6 +14,11 @@ import {
 } from '@vendure/core';
 import { OscarService } from '../services/oscar.service';
 import {
+  UpdateWilayaShippingPriceInput,
+  WilayaShippingService,
+} from '../services/wilaya-shipping.service';
+import { WilayaShipping } from '../entities/wilaya-shipping.entity';
+import {
   DashboardService,
   KpiMetrics,
   SalesTrendDataPoint,
@@ -36,7 +41,25 @@ export class OscarAdminResolver {
     private orderService: OrderService,
     private customerService: CustomerService,
     private connection: TransactionalConnection,
+    private wilayaShippingService: WilayaShippingService,
   ) {}
+
+  // ==================== WILAYA SHIPPING ====================
+
+  @Query()
+  @Allow(Permission.ReadShippingMethod)
+  async wilayaShippingPrices(@Ctx() ctx: RequestContext): Promise<WilayaShipping[]> {
+    return this.wilayaShippingService.findAll(ctx);
+  }
+
+  @Mutation()
+  @Allow(Permission.UpdateShippingMethod)
+  async updateWilayaShippingPrices(
+    @Ctx() ctx: RequestContext,
+    @Args() args: { input: UpdateWilayaShippingPriceInput[] },
+  ): Promise<WilayaShipping[]> {
+    return this.wilayaShippingService.updatePrices(ctx, args.input);
+  }
 
   // ==================== DASHBOARD KPI QUERIES ====================
 

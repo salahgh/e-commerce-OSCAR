@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import {
   dummyPaymentHandler,
+  defaultShippingCalculator,
   DefaultJobQueuePlugin,
   DefaultSearchPlugin,
   DefaultSchedulerPlugin,
@@ -18,6 +19,7 @@ import { cashOnDeliveryHandler } from './plugins/oscar-plugin/payment/cash-on-de
 import { cibPaymentHandler } from './plugins/oscar-plugin/payment/cib-payment-handler';
 import { baridimobPaymentHandler } from './plugins/oscar-plugin/payment/baridimob-payment-handler';
 import { collectionPercentageDiscount } from './plugins/oscar-plugin/promotion/collection-discount-action';
+import { wilayaShippingCalculator } from './plugins/oscar-plugin/shipping/wilaya-shipping-calculator';
 
 const IS_DEV = process.env.NODE_ENV !== 'production';
 
@@ -145,6 +147,11 @@ export const config: VendureConfig = {
   },
   promotionOptions: {
     promotionActions: [collectionPercentageDiscount],
+  },
+  shippingOptions: {
+    // Replaces the default calculator list, so the default flat-rate one must
+    // be re-registered alongside the wilaya-based calculator.
+    shippingCalculators: [defaultShippingCalculator, wilayaShippingCalculator],
   },
   // When adding or changing custom fields, remember to generate
   // a database migration. See https://docs.vendure.io/guides/developer-guide/migrations/

@@ -75,6 +75,7 @@ import { ZoneSettings } from './sections/ZoneSettings';
 import { ChannelSettings } from './sections/ChannelSettings';
 import { ContentSettings } from './sections/ContentSettings';
 import { ShippingMethodCreateModal } from './sections/ShippingMethodCreateModal';
+import { WilayaShippingSettings } from './sections/WilayaShippingSettings';
 import { PaymentMethodCreateModal } from './sections/PaymentMethodCreateModal';
 import { PermissionGate } from '../../components/auth/PermissionGate';
 
@@ -656,6 +657,9 @@ export const Settings: React.FC = () => {
       icon: <Truck className="h-4 w-4" />,
       content: (
         <div className="space-y-6">
+          {/* Per-wilaya delivery prices */}
+          <WilayaShippingSettings />
+
           {/* Shipping Zones */}
           <div className="bg-muted/50 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">

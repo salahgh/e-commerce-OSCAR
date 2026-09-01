@@ -1,6 +1,8 @@
 import { PluginCommonModule, VendurePlugin } from '@vendure/core';
 import { OscarService } from './services/oscar.service';
 import { DashboardService } from './services/dashboard.service';
+import { WilayaShippingService } from './services/wilaya-shipping.service';
+import { WilayaShipping } from './entities/wilaya-shipping.entity';
 import { OscarAdminResolver } from './api/oscar-admin.resolver';
 import { OscarShopResolver } from './api/oscar-shop.resolver';
 import { HealthController } from './api/health.controller';
@@ -17,7 +19,8 @@ import { adminApiExtensions, shopApiExtensions } from './api/api-extensions';
  */
 @VendurePlugin({
   imports: [PluginCommonModule],
-  providers: [OscarService, DashboardService],
+  providers: [OscarService, DashboardService, WilayaShippingService],
+  entities: [WilayaShipping],
   controllers: [HealthController],
   adminApiExtensions: {
     schema: adminApiExtensions,
