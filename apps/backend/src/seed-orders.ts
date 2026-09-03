@@ -159,6 +159,7 @@ async function seedOrders() {
       translations: [
         { languageCode: LanguageCode.en, name: 'Standard Shipping', description: 'Standard delivery' },
         { languageCode: LanguageCode.fr, name: 'Livraison Standard', description: 'Livraison standard' },
+        { languageCode: LanguageCode.ar, name: 'التوصيل العادي', description: 'توصيل عادي' },
       ],
       fulfillmentHandler: 'manual-fulfillment',
       checker: {
@@ -192,6 +193,7 @@ async function seedOrders() {
       translations: [
         { languageCode: LanguageCode.en, name: 'Cash on Delivery', description: 'Pay when you receive' },
         { languageCode: LanguageCode.fr, name: 'Paiement à la livraison', description: 'Payez à la réception' },
+        { languageCode: LanguageCode.ar, name: 'الدفع عند الاستلام', description: 'ادفع عند استلام طلبك' },
       ],
       handler: {
         code: dummyPaymentHandler.code,

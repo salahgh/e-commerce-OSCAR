@@ -161,6 +161,7 @@
     "shipping": {
       "loading": "Chargement des options de livraison...",
       "empty": "Aucune option de livraison disponible. Vérifiez l'adresse.",
+      "fillAddressFirst": "Renseignez vos coordonnées, votre wilaya et votre commune pour voir les options de livraison et leurs tarifs.",
       "deliveryEstimate": "Délai estimé : {delay}",
       "delayZone1": "1-2 jours ouvrés",
       "delayZone2": "2-4 jours ouvrés",
@@ -210,6 +211,8 @@
     "title": "Merci pour votre commande !",
     "subtitle": "Votre commande {code} a bien été enregistrée.",
     "trackingHint": "Vous recevrez un email de confirmation avec le suivi.",
+    "orderNumber": "Numéro de commande",
+    "total": "Total",
     "viewOrder": "Voir ma commande",
     "continueShopping": "Continuer mes achats",
     "errorTitle": "Commande introuvable",
@@ -426,7 +429,7 @@
   },
   "ShippingPage": {
     "title": "Livraison",
-    "intro": "Nous livrons dans les 48 wilayas d'Algérie. Les délais et coûts varient selon la zone.",
+    "intro": "Nous livrons dans toutes les wilayas d'Algérie. Les délais et coûts varient selon la zone.",
     "zonesTitle": "Délais par zone",
     "zone1": "Zone 1 (Alger et proches) — 1 à 2 jours ouvrés",
     "zone2": "Zone 2 (villes côtières) — 2 à 4 jours ouvrés",
@@ -478,7 +481,7 @@
     "valuesTitle": "Nos valeurs",
     "v1": "Qualité — chaque pièce passe par un contrôle avant expédition.",
     "v2": "Proximité — service client en français et en arabe.",
-    "v3": "Couverture — livraison dans les 48 wilayas, paiement à la livraison."
+    "v3": "Couverture — livraison dans toutes les wilayas d'Algérie, paiement à la livraison."
   },
   "CareersPage": {
     "title": "Carrières",

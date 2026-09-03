@@ -7,6 +7,7 @@ import {
   VendureConfig,
   LanguageCode,
   Asset,
+  defaultShippingCalculator,
 } from '@vendure/core';
 import { defaultEmailHandlers, EmailPlugin } from '@vendure/email-plugin';
 import { AssetServerPlugin } from '@vendure/asset-server-plugin';
@@ -18,6 +19,7 @@ import { cashOnDeliveryHandler } from './plugins/oscar-plugin/payment/cash-on-de
 import { cibPaymentHandler } from './plugins/oscar-plugin/payment/cib-payment-handler';
 import { baridimobPaymentHandler } from './plugins/oscar-plugin/payment/baridimob-payment-handler';
 import { collectionPercentageDiscount } from './plugins/oscar-plugin/promotion/collection-discount-action';
+import { wilayaRateCalculator } from './plugins/oscar-plugin/shipping/wilaya-rate-calculator';
 
 const IS_DEV = process.env.NODE_ENV !== 'production';
 
@@ -102,6 +104,11 @@ export const config: VendureConfig = {
       },
       shopApiDebug: true,
     } : {}),
+  },
+  shippingOptions: {
+    // Keep Vendure's flat-rate calculator (any admin-created method may use it) and
+    // add the per-wilaya one behind the home / office delivery methods.
+    shippingCalculators: [defaultShippingCalculator, wilayaRateCalculator],
   },
   authOptions: {
     tokenMethod: ['bearer', 'cookie'],

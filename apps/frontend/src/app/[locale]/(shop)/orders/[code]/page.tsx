@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { formatDzd, formatDzdTotal } from '@/lib/format/price';
 import { useGetOrderByCodeQuery } from '@oscar/graphql-shop/generated';
+import { localizePlaceName } from '@oscar/shared';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from '@/i18n/routing';
 import { Alert, Badge, Breadcrumb, Card, Skeleton } from '@/components/ui';
@@ -140,14 +141,14 @@ export default function OrderDetailPage() {
             <h3 className="text-14 font-bold text-content-strong">{t('shippingAddress')}</h3>
             <address className="not-italic text-12 text-content-muted">
               {order.shippingAddress.fullName && <div>{order.shippingAddress.fullName}</div>}
-              {order.shippingAddress.streetLine1 && <div>{order.shippingAddress.streetLine1}</div>}
+              {order.shippingAddress.streetLine1 && <div>{localizePlaceName(order.shippingAddress.streetLine1, locale)}</div>}
               {order.shippingAddress.streetLine2 && <div>{order.shippingAddress.streetLine2}</div>}
               {(order.shippingAddress.city || order.shippingAddress.postalCode) && (
                 <div>
-                  {order.shippingAddress.postalCode} {order.shippingAddress.city}
+                  {order.shippingAddress.postalCode} {localizePlaceName(order.shippingAddress.city, locale)}
                 </div>
               )}
-              {order.shippingAddress.province && <div>{order.shippingAddress.province}</div>}
+              {order.shippingAddress.province && <div>{localizePlaceName(order.shippingAddress.province, locale)}</div>}
               {order.shippingAddress.country && <div>{order.shippingAddress.country}</div>}
               {order.shippingAddress.phoneNumber && <div>{order.shippingAddress.phoneNumber}</div>}
             </address>

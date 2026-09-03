@@ -1,16 +1,6 @@
 import gql from 'graphql-tag';
 
 export const shopApiExtensions = gql`
-  type Wilaya {
-    code: String!
-    name: String!
-  }
-
-  type ShippingCost {
-    amount: Int!
-    currency: String!
-  }
-
   type MultilingualSearchResult {
     items: [Product!]!
     totalItems: Int!
@@ -40,16 +30,6 @@ export const shopApiExtensions = gql`
       take: Int
       skip: Int
     ): MultilingualSearchResult!
-
-    """
-    Get all Algeria wilayas for shipping
-    """
-    wilayas: [Wilaya!]!
-
-    """
-    Calculate shipping cost for a wilaya
-    """
-    shippingCost(wilayaCode: String!): ShippingCost!
   }
 
   extend type Mutation {

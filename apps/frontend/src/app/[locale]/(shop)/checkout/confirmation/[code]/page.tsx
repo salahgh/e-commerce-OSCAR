@@ -65,9 +65,9 @@ export default function ConfirmationPage() {
 
       <Card padding="lg" className="text-start">
         <dl className="grid grid-cols-2 gap-y-2 text-14">
-          <dt className="text-content-muted">{t('viewOrder')}</dt>
+          <dt className="text-content-muted">{t('orderNumber')}</dt>
           <dd className="font-mono text-end text-content-strong">{order.code}</dd>
-          <dt className="text-content-muted">Total</dt>
+          <dt className="text-content-muted">{t('total')}</dt>
           <dd className="text-end font-bold text-content-strong">
             {formatDzdTotal(order.totalWithTax, locale)}
           </dd>

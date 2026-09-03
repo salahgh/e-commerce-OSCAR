@@ -64,7 +64,7 @@ pnpm --filter @oscar/backend reindex
 
 **`@oscar/shared`** — Pure TypeScript, zero runtime deps:
 - `colors.ts` — Color palette with multilingual names (EN/FR/AR), hex lookup, contrast utilities
-- `constants/wilayas.ts` — 48 Algerian wilayas with communes, shipping zones, pricing
+- `constants/wilayas.ts` — 69 Algerian wilayas with communes and delivery-delay zones (prices live in the backend, see below)
 - `constants/order-status.ts` — Order status labels and Tailwind color classes
 - `constants/payment.ts` — Payment method/status labels (CIB, Baridimob, COD)
 - `constants/sizes.ts` — Available sizes, colors, user roles
@@ -113,6 +113,7 @@ Custom business logic lives in `apps/backend/src/plugins/oscar-plugin/`:
 - `api/` — Custom GraphQL resolvers and schema extensions
 - `services/` — Business logic services
 - `payment/` — Algerian payment handlers (CIB, Baridimob)
+- `shipping/` — Home / office delivery: per-wilaya rate table (`wilaya-shipping-rates.ts`, edit + redeploy to change prices), the `wilaya-rate-calculator`, and a bootstrap service that creates the two shipping methods
 - `entities/` — Custom TypeORM entities extending Vendure
 
 ### Authentication

@@ -161,6 +161,7 @@
     "shipping": {
       "loading": "Loading shipping options...",
       "empty": "No shipping option available. Check the address.",
+      "fillAddressFirst": "Fill in your details, wilaya and commune to see the delivery options and their prices.",
       "deliveryEstimate": "Estimated delivery: {delay}",
       "delayZone1": "1-2 business days",
       "delayZone2": "2-4 business days",
@@ -210,6 +211,8 @@
     "title": "Thank you for your order!",
     "subtitle": "Your order {code} has been recorded.",
     "trackingHint": "You'll receive a confirmation email with tracking details.",
+    "orderNumber": "Order number",
+    "total": "Total",
     "viewOrder": "View my order",
     "continueShopping": "Continue shopping",
     "errorTitle": "Order not found",
@@ -426,7 +429,7 @@
   },
   "ShippingPage": {
     "title": "Shipping",
-    "intro": "We deliver to all 48 wilayas of Algeria. Delays and costs depend on the zone.",
+    "intro": "We deliver to every wilaya in Algeria. Delays and costs depend on the zone.",
     "zonesTitle": "Delays by zone",
     "zone1": "Zone 1 (Algiers and nearby) — 1 to 2 business days",
     "zone2": "Zone 2 (coastal cities) — 2 to 4 business days",
@@ -478,7 +481,7 @@
     "valuesTitle": "Our values",
     "v1": "Quality — every piece is checked before shipping.",
     "v2": "Closeness — customer service in French and Arabic.",
-    "v3": "Reach — delivery to all 48 wilayas, cash on delivery available."
+    "v3": "Reach — delivery to every wilaya in Algeria, cash on delivery available."
   },
   "CareersPage": {
     "title": "Careers",

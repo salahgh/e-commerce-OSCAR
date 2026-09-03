@@ -1,6 +1,8 @@
 import { PluginCommonModule, VendurePlugin } from '@vendure/core';
 import { OscarService } from './services/oscar.service';
 import { DashboardService } from './services/dashboard.service';
+import { OrderWilayaService } from './services/order-wilaya.service';
+import { ShippingSetupService } from './shipping/shipping-setup.service';
 import { OscarAdminResolver } from './api/oscar-admin.resolver';
 import { OscarShopResolver } from './api/oscar-shop.resolver';
 import { HealthController } from './api/health.controller';
@@ -12,12 +14,14 @@ import { adminApiExtensions, shopApiExtensions } from './api/api-extensions';
  * This plugin extends Vendure with custom functionality for the OSCAR fashion store:
  * - Custom API endpoints for Algerian market
  * - Extended product fields (multilingual FR/AR/EN)
- * - Custom shipping zones for Algeria (Wilayas)
+ * - Wilaya bookkeeping for the back-office (copies the shipping wilaya onto
+ *   the `wilaya` custom fields once an order is placed)
+ * - Home / office delivery methods priced per wilaya (shipping/)
  * - Payment integrations (CIB, Baridimob, COD)
  */
 @VendurePlugin({
   imports: [PluginCommonModule],
-  providers: [OscarService, DashboardService],
+  providers: [OscarService, DashboardService, OrderWilayaService, ShippingSetupService],
   controllers: [HealthController],
   adminApiExtensions: {
     schema: adminApiExtensions,

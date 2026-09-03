@@ -4,32 +4,7 @@
 |---|---|
 | **Facture N°** | FAC-OSCAR-2026-005 |
 | **Date d'émission** | 20/06/2026 |
-| **Échéance de paiement** | À la validation du jalon (sous 7 jours — cf. plan de paiement) |
-| **Référence projet** | OSCAR Fashion — Plan de paiement v5.0 (700 000 DZD) |
 | **Objet** | Jalon 5 (final) — Intégration, Déploiement & Support |
-| **Nature** | Facture de jalon — payable à la validation des livrables |
-
----
-
-## Prestataire
-
-- **Nom / Raison sociale** : ______________________________
-- **Adresse** : ______________________________
-- **NIF** : ______________________________
-- **RC (Registre de Commerce)** : ______________________________
-- **NIS** : ______________________________
-- **Article d'imposition (AI)** : ______________________________
-- **RIB / Banque** : ______________________________
-- **Email** : sonyexperiasola29@gmail.com
-- **Téléphone** : ______________________________
-
-## Client
-
-- **Raison sociale** : OSCAR Fashion
-- **Adresse** : ______________________________
-- **NIF** : ______________________________
-- **RC** : ______________________________
-- **NIS** : ______________________________
 
 ---
 
@@ -41,7 +16,6 @@
 
 |  |  |  | **Total** | **80 000,00 DZD** |
 |--|--|--|-----------|-------------------|
-|  |  |  | TVA (selon régime fiscal — *à confirmer / ne s'applique pas en cas de régime IFU*) | — |
 |  |  |  | **Net à payer** | **80 000,00 DZD** |
 
 > **Arrêtée la présente facture à la somme de : quatre-vingt mille dinars algériens (80 000,00 DZD).**
@@ -79,11 +53,6 @@
 
 ---
 
-## Modalités de paiement
-
-- **Mode** : Virement bancaire ou espèces
-- **Délai** : sous 7 jours après validation du jalon (démonstration des livrables + accord écrit du client)
-
 ## Situation du contrat — Plan de paiement v5.0 (total 700 000 DZD)
 
 | Échéance | Montant | Statut |
@@ -92,16 +61,3 @@
 | Jalon 3 — Frontend | 180 000 DZD | 🧾 Facturé (FAC-OSCAR-2026-003) |
 | Jalon 4 — Mobile | 100 000 DZD | 🧾 Facturé (FAC-OSCAR-2026-004) |
 | **Jalon 5 (final) — Intégration, Déploiement & Support (présente facture)** | **80 000 DZD** | 🧾 Facturé |
-
----
-
-## Signatures
-
-| Partie | Nom | Signature | Date |
-|--------|-----|-----------|------|
-| Prestataire | | | |
-| Client (OSCAR Fashion) | | | |
-
----
-
-*Document généré le 20/06/2026 — à compléter avec les coordonnées fiscales et bancaires avant émission.*

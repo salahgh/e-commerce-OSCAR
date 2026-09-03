@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ChevronDown, ArrowLeft, Check } from 'lucide-react';
-import { wilayas } from '@oscar/shared';
+import { wilayas, getShippingZone } from '@oscar/shared';
 import { formatDzdTotal } from '@/lib/format/price';
 import {
   useSetCustomerForOrderMutation,
@@ -24,11 +24,15 @@ import { cn } from '@/lib/utils/cn';
 import { trackInitiateCheckout } from '@/lib/analytics/meta-pixel';
 
 const inputCls =
-  'w-full rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-right text-16 text-accent shadow-sm placeholder:text-content-subtle focus:border-accent focus:outline-none';
+  'w-full rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-start text-16 text-accent shadow-sm placeholder:text-content-subtle focus:border-accent focus:outline-none';
+
+// Localized delivery-delay message per shared shipping zone. The shared
+// `getShippingDelay` helper is French-only, so it is deliberately not used here.
+const DELAY_KEY = { 1: 'delayZone1', 2: 'delayZone2', 3: 'delayZone3', 4: 'delayZone4' } as const;
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <label className="flex w-full flex-col items-end gap-1.5">
+    <label className="flex w-full flex-col items-start gap-1.5">
       <span className="text-14 font-medium text-[#344054]">
         {label}
         {required && '*'}
@@ -41,7 +45,7 @@ function Field({ label, required, children }: { label: string; required?: boolea
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-6 rounded-lg border border-hairline bg-white p-4">
-      <h2 className="text-right text-24 font-medium text-accent">{title}</h2>
+      <h2 className="text-start text-24 font-medium text-accent">{title}</h2>
       {children}
     </div>
   );
@@ -49,12 +53,14 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function ChoiceRow({
   label,
+  description,
   price,
   checked,
   disabled,
   onSelect,
 }: {
   label: string;
+  description?: string;
   price?: string;
   checked: boolean;
   disabled?: boolean;
@@ -66,12 +72,12 @@ function ChoiceRow({
       onClick={onSelect}
       disabled={disabled}
       className={cn(
-        'flex w-full flex-row-reverse items-center justify-between gap-3 rounded-lg border p-3 text-right transition-colors',
+        'flex w-full items-center justify-between gap-3 rounded-lg border p-3 text-start transition-colors',
         checked ? 'border-accent' : 'border-hairline hover:border-border-strong',
         disabled && 'cursor-not-allowed opacity-50',
       )}
     >
-      <span className="flex flex-row-reverse items-center gap-3">
+      <span className="flex items-center gap-3">
         <span
           className={cn(
             'flex size-5 shrink-0 items-center justify-center rounded-full border',
@@ -80,9 +86,12 @@ function ChoiceRow({
         >
           {checked && <Check className="size-3.5" strokeWidth={3} />}
         </span>
-        <span className="text-16 text-content-strong">{label}</span>
+        <span className="flex flex-col items-start gap-0.5">
+          <span className="text-16 text-content-strong">{label}</span>
+          {description && <span className="text-14 text-content-muted">{description}</span>}
+        </span>
       </span>
-      {price && <span className="font-dm text-16 font-medium text-accent">{price}</span>}
+      {price && <span className="shrink-0 font-dm text-16 font-medium text-accent">{price}</span>}
     </button>
   );
 }
@@ -155,11 +164,14 @@ export default function CheckoutPage() {
 
   const buildAddressInput = React.useCallback(() => {
     const commune = communes.find((c) => c.code === addr.communeCode);
+    // Always store the canonical (French) wilaya/commune names, whatever the UI
+    // language: the back-office filters and reports group orders on these values,
+    // and the backend copies `province` into the `wilaya` custom field.
     return {
       fullName: addr.fullName,
-      streetLine1: commune ? name(commune) : (selectedWilaya ? name(selectedWilaya) : '—'),
-      city: commune ? name(commune) : '',
-      province: selectedWilaya ? name(selectedWilaya) : addr.wilayaCode,
+      streetLine1: commune ? commune.name : (selectedWilaya ? selectedWilaya.name : '—'),
+      city: commune ? commune.name : '',
+      province: selectedWilaya ? selectedWilaya.name : addr.wilayaCode,
       postalCode: commune?.postalCode || undefined,
       countryCode: 'DZ',
       phoneNumber: addr.phoneNumber,
@@ -203,6 +215,22 @@ export default function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, addr]);
 
+  // Vendure returns quotes cheapest-first; show home delivery before office pickup
+  // (the calculator tags each quote with `metadata.mode`).
+  const shippingMethods = React.useMemo(() => {
+    const rank = (m: { metadata?: Record<string, unknown> | null }) =>
+      m.metadata?.mode === 'home' ? 0 : m.metadata?.mode === 'office' ? 1 : 2;
+    return [...(shippingQuery.data?.eligibleShippingMethods ?? [])].sort((a, b) => rank(a) - rank(b));
+  }, [shippingQuery.data]);
+  // Keep a valid delivery method selected: pick the first (home) when the list arrives,
+  // and re-pick when a wilaya change made the current selection ineligible.
+  React.useEffect(() => {
+    if (shippingMethods.length === 0) return;
+    if (selectedShipping && shippingMethods.some((m) => m.id === selectedShipping)) return;
+    void onSelectShipping(shippingMethods[0].id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shippingMethods]);
+
   if (!cart || cart.items.length === 0) {
     return (
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-4 px-6 py-24 text-center">
@@ -215,7 +243,6 @@ export default function CheckoutPage() {
     );
   }
 
-  const shippingMethods = shippingQuery.data?.eligibleShippingMethods ?? [];
   const paymentMethods = paymentQuery.data?.eligiblePaymentMethods ?? [];
 
   async function onSelectShipping(id: string) {
@@ -267,7 +294,7 @@ export default function CheckoutPage() {
       <div className="mx-auto grid max-w-[1392px] grid-cols-1 gap-10 lg:grid-cols-[430px_minmax(0,1fr)] lg:gap-[69px]">
         {/* Summary (left) */}
         <aside className="order-2 flex h-fit flex-col gap-6 lg:order-1 lg:sticky lg:top-6">
-          <h2 className="text-right text-32 font-medium text-accent">{tSummary('orderSummary')}</h2>
+          <h2 className="text-start text-32 font-medium text-accent">{tSummary('orderSummary')}</h2>
 
           <div className="flex gap-2">
             <input className={cn(inputCls, 'flex-1')} placeholder={tSummary('discountCode')} aria-label={tSummary('discountCode')} />
@@ -278,20 +305,20 @@ export default function CheckoutPage() {
 
           <div className="flex flex-col gap-3 text-20 font-medium text-accent">
             <div className="flex items-center justify-between gap-4">
-              <span className="font-dm">{formatDzdTotal(subtotal * 100, locale)}</span>
               <span>{tSummary('totalCount', { count: cart.totalQuantity })}</span>
+              <span className="font-dm">{formatDzdTotal(subtotal * 100, locale)}</span>
             </div>
             <div className="flex items-center justify-between gap-4">
+              <span>{tSummary('shippingFee')}</span>
               <span className="font-dm">
                 {cart.shipping > 0 ? formatDzdTotal(cart.shipping * 100, locale) : tSummary('shippingTbd')}
               </span>
-              <span>{tSummary('shippingFee')}</span>
             </div>
           </div>
 
           <div className="flex items-center justify-between gap-4 border-t border-hairline pt-4 text-20 font-bold text-accent">
-            <span className="font-dm">{formatDzdTotal(cart.total * 100, locale)}</span>
             <span>{tSummary('grandTotal')}</span>
+            <span className="font-dm">{formatDzdTotal(cart.total * 100, locale)}</span>
           </div>
 
           <Button onClick={placeOrder} disabled={!selectedPayment} loading={submitting} fullWidth size="lg">
@@ -301,9 +328,9 @@ export default function CheckoutPage() {
 
         {/* Form (right) */}
         <div className="order-1 flex flex-col gap-6 lg:order-2">
-          <Link href="/cart" className="flex items-center justify-end gap-2 text-24 font-medium text-accent">
-            <span>{t('backToCart')}</span>
+          <Link href="/cart" className="flex items-center justify-start gap-2 text-24 font-medium text-accent">
             <ArrowLeft className="size-6 rtl:rotate-180" strokeWidth={1.75} />
+            <span>{t('backToCart')}</span>
           </Link>
 
           {error && <Alert intent="danger">{error}</Alert>}
@@ -360,7 +387,7 @@ export default function CheckoutPage() {
               <Field label={tAddr('wilaya')} required>
                 <div className="relative w-full">
                   <select
-                    className={cn(inputCls, 'appearance-none pl-9')}
+                    className={cn(inputCls, 'appearance-none pe-9')}
                     value={addr.wilayaCode}
                     onChange={(e) => setAddr((a) => ({ ...a, wilayaCode: e.target.value, communeCode: '' }))}
                   >
@@ -371,13 +398,13 @@ export default function CheckoutPage() {
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-content-subtle" />
+                  <ChevronDown className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-content-subtle" />
                 </div>
               </Field>
               <Field label={tAddr('commune')} required>
                 <div className="relative w-full">
                   <select
-                    className={cn(inputCls, 'appearance-none pl-9')}
+                    className={cn(inputCls, 'appearance-none pe-9')}
                     value={addr.communeCode}
                     disabled={!selectedWilaya}
                     onChange={(e) => setAddr((a) => ({ ...a, communeCode: e.target.value }))}
@@ -389,7 +416,7 @@ export default function CheckoutPage() {
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-content-subtle" />
+                  <ChevronDown className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-content-subtle" />
                 </div>
               </Field>
             </div>
@@ -398,19 +425,25 @@ export default function CheckoutPage() {
           {/* 2. Delivery method */}
           <Section title={t('sectionDelivery')}>
             {shippingMethods.length === 0 ? (
-              <p className="text-right text-16 text-content-muted">{tShip('empty')}</p>
+              <p className="text-start text-16 text-content-muted">{ready ? tShip('empty') : tShip('fillAddressFirst')}</p>
             ) : (
               <div className="flex flex-col gap-3">
                 {shippingMethods.map((m) => (
                   <ChoiceRow
                     key={m.id}
                     label={m.name}
+                    description={m.description || undefined}
                     price={formatDzdTotal(m.priceWithTax, locale)}
                     checked={selectedShipping === m.id}
                     onSelect={() => onSelectShipping(m.id)}
                   />
                 ))}
               </div>
+            )}
+            {selectedWilaya && (
+              <p className="text-start text-14 text-content-muted">
+                {tShip('deliveryEstimate', { delay: tShip(DELAY_KEY[getShippingZone(selectedWilaya.code)]) })}
+              </p>
             )}
           </Section>
 

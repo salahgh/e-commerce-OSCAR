@@ -17,6 +17,9 @@ import {
   RequestContext,
   bootstrapWorker,
   JobQueueService,
+  ShippingMethodService,
+  PaymentMethodService,
+  ID,
 } from '@vendure/core';
 import { config } from './vendure-config';
 import { seedSiteContent } from './seed-site-content';
@@ -584,6 +587,64 @@ function generateProducts(): ProductDef[] {
 // MAIN SEED FUNCTION
 // =====================================================
 
+// Shipping/payment method names are shown verbatim on the storefront checkout
+// (`eligibleShippingMethods[].name`) in the shopper's language. `seed-initial`
+// creates them in the channel default language only, so fill in the missing
+// FR/AR names here. Existing translations are never overwritten.
+const METHOD_TRANSLATIONS: Record<string, Partial<Record<LanguageCode, { name: string; description: string }>>> = {
+  'standard-shipping': {
+    [LanguageCode.en]: { name: 'Standard Shipping', description: 'Standard delivery' },
+    [LanguageCode.fr]: { name: 'Livraison standard', description: 'Livraison standard' },
+    [LanguageCode.ar]: { name: 'التوصيل العادي', description: 'توصيل عادي' },
+  },
+  'cash-on-delivery': {
+    [LanguageCode.en]: { name: 'Cash on Delivery', description: 'Pay when you receive your order' },
+    [LanguageCode.fr]: { name: 'Paiement à la livraison', description: 'Payez à la réception de votre commande' },
+    [LanguageCode.ar]: { name: 'الدفع عند الاستلام', description: 'ادفع عند استلام طلبك' },
+  },
+};
+
+interface TranslatableMethod {
+  id: ID;
+  code: string;
+  translations: Array<{ id: ID; languageCode: LanguageCode; name: string; description: string }>;
+}
+
+/** Returns the full translation list to save, or null when nothing is missing. */
+function completedTranslations(method: TranslatableMethod) {
+  const wanted = METHOD_TRANSLATIONS[method.code];
+  if (!wanted) return null;
+  const present = new Set(method.translations.map((tr) => tr.languageCode));
+  const missing = (Object.keys(wanted) as LanguageCode[]).filter((lang) => !present.has(lang));
+  if (missing.length === 0) return null;
+  return {
+    missing,
+    translations: [
+      ...method.translations.map((tr) => ({ id: tr.id, languageCode: tr.languageCode, name: tr.name, description: tr.description })),
+      ...missing.map((lang) => ({ languageCode: lang, ...(wanted[lang] as { name: string; description: string }) })),
+    ],
+  };
+}
+
+async function ensureMethodTranslations(
+  ctx: RequestContext,
+  shippingMethodService: ShippingMethodService,
+  paymentMethodService: PaymentMethodService,
+) {
+  for (const method of (await shippingMethodService.findAll(ctx)).items) {
+    const done = completedTranslations(method);
+    if (!done) continue;
+    if (!DRY_RUN) await shippingMethodService.update(ctx, { id: method.id, translations: done.translations });
+    console.log(`  ✅ Shipping method "${method.code}": added ${done.missing.join('/')} translations`);
+  }
+  for (const method of (await paymentMethodService.findAll(ctx)).items) {
+    const done = completedTranslations(method);
+    if (!done) continue;
+    if (!DRY_RUN) await paymentMethodService.update(ctx, { id: method.id, translations: done.translations });
+    console.log(`  ✅ Payment method "${method.code}": added ${done.missing.join('/')} translations`);
+  }
+}
+
 async function seed() {
   const banner = DRY_RUN ? '[DRY RUN] ' : '';
   console.log(`🚀 ${banner}Starting OSCAR Fashion Vendure seed...\n`);
@@ -613,6 +674,8 @@ async function seed() {
   const collectionService = app.get(CollectionService);
   const taxCategoryService = app.get(TaxCategoryService);
   const assetService = app.get(AssetService);
+  const shippingMethodService = app.get(ShippingMethodService);
+  const paymentMethodService = app.get(PaymentMethodService);
 
   let channel = await channelService.getDefaultChannel();
   let ctx = new RequestContext({
@@ -1015,6 +1078,10 @@ async function seed() {
   // --- Site content (header / footer / home) on the default channel ---
   console.log('\n🎨 Seeding site content…');
   await seedSiteContent(ctx, channelService, assetService);
+
+  // --- Storefront-visible names of the shipping / payment methods (FR/AR) ---
+  console.log('\n🌍 Completing shipping/payment method translations…');
+  await ensureMethodTranslations(ctx, shippingMethodService, paymentMethodService);
 
   console.log('\n✨ Seed completed successfully!\n');
 

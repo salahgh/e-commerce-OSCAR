@@ -59,17 +59,6 @@ export class OscarShopResolver {
     );
   }
 
-  @Query()
-  wilayas() {
-    return this.oscarService.getWilayas();
-  }
-
-  @Query()
-  shippingCost(@Args() args: { wilayaCode: string }) {
-    const amount = this.oscarService.calculateShippingCost(args.wilayaCode);
-    return { amount, currency: 'DZD' };
-  }
-
   @Mutation()
   async trackProductView(
     @Ctx() ctx: RequestContext,

@@ -47,7 +47,7 @@ export default function CartPage() {
       <div className="mx-auto grid max-w-[1392px] grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_430px] lg:gap-[69px]">
         {/* Line items */}
         <section className="flex flex-col gap-8">
-          <h1 className="text-right text-32 font-medium text-accent">{t('title')}</h1>
+          <h1 className="text-start text-32 font-medium text-accent">{t('title')}</h1>
           <ul className="flex flex-col">
             {cart.items.map((item) => (
               <li
@@ -63,10 +63,10 @@ export default function CartPage() {
                 </div>
 
                 {/* name + delete (middle) */}
-                <div className="flex min-w-0 flex-1 flex-col items-end gap-4">
+                <div className="flex min-w-0 flex-1 flex-col items-start gap-4">
                   <Link
                     href={`/products/${item.productSlug ?? ''}`}
-                    className="line-clamp-2 text-right font-dm text-20 font-medium text-accent hover:underline"
+                    className="line-clamp-2 text-start font-dm text-20 font-medium text-accent hover:underline"
                   >
                     {item.productName}
                   </Link>
@@ -112,7 +112,7 @@ export default function CartPage() {
 
         {/* Order summary */}
         <aside className="flex h-fit flex-col gap-6">
-          <h2 className="text-right text-32 font-medium text-accent">{tSummary('title')}</h2>
+          <h2 className="text-start text-32 font-medium text-accent">{tSummary('title')}</h2>
           <div className="flex items-center justify-between gap-4 text-20 font-medium text-accent">
             <span>{tSummary('totalCount', { count: cart.totalQuantity })}</span>
             <span className="font-dm">{formatDzdTotal(cart.total * 100, locale)}</span>

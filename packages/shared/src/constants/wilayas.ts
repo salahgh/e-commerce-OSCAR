@@ -4,7 +4,7 @@ export interface Wilaya {
   name: string;
   nameAr: string;
   communes: Commune[];
-  shippingZone: 1 | 2 | 3 | 4; // For shipping cost calculation
+  shippingZone: 1 | 2 | 3 | 4; // Delivery-delay zone (see shippingZoneDelays)
 }
 
 export interface Commune {
@@ -48,7 +48,7 @@ export const wilayas: Wilaya[] = [
       { code: '0201', name: 'Abou El Hassane', nameAr: 'أبو الحسن', postalCode: '02018' },
       { code: '0202', name: 'Ain Merane', nameAr: 'عين مران', postalCode: '02004' },
       { code: '0203', name: 'Benairia', nameAr: 'بنايرية', postalCode: '02039' },
-      { code: '0204', name: 'Beni  Bouattab', nameAr: 'بني بوعتاب', postalCode: '02071' },
+      { code: '0204', name: 'Beni Bouattab', nameAr: 'بني بوعتاب', postalCode: '02071' },
       { code: '0205', name: 'Beni Haoua', nameAr: 'بني حواء', postalCode: '02017' },
       { code: '0206', name: 'Beni Rached', nameAr: 'بني راشد', postalCode: '02035' },
       { code: '0207', name: 'Boukadir', nameAr: 'بوقادير', postalCode: '02002' },
@@ -360,7 +360,7 @@ export const wilayas: Wilaya[] = [
       { code: '0917', name: 'Larbaa', nameAr: 'الأربعاء', postalCode: '09002' },
       { code: '0918', name: 'Meftah', nameAr: 'مفتاح', postalCode: '09012' },
       { code: '0919', name: 'Mouzaia', nameAr: 'موزاية', postalCode: '09013' },
-      { code: '0920', name: 'Oued  Djer', nameAr: 'وادي جر', postalCode: '09032' },
+      { code: '0920', name: 'Oued Djer', nameAr: 'وادي جر', postalCode: '09032' },
       { code: '0921', name: 'Oued El Alleug', nameAr: 'وادي العلايق', postalCode: '09014' },
       { code: '0922', name: 'Ouled Slama', nameAr: 'اولاد سلامة', postalCode: '09033' },
       { code: '0923', name: 'Ouled Yaich', nameAr: 'أولاد يعيش', postalCode: '09015' },
@@ -969,7 +969,7 @@ export const wilayas: Wilaya[] = [
       { code: '2222', name: 'M\'cid', nameAr: 'مسيد', postalCode: '22052' },
       { code: '2223', name: 'Merine', nameAr: 'مرين', postalCode: '22012' },
       { code: '2224', name: 'Mezaourou', nameAr: 'مزاورو', postalCode: '22025' },
-      { code: '2225', name: 'Mostefa  Ben Brahim', nameAr: 'مصطفى بن ابراهيم', postalCode: '22013' },
+      { code: '2225', name: 'Mostefa Ben Brahim', nameAr: 'مصطفى بن ابراهيم', postalCode: '22013' },
       { code: '2226', name: 'Moulay Slissen', nameAr: 'مولاي سليسن', postalCode: '22026' },
       { code: '2227', name: 'Oued Sebaa', nameAr: 'وادي السبع', postalCode: '22054' },
       { code: '2228', name: 'Oued Sefioun', nameAr: 'وادي سفيون', postalCode: '22055' },
@@ -2126,13 +2126,9 @@ export const wilayas: Wilaya[] = [
 
 ];
 
-// Shipping zone prices
-export const shippingZonePrices: Record<1 | 2 | 3 | 4, number> = {
-  1: 300, // Alger and nearby
-  2: 400, // Coastal cities
-  3: 500, // High plateaus
-  4: 800, // South
-};
+// Shipping prices are NOT defined here: the backend prices the home/office delivery
+// methods per wilaya from apps/backend/src/plugins/oscar-plugin/shipping/wilaya-shipping-rates.ts,
+// and storefronts read the quotes from Vendure's eligibleShippingMethods.
 
 // Shipping zone delays
 export const shippingZoneDelays: Record<1 | 2 | 3 | 4, string> = {
@@ -2152,11 +2148,6 @@ export function getCommunesByWilayaCode(wilayaCode: string): Commune[] {
   return wilaya?.communes || [];
 }
 
-export function getShippingPrice(wilayaCode: string): number {
-  const wilaya = getWilayaByCode(wilayaCode);
-  return wilaya ? shippingZonePrices[wilaya.shippingZone] : 500;
-}
-
 export function getShippingDelay(wilayaCode: string): string {
   const wilaya = getWilayaByCode(wilayaCode);
   return wilaya ? shippingZoneDelays[wilaya.shippingZone] : '3-5 jours ouvrés';
@@ -2174,4 +2165,23 @@ export function getShippingZone(wilayaCode: string): 1 | 2 | 3 | 4 {
 
 export function formatWilayaName(wilaya: Wilaya): string {
   return `${wilaya.code} - ${wilaya.name}`;
+}
+
+/**
+ * Addresses are stored with the canonical French wilaya/commune names (that is
+ * what the checkout writes and what the back-office groups on). Resolve one of
+ * those names to its Arabic form for display in an Arabic UI. Unknown names,
+ * and any non-Arabic locale, get the name back unchanged.
+ */
+export function localizePlaceName(
+  name: string | null | undefined,
+  locale: string,
+): string | null | undefined {
+  if (!name || locale !== 'ar') return name;
+  for (const wilaya of wilayas) {
+    if (wilaya.name === name) return wilaya.nameAr;
+    const commune = wilaya.communes.find((c) => c.name === name);
+    if (commune) return commune.nameAr;
+  }
+  return name;
 }
