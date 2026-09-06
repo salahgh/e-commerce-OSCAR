@@ -230,14 +230,16 @@ export default function CheckoutPage() {
       m.metadata?.mode === 'home' ? 0 : m.metadata?.mode === 'office' ? 1 : 2;
     return [...(shippingQuery.data?.eligibleShippingMethods ?? [])].sort((a, b) => rank(a) - rank(b));
   }, [shippingQuery.data]);
-  // Keep a valid delivery method selected: pick the first (home) when the list arrives,
-  // and re-pick when a wilaya change made the current selection ineligible.
+  // Keep a valid delivery method selected once a wilaya is chosen: pick the first
+  // (home) when the list arrives, and re-pick when a wilaya change made the current
+  // selection ineligible. Before the wilaya is known the quotes are only the
+  // fallback price, so nothing is selected and the summary shows "to be calculated".
   React.useEffect(() => {
-    if (shippingMethods.length === 0) return;
+    if (!addr.wilayaCode || shippingMethods.length === 0) return;
     if (selectedShipping && shippingMethods.some((m) => m.id === selectedShipping)) return;
     void onSelectShipping(shippingMethods[0].id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shippingMethods]);
+  }, [shippingMethods, addr.wilayaCode]);
 
   if (!cart || cart.items.length === 0) {
     return (
@@ -432,8 +434,10 @@ export default function CheckoutPage() {
 
           {/* 2. Delivery method */}
           <Section title={t('sectionDelivery')}>
-            {shippingMethods.length === 0 ? (
-              <p className="text-start text-16 text-content-muted">{ready ? tShip('empty') : tShip('fillAddressFirst')}</p>
+            {!addr.wilayaCode || shippingMethods.length === 0 ? (
+              <p className="text-start text-16 text-content-muted">
+                {addr.wilayaCode && ready ? tShip('empty') : tShip('fillAddressFirst')}
+              </p>
             ) : (
               <div className="flex flex-col gap-3">
                 {shippingMethods.map((m) => (
