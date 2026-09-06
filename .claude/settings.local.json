@@ -197,7 +197,15 @@
       "Bash(python -c \"import sys,json; print\\(json.load\\(sys.stdin\\).get\\('version','unknown'\\)\\)\")",
       "Bash(wc *)",
       "Bash(git ls-tree *)",
-      "Bash(git rev-list *)"
+      "Bash(git rev-list *)",
+      "Skill(run)",
+      "Bash(export ANDROID_HOME=\"C:\\\\\\\\Users\\\\\\\\PC\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Android\\\\\\\\Sdk\")",
+      "Bash('C:\\\\Users\\\\PC\\\\AppData\\\\Local\\\\Android\\\\Sdk/platform-tools/adb.exe' devices *)",
+      "Bash(tail -n 60 \"C:\\\\\\\\Users\\\\\\\\PC\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\C--Users-PC-Documents-GitHub-e-commerce-OSCAR\\\\\\\\42490a4d-427f-45b5-bfcc-c3728dcff687\\\\\\\\tasks\\\\\\\\b3bzzn306.output\")",
+      "Bash(git --no-pager diff apps/mobile/app/_layout.tsx apps/mobile/src/contexts/ThemeContext.tsx apps/mobile/app.json)",
+      "PowerShell(Tee-Object *)",
+      "Bash(ls *)",
+      "Bash(cp *)"
     ],
     "deny": [],
     "ask": []

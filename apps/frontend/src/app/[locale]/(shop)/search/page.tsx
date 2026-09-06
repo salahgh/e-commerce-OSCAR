@@ -193,6 +193,7 @@ function SearchPageContent() {
                       price:
                         'value' in price ? price.value : 'min' in price ? price.min : 0,
                       currencyCode: it.currencyCode,
+                      outOfStock: !it.inStock,
                     };
                     return <ProductCard key={it.productId} product={data} />;
                   })}

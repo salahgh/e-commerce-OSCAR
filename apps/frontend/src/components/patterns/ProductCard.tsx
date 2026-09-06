@@ -20,6 +20,7 @@ export interface ProductCardData {
   reviewCount?: number;
   discountPercent?: number | null;
   isFavorited?: boolean;
+  outOfStock?: boolean;
 }
 
 interface ProductCardProps {
@@ -31,8 +32,9 @@ interface ProductCardProps {
 
 export function ProductCard({ product, hideWishlist, className }: ProductCardProps) {
   const t = useTranslations('ProductCard');
+  const tStock = useTranslations('StockIndicator');
   const wishlist = useWishlist();
-  const { slug, name, imageUrl, price, originalPrice, currencyCode, rating, reviewCount, discountPercent } = product;
+  const { slug, name, imageUrl, price, originalPrice, currencyCode, rating, reviewCount, discountPercent, outOfStock } = product;
   const isFavorited = wishlist.has(slug);
   const onSale = originalPrice != null && originalPrice > price;
 
@@ -51,12 +53,23 @@ export function ProductCard({ product, hideWishlist, className }: ProductCardPro
               alt={name}
               fill
               sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
-              className="object-cover transition-transform duration-slow group-hover:scale-105"
+              className={cn(
+                'object-cover transition-transform duration-slow group-hover:scale-105',
+                outOfStock && 'grayscale',
+              )}
             />
           )}
         </Link>
 
-        {discountPercent != null && discountPercent > 0 && (
+        {outOfStock && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-[6px] bg-black/40">
+            <span className="rounded-md bg-bg-elevated px-3 py-1.5 text-14 font-bold text-content-strong shadow-card">
+              {tStock('outOfStock')}
+            </span>
+          </div>
+        )}
+
+        {!outOfStock && discountPercent != null && discountPercent > 0 && (
           <span
             dir="ltr"
             className="pointer-events-none absolute end-3 top-3 rounded-md border-[1.5px] border-state-danger-border bg-state-danger-bg px-2.5 py-1 text-14 font-bold text-state-danger-content"

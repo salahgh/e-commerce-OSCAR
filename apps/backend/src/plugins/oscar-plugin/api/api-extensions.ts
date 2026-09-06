@@ -228,9 +228,34 @@ export const adminApiExtensions = gql`
     lowStockProductsCount: Int!
   }
 
+  # ==================== WILAYA SHIPPING ====================
+
+  """
+  Per-wilaya home-delivery price (managed in Settings → Livraison)
+  """
+  type WilayaShippingPrice {
+    id: ID!
+    code: String!
+    name: String!
+    nameAr: String!
+    "Delivery price in minor units (centimes)"
+    price: Int!
+  }
+
+  input UpdateWilayaShippingPriceInput {
+    code: String!
+    "Delivery price in minor units (centimes)"
+    price: Int!
+  }
+
   # ==================== QUERIES ====================
 
   extend type Query {
+    """
+    All 69 wilayas with their delivery prices
+    """
+    wilayaShippingPrices: [WilayaShippingPrice!]!
+
     """
     Get comprehensive KPI metrics for the dashboard
     """
@@ -295,6 +320,11 @@ export const adminApiExtensions = gql`
   # ==================== MUTATIONS ====================
 
   extend type Mutation {
+    """
+    Update delivery prices for one or more wilayas
+    """
+    updateWilayaShippingPrices(input: [UpdateWilayaShippingPriceInput!]!): [WilayaShippingPrice!]!
+
     """
     Toggle product featured status
     """

@@ -19,6 +19,7 @@ import {
   type ProductCardData,
 } from '@/components/patterns';
 import { variantDiscount } from '@/lib/format/discount';
+import { productOutOfStock } from '@/lib/format/stock';
 
 const PER_PAGE = 12;
 
@@ -26,7 +27,7 @@ function toCardData(p: {
   slug: string;
   name: string;
   featuredAsset?: { preview: string } | null;
-  variants: Array<{ priceWithTax: number; currencyCode: string }>;
+  variants: Array<{ priceWithTax: number; currencyCode: string; stockLevel: string }>;
 }): ProductCardData {
   const v = p.variants[0];
   return {
@@ -34,6 +35,7 @@ function toCardData(p: {
     name: p.name,
     imageUrl: p.featuredAsset?.preview ?? null,
     currencyCode: v?.currencyCode ?? 'DZD',
+    outOfStock: productOutOfStock(p.variants),
     ...variantDiscount(v),
   };
 }

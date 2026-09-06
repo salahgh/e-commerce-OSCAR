@@ -158,6 +158,22 @@ export default function CheckoutPage() {
     }
   }, [customer]);
 
+  // Auto-select the delivery method when there is only one, so the summary
+  // shows the real shipping cost (instead of "to be calculated") without the
+  // customer having to click the sole option.
+  React.useEffect(() => {
+    const methods = shippingQuery.data?.eligibleShippingMethods ?? [];
+    if (!selectedShipping && methods.length === 1) {
+      setSelectedShipping(methods[0].id);
+      setShippingMethod({ variables: { shippingMethodId: [methods[0].id] } })
+        .then(() => refetchCart())
+        .catch(() => {
+          /* retried on submit */
+        });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shippingQuery.data, selectedShipping]);
+
   const selectedWilaya = wilayas.find((w) => w.code === addr.wilayaCode);
   const communes = selectedWilaya?.communes ?? [];
   const name = (x: { name: string; nameAr: string }) => (isAr ? x.nameAr : x.name);
@@ -179,26 +195,34 @@ export default function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addr, communes, selectedWilaya]);
 
-  // Persist the shipping address as soon as the required fields are complete,
-  // then refresh the eligible shipping methods (they depend on the address zone).
+  // `ready` gates placing the order; the address save below deliberately does
+  // NOT wait for it, so the delivery price refreshes as soon as a wilaya is
+  // picked (changing wilaya resets the commune, which used to leave the old
+  // wilaya's price on screen until a new commune was chosen).
   const ready = !!(addr.fullName && addr.phoneNumber && addr.wilayaCode && addr.communeCode);
   React.useEffect(() => {
-    if (!ready) return;
+    if (!addr.wilayaCode) return;
     const key = JSON.stringify([addr.fullName, addr.phoneNumber, addr.wilayaCode, addr.communeCode, addr.email]);
     if (key === savedKeyRef.current) return;
     const handle = setTimeout(async () => {
       try {
-        if (!isAuthenticated) {
-          const trimmed = addr.fullName.trim();
-          const sp = trimmed.indexOf(' ');
-          const firstName = sp === -1 ? trimmed : trimmed.slice(0, sp);
-          const lastName = sp === -1 ? trimmed : trimmed.slice(sp + 1);
-          const { data } = await setCustomer({
-            variables: { input: { emailAddress: addr.email, firstName, lastName, phoneNumber: addr.phoneNumber || undefined } },
-          });
-          if (data?.setCustomerForOrder?.__typename === 'AlreadyLoggedInError') {
-            setStaleSession(true);
-            return;
+        // Attach the guest customer once their details exist; a failure here
+        // (e.g. half-typed email) must not block the address/price update.
+        if (!isAuthenticated && addr.email && addr.fullName) {
+          try {
+            const trimmed = addr.fullName.trim();
+            const sp = trimmed.indexOf(' ');
+            const firstName = sp === -1 ? trimmed : trimmed.slice(0, sp);
+            const lastName = sp === -1 ? trimmed : trimmed.slice(sp + 1);
+            const { data } = await setCustomer({
+              variables: { input: { emailAddress: addr.email, firstName, lastName, phoneNumber: addr.phoneNumber || undefined } },
+            });
+            if (data?.setCustomerForOrder?.__typename === 'AlreadyLoggedInError') {
+              setStaleSession(true);
+              return;
+            }
+          } catch {
+            /* retried on final submit */
           }
         }
         const input = buildAddressInput();
@@ -213,7 +237,7 @@ export default function CheckoutPage() {
     }, 600);
     return () => clearTimeout(handle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, addr]);
+  }, [addr]);
 
   // Vendure returns quotes cheapest-first; show home delivery before office pickup
   // (the calculator tags each quote with `metadata.mode`).
