@@ -19,7 +19,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { organizationSchema, websiteSchema } from '@/lib/seo/schema';
 import { ServiceWorkerRegistrar } from '@/components/pwa/ServiceWorkerRegistrar';
 import { PWAInstallPrompt } from '@/components/pwa/PWAInstallPrompt';
-import { MetaPixel } from '@/components/analytics/MetaPixel';
+import { PixelPageView } from '@/components/analytics/PixelPageView';
 
 const plexArabic = IBM_Plex_Sans_Arabic({
   subsets: ['arabic', 'latin'],
@@ -140,7 +140,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                       <MiniCart />
                       <ServiceWorkerRegistrar />
                       <PWAInstallPrompt />
-                      <MetaPixel />
+                      <PixelPageView />
                     </WishlistProvider>
                   </CartProvider>
                 </AuthProvider>
