@@ -4,6 +4,11 @@
 **Destinataire :** propriétaire OSCAR Fashion
 **Objet :** informations à réunir avant le développement de la double option de livraison
 
+> **Mise à jour du 6 septembre 2026.** La double option de livraison est en ligne avec les hypothèses
+> par défaut ci-dessous. Les tarifs « bureau » sont des valeurs provisoires (tarif domicile − 100 DA) ;
+> les deux tarifs de chaque wilaya se modifient dans le back-office (Réglages → Livraison), sans
+> intervention technique. Vos réponses ne changent donc plus le développement, seulement la grille.
+
 ## Ce que nous avons compris
 
 - À la commande, le client choisit entre **livraison à domicile** et **livraison au bureau du transporteur le plus proche** (stop desk).

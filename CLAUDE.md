@@ -113,7 +113,7 @@ Custom business logic lives in `apps/backend/src/plugins/oscar-plugin/`:
 - `api/` — Custom GraphQL resolvers and schema extensions
 - `services/` — Business logic services
 - `payment/` — Algerian payment handlers (CIB, Baridimob)
-- `shipping/` — Home / office delivery: per-wilaya rate table (`wilaya-shipping-rates.ts`, edit + redeploy to change prices), the `wilaya-rate-calculator`, and a bootstrap service that creates the two shipping methods
+- `shipping/` — Home / office delivery: two shipping methods (`home-delivery`, `office-delivery`) created on boot by `shipping-setup.service.ts`, priced per wilaya from the `wilaya_shipping` table by `wilaya-shipping-calculator` (its `mode` argument picks the column). Prices are edited in the back-office (Settings → Livraison); an empty price hides that mode in the wilaya. Pure matching/quote rules live in `wilaya-pricing.ts` (unit tests: `pnpm --filter @oscar/backend test:unit`)
 - `entities/` — Custom TypeORM entities extending Vendure
 
 ### Authentication
