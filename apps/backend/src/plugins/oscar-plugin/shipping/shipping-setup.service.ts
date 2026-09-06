@@ -77,7 +77,31 @@ export class ShippingSetupService implements OnApplicationBootstrap {
 
     let created = 0;
     for (const def of DELIVERY_METHODS) {
-      if (existingCodes.has(def.code)) continue;
+      const calculator = {
+        code: wilayaShippingCalculator.code,
+        arguments: [{ name: 'mode', value: def.mode }],
+      };
+      const current = existing.find((m) => m.code === def.code);
+      if (current) {
+        // Self-heal a method created by an earlier build (different calculator
+        // code or mode) so it never silently drops out of the checkout.
+        const mode = current.calculator?.args?.find((a) => a.name === 'mode')?.value;
+        if (current.calculator?.code !== calculator.code || mode !== def.mode) {
+          await this.shippingMethodService.update(ctx, {
+            id: current.id,
+            calculator,
+            // UpdateShippingMethodInput requires translations; keep the existing ones.
+            translations: current.translations.map((t) => ({
+              id: t.id,
+              languageCode: t.languageCode,
+              name: t.name,
+              description: t.description,
+            })),
+          });
+          Logger.info(`Repointed shipping method "${def.code}" to ${calculator.code} (${def.mode})`, loggerCtx);
+        }
+        continue;
+      }
       await this.shippingMethodService.create(ctx, {
         code: def.code,
         translations: def.translations,
@@ -88,10 +112,7 @@ export class ShippingSetupService implements OnApplicationBootstrap {
           // undefined and the method is never eligible.
           arguments: [{ name: 'orderMinimum', value: '0' }],
         },
-        calculator: {
-          code: wilayaShippingCalculator.code,
-          arguments: [{ name: 'mode', value: def.mode }],
-        },
+        calculator,
       });
       created++;
       Logger.info(`Created shipping method "${def.code}"`, loggerCtx);
