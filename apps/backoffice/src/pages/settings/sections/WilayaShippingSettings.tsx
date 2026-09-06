@@ -26,7 +26,8 @@ const WILAYA_SHIPPING_PRICES = gql`
       code
       name
       nameAr
-      price
+      homePrice
+      officePrice
     }
   }
 `;
@@ -36,7 +37,8 @@ const UPDATE_WILAYA_SHIPPING_PRICES = gql`
     updateWilayaShippingPrices(input: $input) {
       id
       code
-      price
+      homePrice
+      officePrice
     }
   }
 `;
@@ -46,13 +48,39 @@ interface WilayaShippingPrice {
   code: string;
   name: string;
   nameAr: string;
-  /** Minor units (centimes). */
-  price: number;
+  /** Minor units (centimes); null = home delivery not offered. */
+  homePrice: number | null;
+  /** Minor units (centimes); null = office pickup not offered. */
+  officePrice: number | null;
+}
+
+type Mode = 'home' | 'office';
+/** Text typed per mode, in DZD. A missing key means the field is untouched. */
+type Draft = Partial<Record<Mode, string>>;
+
+const MODES: ReadonlyArray<{ key: Mode; label: string }> = [
+  { key: 'home', label: 'Domicile (DA)' },
+  { key: 'office', label: 'Bureau (DA)' },
+];
+
+const stored = (row: WilayaShippingPrice, mode: Mode): number | null =>
+  mode === 'home' ? row.homePrice : row.officePrice;
+
+const toText = (minor: number | null): string => (minor == null ? '' : String(minor / 100));
+
+/** DZD text → centimes; empty → null (mode not offered); invalid → undefined. */
+function parseDzd(text: string): number | null | undefined {
+  const trimmed = text.trim();
+  if (trimmed === '') return null;
+  const dzd = Number(trimmed);
+  return Number.isFinite(dzd) && dzd >= 0 ? Math.round(dzd * 100) : undefined;
 }
 
 /**
- * Editable table of the 69 wilayas' delivery prices. Prices are shown and
- * edited in DZD; the API stores centimes. Only modified rows are sent.
+ * Editable table of the 69 wilayas' delivery prices, one column per delivery
+ * mode (home delivery / courier office pickup). Prices are shown and edited
+ * in DZD; the API stores centimes. An empty price means the mode is not
+ * offered in that wilaya. Only modified rows are sent.
  */
 export const WilayaShippingSettings: React.FC = () => {
   const dispatch = useDispatch();
@@ -61,8 +89,7 @@ export const WilayaShippingSettings: React.FC = () => {
   );
   const [updatePrices, { loading: saving }] = useMutation(UPDATE_WILAYA_SHIPPING_PRICES);
 
-  // Edited prices in DZD, keyed by wilaya code.
-  const [edited, setEdited] = useState<Record<string, string>>({});
+  const [edited, setEdited] = useState<Record<string, Draft>>({});
   const [filter, setFilter] = useState('');
 
   const rows = useMemo(() => {
@@ -74,27 +101,35 @@ export const WilayaShippingSettings: React.FC = () => {
     );
   }, [data, filter]);
 
-  const dirtyCodes = Object.keys(edited).filter((code) => {
-    const row = data?.wilayaShippingPrices.find((w) => w.code === code);
-    if (!row) return false;
-    const dzd = Number(edited[code]);
-    return Number.isFinite(dzd) && dzd >= 0 && Math.round(dzd * 100) !== row.price;
-  });
+  /** Value a field would be saved with: the typed text if valid, else the stored price. */
+  const resolved = (row: WilayaShippingPrice, mode: Mode): number | null => {
+    const text = edited[row.code]?.[mode];
+    if (text === undefined) return stored(row, mode);
+    const parsed = parseDzd(text);
+    return parsed === undefined ? stored(row, mode) : parsed;
+  };
+
+  const isDirty = (row: WilayaShippingPrice, mode: Mode) => resolved(row, mode) !== stored(row, mode);
+
+  const dirtyRows = (data?.wilayaShippingPrices ?? []).filter((row) =>
+    MODES.some(({ key }) => isDirty(row, key))
+  );
 
   const handleSave = async () => {
-    if (dirtyCodes.length === 0) return;
+    if (dirtyRows.length === 0) return;
     try {
       await updatePrices({
         variables: {
-          input: dirtyCodes.map((code) => ({
-            code,
-            price: Math.round(Number(edited[code]) * 100),
+          input: dirtyRows.map((row) => ({
+            code: row.code,
+            homePrice: resolved(row, 'home'),
+            officePrice: resolved(row, 'office'),
           })),
         },
       });
       dispatch(
         addToast({
-          message: `Tarifs mis à jour (${dirtyCodes.length} wilaya${dirtyCodes.length > 1 ? 's' : ''})`,
+          message: `Tarifs mis à jour (${dirtyRows.length} wilaya${dirtyRows.length > 1 ? 's' : ''})`,
           type: 'success',
         })
       );
@@ -105,6 +140,9 @@ export const WilayaShippingSettings: React.FC = () => {
     }
   };
 
+  const setDraft = (code: string, mode: Mode, text: string) =>
+    setEdited((prev) => ({ ...prev, [code]: { ...prev[code], [mode]: text } }));
+
   return (
     <div className="bg-muted/50 rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
@@ -114,7 +152,8 @@ export const WilayaShippingSettings: React.FC = () => {
             Livraison par wilaya
           </h3>
           <p className="text-sm text-muted-foreground">
-            Prix de livraison à domicile appliqué au checkout selon la wilaya du client
+            Prix de la livraison à domicile et au bureau du transporteur, appliqués au checkout selon la
+            wilaya du client. Laisser vide pour ne pas proposer ce mode dans la wilaya.
           </p>
         </div>
         <PermissionGate permission="UpdateShippingMethod" disableMode>
@@ -123,10 +162,10 @@ export const WilayaShippingSettings: React.FC = () => {
             size="sm"
             onClick={handleSave}
             loading={saving}
-            disabled={saving || dirtyCodes.length === 0}
+            disabled={saving || dirtyRows.length === 0}
           >
             <Save className="h-4 w-4 mr-2" />
-            Enregistrer{dirtyCodes.length > 0 ? ` (${dirtyCodes.length})` : ''}
+            Enregistrer{dirtyRows.length > 0 ? ` (${dirtyRows.length})` : ''}
           </Button>
         </PermissionGate>
       </div>
@@ -157,41 +196,43 @@ export const WilayaShippingSettings: React.FC = () => {
               <TableRow>
                 <TableHead className="w-16">Code</TableHead>
                 <TableHead>Wilaya</TableHead>
-                <TableHead className="w-44 text-right">Prix livraison (DA)</TableHead>
+                {MODES.map(({ key, label }) => (
+                  <TableHead key={key} className="w-40 text-right">
+                    {label}
+                  </TableHead>
+                ))}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map((w) => {
-                const value = edited[w.code] ?? String(w.price / 100);
-                const dirty = dirtyCodes.includes(w.code);
-                return (
-                  <TableRow key={w.code}>
-                    <TableCell>
-                      <Badge variant="default">{w.code}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <span className="font-medium text-foreground">{w.name}</span>
-                      <span className="ml-2 text-muted-foreground" dir="rtl">
-                        {w.nameAr}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
+              {rows.map((w) => (
+                <TableRow key={w.code}>
+                  <TableCell>
+                    <Badge variant="default">{w.code}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className="font-medium text-foreground">{w.name}</span>
+                    <span className="ml-2 text-muted-foreground" dir="rtl">
+                      {w.nameAr}
+                    </span>
+                  </TableCell>
+                  {MODES.map(({ key, label }) => (
+                    <TableCell key={key} className="text-right">
                       <input
                         type="number"
                         min={0}
                         step={50}
-                        value={value}
-                        onChange={(e) =>
-                          setEdited((prev) => ({ ...prev, [w.code]: e.target.value }))
-                        }
-                        className={`w-28 px-3 py-1.5 bg-card border rounded text-right text-foreground focus:outline-none focus:ring-1 focus:ring-primary ${
-                          dirty ? 'border-primary' : 'border-border'
+                        placeholder="—"
+                        aria-label={`${w.name} — ${label}`}
+                        value={edited[w.code]?.[key] ?? toText(stored(w, key))}
+                        onChange={(e) => setDraft(w.code, key, e.target.value)}
+                        className={`w-28 px-3 py-1.5 bg-card border rounded text-right text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary ${
+                          isDirty(w, key) ? 'border-primary' : 'border-border'
                         }`}
                       />
                     </TableCell>
-                  </TableRow>
-                );
-              })}
+                  ))}
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </div>

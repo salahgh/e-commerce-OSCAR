@@ -722,6 +722,13 @@ export const Settings: React.FC = () => {
                 {shippingMethods.map((method) => {
                   const priceArg = method.calculator?.args?.find((arg) => arg.name === 'rate');
                   const price = priceArg ? parseInt(priceArg.value, 10) : 0;
+                  // Methods priced from the "Livraison par wilaya" table have no flat rate to edit here.
+                  const wilayaMode =
+                    method.calculator?.code === 'wilaya-shipping-calculator'
+                      ? method.calculator.args?.find((arg) => arg.name === 'mode')?.value === 'office'
+                        ? 'Bureau'
+                        : 'Domicile'
+                      : null;
 
                   return (
                     <div
@@ -766,18 +773,26 @@ export const Settings: React.FC = () => {
                           </div>
                         ) : (
                           <>
-                            <span className="text-lg font-semibold text-foreground">
-                              {formatPrice(price / 100)}
-                            </span>
-                            <PermissionGate permission="UpdateShippingMethod" disableMode>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setEditingShipping(method.id)}
-                              >
-                                <Edit2 className="h-4 w-4" />
-                              </Button>
-                            </PermissionGate>
+                            {wilayaMode ? (
+                              <span className="text-sm font-medium text-muted-foreground">
+                                Tarif par wilaya · {wilayaMode}
+                              </span>
+                            ) : (
+                              <>
+                                <span className="text-lg font-semibold text-foreground">
+                                  {formatPrice(price / 100)}
+                                </span>
+                                <PermissionGate permission="UpdateShippingMethod" disableMode>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setEditingShipping(method.id)}
+                                  >
+                                    <Edit2 className="h-4 w-4" />
+                                  </Button>
+                                </PermissionGate>
+                              </>
+                            )}
                             <PermissionGate permission="UpdateShippingMethod" disableMode>
                               <Button
                                 variant="ghost"
