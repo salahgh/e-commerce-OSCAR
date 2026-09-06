@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { ChannelService, RequestContext, TransactionalConnection } from '@vendure/core';
 import { WilayaShipping } from '../entities/wilaya-shipping.entity';
+import { DeliveryMode, findWilayaRow, quoteDelivery } from '../shipping/wilaya-pricing';
 
 export interface UpdateWilayaShippingPriceInput {
   code: string;
-  /** Minor units (centimes). */
-  price: number;
+  /** Minor units (centimes); null = home delivery not offered. */
+  homePrice: number | null;
+  /** Minor units (centimes); null = office pickup not offered. */
+  officePrice: number | null;
 }
-
-/** Charged when the address can't be matched to any wilaya row (500 DZD). */
-export const FALLBACK_SHIPPING_PRICE = 50000;
 
 @Injectable()
 export class WilayaShippingService {
@@ -27,39 +27,32 @@ export class WilayaShippingService {
     input: UpdateWilayaShippingPriceInput[],
   ): Promise<WilayaShipping[]> {
     const repo = this.connection.getRepository(ctx, WilayaShipping);
-    for (const { code, price } of input) {
-      if (!Number.isInteger(price) || price < 0) {
-        throw new Error(`Invalid price for wilaya ${code}: ${price}`);
+    for (const { code, homePrice, officePrice } of input) {
+      for (const [label, price] of [['home', homePrice], ['office', officePrice]] as const) {
+        if (price != null && (!Number.isInteger(price) || price < 0)) {
+          throw new Error(`Invalid ${label} price for wilaya ${code}: ${price}`);
+        }
       }
-      await repo.update({ code }, { price });
+      await repo.update({ code }, { homePrice, officePrice });
     }
     return this.findAll(ctx);
   }
 
   /**
-   * Resolve the delivery price for an order shipping address. The storefront
-   * writes the wilaya into `province` in the shopper's locale (French or
-   * Arabic name, or the raw code as fallback), so match against all three.
-   * Orders above the channel's free-shipping threshold ship free, matching
-   * the storefront banner.
+   * Quote one delivery mode for an order shipping address, in minor units, or
+   * `undefined` when that mode is not offered in the wilaya. Orders above the
+   * channel's free-shipping threshold ship free, matching the storefront banner.
    */
-  async priceForAddress(
+  async quoteForAddress(
     ctx: RequestContext,
     address: { province?: string | null } | undefined,
     orderSubTotalWithTax: number,
-  ): Promise<number> {
+    mode: DeliveryMode,
+  ): Promise<number | undefined> {
+    const rows = await this.findAll(ctx);
+    const row = findWilayaRow(rows, address?.province);
     const threshold = await this.freeShippingThreshold(ctx);
-    if (threshold != null && orderSubTotalWithTax >= threshold) {
-      return 0;
-    }
-    const province = address?.province?.trim();
-    if (!province) return FALLBACK_SHIPPING_PRICE;
-    const row = await this.connection
-      .getRepository(ctx, WilayaShipping)
-      .createQueryBuilder('w')
-      .where('w.code = :p OR w.name = :p OR w.nameAr = :p', { p: province })
-      .getOne();
-    return row?.price ?? FALLBACK_SHIPPING_PRICE;
+    return quoteDelivery(row, mode, orderSubTotalWithTax, threshold);
   }
 
   /** Channel free-shipping threshold in minor units, or null when unset. */

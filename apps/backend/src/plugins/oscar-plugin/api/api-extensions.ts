@@ -231,21 +231,26 @@ export const adminApiExtensions = gql`
   # ==================== WILAYA SHIPPING ====================
 
   """
-  Per-wilaya home-delivery price (managed in Settings → Livraison)
+  Per-wilaya delivery prices (managed in Settings → Livraison).
+  A null price means that delivery mode is not offered in the wilaya.
   """
   type WilayaShippingPrice {
     id: ID!
     code: String!
     name: String!
     nameAr: String!
-    "Delivery price in minor units (centimes)"
-    price: Int!
+    "Home-delivery price in minor units (centimes), or null when not offered"
+    homePrice: Int
+    "Courier-office pickup price in minor units (centimes), or null when not offered"
+    officePrice: Int
   }
 
   input UpdateWilayaShippingPriceInput {
     code: String!
-    "Delivery price in minor units (centimes)"
-    price: Int!
+    "Home-delivery price in minor units (centimes); null to stop offering it"
+    homePrice: Int
+    "Courier-office pickup price in minor units (centimes); null to stop offering it"
+    officePrice: Int
   }
 
   # ==================== QUERIES ====================
