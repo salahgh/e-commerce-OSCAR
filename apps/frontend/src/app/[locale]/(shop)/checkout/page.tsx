@@ -158,22 +158,6 @@ export default function CheckoutPage() {
     }
   }, [customer]);
 
-  // Auto-select the delivery method when there is only one, so the summary
-  // shows the real shipping cost (instead of "to be calculated") without the
-  // customer having to click the sole option.
-  React.useEffect(() => {
-    const methods = shippingQuery.data?.eligibleShippingMethods ?? [];
-    if (!selectedShipping && methods.length === 1) {
-      setSelectedShipping(methods[0].id);
-      setShippingMethod({ variables: { shippingMethodId: [methods[0].id] } })
-        .then(() => refetchCart())
-        .catch(() => {
-          /* retried on submit */
-        });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shippingQuery.data, selectedShipping]);
-
   const selectedWilaya = wilayas.find((w) => w.code === addr.wilayaCode);
   const communes = selectedWilaya?.communes ?? [];
   const name = (x: { name: string; nameAr: string }) => (isAr ? x.nameAr : x.name);

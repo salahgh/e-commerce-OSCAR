@@ -355,6 +355,14 @@ mutation AddPaymentToOrder($input: PaymentInput!) {
 query GetOrderByCode($code: String!) {
   orderByCode(code: $code) {
     ...OrderFields
+    shippingLines {
+      shippingMethod {
+        id
+        code
+        name
+      }
+      priceWithTax
+    }
   }
 }
 

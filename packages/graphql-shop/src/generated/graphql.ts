@@ -3148,10 +3148,6 @@ export type Query = {
   search: SearchResponse;
   /** Search products with multilingual support (FR/AR/EN) */
   searchProductsMultilingual: MultilingualSearchResult;
-  /** Calculate shipping cost for a wilaya */
-  shippingCost: ShippingCost;
-  /** Get all Algeria wilayas for shipping */
-  wilayas: Array<Wilaya>;
 };
 
 export type QueryCollectionArgs = {
@@ -3208,10 +3204,6 @@ export type QuerySearchProductsMultilingualArgs = {
   keyword: Scalars["String"]["input"];
   skip?: InputMaybe<Scalars["Int"]["input"]>;
   take?: InputMaybe<Scalars["Int"]["input"]>;
-};
-
-export type QueryShippingCostArgs = {
-  wilayaCode: Scalars["String"]["input"];
 };
 
 export type RefreshCustomerVerificationResult =
@@ -3432,12 +3424,6 @@ export type SetOrderShippingMethodResult =
   | NoActiveOrderError
   | Order
   | OrderModificationError;
-
-export type ShippingCost = {
-  __typename?: "ShippingCost";
-  amount: Scalars["Int"]["output"];
-  currency: Scalars["String"]["output"];
-};
 
 export type ShippingLine = {
   __typename?: "ShippingLine";
@@ -3822,12 +3808,6 @@ export type VerifyCustomerAccountResult =
   | PasswordValidationError
   | VerificationTokenExpiredError
   | VerificationTokenInvalidError;
-
-export type Wilaya = {
-  __typename?: "Wilaya";
-  code: Scalars["String"]["output"];
-  name: Scalars["String"]["output"];
-};
 
 export type Zone = Node & {
   __typename?: "Zone";
@@ -6072,6 +6052,16 @@ export type GetOrderByCodeQuery = {
     totalWithTax: number;
     currencyCode: CurrencyCode;
     couponCodes: Array<string>;
+    shippingLines: Array<{
+      __typename?: "ShippingLine";
+      priceWithTax: number;
+      shippingMethod: {
+        __typename?: "ShippingMethod";
+        id: string;
+        code: string;
+        name: string;
+      };
+    }>;
     discounts: Array<{
       __typename?: "Discount";
       adjustmentSource: string;
@@ -10155,6 +10145,14 @@ export const GetOrderByCodeDocument = gql`
   query GetOrderByCode($code: String!) {
     orderByCode(code: $code) {
       ...OrderFields
+      shippingLines {
+        shippingMethod {
+          id
+          code
+          name
+        }
+        priceWithTax
+      }
     }
   }
   ${OrderFieldsFragmentDoc}

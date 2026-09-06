@@ -128,7 +128,12 @@ export default function OrderDetailPage() {
             <dt className="text-content-muted">{t('subtotal')}</dt>
             <dd className="text-end">{formatDzdTotal(order.subTotalWithTax, locale)}</dd>
             <dt className="text-content-muted">{t('shipping')}</dt>
-            <dd className="text-end">{formatDzdTotal(order.shippingWithTax, locale)}</dd>
+            <dd className="text-end">
+              {order.shippingLines[0]?.shippingMethod.name && (
+                <span className="me-2 text-content-muted">{order.shippingLines[0].shippingMethod.name}</span>
+              )}
+              {formatDzdTotal(order.shippingWithTax, locale)}
+            </dd>
             <dt className="pt-2 font-bold text-content-strong">{t('total')}</dt>
             <dd className="pt-2 text-end font-bold text-content-strong">
               {formatDzdTotal(order.totalWithTax, locale)}
