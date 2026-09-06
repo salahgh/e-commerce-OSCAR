@@ -1125,6 +1125,10 @@
   - [x] Page view tracking
   - [x] Add to cart events
   - [x] Purchase events
+- [x] TikTok Pixel
+  - [x] Page view tracking
+  - [x] Add to cart events
+  - [x] Purchase events
 
 ## 6.3 Multilingual Implementation
 

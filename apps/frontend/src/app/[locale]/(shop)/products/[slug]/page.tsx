@@ -21,7 +21,7 @@ import { SectionHeader } from '@/components/home';
 import { cn } from '@/lib/utils/cn';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { productSchema, breadcrumbSchema } from '@/lib/seo/schema';
-import { trackViewContent } from '@/lib/analytics/meta-pixel';
+import { trackViewContent } from '@/lib/analytics';
 
 /** Size / colour selector chip — black when selected, outlined otherwise (Figma "متغيرات الأوسمة"). */
 function VariantChip({

@@ -21,7 +21,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useRouter, Link } from '@/i18n/routing';
 import { Alert, Button } from '@/components/ui';
 import { cn } from '@/lib/utils/cn';
-import { trackInitiateCheckout } from '@/lib/analytics/meta-pixel';
+import { trackInitiateCheckout } from '@/lib/analytics';
 
 const inputCls =
   'w-full rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-start text-16 text-accent shadow-sm placeholder:text-content-subtle focus:border-accent focus:outline-none';

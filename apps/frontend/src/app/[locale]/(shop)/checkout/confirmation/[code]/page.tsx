@@ -8,7 +8,7 @@ import { formatDzdTotal } from '@/lib/format/price';
 import { useGetOrderByCodeQuery } from '@oscar/graphql-shop/generated';
 import { Link } from '@/i18n/routing';
 import { Alert, Button, Card, Skeleton } from '@/components/ui';
-import { trackPurchase } from '@/lib/analytics/meta-pixel';
+import { trackPurchase } from '@/lib/analytics';
 
 export default function ConfirmationPage() {
   const t = useTranslations('CheckoutConfirmationPage');

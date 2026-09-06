@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { useTranslations } from 'next-intl';
 import { useAuth } from './AuthContext';
 import { useToast } from '@/components/ui/Toast';
-import { trackAddToCart } from '@/lib/analytics/meta-pixel';
+import { trackAddToCart } from '@/lib/analytics';
 import {
   useGetActiveOrderQuery,
   useAddItemToOrderMutation,
