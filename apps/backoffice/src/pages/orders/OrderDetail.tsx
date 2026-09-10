@@ -45,6 +45,7 @@ import {
 } from '../../graphql/generated/graphql';
 import { RefundDialog, ManualPaymentDialog, ModifyOrderDialog } from './OrderActionDialogs';
 import { FulfillmentDialog } from './FulfillmentDialog';
+import { orderListReturnPath } from './useOrderListParams';
 import { TransitionFulfillmentToStateDocument } from '../../graphql/generated/graphql';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -93,7 +94,7 @@ const ORDER_STATUS: Record<
     next: ['PaymentAuthorized', 'PaymentSettled', 'Cancelled'],
   },
   PaymentAuthorized: {
-    label: 'Paiement autorisé',
+    label: 'Nouvelle',
     variant: 'info',
     icon: <CheckCircle className="h-4 w-4" />,
     color: 'text-blue-400',
@@ -491,7 +492,7 @@ export const OrderDetail: React.FC = () => {
         <p className="text-muted-foreground/70 text-sm mb-6">
           Cette commande n'existe pas ou a été supprimée
         </p>
-        <Button variant="primary" onClick={() => navigate('/orders')}>
+        <Button variant="primary" onClick={() => navigate(orderListReturnPath())}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour aux commandes
         </Button>
@@ -517,7 +518,7 @@ export const OrderDetail: React.FC = () => {
           {/* Left Side - Order Info */}
           <div className="flex items-start gap-4">
             <button
-              onClick={() => navigate('/orders')}
+              onClick={() => navigate(orderListReturnPath())}
               className="p-2 bg-accent/50 hover:bg-accent rounded-lg transition-colors"
             >
               <ArrowLeft className="h-5 w-5 text-foreground" />

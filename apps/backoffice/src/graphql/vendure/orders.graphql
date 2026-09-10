@@ -11,6 +11,7 @@ query AdminOrders($options: OrderListOptions) {
       updatedAt
       totalWithTax
       total
+      totalQuantity
       currencyCode
       customer {
         id
@@ -22,6 +23,7 @@ query AdminOrders($options: OrderListOptions) {
       shippingLines {
         shippingMethod {
           id
+          code
           name
         }
         priceWithTax
@@ -42,6 +44,25 @@ query AdminOrders($options: OrderListOptions) {
     }
     totalItems
   }
+}
+
+# One count per status tab of the orders list; each variable carries the shared
+# search/wilaya/date filters plus that tab's own state condition (take: 1, only
+# totalItems is read).
+query AdminOrderTabCounts(
+  $all: OrderListOptions
+  $toShip: OrderListOptions
+  $shipped: OrderListOptions
+  $delivered: OrderListOptions
+  $cancelled: OrderListOptions
+  $carts: OrderListOptions
+) {
+  all: orders(options: $all) { totalItems }
+  toShip: orders(options: $toShip) { totalItems }
+  shipped: orders(options: $shipped) { totalItems }
+  delivered: orders(options: $delivered) { totalItems }
+  cancelled: orders(options: $cancelled) { totalItems }
+  carts: orders(options: $carts) { totalItems }
 }
 
 query AdminOrder($id: ID!) {

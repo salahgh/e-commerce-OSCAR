@@ -9,6 +9,7 @@
     "start": "serve dist -s -p 3000",
     "preview": "vite preview",
     "codegen": "graphql-codegen",
+    "test:unit": "node --import ./scripts/node-test/register.mjs --test \"src/**/*.test.ts\"",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\""
   },
   "dependencies": {
