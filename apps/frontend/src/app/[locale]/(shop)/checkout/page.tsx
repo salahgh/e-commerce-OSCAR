@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ChevronDown, ArrowLeft, Check } from 'lucide-react';
-import { wilayas, getShippingZone } from '@oscar/shared';
+import { wilayas, getShippingZone, placeholderEmailForPhone } from '@oscar/shared';
 import { formatDzdTotal } from '@/lib/format/price';
 import {
   useSetCustomerForOrderMutation,
@@ -192,14 +192,17 @@ export default function CheckoutPage() {
       try {
         // Attach the guest customer once their details exist; a failure here
         // (e.g. half-typed email) must not block the address/price update.
-        if (!isAuthenticated && addr.email && addr.fullName) {
+        // The email is optional: without one, Vendure gets a placeholder
+        // derived from the phone number (see @oscar/shared guest-email).
+        if (!isAuthenticated && addr.fullName && addr.phoneNumber) {
           try {
             const trimmed = addr.fullName.trim();
             const sp = trimmed.indexOf(' ');
             const firstName = sp === -1 ? trimmed : trimmed.slice(0, sp);
             const lastName = sp === -1 ? trimmed : trimmed.slice(sp + 1);
+            const emailAddress = addr.email.trim() || placeholderEmailForPhone(addr.phoneNumber);
             const { data } = await setCustomer({
-              variables: { input: { emailAddress: addr.email, firstName, lastName, phoneNumber: addr.phoneNumber || undefined } },
+              variables: { input: { emailAddress, firstName, lastName, phoneNumber: addr.phoneNumber } },
             });
             if (data?.setCustomerForOrder?.__typename === 'AlreadyLoggedInError') {
               setStaleSession(true);
@@ -241,6 +244,15 @@ export default function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shippingMethods, addr.wilayaCode]);
 
+  // Cash on delivery is the only payment method today: when exactly one method is
+  // eligible, pre-select it so the shopper never has to click a lone option.
+  const paymentMethods = React.useMemo(() => paymentQuery.data?.eligiblePaymentMethods ?? [], [paymentQuery.data]);
+  React.useEffect(() => {
+    if (selectedPayment) return;
+    const eligible = paymentMethods.filter((m) => m.isEligible);
+    if (eligible.length === 1) setSelectedPayment(eligible[0].code);
+  }, [paymentMethods, selectedPayment]);
+
   if (!cart || cart.items.length === 0) {
     return (
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-4 px-6 py-24 text-center">
@@ -252,8 +264,6 @@ export default function CheckoutPage() {
       </div>
     );
   }
-
-  const paymentMethods = paymentQuery.data?.eligiblePaymentMethods ?? [];
 
   async function onSelectShipping(id: string) {
     setSelectedShipping(id);
@@ -358,10 +368,11 @@ export default function CheckoutPage() {
           {/* 1. Shipping details */}
           <Section title={t('sectionShipping')}>
             {!isAuthenticated && (
-              <Field label={tAddr('email')} required>
+              <Field label={tAddr('emailOptional')}>
                 <input
                   type="email"
                   className={inputCls}
+                  placeholder={tAddr('emailHint')}
                   value={addr.email}
                   onChange={(e) => setAddr((a) => ({ ...a, email: e.target.value }))}
                 />

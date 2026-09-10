@@ -32,3 +32,6 @@ export type {
   FacetGroup,
   FacetedSearchState,
 } from './facet-utils';
+
+// Guest checkout placeholder email
+export { PLACEHOLDER_EMAIL_DOMAIN, placeholderEmailForPhone, isPlaceholderEmail } from './guest-email';

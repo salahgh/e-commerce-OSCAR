@@ -9,6 +9,7 @@
     "./colors": "./src/colors.ts",
     "./constants/*": "./src/constants/*.ts",
     "./formatters/*": "./src/formatters/*.ts",
-    "./facet-utils": "./src/facet-utils.ts"
+    "./facet-utils": "./src/facet-utils.ts",
+    "./guest-email": "./src/guest-email.ts"
   }
 }

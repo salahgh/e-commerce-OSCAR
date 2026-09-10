@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
+import { isPlaceholderEmail } from '@oscar/shared';
 import { formatDzdTotal } from '@/lib/format/price';
 import { useGetOrderByCodeQuery } from '@oscar/graphql-shop/generated';
 import { Link } from '@/i18n/routing';
@@ -74,7 +75,10 @@ export default function ConfirmationPage() {
         </dl>
       </Card>
 
-      <p className="text-12 text-content-muted">{t('trackingHint')}</p>
+      {/* Guests may skip the email at checkout; don't promise one they won't get. */}
+      {!isPlaceholderEmail(order.customer?.emailAddress) && (
+        <p className="text-12 text-content-muted">{t('trackingHint')}</p>
+      )}
 
       <div className="flex flex-wrap justify-center gap-3">
         <Button asChild>

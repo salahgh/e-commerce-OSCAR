@@ -142,6 +142,7 @@
     "address": {
       "email": "Email",
       "emailHint": "Pour la confirmation de commande",
+      "emailOptional": "Email (optionnel)",
       "fullName": "Nom complet",
       "streetLine1": "Adresse",
       "streetLine2": "Complément d'adresse (optionnel)",
