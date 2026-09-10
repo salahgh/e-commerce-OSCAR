@@ -140,9 +140,6 @@
     "stepShipping": "2. Shipping method",
     "stepPayment": "3. Payment",
     "address": {
-      "email": "Email",
-      "emailHint": "For order confirmation",
-      "emailOptional": "Email (optional)",
       "fullName": "Full name",
       "streetLine1": "Street address",
       "streetLine2": "Address complement (optional)",

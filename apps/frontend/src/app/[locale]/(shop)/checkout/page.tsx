@@ -133,7 +133,6 @@ export default function CheckoutPage() {
   const paymentQuery = useGetEligiblePaymentMethodsQuery({ fetchPolicy: 'network-only' });
 
   const [addr, setAddr] = React.useState({
-    email: '',
     fullName: '',
     phoneNumber: '',
     phone2: '',
@@ -151,7 +150,6 @@ export default function CheckoutPage() {
     if (customer) {
       setAddr((a) => ({
         ...a,
-        email: a.email || customer.emailAddress,
         fullName: a.fullName || `${customer.firstName} ${customer.lastName}`.trim(),
         phoneNumber: a.phoneNumber || customer.phoneNumber || '',
       }));
@@ -186,21 +184,22 @@ export default function CheckoutPage() {
   const ready = !!(addr.fullName && addr.phoneNumber && addr.wilayaCode && addr.communeCode);
   React.useEffect(() => {
     if (!addr.wilayaCode) return;
-    const key = JSON.stringify([addr.fullName, addr.phoneNumber, addr.wilayaCode, addr.communeCode, addr.email]);
+    const key = JSON.stringify([addr.fullName, addr.phoneNumber, addr.wilayaCode, addr.communeCode]);
     if (key === savedKeyRef.current) return;
     const handle = setTimeout(async () => {
       try {
         // Attach the guest customer once their details exist; a failure here
-        // (e.g. half-typed email) must not block the address/price update.
-        // The email is optional: without one, Vendure gets a placeholder
-        // derived from the phone number (see @oscar/shared guest-email).
+        // must not block the address/price update. The owner does not want an
+        // email field at checkout, but Vendure requires one on the customer, so
+        // guests get a placeholder derived from the phone number (see
+        // @oscar/shared guest-email).
         if (!isAuthenticated && addr.fullName && addr.phoneNumber) {
           try {
             const trimmed = addr.fullName.trim();
             const sp = trimmed.indexOf(' ');
             const firstName = sp === -1 ? trimmed : trimmed.slice(0, sp);
             const lastName = sp === -1 ? trimmed : trimmed.slice(sp + 1);
-            const emailAddress = addr.email.trim() || placeholderEmailForPhone(addr.phoneNumber);
+            const emailAddress = placeholderEmailForPhone(addr.phoneNumber);
             const { data } = await setCustomer({
               variables: { input: { emailAddress, firstName, lastName, phoneNumber: addr.phoneNumber } },
             });
@@ -367,17 +366,6 @@ export default function CheckoutPage() {
 
           {/* 1. Shipping details */}
           <Section title={t('sectionShipping')}>
-            {!isAuthenticated && (
-              <Field label={tAddr('emailOptional')}>
-                <input
-                  type="email"
-                  className={inputCls}
-                  placeholder={tAddr('emailHint')}
-                  value={addr.email}
-                  onChange={(e) => setAddr((a) => ({ ...a, email: e.target.value }))}
-                />
-              </Field>
-            )}
             <Field label={tAddr('fullName')} required>
               <input
                 className={inputCls}

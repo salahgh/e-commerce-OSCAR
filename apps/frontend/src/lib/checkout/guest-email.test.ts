@@ -1,4 +1,4 @@
-// The checkout email is optional, but Vendure still needs one on the guest
+// Checkout has no email field, but Vendure still needs one on the guest
 // customer: these helpers build (and recognise) the placeholder derived from
 // the phone number. Run: pnpm --filter @oscar/frontend test:unit
 import { test } from 'node:test';

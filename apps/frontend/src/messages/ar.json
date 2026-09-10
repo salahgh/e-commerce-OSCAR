@@ -140,9 +140,6 @@
     "stepShipping": "2. طريقة التوصيل",
     "stepPayment": "3. الدفع",
     "address": {
-      "email": "البريد الإلكتروني",
-      "emailHint": "لتأكيد الطلب",
-      "emailOptional": "البريد الإلكتروني (اختياري)",
       "fullName": "الاسم الكامل",
       "streetLine1": "العنوان",
       "streetLine2": "تفاصيل إضافية (اختياري)",
