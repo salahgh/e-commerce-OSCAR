@@ -40,6 +40,11 @@ pnpm build --filter=@oscar/backend --filter=@oscar/frontend --filter=@oscar/back
 # Migrations run automatically when the backend boots — they apply on
 # the next `pm2 reload` below. See apps/backend/src/index.ts:9.
 
+# Belt and braces: the same purge also runs as a preload on every frontend
+# (re)start via ecosystem.config.cjs. Never fails the deploy.
+echo "▶  Purging zero-byte files from the frontend image cache"
+node deploy/scripts/clean-image-cache.cjs apps/frontend || true
+
 echo "▶  Reloading PM2 (zero-downtime — migrations apply on backend restart)"
 pm2 reload "$ECO" --update-env
 

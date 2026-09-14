@@ -32,8 +32,16 @@ module.exports = {
       cwd: frontendDir,
       script: nextBin,
       args: 'start -p 3001',
+      // Preload: purge zero-byte files from .next/cache/images before Next.js
+      // scans it. A single empty file poisoned the whole image cache for two
+      // weeks (2026-08-31 → 09-14). See clean-image-cache.cjs.
+      node_args: ['--require', path.join(__dirname, 'clean-image-cache.cjs')],
       env_file: path.join(frontendDir, '.env.production'),
       max_memory_restart: '1G',
+      // PM2's default is 1.6 s, after which it SIGKILLs — that is how the
+      // half-written cache file above came to exist. Give Next.js time to
+      // finish in-flight responses and cache writes.
+      kill_timeout: 10000,
       instances: 1,
       exec_mode: 'fork',
       time: true,
