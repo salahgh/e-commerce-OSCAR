@@ -3,7 +3,7 @@
 import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 
-process.env.NEXT_PUBLIC_META_PIXEL_ID = '1795558734909993';
+process.env.NEXT_PUBLIC_META_PIXEL_ID = '28129206250064371';
 process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID = 'DAA2TURC77UBPDTVK0FG';
 
 const g = globalThis as any;

@@ -42,6 +42,9 @@ export function generateStaticParams() {
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://oscarfashion.dz';
 const GTM_ID = 'GTM-PB2KLTSW';
+// Empty in dev (see .env.example) so local sessions never reach the live properties.
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const CONTENTSQUARE_ID = process.env.NEXT_PUBLIC_CONTENTSQUARE_ID;
 
 export const viewport: Viewport = {
   themeColor: '#1E1E1E',
@@ -116,6 +119,31 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','${GTM_ID}');`}
       </Script>
+      {/* Google Analytics 4 (gtag.js). Enhanced measurement's history-change
+          detection reports client-side route changes, so no manual page_view. */}
+      {GA_MEASUREMENT_ID && (
+        <>
+          <Script
+            id="google-analytics-loader"
+            src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+            strategy="afterInteractive"
+          />
+          <Script id="google-analytics" strategy="afterInteractive">
+            {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA_MEASUREMENT_ID}');`}
+          </Script>
+        </>
+      )}
+      {/* Contentsquare (Hotjar) session recordings & heatmaps */}
+      {CONTENTSQUARE_ID && (
+        <Script
+          id="contentsquare"
+          src={`https://t.contentsquare.net/uxa/${CONTENTSQUARE_ID}.js`}
+          strategy="afterInteractive"
+        />
+      )}
       <body className="bg-bg-base text-content font-sans antialiased">
         {/* Google Tag Manager (noscript) */}
         <noscript>
