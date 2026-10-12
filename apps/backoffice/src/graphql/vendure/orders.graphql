@@ -482,6 +482,45 @@ mutation TransitionFulfillmentToState($id: ID!, $state: String!) {
 
 # Apply changes to an order (adjust line quantities, add surcharges, etc.).
 # Use `dryRun: true` to preview the impact without persisting.
+# One-call modification (Oscar plugin): handles Modifying in/out and the money side.
+# dryRun: true returns the previewed order without persisting anything.
+mutation ModifyOrderGuided($input: ModifyOrderInput!) {
+  modifyOrderGuided(input: $input) {
+    ... on Order {
+      id
+      state
+      subTotalWithTax
+      shippingWithTax
+      totalWithTax
+      lines {
+        id
+        quantity
+        linePriceWithTax
+        productVariant {
+          id
+          name
+          sku
+        }
+      }
+      surcharges {
+        id
+        description
+        priceWithTax
+      }
+      payments {
+        id
+        method
+        state
+        amount
+      }
+    }
+    ... on ErrorResult {
+      errorCode
+      message
+    }
+  }
+}
+
 mutation ModifyOrder($input: ModifyOrderInput!) {
   modifyOrder(input: $input) {
     ... on Order {

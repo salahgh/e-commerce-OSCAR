@@ -367,4 +367,15 @@ export const adminApiExtensions = gql`
     """
     addOrderAdminNotes(orderId: ID!, notes: String!): Order!
   }
+
+  extend type Mutation {
+    """
+    Modify an unshipped order in one call: enters Modifying, applies the changes, settles the
+    money side (COD authorization follows the new total; a lower total refunds against the
+    existing payment; a higher total on a paid order goes to ArrangingAdditionalPayment) and
+    returns to the original state. With dryRun: true nothing is persisted and the previewed
+    order is returned.
+    """
+    modifyOrderGuided(input: ModifyOrderInput!): ModifyOrderResult!
+  }
 `;

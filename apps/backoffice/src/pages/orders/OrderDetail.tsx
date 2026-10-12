@@ -99,7 +99,10 @@ const ORDER_STATUS: Record<
     icon: <CheckCircle className="h-4 w-4" />,
     color: 'text-blue-400',
     bgColor: 'bg-blue-500/20',
-    next: ['PaymentSettled', 'Cancelled'],
+    // Ship via "Créer une expédition" (fulfilment); settle via the payment card
+    // or automatically at delivery. A direct PaymentSettled transition always
+    // failed for COD ("cannot transition without settled payments").
+    next: ['Cancelled'],
   },
   PaymentSettled: {
     label: 'Payé',
@@ -107,7 +110,8 @@ const ORDER_STATUS: Record<
     icon: <DollarSign className="h-4 w-4" />,
     color: 'text-green-400',
     bgColor: 'bg-green-500/20',
-    next: ['PartiallyShipped', 'Shipped', 'Cancelled'],
+    // Shipped/PartiallyShipped are reached through fulfilments, never directly.
+    next: ['Cancelled'],
   },
   PartiallyShipped: {
     label: 'Partiellement expédié',
@@ -164,7 +168,11 @@ const ORDER_STATUS: Record<
 };
 
 // Order flow steps for progress visualization
-const ORDER_FLOW = ['AddingItems', 'ArrangingPayment', 'PaymentSettled', 'Shipped', 'Delivered'];
+// Progress stepper. Cash on delivery lands orders in PaymentAuthorized and the
+// money is only collected at delivery, so "paid" is NOT a step: the payment card
+// and the header badge say whether the cash is in. PaymentSettled (paid up
+// front or settled by hand) sits at the same step as PaymentAuthorized.
+const ORDER_FLOW = ['AddingItems', 'ArrangingPayment', 'PaymentAuthorized', 'Shipped', 'Delivered'];
 
 // Vendure's default fulfillment process. Used to render transition buttons without
 // selecting Fulfillment.nextStates in the order fragment.
@@ -282,7 +290,7 @@ export const OrderDetail: React.FC = () => {
     const currentIndex = ORDER_FLOW.indexOf(order.state);
     if (currentIndex === -1) {
       // Handle intermediate states
-      if (['PaymentAuthorized'].includes(order.state)) return 2;
+      if (['PaymentSettled', 'Modifying', 'ArrangingAdditionalPayment'].includes(order.state)) return 2;
       if (['PartiallyShipped'].includes(order.state)) return 3;
       if (['PartiallyDelivered'].includes(order.state)) return 4;
       return 0;
@@ -541,6 +549,22 @@ export const OrderDetail: React.FC = () => {
                     {statusConfig.label}
                   </span>
                 </div>
+                {order.state !== 'Cancelled' && order.payments && order.payments.length > 0 && (
+                  <span
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                      order.payments.some((p) => p.state === 'Settled')
+                        ? 'bg-green-500/20 text-green-400'
+                        : 'bg-amber-500/20 text-amber-400'
+                    }`}
+                    title={
+                      order.payments.some((p) => p.state === 'Settled')
+                        ? 'Paiement encaissé'
+                        : 'Paiement à la livraison : encaissé par le livreur'
+                    }
+                  >
+                    {order.payments.some((p) => p.state === 'Settled') ? 'Payée' : 'Non encaissée'}
+                  </span>
+                )}
               </div>
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
@@ -613,8 +637,8 @@ export const OrderDetail: React.FC = () => {
                     </Button>
                   </PermissionGate>
                 )}
-                {/* Modify order — available before the order is fully shipped/delivered */}
-                {!['Cancelled', 'Delivered'].includes(order.state) && (
+                {/* Modify order — only before anything has shipped (lines are locked afterwards) */}
+                {['PaymentAuthorized', 'PaymentSettled'].includes(order.state) && (
                   <PermissionGate permission="UpdateOrder" disableMode>
                     <Button
                       variant="ghost"
@@ -1228,7 +1252,7 @@ export const OrderDetail: React.FC = () => {
                 <Truck className="h-5 w-5 text-orange-400" />
                 Expéditions
               </h3>
-              {['PaymentSettled', 'PartiallyShipped'].includes(order.state) && (
+              {['PaymentAuthorized', 'PaymentSettled', 'PartiallyShipped'].includes(order.state) && (
                 <PermissionGate permission="UpdateOrder" disableMode>
                   <Button variant="primary" size="sm" onClick={() => setShowFulfillmentDialog(true)}>
                     Créer une expédition
@@ -1394,6 +1418,8 @@ export const OrderDetail: React.FC = () => {
         isOpen={showModifyDialog}
         onClose={() => setShowModifyDialog(false)}
         orderId={id!}
+        orderState={order.state}
+        currentTotalWithTax={order.totalWithTax}
         lines={order.lines || []}
         onSuccess={refetch}
       />

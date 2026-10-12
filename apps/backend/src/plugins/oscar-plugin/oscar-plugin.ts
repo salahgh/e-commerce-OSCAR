@@ -1,5 +1,7 @@
 import { PluginCommonModule, VendurePlugin } from '@vendure/core';
 import { OscarService } from './services/oscar.service';
+import { OrderModificationService } from './services/order-modification.service';
+import { codOrderProcess } from './order/cod-order-process';
 import { DashboardService } from './services/dashboard.service';
 import { WilayaShippingService } from './services/wilaya-shipping.service';
 import { OrderWilayaService } from './services/order-wilaya.service';
@@ -23,7 +25,14 @@ import { adminApiExtensions, shopApiExtensions } from './api/api-extensions';
  */
 @VendurePlugin({
   imports: [PluginCommonModule],
-  providers: [OscarService, DashboardService, WilayaShippingService, OrderWilayaService, ShippingSetupService],
+  providers: [
+    OscarService,
+    DashboardService,
+    WilayaShippingService,
+    OrderWilayaService,
+    ShippingSetupService,
+    OrderModificationService,
+  ],
   entities: [WilayaShipping],
   controllers: [HealthController],
   adminApiExtensions: {
@@ -33,6 +42,11 @@ import { adminApiExtensions, shopApiExtensions } from './api/api-extensions';
   shopApiExtensions: {
     schema: shopApiExtensions,
     resolvers: [OscarShopResolver],
+  },
+  configuration: config => {
+    // Cash on delivery: ship before payment, settle the COD payment on delivery.
+    config.orderOptions.process = [...config.orderOptions.process, codOrderProcess];
+    return config;
   },
   compatibility: '^3.0.0',
 })

@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '@apollo/client';
 import {
   AddManualPaymentToOrderDocument,
   AdminPaymentMethodsForOrderDocument,
-  ModifyOrderDocument,
+  ModifyOrderGuidedDocument,
   RefundOrderDocument,
 } from '../../graphql/generated/graphql';
 import { Modal, ModalContent, ModalFooter } from '../../components/ui/Modal';
@@ -321,21 +321,37 @@ export const ManualPaymentDialog: React.FC<ManualPaymentDialogProps> = ({
 };
 
 // ──────────────────────────────────────────────────────────────────────────
-// Modify order dialog — modifyOrder (simplified: line quantities + surcharge)
+// Modify order dialog — modifyOrderGuided (Oscar plugin)
+//
+// Vendure's raw modifyOrder needs the order moved into "Modifying" first and the
+// price difference settled by the caller; the plugin mutation does all of that
+// in one transaction. Flow here: edit quantities / add a surcharge → "Aperçu"
+// (dry run, nothing saved, shows the new total) → "Appliquer".
 // ──────────────────────────────────────────────────────────────────────────
 
 interface ModifyOrderDialogProps {
   isOpen: boolean;
   onClose: () => void;
   orderId: string;
+  orderState: string;
+  currentTotalWithTax: number;
   lines: OrderLineLite[];
   onSuccess: () => void;
+}
+
+interface ModificationPreview {
+  totalWithTax: number;
+  subTotalWithTax: number;
+  shippingWithTax: number;
+  lines: Array<{ id: string; quantity: number; linePriceWithTax: number }>;
 }
 
 export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
   isOpen,
   onClose,
   orderId,
+  orderState,
+  currentTotalWithTax,
   lines,
   onSuccess,
 }) => {
@@ -350,7 +366,9 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
   const [surchargeDescription, setSurchargeDescription] = useState('');
   const [surchargeAmount, setSurchargeAmount] = useState('');
   const [note, setNote] = useState('');
-  const [dryRun, setDryRun] = useState(true);
+  const [preview, setPreview] = useState<ModificationPreview | null>(null);
+  const [previewing, setPreviewing] = useState(false);
+  const [applying, setApplying] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -358,17 +376,16 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
       setSurchargeDescription('');
       setSurchargeAmount('');
       setNote('');
-      setDryRun(true);
+      setPreview(null);
     }
   }, [isOpen, initialQty]);
 
-  const [modify, { loading }] = useMutation(ModifyOrderDocument);
+  const [modify] = useMutation(ModifyOrderGuidedDocument);
 
-  const handleSubmit = async () => {
+  const buildInput = (dryRun: boolean) => {
     const adjustOrderLines = lines
       .filter((l) => quantities[l.id] !== l.quantity)
       .map((l) => ({ orderLineId: l.id, quantity: Math.max(0, quantities[l.id] || 0) }));
-
     const surchargeNum = Number(surchargeAmount.replace(',', '.'));
     const surcharges =
       surchargeDescription.trim() && Number.isFinite(surchargeNum) && surchargeNum !== 0
@@ -383,48 +400,71 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
             },
           ]
         : undefined;
+    if (adjustOrderLines.length === 0 && !surcharges) return null;
+    return {
+      orderId,
+      dryRun,
+      adjustOrderLines: adjustOrderLines.length ? adjustOrderLines : undefined,
+      surcharges,
+      note: note || undefined,
+    };
+  };
 
-    if (adjustOrderLines.length === 0 && !surcharges && !note) {
+  const run = async (dryRun: boolean) => {
+    const input = buildInput(dryRun);
+    if (!input) {
       dispatch(addToast({ message: 'Aucune modification à appliquer', type: 'error' }));
       return;
     }
-
+    const setBusy = dryRun ? setPreviewing : setApplying;
+    setBusy(true);
     try {
-      const result = await modify({
-        variables: {
-          input: {
-            orderId,
-            dryRun,
-            adjustOrderLines: adjustOrderLines.length ? adjustOrderLines : undefined,
-            surcharges,
-            note: note || undefined,
-          },
-        },
-      });
-      const response = result.data?.modifyOrder;
-      if (response && '__typename' in response && response.__typename !== 'Order') {
-        dispatch(
-          addToast({
-            message: (response as any).message || 'Modification refusée',
-            type: 'error',
-          })
-        );
+      const result = await modify({ variables: { input } });
+      const response = result.data?.modifyOrderGuided;
+      if (!response) {
+        dispatch(addToast({ message: 'Réponse vide du serveur', type: 'error' }));
         return;
       }
-      dispatch(
-        addToast({
-          message: dryRun ? 'Aperçu OK — décochez "Aperçu" pour appliquer' : 'Commande modifiée',
-          type: 'success',
-        })
-      );
-      if (!dryRun) {
-        onSuccess();
-        onClose();
+      if (response.__typename !== 'Order') {
+        const message =
+          'message' in response && response.message
+            ? ERROR_MESSAGES[(response as any).errorCode] || response.message
+            : 'Modification refusée';
+        dispatch(addToast({ message, type: 'error' }));
+        return;
       }
+      if (dryRun) {
+        setPreview({
+          totalWithTax: response.totalWithTax,
+          subTotalWithTax: response.subTotalWithTax,
+          shippingWithTax: response.shippingWithTax,
+          lines: response.lines.map((l) => ({
+            id: l.id,
+            quantity: l.quantity,
+            linePriceWithTax: l.linePriceWithTax,
+          })),
+        });
+        return;
+      }
+      const delta = response.totalWithTax - currentTotalWithTax;
+      const suffix =
+        response.state === 'ArrangingAdditionalPayment'
+          ? ' — paiement additionnel à enregistrer'
+          : delta > 0 && orderState === 'PaymentAuthorized'
+            ? ' — montant à encaisser mis à jour'
+            : '';
+      dispatch(addToast({ message: `Commande modifiée${suffix}`, type: 'success' }));
+      onSuccess();
+      onClose();
     } catch (err: any) {
       dispatch(addToast({ message: err.message || 'Erreur', type: 'error' }));
+    } finally {
+      setBusy(false);
     }
   };
+
+  const delta = preview ? preview.totalWithTax - currentTotalWithTax : 0;
+  const isCod = orderState === 'PaymentAuthorized';
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Modifier la commande" size="lg">
@@ -449,15 +489,17 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
                     type="number"
                     min={0}
                     value={quantities[line.id] ?? line.quantity}
-                    onChange={(e) =>
-                      setQuantities({ ...quantities, [line.id]: Number(e.target.value) })
-                    }
+                    onChange={(e) => {
+                      setQuantities({ ...quantities, [line.id]: Number(e.target.value) });
+                      setPreview(null);
+                    }}
                     className="w-20 bg-background border-border"
                   />
                 </div>
               </div>
             ))}
           </div>
+          <p className="mt-1 text-xs text-muted-foreground">Quantité 0 = retirer la ligne.</p>
         </div>
 
         <div className="border-t border-border pt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -467,20 +509,26 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
             </label>
             <Input
               value={surchargeDescription}
-              onChange={(e) => setSurchargeDescription(e.target.value)}
-              placeholder="Frais de livraison express, ..."
+              onChange={(e) => {
+                setSurchargeDescription(e.target.value);
+                setPreview(null);
+              }}
+              placeholder="Frais de livraison express, remise commerciale, ..."
               className="bg-background border-border"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-1">
-              Montant (DA, peut être négatif)
+              Montant (DA, négatif = remise)
             </label>
             <Input
               type="number"
               step="0.01"
               value={surchargeAmount}
-              onChange={(e) => setSurchargeAmount(e.target.value)}
+              onChange={(e) => {
+                setSurchargeAmount(e.target.value);
+                setPreview(null);
+              }}
               className="bg-background border-border"
             />
           </div>
@@ -488,37 +536,79 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
 
         <div>
           <label className="block text-sm font-medium text-muted-foreground mb-1">
-            Note d'historique
+            Raison (note d'historique)
           </label>
           <TextArea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={2}
-            placeholder="Raison de la modification"
+            placeholder="Demande du client par téléphone, ..."
             className="bg-background border-border"
           />
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-foreground">
-          <input
-            type="checkbox"
-            checked={dryRun}
-            onChange={(e) => setDryRun(e.target.checked)}
-            className="rounded border-border"
-          />
-          Aperçu (ne pas enregistrer)
-        </label>
+        {preview && (
+          <div className="rounded-lg border border-border bg-background/50 p-4 space-y-1 text-sm">
+            <div className="flex justify-between text-muted-foreground">
+              <span>Total actuel</span>
+              <span>{formatPrice(currentTotalWithTax / 100)}</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <span>Livraison</span>
+              <span>{formatPrice(preview.shippingWithTax / 100)}</span>
+            </div>
+            <div className="flex justify-between font-semibold text-foreground">
+              <span>Nouveau total</span>
+              <span>{formatPrice(preview.totalWithTax / 100)}</span>
+            </div>
+            <div
+              className={`flex justify-between ${
+                delta > 0 ? 'text-amber-400' : delta < 0 ? 'text-green-400' : 'text-muted-foreground'
+              }`}
+            >
+              <span>Différence</span>
+              <span>
+                {delta > 0 ? '+' : ''}
+                {formatPrice(delta / 100)}
+              </span>
+            </div>
+            <p className="pt-2 text-xs text-muted-foreground">
+              {delta === 0
+                ? 'Le total ne change pas.'
+                : isCod
+                  ? delta > 0
+                    ? 'Paiement à la livraison : le livreur encaissera le nouveau total.'
+                    : 'Paiement à la livraison : le livreur encaissera le nouveau total (un avoir est enregistré sur le paiement).'
+                  : delta > 0
+                    ? 'Commande déjà payée : elle passera en « Paiement additionnel » jusqu\'à l\'enregistrement du complément.'
+                    : 'Commande déjà payée : un remboursement de la différence est enregistré.'}
+            </p>
+          </div>
+        )}
       </ModalContent>
       <ModalFooter>
         <Button variant="ghost" onClick={onClose}>
-          Annuler
+          Fermer
+        </Button>
+        <Button variant="outline" onClick={() => run(true)} loading={previewing}>
+          Aperçu
         </Button>
         <PermissionGate permission="UpdateOrder" disableMode>
-          <Button onClick={handleSubmit} loading={loading}>
-            {dryRun ? 'Prévisualiser' : 'Appliquer'}
+          <Button onClick={() => run(false)} loading={applying} disabled={!preview}>
+            Appliquer
           </Button>
         </PermissionGate>
       </ModalFooter>
     </Modal>
   );
+};
+
+const ERROR_MESSAGES: Record<string, string> = {
+  ORDER_MODIFICATION_STATE_ERROR: 'Cette commande ne peut plus être modifiée (déjà expédiée ou annulée).',
+  NO_CHANGES_SPECIFIED_ERROR: 'Aucune modification à appliquer.',
+  INSUFFICIENT_STOCK_ERROR: 'Stock insuffisant pour cette quantité.',
+  NEGATIVE_QUANTITY_ERROR: 'La quantité ne peut pas être négative.',
+  REFUND_PAYMENT_ID_MISSING_ERROR: 'Impossible de baisser le total : aucun paiement à créditer.',
+  PAYMENT_METHOD_MISSING_ERROR: 'Aucun moyen de paiement pour le complément.',
+  INELIGIBLE_SHIPPING_METHOD_ERROR: 'Le mode de livraison n\'est plus éligible avec ces lignes.',
 };

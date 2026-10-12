@@ -12,7 +12,9 @@ import {
   CustomerService,
   TransactionalConnection,
 } from '@vendure/core';
+import { ModifyOrderInput } from '@vendure/common/lib/generated-types';
 import { OscarService } from '../services/oscar.service';
+import { OrderModificationService } from '../services/order-modification.service';
 import {
   UpdateWilayaShippingPriceInput,
   WilayaShippingService,
@@ -44,6 +46,7 @@ export class OscarAdminResolver {
     private customerService: CustomerService,
     private connection: TransactionalConnection,
     private wilayaShippingService: WilayaShippingService,
+    private orderModificationService: OrderModificationService,
   ) {}
 
   // ==================== WILAYA SHIPPING ====================
@@ -161,6 +164,14 @@ export class OscarAdminResolver {
   @Allow(Permission.ReadCatalog)
   async collectionVariantCounts(@Ctx() ctx: RequestContext): Promise<CollectionVariantCount[]> {
     return this.dashboardService.getCollectionVariantCounts(ctx);
+  }
+
+  // ==================== ORDER MODIFICATION ====================
+
+  @Mutation()
+  @Allow(Permission.UpdateOrder)
+  async modifyOrderGuided(@Ctx() ctx: RequestContext, @Args() args: { input: ModifyOrderInput }) {
+    return this.orderModificationService.modify(ctx, args.input);
   }
 
   // ==================== LEGACY QUERIES (kept for compatibility) ====================

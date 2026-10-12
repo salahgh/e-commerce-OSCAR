@@ -159,6 +159,8 @@ type Query {
 }
 
 type Mutation {
+  """Oscar plugin: guided order modification (see modifyOrderGuided in api-extensions.ts)."""
+  modifyOrderGuided(input: ModifyOrderInput!): ModifyOrderResult!
   """Create a new Administrator"""
   createAdministrator(input: CreateAdministratorInput!): Administrator!
 
