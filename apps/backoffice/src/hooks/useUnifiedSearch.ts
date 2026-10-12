@@ -17,7 +17,7 @@ import { useQuery } from '@apollo/client';
 import {
   AdminSearchProductsDocument,
   AdminFacetsWithValuesDocument,
-  AdminCollectionsDocument,
+  AdminCollectionsLiteDocument,
   type SearchInput,
   type FacetValueFilterInput,
   SortOrder,
@@ -324,7 +324,7 @@ export function useUnifiedSearch(): UseUnifiedSearchReturn {
     data: collectionsData,
     loading: collectionsLoading,
     error: collectionsError,
-  } = useQuery(AdminCollectionsDocument, {
+  } = useQuery(AdminCollectionsLiteDocument, {
     variables: {
       options: {
         take: 100,

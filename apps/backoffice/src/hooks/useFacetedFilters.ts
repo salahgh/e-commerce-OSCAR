@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import {
   AdminFacetsWithValuesDocument,
-  AdminCollectionsDocument,
+  AdminCollectionsLiteDocument,
 } from '../graphql/generated/graphql';
 import {
   type FacetGroup,
@@ -75,7 +75,7 @@ export function useFacetedFilters(): UseFacetedFiltersReturn {
     data: collectionsData,
     loading: collectionsLoading,
     error: collectionsError,
-  } = useQuery(AdminCollectionsDocument, {
+  } = useQuery(AdminCollectionsLiteDocument, {
     variables: {
       options: {
         take: 100,

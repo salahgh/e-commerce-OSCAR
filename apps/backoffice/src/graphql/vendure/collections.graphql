@@ -206,6 +206,22 @@ mutation UpdateCollectionFilters($id: ID!, $filters: [ConfigurableOperationInput
 }
 
 # Get all collections with their filters (for product-collection management)
+# Lean list for filter sidebars (products page). The full AdminCollections
+# query resolves breadcrumbs and a variant count per collection, which took
+# ~7 s for 100 collections on the production server.
+query AdminCollectionsLite($options: CollectionListOptions) {
+  collections(options: $options) {
+    items {
+      id
+      name
+      slug
+      parentId
+      position
+    }
+    totalItems
+  }
+}
+
 query AdminCollectionsWithFilters($options: CollectionListOptions) {
   collections(options: $options) {
     items {
