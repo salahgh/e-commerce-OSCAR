@@ -380,7 +380,10 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
     }
   }, [isOpen, initialQty]);
 
-  const [modify] = useMutation(ModifyOrderGuidedDocument);
+  // no-cache: a dry-run result is an Order with the real id, and Apollo would
+  // otherwise merge the previewed lines/total into the cached order behind
+  // the dialog as if they had been applied.
+  const [modify] = useMutation(ModifyOrderGuidedDocument, { fetchPolicy: 'no-cache' });
 
   const buildInput = (dryRun: boolean) => {
     const adjustOrderLines = lines
