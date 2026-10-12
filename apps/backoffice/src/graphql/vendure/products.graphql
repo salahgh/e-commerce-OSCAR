@@ -96,6 +96,44 @@ query AdminProducts($options: ProductListOptions) {
   }
 }
 
+# Products that have no variants (never search-indexed) — one SQL statement
+# server-side instead of loading 100 products with all relations (~5 s in prod).
+query AdminProductsWithoutVariants($limit: Int) {
+  productsWithoutVariants(limit: $limit) {
+    id
+    name
+    enabled
+    createdAt
+  }
+}
+
+# Lean list for the bulk-operations page: only the columns it renders/exports.
+# Each extra relation on 100 products costs ~1-2 s on the production server.
+query AdminProductsBulkList($options: ProductListOptions) {
+  products(options: $options) {
+    items {
+      id
+      name
+      enabled
+      featuredAsset {
+        id
+        preview
+      }
+      variants {
+        id
+        sku
+        price
+        stockOnHand
+      }
+      translations {
+        languageCode
+        name
+      }
+    }
+    totalItems
+  }
+}
+
 # Get single product with full details
 query AdminProduct($id: ID!) {
   product(id: $id) {

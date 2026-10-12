@@ -16,7 +16,7 @@ import {
 import { useDispatch } from 'react-redux';
 import { addToast } from '../../store/slices/uiSlice';
 import {
-  AdminProductsDocument,
+  AdminProductsBulkListDocument,
   DeleteProductDocument,
   UpdateProductDocument,
   ImportProductsDocument,
@@ -41,7 +41,7 @@ export const BulkOperations: React.FC = () => {
   const [importPreview, setImportPreview] = useState<any[]>([]);
 
   // Queries
-  const { data, loading, refetch } = useQuery(AdminProductsDocument, {
+  const { data, loading, refetch } = useQuery(AdminProductsBulkListDocument, {
     variables: {
       options: {
         take: 100,

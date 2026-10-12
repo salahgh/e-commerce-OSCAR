@@ -17,6 +17,7 @@ import {
   StockLevel,
 } from '@vendure/core';
 import { MoreThanOrEqual, IsNull, Not } from 'typeorm';
+import { pickProductName } from './product-name';
 
 export interface KpiMetrics {
   // Revenue metrics
@@ -129,6 +130,13 @@ export interface ProductsByCollectionPoint {
   collectionId: string;
   collectionName: string;
   productCount: number;
+}
+
+export interface IncompleteProductItem {
+  id: string;
+  name: string;
+  enabled: boolean;
+  createdAt: Date;
 }
 
 export interface RecentProductItem {
@@ -616,6 +624,37 @@ export class DashboardService {
   /**
    * Most recently created products, with translated name + variant count.
    */
+  /**
+   * Products of the current channel that have no (non-deleted) variants.
+   * Such products are never indexed by Vendure's search, so the back-office
+   * list cannot show them; this surfaces them so staff can complete them.
+   * One SQL statement (LEFT JOIN variants … IS NULL) instead of loading every
+   * product with all of its relations, which cost ~5 s on the production box.
+   */
+  async getProductsWithoutVariants(
+    ctx: RequestContext,
+    limit: number = 100,
+  ): Promise<IncompleteProductItem[]> {
+    const products = await this.connection
+      .getRepository(ctx, Product)
+      .createQueryBuilder('product')
+      .innerJoin('product.channels', 'channel', 'channel.id = :channelId', { channelId: ctx.channelId })
+      .leftJoin('product.variants', 'variant', 'variant.deletedAt IS NULL')
+      .leftJoinAndSelect('product.translations', 'translation')
+      .where('product.deletedAt IS NULL')
+      .andWhere('variant.id IS NULL')
+      .orderBy('product.createdAt', 'DESC')
+      .take(limit)
+      .getMany();
+
+    return products.map(product => ({
+      id: product.id.toString(),
+      name: pickProductName(product.translations, ctx.languageCode, ctx.channel.defaultLanguageCode),
+      enabled: product.enabled,
+      createdAt: product.createdAt,
+    }));
+  }
+
   async getRecentProducts(
     ctx: RequestContext,
     limit: number = 5,

@@ -30,6 +30,7 @@ import {
   CatalogStats,
   ProductsByCollectionPoint,
   RecentProductItem,
+  IncompleteProductItem,
 } from '../services/dashboard.service';
 
 @Resolver()
@@ -144,6 +145,15 @@ export class OscarAdminResolver {
     @Args() args: { limit?: number },
   ): Promise<RecentProductItem[]> {
     return this.dashboardService.getRecentProducts(ctx, args.limit ?? 5);
+  }
+
+  @Query()
+  @Allow(Permission.ReadCatalog)
+  async productsWithoutVariants(
+    @Ctx() ctx: RequestContext,
+    @Args() args: { limit?: number },
+  ): Promise<IncompleteProductItem[]> {
+    return this.dashboardService.getProductsWithoutVariants(ctx, args.limit ?? 100);
   }
 
   // ==================== LEGACY QUERIES (kept for compatibility) ====================

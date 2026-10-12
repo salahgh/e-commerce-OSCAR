@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
-import { AdminProductsDocument, DeleteProductDocument, ReindexDocument } from '../../graphql/generated/graphql';
+import { AdminProductsWithoutVariantsDocument, DeleteProductDocument, ReindexDocument } from '../../graphql/generated/graphql';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { formatDate } from '../../lib/utils';
 import { useUnifiedSearch, type SortByField } from '../../hooks/useUnifiedSearch';
@@ -59,18 +59,13 @@ export const ProductList: React.FC = () => {
 
   // The main list is search-index-based, and products WITHOUT variants are never
   // indexed by Vendure — they would be invisible and impossible to complete.
-  // Fetch them directly from the products query and surface them separately.
-  const { data: allProductsData } = useQuery(AdminProductsDocument, {
-    variables: { options: { take: 100 } },
+  // A dedicated server query finds them in one SQL statement; the previous
+  // approach (100 products with every relation, filtered client-side) took ~5 s.
+  const { data: incompleteData } = useQuery(AdminProductsWithoutVariantsDocument, {
+    variables: { limit: 100 },
     fetchPolicy: 'cache-and-network',
   });
-  const incompleteProducts = useMemo(
-    () =>
-      (allProductsData?.products?.items ?? []).filter(
-        (p: any) => (p.variants?.length ?? 0) === 0
-      ),
-    [allProductsData]
-  );
+  const incompleteProducts = incompleteData?.productsWithoutVariants ?? [];
 
   // Total pages must use the SAME page size the query actually fetches
   // (search.state.perPage). Using a separate hardcoded value made the page
@@ -243,7 +238,7 @@ export const ProductList: React.FC = () => {
             boutique) — ajoutez variantes et prix pour les compléter :
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {incompleteProducts.map((p: any) => (
+            {incompleteProducts.map((p) => (
               <Link
                 key={p.id}
                 to={`/products/${p.id}/edit`}

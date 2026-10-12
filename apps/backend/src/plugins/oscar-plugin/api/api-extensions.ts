@@ -211,6 +211,13 @@ export const adminApiExtensions = gql`
     variantCount: Int!
   }
 
+  type IncompleteProduct {
+    id: ID!
+    name: String!
+    enabled: Boolean!
+    createdAt: DateTime!
+  }
+
   # ==================== LEGACY TYPES (kept for compatibility) ====================
 
   type LowStockProduct {
@@ -310,6 +317,11 @@ export const adminApiExtensions = gql`
     Most recently created products, sorted by createdAt descending.
     """
     dashboardRecentProducts(limit: Int): [RecentProductItem!]!
+
+    """
+    Products in this channel that have no variants (never search-indexed), newest first.
+    """
+    productsWithoutVariants(limit: Int): [IncompleteProduct!]!
 
     """
     Get products with low stock (legacy - for admin alerts)
