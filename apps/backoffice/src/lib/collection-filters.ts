@@ -47,7 +47,7 @@ function parseIds(value: string | undefined): string[] {
 }
 
 /** Product ids listed by the collection's product-id filter, if any. */
-export function productIdsOf(collection: Pick<CollectionLike, 'filters'>): string[] {
+export function productIdsOf(collection: Partial<CollectionLike>): string[] {
   const filter = (collection.filters ?? []).find((f) => f.code === PRODUCT_ID_FILTER);
   return parseIds(filter?.args?.find((a) => a.name === PRODUCT_IDS_ARG)?.value);
 }

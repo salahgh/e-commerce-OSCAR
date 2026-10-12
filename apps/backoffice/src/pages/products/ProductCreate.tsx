@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
-import { assignmentPlan, flattenTree } from '@/lib/collection-filters';
+import { assignmentPlan, flattenTree } from '../../lib/collection-filters';
 import {
   ArrowLeft,
   ArrowRight,

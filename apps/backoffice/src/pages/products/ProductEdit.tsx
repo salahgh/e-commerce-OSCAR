@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
-import { assignmentPlan, flattenTree } from '@/lib/collection-filters';
+import { assignmentPlan, flattenTree } from '../../lib/collection-filters';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import {
