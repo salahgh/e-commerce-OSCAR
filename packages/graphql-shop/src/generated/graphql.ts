@@ -6849,6 +6849,38 @@ export type CollectionFieldsFragment = {
   }>;
 };
 
+export type ProductListFieldsFragment = {
+  __typename?: "Product";
+  id: string;
+  name: string;
+  slug: string;
+  featuredAsset?: { __typename?: "Asset"; id: string; preview: string } | null;
+  variants: Array<{
+    __typename?: "ProductVariant";
+    id: string;
+    priceWithTax: number;
+    currencyCode: CurrencyCode;
+    stockLevel: string;
+    customFields?: {
+      __typename?: "ProductVariantCustomFields";
+      originalPrice?: number | null;
+      discountPercent?: number | null;
+    } | null;
+    options: Array<{
+      __typename?: "ProductOption";
+      id: string;
+      code: string;
+      name: string;
+      group: {
+        __typename?: "ProductOptionGroup";
+        id: string;
+        code: string;
+        name: string;
+      };
+    }>;
+  }>;
+};
+
 export type GetProductsQueryVariables = Exact<{
   options?: InputMaybe<ProductListOptions>;
 }>;
@@ -6863,30 +6895,14 @@ export type GetProductsQuery = {
       id: string;
       name: string;
       slug: string;
-      description: string;
       featuredAsset?: {
         __typename?: "Asset";
         id: string;
         preview: string;
-        source: string;
-        width: number;
-        height: number;
-        name: string;
       } | null;
-      assets: Array<{
-        __typename?: "Asset";
-        id: string;
-        preview: string;
-        source: string;
-        width: number;
-        height: number;
-        name: string;
-      }>;
       variants: Array<{
         __typename?: "ProductVariant";
         id: string;
-        name: string;
-        sku: string;
         priceWithTax: number;
         currencyCode: CurrencyCode;
         stockLevel: string;
@@ -6894,15 +6910,6 @@ export type GetProductsQuery = {
           __typename?: "ProductVariantCustomFields";
           originalPrice?: number | null;
           discountPercent?: number | null;
-        } | null;
-        featuredAsset?: {
-          __typename?: "Asset";
-          id: string;
-          preview: string;
-          source: string;
-          width: number;
-          height: number;
-          name: string;
         } | null;
         options: Array<{
           __typename?: "ProductOption";
@@ -6916,19 +6923,6 @@ export type GetProductsQuery = {
             name: string;
           };
         }>;
-      }>;
-      collections: Array<{
-        __typename?: "Collection";
-        id: string;
-        name: string;
-        slug: string;
-      }>;
-      facetValues: Array<{
-        __typename?: "FacetValue";
-        id: string;
-        name: string;
-        code: string;
-        facet: { __typename?: "Facet"; id: string; name: string; code: string };
       }>;
     }>;
   };
@@ -8269,6 +8263,37 @@ export const CollectionFieldsFragmentDoc = gql`
     }
   }
   ${AssetFieldsFragmentDoc}
+`;
+export const ProductListFieldsFragmentDoc = gql`
+  fragment ProductListFields on Product {
+    id
+    name
+    slug
+    featuredAsset {
+      id
+      preview
+    }
+    variants {
+      id
+      priceWithTax
+      currencyCode
+      stockLevel
+      customFields {
+        originalPrice
+        discountPercent
+      }
+      options {
+        id
+        code
+        name
+        group {
+          id
+          code
+          name
+        }
+      }
+    }
+  }
 `;
 export const ActiveCustomerDocument = gql`
   query ActiveCustomer {
@@ -10804,12 +10829,12 @@ export const GetProductsDocument = gql`
   query GetProducts($options: ProductListOptions) {
     products(options: $options) {
       items {
-        ...ProductFields
+        ...ProductListFields
       }
       totalItems
     }
   }
-  ${ProductFieldsFragmentDoc}
+  ${ProductListFieldsFragmentDoc}
 `;
 
 /**

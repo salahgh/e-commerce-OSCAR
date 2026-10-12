@@ -86,6 +86,11 @@ export const config: VendureConfig = {
     hostname: '0.0.0.0',
     adminApiPath: 'admin-api',
     shopApiPath: 'shop-api',
+    // Production sits behind nginx (X-Forwarded-For / X-Forwarded-Proto). Without this,
+    // Express sees every request as coming from 127.0.0.1 over http: the admin-ui
+    // rate limiter logs ERR_ERL_UNEXPECTED_X_FORWARDED_FOR and session cookies are
+    // never flagged Secure.
+    trustProxy: IS_DEV ? false : 1,
     // CORS settings to allow frontend apps
     cors: {
       origin: getCorsOrigins(),
@@ -113,6 +118,14 @@ export const config: VendureConfig = {
     },
     cookieOptions: {
       secret: process.env.COOKIE_SECRET || 'oscar-cookie-secret',
+      // Distinct cookies per API. With the default single `session` cookie, logging
+      // into the back-office put an ADMIN session on the storefront (same api host):
+      // activeCustomer came back null, checkout hit AlreadyLoggedInError and showed
+      // "Session expirée", and its reset button (shop-api `logout`) then destroyed
+      // every admin session of that user. Everyone re-logs once after this change.
+      name: { shop: 'oscar-shop-session', admin: 'oscar-admin-session' },
+      // Only send cookies over https in production (trustProxy makes req.secure true).
+      secure: !IS_DEV,
     },
     requireVerification: false, // Set to true in production
   },

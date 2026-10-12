@@ -92,10 +92,45 @@ fragment CollectionFields on Collection {
 }
 
 # Get all products with pagination and filters
+# Card-level product data for listing pages (/products, home rails, category
+# hydration, PDP "related"). Every relation Vendure resolves per product costs
+# ~1-2 s per 100 products on the production server, so this deliberately omits
+# description, assets, collections, facetValues and per-variant assets — the
+# product page (GetProductBySlug) still loads the full ProductFields.
+fragment ProductListFields on Product {
+  id
+  name
+  slug
+  featuredAsset {
+    id
+    preview
+  }
+  variants {
+    id
+    priceWithTax
+    currencyCode
+    stockLevel
+    customFields {
+      originalPrice
+      discountPercent
+    }
+    options {
+      id
+      code
+      name
+      group {
+        id
+        code
+        name
+      }
+    }
+  }
+}
+
 query GetProducts($options: ProductListOptions) {
   products(options: $options) {
     items {
-      ...ProductFields
+      ...ProductListFields
     }
     totalItems
   }

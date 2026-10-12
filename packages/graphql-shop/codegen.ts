@@ -2,7 +2,8 @@ import type { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
   overwrite: true,
-  schema: 'http://localhost:8085/shop-api',
+  // Override with SHOP_SCHEMA_URL=https://api.oscarfashion.dz/shop-api when no local backend runs.
+  schema: process.env.SHOP_SCHEMA_URL ?? 'http://localhost:8085/shop-api',
   documents: ['src/operations/**/*.graphql'],
   generates: {
     'src/generated/graphql.ts': {
