@@ -11,6 +11,7 @@ import {
   isGraphQlErrorResult,
 } from '@vendure/core';
 import { ModifyOrderInput } from '@vendure/common/lib/generated-types';
+import { OrderModification } from '@vendure/core/dist/entity/order-modification/order-modification.entity';
 import { isModifiableState, planModification } from '../order/modification-plan';
 
 /** Vendure's OrderStateTransitionError carries the real reason in `transitionError`. */
@@ -104,9 +105,20 @@ export class OrderModificationService {
         }
 
         if (plan.codPaymentId && plan.codAmountToSet != null) {
-          await this.connection
-            .getRepository(txCtx, Payment)
-            .update(plan.codPaymentId, { amount: plan.codAmountToSet });
+          const paymentRepo = this.connection.getRepository(txCtx, Payment);
+          await paymentRepo.update(plan.codPaymentId, { amount: plan.codAmountToSet });
+          // Vendure only lets an order leave Modifying once every price-increasing
+          // modification is "settled", i.e. linked to a payment. For COD the raised
+          // authorization IS the settlement, so link it the way addManualPaymentToOrder
+          // would link a new payment.
+          const codPayment = await paymentRepo.findOneOrFail({ where: { id: plan.codPaymentId } });
+          const modifications = await this.connection
+            .getRepository(txCtx, OrderModification)
+            .find({ where: { order: { id: order.id } }, relations: ['payment', 'refund'] });
+          for (const modification of modifications.filter(m => !m.isSettled)) {
+            modification.payment = codPayment;
+            await this.connection.getRepository(txCtx, OrderModification).save(modification);
+          }
           await this.orderService.addNoteToOrder(txCtx, {
             id: order.id,
             isPublic: false,
