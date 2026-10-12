@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 import {
   useGetCollectionWithProductsQuery,
   useSearchProductsWithFacetsQuery,
-  useGetProductsQuery,
 } from '@oscar/graphql-shop/generated';
 import { Alert, Skeleton } from '@/components/ui';
 import { PageHeader } from '@/components/layout';
@@ -20,6 +19,7 @@ import {
 } from '@/components/patterns';
 import { variantDiscount } from '@/lib/format/discount';
 import { productOutOfStock } from '@/lib/format/stock';
+import { useHydratedProducts } from '@/lib/catalog/use-hydrated-products';
 
 const PER_PAGE = 12;
 
@@ -74,7 +74,16 @@ export default function CategoryDetailPage() {
   const total = searchData?.search.totalItems ?? 0;
   const hasMore = searchItems.length < total;
 
+  // Hydrate the loaded pages with full product data (variants carry the discount
+  // custom fields that search results lack), preserving the search result order.
+  // Only the ids of the newest page are fetched: refetching every loaded product
+  // on each page made the request grow with the page count (seconds each on the
+  // production box) and the scroll trigger, which only waited for the cheap search
+  // request, restarted it before it ever finished, so the grid stuck at one page.
+  const { products, hydrating, retry: retryHydration } = useHydratedProducts(searchItems);
+
   const onLoadMore = React.useCallback(() => {
+    retryHydration();
     setLoadingMore(true);
     fetchMore({
       variables: {
@@ -86,25 +95,9 @@ export default function CategoryDetailPage() {
         },
       },
     }).finally(() => setLoadingMore(false));
-  }, [fetchMore, slug, searchItems.length]);
+  }, [fetchMore, retryHydration, slug, searchItems.length]);
 
-  // Hydrate the loaded pages with full product data (variants carry the discount
-  // custom fields that search results lack), preserving the search result order.
-  const loadedIds = Array.from(new Set(searchItems.map((it) => it.productId)));
-  const { data: productsData, previousData: previousProductsData, loading: productsLoading } =
-    useGetProductsQuery({
-      variables: { options: { filter: { id: { in: loadedIds } }, take: loadedIds.length } },
-      skip: loadedIds.length === 0,
-    });
-  // While the next page hydrates, keep showing the previous set instead of skeletons.
-  const hydrated = productsData ?? previousProductsData;
-  const byId = new Map((hydrated?.products.items ?? []).map((p) => [p.id, p]));
-  const products = loadedIds.flatMap((id) => {
-    const p = byId.get(id);
-    return p ? [p] : [];
-  });
-
-  const gridLoading = (loading || searchLoading || productsLoading) && products.length === 0;
+  const gridLoading = (loading || searchLoading || hydrating) && products.length === 0;
 
   // Breadcrumb is driven by Vendure's collection.breadcrumbs (full ancestor chain),
   // excluding the synthetic root collection. The last crumb (current category) has no link.
@@ -166,7 +159,7 @@ export default function CategoryDetailPage() {
 
           <LoadMore
             hasMore={hasMore}
-            loading={loadingMore}
+            loading={loadingMore || hydrating}
             onLoadMore={onLoadMore}
             label={t('loadMore')}
             loadingLabel={t('loading')}
