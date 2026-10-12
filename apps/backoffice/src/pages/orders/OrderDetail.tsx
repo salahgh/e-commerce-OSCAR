@@ -901,7 +901,9 @@ export const OrderDetail: React.FC = () => {
                                   ? 'bg-yellow-500/20 text-yellow-400'
                                   : item.type === 'ORDER_PAYMENT_TRANSITION'
                                     ? 'bg-green-500/20 text-green-400'
-                                    : 'bg-muted text-muted-foreground'
+                                    : item.type === 'ORDER_CANCELLATION'
+                                      ? 'bg-red-500/20 text-red-400'
+                                      : 'bg-muted text-muted-foreground'
                             }`}
                           >
                             {item.type === 'ORDER_STATE_TRANSITION' ? (
@@ -910,6 +912,8 @@ export const OrderDetail: React.FC = () => {
                               <MessageSquare className="h-4 w-4" />
                             ) : item.type === 'ORDER_PAYMENT_TRANSITION' ? (
                               <CreditCard className="h-4 w-4" />
+                            ) : item.type === 'ORDER_CANCELLATION' ? (
+                              <XCircle className="h-4 w-4" />
                             ) : (
                               <Clock className="h-4 w-4" />
                             )}
@@ -941,10 +945,25 @@ export const OrderDetail: React.FC = () => {
                                     Paiement: {(item.data as any).paymentState}
                                   </p>
                                 )}
+                                {item.type === 'ORDER_CANCELLATION' && (
+                                  <div className="space-y-1">
+                                    <p className="text-foreground">Commande annulée</p>
+                                    {(item.data as any)?.reason ? (
+                                      <p className="text-foreground italic">
+                                        Raison : "{(item.data as any).reason}"
+                                      </p>
+                                    ) : (
+                                      <p className="text-muted-foreground text-sm">
+                                        Aucune raison indiquée
+                                      </p>
+                                    )}
+                                  </div>
+                                )}
                                 {![
                                   'ORDER_STATE_TRANSITION',
                                   'ORDER_NOTE',
                                   'ORDER_PAYMENT_TRANSITION',
+                                  'ORDER_CANCELLATION',
                                 ].includes(item.type) && (
                                   <p className="text-muted-foreground">{item.type}</p>
                                 )}
