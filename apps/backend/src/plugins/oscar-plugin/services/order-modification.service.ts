@@ -128,7 +128,13 @@ export class OrderModificationService {
 
         const left = await this.orderService.transitionToState(txCtx, order.id, plan.returnState);
         if (isGraphQlErrorResult(left)) {
-          throw new UserInputError(describeTransitionError(left));
+          const mods = await this.connection
+            .getRepository(txCtx, OrderModification)
+            .find({ where: { order: { id: order.id } }, relations: ['payment', 'refund'] });
+          const detail = mods
+            .map(m => `#${m.id} Δ${m.priceChange} payment=${m.payment?.id ?? '-'} refund=${m.refund?.id ?? '-'} settled=${m.isSettled}`)
+            .join('; ');
+          throw new UserInputError(`${describeTransitionError(left)} [modifications: ${detail}]`);
         }
         return (await this.orderService.findOne(txCtx, order.id)) as Order;
       });
