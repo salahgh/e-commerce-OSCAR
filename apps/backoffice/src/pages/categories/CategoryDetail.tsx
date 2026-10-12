@@ -770,7 +770,9 @@ export const CategoryDetail: React.FC = () => {
                             Hériter les filtres du parent
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            Les produits de la catégorie parente sont aussi inclus dans cette catégorie
+                            Restreint cette catégorie aux produits qui correspondent aussi aux filtres
+                            de la catégorie parente. Un produit absent de la liste du parent n'apparaîtra
+                            pas ici. Sans filtre propre, la catégorie affiche tout le contenu du parent.
                           </p>
                         </div>
                       </div>

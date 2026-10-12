@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
+import { assignmentPlan, flattenTree } from '@/lib/collection-filters';
 import {
   ArrowLeft,
   ArrowRight,
@@ -263,19 +264,6 @@ export const ProductCreate: React.FC = () => {
     setShowAssetPicker(false);
   };
 
-  // Helper to get product IDs from collection filters
-  const getProductIdsFromCollection = (collection: any): string[] => {
-    const productIdFilter = collection.filters?.find((f: any) => f.code === 'product-id-filter');
-    if (!productIdFilter) return [];
-    const productIdsArg = productIdFilter.args?.find((a: any) => a.name === 'productIds');
-    if (!productIdsArg?.value) return [];
-    try {
-      return JSON.parse(productIdsArg.value);
-    } catch {
-      return [];
-    }
-  };
-
   // Create product
   const handleCreate = async () => {
     if (!formData.name || !formData.slug) {
@@ -500,24 +488,12 @@ export const ProductCreate: React.FC = () => {
         });
       }
 
-      // Step 6: Add product to selected collections
-      for (const collectionId of selectedCollections) {
-        const collection = collections.find((c: any) => c.id === collectionId);
-        if (!collection) continue;
-
-        const currentProductIds = getProductIdsFromCollection(collection);
-        const newProductIds = [...currentProductIds, productId];
-
+      // Step 6: Add product to selected collections (and their parents, so
+      // inherited filters don't hide it), keeping each collection's other filters.
+      const plan = assignmentPlan(collections, productId, { add: selectedCollections, remove: [] });
+      for (const update of plan) {
         await updateCollectionFilters({
-          variables: {
-            id: collectionId,
-            filters: [
-              {
-                code: 'product-id-filter',
-                arguments: [{ name: 'productIds', value: JSON.stringify(newProductIds) }],
-              },
-            ],
-          },
+          variables: { id: update.collectionId, filters: update.filters },
         });
       }
 
@@ -908,11 +884,16 @@ export const ProductCreate: React.FC = () => {
                 {collections.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Aucune categorie disponible</p>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {collections.map((collection: any) => (
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Cocher une sous-catégorie ajoute aussi le produit à ses catégories parentes,
+                      sinon il n'y apparaîtrait pas.
+                    </p>
+                    {flattenTree(collections).map(({ depth, collection }: { depth: number; collection: any }) => (
                       <label
                         key={collection.id}
-                        className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
+                        style={{ marginInlineStart: depth * 24 }}
+                        className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
                           selectedCollections.includes(collection.id)
                             ? 'border-primary bg-primary/10'
                             : 'border-border hover:border-muted-foreground'
@@ -932,10 +913,15 @@ export const ProductCreate: React.FC = () => {
                           }}
                           className="h-5 w-5 text-primary border-border rounded bg-card"
                         />
-                        <div>
-                          <p className="font-medium text-foreground">{collection.name}</p>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <p className="font-medium text-foreground truncate">{collection.name}</p>
                           {collection.slug && (
-                            <p className="text-xs text-muted-foreground">/{collection.slug}</p>
+                            <p className="text-xs text-muted-foreground truncate">/{collection.slug}</p>
+                          )}
+                          {collection.isPrivate && (
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-500">
+                              privée
+                            </span>
                           )}
                         </div>
                       </label>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
+import { assignmentPlan, flattenTree } from '@/lib/collection-filters';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import {
@@ -458,56 +459,28 @@ export const ProductEdit: React.FC = () => {
         (cid) => !selectedCollections.includes(cid)
       );
 
-      for (const collectionId of collectionsToAdd) {
-        const collection = allCollections.find((c: any) => c.id === collectionId);
-        if (!collection) continue;
-
-        const currentProductIds = getProductIdsFromCollection(collection);
-        const newProductIds = [...currentProductIds, id];
-
+      // Keeps each collection's other filters and also adds the product to the
+      // parents of a chosen sub-category, otherwise inherited filters hide it.
+      const plan = assignmentPlan(allCollections, id, {
+        add: collectionsToAdd,
+        remove: collectionsToRemove,
+      });
+      for (const update of plan) {
         await updateCollectionFilters({
-          variables: {
-            id: collectionId,
-            filters: [
-              {
-                code: 'product-id-filter',
-                arguments: [{ name: 'productIds', value: JSON.stringify(newProductIds) }],
-              },
-            ],
-          },
+          variables: { id: update.collectionId, filters: update.filters },
         });
       }
 
-      for (const collectionId of collectionsToRemove) {
-        const collection = allCollections.find((c: any) => c.id === collectionId);
-        if (!collection) continue;
-
-        const currentProductIds = getProductIdsFromCollection(collection);
-        const newProductIds = currentProductIds.filter((pid: string) => pid !== id);
-
-        if (newProductIds.length > 0) {
-          await updateCollectionFilters({
-            variables: {
-              id: collectionId,
-              filters: [
-                {
-                  code: 'product-id-filter',
-                  arguments: [{ name: 'productIds', value: JSON.stringify(newProductIds) }],
-                },
-              ],
-            },
-          });
-        } else {
-          await updateCollectionFilters({
-            variables: {
-              id: collectionId,
-              filters: [],
-            },
-          });
-        }
-      }
-
-      dispatch(addToast({ message: 'Catégories mises à jour!', type: 'success' }));
+      const parentsTouched = plan.length - collectionsToAdd.length - collectionsToRemove.length;
+      dispatch(
+        addToast({
+          message:
+            parentsTouched > 0
+              ? `Catégories mises à jour (ajouté aussi à ${parentsTouched} catégorie(s) parente(s)). Le contenu des catégories est recalculé en arrière-plan.`
+              : 'Catégories mises à jour! Le contenu des catégories est recalculé en arrière-plan.',
+          type: 'success',
+        })
+      );
       refetch();
     } catch (err: any) {
       dispatch(
@@ -955,11 +928,16 @@ export const ProductEdit: React.FC = () => {
           <p className="text-muted-foreground">Aucune catégorie disponible</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {allCollections.map((collection: any) => (
+        <div className="flex flex-col gap-2">
+          <p className="text-sm text-muted-foreground mb-1">
+            Cocher une sous-catégorie ajoute aussi le produit à ses catégories parentes, sinon il
+            n'y apparaîtrait pas.
+          </p>
+          {flattenTree(allCollections).map(({ depth, collection }: { depth: number; collection: any }) => (
             <label
               key={collection.id}
-              className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
+              style={{ marginInlineStart: depth * 24 }}
+              className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
                 selectedCollections.includes(collection.id)
                   ? 'border-primary bg-primary/10'
                   : 'border-border hover:border-muted-foreground'
@@ -979,10 +957,15 @@ export const ProductEdit: React.FC = () => {
                 }}
                 className="h-5 w-5 text-primary border-border rounded bg-card"
               />
-              <div>
-                <p className="font-medium text-foreground">{collection.name}</p>
+              <div className="flex items-center gap-2 min-w-0">
+                <p className="font-medium text-foreground truncate">{collection.name}</p>
                 {collection.slug && (
-                  <p className="text-xs text-muted-foreground">/{collection.slug}</p>
+                  <p className="text-xs text-muted-foreground truncate">/{collection.slug}</p>
+                )}
+                {collection.isPrivate && (
+                  <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-500">
+                    privée
+                  </span>
                 )}
               </div>
             </label>

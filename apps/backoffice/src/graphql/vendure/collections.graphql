@@ -237,6 +237,7 @@ query AdminCollectionsWithFilters($options: CollectionListOptions) {
       name
       slug
       parentId
+      isPrivate
       filters {
         code
         args {
