@@ -1200,9 +1200,35 @@ export const OrderDetail: React.FC = () => {
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <p className="text-foreground font-bold">
-                        {formatPrice(payment.amount / 100)}
-                      </p>
+                      {(() => {
+                        const refunded = (payment.refunds ?? [])
+                          .filter((r) => r.state !== 'Failed')
+                          .reduce((sum, r) => sum + r.total, 0);
+                        return refunded > 0 ? (
+                          <div className="text-right">
+                            <p className="text-xs text-muted-foreground line-through">
+                              {formatPrice(payment.amount / 100)}
+                            </p>
+                            <p className="text-xs text-amber-400">
+                              avoir −{formatPrice(refunded / 100)}
+                            </p>
+                            <p
+                              className="text-foreground font-bold"
+                              title={
+                                payment.state === 'Authorized'
+                                  ? 'Net à encaisser à la livraison'
+                                  : 'Net encaissé'
+                              }
+                            >
+                              {formatPrice((payment.amount - refunded) / 100)}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-foreground font-bold">
+                            {formatPrice(payment.amount / 100)}
+                          </p>
+                        );
+                      })()}
                       {payment.state === 'Authorized' && (
                         <>
                           <PermissionGate permission="UpdateOrder" disableMode>
