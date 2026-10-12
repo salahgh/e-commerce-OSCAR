@@ -139,6 +139,11 @@ export interface IncompleteProductItem {
   createdAt: Date;
 }
 
+export interface CollectionVariantCount {
+  collectionId: string;
+  count: number;
+}
+
 export interface RecentProductItem {
   id: string;
   name: string;
@@ -653,6 +658,26 @@ export class DashboardService {
       enabled: product.enabled,
       createdAt: product.createdAt,
     }));
+  }
+
+  /**
+   * Number of non-deleted variants per collection, for the current channel,
+   * in ONE grouped SQL statement. Vendure's `Collection.productVariants`
+   * field runs a full variant list query per collection instead, which took
+   * ~5.6 s for 64 collections on the production box (vs ~15 ms here).
+   */
+  async getCollectionVariantCounts(ctx: RequestContext): Promise<CollectionVariantCount[]> {
+    const rows = await this.connection
+      .getRepository(ctx, Collection)
+      .createQueryBuilder('collection')
+      .innerJoin('collection.channels', 'channel', 'channel.id = :channelId', { channelId: ctx.channelId })
+      .innerJoin('collection.productVariants', 'variant', 'variant.deletedAt IS NULL')
+      .innerJoin('variant.channels', 'variantChannel', 'variantChannel.id = :channelId', { channelId: ctx.channelId })
+      .select('collection.id', 'collectionId')
+      .addSelect('COUNT(DISTINCT variant.id)', 'count')
+      .groupBy('collection.id')
+      .getRawMany<{ collectionId: string | number; count: string }>();
+    return rows.map(r => ({ collectionId: String(r.collectionId), count: Number(r.count) }));
   }
 
   async getRecentProducts(

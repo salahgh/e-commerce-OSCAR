@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useLazyQuery } from '@apollo/client';
 import { Formik, Form, Field } from 'formik';
@@ -33,6 +33,7 @@ import { addToast } from '../../store/slices/uiSlice';
 import {
   AdminCollectionDocument,
   AdminCollectionsDocument,
+  AdminCollectionVariantCountsDocument,
   AdminChannelsDocument,
   CreateCollectionDocument,
   UpdateCollectionDocument,
@@ -144,6 +145,8 @@ export const CategoryDetail: React.FC = () => {
   const { data: collectionsData } = useQuery(AdminCollectionsDocument, {
     variables: { options: { take: 100 } },
   });
+  // See CategoryList: per-collection counts merged from one grouped query.
+  const { data: countsData } = useQuery(AdminCollectionVariantCountsDocument);
 
   const [createCollection, { loading: creating }] = useMutation(CreateCollectionDocument);
   const [updateCollection, { loading: updating }] = useMutation(UpdateCollectionDocument);
@@ -211,7 +214,15 @@ export const CategoryDetail: React.FC = () => {
   const previewItems = previewState.data?.previewCollectionVariants?.items ?? [];
 
   const collection = data?.collection;
-  const allCollections = collectionsData?.collections?.items || [];
+  const allCollections = useMemo(() => {
+    const counts = new Map(
+      (countsData?.collectionVariantCounts ?? []).map((c) => [c.collectionId, c.count])
+    );
+    return (collectionsData?.collections?.items ?? []).map((c) => ({
+      ...c,
+      productVariants: { totalItems: counts.get(c.id) ?? 0 },
+    }));
+  }, [collectionsData, countsData]);
 
   // Handle image selection
   const handleImageSelect = useCallback(

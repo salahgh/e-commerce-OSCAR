@@ -31,6 +31,7 @@ import {
   ProductsByCollectionPoint,
   RecentProductItem,
   IncompleteProductItem,
+  CollectionVariantCount,
 } from '../services/dashboard.service';
 
 @Resolver()
@@ -154,6 +155,12 @@ export class OscarAdminResolver {
     @Args() args: { limit?: number },
   ): Promise<IncompleteProductItem[]> {
     return this.dashboardService.getProductsWithoutVariants(ctx, args.limit ?? 100);
+  }
+
+  @Query()
+  @Allow(Permission.ReadCatalog)
+  async collectionVariantCounts(@Ctx() ctx: RequestContext): Promise<CollectionVariantCount[]> {
+    return this.dashboardService.getCollectionVariantCounts(ctx);
   }
 
   // ==================== LEGACY QUERIES (kept for compatibility) ====================

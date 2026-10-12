@@ -218,6 +218,11 @@ export const adminApiExtensions = gql`
     createdAt: DateTime!
   }
 
+  type CollectionVariantCount {
+    collectionId: ID!
+    count: Int!
+  }
+
   # ==================== LEGACY TYPES (kept for compatibility) ====================
 
   type LowStockProduct {
@@ -322,6 +327,11 @@ export const adminApiExtensions = gql`
     Products in this channel that have no variants (never search-indexed), newest first.
     """
     productsWithoutVariants(limit: Int): [IncompleteProduct!]!
+
+    """
+    Non-deleted variant count per collection in this channel (one grouped query). Collections with zero variants are omitted.
+    """
+    collectionVariantCounts: [CollectionVariantCount!]!
 
     """
     Get products with low stock (legacy - for admin alerts)

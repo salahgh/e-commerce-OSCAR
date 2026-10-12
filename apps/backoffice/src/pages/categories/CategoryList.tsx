@@ -42,6 +42,7 @@ import { useDispatch } from 'react-redux';
 import { addToast } from '../../store/slices/uiSlice';
 import {
   AdminCollectionsDocument,
+  AdminCollectionVariantCountsDocument,
   DeleteCollectionDocument,
   DeleteCollectionsDocument,
   UpdateCollectionDocument,
@@ -566,7 +567,19 @@ export const CategoryList: React.FC = () => {
     })
   );
 
-  const collections = data?.collections?.items || [];
+  // Variant counts come from one grouped server query and are merged in here,
+  // so the row renderers keep reading `collection.productVariants.totalItems`.
+  // Asking Vendure for that field per collection took ~5.6 s in production.
+  const { data: countsData } = useQuery(AdminCollectionVariantCountsDocument);
+  const collections = useMemo(() => {
+    const counts = new Map(
+      (countsData?.collectionVariantCounts ?? []).map((c) => [c.collectionId, c.count])
+    );
+    return (data?.collections?.items ?? []).map((c) => ({
+      ...c,
+      productVariants: { totalItems: counts.get(c.id) ?? 0 },
+    }));
+  }, [data, countsData]);
   const totalItems = data?.collections?.totalItems || 0;
 
   // Sort function for collections - by displayOrder first, then by position
