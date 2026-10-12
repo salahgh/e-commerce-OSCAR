@@ -53,39 +53,42 @@ export class OrderModificationService {
     if (!isModifiableState(fromState)) {
       return new OrderModificationStateError();
     }
+
+    // 1. Preview in its own transaction, always rolled back. Vendure's dry run
+    //    still persists adjusted order lines, so it must never share a
+    //    transaction with the real apply (the apply would then start from a
+    //    half-updated order and mis-compute the price change).
+    const preview = await this.rolledBack(ctx, async txCtx => {
+      await this.enterModifying(txCtx, order.id);
+      return this.orderService.modifyOrder(txCtx, {
+        ...input,
+        dryRun: true,
+        refund: undefined,
+        refunds: undefined,
+      });
+    });
+    if (input.dryRun || isGraphQlErrorResult(preview)) {
+      return preview;
+    }
+
+    // 2. Decide the money side from the previewed total, then apply for real.
     const payments = await this.orderService.getOrderPayments(ctx, order.id);
-    const initialTotal = order.totalWithTax;
+    const newTotal = preview.totalWithTax;
+    const plan = planModification({
+      fromState,
+      delta: newTotal - order.totalWithTax,
+      newTotal,
+      payments: payments.map(p => ({
+        id: String(p.id),
+        method: p.method,
+        state: p.state,
+        amount: p.amount,
+      })),
+    });
 
     try {
       return await this.connection.withTransaction(ctx, async txCtx => {
-        const entered = await this.orderService.transitionToState(txCtx, order.id, 'Modifying');
-        if (isGraphQlErrorResult(entered)) {
-          throw new UserInputError(describeTransitionError(entered));
-        }
-
-        // Always dry-run first: it validates the input and tells us the price delta.
-        const preview = await this.orderService.modifyOrder(txCtx, {
-          ...input,
-          dryRun: true,
-          refund: undefined,
-          refunds: undefined,
-        });
-        if (input.dryRun || isGraphQlErrorResult(preview)) {
-          throw new Rollback(preview);
-        }
-
-        const newTotal = preview.totalWithTax;
-        const plan = planModification({
-          fromState,
-          delta: newTotal - initialTotal,
-          newTotal,
-          payments: payments.map(p => ({
-            id: String(p.id),
-            method: p.method,
-            state: p.state,
-            amount: p.amount,
-          })),
-        });
+        await this.enterModifying(txCtx, order.id);
 
         const applied = await this.orderService.modifyOrder(txCtx, {
           ...input,
@@ -144,5 +147,27 @@ export class OrderModificationService {
       }
       throw e;
     }
+  }
+
+  private async enterModifying(ctx: RequestContext, orderId: ID): Promise<void> {
+    const entered = await this.orderService.transitionToState(ctx, orderId, 'Modifying');
+    if (isGraphQlErrorResult(entered)) {
+      throw new UserInputError(describeTransitionError(entered));
+    }
+  }
+
+  /** Run `work` in a transaction that is always rolled back; return what it produced. */
+  private async rolledBack<T>(ctx: RequestContext, work: (ctx: RequestContext) => Promise<T>): Promise<T> {
+    try {
+      await this.connection.withTransaction(ctx, async txCtx => {
+        throw new Rollback(await work(txCtx));
+      });
+    } catch (e) {
+      if (e instanceof Rollback) {
+        return e.value as T;
+      }
+      throw e;
+    }
+    throw new Error('unreachable');
   }
 }
