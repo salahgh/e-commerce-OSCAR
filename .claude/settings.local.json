@@ -205,7 +205,9 @@
       "Bash(git --no-pager diff apps/mobile/app/_layout.tsx apps/mobile/src/contexts/ThemeContext.tsx apps/mobile/app.json)",
       "PowerShell(Tee-Object *)",
       "Bash(ls *)",
-      "Bash(cp *)"
+      "Bash(cp *)",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "Bash(cd *)"
     ],
     "deny": [],
     "ask": []
