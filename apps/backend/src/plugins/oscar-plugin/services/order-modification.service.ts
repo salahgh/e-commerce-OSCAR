@@ -13,6 +13,12 @@ import {
 import { ModifyOrderInput } from '@vendure/common/lib/generated-types';
 import { isModifiableState, planModification } from '../order/modification-plan';
 
+/** Vendure's OrderStateTransitionError carries the real reason in `transitionError`. */
+function describeTransitionError(e: { message: string; transitionError?: string; fromState?: string; toState?: string }): string {
+  const reason = e.transitionError || e.message;
+  return e.fromState && e.toState ? `${reason} (${e.fromState} → ${e.toState})` : reason;
+}
+
 /** Thrown inside the transaction to roll it back while carrying a value out. */
 class Rollback<T> {
   constructor(public readonly value: T) {}
@@ -53,7 +59,7 @@ export class OrderModificationService {
       return await this.connection.withTransaction(ctx, async txCtx => {
         const entered = await this.orderService.transitionToState(txCtx, order.id, 'Modifying');
         if (isGraphQlErrorResult(entered)) {
-          throw new UserInputError(entered.message);
+          throw new UserInputError(describeTransitionError(entered));
         }
 
         // Always dry-run first: it validates the input and tells us the price delta.
@@ -110,7 +116,7 @@ export class OrderModificationService {
 
         const left = await this.orderService.transitionToState(txCtx, order.id, plan.returnState);
         if (isGraphQlErrorResult(left)) {
-          throw new UserInputError(left.message);
+          throw new UserInputError(describeTransitionError(left));
         }
         return (await this.orderService.findOne(txCtx, order.id)) as Order;
       });
