@@ -175,17 +175,19 @@ export default function ProductPage() {
         {/* Detail row: gallery (right in RTL) + info (left in RTL) */}
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
           {/* Gallery */}
-          <div className="flex w-full gap-[23px] lg:w-[755px]">
+          <div className="relative w-full lg:w-[755px]">
+            {/* Every photo gets a thumbnail. The column is absolutely positioned so the main image alone sets the
+                gallery height; when the thumbnails don't fit, the column scrolls instead of stretching the row. */}
             {images.length > 1 && (
-              <div className="flex w-[88px] shrink-0 flex-col gap-4 sm:w-[126px] lg:gap-8">
-                {images.slice(0, 4).map((img, i) => (
+              <div className="absolute inset-y-0 start-0 flex w-[88px] flex-col gap-4 overflow-y-auto sm:w-[126px] lg:gap-8">
+                {images.map((img, i) => (
                   <button
                     key={img.id}
                     type="button"
                     onClick={() => setActiveImage(i)}
                     aria-label={t('viewLabel', { n: i + 1 })}
                     className={cn(
-                      'relative aspect-[126/140] overflow-hidden rounded-[2px] border bg-bg-muted',
+                      'relative aspect-[126/140] shrink-0 overflow-hidden rounded-[2px] border bg-bg-muted',
                       i === activeImage ? 'border-accent' : 'border-transparent',
                     )}
                   >
@@ -195,7 +197,12 @@ export default function ProductPage() {
                 ))}
               </div>
             )}
-            <div className="relative aspect-[606/714] flex-1 overflow-hidden rounded-[2px] bg-bg-muted lg:h-[714px] lg:aspect-auto">
+            <div
+              className={cn(
+                'relative aspect-[606/714] overflow-hidden rounded-[2px] bg-bg-muted lg:h-[714px] lg:aspect-auto',
+                images.length > 1 && 'ms-[111px] sm:ms-[149px]',
+              )}
+            >
               {images[activeImage] && (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img

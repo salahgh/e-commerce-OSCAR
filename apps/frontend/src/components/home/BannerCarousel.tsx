@@ -46,6 +46,7 @@ export function BannerCarousel({ settingKey, fallbackSrcs, alt, priority }: Bann
               alt={alt}
               width={1392}
               height={733}
+              sizes="(min-width: 1440px) 1392px, 100vw"
               priority={priority && i === 0}
               className="h-auto w-full shrink-0 object-cover"
             />
