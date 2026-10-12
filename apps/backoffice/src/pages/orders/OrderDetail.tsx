@@ -157,6 +157,9 @@ const ORDER_STATUS: Record<
     icon: <CreditCard className="h-4 w-4" />,
     color: 'text-blue-400',
     bgColor: 'bg-blue-500/20',
+    // After the complement is recorded via "+ Paiement", Vendure does not leave
+    // this state on its own: offer "Payé" (Vendure checks the total is covered).
+    next: ['PaymentSettled', 'Cancelled'],
   },
   Cancelled: {
     label: 'Annulé',
@@ -552,17 +555,25 @@ export const OrderDetail: React.FC = () => {
                 {order.state !== 'Cancelled' && order.payments && order.payments.length > 0 && (
                   <span
                     className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                      order.payments.some((p) => p.state === 'Settled')
-                        ? 'bg-green-500/20 text-green-400'
-                        : 'bg-amber-500/20 text-amber-400'
+                      order.state === 'ArrangingAdditionalPayment'
+                        ? 'bg-amber-500/20 text-amber-400'
+                        : order.payments.some((p) => p.state === 'Settled')
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-amber-500/20 text-amber-400'
                     }`}
                     title={
-                      order.payments.some((p) => p.state === 'Settled')
-                        ? 'Paiement encaissé'
-                        : 'Paiement à la livraison : encaissé par le livreur'
+                      order.state === 'ArrangingAdditionalPayment'
+                        ? 'Le total a augmenté : enregistrez le complément via « + Paiement », puis « Payé »'
+                        : order.payments.some((p) => p.state === 'Settled')
+                          ? 'Paiement encaissé'
+                          : 'Paiement à la livraison : encaissé par le livreur'
                     }
                   >
-                    {order.payments.some((p) => p.state === 'Settled') ? 'Payée' : 'Non encaissée'}
+                    {order.state === 'ArrangingAdditionalPayment'
+                      ? 'Complément à encaisser'
+                      : order.payments.some((p) => p.state === 'Settled')
+                        ? 'Payée'
+                        : 'Non encaissée'}
                   </span>
                 )}
               </div>
