@@ -16,10 +16,15 @@ import { ModifyOrderInput } from '@vendure/common/lib/generated-types';
 import { OscarService } from '../services/oscar.service';
 import { OrderModificationService } from '../services/order-modification.service';
 import {
+  CreateDeliveryCommuneInput,
+  CreateDeliveryWilayaInput,
+  UpdateDeliveryCommuneInput,
+  UpdateDeliveryWilayaInput,
   UpdateWilayaShippingPriceInput,
   WilayaShippingService,
 } from '../services/wilaya-shipping.service';
 import { WilayaShipping } from '../entities/wilaya-shipping.entity';
+import { WilayaCommune } from '../entities/wilaya-commune.entity';
 import {
   DashboardService,
   KpiMetrics,
@@ -49,11 +54,11 @@ export class OscarAdminResolver {
     private orderModificationService: OrderModificationService,
   ) {}
 
-  // ==================== WILAYA SHIPPING ====================
+  // ==================== DELIVERY DESTINATIONS ====================
 
   @Query()
   @Allow(Permission.ReadShippingMethod)
-  async wilayaShippingPrices(@Ctx() ctx: RequestContext): Promise<WilayaShipping[]> {
+  async deliveryWilayas(@Ctx() ctx: RequestContext): Promise<WilayaShipping[]> {
     return this.wilayaShippingService.findAll(ctx);
   }
 
@@ -64,6 +69,54 @@ export class OscarAdminResolver {
     @Args() args: { input: UpdateWilayaShippingPriceInput[] },
   ): Promise<WilayaShipping[]> {
     return this.wilayaShippingService.updatePrices(ctx, args.input);
+  }
+
+  @Mutation()
+  @Allow(Permission.UpdateShippingMethod)
+  async createDeliveryWilaya(
+    @Ctx() ctx: RequestContext,
+    @Args() args: { input: CreateDeliveryWilayaInput },
+  ): Promise<WilayaShipping> {
+    return this.wilayaShippingService.createWilaya(ctx, args.input);
+  }
+
+  @Mutation()
+  @Allow(Permission.UpdateShippingMethod)
+  async updateDeliveryWilaya(
+    @Ctx() ctx: RequestContext,
+    @Args() args: { input: UpdateDeliveryWilayaInput },
+  ): Promise<WilayaShipping> {
+    return this.wilayaShippingService.updateWilaya(ctx, args.input);
+  }
+
+  @Mutation()
+  @Allow(Permission.UpdateShippingMethod)
+  async deleteDeliveryWilaya(@Ctx() ctx: RequestContext, @Args() args: { id: ID }): Promise<boolean> {
+    return this.wilayaShippingService.deleteWilaya(ctx, args.id);
+  }
+
+  @Mutation()
+  @Allow(Permission.UpdateShippingMethod)
+  async createDeliveryCommune(
+    @Ctx() ctx: RequestContext,
+    @Args() args: { input: CreateDeliveryCommuneInput },
+  ): Promise<WilayaCommune> {
+    return this.wilayaShippingService.createCommune(ctx, args.input);
+  }
+
+  @Mutation()
+  @Allow(Permission.UpdateShippingMethod)
+  async updateDeliveryCommune(
+    @Ctx() ctx: RequestContext,
+    @Args() args: { input: UpdateDeliveryCommuneInput },
+  ): Promise<WilayaCommune> {
+    return this.wilayaShippingService.updateCommune(ctx, args.input);
+  }
+
+  @Mutation()
+  @Allow(Permission.UpdateShippingMethod)
+  async deleteDeliveryCommune(@Ctx() ctx: RequestContext, @Args() args: { id: ID }): Promise<boolean> {
+    return this.wilayaShippingService.deleteCommune(ctx, args.id);
   }
 
   // ==================== DASHBOARD KPI QUERIES ====================

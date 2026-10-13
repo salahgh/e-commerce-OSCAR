@@ -219,6 +219,12 @@ export const config: VendureConfig = {
         label: [{ languageCode: LanguageCode.en, value: 'Avatar' }],
       },
     ],
+    // Destination codes sent by the storefronts with every address, so delivery
+    // quoting survives a wilaya rename in the back-office (see wilaya-pricing.ts).
+    Address: [
+      { name: 'wilayaCode', type: 'string', nullable: true, public: true, label: [{ languageCode: LanguageCode.en, value: 'Wilaya code' }] },
+      { name: 'communeCode', type: 'string', nullable: true, public: true, label: [{ languageCode: LanguageCode.en, value: 'Commune code' }] },
+    ],
     Order: [
       { name: 'customerNotes', type: 'text', label: [{ languageCode: LanguageCode.en, value: 'Customer Notes' }] },
       { name: 'adminNotes', type: 'text', label: [{ languageCode: LanguageCode.en, value: 'Admin Notes' }] },

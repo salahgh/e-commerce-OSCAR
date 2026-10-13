@@ -1,16 +1,17 @@
 import { Injector, LanguageCode, ShippingCalculator } from '@vendure/core';
 import { WilayaShippingService } from '../services/wilaya-shipping.service';
-import { DeliveryMode } from './wilaya-pricing';
+import { AddressLike, DeliveryMode } from './wilaya-pricing';
 
 let wilayaShippingService: WilayaShippingService;
 
 /**
  * Prices a delivery method from the WilayaShipping table (managed in the
- * back-office "Livraison par wilaya" section) based on the order's shipping
- * address. One shipping method is configured with `mode = home`, the other
- * with `mode = office`; when the mode has no price in the customer's wilaya
- * the calculator returns nothing and Vendure leaves that method out of
- * `eligibleShippingMethods`. Free above the channel's free-shipping threshold.
+ * back-office "Livraison" section) based on the order's shipping address.
+ * One shipping method is configured with `mode = home`, the other with
+ * `mode = office`; when the mode has no price in the customer's wilaya, or the
+ * wilaya is switched off, the calculator returns nothing and Vendure leaves
+ * that method out of `eligibleShippingMethods`. Free above the channel's
+ * free-shipping threshold.
  */
 export const wilayaShippingCalculator = new ShippingCalculator({
   code: 'wilaya-shipping-calculator',
@@ -62,7 +63,7 @@ export const wilayaShippingCalculator = new ShippingCalculator({
     const mode: DeliveryMode = args.mode === 'office' ? 'office' : 'home';
     const price = await wilayaShippingService.quoteForAddress(
       ctx,
-      order.shippingAddress,
+      order.shippingAddress as AddressLike | undefined,
       order.subTotalWithTax,
       mode,
     );

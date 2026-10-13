@@ -6,7 +6,32 @@ export const shopApiExtensions = gql`
     totalItems: Int!
   }
 
+  """
+  A wilaya customers can be delivered to, with the communes they can pick.
+  """
+  type DeliveryDestination {
+    code: String!
+    name: String!
+    nameAr: String!
+    "Delivery-delay zone 1..4 (storefronts map it to a localized estimate)"
+    shippingZone: Int!
+    communes: [DeliveryDestinationCommune!]!
+  }
+
+  type DeliveryDestinationCommune {
+    code: String!
+    name: String!
+    nameAr: String!
+    postalCode: String
+  }
+
   extend type Query {
+    """
+    Active delivery wilayas with their active communes, ordered by code.
+    Managed in the back-office; drives the address forms.
+    """
+    deliveryDestinations: [DeliveryDestination!]!
+
     """
     Get featured products for homepage
     """
@@ -240,21 +265,74 @@ export const adminApiExtensions = gql`
     lowStockProductsCount: Int!
   }
 
-  # ==================== WILAYA SHIPPING ====================
+  # ==================== DELIVERY DESTINATIONS ====================
 
   """
-  Per-wilaya delivery prices (managed in Settings → Livraison).
-  A null price means that delivery mode is not offered in the wilaya.
+  A delivery wilaya (managed in Settings → Livraison): the destination itself
+  and its two delivery prices. A null price means that delivery mode is not
+  offered in the wilaya; an inactive wilaya is hidden from customers.
   """
-  type WilayaShippingPrice {
+  type DeliveryWilaya {
     id: ID!
+    "Two-digit code"
     code: String!
     name: String!
     nameAr: String!
+    "Offered to customers at all"
+    active: Boolean!
+    "Delivery-delay zone 1..4"
+    shippingZone: Int!
     "Home-delivery price in minor units (centimes), or null when not offered"
     homePrice: Int
     "Courier-office pickup price in minor units (centimes), or null when not offered"
     officePrice: Int
+    communes: [DeliveryCommune!]!
+  }
+
+  type DeliveryCommune {
+    id: ID!
+    "Wilaya code + two-digit sequence, generated"
+    code: String!
+    name: String!
+    nameAr: String!
+    postalCode: String
+    active: Boolean!
+  }
+
+  input CreateDeliveryWilayaInput {
+    "Two digits, unique"
+    code: String!
+    name: String!
+    nameAr: String!
+    shippingZone: Int!
+    homePrice: Int
+    officePrice: Int
+  }
+
+  "Omitted fields are unchanged; an explicit null price stops offering that mode."
+  input UpdateDeliveryWilayaInput {
+    id: ID!
+    name: String
+    nameAr: String
+    active: Boolean
+    shippingZone: Int
+    homePrice: Int
+    officePrice: Int
+  }
+
+  input CreateDeliveryCommuneInput {
+    wilayaId: ID!
+    name: String!
+    nameAr: String!
+    postalCode: String
+  }
+
+  input UpdateDeliveryCommuneInput {
+    id: ID!
+    name: String
+    nameAr: String
+    postalCode: String
+    active: Boolean
   }
 
   input UpdateWilayaShippingPriceInput {
@@ -269,9 +347,9 @@ export const adminApiExtensions = gql`
 
   extend type Query {
     """
-    All 69 wilayas with their delivery prices
+    Every delivery wilaya (active or not) with its communes, ordered by code
     """
-    wilayaShippingPrices: [WilayaShippingPrice!]!
+    deliveryWilayas: [DeliveryWilaya!]!
 
     """
     Get comprehensive KPI metrics for the dashboard
@@ -348,9 +426,17 @@ export const adminApiExtensions = gql`
 
   extend type Mutation {
     """
-    Update delivery prices for one or more wilayas
+    Update delivery prices for one or more wilayas (bulk save of the price grid)
     """
-    updateWilayaShippingPrices(input: [UpdateWilayaShippingPriceInput!]!): [WilayaShippingPrice!]!
+    updateWilayaShippingPrices(input: [UpdateWilayaShippingPriceInput!]!): [DeliveryWilaya!]!
+
+    createDeliveryWilaya(input: CreateDeliveryWilayaInput!): DeliveryWilaya!
+    updateDeliveryWilaya(input: UpdateDeliveryWilayaInput!): DeliveryWilaya!
+    "Deletes the wilaya and its communes. Existing orders keep their address text."
+    deleteDeliveryWilaya(id: ID!): Boolean!
+    createDeliveryCommune(input: CreateDeliveryCommuneInput!): DeliveryCommune!
+    updateDeliveryCommune(input: UpdateDeliveryCommuneInput!): DeliveryCommune!
+    deleteDeliveryCommune(id: ID!): Boolean!
 
     """
     Toggle product featured status

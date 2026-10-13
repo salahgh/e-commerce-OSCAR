@@ -13,6 +13,8 @@ import {
   InternalServerError,
 } from '@vendure/core';
 import { OscarService } from '../services/oscar.service';
+import { WilayaShippingService } from '../services/wilaya-shipping.service';
+import { WilayaShipping } from '../entities/wilaya-shipping.entity';
 
 @Resolver()
 export class OscarShopResolver {
@@ -20,7 +22,14 @@ export class OscarShopResolver {
     private oscarService: OscarService,
     private assetService: AssetService,
     private customerService: CustomerService,
+    private wilayaShippingService: WilayaShippingService,
   ) {}
+
+  /** Active wilayas and communes for the address forms (public). */
+  @Query()
+  async deliveryDestinations(@Ctx() ctx: RequestContext): Promise<WilayaShipping[]> {
+    return this.wilayaShippingService.findActive(ctx);
+  }
 
   @Query()
   async featuredProducts(

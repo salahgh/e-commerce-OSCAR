@@ -7,6 +7,7 @@ import { WilayaShippingService } from './services/wilaya-shipping.service';
 import { OrderWilayaService } from './services/order-wilaya.service';
 import { ShippingSetupService } from './shipping/shipping-setup.service';
 import { WilayaShipping } from './entities/wilaya-shipping.entity';
+import { WilayaCommune } from './entities/wilaya-commune.entity';
 import { OscarAdminResolver } from './api/oscar-admin.resolver';
 import { OscarShopResolver } from './api/oscar-shop.resolver';
 import { HealthController } from './api/health.controller';
@@ -33,7 +34,7 @@ import { adminApiExtensions, shopApiExtensions } from './api/api-extensions';
     ShippingSetupService,
     OrderModificationService,
   ],
-  entities: [WilayaShipping],
+  entities: [WilayaShipping, WilayaCommune],
   controllers: [HealthController],
   adminApiExtensions: {
     schema: adminApiExtensions,
