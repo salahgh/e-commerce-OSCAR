@@ -1,0 +1,69 @@
+# Delivery destinations and per-wilaya prices (oscar-plugin admin-api extension).
+# Managed in Settings → Livraison.
+
+fragment DeliveryCommuneFields on DeliveryCommune {
+  id
+  code
+  name
+  nameAr
+  postalCode
+  active
+}
+
+fragment DeliveryWilayaFields on DeliveryWilaya {
+  id
+  code
+  name
+  nameAr
+  active
+  shippingZone
+  homePrice
+  officePrice
+  communes {
+    ...DeliveryCommuneFields
+  }
+}
+
+query DeliveryWilayas {
+  deliveryWilayas {
+    ...DeliveryWilayaFields
+  }
+}
+
+mutation UpdateWilayaShippingPrices($input: [UpdateWilayaShippingPriceInput!]!) {
+  updateWilayaShippingPrices(input: $input) {
+    ...DeliveryWilayaFields
+  }
+}
+
+mutation CreateDeliveryWilaya($input: CreateDeliveryWilayaInput!) {
+  createDeliveryWilaya(input: $input) {
+    ...DeliveryWilayaFields
+  }
+}
+
+mutation UpdateDeliveryWilaya($input: UpdateDeliveryWilayaInput!) {
+  updateDeliveryWilaya(input: $input) {
+    ...DeliveryWilayaFields
+  }
+}
+
+mutation DeleteDeliveryWilaya($id: ID!) {
+  deleteDeliveryWilaya(id: $id)
+}
+
+mutation CreateDeliveryCommune($input: CreateDeliveryCommuneInput!) {
+  createDeliveryCommune(input: $input) {
+    ...DeliveryCommuneFields
+  }
+}
+
+mutation UpdateDeliveryCommune($input: UpdateDeliveryCommuneInput!) {
+  updateDeliveryCommune(input: $input) {
+    ...DeliveryCommuneFields
+  }
+}
+
+mutation DeleteDeliveryCommune($id: ID!) {
+  deleteDeliveryCommune(id: $id)
+}

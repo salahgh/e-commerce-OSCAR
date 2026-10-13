@@ -657,7 +657,7 @@ export const Settings: React.FC = () => {
       icon: <Truck className="h-4 w-4" />,
       content: (
         <div className="space-y-6">
-          {/* Per-wilaya delivery prices */}
+          {/* Delivery destinations (wilayas, communes) and per-wilaya prices */}
           <WilayaShippingSettings />
 
           {/* Shipping Zones */}

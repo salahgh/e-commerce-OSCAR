@@ -67,72 +67,7 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { TextArea } from '../../components/ui/TextArea';
 import { PermissionGate } from '../../components/auth/PermissionGate';
 import { formatDateTime, formatPrice } from '../../lib/utils';
-
-const WILAYAS = [
-  'Adrar',
-  'Chlef',
-  'Laghouat',
-  'Oum El Bouaghi',
-  'Batna',
-  'Béjaïa',
-  'Biskra',
-  'Béchar',
-  'Blida',
-  'Bouira',
-  'Tamanrasset',
-  'Tébessa',
-  'Tlemcen',
-  'Tiaret',
-  'Tizi Ouzou',
-  'Alger',
-  'Djelfa',
-  'Jijel',
-  'Sétif',
-  'Saïda',
-  'Skikda',
-  'Sidi Bel Abbès',
-  'Annaba',
-  'Guelma',
-  'Constantine',
-  'Médéa',
-  'Mostaganem',
-  "M'Sila",
-  'Mascara',
-  'Ouargla',
-  'Oran',
-  'El Bayadh',
-  'Illizi',
-  'Bordj Bou Arréridj',
-  'Boumerdès',
-  'El Tarf',
-  'Tindouf',
-  'Tissemsilt',
-  'El Oued',
-  'Khenchela',
-  'Souk Ahras',
-  'Tipaza',
-  'Mila',
-  'Aïn Defla',
-  'Naâma',
-  'Aïn Témouchent',
-  'Ghardaïa',
-  'Relizane',
-  'Timimoun',
-  'Bordj Badji Mokhtar',
-  'Ouled Djellal',
-  'Béni Abbès',
-  'In Salah',
-  'In Guezzam',
-  'Touggourt',
-  'Djanet',
-  "El M'Ghair",
-  'El Meniaa',
-];
-
-const WILAYA_OPTIONS = [
-  { value: '', label: 'Sélectionner une wilaya' },
-  ...WILAYAS.map((w) => ({ value: w, label: w })),
-];
+import { useDeliveryWilayas } from '../../hooks/useDeliveryWilayas';
 
 const ORDER_STATE_CONFIG: Record<
   string,
@@ -279,6 +214,11 @@ const validationSchema = Yup.object({
 });
 
 export const CustomerDetail: React.FC = () => {
+  const { names: wilayaNames } = useDeliveryWilayas();
+  const wilayaOptions = [
+    { value: '', label: 'Sélectionner une wilaya' },
+    ...wilayaNames.map((w) => ({ value: w, label: w })),
+  ];
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -970,7 +910,7 @@ export const CustomerDetail: React.FC = () => {
                             value={values.wilaya}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            options={WILAYA_OPTIONS}
+                            options={wilayaOptions}
                           />
                           <Input
                             label="Ville"

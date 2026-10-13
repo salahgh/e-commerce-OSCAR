@@ -113,6 +113,11 @@ type Query {
   """Get metrics for the given interval and metric types."""
   metricSummary(input: MetricSummaryInput): [MetricSummary!]!
 
+  """
+  Every delivery wilaya (active or not) with its communes, ordered by code
+  """
+  deliveryWilayas: [DeliveryWilaya!]!
+
   """Get comprehensive KPI metrics for the dashboard"""
   dashboardKpiMetrics: KpiMetrics!
 
@@ -145,10 +150,14 @@ type Query {
   """Most recently created products, sorted by createdAt descending."""
   dashboardRecentProducts(limit: Int): [RecentProductItem!]!
 
-  """Products in this channel that have no variants (never search-indexed), newest first."""
+  """
+  Products in this channel that have no variants (never search-indexed), newest first.
+  """
   productsWithoutVariants(limit: Int): [IncompleteProduct!]!
 
-  """Non-deleted variant count per collection in this channel (one grouped query). Collections with zero variants are omitted."""
+  """
+  Non-deleted variant count per collection in this channel (one grouped query). Collections with zero variants are omitted.
+  """
   collectionVariantCounts: [CollectionVariantCount!]!
 
   """Get products with low stock (legacy - for admin alerts)"""
@@ -159,8 +168,6 @@ type Query {
 }
 
 type Mutation {
-  """Oscar plugin: guided order modification (see modifyOrderGuided in api-extensions.ts)."""
-  modifyOrderGuided(input: ModifyOrderInput!): ModifyOrderResult!
   """Create a new Administrator"""
   createAdministrator(input: CreateAdministratorInput!): Administrator!
 
@@ -648,6 +655,21 @@ type Mutation {
   """Remove members from a Zone"""
   removeMembersFromZone(zoneId: ID!, memberIds: [ID!]!): Zone!
 
+  """
+  Update delivery prices for one or more wilayas (bulk save of the price grid)
+  """
+  updateWilayaShippingPrices(input: [UpdateWilayaShippingPriceInput!]!): [DeliveryWilaya!]!
+  createDeliveryWilaya(input: CreateDeliveryWilayaInput!): DeliveryWilaya!
+  updateDeliveryWilaya(input: UpdateDeliveryWilayaInput!): DeliveryWilaya!
+
+  """
+  Deletes the wilaya and its communes. Existing orders keep their address text.
+  """
+  deleteDeliveryWilaya(id: ID!): Boolean!
+  createDeliveryCommune(input: CreateDeliveryCommuneInput!): DeliveryCommune!
+  updateDeliveryCommune(input: UpdateDeliveryCommuneInput!): DeliveryCommune!
+  deleteDeliveryCommune(id: ID!): Boolean!
+
   """Toggle product featured status"""
   toggleProductFeatured(productId: ID!): Product!
 
@@ -656,6 +678,15 @@ type Mutation {
 
   """Add admin notes to order"""
   addOrderAdminNotes(orderId: ID!, notes: String!): Order!
+
+  """
+  Modify an unshipped order in one call: enters Modifying, applies the changes, settles the
+  money side (COD authorization follows the new total; a lower total refunds against the
+  existing payment; a higher total on a paid order goes to ArrangingAdditionalPayment) and
+  returns to the original state. With dryRun: true nothing is persisted and the previewed
+  order is returned.
+  """
+  modifyOrderGuided(input: ModifyOrderInput!): ModifyOrderResult!
 }
 
 input AdministratorListOptions {
@@ -1696,6 +1727,7 @@ input UpdateOrderAddressInput {
   postalCode: String
   countryCode: String
   phoneNumber: String
+  customFields: UpdateAddressCustomFieldsInput
 }
 
 input ModifyOrderInput {
@@ -3052,7 +3084,7 @@ type Address implements Node {
   phoneNumber: String
   defaultShippingAddress: Boolean
   defaultBillingAddress: Boolean
-  customFields: JSON
+  customFields: AddressCustomFields
 }
 
 type Asset implements Node {
@@ -3900,7 +3932,7 @@ input CreateAddressInput {
   phoneNumber: String
   defaultShippingAddress: Boolean
   defaultBillingAddress: Boolean
-  customFields: JSON
+  customFields: CreateAddressCustomFieldsInput
 }
 
 """
@@ -3923,7 +3955,7 @@ input UpdateAddressInput {
   phoneNumber: String
   defaultShippingAddress: Boolean
   defaultBillingAddress: Boolean
-  customFields: JSON
+  customFields: UpdateAddressCustomFieldsInput
 }
 
 """
@@ -5365,7 +5397,7 @@ type OrderAddress {
   country: String
   countryCode: String
   phoneNumber: String
-  customFields: JSON
+  customFields: AddressCustomFields
 }
 
 type OrderList implements PaginatedList {
@@ -6083,6 +6115,100 @@ type DashboardStats {
   lowStockProductsCount: Int!
 }
 
+"""
+A delivery wilaya (managed in Settings → Livraison): the destination itself
+and its two delivery prices. A null price means that delivery mode is not
+offered in the wilaya; an inactive wilaya is hidden from customers.
+"""
+type DeliveryWilaya {
+  id: ID!
+
+  """Two-digit code"""
+  code: String!
+  name: String!
+  nameAr: String!
+
+  """Offered to customers at all"""
+  active: Boolean!
+
+  """Delivery-delay zone 1..4"""
+  shippingZone: Int!
+
+  """
+  Home-delivery price in minor units (centimes), or null when not offered
+  """
+  homePrice: Int
+
+  """
+  Courier-office pickup price in minor units (centimes), or null when not offered
+  """
+  officePrice: Int
+  communes: [DeliveryCommune!]!
+}
+
+type DeliveryCommune {
+  id: ID!
+
+  """Wilaya code + two-digit sequence, generated"""
+  code: String!
+  name: String!
+  nameAr: String!
+  postalCode: String
+  active: Boolean!
+}
+
+input CreateDeliveryWilayaInput {
+  """Two digits, unique"""
+  code: String!
+  name: String!
+  nameAr: String!
+  shippingZone: Int!
+  homePrice: Int
+  officePrice: Int
+}
+
+"""
+Omitted fields are unchanged; an explicit null price stops offering that mode.
+"""
+input UpdateDeliveryWilayaInput {
+  id: ID!
+  name: String
+  nameAr: String
+  active: Boolean
+  shippingZone: Int
+  homePrice: Int
+  officePrice: Int
+}
+
+input CreateDeliveryCommuneInput {
+  wilayaId: ID!
+  name: String!
+  nameAr: String!
+  postalCode: String
+}
+
+input UpdateDeliveryCommuneInput {
+  id: ID!
+  name: String
+  nameAr: String
+  postalCode: String
+  active: Boolean
+}
+
+input UpdateWilayaShippingPriceInput {
+  code: String!
+
+  """
+  Home-delivery price in minor units (centimes); null to stop offering it
+  """
+  homePrice: Int
+
+  """
+  Courier-office pickup price in minor units (centimes); null to stop offering it
+  """
+  officePrice: Int
+}
+
 input AdministratorFilterParameter {
   id: IDOperators
   createdAt: DateOperators
@@ -6308,6 +6434,7 @@ input CustomerSortParameter {
   wilaya: SortOrder
   city: SortOrder
   adminNotes: SortOrder
+  avatar: SortOrder
 }
 
 input FacetFilterParameter {
@@ -6635,6 +6762,21 @@ input HistoryEntrySortParameter {
   updatedAt: SortOrder
 }
 
+type AddressCustomFields {
+  wilayaCode: String
+  communeCode: String
+}
+
+input CreateAddressCustomFieldsInput {
+  wilayaCode: String
+  communeCode: String
+}
+
+input UpdateAddressCustomFieldsInput {
+  wilayaCode: String
+  communeCode: String
+}
+
 type ChannelCustomFields {
   promoTextAr: String
   promoTextFr: String
@@ -6744,18 +6886,21 @@ type CustomerCustomFields {
   wilaya: String
   city: String
   adminNotes: String
+  avatar: Asset
 }
 
 input CreateCustomerCustomFieldsInput {
   wilaya: String
   city: String
   adminNotes: String
+  avatarId: ID
 }
 
 input UpdateCustomerCustomFieldsInput {
   wilaya: String
   city: String
   adminNotes: String
+  avatarId: ID
 }
 
 type FacetValueCustomFields {

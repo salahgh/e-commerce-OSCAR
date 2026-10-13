@@ -56,7 +56,7 @@ export type Address = Node & {
   company?: Maybe<Scalars['String']['output']>;
   country: Country;
   createdAt: Scalars['DateTime']['output'];
-  customFields?: Maybe<Scalars['JSON']['output']>;
+  customFields?: Maybe<AddressCustomFields>;
   defaultBillingAddress?: Maybe<Scalars['Boolean']['output']>;
   defaultShippingAddress?: Maybe<Scalars['Boolean']['output']>;
   fullName?: Maybe<Scalars['String']['output']>;
@@ -67,6 +67,12 @@ export type Address = Node & {
   streetLine1: Scalars['String']['output'];
   streetLine2?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
+};
+
+export type AddressCustomFields = {
+  __typename?: 'AddressCustomFields';
+  communeCode?: Maybe<Scalars['String']['output']>;
+  wilayaCode?: Maybe<Scalars['String']['output']>;
 };
 
 export type AdjustDraftOrderLineInput = {
@@ -841,6 +847,11 @@ export type CouponCodeLimitError = ErrorResult & {
   message: Scalars['String']['output'];
 };
 
+export type CreateAddressCustomFieldsInput = {
+  communeCode?: InputMaybe<Scalars['String']['input']>;
+  wilayaCode?: InputMaybe<Scalars['String']['input']>;
+};
+
 /**
  * Input used to create an Address.
  *
@@ -852,7 +863,7 @@ export type CreateAddressInput = {
   city?: InputMaybe<Scalars['String']['input']>;
   company?: InputMaybe<Scalars['String']['input']>;
   countryCode: Scalars['String']['input'];
-  customFields?: InputMaybe<Scalars['JSON']['input']>;
+  customFields?: InputMaybe<CreateAddressCustomFieldsInput>;
   defaultBillingAddress?: InputMaybe<Scalars['Boolean']['input']>;
   defaultShippingAddress?: InputMaybe<Scalars['Boolean']['input']>;
   fullName?: InputMaybe<Scalars['String']['input']>;
@@ -961,6 +972,7 @@ export type CreateCountryInput = {
 
 export type CreateCustomerCustomFieldsInput = {
   adminNotes?: InputMaybe<Scalars['String']['input']>;
+  avatarId?: InputMaybe<Scalars['ID']['input']>;
   city?: InputMaybe<Scalars['String']['input']>;
   wilaya?: InputMaybe<Scalars['String']['input']>;
 };
@@ -981,6 +993,23 @@ export type CreateCustomerInput = {
 };
 
 export type CreateCustomerResult = Customer | EmailAddressConflictError;
+
+export type CreateDeliveryCommuneInput = {
+  name: Scalars['String']['input'];
+  nameAr: Scalars['String']['input'];
+  postalCode?: InputMaybe<Scalars['String']['input']>;
+  wilayaId: Scalars['ID']['input'];
+};
+
+export type CreateDeliveryWilayaInput = {
+  /** Two digits, unique */
+  code: Scalars['String']['input'];
+  homePrice?: InputMaybe<Scalars['Int']['input']>;
+  name: Scalars['String']['input'];
+  nameAr: Scalars['String']['input'];
+  officePrice?: InputMaybe<Scalars['Int']['input']>;
+  shippingZone: Scalars['Int']['input'];
+};
 
 export type CreateFacetInput = {
   code: Scalars['String']['input'];
@@ -1598,6 +1627,7 @@ export type CustomerOrdersArgs = {
 export type CustomerCustomFields = {
   __typename?: 'CustomerCustomFields';
   adminNotes?: Maybe<Scalars['String']['output']>;
+  avatar?: Maybe<Asset>;
   city?: Maybe<Scalars['String']['output']>;
   wilaya?: Maybe<Scalars['String']['output']>;
 };
@@ -1690,6 +1720,7 @@ export type CustomerListOptions = {
 
 export type CustomerSortParameter = {
   adminNotes?: InputMaybe<SortOrder>;
+  avatar?: InputMaybe<SortOrder>;
   city?: InputMaybe<SortOrder>;
   createdAt?: InputMaybe<SortOrder>;
   emailAddress?: InputMaybe<SortOrder>;
@@ -1800,6 +1831,40 @@ export enum DeletionResult {
   /** Deletion did not take place, reason given in message */
   NotDeleted = 'NOT_DELETED'
 }
+
+export type DeliveryCommune = {
+  __typename?: 'DeliveryCommune';
+  active: Scalars['Boolean']['output'];
+  /** Wilaya code + two-digit sequence, generated */
+  code: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  nameAr: Scalars['String']['output'];
+  postalCode?: Maybe<Scalars['String']['output']>;
+};
+
+/**
+ * A delivery wilaya (managed in Settings → Livraison): the destination itself
+ * and its two delivery prices. A null price means that delivery mode is not
+ * offered in the wilaya; an inactive wilaya is hidden from customers.
+ */
+export type DeliveryWilaya = {
+  __typename?: 'DeliveryWilaya';
+  /** Offered to customers at all */
+  active: Scalars['Boolean']['output'];
+  /** Two-digit code */
+  code: Scalars['String']['output'];
+  communes: Array<DeliveryCommune>;
+  /** Home-delivery price in minor units (centimes), or null when not offered */
+  homePrice?: Maybe<Scalars['Int']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  nameAr: Scalars['String']['output'];
+  /** Courier-office pickup price in minor units (centimes), or null when not offered */
+  officePrice?: Maybe<Scalars['Int']['output']>;
+  /** Delivery-delay zone 1..4 */
+  shippingZone: Scalars['Int']['output'];
+};
 
 export type Discount = {
   __typename?: 'Discount';
@@ -3076,6 +3141,8 @@ export type Mutation = {
   createCustomerAddress: Address;
   /** Create a new CustomerGroup */
   createCustomerGroup: CustomerGroup;
+  createDeliveryCommune: DeliveryCommune;
+  createDeliveryWilaya: DeliveryWilaya;
   /** Creates a draft Order */
   createDraftOrder: Order;
   /** Create a new Facet */
@@ -3143,6 +3210,9 @@ export type Mutation = {
   deleteCustomerNote: DeletionResponse;
   /** Deletes Customers */
   deleteCustomers: Array<DeletionResponse>;
+  deleteDeliveryCommune: Scalars['Boolean']['output'];
+  /** Deletes the wilaya and its communes. Existing orders keep their address text. */
+  deleteDeliveryWilaya: Scalars['Boolean']['output'];
   /** Deletes a draft Order */
   deleteDraftOrder: DeletionResponse;
   /** Delete an existing Facet */
@@ -3218,7 +3288,13 @@ export type Mutation = {
    * be in the `Modifying` state.
    */
   modifyOrder: ModifyOrderResult;
-  /** Oscar plugin: guided order modification (see modifyOrderGuided in api-extensions.ts). */
+  /**
+   * Modify an unshipped order in one call: enters Modifying, applies the changes, settles the
+   * money side (COD authorization follows the new total; a lower total refunds against the
+   * existing payment; a higher total on a paid order goes to ArrangingAdditionalPayment) and
+   * returns to the original state. With dryRun: true nothing is persisted and the previewed
+   * order is returned.
+   */
   modifyOrderGuided: ModifyOrderResult;
   /** Move a Collection to a different parent or index */
   moveCollection: Collection;
@@ -3305,6 +3381,8 @@ export type Mutation = {
   /** Update an existing CustomerGroup */
   updateCustomerGroup: CustomerGroup;
   updateCustomerNote: HistoryEntry;
+  updateDeliveryCommune: DeliveryCommune;
+  updateDeliveryWilaya: DeliveryWilaya;
   /** Update an existing Facet */
   updateFacet: Facet;
   /** Update a single FacetValue */
@@ -3346,6 +3424,8 @@ export type Mutation = {
   updateTaxCategory: TaxCategory;
   /** Update an existing TaxRate */
   updateTaxRate: TaxRate;
+  /** Update delivery prices for one or more wilayas (bulk save of the price grid) */
+  updateWilayaShippingPrices: Array<DeliveryWilaya>;
   /** Update an existing Zone */
   updateZone: Zone;
 };
@@ -3527,6 +3607,16 @@ export type MutationCreateCustomerGroupArgs = {
 };
 
 
+export type MutationCreateDeliveryCommuneArgs = {
+  input: CreateDeliveryCommuneInput;
+};
+
+
+export type MutationCreateDeliveryWilayaArgs = {
+  input: CreateDeliveryWilayaInput;
+};
+
+
 export type MutationCreateFacetArgs = {
   input: CreateFacetInput;
 };
@@ -3694,6 +3784,16 @@ export type MutationDeleteCustomerNoteArgs = {
 
 export type MutationDeleteCustomersArgs = {
   ids: Array<Scalars['ID']['input']>;
+};
+
+
+export type MutationDeleteDeliveryCommuneArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteDeliveryWilayaArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -4120,6 +4220,16 @@ export type MutationUpdateCustomerNoteArgs = {
 };
 
 
+export type MutationUpdateDeliveryCommuneArgs = {
+  input: UpdateDeliveryCommuneInput;
+};
+
+
+export type MutationUpdateDeliveryWilayaArgs = {
+  input: UpdateDeliveryWilayaInput;
+};
+
+
 export type MutationUpdateFacetArgs = {
   input: UpdateFacetInput;
 };
@@ -4233,6 +4343,11 @@ export type MutationUpdateTaxCategoryArgs = {
 
 export type MutationUpdateTaxRateArgs = {
   input: UpdateTaxRateInput;
+};
+
+
+export type MutationUpdateWilayaShippingPricesArgs = {
+  input: Array<UpdateWilayaShippingPriceInput>;
 };
 
 
@@ -4385,7 +4500,7 @@ export type OrderAddress = {
   company?: Maybe<Scalars['String']['output']>;
   country?: Maybe<Scalars['String']['output']>;
   countryCode?: Maybe<Scalars['String']['output']>;
-  customFields?: Maybe<Scalars['JSON']['output']>;
+  customFields?: Maybe<AddressCustomFields>;
   fullName?: Maybe<Scalars['String']['output']>;
   phoneNumber?: Maybe<Scalars['String']['output']>;
   postalCode?: Maybe<Scalars['String']['output']>;
@@ -5572,6 +5687,8 @@ export type Query = {
   dashboardSalesTrend: Array<SalesTrendDataPoint>;
   /** Get top selling products */
   dashboardTopSellingProducts: Array<TopSellingProduct>;
+  /** Every delivery wilaya (active or not) with its communes, ordered by code */
+  deliveryWilayas: Array<DeliveryWilaya>;
   /** Returns a list of eligible shipping methods for the draft Order */
   eligibleShippingMethodsForDraftOrder: Array<ShippingMethodQuote>;
   /** Returns all configured EntityDuplicators. */
@@ -7054,6 +7171,11 @@ export type UpdateActiveAdministratorInput = {
   password?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UpdateAddressCustomFieldsInput = {
+  communeCode?: InputMaybe<Scalars['String']['input']>;
+  wilayaCode?: InputMaybe<Scalars['String']['input']>;
+};
+
 /**
  * Input used to update an Address.
  *
@@ -7065,7 +7187,7 @@ export type UpdateAddressInput = {
   city?: InputMaybe<Scalars['String']['input']>;
   company?: InputMaybe<Scalars['String']['input']>;
   countryCode?: InputMaybe<Scalars['String']['input']>;
-  customFields?: InputMaybe<Scalars['JSON']['input']>;
+  customFields?: InputMaybe<UpdateAddressCustomFieldsInput>;
   defaultBillingAddress?: InputMaybe<Scalars['Boolean']['input']>;
   defaultShippingAddress?: InputMaybe<Scalars['Boolean']['input']>;
   fullName?: InputMaybe<Scalars['String']['input']>;
@@ -7180,6 +7302,7 @@ export type UpdateCountryInput = {
 
 export type UpdateCustomerCustomFieldsInput = {
   adminNotes?: InputMaybe<Scalars['String']['input']>;
+  avatarId?: InputMaybe<Scalars['ID']['input']>;
   city?: InputMaybe<Scalars['String']['input']>;
   wilaya?: InputMaybe<Scalars['String']['input']>;
 };
@@ -7206,6 +7329,25 @@ export type UpdateCustomerNoteInput = {
 };
 
 export type UpdateCustomerResult = Customer | EmailAddressConflictError;
+
+export type UpdateDeliveryCommuneInput = {
+  active?: InputMaybe<Scalars['Boolean']['input']>;
+  id: Scalars['ID']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  nameAr?: InputMaybe<Scalars['String']['input']>;
+  postalCode?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Omitted fields are unchanged; an explicit null price stops offering that mode. */
+export type UpdateDeliveryWilayaInput = {
+  active?: InputMaybe<Scalars['Boolean']['input']>;
+  homePrice?: InputMaybe<Scalars['Int']['input']>;
+  id: Scalars['ID']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  nameAr?: InputMaybe<Scalars['String']['input']>;
+  officePrice?: InputMaybe<Scalars['Int']['input']>;
+  shippingZone?: InputMaybe<Scalars['Int']['input']>;
+};
 
 export type UpdateFacetInput = {
   code?: InputMaybe<Scalars['String']['input']>;
@@ -7239,6 +7381,7 @@ export type UpdateOrderAddressInput = {
   city?: InputMaybe<Scalars['String']['input']>;
   company?: InputMaybe<Scalars['String']['input']>;
   countryCode?: InputMaybe<Scalars['String']['input']>;
+  customFields?: InputMaybe<UpdateAddressCustomFieldsInput>;
   fullName?: InputMaybe<Scalars['String']['input']>;
   phoneNumber?: InputMaybe<Scalars['String']['input']>;
   postalCode?: InputMaybe<Scalars['String']['input']>;
@@ -7430,6 +7573,14 @@ export type UpdateTaxRateInput = {
   name?: InputMaybe<Scalars['String']['input']>;
   value?: InputMaybe<Scalars['Float']['input']>;
   zoneId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type UpdateWilayaShippingPriceInput = {
+  code: Scalars['String']['input'];
+  /** Home-delivery price in minor units (centimes); null to stop offering it */
+  homePrice?: InputMaybe<Scalars['Int']['input']>;
+  /** Courier-office pickup price in minor units (centimes); null to stop offering it */
+  officePrice?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type UpdateZoneInput = {
@@ -7933,6 +8084,85 @@ export type LowStockProductsQueryVariables = Exact<{
 
 
 export type LowStockProductsQuery = { __typename?: 'Query', lowStockProducts: Array<{ __typename?: 'Product', id: string, name: string, slug: string, variants: Array<{ __typename?: 'ProductVariant', id: string, sku: string, stockOnHand: number, customFields?: { __typename?: 'ProductVariantCustomFields', minStockAlert?: number | null } | null }>, translations: Array<{ __typename?: 'ProductTranslation', languageCode: LanguageCode, name: string }> }> };
+
+export type DeliveryCommuneFieldsFragment = { __typename?: 'DeliveryCommune', id: string, code: string, name: string, nameAr: string, postalCode?: string | null, active: boolean } & { ' $fragmentName'?: 'DeliveryCommuneFieldsFragment' };
+
+export type DeliveryWilayaFieldsFragment = { __typename?: 'DeliveryWilaya', id: string, code: string, name: string, nameAr: string, active: boolean, shippingZone: number, homePrice?: number | null, officePrice?: number | null, communes: Array<(
+    { __typename?: 'DeliveryCommune' }
+    & { ' $fragmentRefs'?: { 'DeliveryCommuneFieldsFragment': DeliveryCommuneFieldsFragment } }
+  )> } & { ' $fragmentName'?: 'DeliveryWilayaFieldsFragment' };
+
+export type DeliveryWilayasQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DeliveryWilayasQuery = { __typename?: 'Query', deliveryWilayas: Array<(
+    { __typename?: 'DeliveryWilaya' }
+    & { ' $fragmentRefs'?: { 'DeliveryWilayaFieldsFragment': DeliveryWilayaFieldsFragment } }
+  )> };
+
+export type UpdateWilayaShippingPricesMutationVariables = Exact<{
+  input: Array<UpdateWilayaShippingPriceInput> | UpdateWilayaShippingPriceInput;
+}>;
+
+
+export type UpdateWilayaShippingPricesMutation = { __typename?: 'Mutation', updateWilayaShippingPrices: Array<(
+    { __typename?: 'DeliveryWilaya' }
+    & { ' $fragmentRefs'?: { 'DeliveryWilayaFieldsFragment': DeliveryWilayaFieldsFragment } }
+  )> };
+
+export type CreateDeliveryWilayaMutationVariables = Exact<{
+  input: CreateDeliveryWilayaInput;
+}>;
+
+
+export type CreateDeliveryWilayaMutation = { __typename?: 'Mutation', createDeliveryWilaya: (
+    { __typename?: 'DeliveryWilaya' }
+    & { ' $fragmentRefs'?: { 'DeliveryWilayaFieldsFragment': DeliveryWilayaFieldsFragment } }
+  ) };
+
+export type UpdateDeliveryWilayaMutationVariables = Exact<{
+  input: UpdateDeliveryWilayaInput;
+}>;
+
+
+export type UpdateDeliveryWilayaMutation = { __typename?: 'Mutation', updateDeliveryWilaya: (
+    { __typename?: 'DeliveryWilaya' }
+    & { ' $fragmentRefs'?: { 'DeliveryWilayaFieldsFragment': DeliveryWilayaFieldsFragment } }
+  ) };
+
+export type DeleteDeliveryWilayaMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteDeliveryWilayaMutation = { __typename?: 'Mutation', deleteDeliveryWilaya: boolean };
+
+export type CreateDeliveryCommuneMutationVariables = Exact<{
+  input: CreateDeliveryCommuneInput;
+}>;
+
+
+export type CreateDeliveryCommuneMutation = { __typename?: 'Mutation', createDeliveryCommune: (
+    { __typename?: 'DeliveryCommune' }
+    & { ' $fragmentRefs'?: { 'DeliveryCommuneFieldsFragment': DeliveryCommuneFieldsFragment } }
+  ) };
+
+export type UpdateDeliveryCommuneMutationVariables = Exact<{
+  input: UpdateDeliveryCommuneInput;
+}>;
+
+
+export type UpdateDeliveryCommuneMutation = { __typename?: 'Mutation', updateDeliveryCommune: (
+    { __typename?: 'DeliveryCommune' }
+    & { ' $fragmentRefs'?: { 'DeliveryCommuneFieldsFragment': DeliveryCommuneFieldsFragment } }
+  ) };
+
+export type DeleteDeliveryCommuneMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteDeliveryCommuneMutation = { __typename?: 'Mutation', deleteDeliveryCommune: boolean };
 
 export type AdminFacetQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -8973,7 +9203,8 @@ export type MldjfdQueryVariables = Exact<{
 
 export type MldjfdQuery = { __typename?: 'Query', products: { __typename?: 'ProductList', items: Array<{ __typename?: 'Product', id: string, name: string }> } };
 
-
+export const DeliveryCommuneFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeliveryCommuneFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeliveryCommune"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"postalCode"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<DeliveryCommuneFieldsFragment, unknown>;
+export const DeliveryWilayaFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeliveryWilayaFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeliveryWilaya"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"shippingZone"}},{"kind":"Field","name":{"kind":"Name","value":"homePrice"}},{"kind":"Field","name":{"kind":"Name","value":"officePrice"}},{"kind":"Field","name":{"kind":"Name","value":"communes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeliveryCommuneFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeliveryCommuneFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeliveryCommune"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"postalCode"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<DeliveryWilayaFieldsFragment, unknown>;
 export const UpdateActiveAdministratorDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateActiveAdministrator"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateActiveAdministratorInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateActiveAdministrator"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"emailAddress"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"verified"}},{"kind":"Field","name":{"kind":"Name","value":"lastLogin"}},{"kind":"Field","name":{"kind":"Name","value":"roles"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<UpdateActiveAdministratorMutation, UpdateActiveAdministratorMutationVariables>;
 export const AdminAdministratorsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminAdministrators"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"AdministratorListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"administrators"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"emailAddress"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"verified"}},{"kind":"Field","name":{"kind":"Name","value":"lastLogin"}},{"kind":"Field","name":{"kind":"Name","value":"roles"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<AdminAdministratorsQuery, AdminAdministratorsQueryVariables>;
 export const AdminAdministratorDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminAdministrator"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"administrator"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}},{"kind":"Field","name":{"kind":"Name","value":"emailAddress"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"verified"}},{"kind":"Field","name":{"kind":"Name","value":"lastLogin"}},{"kind":"Field","name":{"kind":"Name","value":"roles"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}}]}}]}}]}}]}}]} as unknown as DocumentNode<AdminAdministratorQuery, AdminAdministratorQueryVariables>;
@@ -9037,6 +9268,14 @@ export const DashboardRecentProductsDocument = {"kind":"Document","definitions":
 export const OscarDashboardStatsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"OscarDashboardStats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"oscarDashboardStats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalOrders"}},{"kind":"Field","name":{"kind":"Name","value":"totalRevenue"}},{"kind":"Field","name":{"kind":"Name","value":"totalCustomers"}},{"kind":"Field","name":{"kind":"Name","value":"totalProducts"}},{"kind":"Field","name":{"kind":"Name","value":"pendingOrders"}},{"kind":"Field","name":{"kind":"Name","value":"lowStockProductsCount"}}]}}]}}]} as unknown as DocumentNode<OscarDashboardStatsQuery, OscarDashboardStatsQueryVariables>;
 export const RecentOrdersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"RecentOrders"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"OrderListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"orders"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"totalWithTax"}},{"kind":"Field","name":{"kind":"Name","value":"orderPlacedAt"}},{"kind":"Field","name":{"kind":"Name","value":"customer"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"firstName"}},{"kind":"Field","name":{"kind":"Name","value":"lastName"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"trackingNumber"}},{"kind":"Field","name":{"kind":"Name","value":"wilaya"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<RecentOrdersQuery, RecentOrdersQueryVariables>;
 export const LowStockProductsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"LowStockProducts"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"threshold"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"lowStockProducts"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"threshold"},"value":{"kind":"Variable","name":{"kind":"Name","value":"threshold"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"variants"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"stockOnHand"}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"minStockAlert"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"translations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"languageCode"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<LowStockProductsQuery, LowStockProductsQueryVariables>;
+export const DeliveryWilayasDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DeliveryWilayas"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deliveryWilayas"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeliveryWilayaFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeliveryCommuneFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeliveryCommune"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"postalCode"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeliveryWilayaFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeliveryWilaya"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"shippingZone"}},{"kind":"Field","name":{"kind":"Name","value":"homePrice"}},{"kind":"Field","name":{"kind":"Name","value":"officePrice"}},{"kind":"Field","name":{"kind":"Name","value":"communes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeliveryCommuneFields"}}]}}]}}]} as unknown as DocumentNode<DeliveryWilayasQuery, DeliveryWilayasQueryVariables>;
+export const UpdateWilayaShippingPricesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateWilayaShippingPrices"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateWilayaShippingPriceInput"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateWilayaShippingPrices"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeliveryWilayaFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeliveryCommuneFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeliveryCommune"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"postalCode"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeliveryWilayaFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeliveryWilaya"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"shippingZone"}},{"kind":"Field","name":{"kind":"Name","value":"homePrice"}},{"kind":"Field","name":{"kind":"Name","value":"officePrice"}},{"kind":"Field","name":{"kind":"Name","value":"communes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeliveryCommuneFields"}}]}}]}}]} as unknown as DocumentNode<UpdateWilayaShippingPricesMutation, UpdateWilayaShippingPricesMutationVariables>;
+export const CreateDeliveryWilayaDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateDeliveryWilaya"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateDeliveryWilayaInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createDeliveryWilaya"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeliveryWilayaFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeliveryCommuneFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeliveryCommune"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"postalCode"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeliveryWilayaFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeliveryWilaya"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"shippingZone"}},{"kind":"Field","name":{"kind":"Name","value":"homePrice"}},{"kind":"Field","name":{"kind":"Name","value":"officePrice"}},{"kind":"Field","name":{"kind":"Name","value":"communes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeliveryCommuneFields"}}]}}]}}]} as unknown as DocumentNode<CreateDeliveryWilayaMutation, CreateDeliveryWilayaMutationVariables>;
+export const UpdateDeliveryWilayaDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateDeliveryWilaya"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateDeliveryWilayaInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateDeliveryWilaya"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeliveryWilayaFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeliveryCommuneFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeliveryCommune"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"postalCode"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeliveryWilayaFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeliveryWilaya"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"shippingZone"}},{"kind":"Field","name":{"kind":"Name","value":"homePrice"}},{"kind":"Field","name":{"kind":"Name","value":"officePrice"}},{"kind":"Field","name":{"kind":"Name","value":"communes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeliveryCommuneFields"}}]}}]}}]} as unknown as DocumentNode<UpdateDeliveryWilayaMutation, UpdateDeliveryWilayaMutationVariables>;
+export const DeleteDeliveryWilayaDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteDeliveryWilaya"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteDeliveryWilaya"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeleteDeliveryWilayaMutation, DeleteDeliveryWilayaMutationVariables>;
+export const CreateDeliveryCommuneDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateDeliveryCommune"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateDeliveryCommuneInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createDeliveryCommune"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeliveryCommuneFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeliveryCommuneFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeliveryCommune"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"postalCode"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<CreateDeliveryCommuneMutation, CreateDeliveryCommuneMutationVariables>;
+export const UpdateDeliveryCommuneDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateDeliveryCommune"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateDeliveryCommuneInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateDeliveryCommune"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeliveryCommuneFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeliveryCommuneFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeliveryCommune"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"nameAr"}},{"kind":"Field","name":{"kind":"Name","value":"postalCode"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<UpdateDeliveryCommuneMutation, UpdateDeliveryCommuneMutationVariables>;
+export const DeleteDeliveryCommuneDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteDeliveryCommune"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteDeliveryCommune"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeleteDeliveryCommuneMutation, DeleteDeliveryCommuneMutationVariables>;
 export const AdminFacetDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminFacet"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"facet"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"isPrivate"}},{"kind":"Field","name":{"kind":"Name","value":"translations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"languageCode"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"values"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"translations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"languageCode"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"facet"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"colorHex"}}]}}]}}]}}]}}]} as unknown as DocumentNode<AdminFacetQuery, AdminFacetQueryVariables>;
 export const AdminFacetListDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminFacetList"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"options"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"FacetListOptions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"facets"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"options"},"value":{"kind":"Variable","name":{"kind":"Name","value":"options"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"isPrivate"}},{"kind":"Field","name":{"kind":"Name","value":"translations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"languageCode"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"values"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"translations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"languageCode"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"customFields"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"colorHex"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}}]}}]}}]} as unknown as DocumentNode<AdminFacetListQuery, AdminFacetListQueryVariables>;
 export const CreateFacetDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateFacet"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateFacetInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createFacet"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"isPrivate"}},{"kind":"Field","name":{"kind":"Name","value":"translations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"languageCode"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"values"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}}]}}]}}]} as unknown as DocumentNode<CreateFacetMutation, CreateFacetMutationVariables>;

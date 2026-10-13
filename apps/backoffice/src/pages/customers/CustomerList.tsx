@@ -30,69 +30,10 @@ import { formatDateTime, formatPrice } from '../../lib/utils';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
 import { CreateCustomerDialog } from './CustomerDialogs';
-
-const WILAYAS = [
-  'Adrar',
-  'Chlef',
-  'Laghouat',
-  'Oum El Bouaghi',
-  'Batna',
-  'Béjaïa',
-  'Biskra',
-  'Béchar',
-  'Blida',
-  'Bouira',
-  'Tamanrasset',
-  'Tébessa',
-  'Tlemcen',
-  'Tiaret',
-  'Tizi Ouzou',
-  'Alger',
-  'Djelfa',
-  'Jijel',
-  'Sétif',
-  'Saïda',
-  'Skikda',
-  'Sidi Bel Abbès',
-  'Annaba',
-  'Guelma',
-  'Constantine',
-  'Médéa',
-  'Mostaganem',
-  "M'Sila",
-  'Mascara',
-  'Ouargla',
-  'Oran',
-  'El Bayadh',
-  'Illizi',
-  'Bordj Bou Arréridj',
-  'Boumerdès',
-  'El Tarf',
-  'Tindouf',
-  'Tissemsilt',
-  'El Oued',
-  'Khenchela',
-  'Souk Ahras',
-  'Tipaza',
-  'Mila',
-  'Aïn Defla',
-  'Naâma',
-  'Aïn Témouchent',
-  'Ghardaïa',
-  'Relizane',
-  'Timimoun',
-  'Bordj Badji Mokhtar',
-  'Ouled Djellal',
-  'Béni Abbès',
-  'In Salah',
-  'In Guezzam',
-  'Touggourt',
-  'Djanet',
-  "El M'Ghair",
-  'El Meniaa',
-];
+import { useDeliveryWilayas } from '../../hooks/useDeliveryWilayas';
 
 export const CustomerList: React.FC = () => {
+  const { names: wilayaNames } = useDeliveryWilayas();
   const dispatch = useAppDispatch();
   const [searchTerm, setSearchTerm] = useState('');
   const [wilayaFilter, setWilayaFilter] = useState('');
@@ -257,7 +198,7 @@ export const CustomerList: React.FC = () => {
             className="px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none md:w-64"
           >
             <option value="">Toutes les wilayas</option>
-            {WILAYAS.map((w) => (
+            {wilayaNames.map((w) => (
               <option key={w} value={w}>
                 {w}
               </option>

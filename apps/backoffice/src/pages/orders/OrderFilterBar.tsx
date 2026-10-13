@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Search, X, SlidersHorizontal } from 'lucide-react';
-import { wilayas } from '@oscar/shared';
 import { useDebounce } from '../../hooks/useDebounce';
+import { useDeliveryWilayas } from '../../hooks/useDeliveryWilayas';
 import { cn } from '../../lib/utils';
 import { DATE_PRESETS, type OrderListState } from './order-list-params';
 
@@ -10,8 +10,6 @@ interface Props {
   onChange: (patch: Partial<OrderListState>) => void;
   onReset: () => void;
 }
-
-const WILAYA_NAMES = wilayas.map((w) => w.name).sort((a, b) => a.localeCompare(b, 'fr'));
 
 const controlCls =
   'h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/30';
@@ -36,6 +34,7 @@ function fmtDay(iso: string): string {
  * the only debounced one.
  */
 export const OrderFilterBar: React.FC<Props> = ({ state, onChange, onReset }) => {
+  const { names: wilayaNames } = useDeliveryWilayas();
   const [search, setSearch] = useState(state.q);
   const debounced = useDebounce(search.trim(), 300);
   const [showMore, setShowMore] = useState(!!(state.min || state.max));
@@ -106,7 +105,7 @@ export const OrderFilterBar: React.FC<Props> = ({ state, onChange, onReset }) =>
           className={cn(controlCls, 'lg:w-52')}
         >
           <option value="">Toutes les wilayas</option>
-          {WILAYA_NAMES.map((name) => (
+          {wilayaNames.map((name) => (
             <option key={name} value={name}>
               {name}
             </option>

@@ -11,6 +11,7 @@ import { Input } from '../../components/ui/Input';
 import { PermissionGate } from '../../components/auth/PermissionGate';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { addToast } from '../../store/slices/uiSlice';
+import { useDeliveryWilayas } from '../../hooks/useDeliveryWilayas';
 
 // ──────────────────────────────────────────────────────────────────────────
 // Create customer dialog
@@ -168,15 +169,6 @@ interface AddressDialogProps {
   onSuccess: () => void;
 }
 
-const ALGERIA_WILAYAS = [
-  'Adrar','Chlef','Laghouat','Oum El Bouaghi','Batna','Béjaïa','Biskra','Béchar','Blida','Bouira',
-  'Tamanrasset','Tébessa','Tlemcen','Tiaret','Tizi Ouzou','Alger','Djelfa','Jijel','Sétif','Saïda',
-  'Skikda','Sidi Bel Abbès','Annaba','Guelma','Constantine','Médéa','Mostaganem',"M'Sila",'Mascara',
-  'Ouargla','Oran','El Bayadh','Illizi','Bordj Bou Arréridj','Boumerdès','El Tarf','Tindouf',
-  'Tissemsilt','El Oued','Khenchela','Souk Ahras','Tipaza','Mila','Aïn Defla','Naâma','Aïn Témouchent',
-  'Ghardaïa','Relizane',
-];
-
 export const AddressDialog: React.FC<AddressDialogProps> = ({
   isOpen,
   onClose,
@@ -184,6 +176,7 @@ export const AddressDialog: React.FC<AddressDialogProps> = ({
   initial,
   onSuccess,
 }) => {
+  const { names: wilayaNames } = useDeliveryWilayas();
   const dispatch = useAppDispatch();
   const isEdit = !!initial?.id;
 
@@ -328,7 +321,7 @@ export const AddressDialog: React.FC<AddressDialogProps> = ({
             className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground"
           >
             <option value="">Sélectionner...</option>
-            {ALGERIA_WILAYAS.map((w) => (
+            {wilayaNames.map((w) => (
               <option key={w} value={w}>
                 {w}
               </option>
