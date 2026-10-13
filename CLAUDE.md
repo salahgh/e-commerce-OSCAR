@@ -64,7 +64,6 @@ pnpm --filter @oscar/backend reindex
 
 **`@oscar/shared`** — Pure TypeScript, zero runtime deps:
 - `colors.ts` — Color palette with multilingual names (EN/FR/AR), hex lookup, contrast utilities
-- `constants/wilayas.ts` — 69 Algerian wilayas with communes and delivery-delay zones (prices live in the backend, see below)
 - `constants/order-status.ts` — Order status labels and Tailwind color classes
 - `constants/payment.ts` — Payment method/status labels (CIB, Baridimob, COD)
 - `constants/sizes.ts` — Available sizes, colors, user roles
@@ -113,7 +112,7 @@ Custom business logic lives in `apps/backend/src/plugins/oscar-plugin/`:
 - `api/` — Custom GraphQL resolvers and schema extensions
 - `services/` — Business logic services
 - `payment/` — Algerian payment handlers (CIB, Baridimob)
-- `shipping/` — Home / office delivery: two shipping methods (`home-delivery`, `office-delivery`) created on boot by `shipping-setup.service.ts`, priced per wilaya from the `wilaya_shipping` table by `wilaya-shipping-calculator` (its `mode` argument picks the column). Prices are edited in the back-office (Settings → Livraison); an empty price hides that mode in the wilaya. Pure matching/quote rules live in `wilaya-pricing.ts` (unit tests: `pnpm --filter @oscar/backend test:unit`)
+- `shipping/` — Home / office delivery: two shipping methods (`home-delivery`, `office-delivery`) created on boot by `shipping-setup.service.ts`, priced per wilaya from the `wilaya_shipping` table by `wilaya-shipping-calculator` (its `mode` argument picks the column). Destinations (wilayas + `wilaya_commune` rows, on/off switch, delay zone) and prices are managed in the back-office (Settings → Livraison); an empty price hides that mode in the wilaya, an inactive wilaya offers nothing and is hidden from storefronts. Addresses carry `customFields.wilayaCode/communeCode` so quoting survives renames. Pure matching/quote rules live in `wilaya-pricing.ts` (unit tests: `pnpm --filter @oscar/backend test:unit`)
 - `entities/` — Custom TypeORM entities extending Vendure
 
 ### Authentication
@@ -124,7 +123,7 @@ Custom business logic lives in `apps/backend/src/plugins/oscar-plugin/`:
 
 ### Algerian Market Specifics
 - Payment methods: CIB (inter-bank), Baridimob (postal)
-- Shipping: Algerian wilayas (provinces) as zones — data in `@oscar/shared`
+- Shipping: Algerian wilayas (provinces) and communes are **delivery destinations managed in the back-office** (Settings → Livraison) and served to storefronts by the shop-api `deliveryDestinations` query; there is no static list in the code
 - Currency: DZD (Algerian Dinar) — formatter in `@oscar/shared`
 - Primary language: French (default), with full Arabic RTL support
 

@@ -49,8 +49,10 @@ the constant (the migration is the durable artefact, like migration 1788).
 
 ## Backend rules (`wilaya-pricing.ts`, unit-tested)
 
-- `findWilayaRow(rows, address)` matches, in order: `customFields.wilayaCode` → `province` as a bare
-  code → `province` as French or Arabic name (existing normalisation).
+- `findWilayaRow(rows, address)` matches, in order: `province` as a bare code → `province` as French
+  or Arabic name (existing normalisation) → `customFields.wilayaCode`. The shipped-to text wins whenever it
+  still names a wilaya, so a client cannot pair a cheap code with an expensive destination; the code is only
+  the fallback for a wilaya renamed after the address was saved.
 - `quoteDelivery` returns `undefined` for both modes when the matched row is `active = false`.
 - Unknown wilaya (no row at all) keeps today's fallback: home at 500 DZD, no office. This only
   serves legacy addresses whose name no longer matches; storefronts can no longer produce one.
