@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ChevronDown, ArrowLeft, Check } from 'lucide-react';
-import { wilayas, getShippingZone, placeholderEmailForPhone } from '@oscar/shared';
+import { placeholderEmailForPhone } from '@oscar/shared';
 import { formatDzdTotal } from '@/lib/format/price';
 import {
   useSetCustomerForOrderMutation,
@@ -17,6 +17,7 @@ import {
   useAddPaymentToOrderMutation,
 } from '@oscar/graphql-shop/generated';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDeliveryDestinations } from '@/hooks/useDeliveryDestinations';
 import { useCart } from '@/contexts/CartContext';
 import { useRouter, Link } from '@/i18n/routing';
 import { Alert, Button } from '@/components/ui';
@@ -26,9 +27,13 @@ import { trackInitiateCheckout } from '@/lib/analytics';
 const inputCls =
   'w-full rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-start text-16 text-accent shadow-sm placeholder:text-content-subtle focus:border-accent focus:outline-none';
 
-// Localized delivery-delay message per shared shipping zone. The shared
-// `getShippingDelay` helper is French-only, so it is deliberately not used here.
-const DELAY_KEY = { 1: 'delayZone1', 2: 'delayZone2', 3: 'delayZone3', 4: 'delayZone4' } as const;
+// Localized delivery-delay message per delivery zone (set per wilaya in the back-office).
+const DELAY_KEY: Record<number, 'delayZone1' | 'delayZone2' | 'delayZone3' | 'delayZone4'> = {
+  1: 'delayZone1',
+  2: 'delayZone2',
+  3: 'delayZone3',
+  4: 'delayZone4',
+};
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
@@ -156,6 +161,8 @@ export default function CheckoutPage() {
     }
   }, [customer]);
 
+  // Destinations are managed in the back-office; an inactive wilaya is simply absent.
+  const { destinations: wilayas, loading: destinationsLoading } = useDeliveryDestinations();
   const selectedWilaya = wilayas.find((w) => w.code === addr.wilayaCode);
   const communes = selectedWilaya?.communes ?? [];
   const name = (x: { name: string; nameAr: string }) => (isAr ? x.nameAr : x.name);
@@ -173,6 +180,8 @@ export default function CheckoutPage() {
       postalCode: commune?.postalCode || undefined,
       countryCode: 'DZ',
       phoneNumber: addr.phoneNumber,
+      // Codes survive a rename of the destination in the back-office.
+      customFields: { wilayaCode: addr.wilayaCode, communeCode: addr.communeCode || null },
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addr, communes, selectedWilaya]);
@@ -398,9 +407,10 @@ export default function CheckoutPage() {
                   <select
                     className={cn(inputCls, 'appearance-none pe-9')}
                     value={addr.wilayaCode}
+                    disabled={destinationsLoading}
                     onChange={(e) => setAddr((a) => ({ ...a, wilayaCode: e.target.value, communeCode: '' }))}
                   >
-                    <option value="">{tAddr('selectWilaya')}</option>
+                    <option value="">{destinationsLoading ? '…' : tAddr('selectWilaya')}</option>
                     {wilayas.map((w) => (
                       <option key={w.code} value={w.code}>
                         {w.code} — {name(w)}
@@ -453,7 +463,7 @@ export default function CheckoutPage() {
             )}
             {selectedWilaya && (
               <p className="text-start text-14 text-content-muted">
-                {tShip('deliveryEstimate', { delay: tShip(DELAY_KEY[getShippingZone(selectedWilaya.code)]) })}
+                {tShip('deliveryEstimate', { delay: tShip(DELAY_KEY[selectedWilaya.shippingZone] ?? 'delayZone3') })}
               </p>
             )}
           </Section>

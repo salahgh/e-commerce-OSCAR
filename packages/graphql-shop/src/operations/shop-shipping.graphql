@@ -1,0 +1,17 @@
+# Vendure Shop API - Delivery destinations (oscar-plugin extension)
+# Active wilayas and communes, managed in the back-office; drives the
+# checkout / address-book dropdowns and the delivery-delay estimate.
+query DeliveryDestinations {
+  deliveryDestinations {
+    code
+    name
+    nameAr
+    shippingZone
+    communes {
+      code
+      name
+      nameAr
+      postalCode
+    }
+  }
+}

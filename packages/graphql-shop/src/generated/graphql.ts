@@ -56,7 +56,7 @@ export type Address = Node & {
   company?: Maybe<Scalars["String"]["output"]>;
   country: Country;
   createdAt: Scalars["DateTime"]["output"];
-  customFields?: Maybe<Scalars["JSON"]["output"]>;
+  customFields?: Maybe<AddressCustomFields>;
   defaultBillingAddress?: Maybe<Scalars["Boolean"]["output"]>;
   defaultShippingAddress?: Maybe<Scalars["Boolean"]["output"]>;
   fullName?: Maybe<Scalars["String"]["output"]>;
@@ -67,6 +67,12 @@ export type Address = Node & {
   streetLine1: Scalars["String"]["output"];
   streetLine2?: Maybe<Scalars["String"]["output"]>;
   updatedAt: Scalars["DateTime"]["output"];
+};
+
+export type AddressCustomFields = {
+  __typename?: "AddressCustomFields";
+  communeCode?: Maybe<Scalars["String"]["output"]>;
+  wilayaCode?: Maybe<Scalars["String"]["output"]>;
 };
 
 export type Adjustment = {
@@ -448,6 +454,11 @@ export type CouponCodeLimitError = ErrorResult & {
   message: Scalars["String"]["output"];
 };
 
+export type CreateAddressCustomFieldsInput = {
+  communeCode?: InputMaybe<Scalars["String"]["input"]>;
+  wilayaCode?: InputMaybe<Scalars["String"]["input"]>;
+};
+
 /**
  * Input used to create an Address.
  *
@@ -459,7 +470,7 @@ export type CreateAddressInput = {
   city?: InputMaybe<Scalars["String"]["input"]>;
   company?: InputMaybe<Scalars["String"]["input"]>;
   countryCode: Scalars["String"]["input"];
-  customFields?: InputMaybe<Scalars["JSON"]["input"]>;
+  customFields?: InputMaybe<CreateAddressCustomFieldsInput>;
   defaultBillingAddress?: InputMaybe<Scalars["Boolean"]["input"]>;
   defaultShippingAddress?: InputMaybe<Scalars["Boolean"]["input"]>;
   fullName?: InputMaybe<Scalars["String"]["input"]>;
@@ -1014,6 +1025,25 @@ export enum DeletionResult {
   /** Deletion did not take place, reason given in message */
   NotDeleted = "NOT_DELETED",
 }
+
+/** A wilaya customers can be delivered to, with the communes they can pick. */
+export type DeliveryDestination = {
+  __typename?: "DeliveryDestination";
+  code: Scalars["String"]["output"];
+  communes: Array<DeliveryDestinationCommune>;
+  name: Scalars["String"]["output"];
+  nameAr: Scalars["String"]["output"];
+  /** Delivery-delay zone 1..4 (storefronts map it to a localized estimate) */
+  shippingZone: Scalars["Int"]["output"];
+};
+
+export type DeliveryDestinationCommune = {
+  __typename?: "DeliveryDestinationCommune";
+  code: Scalars["String"]["output"];
+  name: Scalars["String"]["output"];
+  nameAr: Scalars["String"]["output"];
+  postalCode?: Maybe<Scalars["String"]["output"]>;
+};
 
 export type Discount = {
   __typename?: "Discount";
@@ -2226,7 +2256,7 @@ export type OrderAddress = {
   company?: Maybe<Scalars["String"]["output"]>;
   country?: Maybe<Scalars["String"]["output"]>;
   countryCode?: Maybe<Scalars["String"]["output"]>;
-  customFields?: Maybe<Scalars["JSON"]["output"]>;
+  customFields?: Maybe<AddressCustomFields>;
   fullName?: Maybe<Scalars["String"]["output"]>;
   phoneNumber?: Maybe<Scalars["String"]["output"]>;
   postalCode?: Maybe<Scalars["String"]["output"]>;
@@ -3110,6 +3140,11 @@ export type Query = {
   collection?: Maybe<Collection>;
   /** A list of Collections available to the shop */
   collections: CollectionList;
+  /**
+   * Active delivery wilayas with their active communes, ordered by code.
+   * Managed in the back-office; drives the address forms.
+   */
+  deliveryDestinations: Array<DeliveryDestination>;
   /** Returns a list of payment methods and their eligibility based on the current active Order */
   eligiblePaymentMethods: Array<PaymentMethodQuote>;
   /** Returns a list of eligible shipping methods based on the current active Order */
@@ -3679,6 +3714,11 @@ export type TextStructFieldConfig = StructField & {
 
 export type TransitionOrderToStateResult = Order | OrderStateTransitionError;
 
+export type UpdateAddressCustomFieldsInput = {
+  communeCode?: InputMaybe<Scalars["String"]["input"]>;
+  wilayaCode?: InputMaybe<Scalars["String"]["input"]>;
+};
+
 /**
  * Input used to update an Address.
  *
@@ -3690,7 +3730,7 @@ export type UpdateAddressInput = {
   city?: InputMaybe<Scalars["String"]["input"]>;
   company?: InputMaybe<Scalars["String"]["input"]>;
   countryCode?: InputMaybe<Scalars["String"]["input"]>;
-  customFields?: InputMaybe<Scalars["JSON"]["input"]>;
+  customFields?: InputMaybe<UpdateAddressCustomFieldsInput>;
   defaultBillingAddress?: InputMaybe<Scalars["Boolean"]["input"]>;
   defaultShippingAddress?: InputMaybe<Scalars["Boolean"]["input"]>;
   fullName?: InputMaybe<Scalars["String"]["input"]>;
@@ -7922,6 +7962,28 @@ export type GetSiteSettingsQuery = {
       }> | null;
     } | null;
   };
+};
+
+export type DeliveryDestinationsQueryVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type DeliveryDestinationsQuery = {
+  __typename?: "Query";
+  deliveryDestinations: Array<{
+    __typename?: "DeliveryDestination";
+    code: string;
+    name: string;
+    nameAr: string;
+    shippingZone: number;
+    communes: Array<{
+      __typename?: "DeliveryDestinationCommune";
+      code: string;
+      name: string;
+      nameAr: string;
+      postalCode?: string | null;
+    }>;
+  }>;
 };
 
 export const CurrentUserFieldsFragmentDoc = gql`
@@ -12590,4 +12652,111 @@ export type GetSiteSettingsSuspenseQueryHookResult = ReturnType<
 export type GetSiteSettingsQueryResult = Apollo.QueryResult<
   GetSiteSettingsQuery,
   GetSiteSettingsQueryVariables
+>;
+export const DeliveryDestinationsDocument = gql`
+  query DeliveryDestinations {
+    deliveryDestinations {
+      code
+      name
+      nameAr
+      shippingZone
+      communes {
+        code
+        name
+        nameAr
+        postalCode
+      }
+    }
+  }
+`;
+
+/**
+ * __useDeliveryDestinationsQuery__
+ *
+ * To run a query within a React component, call `useDeliveryDestinationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDeliveryDestinationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDeliveryDestinationsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useDeliveryDestinationsQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    DeliveryDestinationsQuery,
+    DeliveryDestinationsQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<
+    DeliveryDestinationsQuery,
+    DeliveryDestinationsQueryVariables
+  >(DeliveryDestinationsDocument, options);
+}
+export function useDeliveryDestinationsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    DeliveryDestinationsQuery,
+    DeliveryDestinationsQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<
+    DeliveryDestinationsQuery,
+    DeliveryDestinationsQueryVariables
+  >(DeliveryDestinationsDocument, options);
+}
+// @ts-ignore
+export function useDeliveryDestinationsSuspenseQuery(
+  baseOptions?: Apollo.SuspenseQueryHookOptions<
+    DeliveryDestinationsQuery,
+    DeliveryDestinationsQueryVariables
+  >,
+): Apollo.UseSuspenseQueryResult<
+  DeliveryDestinationsQuery,
+  DeliveryDestinationsQueryVariables
+>;
+export function useDeliveryDestinationsSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<
+        DeliveryDestinationsQuery,
+        DeliveryDestinationsQueryVariables
+      >,
+): Apollo.UseSuspenseQueryResult<
+  DeliveryDestinationsQuery | undefined,
+  DeliveryDestinationsQueryVariables
+>;
+export function useDeliveryDestinationsSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<
+        DeliveryDestinationsQuery,
+        DeliveryDestinationsQueryVariables
+      >,
+) {
+  const options =
+    baseOptions === Apollo.skipToken
+      ? baseOptions
+      : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<
+    DeliveryDestinationsQuery,
+    DeliveryDestinationsQueryVariables
+  >(DeliveryDestinationsDocument, options);
+}
+export type DeliveryDestinationsQueryHookResult = ReturnType<
+  typeof useDeliveryDestinationsQuery
+>;
+export type DeliveryDestinationsLazyQueryHookResult = ReturnType<
+  typeof useDeliveryDestinationsLazyQuery
+>;
+export type DeliveryDestinationsSuspenseQueryHookResult = ReturnType<
+  typeof useDeliveryDestinationsSuspenseQuery
+>;
+export type DeliveryDestinationsQueryResult = Apollo.QueryResult<
+  DeliveryDestinationsQuery,
+  DeliveryDestinationsQueryVariables
 >;
