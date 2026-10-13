@@ -22,6 +22,8 @@ import { cn } from '@/lib/utils/cn';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { productSchema, breadcrumbSchema } from '@/lib/seo/schema';
 import { trackViewContent } from '@/lib/analytics';
+import { ProductGallery } from '@/components/product/ProductGallery';
+import { gallerySlides } from '@/lib/catalog/gallery-slides';
 import {
   optionGroupsOf,
   initialSelections,
@@ -82,7 +84,6 @@ export default function ProductPage() {
 
   const [quantity, setQuantity] = React.useState(1);
   const [selections, setSelections] = React.useState<OptionSelections>({});
-  const [activeImage, setActiveImage] = React.useState(0);
   const [detailsOpen, setDetailsOpen] = React.useState(true);
 
   const product = data?.product;
@@ -118,6 +119,7 @@ export default function ProductPage() {
 
   const variants = product.variants;
   const images = product.assets.length > 0 ? product.assets : product.featuredAsset ? [product.featuredAsset] : [];
+  const slides = gallerySlides(images, product.name);
 
   const selectedVariant = matchVariant(variants, selections) ?? variants[0];
 
@@ -173,45 +175,8 @@ export default function ProductPage() {
       <div className="mx-auto flex max-w-[1392px] flex-col gap-12">
         {/* Detail row: gallery (right in RTL) + info (left in RTL) */}
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-          {/* Gallery */}
-          <div className="relative w-full lg:w-[755px]">
-            {/* Every photo gets a thumbnail. The column is absolutely positioned so the main image alone sets the
-                gallery height; when the thumbnails don't fit, the column scrolls instead of stretching the row. */}
-            {images.length > 1 && (
-              <div className="absolute inset-y-0 start-0 flex w-[88px] flex-col gap-4 overflow-y-auto sm:w-[126px] lg:gap-8">
-                {images.map((img, i) => (
-                  <button
-                    key={img.id}
-                    type="button"
-                    onClick={() => setActiveImage(i)}
-                    aria-label={t('viewLabel', { n: i + 1 })}
-                    className={cn(
-                      'relative aspect-[126/140] shrink-0 overflow-hidden rounded-[2px] border bg-bg-muted',
-                      i === activeImage ? 'border-accent' : 'border-transparent',
-                    )}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.preview} alt="" className="absolute inset-0 h-full w-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
-            <div
-              className={cn(
-                'relative aspect-[606/714] overflow-hidden rounded-[2px] bg-bg-muted lg:h-[714px] lg:aspect-auto',
-                images.length > 1 && 'ms-[111px] sm:ms-[149px]',
-              )}
-            >
-              {images[activeImage] && (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={images[activeImage].preview}
-                  alt={product.name}
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-              )}
-            </div>
-          </div>
+          {/* Gallery: slider + thumbnails + fullscreen zoom */}
+          <ProductGallery slides={slides} />
 
           {/* Info */}
           <div className="flex w-full flex-col gap-9 lg:w-[557px]">
