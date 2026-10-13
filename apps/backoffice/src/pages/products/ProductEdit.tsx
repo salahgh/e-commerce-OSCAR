@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
-import { assignmentPlan, flattenTree } from '../../lib/collection-filters';
+import { assignmentPlan } from '../../lib/collection-filters';
+import { CategoryPicker } from '../../components/collections/CategoryPicker';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import {
@@ -933,43 +934,11 @@ export const ProductEdit: React.FC = () => {
             Cocher une sous-catégorie ajoute aussi le produit à ses catégories parentes, sinon il
             n'y apparaîtrait pas.
           </p>
-          {flattenTree(allCollections).map(({ depth, collection }: { depth: number; collection: any }) => (
-            <label
-              key={collection.id}
-              style={{ marginInlineStart: depth * 24 }}
-              className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
-                selectedCollections.includes(collection.id)
-                  ? 'border-primary bg-primary/10'
-                  : 'border-border hover:border-muted-foreground'
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={selectedCollections.includes(collection.id)}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedCollections([...selectedCollections, collection.id]);
-                  } else {
-                    setSelectedCollections(
-                      selectedCollections.filter((cid) => cid !== collection.id)
-                    );
-                  }
-                }}
-                className="h-5 w-5 text-primary border-border rounded bg-card"
-              />
-              <div className="flex items-center gap-2 min-w-0">
-                <p className="font-medium text-foreground truncate">{collection.name}</p>
-                {collection.slug && (
-                  <p className="text-xs text-muted-foreground truncate">/{collection.slug}</p>
-                )}
-                {collection.isPrivate && (
-                  <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-500">
-                    privée
-                  </span>
-                )}
-              </div>
-            </label>
-          ))}
+          <CategoryPicker
+            collections={allCollections}
+            selected={selectedCollections}
+            onChange={setSelectedCollections}
+          />
         </div>
       )}
     </div>
