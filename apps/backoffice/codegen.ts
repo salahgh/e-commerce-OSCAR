@@ -7,6 +7,8 @@ const config: CodegenConfig = {
   generates: {
     './src/graphql/generated/': {
       preset: 'client',
+      // Plain result types: components read fragment fields directly (no useFragment).
+      presetConfig: { fragmentMasking: false },
       config: {
         useTypeImports: true,
       },

@@ -579,7 +579,9 @@ export const WilayaShippingSettings: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-8" />
+                <TableHead className="w-8">
+                  <span className="sr-only">Communes</span>
+                </TableHead>
                 <TableHead className="w-16">Code</TableHead>
                 <TableHead>Wilaya</TableHead>
                 <TableHead className="w-20 text-center">Active</TableHead>
@@ -589,7 +591,9 @@ export const WilayaShippingSettings: React.FC = () => {
                     {label}
                   </TableHead>
                 ))}
-                <TableHead className="w-20" />
+                <TableHead className="w-20">
+                  <span className="sr-only">Actions</span>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

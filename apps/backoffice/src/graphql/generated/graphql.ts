@@ -8085,50 +8085,35 @@ export type LowStockProductsQueryVariables = Exact<{
 
 export type LowStockProductsQuery = { __typename?: 'Query', lowStockProducts: Array<{ __typename?: 'Product', id: string, name: string, slug: string, variants: Array<{ __typename?: 'ProductVariant', id: string, sku: string, stockOnHand: number, customFields?: { __typename?: 'ProductVariantCustomFields', minStockAlert?: number | null } | null }>, translations: Array<{ __typename?: 'ProductTranslation', languageCode: LanguageCode, name: string }> }> };
 
-export type DeliveryCommuneFieldsFragment = { __typename?: 'DeliveryCommune', id: string, code: string, name: string, nameAr: string, postalCode?: string | null, active: boolean } & { ' $fragmentName'?: 'DeliveryCommuneFieldsFragment' };
+export type DeliveryCommuneFieldsFragment = { __typename?: 'DeliveryCommune', id: string, code: string, name: string, nameAr: string, postalCode?: string | null, active: boolean };
 
-export type DeliveryWilayaFieldsFragment = { __typename?: 'DeliveryWilaya', id: string, code: string, name: string, nameAr: string, active: boolean, shippingZone: number, homePrice?: number | null, officePrice?: number | null, communes: Array<(
-    { __typename?: 'DeliveryCommune' }
-    & { ' $fragmentRefs'?: { 'DeliveryCommuneFieldsFragment': DeliveryCommuneFieldsFragment } }
-  )> } & { ' $fragmentName'?: 'DeliveryWilayaFieldsFragment' };
+export type DeliveryWilayaFieldsFragment = { __typename?: 'DeliveryWilaya', id: string, code: string, name: string, nameAr: string, active: boolean, shippingZone: number, homePrice?: number | null, officePrice?: number | null, communes: Array<{ __typename?: 'DeliveryCommune', id: string, code: string, name: string, nameAr: string, postalCode?: string | null, active: boolean }> };
 
 export type DeliveryWilayasQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DeliveryWilayasQuery = { __typename?: 'Query', deliveryWilayas: Array<(
-    { __typename?: 'DeliveryWilaya' }
-    & { ' $fragmentRefs'?: { 'DeliveryWilayaFieldsFragment': DeliveryWilayaFieldsFragment } }
-  )> };
+export type DeliveryWilayasQuery = { __typename?: 'Query', deliveryWilayas: Array<{ __typename?: 'DeliveryWilaya', id: string, code: string, name: string, nameAr: string, active: boolean, shippingZone: number, homePrice?: number | null, officePrice?: number | null, communes: Array<{ __typename?: 'DeliveryCommune', id: string, code: string, name: string, nameAr: string, postalCode?: string | null, active: boolean }> }> };
 
 export type UpdateWilayaShippingPricesMutationVariables = Exact<{
   input: Array<UpdateWilayaShippingPriceInput> | UpdateWilayaShippingPriceInput;
 }>;
 
 
-export type UpdateWilayaShippingPricesMutation = { __typename?: 'Mutation', updateWilayaShippingPrices: Array<(
-    { __typename?: 'DeliveryWilaya' }
-    & { ' $fragmentRefs'?: { 'DeliveryWilayaFieldsFragment': DeliveryWilayaFieldsFragment } }
-  )> };
+export type UpdateWilayaShippingPricesMutation = { __typename?: 'Mutation', updateWilayaShippingPrices: Array<{ __typename?: 'DeliveryWilaya', id: string, code: string, name: string, nameAr: string, active: boolean, shippingZone: number, homePrice?: number | null, officePrice?: number | null, communes: Array<{ __typename?: 'DeliveryCommune', id: string, code: string, name: string, nameAr: string, postalCode?: string | null, active: boolean }> }> };
 
 export type CreateDeliveryWilayaMutationVariables = Exact<{
   input: CreateDeliveryWilayaInput;
 }>;
 
 
-export type CreateDeliveryWilayaMutation = { __typename?: 'Mutation', createDeliveryWilaya: (
-    { __typename?: 'DeliveryWilaya' }
-    & { ' $fragmentRefs'?: { 'DeliveryWilayaFieldsFragment': DeliveryWilayaFieldsFragment } }
-  ) };
+export type CreateDeliveryWilayaMutation = { __typename?: 'Mutation', createDeliveryWilaya: { __typename?: 'DeliveryWilaya', id: string, code: string, name: string, nameAr: string, active: boolean, shippingZone: number, homePrice?: number | null, officePrice?: number | null, communes: Array<{ __typename?: 'DeliveryCommune', id: string, code: string, name: string, nameAr: string, postalCode?: string | null, active: boolean }> } };
 
 export type UpdateDeliveryWilayaMutationVariables = Exact<{
   input: UpdateDeliveryWilayaInput;
 }>;
 
 
-export type UpdateDeliveryWilayaMutation = { __typename?: 'Mutation', updateDeliveryWilaya: (
-    { __typename?: 'DeliveryWilaya' }
-    & { ' $fragmentRefs'?: { 'DeliveryWilayaFieldsFragment': DeliveryWilayaFieldsFragment } }
-  ) };
+export type UpdateDeliveryWilayaMutation = { __typename?: 'Mutation', updateDeliveryWilaya: { __typename?: 'DeliveryWilaya', id: string, code: string, name: string, nameAr: string, active: boolean, shippingZone: number, homePrice?: number | null, officePrice?: number | null, communes: Array<{ __typename?: 'DeliveryCommune', id: string, code: string, name: string, nameAr: string, postalCode?: string | null, active: boolean }> } };
 
 export type DeleteDeliveryWilayaMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -8142,20 +8127,14 @@ export type CreateDeliveryCommuneMutationVariables = Exact<{
 }>;
 
 
-export type CreateDeliveryCommuneMutation = { __typename?: 'Mutation', createDeliveryCommune: (
-    { __typename?: 'DeliveryCommune' }
-    & { ' $fragmentRefs'?: { 'DeliveryCommuneFieldsFragment': DeliveryCommuneFieldsFragment } }
-  ) };
+export type CreateDeliveryCommuneMutation = { __typename?: 'Mutation', createDeliveryCommune: { __typename?: 'DeliveryCommune', id: string, code: string, name: string, nameAr: string, postalCode?: string | null, active: boolean } };
 
 export type UpdateDeliveryCommuneMutationVariables = Exact<{
   input: UpdateDeliveryCommuneInput;
 }>;
 
 
-export type UpdateDeliveryCommuneMutation = { __typename?: 'Mutation', updateDeliveryCommune: (
-    { __typename?: 'DeliveryCommune' }
-    & { ' $fragmentRefs'?: { 'DeliveryCommuneFieldsFragment': DeliveryCommuneFieldsFragment } }
-  ) };
+export type UpdateDeliveryCommuneMutation = { __typename?: 'Mutation', updateDeliveryCommune: { __typename?: 'DeliveryCommune', id: string, code: string, name: string, nameAr: string, postalCode?: string | null, active: boolean } };
 
 export type DeleteDeliveryCommuneMutationVariables = Exact<{
   id: Scalars['ID']['input'];
