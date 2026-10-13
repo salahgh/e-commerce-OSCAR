@@ -52,7 +52,7 @@ export type Address = Node & {
   company?: Maybe<Scalars['String']['output']>;
   country: Country;
   createdAt: Scalars['DateTime']['output'];
-  customFields?: Maybe<Scalars['JSON']['output']>;
+  customFields?: Maybe<AddressCustomFields>;
   defaultBillingAddress?: Maybe<Scalars['Boolean']['output']>;
   defaultShippingAddress?: Maybe<Scalars['Boolean']['output']>;
   fullName?: Maybe<Scalars['String']['output']>;
@@ -63,6 +63,12 @@ export type Address = Node & {
   streetLine1: Scalars['String']['output'];
   streetLine2?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
+};
+
+export type AddressCustomFields = {
+  __typename?: 'AddressCustomFields';
+  communeCode?: Maybe<Scalars['String']['output']>;
+  wilayaCode?: Maybe<Scalars['String']['output']>;
 };
 
 export type Adjustment = {
@@ -182,7 +188,7 @@ export type Channel = Node & {
   createdAt: Scalars['DateTime']['output'];
   /** @deprecated Use defaultCurrencyCode instead */
   currencyCode: CurrencyCode;
-  customFields?: Maybe<Scalars['JSON']['output']>;
+  customFields?: Maybe<ChannelCustomFields>;
   defaultCurrencyCode: CurrencyCode;
   defaultLanguageCode: LanguageCode;
   defaultShippingZone?: Maybe<Zone>;
@@ -196,6 +202,38 @@ export type Channel = Node & {
   /** Not yet used - will be implemented in a future release. */
   trackInventory?: Maybe<Scalars['Boolean']['output']>;
   updatedAt: Scalars['DateTime']['output'];
+};
+
+export type ChannelCustomFields = {
+  __typename?: 'ChannelCustomFields';
+  appAppStore?: Maybe<Scalars['String']['output']>;
+  appGooglePlay?: Maybe<Scalars['String']['output']>;
+  bannerImages?: Maybe<Array<Asset>>;
+  contactEmail?: Maybe<Scalars['String']['output']>;
+  contactPhone?: Maybe<Scalars['String']['output']>;
+  copyrightTextAr?: Maybe<Scalars['String']['output']>;
+  copyrightTextEn?: Maybe<Scalars['String']['output']>;
+  copyrightTextFr?: Maybe<Scalars['String']['output']>;
+  footerAddressAr?: Maybe<Scalars['String']['output']>;
+  footerAddressEn?: Maybe<Scalars['String']['output']>;
+  footerAddressFr?: Maybe<Scalars['String']['output']>;
+  freeShippingThreshold?: Maybe<Scalars['Int']['output']>;
+  heroImages?: Maybe<Array<Asset>>;
+  promoTextAr?: Maybe<Scalars['String']['output']>;
+  promoTextEn?: Maybe<Scalars['String']['output']>;
+  promoTextFr?: Maybe<Scalars['String']['output']>;
+  reviewImages?: Maybe<Array<Asset>>;
+  reviewsSubtitleAr?: Maybe<Scalars['String']['output']>;
+  reviewsSubtitleEn?: Maybe<Scalars['String']['output']>;
+  reviewsSubtitleFr?: Maybe<Scalars['String']['output']>;
+  reviewsTitleAr?: Maybe<Scalars['String']['output']>;
+  reviewsTitleEn?: Maybe<Scalars['String']['output']>;
+  reviewsTitleFr?: Maybe<Scalars['String']['output']>;
+  socialFacebook?: Maybe<Scalars['String']['output']>;
+  socialInstagram?: Maybe<Scalars['String']['output']>;
+  socialLinkedin?: Maybe<Scalars['String']['output']>;
+  socialTwitter?: Maybe<Scalars['String']['output']>;
+  socialYoutube?: Maybe<Scalars['String']['output']>;
 };
 
 export type Collection = Node & {
@@ -409,6 +447,11 @@ export type CouponCodeLimitError = ErrorResult & {
   message: Scalars['String']['output'];
 };
 
+export type CreateAddressCustomFieldsInput = {
+  communeCode?: InputMaybe<Scalars['String']['input']>;
+  wilayaCode?: InputMaybe<Scalars['String']['input']>;
+};
+
 /**
  * Input used to create an Address.
  *
@@ -420,7 +463,7 @@ export type CreateAddressInput = {
   city?: InputMaybe<Scalars['String']['input']>;
   company?: InputMaybe<Scalars['String']['input']>;
   countryCode: Scalars['String']['input'];
-  customFields?: InputMaybe<Scalars['JSON']['input']>;
+  customFields?: InputMaybe<CreateAddressCustomFieldsInput>;
   defaultBillingAddress?: InputMaybe<Scalars['Boolean']['input']>;
   defaultShippingAddress?: InputMaybe<Scalars['Boolean']['input']>;
   fullName?: InputMaybe<Scalars['String']['input']>;
@@ -433,6 +476,7 @@ export type CreateAddressInput = {
 
 export type CreateCustomerCustomFieldsInput = {
   adminNotes?: InputMaybe<Scalars['String']['input']>;
+  avatarId?: InputMaybe<Scalars['ID']['input']>;
   city?: InputMaybe<Scalars['String']['input']>;
   wilaya?: InputMaybe<Scalars['String']['input']>;
 };
@@ -890,6 +934,7 @@ export type CustomerListOptions = {
 
 export type CustomerSortParameter = {
   adminNotes?: InputMaybe<SortOrder>;
+  avatar?: InputMaybe<SortOrder>;
   city?: InputMaybe<SortOrder>;
   createdAt?: InputMaybe<SortOrder>;
   emailAddress?: InputMaybe<SortOrder>;
@@ -973,6 +1018,25 @@ export enum DeletionResult {
   /** Deletion did not take place, reason given in message */
   NotDeleted = 'NOT_DELETED',
 }
+
+/** A wilaya customers can be delivered to, with the communes they can pick. */
+export type DeliveryDestination = {
+  __typename?: 'DeliveryDestination';
+  code: Scalars['String']['output'];
+  communes: Array<DeliveryDestinationCommune>;
+  name: Scalars['String']['output'];
+  nameAr: Scalars['String']['output'];
+  /** Delivery-delay zone 1..4 (storefronts map it to a localized estimate) */
+  shippingZone: Scalars['Int']['output'];
+};
+
+export type DeliveryDestinationCommune = {
+  __typename?: 'DeliveryDestinationCommune';
+  code: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  nameAr: Scalars['String']['output'];
+  postalCode?: Maybe<Scalars['String']['output']>;
+};
 
 export type Discount = {
   __typename?: 'Discount';
@@ -1846,11 +1910,11 @@ export type Mutation = {
    * _If `authOptions.requireVerification` is set to `true`:_
    *
    * 1. **The Customer is registered _with_ a password**. A verificationToken will be created (and typically emailed to the Customer). That
-   * verificationToken would then be passed to the `verifyCustomerAccount` mutation _without_ a password. The Customer is then
-   * verified and authenticated in one step.
+   *    verificationToken would then be passed to the `verifyCustomerAccount` mutation _without_ a password. The Customer is then
+   *    verified and authenticated in one step.
    * 2. **The Customer is registered _without_ a password**. A verificationToken will be created (and typically emailed to the Customer). That
-   * verificationToken would then be passed to the `verifyCustomerAccount` mutation _with_ the chosen password of the Customer. The Customer is then
-   * verified and authenticated in one step.
+   *    verificationToken would then be passed to the `verifyCustomerAccount` mutation _with_ the chosen password of the Customer. The Customer is then
+   *    verified and authenticated in one step.
    *
    * _If `authOptions.requireVerification` is set to `false`:_
    *
@@ -1901,7 +1965,10 @@ export type Mutation = {
   updateCustomer: Customer;
   /** Update an existing Address */
   updateCustomerAddress: Address;
-  /** Upload (or replace) the active customer's avatar image. */
+  /**
+   * Upload (or replace) the active customer's avatar image.
+   * Accepts a multipart file upload and returns the updated customer.
+   */
   updateCustomerAvatar: Customer;
   /**
    * Confirm the update of the emailAddress with the provided token, which has been generated by the
@@ -2182,7 +2249,7 @@ export type OrderAddress = {
   company?: Maybe<Scalars['String']['output']>;
   country?: Maybe<Scalars['String']['output']>;
   countryCode?: Maybe<Scalars['String']['output']>;
-  customFields?: Maybe<Scalars['JSON']['output']>;
+  customFields?: Maybe<AddressCustomFields>;
   fullName?: Maybe<Scalars['String']['output']>;
   phoneNumber?: Maybe<Scalars['String']['output']>;
   postalCode?: Maybe<Scalars['String']['output']>;
@@ -2529,10 +2596,10 @@ export type PaymentMethodTranslation = {
  * \@Query()
  * \@Allow(Permission.Owner)
  * async activeCustomer(\@Ctx() ctx: RequestContext): Promise<Customer | undefined> {
- * const userId = ctx.activeUserId;
- * if (userId) {
- * return this.customerService.findOneByUserId(ctx, userId);
- * }
+ *   const userId = ctx.activeUserId;
+ *   if (userId) {
+ *     return this.customerService.findOneByUserId(ctx, userId);
+ *   }
  * }
  * ```
  *
@@ -2744,7 +2811,7 @@ export type Product = Node & {
   assets: Array<Asset>;
   collections: Array<Collection>;
   createdAt: Scalars['DateTime']['output'];
-  customFields?: Maybe<Scalars['JSON']['output']>;
+  customFields?: Maybe<ProductCustomFields>;
   description: Scalars['String']['output'];
   enabled: Scalars['Boolean']['output'];
   facetValues: Array<FacetValue>;
@@ -2766,6 +2833,12 @@ export type ProductVariantListArgs = {
   options?: InputMaybe<ProductVariantListOptions>;
 };
 
+export type ProductCustomFields = {
+  __typename?: 'ProductCustomFields';
+  isFeatured?: Maybe<Scalars['Boolean']['output']>;
+  viewCount?: Maybe<Scalars['Int']['output']>;
+};
+
 export type ProductFilterParameter = {
   _and?: InputMaybe<Array<ProductFilterParameter>>;
   _or?: InputMaybe<Array<ProductFilterParameter>>;
@@ -2773,10 +2846,12 @@ export type ProductFilterParameter = {
   description?: InputMaybe<StringOperators>;
   enabled?: InputMaybe<BooleanOperators>;
   id?: InputMaybe<IdOperators>;
+  isFeatured?: InputMaybe<BooleanOperators>;
   languageCode?: InputMaybe<StringOperators>;
   name?: InputMaybe<StringOperators>;
   slug?: InputMaybe<StringOperators>;
   updatedAt?: InputMaybe<DateOperators>;
+  viewCount?: InputMaybe<NumberOperators>;
 };
 
 export type ProductList = PaginatedList & {
@@ -2847,9 +2922,11 @@ export type ProductSortParameter = {
   createdAt?: InputMaybe<SortOrder>;
   description?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
+  isFeatured?: InputMaybe<SortOrder>;
   name?: InputMaybe<SortOrder>;
   slug?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
+  viewCount?: InputMaybe<SortOrder>;
 };
 
 export type ProductTranslation = {
@@ -2899,10 +2976,12 @@ export type ProductVariantFilterParameter = {
   _or?: InputMaybe<Array<ProductVariantFilterParameter>>;
   createdAt?: InputMaybe<DateOperators>;
   currencyCode?: InputMaybe<StringOperators>;
+  discountPercent?: InputMaybe<NumberOperators>;
   id?: InputMaybe<IdOperators>;
   languageCode?: InputMaybe<StringOperators>;
   minStockAlert?: InputMaybe<NumberOperators>;
   name?: InputMaybe<StringOperators>;
+  originalPrice?: InputMaybe<NumberOperators>;
   price?: InputMaybe<NumberOperators>;
   priceWithTax?: InputMaybe<NumberOperators>;
   productId?: InputMaybe<IdOperators>;
@@ -2932,9 +3011,11 @@ export type ProductVariantListOptions = {
 
 export type ProductVariantSortParameter = {
   createdAt?: InputMaybe<SortOrder>;
+  discountPercent?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   minStockAlert?: InputMaybe<SortOrder>;
   name?: InputMaybe<SortOrder>;
+  originalPrice?: InputMaybe<SortOrder>;
   price?: InputMaybe<SortOrder>;
   priceWithTax?: InputMaybe<SortOrder>;
   productId?: InputMaybe<SortOrder>;
@@ -3052,6 +3133,11 @@ export type Query = {
   collection?: Maybe<Collection>;
   /** A list of Collections available to the shop */
   collections: CollectionList;
+  /**
+   * Active delivery wilayas with their active communes, ordered by code.
+   * Managed in the back-office; drives the address forms.
+   */
+  deliveryDestinations: Array<DeliveryDestination>;
   /** Returns a list of payment methods and their eligibility based on the current active Order */
   eligiblePaymentMethods: Array<PaymentMethodQuote>;
   /** Returns a list of eligible shipping methods based on the current active Order */
@@ -3090,10 +3176,6 @@ export type Query = {
   search: SearchResponse;
   /** Search products with multilingual support (FR/AR/EN) */
   searchProductsMultilingual: MultilingualSearchResult;
-  /** Calculate shipping cost for a wilaya */
-  shippingCost: ShippingCost;
-  /** Get all Algeria wilayas for shipping */
-  wilayas: Array<Wilaya>;
 };
 
 export type QueryCollectionArgs = {
@@ -3150,10 +3232,6 @@ export type QuerySearchProductsMultilingualArgs = {
   keyword: Scalars['String']['input'];
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
-};
-
-export type QueryShippingCostArgs = {
-  wilayaCode: Scalars['String']['input'];
 };
 
 export type RefreshCustomerVerificationResult = NativeAuthStrategyError | Success;
@@ -3217,6 +3295,7 @@ export type RegisterCustomerAccountResult =
 
 export type RegisterCustomerCustomFieldsInput = {
   adminNotes?: InputMaybe<Scalars['String']['input']>;
+  avatarId?: InputMaybe<Scalars['ID']['input']>;
   city?: InputMaybe<Scalars['String']['input']>;
   wilaya?: InputMaybe<Scalars['String']['input']>;
 };
@@ -3368,12 +3447,6 @@ export type SetOrderShippingMethodResult =
   | NoActiveOrderError
   | Order
   | OrderModificationError;
-
-export type ShippingCost = {
-  __typename?: 'ShippingCost';
-  amount: Scalars['Int']['output'];
-  currency: Scalars['String']['output'];
-};
 
 export type ShippingLine = {
   __typename?: 'ShippingLine';
@@ -3629,6 +3702,11 @@ export type TextStructFieldConfig = StructField & {
 
 export type TransitionOrderToStateResult = Order | OrderStateTransitionError;
 
+export type UpdateAddressCustomFieldsInput = {
+  communeCode?: InputMaybe<Scalars['String']['input']>;
+  wilayaCode?: InputMaybe<Scalars['String']['input']>;
+};
+
 /**
  * Input used to update an Address.
  *
@@ -3640,7 +3718,7 @@ export type UpdateAddressInput = {
   city?: InputMaybe<Scalars['String']['input']>;
   company?: InputMaybe<Scalars['String']['input']>;
   countryCode?: InputMaybe<Scalars['String']['input']>;
-  customFields?: InputMaybe<Scalars['JSON']['input']>;
+  customFields?: InputMaybe<UpdateAddressCustomFieldsInput>;
   defaultBillingAddress?: InputMaybe<Scalars['Boolean']['input']>;
   defaultShippingAddress?: InputMaybe<Scalars['Boolean']['input']>;
   fullName?: InputMaybe<Scalars['String']['input']>;
@@ -3654,6 +3732,7 @@ export type UpdateAddressInput = {
 
 export type UpdateCustomerCustomFieldsInput = {
   adminNotes?: InputMaybe<Scalars['String']['input']>;
+  avatarId?: InputMaybe<Scalars['ID']['input']>;
   city?: InputMaybe<Scalars['String']['input']>;
   wilaya?: InputMaybe<Scalars['String']['input']>;
 };
@@ -3758,12 +3837,6 @@ export type VerifyCustomerAccountResult =
   | VerificationTokenExpiredError
   | VerificationTokenInvalidError;
 
-export type Wilaya = {
-  __typename?: 'Wilaya';
-  code: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-};
-
 export type Zone = Node & {
   __typename?: 'Zone';
   createdAt: Scalars['DateTime']['output'];
@@ -3810,6 +3883,11 @@ export type CustomerFieldsFragment = {
     defaultShippingAddress?: boolean | null;
     defaultBillingAddress?: boolean | null;
     country: { __typename?: 'Country'; code: string; name: string };
+    customFields?: {
+      __typename?: 'AddressCustomFields';
+      wilayaCode?: string | null;
+      communeCode?: string | null;
+    } | null;
   }> | null;
   customFields?: {
     __typename?: 'CustomerCustomFields';
@@ -3985,6 +4063,11 @@ export type UpdateCustomerProfileMutation = {
       defaultShippingAddress?: boolean | null;
       defaultBillingAddress?: boolean | null;
       country: { __typename?: 'Country'; code: string; name: string };
+      customFields?: {
+        __typename?: 'AddressCustomFields';
+        wilayaCode?: string | null;
+        communeCode?: string | null;
+      } | null;
     }> | null;
     customFields?: {
       __typename?: 'CustomerCustomFields';
@@ -4048,6 +4131,11 @@ export type CreateCustomerAddressMutation = {
     defaultShippingAddress?: boolean | null;
     defaultBillingAddress?: boolean | null;
     country: { __typename?: 'Country'; code: string; name: string };
+    customFields?: {
+      __typename?: 'AddressCustomFields';
+      wilayaCode?: string | null;
+      communeCode?: string | null;
+    } | null;
   };
 };
 
@@ -4071,6 +4159,11 @@ export type UpdateCustomerAddressMutation = {
     defaultShippingAddress?: boolean | null;
     defaultBillingAddress?: boolean | null;
     country: { __typename?: 'Country'; code: string; name: string };
+    customFields?: {
+      __typename?: 'AddressCustomFields';
+      wilayaCode?: string | null;
+      communeCode?: string | null;
+    } | null;
   };
 };
 
@@ -5528,6 +5621,11 @@ export type ActiveCustomerQuery = {
       defaultShippingAddress?: boolean | null;
       defaultBillingAddress?: boolean | null;
       country: { __typename?: 'Country'; code: string; name: string };
+      customFields?: {
+        __typename?: 'AddressCustomFields';
+        wilayaCode?: string | null;
+        communeCode?: string | null;
+      } | null;
     }> | null;
     customFields?: {
       __typename?: 'CustomerCustomFields';
@@ -5902,6 +6000,26 @@ export type GetCollectionTreeQuery = {
       }> | null;
     }>;
   };
+};
+
+export type DeliveryDestinationsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type DeliveryDestinationsQuery = {
+  __typename?: 'Query';
+  deliveryDestinations: Array<{
+    __typename?: 'DeliveryDestination';
+    code: string;
+    name: string;
+    nameAr: string;
+    shippingZone: number;
+    communes: Array<{
+      __typename?: 'DeliveryDestinationCommune';
+      code: string;
+      name: string;
+      nameAr: string;
+      postalCode?: string | null;
+    }>;
+  }>;
 };
 
 export type CustomerOrderFieldsFragment = {
@@ -6749,6 +6867,10 @@ export const CustomerFieldsFragmentDoc = gql`
       }
       phoneNumber
       defaultShippingAddress
+      customFields {
+        wilayaCode
+        communeCode
+      }
       defaultBillingAddress
     }
     customFields {
@@ -7661,6 +7783,10 @@ export const CreateCustomerAddressDocument = gql`
       }
       phoneNumber
       defaultShippingAddress
+      customFields {
+        wilayaCode
+        communeCode
+      }
       defaultBillingAddress
     }
   }
@@ -7725,6 +7851,10 @@ export const UpdateCustomerAddressDocument = gql`
       }
       phoneNumber
       defaultShippingAddress
+      customFields {
+        wilayaCode
+        communeCode
+      }
       defaultBillingAddress
     }
   }
@@ -9717,6 +9847,111 @@ export type GetCollectionTreeSuspenseQueryHookResult = ReturnType<
 export type GetCollectionTreeQueryResult = Apollo.QueryResult<
   GetCollectionTreeQuery,
   GetCollectionTreeQueryVariables
+>;
+export const DeliveryDestinationsDocument = gql`
+  query DeliveryDestinations {
+    deliveryDestinations {
+      code
+      name
+      nameAr
+      shippingZone
+      communes {
+        code
+        name
+        nameAr
+        postalCode
+      }
+    }
+  }
+`;
+
+/**
+ * __useDeliveryDestinationsQuery__
+ *
+ * To run a query within a React component, call `useDeliveryDestinationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDeliveryDestinationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDeliveryDestinationsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useDeliveryDestinationsQuery(
+  baseOptions?: ApolloReactHooks.QueryHookOptions<
+    DeliveryDestinationsQuery,
+    DeliveryDestinationsQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useQuery<DeliveryDestinationsQuery, DeliveryDestinationsQueryVariables>(
+    DeliveryDestinationsDocument,
+    options
+  );
+}
+export function useDeliveryDestinationsLazyQuery(
+  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
+    DeliveryDestinationsQuery,
+    DeliveryDestinationsQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useLazyQuery<
+    DeliveryDestinationsQuery,
+    DeliveryDestinationsQueryVariables
+  >(DeliveryDestinationsDocument, options);
+}
+// @ts-ignore
+export function useDeliveryDestinationsSuspenseQuery(
+  baseOptions?: ApolloReactHooks.SuspenseQueryHookOptions<
+    DeliveryDestinationsQuery,
+    DeliveryDestinationsQueryVariables
+  >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  DeliveryDestinationsQuery,
+  DeliveryDestinationsQueryVariables
+>;
+export function useDeliveryDestinationsSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<
+        DeliveryDestinationsQuery,
+        DeliveryDestinationsQueryVariables
+      >
+): ApolloReactHooks.UseSuspenseQueryResult<
+  DeliveryDestinationsQuery | undefined,
+  DeliveryDestinationsQueryVariables
+>;
+export function useDeliveryDestinationsSuspenseQuery(
+  baseOptions?:
+    | ApolloReactHooks.SkipToken
+    | ApolloReactHooks.SuspenseQueryHookOptions<
+        DeliveryDestinationsQuery,
+        DeliveryDestinationsQueryVariables
+      >
+) {
+  const options =
+    baseOptions === ApolloReactHooks.skipToken
+      ? baseOptions
+      : { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useSuspenseQuery<
+    DeliveryDestinationsQuery,
+    DeliveryDestinationsQueryVariables
+  >(DeliveryDestinationsDocument, options);
+}
+export type DeliveryDestinationsQueryHookResult = ReturnType<typeof useDeliveryDestinationsQuery>;
+export type DeliveryDestinationsLazyQueryHookResult = ReturnType<
+  typeof useDeliveryDestinationsLazyQuery
+>;
+export type DeliveryDestinationsSuspenseQueryHookResult = ReturnType<
+  typeof useDeliveryDestinationsSuspenseQuery
+>;
+export type DeliveryDestinationsQueryResult = Apollo.QueryResult<
+  DeliveryDestinationsQuery,
+  DeliveryDestinationsQueryVariables
 >;
 export const GetMyOrdersDocument = gql`
   query GetMyOrders($options: OrderListOptions) {

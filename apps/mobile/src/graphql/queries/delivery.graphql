@@ -1,0 +1,16 @@
+# Delivery destinations (oscar-plugin shop-api extension): active wilayas and
+# communes managed in the back-office. Drives the address pickers.
+query DeliveryDestinations {
+  deliveryDestinations {
+    code
+    name
+    nameAr
+    shippingZone
+    communes {
+      code
+      name
+      nameAr
+      postalCode
+    }
+  }
+}

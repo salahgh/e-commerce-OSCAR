@@ -34,6 +34,10 @@ fragment CustomerFields on Customer {
     }
     phoneNumber
     defaultShippingAddress
+    customFields {
+      wilayaCode
+      communeCode
+    }
     defaultBillingAddress
   }
   customFields {
@@ -243,6 +247,10 @@ mutation CreateCustomerAddress($input: CreateAddressInput!) {
     }
     phoneNumber
     defaultShippingAddress
+    customFields {
+      wilayaCode
+      communeCode
+    }
     defaultBillingAddress
   }
 }
@@ -264,6 +272,10 @@ mutation UpdateCustomerAddress($input: UpdateAddressInput!) {
     }
     phoneNumber
     defaultShippingAddress
+    customFields {
+      wilayaCode
+      communeCode
+    }
     defaultBillingAddress
   }
 }

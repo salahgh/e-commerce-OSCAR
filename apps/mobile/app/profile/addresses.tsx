@@ -20,7 +20,7 @@ import {
   buildUpdateAddressInput,
   addressToFormValues,
 } from '../../src/utils/address';
-import { wilayas } from '../../src/data/wilayas';
+import { useDeliveryDestinations } from '../../src/hooks/useDeliveryDestinations';
 import { spacing, makeThemedStyles, useThemeColors } from '../../src/theme';
 
 type Mode = { kind: 'list' } | { kind: 'create' } | { kind: 'edit'; address: SavedAddress };
@@ -34,6 +34,7 @@ export default function AddressesScreen() {
   const insets = useSafeAreaInsets();
 
   const { data, loading } = useActiveCustomerQuery({ fetchPolicy: 'cache-and-network' });
+  const { wilayas } = useDeliveryDestinations();
   const [createAddress, { loading: creating }] = useCreateCustomerAddressMutation();
   const [updateAddress, { loading: updating }] = useUpdateCustomerAddressMutation();
   const [deleteAddress] = useDeleteCustomerAddressMutation();

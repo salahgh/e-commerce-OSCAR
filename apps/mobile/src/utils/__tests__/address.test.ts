@@ -5,8 +5,9 @@ import {
   buildUpdateAddressInput,
   addressToFormValues,
   addressToCheckoutValues,
+  resolveSavedCodes,
 } from '../address';
-import type { Wilaya } from '../../data/wilayas';
+import type { Wilaya } from '../../types/delivery';
 
 const WILAYAS = [
   {
@@ -90,6 +91,7 @@ describe('buildCreateAddressInput', () => {
       countryCode: 'DZ',
       phoneNumber: '0551234567',
       defaultShippingAddress: true,
+      customFields: { wilayaCode: '16', communeCode: '1601' },
     });
   });
   it('yields empty city and undefined postalCode for an unknown commune', () => {
@@ -137,5 +139,20 @@ describe('addressToCheckoutValues', () => {
   });
   it('yields an empty wilayaCode for an unknown province', () => {
     expect(addressToCheckoutValues({ ...SAVED, province: 'Unknown Place' }, WILAYAS).wilayaCode).toBe('');
+  });
+});
+
+describe('resolveSavedCodes', () => {
+  it('prefers the stored destination codes over the names (a renamed wilaya still resolves)', () => {
+    const saved = { ...SAVED, province: 'Ancien nom', city: 'Ancienne commune', customFields: { wilayaCode: '16', communeCode: '1602' } };
+    expect(resolveSavedCodes(saved, WILAYAS)).toEqual({ wilayaCode: '16', communeCode: '1602' });
+  });
+  it('falls back to the commune name when the stored commune code no longer exists', () => {
+    const saved = { ...SAVED, customFields: { wilayaCode: '16', communeCode: '1699' } };
+    expect(resolveSavedCodes(saved, WILAYAS)).toEqual({ wilayaCode: '16', communeCode: '1601' });
+  });
+  it('falls back to the names when the stored wilaya code is unknown or absent', () => {
+    expect(resolveSavedCodes({ ...SAVED, customFields: { wilayaCode: '99', communeCode: '9901' } }, WILAYAS)).toEqual({ wilayaCode: '16', communeCode: '1601' });
+    expect(resolveSavedCodes({ ...SAVED, customFields: null }, WILAYAS)).toEqual({ wilayaCode: '16', communeCode: '1601' });
   });
 });

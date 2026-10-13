@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { wilayas } from '../../data/wilayas';
+import { useDeliveryDestinations } from '../../hooks/useDeliveryDestinations';
 import { FilterSheet } from '../products/FilterSheet';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 import { useAppFont } from '../../hooks/useAppFont';
@@ -62,6 +62,7 @@ export const CommunePicker: React.FC<CommunePickerProps> = ({
   const colors = useThemeColors();
   const { fontFamily } = useAppFont();
   const [open, setOpen] = useState(false);
+  const { wilayas } = useDeliveryDestinations();
 
   const wilaya = wilayas.find((w) => w.code === wilayaCode);
   const communes = wilaya?.communes ?? [];

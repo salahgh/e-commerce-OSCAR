@@ -1,4 +1,4 @@
-import type { Wilaya } from '../data/wilayas';
+import type { Wilaya } from '../types/delivery';
 
 /** Form values the checkout address step collects (superset used by the helpers). */
 export interface CheckoutAddressValues {
@@ -20,6 +20,8 @@ export interface ShippingAddressInput {
   postalCode: string;
   countryCode: string;
   phoneNumber: string;
+  /** Destination codes; they survive a rename of the wilaya in the back-office. */
+  customFields: { wilayaCode: string; communeCode: string | null };
 }
 
 export interface GuestCustomerInput {
@@ -53,6 +55,7 @@ export function buildShippingAddressInput(
     postalCode: commune?.postalCode || '',
     countryCode: 'DZ',
     phoneNumber: values.phoneNumber,
+    customFields: { wilayaCode: values.wilayaCode, communeCode: values.communeCode || null },
   };
 }
 

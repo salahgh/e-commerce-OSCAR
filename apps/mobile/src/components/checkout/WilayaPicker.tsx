@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { wilayas } from '../../data/wilayas';
+import { useDeliveryDestinations } from '../../hooks/useDeliveryDestinations';
 import { FilterSheet } from '../products/FilterSheet';
 import { spacing, typography, makeThemedStyles, useThemeColors } from '../../theme';
 import { useAppFont } from '../../hooks/useAppFont';
@@ -55,6 +55,7 @@ export const WilayaPicker: React.FC<WilayaPickerProps> = ({ value, onSelect, err
   const colors = useThemeColors();
   const { fontFamily } = useAppFont();
   const [open, setOpen] = useState(false);
+  const { wilayas, loading } = useDeliveryDestinations();
   const selectedName = wilayas.find((w) => w.code === value)?.name ?? '';
 
   return (
@@ -77,7 +78,7 @@ export const WilayaPicker: React.FC<WilayaPickerProps> = ({ value, onSelect, err
             { fontFamily: fontFamily.regular },
           ]}
         >
-          {selectedName || t('checkout.chooseWilaya', 'Choose wilaya')}
+          {selectedName || (loading ? '…' : t('checkout.chooseWilaya', 'Choose wilaya'))}
         </Text>
         <Ionicons name="chevron-down" size={20} color={colors.text.tertiary} />
       </TouchableOpacity>

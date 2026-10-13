@@ -1,4 +1,4 @@
-import type { Wilaya } from '../data/wilayas';
+import type { Wilaya } from '../types/delivery';
 import { resolveWilayaName } from './checkout';
 
 export interface AddressFormValues {
@@ -19,6 +19,8 @@ export interface CreateAddressInputShape {
   countryCode: string;
   phoneNumber: string;
   defaultShippingAddress: boolean;
+  /** Destination codes; they survive a rename of the wilaya in the back-office. */
+  customFields: { wilayaCode: string; communeCode: string | null };
 }
 
 /** A saved address (subset of ActiveCustomer.addresses) the helpers consume. */
@@ -32,6 +34,7 @@ export interface SavedAddress {
   postalCode?: string | null;
   phoneNumber?: string | null;
   defaultShippingAddress?: boolean | null;
+  customFields?: { wilayaCode?: string | null; communeCode?: string | null } | null;
 }
 
 /**
@@ -87,6 +90,7 @@ export function buildCreateAddressInput(values: AddressFormValues, wilayas: Wila
     countryCode: 'DZ',
     phoneNumber: values.phoneNumber,
     defaultShippingAddress: values.defaultShippingAddress,
+    customFields: { wilayaCode: values.wilayaCode, communeCode: values.communeCode || null },
   };
 }
 
@@ -94,27 +98,46 @@ export function buildUpdateAddressInput(id: string, values: AddressFormValues, w
   return { id, ...buildCreateAddressInput(values, wilayas) };
 }
 
-export function addressToFormValues(a: SavedAddress, wilayas: Wilaya[]): AddressFormValues {
+/**
+ * Codes of a saved address: the stored custom-field codes when they still match
+ * an offered destination, else the names resolved against the current list.
+ */
+export function resolveSavedCodes(a: SavedAddress, wilayas: Wilaya[]): { wilayaCode: string; communeCode: string } {
+  const storedWilaya = a.customFields?.wilayaCode ?? '';
+  const wilaya = wilayas.find((w) => w.code === storedWilaya);
+  if (wilaya) {
+    const storedCommune = a.customFields?.communeCode ?? '';
+    const commune = wilaya.communes.find((c) => c.code === storedCommune);
+    return {
+      wilayaCode: wilaya.code,
+      communeCode: commune ? commune.code : resolveCommuneCode(wilaya.code, a.city ?? '', wilayas),
+    };
+  }
   const wilayaCode = resolveWilayaCode(a.province ?? '', wilayas);
+  return { wilayaCode, communeCode: resolveCommuneCode(wilayaCode, a.city ?? '', wilayas) };
+}
+
+export function addressToFormValues(a: SavedAddress, wilayas: Wilaya[]): AddressFormValues {
+  const { wilayaCode, communeCode } = resolveSavedCodes(a, wilayas);
   return {
     fullName: a.fullName ?? '',
     phoneNumber: a.phoneNumber ?? '',
     streetLine1: a.streetLine1 ?? '',
     wilayaCode,
-    communeCode: resolveCommuneCode(wilayaCode, a.city ?? '', wilayas),
+    communeCode,
     defaultShippingAddress: !!a.defaultShippingAddress,
   };
 }
 
 /** Map a saved address to the checkout ShippingAddressForm field names (no email). */
 export function addressToCheckoutValues(a: SavedAddress, wilayas: Wilaya[]) {
-  const wilayaCode = resolveWilayaCode(a.province ?? '', wilayas);
+  const { wilayaCode, communeCode } = resolveSavedCodes(a, wilayas);
   return {
     fullName: a.fullName ?? '',
     phoneNumber: a.phoneNumber ?? '',
     address: a.streetLine1 ?? '',
     notes: a.streetLine2 ?? '',
     wilayaCode,
-    communeCode: resolveCommuneCode(wilayaCode, a.city ?? '', wilayas),
+    communeCode,
   };
 }

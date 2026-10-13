@@ -5,7 +5,7 @@
  * surfaced as "coming soon" (non-selectable) while COD stays the working path.
  * Pure + UI-free: `icon` is a plain Ionicons glyph name (cast at the UI boundary).
  * Mobile is standalone and cannot import `@oscar/shared`, so the labels are
- * mirrored here (same pattern as `src/data/wilayas.ts`).
+ * mirrored here.
  */
 export type PaymentAvailability = 'available' | 'coming-soon';
 

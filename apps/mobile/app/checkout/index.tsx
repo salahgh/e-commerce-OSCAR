@@ -29,7 +29,7 @@ import {
   STALE_SESSION_ERROR,
 } from '../../src/utils/checkout';
 import { makeShippingAddressSchema } from '../../src/utils/validation';
-import { wilayas } from '../../src/data/wilayas';
+import { useDeliveryDestinations } from '../../src/hooks/useDeliveryDestinations';
 import { addressToCheckoutValues, SavedAddress } from '../../src/utils/address';
 import { SavedAddressPicker } from '../../src/components/checkout/SavedAddressPicker';
 import { partitionPaymentMethods, getPaymentAvailability } from '../../src/utils/payment';
@@ -103,6 +103,7 @@ export default function CheckoutScreen() {
     }
   }, [savedAddresses, selectedAddressId, enteringNewAddress]);
 
+  const { wilayas } = useDeliveryDestinations();
   const selectedAddress = savedAddresses.find((a) => a.id === selectedAddressId) ?? null;
   const formInitialValues =
     shippingAddress ??

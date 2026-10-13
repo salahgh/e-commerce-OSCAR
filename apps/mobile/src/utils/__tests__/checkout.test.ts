@@ -5,7 +5,7 @@ import {
   submitCheckoutAddress,
   STALE_SESSION_ERROR,
 } from '../checkout';
-import type { Wilaya } from '../../data/wilayas';
+import type { Wilaya } from '../../types/delivery';
 
 const WILAYAS = [
   {
@@ -48,6 +48,7 @@ describe('buildShippingAddressInput', () => {
       postalCode: '16000',
       countryCode: 'DZ',
       phoneNumber: '0551234567',
+      customFields: { wilayaCode: '16', communeCode: '1601' },
     });
   });
   it('never emits an empty province for a known wilaya', () => {
