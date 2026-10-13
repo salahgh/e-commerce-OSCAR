@@ -54,6 +54,7 @@ import { Spinner } from '../../components/ui/Spinner';
 import { Input } from '../../components/ui/Input';
 import { TextArea } from '../../components/ui/TextArea';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { Modal } from '../../components/ui/Modal';
 import { PermissionGate } from '../../components/auth/PermissionGate';
 import { formatPrice, formatDateTime, formatDate } from '../../lib/utils';
 import { printInvoice } from '../../lib/export-utils';
@@ -185,6 +186,17 @@ const FULFILLMENT_NEXT_STATES: Record<string, string[]> = {
   Shipped: ['Delivered'],
 };
 
+/** Vendure asset preview at a named preset (tiny/thumb/small/medium/large) instead of the full upload. */
+const assetPreset = (preview: string, preset: 'medium' | 'large') =>
+  `${preview}${preview.includes('?') ? '&' : '?'}preset=${preset}`;
+
+interface LineImagePreview {
+  src: string;
+  title: string;
+  sku: string;
+  variantName: string;
+}
+
 export const OrderDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -199,6 +211,7 @@ export const OrderDetail: React.FC = () => {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
   const [activeTab, setActiveTab] = useState<'items' | 'history' | 'notes'>('items');
+  const [imagePreview, setImagePreview] = useState<LineImagePreview | null>(null);
   const [showRefundDialog, setShowRefundDialog] = useState(false);
   const [refundDefaultPaymentId, setRefundDefaultPaymentId] = useState<string | null>(null);
   const [showManualPaymentDialog, setShowManualPaymentDialog] = useState(false);
@@ -823,17 +836,43 @@ export const OrderDetail: React.FC = () => {
                       key={line.id}
                       className="flex items-center gap-4 p-4 bg-background/50 rounded-lg border border-border"
                     >
-                      {line.productVariant?.product?.featuredAsset?.preview ? (
-                        <img
-                          src={line.productVariant.product.featuredAsset.preview}
-                          alt=""
-                          className="h-16 w-16 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <div className="h-16 w-16 bg-muted rounded-lg flex items-center justify-center">
-                          <Package className="h-8 w-8 text-muted-foreground" />
-                        </div>
-                      )}
+                      {(() => {
+                        // The variant photo (right colour) when it has one, else the product photo.
+                        const preview =
+                          line.productVariant?.featuredAsset?.preview ||
+                          line.productVariant?.product?.featuredAsset?.preview;
+                        const title =
+                          getProductNameFr(line.productVariant?.product?.translations) ||
+                          line.productVariant?.product?.name ||
+                          line.productVariant?.name ||
+                          '';
+                        return preview ? (
+                          <button
+                            type="button"
+                            className="h-40 w-24 sm:w-32 shrink-0 rounded-lg bg-muted overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary"
+                            title="Agrandir la photo"
+                            aria-label={`Agrandir la photo de ${title}`}
+                            onClick={() =>
+                              setImagePreview({
+                                src: assetPreset(preview, 'large'),
+                                title,
+                                sku: line.productVariant?.sku || '',
+                                variantName: line.productVariant?.name || '',
+                              })
+                            }
+                          >
+                            <img
+                              src={assetPreset(preview, 'medium')}
+                              alt=""
+                              className="h-full w-full object-contain"
+                            />
+                          </button>
+                        ) : (
+                          <div className="h-40 w-24 sm:w-32 shrink-0 bg-muted rounded-lg flex items-center justify-center">
+                            <Package className="h-10 w-10 text-muted-foreground" />
+                          </div>
+                        );
+                      })()}
                       <div className="flex-1 min-w-0">
                         <p className="text-foreground font-medium truncate">
                           {getProductNameFr(line.productVariant?.product?.translations) ||
@@ -1428,6 +1467,26 @@ export const OrderDetail: React.FC = () => {
       </div>
 
       {/* Cancel Confirmation Dialog */}
+      <Modal
+        isOpen={!!imagePreview}
+        onClose={() => setImagePreview(null)}
+        title={imagePreview?.title}
+        size="lg"
+      >
+        {imagePreview && (
+          <div className="flex flex-col items-center gap-3 p-4">
+            <img
+              src={imagePreview.src}
+              alt={imagePreview.title}
+              className="max-h-[70vh] w-auto max-w-full rounded-lg object-contain bg-muted"
+            />
+            <p className="text-sm text-muted-foreground">
+              {imagePreview.variantName}
+              {imagePreview.sku ? ` · SKU ${imagePreview.sku}` : ''}
+            </p>
+          </div>
+        )}
+      </Modal>
       <ConfirmDialog
         isOpen={showCancelDialog}
         onClose={() => {

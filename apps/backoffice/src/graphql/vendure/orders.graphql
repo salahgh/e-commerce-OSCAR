@@ -131,6 +131,9 @@ query AdminOrder($id: ID!) {
         id
         sku
         name
+        featuredAsset {
+          preview
+        }
         product {
           id
           name
