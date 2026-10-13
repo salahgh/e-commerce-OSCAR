@@ -398,6 +398,7 @@
     "viewLabel": "View {n}",
     "selectColor": "Please select a color.",
     "selectSize": "Please select a size.",
+    "selectOption": "Please choose: {name}.",
     "tabs": {
       "description": "Description",
       "details": "Details",

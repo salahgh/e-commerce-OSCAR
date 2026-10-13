@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/
 import { ProductCard, ProductCardSkeleton, CategoryCircles, type ProductCardData } from '@/components/patterns';
 import { variantDiscount } from '@/lib/format/discount';
 import { productOutOfStock } from '@/lib/format/stock';
+import { sizeNamesOf } from '@/lib/catalog/variant-options';
 import { cn } from '@/lib/utils/cn';
 
 const TAKE = 48;
@@ -80,22 +81,8 @@ export default function ProductsPage() {
 
   // Available sizes across the loaded products — deduped by NAME (each product has
   // its own size-option codes, so keying by code yields one chip per product).
-  const sizes = React.useMemo(() => {
-    const order = ['XS', 'S', 'M', 'L', 'XL', '2XL', 'XXL', '3XL', 'XXXL', 'ONE SIZE'];
-    const names = new Set<string>();
-    for (const p of items) {
-      for (const v of p.variants) {
-        for (const o of v.options) {
-          if (/taille|size|مقاس/i.test(o.group.code) || /taille|size|مقاس/i.test(o.group.name)) names.add(o.name);
-        }
-      }
-    }
-    const rank = (n: string) => {
-      const i = order.indexOf(n.trim().toUpperCase());
-      return i === -1 ? order.length : i;
-    };
-    return Array.from(names, (name) => ({ code: name, name })).sort((a, b) => rank(a.name) - rank(b.name));
-  }, [items]);
+  // Clothing sizes come first, shoe pointures after them in numeric order.
+  const sizes = React.useMemo(() => sizeNamesOf(items).map((name) => ({ code: name, name })), [items]);
 
   const shown = React.useMemo(() => {
     let list = items.slice();

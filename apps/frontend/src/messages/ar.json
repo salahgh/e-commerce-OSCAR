@@ -398,6 +398,7 @@
     "viewLabel": "صورة {n}",
     "selectColor": "يرجى اختيار اللون.",
     "selectSize": "يرجى اختيار المقاس.",
+    "selectOption": "يرجى الاختيار: {name}.",
     "tabs": {
       "description": "الوصف",
       "details": "التفاصيل",

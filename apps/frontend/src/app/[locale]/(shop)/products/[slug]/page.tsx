@@ -22,6 +22,14 @@ import { cn } from '@/lib/utils/cn';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { productSchema, breadcrumbSchema } from '@/lib/seo/schema';
 import { trackViewContent } from '@/lib/analytics';
+import {
+  optionGroupsOf,
+  initialSelections,
+  matchVariant,
+  missingGroup,
+  type OptionGroupView,
+  type OptionSelections,
+} from '@/lib/catalog/variant-options';
 
 /** Size / colour selector chip — black when selected, outlined otherwise (Figma "متغيرات الأوسمة"). */
 function VariantChip({
@@ -73,12 +81,18 @@ export default function ProductPage() {
   const wishlist = useWishlist();
 
   const [quantity, setQuantity] = React.useState(1);
-  const [selectedColor, setSelectedColor] = React.useState<string>();
-  const [selectedSize, setSelectedSize] = React.useState<string>();
+  const [selections, setSelections] = React.useState<OptionSelections>({});
   const [activeImage, setActiveImage] = React.useState(0);
   const [detailsOpen, setDetailsOpen] = React.useState(true);
 
   const product = data?.product;
+
+  // Every option group the variants carry (size-like first: "Taille", "Pointure", ...).
+  // Groups with a single value need no choice, so they start selected.
+  const optionGroups = React.useMemo(() => optionGroupsOf(product?.variants ?? []), [product]);
+  React.useEffect(() => {
+    setSelections(initialSelections(optionGroups));
+  }, [optionGroups]);
 
   React.useEffect(() => {
     if (!product) return;
@@ -105,26 +119,11 @@ export default function ProductPage() {
   const variants = product.variants;
   const images = product.assets.length > 0 ? product.assets : product.featuredAsset ? [product.featuredAsset] : [];
 
-  // Derive option groups (size / colour) from variants.
-  const optionGroups = new Map<string, { code: string; name: string; values: Map<string, { code: string; name: string }> }>();
-  for (const v of variants) {
-    for (const opt of v.options) {
-      const g = optionGroups.get(opt.group.code) ?? { code: opt.group.code, name: opt.group.name, values: new Map() };
-      g.values.set(opt.code, { code: opt.code, name: opt.name });
-      optionGroups.set(opt.group.code, g);
-    }
-  }
-  const colorGroup = Array.from(optionGroups.values()).find((g) => /couleur|color|لون/i.test(g.code) || /couleur|color|لون/i.test(g.name));
-  const sizeGroup = Array.from(optionGroups.values()).find((g) => /taille|size|مقاس/i.test(g.code) || /taille|size|مقاس/i.test(g.name));
+  const selectedVariant = matchVariant(variants, selections) ?? variants[0];
 
-  const selectedVariant =
-    variants.find((v) =>
-      v.options.every((o) => {
-        if (colorGroup && o.group.code === colorGroup.code) return o.code === selectedColor;
-        if (sizeGroup && o.group.code === sizeGroup.code) return o.code === selectedSize;
-        return true;
-      }),
-    ) ?? variants[0];
+  const groupLabel = (g: OptionGroupView) => (g.kind === 'size' ? t('size') : g.kind === 'color' ? t('color') : g.name);
+  const selectGroupMessage = (g: OptionGroupView) =>
+    g.kind === 'size' ? t('selectSize') : g.kind === 'color' ? t('selectColor') : t('selectOption', { name: g.name });
 
   const currency = selectedVariant?.currencyCode ?? 'DZD';
   const price = selectedVariant?.priceWithTax ?? 0;
@@ -144,8 +143,8 @@ export default function ProductPage() {
 
   async function handleAddToCart() {
     if (!selectedVariant) return;
-    if (colorGroup && !selectedColor) return toast.error(t('selectColor'));
-    if (sizeGroup && !selectedSize) return toast.error(t('selectSize'));
+    const missing = missingGroup(optionGroups, selections);
+    if (missing) return toast.error(selectGroupMessage(missing));
     await addToCart(selectedVariant.id, quantity);
   }
 
@@ -228,33 +227,23 @@ export default function ProductPage() {
               <span className="font-dm text-36 font-bold text-accent">{formatDzd(price)}</span>
             </div>
 
-            {/* Size */}
-            {sizeGroup && (
-              <div className="flex w-full flex-col items-end gap-3">
-                <p className="w-full text-right text-24 font-[600] leading-8 text-accent">{t('size')}</p>
+            {/* One chip row per option group: size (Taille / Pointure ...), colour, then anything else */}
+            {optionGroups.map((group) => (
+              <div key={group.code} className="flex w-full flex-col items-end gap-3">
+                <p className="w-full text-right text-24 font-[600] leading-8 text-accent">{groupLabel(group)}</p>
                 <div className="flex w-full flex-wrap items-center justify-end gap-3">
-                  {Array.from(sizeGroup.values.values()).map((v) => (
-                    <VariantChip key={v.code} selected={selectedSize === v.code} onClick={() => setSelectedSize(v.code)}>
+                  {group.values.map((v) => (
+                    <VariantChip
+                      key={v.code}
+                      selected={selections[group.code] === v.code}
+                      onClick={() => setSelections((s) => ({ ...s, [group.code]: v.code }))}
+                    >
                       {v.name}
                     </VariantChip>
                   ))}
                 </div>
               </div>
-            )}
-
-            {/* Colour */}
-            {colorGroup && (
-              <div className="flex w-full flex-col items-end gap-3">
-                <p className="w-full text-right text-24 font-[600] leading-8 text-accent">{t('color')}</p>
-                <div className="flex w-full flex-wrap items-center justify-end gap-3">
-                  {Array.from(colorGroup.values.values()).map((v) => (
-                    <VariantChip key={v.code} selected={selectedColor === v.code} onClick={() => setSelectedColor(v.code)}>
-                      {v.name}
-                    </VariantChip>
-                  ))}
-                </div>
-              </div>
-            )}
+            ))}
 
             {/* Products without purchasable variants must not offer cart actions */}
             {variants.length === 0 && (
