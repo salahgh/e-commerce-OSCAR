@@ -43,7 +43,8 @@ import {
   CancelPaymentDocument,
   SettleRefundDocument,
 } from '../../graphql/generated/graphql';
-import { RefundDialog, ManualPaymentDialog, ModifyOrderDialog } from './OrderActionDialogs';
+import { RefundDialog, ManualPaymentDialog } from './OrderActionDialogs';
+import { ModifyOrderDialog } from './ModifyOrderDialog';
 import { FulfillmentDialog } from './FulfillmentDialog';
 import { orderListReturnPath } from './useOrderListParams';
 import { TransitionFulfillmentToStateDocument } from '../../graphql/generated/graphql';
@@ -1536,6 +1537,7 @@ export const OrderDetail: React.FC = () => {
         orderId={id!}
         orderState={order.state}
         currentTotalWithTax={order.totalWithTax}
+        currentShippingWithTax={order.shippingWithTax}
         lines={order.lines || []}
         onSuccess={refetch}
       />

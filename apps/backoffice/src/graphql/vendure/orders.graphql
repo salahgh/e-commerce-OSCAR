@@ -607,3 +607,47 @@ query AdminPaymentMethodsForOrder {
     }
   }
 }
+
+# Other variants of a product (size/colour) to swap an order line for.
+query AdminVariantsOfProduct($productId: ID!) {
+  productVariants(productId: $productId, options: { take: 100, sort: { name: ASC } }) {
+    items {
+      id
+      name
+      sku
+      enabled
+      priceWithTax
+      stockOnHand
+      stockAllocated
+      trackInventory
+      product {
+        id
+      }
+    }
+  }
+}
+
+# Variant search by name or SKU, to add a product to an order.
+query AdminSearchVariantsForOrder($term: String!) {
+  productVariants(
+    options: {
+      take: 20
+      filter: { _or: [{ name: { contains: $term } }, { sku: { contains: $term } }] }
+      sort: { name: ASC }
+    }
+  ) {
+    items {
+      id
+      name
+      sku
+      enabled
+      priceWithTax
+      stockOnHand
+      stockAllocated
+      trackInventory
+      product {
+        id
+      }
+    }
+  }
+}
