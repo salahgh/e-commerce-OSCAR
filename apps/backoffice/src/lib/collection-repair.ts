@@ -45,7 +45,8 @@ export interface RepairCollection {
 export type RepairAction =
   | { type: 'update-filters'; id: string; name: string; filters: FilterInput[]; reason: string }
   | { type: 'set-private'; id: string; name: string; isPrivate: boolean; reason: string }
-  | { type: 'stop-inheriting'; id: string; name: string; reason: string }
+  // carries the collection's own filters: Vendure only recomputes contents when `filters` is in the update
+  | { type: 'stop-inheriting'; id: string; name: string; filters: FilterInput[]; reason: string }
   | { type: 'rename'; id: string; name: string; translations: RepairTranslation[]; reason: string };
 
 export interface RepairReport {
@@ -126,10 +127,11 @@ export function planRepairs(collections: RepairCollection[], existingProductIds:
     const orList = c.filters.some(
       (f) => f.code === PRODUCT_ID_FILTER && f.args.some((a) => a.name === 'combineWithAnd' && a.value === 'false'),
     );
+    const filters = filtersWithIds(c.filters, lists.get(c.id)!);
     if (c.filters.length === 0) {
-      actions.push({ type: 'stop-inheriting', id: c.id, name: clean(c.name), reason: 'no filter of its own: it shows the whole parent' });
+      actions.push({ type: 'stop-inheriting', id: c.id, name: clean(c.name), filters, reason: 'no filter of its own: it shows the whole parent' });
     } else if (orList) {
-      actions.push({ type: 'stop-inheriting', id: c.id, name: clean(c.name), reason: 'its product list is OR-ed with the parent: it shows the whole parent' });
+      actions.push({ type: 'stop-inheriting', id: c.id, name: clean(c.name), filters, reason: 'its product list is OR-ed with the parent: it shows the whole parent' });
     }
   }
 

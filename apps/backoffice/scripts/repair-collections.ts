@@ -111,7 +111,10 @@ async function apply(a: RepairAction) {
   const input: Record<string, unknown> = { id: a.id };
   if (a.type === 'update-filters') input.filters = a.filters;
   if (a.type === 'set-private') input.isPrivate = a.isPrivate;
-  if (a.type === 'stop-inheriting') input.inheritFilters = false;
+  if (a.type === 'stop-inheriting') {
+    input.inheritFilters = false;
+    input.filters = a.filters;
+  }
   if (a.type === 'rename') input.translations = a.translations;
   await gql(`mutation($input: UpdateCollectionInput!) { updateCollection(input:$input) { id } }`, { input });
 }

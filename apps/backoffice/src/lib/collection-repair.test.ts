@@ -85,8 +85,15 @@ test('stops inheritance on sub-categories that show the whole parent', () => {
   assert.deepEqual(
     plan.actions.filter((a) => a.type === 'stop-inheriting'),
     [
-      { type: 'stop-inheriting', id: 'hair', name: 'Hair color', reason: 'no filter of its own: it shows the whole parent' },
-      { type: 'stop-inheriting', id: 'sham', name: 'Shampoings', reason: 'its product list is OR-ed with the parent: it shows the whole parent' },
+      { type: 'stop-inheriting', id: 'hair', name: 'Hair color', filters: [], reason: 'no filter of its own: it shows the whole parent' },
+      {
+        type: 'stop-inheriting',
+        id: 'sham',
+        name: 'Shampoings',
+        // re-sent so Vendure recomputes the contents
+        filters: [{ code: 'product-id-filter', arguments: [{ name: 'productIds', value: '["21"]' }, { name: 'combineWithAnd', value: 'false' }] }],
+        reason: 'its product list is OR-ed with the parent: it shows the whole parent',
+      },
     ],
   );
   assert.equal(plan.actions.some((a) => a.type === 'set-private'), false);
