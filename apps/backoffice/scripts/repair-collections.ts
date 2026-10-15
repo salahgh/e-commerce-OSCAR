@@ -104,7 +104,11 @@ async function main() {
     done += 1;
     console.log(`  ${done}/${plan.actions.length} ${a.type} ${a.name}`);
   }
-  console.log('\nDone. Vendure is now recomputing collection contents in the background.');
+  // The incremental search-index updates that follow a collection change can leave
+  // stale collectionIds behind (seen 2026-10-15: sub-categories kept their old
+  // products on the storefront), and storefront category pages read the search index.
+  await gql(`mutation { reindex { id } }`);
+  console.log('\nDone. Vendure is now recomputing collection contents and rebuilding the search index in the background.');
 }
 
 async function apply(a: RepairAction) {
