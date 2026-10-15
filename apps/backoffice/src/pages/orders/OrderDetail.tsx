@@ -1000,11 +1000,15 @@ export const OrderDetail: React.FC = () => {
                                     )}
                                   </div>
                                 )}
+                                {item.type === 'ORDER_MODIFIED' && (
+                                  <p className="text-foreground">Lignes de la commande modifiées</p>
+                                )}
                                 {![
                                   'ORDER_STATE_TRANSITION',
                                   'ORDER_NOTE',
                                   'ORDER_PAYMENT_TRANSITION',
                                   'ORDER_CANCELLATION',
+                                  'ORDER_MODIFIED',
                                 ].includes(item.type) && (
                                   <p className="text-muted-foreground">{item.type}</p>
                                 )}
