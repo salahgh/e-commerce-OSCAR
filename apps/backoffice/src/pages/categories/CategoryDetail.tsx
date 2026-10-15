@@ -536,7 +536,9 @@ export const CategoryDetail: React.FC = () => {
     descriptionAr: getTranslation(collection?.translations, 'ar', 'description'),
     parentId: collection?.parentId || '',
     isPrivate: collection?.isPrivate || false,
-    inheritFilters: collection?.inheritFilters ?? true,
+    // Off for new categories: in Vendure a sub-category that inherits starts with the
+    // parent's filters, so an empty one shows every product of the parent.
+    inheritFilters: collection?.inheritFilters ?? false,
     displayOrder: collection?.customFields?.displayOrder || 0,
   };
 

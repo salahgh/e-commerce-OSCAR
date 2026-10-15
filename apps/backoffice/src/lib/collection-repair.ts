@@ -8,7 +8,8 @@
  *  - product-id lists pointing at deleted products
  *  - sub-categories whose products are missing from the parent's list, which
  *    `inheritFilters` turns into hidden products
- *  - public sub-categories with no filter of their own (they show the whole parent)
+ *  - sub-categories that show the whole parent: no filter of their own, or a
+ *    product list OR-ed with the inherited filters (inheritance is turned off)
  *  - top-level categories with nothing left in them
  *  - private parents with a public child (the child is unreachable)
  *  - stray whitespace in names
@@ -44,6 +45,7 @@ export interface RepairCollection {
 export type RepairAction =
   | { type: 'update-filters'; id: string; name: string; filters: FilterInput[]; reason: string }
   | { type: 'set-private'; id: string; name: string; isPrivate: boolean; reason: string }
+  | { type: 'stop-inheriting'; id: string; name: string; reason: string }
   | { type: 'rename'; id: string; name: string; translations: RepairTranslation[]; reason: string };
 
 export interface RepairReport {
@@ -116,10 +118,18 @@ export function planRepairs(collections: RepairCollection[], existingProductIds:
     actions.push({ type: 'update-filters', id: c.id, name: clean(c.name), filters, reason: why.join('; ') });
   }
 
-  // 3. public sub-category with no own filter shows the entire parent
+  // 3. sub-category that shows the entire parent. Vendure prepends the inherited
+  // filters, so with none of its own the child gets the parent's products, and an
+  // OR-ed product list (combineWithAnd=false) yields parent UNION child.
   for (const c of collections) {
-    if (!c.isPrivate && c.inheritFilters && c.filters.length === 0 && inTree(c.parentId)) {
-      actions.push({ type: 'set-private', id: c.id, name: clean(c.name), isPrivate: true, reason: 'no filter of its own: it shows the whole parent' });
+    if (!c.inheritFilters || !inTree(c.parentId)) continue;
+    const orList = c.filters.some(
+      (f) => f.code === PRODUCT_ID_FILTER && f.args.some((a) => a.name === 'combineWithAnd' && a.value === 'false'),
+    );
+    if (c.filters.length === 0) {
+      actions.push({ type: 'stop-inheriting', id: c.id, name: clean(c.name), reason: 'no filter of its own: it shows the whole parent' });
+    } else if (orList) {
+      actions.push({ type: 'stop-inheriting', id: c.id, name: clean(c.name), reason: 'its product list is OR-ed with the parent: it shows the whole parent' });
     }
   }
 

@@ -78,6 +78,8 @@ async function main() {
         a.filters.find((f: FilterInput) => f.code === 'product-id-filter')?.arguments.find((x: FilterArg) => x.name === 'productIds')?.value ?? '[]',
       );
       console.log(`  [filters]  ${a.name} (#${a.id}) -> ${ids.length} products: ${a.reason}`);
+    } else if (a.type === 'stop-inheriting') {
+      console.log(`  [no-inherit]  ${a.name} (#${a.id}): ${a.reason}`);
     } else if (a.type === 'set-private') {
       console.log(`  [${a.isPrivate ? 'hide' : 'publish'}]  ${a.name} (#${a.id}): ${a.reason}`);
     } else {
@@ -109,6 +111,7 @@ async function apply(a: RepairAction) {
   const input: Record<string, unknown> = { id: a.id };
   if (a.type === 'update-filters') input.filters = a.filters;
   if (a.type === 'set-private') input.isPrivate = a.isPrivate;
+  if (a.type === 'stop-inheriting') input.inheritFilters = false;
   if (a.type === 'rename') input.translations = a.translations;
   await gql(`mutation($input: UpdateCollectionInput!) { updateCollection(input:$input) { id } }`, { input });
 }

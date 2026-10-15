@@ -59,15 +59,37 @@ test('does not propagate into facet-driven ancestors or from children that do no
   assert.deepEqual(plan.actions.filter((a) => a.type === 'update-filters'), []);
 });
 
-test('hides a public sub-category that has no filter of its own', () => {
+test('stops inheritance on sub-categories that show the whole parent', () => {
+  const orIds = (list: string[]) => ({
+    code: 'product-id-filter',
+    args: [
+      { name: 'productIds', value: JSON.stringify(list) },
+      { name: 'combineWithAnd', value: 'false' },
+    ],
+  });
   const plan = planRepairs(
-    [col({ id: 'cos', name: 'Cosmétique', filters: [ids(['20'])] }), col({ id: 'hair', name: 'Hair color', parentId: 'cos' })],
+    [
+      col({ id: 'cos', name: 'Cosmétique', filters: [ids(['20', '21'])] }),
+      // no filter of its own: Vendure gives it every product of the parent
+      col({ id: 'hair', name: 'Hair color', parentId: 'cos' }),
+      // OR-ed product list: parent's products UNION its own
+      col({ id: 'sham', name: 'Shampoings', parentId: 'cos', filters: [orIds(['21'])] }),
+      // AND-ed list and non-inheriting children are fine
+      col({ id: 'gel', name: 'Gel', parentId: 'cos', filters: [ids(['20'])] }),
+      col({ id: 'free', name: 'Free', parentId: 'cos', inheritFilters: false }),
+      // top-level: no parent to leak from
+      col({ id: 'top', name: 'Top', filters: [orIds(['10'])] }),
+    ],
     existing,
   );
   assert.deepEqual(
-    plan.actions.filter((a) => a.type === 'set-private'),
-    [{ type: 'set-private', id: 'hair', name: 'Hair color', isPrivate: true, reason: 'no filter of its own: it shows the whole parent' }],
+    plan.actions.filter((a) => a.type === 'stop-inheriting'),
+    [
+      { type: 'stop-inheriting', id: 'hair', name: 'Hair color', reason: 'no filter of its own: it shows the whole parent' },
+      { type: 'stop-inheriting', id: 'sham', name: 'Shampoings', reason: 'its product list is OR-ed with the parent: it shows the whole parent' },
+    ],
   );
+  assert.equal(plan.actions.some((a) => a.type === 'set-private'), false);
 });
 
 test('hides a top-level category whose products no longer exist', () => {

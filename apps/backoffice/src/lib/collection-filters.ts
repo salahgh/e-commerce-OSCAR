@@ -2,9 +2,9 @@
  * Pure helpers for editing Vendure collection filters from the product pages.
  *
  * Collections in this shop are manual product lists: a `product-id-filter`
- * holding a JSON array of product ids. Sub-categories keep `inheritFilters`
- * on, which in Vendure means the child is restricted to products that ALSO
- * match every ancestor's filters. So a product assigned to a child must be in
+ * holding a JSON array of product ids. Older sub-categories keep `inheritFilters`
+ * on (new ones are created with it off), which in Vendure means the child is
+ * restricted to products that ALSO match every ancestor's filters. So a product assigned to a child must be in
  * the parents too, or it is silently hidden. `assignmentPlan` enforces that,
  * and every helper keeps the collection's other filters (facet, name...)
  * instead of replacing the whole list.
