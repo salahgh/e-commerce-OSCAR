@@ -58,6 +58,7 @@ import { Modal } from '../../components/ui/Modal';
 import { PermissionGate } from '../../components/auth/PermissionGate';
 import { formatPrice, formatDateTime, formatDate } from '../../lib/utils';
 import { printInvoice } from '../../lib/export-utils';
+import { cancellationReason as reasonOfCancellation } from '../../lib/cancellation-reason';
 
 // Helper to get French translation from product translations
 const getProductNameFr = (translations: any[] | undefined): string => {
@@ -524,6 +525,8 @@ export const OrderDetail: React.FC = () => {
     );
   }
 
+  const cancelReason = reasonOfCancellation(order.customFields?.cancellationReason, order.history?.items);
+
   const statusConfig = ORDER_STATUS[order.state] || {
     label: order.state,
     variant: 'default' as const,
@@ -735,10 +738,8 @@ export const OrderDetail: React.FC = () => {
             <XCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-red-300 font-medium">Cette commande a été annulée</p>
-              {order.customFields?.cancellationReason && (
-                <p className="text-red-400 text-sm mt-1">
-                  Raison: {order.customFields.cancellationReason}
-                </p>
+              {cancelReason && (
+                <p className="text-red-400 text-sm mt-1">Raison : {cancelReason}</p>
               )}
             </div>
           </div>
