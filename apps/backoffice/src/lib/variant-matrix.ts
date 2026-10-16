@@ -97,7 +97,8 @@ export function buildMatrix(product: MatrixProduct, selection: Selection): Matri
       const state: OptionState = withIt.some(isSellable) ? 'available' : withIt.length ? 'out-of-stock' : 'unavailable';
       return { id: o.id, code: o.code, name: o.name, state };
     });
-    return { id: g.id, code: g.code, name: g.name, values: sortValues(values) };
+    // catalogue names like "Taille.." read badly in "Choisissez : taille.."
+    return { id: g.id, code: g.code, name: g.name.replace(/[.\s]+$/, ''), values: sortValues(values) };
   });
 
   const complete = groups.every((g) => selection[g.id]);

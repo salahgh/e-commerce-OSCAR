@@ -174,7 +174,7 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
             .filter((l) => l.quantity > 0)
             .map((l) => ({
               id: l.id,
-              name: l.productVariant?.name || l.productVariant?.sku || `Ligne ${l.id}`,
+              name: lineLabel(l),
               quantity: l.quantity,
               linePriceWithTax: l.linePriceWithTax,
             })),

@@ -115,3 +115,8 @@ test('choose keeps compatible choices and drops the ones that clash', () => {
   // clicking the chosen value again clears it
   assert.deepEqual(choose(product, { 'g-couleur': 'c-Gris', 'g-taille': 't-38' }, 'g-taille', 't-38'), { 'g-couleur': 'c-Gris' });
 });
+
+test('group names lose trailing dots and spaces from the catalogue ("Taille.." → "Taille")', () => {
+  const p: MatrixProduct = { ...product, optionGroups: [{ id: 'g-couleur', code: 'couleur', name: 'Couleur.. ' }, { id: 'g-taille', code: 'taille', name: 'Taille..' }] };
+  assert.deepEqual(buildMatrix(p, {}).groups.map((g) => g.name), ['Couleur', 'Taille']);
+});

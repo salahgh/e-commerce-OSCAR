@@ -509,6 +509,10 @@ mutation ModifyOrderGuided($input: ModifyOrderInput!) {
           id
           name
           sku
+          product {
+            id
+            name
+          }
         }
       }
       surcharges {
