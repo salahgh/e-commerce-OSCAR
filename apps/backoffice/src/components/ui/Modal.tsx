@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -12,6 +12,10 @@ interface ModalProps {
   showCloseButton?: boolean;
 }
 
+// Open modals, oldest first. With a dialog opened from another dialog only the
+// topmost one reacts to Escape, and page scroll comes back when the last closes.
+const openModals: symbol[] = [];
+
 export const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
@@ -20,26 +24,27 @@ export const Modal: React.FC<ModalProps> = ({
   size = 'md',
   showCloseButton = true,
 }) => {
+  const id = useRef(Symbol('modal')).current;
+
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    if (!isOpen) return;
+    openModals.push(id);
+    document.body.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = 'unset';
+      openModals.splice(openModals.indexOf(id), 1);
+      if (openModals.length === 0) document.body.style.overflow = 'unset';
     };
-  }, [isOpen]);
+  }, [isOpen, id]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape' && isOpen && openModals[openModals.length - 1] === id) {
         onClose();
       }
     };
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, id]);
 
   if (!isOpen) return null;
 

@@ -1,31 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
-import { Plus, Repeat, Search, Trash2, Undo2, X } from 'lucide-react';
-import {
-  AddNoteToOrderDocument,
-  AdminSearchVariantsForOrderDocument,
-  AdminVariantsOfProductDocument,
-  ModifyOrderGuidedDocument,
-} from '../../graphql/generated/graphql';
+import { useMutation } from '@apollo/client';
+import { Plus, Repeat, Trash2, Undo2, X } from 'lucide-react';
+import { AddNoteToOrderDocument, ModifyOrderGuidedDocument } from '../../graphql/generated/graphql';
 import { Modal, ModalContent, ModalFooter } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { TextArea } from '../../components/ui/TextArea';
-import { Spinner } from '../../components/ui/Spinner';
 import { PermissionGate } from '../../components/auth/PermissionGate';
 import { formatPrice } from '../../lib/utils';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
-import { useDebounce } from '../../hooks/useDebounce';
 import { addToast } from '../../store/slices/uiSlice';
 import {
-  availableStock,
   buildModification,
   describeEdits,
   emptyEdits,
+  lineLabel,
   type EditableLine,
   type OrderEdits,
   type VariantPick,
 } from '../../lib/order-edits';
+import { ProductPickerDialog } from './ProductPickerDialog';
+import { VariantChooser } from './VariantChooser';
 
 // ──────────────────────────────────────────────────────────────────────────
 // Modify order dialog — modifyOrderGuided (Oscar plugin)
@@ -33,19 +28,12 @@ import {
 // Vendure's raw modifyOrder needs the order moved into "Modifying" first and the
 // price difference settled by the caller; the plugin mutation does all of that
 // in one transaction. Flow here: change quantities, swap a line for another
-// variant of the same product, add products, add a surcharge → "Aperçu" (dry
+// variant of the same product ("Changer" → VariantChooser dialog), add products
+// ("Ajouter un produit" → ProductPickerDialog), add a surcharge → "Aperçu" (dry
 // run, nothing saved, shows the new lines and total) → "Appliquer". Everything
 // goes out as ONE modification (src/lib/order-edits.ts), so a swap can never
 // end up half-applied.
 // ──────────────────────────────────────────────────────────────────────────
-
-interface CatalogVariant extends VariantPick {
-  enabled: boolean;
-  priceWithTax: number;
-  stockOnHand: number;
-  stockAllocated: number;
-  trackInventory: string;
-}
 
 interface ModifyOrderDialogProps {
   isOpen: boolean;
@@ -67,79 +55,6 @@ interface ModificationPreview {
 
 const variantLabel = (v: VariantPick) => v.name || v.sku || v.id;
 
-/** A pickable list of catalogue variants; out-of-stock or disabled ones can't be chosen. */
-const VariantList: React.FC<{
-  variants: CatalogVariant[];
-  excludeId?: string;
-  loading: boolean;
-  emptyText: string;
-  onPick: (v: CatalogVariant) => void;
-}> = ({ variants, excludeId, loading, emptyText, onPick }) => {
-  if (loading) {
-    return (
-      <div className="flex justify-center py-3">
-        <Spinner size="sm" />
-      </div>
-    );
-  }
-  const items = variants.filter((v) => v.id !== excludeId);
-  if (items.length === 0) return <p className="text-sm text-muted-foreground py-2">{emptyText}</p>;
-  return (
-    <ul className="divide-y divide-border rounded-lg border border-border overflow-hidden max-h-64 overflow-y-auto">
-      {items.map((v) => {
-        const stock = availableStock(v);
-        const unavailable = !v.enabled || stock === 0;
-        return (
-          <li key={v.id}>
-            <button
-              type="button"
-              disabled={unavailable}
-              onClick={() => onPick(v)}
-              className="w-full flex items-center justify-between gap-3 px-3 py-2 text-left hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span className="min-w-0">
-                <span className="block text-sm text-foreground truncate">{variantLabel(v)}</span>
-                <span className="block text-xs text-muted-foreground">{v.sku}</span>
-              </span>
-              <span className="flex items-center gap-3 text-xs whitespace-nowrap">
-                <span
-                  className={
-                    !v.enabled ? 'text-muted-foreground' : stock === 0 ? 'text-red-400' : 'text-muted-foreground'
-                  }
-                >
-                  {!v.enabled ? 'Désactivé' : stock === null ? 'Stock illimité' : stock === 0 ? 'Rupture' : `Stock : ${stock}`}
-                </span>
-                <span className="text-foreground font-medium">{formatPrice(v.priceWithTax / 100)}</span>
-              </span>
-            </button>
-          </li>
-        );
-      })}
-    </ul>
-  );
-};
-
-/** Other variants (size, colour) of the line's product. */
-const SwapPanel: React.FC<{ productId: string; currentVariantId?: string; onPick: (v: CatalogVariant) => void }> = ({
-  productId,
-  currentVariantId,
-  onPick,
-}) => {
-  const { data, loading } = useQuery(AdminVariantsOfProductDocument, { variables: { productId } });
-  return (
-    <div className="mt-2">
-      <p className="text-xs text-muted-foreground mb-1">Remplacer par :</p>
-      <VariantList
-        variants={data?.productVariants.items ?? []}
-        excludeId={currentVariantId}
-        loading={loading}
-        emptyText="Aucune autre variante pour ce produit."
-        onPick={onPick}
-      />
-    </div>
-  );
-};
-
 export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
   isOpen,
   onClose,
@@ -152,8 +67,8 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const [edits, setEdits] = useState<OrderEdits>(emptyEdits);
-  const [swapOpenFor, setSwapOpenFor] = useState<string | null>(null);
-  const [term, setTerm] = useState('');
+  const [swapFor, setSwapFor] = useState<EditableLine | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [surchargeDescription, setSurchargeDescription] = useState('');
   const [surchargeAmount, setSurchargeAmount] = useState('');
   const [note, setNote] = useState('');
@@ -164,20 +79,14 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
   useEffect(() => {
     if (isOpen) {
       setEdits(emptyEdits());
-      setSwapOpenFor(null);
-      setTerm('');
+      setSwapFor(null);
+      setPickerOpen(false);
       setSurchargeDescription('');
       setSurchargeAmount('');
       setNote('');
       setPreview(null);
     }
   }, [isOpen]);
-
-  const debouncedTerm = useDebounce(term.trim(), 300);
-  const search = useQuery(AdminSearchVariantsForOrderDocument, {
-    variables: { term: debouncedTerm },
-    skip: debouncedTerm.length < 2,
-  });
 
   // no-cache: a dry-run result is an Order with the real id, and Apollo would
   // otherwise merge the previewed lines/total into the cached order behind
@@ -198,13 +107,10 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
     if (variant) swaps[lineId] = variant;
     else delete swaps[lineId];
     update({ swaps });
-    setSwapOpenFor(null);
+    setSwapFor(null);
   };
-  const addVariant = (variant: CatalogVariant) => {
-    const { id, name, sku, product } = variant;
-    update({ additions: [...edits.additions, { variant: { id, name, sku, product }, quantity: 1 }] });
-    setTerm('');
-  };
+  const addVariant = (variant: VariantPick, quantity: number) =>
+    update({ additions: [...edits.additions, { variant, quantity }] });
   const setAdditionQuantity = (index: number, quantity: number) =>
     update({ additions: edits.additions.map((a, i) => (i === index ? { ...a, quantity } : a)) });
   const removeAddition = (index: number) => update({ additions: edits.additions.filter((_, i) => i !== index) });
@@ -305,6 +211,7 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
   const summary = describeEdits(lines, edits);
 
   return (
+    <>
     <Modal isOpen={isOpen} onClose={onClose} title="Modifier la commande" size="lg">
       <ModalContent className="space-y-4">
         <div>
@@ -314,7 +221,7 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
               const swap = edits.swaps[line.id];
               const qty = edits.quantities[line.id] ?? line.quantity;
               const removed = !swap && qty === 0;
-              const label = line.productVariant?.name || line.productVariant?.sku || `Ligne ${line.id}`;
+              const label = lineLabel(line);
               const productId = line.productVariant?.product?.id;
               return (
                 <div key={line.id} className="p-3 bg-background/50 rounded-lg">
@@ -354,7 +261,7 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
                           variant="outline"
                           size="sm"
                           disabled={!productId}
-                          onClick={() => setSwapOpenFor(swapOpenFor === line.id ? null : line.id)}
+                          onClick={() => setSwapFor(line)}
                           title="Remplacer par une autre taille ou couleur"
                         >
                           <Repeat className="h-4 w-4 mr-1" />
@@ -372,13 +279,6 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
                       </Button>
                     </div>
                   </div>
-                  {swapOpenFor === line.id && productId && (
-                    <SwapPanel
-                      productId={productId}
-                      currentVariantId={line.productVariant?.id}
-                      onPick={(v) => setSwap(line.id, { id: v.id, name: v.name, sku: v.sku, product: v.product })}
-                    />
-                  )}
                 </div>
               );
             })}
@@ -386,7 +286,14 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
         </div>
 
         <div className="border-t border-border pt-4">
-          <p className="text-sm font-medium text-muted-foreground mb-2">Ajouter un produit</p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm font-medium text-muted-foreground">Produits ajoutés</p>
+            <Button variant="outline" size="sm" onClick={() => setPickerOpen(true)}>
+              <Plus className="h-4 w-4 mr-1" />
+              Ajouter un produit
+            </Button>
+          </div>
+          {edits.additions.length === 0 && <p className="text-sm text-muted-foreground">Aucun.</p>}
           {edits.additions.length > 0 && (
             <div className="space-y-2 mb-3">
               {edits.additions.map((a, index) => (
@@ -417,26 +324,6 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
                   </div>
                 </div>
               ))}
-            </div>
-          )}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={term}
-              onChange={(e) => setTerm(e.target.value)}
-              placeholder="Rechercher par nom ou SKU..."
-              className="pl-9 bg-background border-border"
-              aria-label="Rechercher un produit à ajouter"
-            />
-          </div>
-          {debouncedTerm.length >= 2 && (
-            <div className="mt-2">
-              <VariantList
-                variants={search.data?.productVariants.items ?? []}
-                loading={search.loading}
-                emptyText="Aucun produit trouvé."
-                onPick={addVariant}
-              />
             </div>
           )}
         </div>
@@ -557,6 +444,29 @@ export const ModifyOrderDialog: React.FC<ModifyOrderDialogProps> = ({
         </PermissionGate>
       </ModalFooter>
     </Modal>
+
+    <ProductPickerDialog isOpen={isOpen && pickerOpen} onClose={() => setPickerOpen(false)} onPick={addVariant} />
+
+    <Modal
+      isOpen={isOpen && !!swapFor}
+      onClose={() => setSwapFor(null)}
+      title={swapFor ? `Changer : ${lineLabel(swapFor)}` : 'Changer'}
+      size="md"
+    >
+      <ModalContent>
+        {swapFor?.productVariant?.product?.id && (
+          <VariantChooser
+            productId={swapFor.productVariant.product.id}
+            initialVariantId={swapFor.productVariant.id}
+            currentVariantId={swapFor.productVariant.id}
+            hideQuantity
+            confirmLabel="Remplacer"
+            onConfirm={(variant) => setSwap(swapFor.id, variant)}
+          />
+        )}
+      </ModalContent>
+    </Modal>
+    </>
   );
 };
 

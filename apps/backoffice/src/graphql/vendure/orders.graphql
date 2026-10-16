@@ -608,35 +608,47 @@ query AdminPaymentMethodsForOrder {
   }
 }
 
-# Other variants of a product (size/colour) to swap an order line for.
-query AdminVariantsOfProduct($productId: ID!) {
-  productVariants(productId: $productId, options: { take: 100, sort: { name: ASC } }) {
+# Product picker of the order dialog: products grouped, optionally in one category.
+query AdminProductPickerSearch($input: SearchInput!) {
+  search(input: $input) {
+    totalItems
     items {
-      id
-      name
+      productId
+      productName
       sku
-      enabled
-      priceWithTax
-      stockOnHand
-      stockAllocated
-      trackInventory
-      product {
+      inStock
+      productAsset {
         id
+        preview
+      }
+      priceWithTax {
+        ... on SinglePrice {
+          value
+        }
+        ... on PriceRange {
+          min
+          max
+        }
       }
     }
   }
 }
 
-# Variant search by name or SKU, to add a product to an order.
-query AdminSearchVariantsForOrder($term: String!) {
-  productVariants(
-    options: {
-      take: 20
-      filter: { _or: [{ name: { contains: $term } }, { sku: { contains: $term } }] }
-      sort: { name: ASC }
+# A product with its option groups and variants, for the variant chooser.
+query AdminProductForOrder($id: ID!) {
+  product(id: $id) {
+    id
+    name
+    featuredAsset {
+      id
+      preview
     }
-  ) {
-    items {
+    optionGroups {
+      id
+      code
+      name
+    }
+    variants {
       id
       name
       sku
@@ -645,8 +657,15 @@ query AdminSearchVariantsForOrder($term: String!) {
       stockOnHand
       stockAllocated
       trackInventory
-      product {
+      featuredAsset {
         id
+        preview
+      }
+      options {
+        id
+        code
+        name
+        groupId
       }
     }
   }

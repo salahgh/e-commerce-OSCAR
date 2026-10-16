@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { availableStock, buildModification, describeEdits, emptyEdits, type EditableLine, type OrderEdits } from './order-edits';
+import { availableStock, buildModification, describeEdits, emptyEdits, lineLabel, type EditableLine, type OrderEdits } from './order-edits';
 
 const variant = (id: string, name: string, productId = 'p1') => ({ id, name, sku: `SKU-${id}`, product: { id: productId } });
 const lines: EditableLine[] = [
@@ -105,4 +105,11 @@ test('availableStock: untracked variants are unlimited, tracked ones subtract al
   assert.equal(availableStock({ trackInventory: 'FALSE', stockOnHand: 0, stockAllocated: 0 }), null);
   assert.equal(availableStock({ trackInventory: 'TRUE', stockOnHand: 5, stockAllocated: 2 }), 3);
   assert.equal(availableStock({ trackInventory: 'INHERIT', stockOnHand: 1, stockAllocated: 4 }), 0);
+});
+
+test('lineLabel prefixes the product name when the variant name lacks it', () => {
+  assert.equal(lineLabel({ id: 'L', quantity: 1, productVariant: { id: 'v', name: 'Gris / 38', product: { id: 'p', name: 'Basket' } } }), 'Basket – Gris / 38');
+  assert.equal(lineLabel({ id: 'L', quantity: 1, productVariant: { id: 'v', name: 'Basket Gris 38', product: { id: 'p', name: 'Basket' } } }), 'Basket Gris 38');
+  assert.equal(lineLabel({ id: 'L', quantity: 1, productVariant: { id: 'v', name: 'Pantalon M' } }), 'Pantalon M');
+  assert.equal(lineLabel({ id: 'L', quantity: 1, productVariant: null }), 'Ligne L');
 });

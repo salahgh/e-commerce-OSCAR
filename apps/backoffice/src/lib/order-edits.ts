@@ -10,7 +10,7 @@ export interface VariantPick {
   id: string;
   name?: string | null;
   sku?: string | null;
-  product?: { id: string } | null;
+  product?: { id: string; name?: string | null } | null;
 }
 
 export interface EditableLine {
@@ -42,7 +42,14 @@ export const emptyEdits = (): OrderEdits => ({ quantities: {}, swaps: {}, additi
 const clampQty = (q: number | undefined, fallback: number) =>
   Number.isFinite(q) ? Math.max(0, Math.trunc(q as number)) : fallback;
 
-const lineLabel = (line: EditableLine) => line.productVariant?.name || line.productVariant?.sku || `Ligne ${line.id}`;
+/** "Basket – Gris / 38": shop variant names are often only the options. */
+export function lineLabel(line: EditableLine): string {
+  const v = line.productVariant;
+  const name = v?.name || v?.sku;
+  if (!name) return `Ligne ${line.id}`;
+  const product = v?.product?.name;
+  return product && !name.includes(product) ? `${product} – ${name}` : name;
+}
 const variantLabel = (v: VariantPick) => v.name || v.sku || v.id;
 
 export function buildModification(lines: EditableLine[], edits: OrderEdits): ModificationLines | null {
