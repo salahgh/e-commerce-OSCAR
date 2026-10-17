@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useLocale } from 'next-intl';
 import { useGetSiteSettingsQuery } from '@oscar/graphql-shop/generated';
+import { localizedText } from '@/lib/site-settings/localized';
 
 /** Resolved, locale-collapsed site content for the current request. */
 export interface SiteSettings {
@@ -29,20 +30,16 @@ export interface SiteSettings {
 
 const SiteSettingsContext = React.createContext<SiteSettings | null>(null);
 
-type Locale = 'ar' | 'fr' | 'en';
-const suffixFor = (locale: string): 'Ar' | 'Fr' | 'En' =>
-  locale === 'ar' ? 'Ar' : locale === 'en' ? 'En' : 'Fr';
-
 export function SiteSettingsProvider({ children }: { children: React.ReactNode }) {
-  const locale = useLocale() as Locale;
+  const locale = useLocale();
   // Apollo's auth link sends Accept-Language; non-localized fields are channel-wide.
   const { data } = useGetSiteSettingsQuery();
   const cf = data?.activeChannel?.customFields as Record<string, unknown> | undefined;
 
   const value = React.useMemo<SiteSettings | null>(() => {
     if (!cf) return null;
-    const sfx = suffixFor(locale);
-    const text = (base: string) => (cf[`${base}${sfx}`] as string | null) ?? null;
+    // falls back to another language when this one was left empty in the back-office
+    const text = (base: string) => localizedText(cf, base, locale);
     const str = (k: string) => (cf[k] as string | null) ?? null;
     const assetUrls = (k: string) =>
       ((cf[k] as Array<{ preview: string }> | null) ?? []).map((a) => a.preview);

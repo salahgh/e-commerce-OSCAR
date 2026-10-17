@@ -5,16 +5,18 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Logo } from './Logo';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
+import { phoneNumbers } from '@/lib/site-settings/localized';
 
 export function Footer() {
   const t = useTranslations('Layout.footer');
   const s = useSiteSettings();
   const year = new Date().getFullYear();
 
-  const email = s?.contactEmail || 'contact@oscarfashion.dz';
-  const phone = s?.contactPhone || '+213 555 000 000';
-  const telHref = `tel:${phone.replace(/\s+/g, '')}`;
-  const address = s?.footerAddress || t('address');
+  // Only what the shop entered in the back-office: no built-in address or number,
+  // which used to show (a fake "Rue Didouche Mourad") until the settings loaded.
+  const email = s?.contactEmail;
+  const phones = phoneNumbers(s?.contactPhone);
+  const address = s?.footerAddress;
   const copyright = s?.copyrightText || t('copyright', { year });
 
   const socials = [
@@ -68,22 +70,32 @@ export function Footer() {
           <div className="flex flex-col items-start gap-8 md:w-[406px]">
             <p className="font-dm text-20 font-bold text-ink-heading">{t('contactsTitle')}</p>
             <ul className="flex flex-col items-start gap-5 font-dm text-18 text-ink-muted">
-              <li className="flex items-center gap-2">
-                <Mail className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-                <a href={`mailto:${email}`} className="transition-colors hover:text-content-strong">
-                  {email}
-                </a>
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-                <a href={telHref} className="transition-colors hover:text-content-strong">
-                  {phone}
-                </a>
-              </li>
-              <li className="flex items-start gap-2">
-                <MapPin className="mt-1 h-5 w-5 shrink-0" strokeWidth={1.75} />
-                <span className="leading-relaxed">{address}</span>
-              </li>
+              {email && (
+                <li className="flex items-center gap-2">
+                  <Mail className="h-5 w-5 shrink-0" strokeWidth={1.75} />
+                  <a href={`mailto:${email}`} className="transition-colors hover:text-content-strong">
+                    {email}
+                  </a>
+                </li>
+              )}
+              {phones.length > 0 && (
+                <li className="flex items-center gap-2">
+                  <Phone className="h-5 w-5 shrink-0" strokeWidth={1.75} />
+                  <span className="flex flex-wrap gap-x-3 gap-y-1">
+                    {phones.map((p) => (
+                      <a key={p.href} href={p.href} dir="ltr" className="transition-colors hover:text-content-strong">
+                        {p.label}
+                      </a>
+                    ))}
+                  </span>
+                </li>
+              )}
+              {address && (
+                <li className="flex items-start gap-2">
+                  <MapPin className="mt-1 h-5 w-5 shrink-0" strokeWidth={1.75} />
+                  <span dir="auto" className="leading-relaxed">{address}</span>
+                </li>
+              )}
             </ul>
           </div>
         </div>
