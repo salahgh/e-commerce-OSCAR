@@ -27,7 +27,7 @@ export const shopApiExtensions = gql`
 
   type AddToPlacedOrderResult {
     success: Boolean!
-    "NOT_FOUND | EXPIRED | NOT_EDITABLE | NOT_CASH_ON_DELIVERY | NOT_PLACED | INVALID_QUANTITY, or a Vendure error code such as INSUFFICIENT_STOCK_ERROR"
+    "NOT_FOUND | EXPIRED | NOT_EDITABLE | NOT_CASH_ON_DELIVERY | NOT_PLACED | INVALID_QUANTITY | VARIANT_NOT_AVAILABLE, or a Vendure error code such as INSUFFICIENT_STOCK_ERROR"
     errorCode: String
     message: String
     order: Order

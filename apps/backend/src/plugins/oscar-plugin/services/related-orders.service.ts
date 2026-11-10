@@ -3,6 +3,7 @@ import {
   ID,
   Order,
   OrderService,
+  ProductVariant,
   RequestContext,
   TransactionalConnection,
   UserInputError,
@@ -179,6 +180,16 @@ export class RelatedOrdersService {
       new Date(),
     );
     if (blocker) return { success: false, errorCode: blocker };
+
+    // Only what the shop sells: Vendure's modifyOrder (an admin operation) checks the
+    // channel and deletion but not `enabled`, unlike addItemToOrder.
+    const variant = await this.connection.findOneInChannel(ctx, ProductVariant, productVariantId, ctx.channelId, {
+      relations: ['product'],
+      loadEagerRelations: false,
+    });
+    if (!variant || variant.deletedAt || !variant.enabled || !variant.product?.enabled || variant.product.deletedAt) {
+      return { success: false, errorCode: 'VARIANT_NOT_AVAILABLE' };
+    }
 
     const result = await this.orderModificationService.modify(ctx, {
       orderId: order.id,
