@@ -171,8 +171,18 @@ function localDate(iso: string, endOfDay: boolean): string {
   return date.toISOString();
 }
 
+/**
+ * True when the search text could be a phone number (only digits and phone
+ * punctuation, at least 4 digits): the page then asks the backend for the
+ * matching order ids (`phoneSearch`), since Vendure can't filter orders by phone.
+ */
+export function looksLikePhone(q: string): boolean {
+  const text = q.trim();
+  return /^[\d\s+().\-/]+$/.test(text) && text.replace(/\D/g, '').length >= 4;
+}
+
 /** Filters shared by the list and by every tab count: everything except the tab itself. */
-function commonFilter(state: OrderListState, tab: OrderTab): Filter {
+function commonFilter(state: OrderListState, tab: OrderTab, phoneOrderIds: readonly string[] = []): Filter {
   const filter: Filter = {};
   if (state.wilaya) filter.wilaya = { eq: state.wilaya };
   if (state.from || state.to) {
@@ -192,6 +202,8 @@ function commonFilter(state: OrderListState, tab: OrderTab): Filter {
     // Vendure applies one operator to the whole filter object; the nested `_or`
     // keeps the search alternatives together while the rest stays ANDed.
     filter._or = [{ code: { contains: q } }, { customerLastName: { contains: q } }];
+    // Orders whose customer or delivery phone matches (ids from `phoneSearch`).
+    if (phoneOrderIds.length) filter._or.push({ id: { in: [...phoneOrderIds] } });
   }
   return filter;
 }
@@ -213,22 +225,25 @@ function sortField(sort: OrderSortKey, tab: OrderTab): keyof OrderSortParameter 
   }
 }
 
-export function buildOrderListOptions(state: OrderListState): OrderListOptions {
+export function buildOrderListOptions(state: OrderListState, phoneOrderIds?: readonly string[]): OrderListOptions {
   // The generated SortOrder is a string enum whose values are exactly these strings.
   const dir = (state.dir === 'asc' ? 'ASC' : 'DESC') as SortOrder;
   return {
     skip: (state.page - 1) * state.size,
     take: state.size,
     sort: { [sortField(state.sort, state.tab)]: dir },
-    filter: { ...tabFilter(state.tab), ...commonFilter(state, state.tab) },
+    filter: { ...tabFilter(state.tab), ...commonFilter(state, state.tab, phoneOrderIds) },
   };
 }
 
 /** One cheap query per tab (take: 1, only totalItems is read) for the tab badges. */
-export function buildTabCountOptions(state: OrderListState): Record<OrderTab, OrderListOptions> {
+export function buildTabCountOptions(
+  state: OrderListState,
+  phoneOrderIds?: readonly string[],
+): Record<OrderTab, OrderListOptions> {
   const out = {} as Record<OrderTab, OrderListOptions>;
   for (const { key } of ORDER_TABS) {
-    out[key] = { take: 1, filter: { ...tabFilter(key), ...commonFilter(state, key) } };
+    out[key] = { take: 1, filter: { ...tabFilter(key), ...commonFilter(state, key, phoneOrderIds) } };
   }
   return out;
 }

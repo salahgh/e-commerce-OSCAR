@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
@@ -10,6 +10,7 @@ import { useGetOrderByCodeQuery } from '@oscar/graphql-shop/generated';
 import { Link } from '@/i18n/routing';
 import { Alert, Button, Card, Skeleton } from '@/components/ui';
 import { trackPurchase } from '@/lib/analytics';
+import { getRecentOrder, minutesLeft, type RecentOrder } from '@/lib/checkout/recent-order';
 
 export default function ConfirmationPage() {
   const t = useTranslations('CheckoutConfirmationPage');
@@ -24,6 +25,13 @@ export default function ConfirmationPage() {
   });
 
   const order = data?.orderByCode;
+
+  // Read after mount: localStorage is not available during server rendering.
+  const [recent, setRecent] = useState<RecentOrder | null>(null);
+  useEffect(() => {
+    const r = getRecentOrder();
+    setRecent(r?.code === code ? r : null);
+  }, [code]);
 
   useEffect(() => {
     if (!order) return;
@@ -47,6 +55,22 @@ export default function ConfirmationPage() {
   }
 
   if (error || !order) {
+    // This page is only reached after a successful checkout (or from the
+    // "add to my order" flow): a red error here made customers order again.
+    // An order this browser just placed is shown as saved even if it can't be loaded.
+    if (recent) {
+      return (
+        <div className="mx-auto flex max-w-2xl flex-col gap-6 px-6 py-24 text-center">
+          <CheckCircle2 className="mx-auto h-16 w-16 text-state-success-border" />
+          <Alert intent="success" title={t('savedTitle')}>
+            {t('savedBody', { code })}
+          </Alert>
+          <Button asChild intent="secondary">
+            <Link href="/products">{t('continueShopping')}</Link>
+          </Button>
+        </div>
+      );
+    }
     return (
       <div className="mx-auto max-w-2xl px-6 py-24">
         <Alert intent="danger" title={t('errorTitle')}>
@@ -56,6 +80,10 @@ export default function ConfirmationPage() {
     );
   }
 
+  const phone = order.shippingAddress?.phoneNumber;
+  const address = [order.shippingAddress?.city, order.shippingAddress?.province].filter(Boolean).join(', ');
+  const cashOnDelivery = order.payments?.some((p) => p.method === 'cash-on-delivery');
+
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-8 px-6 py-12 text-center">
       <CheckCircle2 className="mx-auto h-16 w-16 text-state-success-border" />
@@ -64,16 +92,61 @@ export default function ConfirmationPage() {
         <p className="text-14 text-content-muted">{t('subtitle', { code: order.code })}</p>
       </header>
 
-      <Card padding="lg" className="text-start">
-        <dl className="grid grid-cols-2 gap-y-2 text-14">
+      <Alert intent="info" className="text-start">
+        {phone ? t('callHint', { phone }) : t('callHintNoPhone')}
+      </Alert>
+
+      <Card padding="lg" className="flex flex-col gap-4 text-start">
+        <h2 className="text-16 font-bold text-content-strong">{t('items')}</h2>
+        <ul className="flex flex-col gap-3">
+          {order.lines
+            .filter((line) => line.quantity > 0)
+            .map((line) => {
+              const image = line.featuredAsset?.preview ?? line.productVariant.product.featuredAsset?.preview;
+              const product = line.productVariant.product.name;
+              const variant = line.productVariant.name;
+              return (
+                <li key={line.id} className="flex items-center gap-3">
+                  {image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={`${image}?preset=thumb`} alt="" className="size-14 shrink-0 rounded-md object-cover" />
+                  ) : (
+                    <div className="size-14 shrink-0 rounded-md bg-bg-muted" />
+                  )}
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-14 font-medium text-content-strong">{product}</span>
+                    {variant && variant !== product && (
+                      <span className="truncate text-12 text-content-muted">{variant}</span>
+                    )}
+                    <span className="text-12 text-content-muted">{t('quantity', { count: line.quantity })}</span>
+                  </div>
+                  <span className="text-14 text-content-strong">{formatDzdTotal(line.linePriceWithTax, locale)}</span>
+                </li>
+              );
+            })}
+        </ul>
+
+        <dl className="grid grid-cols-2 gap-y-2 border-t border-border pt-4 text-14">
           <dt className="text-content-muted">{t('orderNumber')}</dt>
           <dd className="font-mono text-end text-content-strong">{order.code}</dd>
-          <dt className="text-content-muted">{t('total')}</dt>
+          {address && (
+            <>
+              <dt className="text-content-muted">{t('deliveryTo')}</dt>
+              <dd className="text-end text-content-strong">{address}</dd>
+            </>
+          )}
+          <dt className="text-content-muted">{t('shipping')}</dt>
+          <dd className="text-end text-content-strong">{formatDzdTotal(order.shippingWithTax, locale)}</dd>
+          <dt className="font-bold text-content-strong">{cashOnDelivery ? t('payOnDelivery') : t('total')}</dt>
           <dd className="text-end font-bold text-content-strong">
             {formatDzdTotal(order.totalWithTax, locale)}
           </dd>
         </dl>
       </Card>
+
+      {recent && order.state === 'PaymentAuthorized' && (
+        <p className="text-14 text-content-muted">{t('addMoreHint', { minutes: minutesLeft(recent) })}</p>
+      )}
 
       {/* Guests may skip the email at checkout; don't promise one they won't get. */}
       {!isPlaceholderEmail(order.customer?.emailAddress) && (

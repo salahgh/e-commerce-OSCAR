@@ -54,7 +54,8 @@ interface Cart {
 interface CartContextType {
   cart: Cart | null;
   loading: boolean;
-  addToCart: (productVariantId: string, quantity: number) => Promise<void>;
+  /** Resolves true when the item is in the cart. `openMiniCart: false` for flows that navigate away (buy now). */
+  addToCart: (productVariantId: string, quantity: number, options?: { openMiniCart?: boolean }) => Promise<boolean>;
   updateQuantity: (orderLineId: string, quantity: number) => Promise<void>;
   removeItem: (orderLineId: string) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -129,18 +130,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     await refetch();
   }, [refetch]);
 
-  const addToCart = async (productVariantId: string, quantity: number) => {
+  const addToCart = async (productVariantId: string, quantity: number, options?: { openMiniCart?: boolean }) => {
     try {
       const { data: result } = await addItemMutation({ variables: { productVariantId, quantity } });
       const response = result?.addItemToOrder;
-      if (!response) return;
+      if (!response) return false;
       if ('errorCode' in response) {
         if (response.errorCode === 'INSUFFICIENT_STOCK_ERROR') {
           toast.error(tErrors('insufficientStock', { available: (response as { quantityAvailable?: number }).quantityAvailable ?? 0 }));
         } else {
           toast.error((response as { message?: string }).message ?? tErrors('addFailed'));
         }
-        return;
+        return false;
       }
       if ('id' in response) {
         const nextCart = mapOrderToCart(response as OrderFieldsFragment);
@@ -154,13 +155,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             value: line.unitPrice * quantity,
           });
         }
-        toast.success(tToasts('added'));
-        // Auto-open the mini-cart so the user sees the new item — feels
-        // more like adding to a real cart than a toast that vanishes.
-        setMiniCartOpen(true);
+        // Auto-open the mini-cart so the user sees the new item and can keep
+        // shopping before checking out (one order for several items).
+        if (options?.openMiniCart !== false) {
+          toast.success(tToasts('added'));
+          setMiniCartOpen(true);
+        }
+        return true;
       }
+      return false;
     } catch (error) {
       toast.error(error instanceof Error ? error.message : tErrors('addFailed'));
+      return false;
     }
   };
 

@@ -11,6 +11,7 @@ import {
   Clock,
   MessageSquare,
   Edit2,
+  Undo2,
   Save,
   X,
   CheckCircle,
@@ -45,6 +46,8 @@ import {
 } from '../../graphql/generated/graphql';
 import { RefundDialog, ManualPaymentDialog } from './OrderActionDialogs';
 import { ModifyOrderDialog } from './ModifyOrderDialog';
+import { RelatedOrdersBanner } from './RelatedOrdersBanner';
+import { ReturnDialog } from './ReturnDialog';
 import { FulfillmentDialog } from './FulfillmentDialog';
 import { orderListReturnPath } from './useOrderListParams';
 import { TransitionFulfillmentToStateDocument } from '../../graphql/generated/graphql';
@@ -54,12 +57,17 @@ import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
 import { Input } from '../../components/ui/Input';
 import { TextArea } from '../../components/ui/TextArea';
+import { Select } from '../../components/ui/Select';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Modal } from '../../components/ui/Modal';
 import { PermissionGate } from '../../components/auth/PermissionGate';
 import { formatPrice, formatDateTime, formatDate } from '../../lib/utils';
 import { printInvoice } from '../../lib/export-utils';
-import { cancellationReason as reasonOfCancellation } from '../../lib/cancellation-reason';
+import {
+  cancellationReason as reasonOfCancellation,
+  CANCELLATION_REASONS,
+  buildCancellationReason,
+} from '../../lib/cancellation-reason';
 
 // Helper to get French translation from product translations
 const getProductNameFr = (translations: any[] | undefined): string => {
@@ -212,12 +220,15 @@ export const OrderDetail: React.FC = () => {
   const [newNote, setNewNote] = useState('');
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
+  const [cancellationPreset, setCancellationPreset] = useState('');
+  const cancelReasonToSend = buildCancellationReason(cancellationPreset, cancellationReason);
   const [activeTab, setActiveTab] = useState<'items' | 'history' | 'notes'>('items');
   const [imagePreview, setImagePreview] = useState<LineImagePreview | null>(null);
   const [showRefundDialog, setShowRefundDialog] = useState(false);
   const [refundDefaultPaymentId, setRefundDefaultPaymentId] = useState<string | null>(null);
   const [showManualPaymentDialog, setShowManualPaymentDialog] = useState(false);
   const [showModifyDialog, setShowModifyDialog] = useState(false);
+  const [showReturnDialog, setShowReturnDialog] = useState(false);
   const [showFulfillmentDialog, setShowFulfillmentDialog] = useState(false);
 
   // Fetch order data
@@ -474,12 +485,13 @@ export const OrderDetail: React.FC = () => {
 
   // Handle cancel order
   const handleCancelOrder = async () => {
+    if (!cancelReasonToSend) return; // the confirm button stays disabled until a reason is chosen
     try {
       const result = await cancelOrder({
         variables: {
           input: {
             orderId: id!,
-            reason: cancellationReason || undefined,
+            reason: cancelReasonToSend,
           },
         },
       });
@@ -500,6 +512,7 @@ export const OrderDetail: React.FC = () => {
     }
     setShowCancelDialog(false);
     setCancellationReason('');
+    setCancellationPreset('');
   };
 
   if (loading) {
@@ -679,10 +692,32 @@ export const OrderDetail: React.FC = () => {
                     </Button>
                   </PermissionGate>
                 )}
+                {/* Returns — once items have left the shop (refused at the door, returned later) */}
+                {['PartiallyShipped', 'Shipped', 'PartiallyDelivered', 'Delivered'].includes(order.state) && (
+                  <PermissionGate permission="UpdateOrder" disableMode>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowReturnDialog(true)}
+                      className="ml-2"
+                    >
+                      <Undo2 className="h-4 w-4 mr-1" />
+                      Retour
+                    </Button>
+                  </PermissionGate>
+                )}
               </div>
             )}
           </div>
         </div>
+
+        <RelatedOrdersBanner
+          orderId={order.id}
+          orderCode={order.code}
+          orderState={order.state}
+          statusLabel={(state) => ORDER_STATUS[state]?.label ?? state}
+          onMerged={() => refetch()}
+        />
 
         {/* Order Progress */}
         {order.state !== 'Cancelled' && (
@@ -988,7 +1023,14 @@ export const OrderDetail: React.FC = () => {
                                 )}
                                 {item.type === 'ORDER_CANCELLATION' && (
                                   <div className="space-y-1">
-                                    <p className="text-foreground">Commande annulée</p>
+                                    <p className="text-foreground">
+                                      {String((item.data as any)?.reason ?? '').startsWith('Retour — ')
+                                        ? `Articles retournés (${((item.data as any)?.lines ?? []).reduce(
+                                            (n: number, l: { quantity: number }) => n + l.quantity,
+                                            0
+                                          )})`
+                                        : 'Commande annulée'}
+                                    </p>
                                     {(item.data as any)?.reason ? (
                                       <p className="text-foreground italic">
                                         Raison : "{(item.data as any).reason}"
@@ -1498,6 +1540,7 @@ export const OrderDetail: React.FC = () => {
         onClose={() => {
           setShowCancelDialog(false);
           setCancellationReason('');
+          setCancellationPreset('');
         }}
         onConfirm={handleCancelOrder}
         title="Annuler la commande"
@@ -1506,12 +1549,23 @@ export const OrderDetail: React.FC = () => {
             <p className="text-foreground">
               Êtes-vous sûr de vouloir annuler cette commande? Cette action est irréversible.
             </p>
+            <Select
+              label="Raison d'annulation *"
+              value={cancellationPreset}
+              onChange={(e) => setCancellationPreset(e.target.value)}
+              options={[
+                { value: '', label: '— Choisir une raison —' },
+                ...CANCELLATION_REASONS.map((r) => ({ value: r, label: r })),
+              ]}
+            />
             <TextArea
-              label="Raison d'annulation"
+              label={cancellationPreset === 'Autre' ? 'Précisez la raison *' : 'Précisions (facultatif)'}
               value={cancellationReason}
               onChange={(e) => setCancellationReason(e.target.value)}
-              rows={3}
-              placeholder="Raison de l'annulation..."
+              rows={2}
+              placeholder={
+                cancellationPreset === 'Article ou taille non disponible' ? 'Ex. : taille 42, couleur noire' : ''
+              }
               className="bg-card border-border"
             />
           </div>
@@ -1519,6 +1573,7 @@ export const OrderDetail: React.FC = () => {
         confirmText="Annuler la commande"
         variant="danger"
         loading={cancelling}
+        confirmDisabled={!cancelReasonToSend}
       />
 
       {/* New action dialogs */}
@@ -1533,6 +1588,13 @@ export const OrderDetail: React.FC = () => {
         isOpen={showManualPaymentDialog}
         onClose={() => setShowManualPaymentDialog(false)}
         orderId={id!}
+        onSuccess={refetch}
+      />
+      <ReturnDialog
+        isOpen={showReturnDialog}
+        onClose={() => setShowReturnDialog(false)}
+        orderId={id!}
+        lines={(order.lines || []).filter((l) => l.quantity > 0)}
         onSuccess={refetch}
       />
       <ModifyOrderDialog

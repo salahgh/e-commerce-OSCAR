@@ -213,7 +213,17 @@
     "viewOrder": "Voir ma commande",
     "continueShopping": "Continuer mes achats",
     "errorTitle": "Commande introuvable",
-    "errorBody": "Le code de commande est invalide."
+    "errorBody": "Le code de commande est invalide.",
+    "callHint": "Notre équipe va vous appeler au {phone} pour confirmer votre commande avant l'expédition. Gardez votre téléphone à portée de main.",
+    "callHintNoPhone": "Notre équipe va vous appeler pour confirmer votre commande avant l'expédition.",
+    "items": "Articles commandés",
+    "quantity": "Qté {count}",
+    "deliveryTo": "Livraison à",
+    "shipping": "Livraison",
+    "payOnDelivery": "À payer à la livraison",
+    "addMoreHint": "Vous avez oublié un article ? Pendant {minutes} min, ajoutez-le à cette commande depuis la page du produit (bouton « Ajouter à ma commande ») : inutile de repasser commande.",
+    "savedTitle": "Commande enregistrée",
+    "savedBody": "Votre commande {code} est bien enregistrée. Ne la repassez pas : nous vous appellerons pour la confirmer."
   },
   "UserLayout": {
     "title": "Mon compte",
@@ -672,5 +682,19 @@
       "phoneInvalid": "Numéro de téléphone invalide",
       "termsRequired": "Vous devez accepter les conditions"
     }
+  },
+  "RecentOrder": {
+    "banner": "Commande {code} en cours : ajoutez cet article directement à votre commande (encore {minutes} min).",
+    "addToOrder": "Ajouter à ma commande",
+    "added": "Article ajouté à votre commande {code}. Le montant à payer à la livraison a été mis à jour.",
+    "addedAll": "Articles ajoutés à votre commande {code}.",
+    "closed": "Cette commande ne peut plus être modifiée : elle est déjà en préparation. Passez une nouvelle commande.",
+    "insufficientStock": "Stock insuffisant pour cet article.",
+    "failed": "Impossible d'ajouter l'article à votre commande.",
+    "partial": "{added} article(s) ajouté(s) à votre commande {code}, mais pas tous : {reason}",
+    "checkoutTitle": "Vous venez de passer la commande {code}",
+    "checkoutBody": "Ajoutez ces articles à cette commande plutôt que d'en passer une nouvelle : une seule livraison et un seul paiement à la livraison. Possible encore {minutes} min.",
+    "checkoutAdd": "Ajouter à ma commande {code}",
+    "checkoutNew": "Non, passer une nouvelle commande"
   }
 }

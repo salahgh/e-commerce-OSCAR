@@ -13,6 +13,8 @@ query AdminOrders($options: OrderListOptions) {
       total
       totalQuantity
       currencyCode
+      # Possible duplicates: other orders from the same phone within 24h (Oscar plugin)
+      relatedOrderCount
       customer {
         id
         firstName
@@ -671,6 +673,71 @@ query AdminProductForOrder($id: ID!) {
         name
         groupId
       }
+    }
+  }
+}
+
+# Other orders from the same phone number within 24 hours (Oscar plugin)
+query RelatedOrders($orderId: ID!) {
+  relatedOrders(orderId: $orderId) {
+    id
+    code
+    state
+    orderPlacedAt
+    totalWithTax
+    itemCount
+  }
+}
+
+# Move every item of the source order into the target and cancel the source (Oscar plugin)
+mutation MergeOrders($targetOrderId: ID!, $sourceOrderId: ID!) {
+  mergeOrders(targetOrderId: $targetOrderId, sourceOrderId: $sourceOrderId) {
+    id
+    code
+    state
+    totalWithTax
+  }
+}
+
+# Order and customer ids whose phone contains the digits typed, any formatting (Oscar plugin)
+query PhoneSearch($phone: String!) {
+  phoneSearch(phone: $phone) {
+    orderIds
+    customerIds
+  }
+}
+
+# ==================== RETURNS (Oscar plugin) ====================
+
+query ReturnDialogData($orderId: ID!) {
+  returnReasons {
+    code
+    label
+  }
+  returnableLines(orderId: $orderId) {
+    orderLineId
+    quantity
+  }
+}
+
+mutation RegisterReturn($input: RegisterReturnInput!) {
+  registerReturn(input: $input) {
+    id
+    state
+    totalWithTax
+  }
+}
+
+query ReturnStats($from: DateTime!, $to: DateTime!) {
+  returnStats(from: $from, to: $to) {
+    returns
+    units
+    value
+    byReason {
+      reason
+      returns
+      units
+      value
     }
   }
 }

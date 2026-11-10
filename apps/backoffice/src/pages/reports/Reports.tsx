@@ -38,6 +38,7 @@ import {
   ArrowDownRight,
   Box,
   RefreshCw,
+  Undo2,
 } from 'lucide-react';
 import {
   SalesReportOrdersDocument,
@@ -48,6 +49,7 @@ import {
   CategoriesForReportDocument,
 } from '../../graphql/generated/graphql';
 import { Tabs } from '../../components/ui/Tabs';
+import { ReturnsReport } from './ReturnsReport';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Spinner } from '../../components/ui/Spinner';
@@ -1047,6 +1049,12 @@ export const Reports: React.FC = () => {
           )}
         </div>
       ),
+    },
+    {
+      id: 'returns',
+      label: 'Retours',
+      icon: <Undo2 className="h-4 w-4" />,
+      content: <ReturnsReport dateRange={dateRange} onDateRangeChange={setDateRange} ranges={DATE_RANGES} />,
     },
   ];
 

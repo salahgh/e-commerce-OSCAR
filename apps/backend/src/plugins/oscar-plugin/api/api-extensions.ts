@@ -25,6 +25,14 @@ export const shopApiExtensions = gql`
     postalCode: String
   }
 
+  type AddToPlacedOrderResult {
+    success: Boolean!
+    "NOT_FOUND | EXPIRED | NOT_EDITABLE | NOT_CASH_ON_DELIVERY | NOT_PLACED | INVALID_QUANTITY, or a Vendure error code such as INSUFFICIENT_STOCK_ERROR"
+    errorCode: String
+    message: String
+    order: Order
+  }
+
   extend type Query {
     """
     Active delivery wilayas with their active communes, ordered by code.
@@ -68,6 +76,13 @@ export const shopApiExtensions = gql`
     Accepts a multipart file upload and returns the updated customer.
     """
     updateCustomerAvatar(file: Upload!): Customer!
+
+    """
+    Add an item to a cash-on-delivery order placed in the last 30 minutes, instead of
+    placing a second order. The order code is the guest's proof of ownership; a
+    registered customer's order also requires their session.
+    """
+    addToPlacedOrder(orderCode: String!, productVariantId: ID!, quantity: Int!): AddToPlacedOrderResult!
   }
 `;
 
@@ -463,5 +478,107 @@ export const adminApiExtensions = gql`
     order is returned.
     """
     modifyOrderGuided(input: ModifyOrderInput!): ModifyOrderResult!
+
+    """
+    Move every item of sourceOrderId into targetOrderId and cancel the source (reason
+    "Fusionnée dans la commande …"), in one transaction. Both orders must be unshipped
+    cash-on-delivery orders awaiting confirmation (PaymentAuthorized).
+    """
+    mergeOrders(targetOrderId: ID!, sourceOrderId: ID!): Order!
+  }
+
+  "Another order from the same phone number placed within 24 hours."
+  type RelatedOrder {
+    id: ID!
+    code: String!
+    state: String!
+    orderPlacedAt: DateTime!
+    totalWithTax: Money!
+    itemCount: Int!
+  }
+
+  extend type Order {
+    "Number of other orders from the same phone number placed within 24 hours (possible duplicates)."
+    relatedOrderCount: Int!
+  }
+
+  "Ids matching a phone search; the back-office adds them to its list filters as id IN (...)."
+  type PhoneSearchResult {
+    orderIds: [ID!]!
+    customerIds: [ID!]!
+  }
+
+  extend type Query {
+    "Other orders from the same phone number placed within 24 hours of this one, oldest first."
+    relatedOrders(orderId: ID!): [RelatedOrder!]!
+
+    """
+    Orders (customer or delivery phone) and customers (own or address phone) whose number
+    contains the digits typed, whatever the formatting ("+213 661…", "0661…"). Empty when the
+    text is not a phone number (letters or fewer than 4 digits). At most 500 ids each.
+    """
+    phoneSearch(phone: String!): PhoneSearchResult!
+  }
+
+  # ==================== RETURNS ====================
+
+  type ReturnReason {
+    code: String!
+    label: String!
+  }
+
+  type ReturnableLine {
+    orderLineId: ID!
+    "Units shipped and not yet returned"
+    quantity: Int!
+  }
+
+  type ReturnReasonStats {
+    reason: String!
+    returns: Int!
+    units: Int!
+    value: Money!
+  }
+
+  type ReturnStats {
+    returns: Int!
+    units: Int!
+    "Value at the price paid"
+    value: Money!
+    byReason: [ReturnReasonStats!]!
+  }
+
+  input ReturnLineInput {
+    orderLineId: ID!
+    quantity: Int!
+  }
+
+  input RegisterReturnInput {
+    orderId: ID!
+    lines: [ReturnLineInput!]!
+    "A code from returnReasons"
+    reasonCode: String!
+    "Free text; required when reasonCode is OTHER"
+    details: String
+    "Put the units back on sale (false for defective items: written off)"
+    restock: Boolean!
+  }
+
+  extend type Query {
+    returnReasons: [ReturnReason!]!
+    "Units of each line that can still be returned (shipped minus already returned)"
+    returnableLines(orderId: ID!): [ReturnableLine!]!
+    "Returns registered between from and to, per reason"
+    returnStats(from: DateTime!, to: DateTime!): ReturnStats!
+  }
+
+  extend type Mutation {
+    """
+    Register returned items on a shipped or delivered order. Recorded as a line cancellation
+    with reason "Retour — …" (stock restored once); defective items are written off when
+    restock is false. While cash on delivery is uncollected, the amount to collect follows
+    the new total; otherwise the amount to give back is noted on the order.
+    """
+    registerReturn(input: RegisterReturnInput!): Order!
   }
 `;

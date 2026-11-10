@@ -20,7 +20,9 @@ import {
 import {
   AdminCustomersDocument,
   DeleteCustomerDocument,
+  PhoneSearchDocument,
 } from '../../graphql/generated/graphql';
+import { looksLikePhone } from '../orders/order-list-params';
 import { Badge } from '../../components/ui/Badge';
 import { Spinner } from '../../components/ui/Spinner';
 import { Button } from '../../components/ui/Button';
@@ -44,7 +46,14 @@ export const CustomerList: React.FC = () => {
   const pageSize = 10;
   const [deleteCustomer, { loading: deleting }] = useMutation(DeleteCustomerDocument);
 
-  // Build filter based on search term (searches email, firstName, or lastName)
+  // A search that looks like a phone number also matches the customer's own and
+  // saved-address phones whatever their formatting (resolved to ids server-side).
+  const phoneTerm = searchTerm.trim();
+  const isPhone = looksLikePhone(phoneTerm);
+  const phone = useQuery(PhoneSearchDocument, { variables: { phone: phoneTerm }, skip: !isPhone });
+  const phoneCustomerIds = isPhone ? phone.data?.phoneSearch.customerIds ?? [] : [];
+
+  // Search email, first name, last name, phone
   const buildFilter = () => {
     if (!searchTerm) return undefined;
     return {
@@ -52,11 +61,14 @@ export const CustomerList: React.FC = () => {
         { emailAddress: { contains: searchTerm } },
         { firstName: { contains: searchTerm } },
         { lastName: { contains: searchTerm } },
+        { phoneNumber: { contains: searchTerm } },
+        ...(phoneCustomerIds.length ? [{ id: { in: [...phoneCustomerIds] } }] : []),
       ],
     };
   };
 
   const { data, loading, error, refetch } = useQuery(AdminCustomersDocument, {
+    skip: isPhone && phone.loading,
     variables: {
       options: {
         skip: currentPage * pageSize,
@@ -180,7 +192,7 @@ export const CustomerList: React.FC = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Rechercher par nom, prénom ou email..."
+              placeholder="Rechercher par nom, prénom, email ou téléphone..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);

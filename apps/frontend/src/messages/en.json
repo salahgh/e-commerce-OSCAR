@@ -213,7 +213,17 @@
     "viewOrder": "View my order",
     "continueShopping": "Continue shopping",
     "errorTitle": "Order not found",
-    "errorBody": "The order code is invalid."
+    "errorBody": "The order code is invalid.",
+    "callHint": "Our team will call you on {phone} to confirm your order before shipping. Please keep your phone nearby.",
+    "callHintNoPhone": "Our team will call you to confirm your order before shipping.",
+    "items": "Items ordered",
+    "quantity": "Qty {count}",
+    "deliveryTo": "Deliver to",
+    "shipping": "Delivery",
+    "payOnDelivery": "To pay on delivery",
+    "addMoreHint": "Forgot something? For {minutes} min you can add it to this order from the product page (\"Add to my order\" button) — no need to order again.",
+    "savedTitle": "Order received",
+    "savedBody": "Your order {code} has been received. Please don't place it again: we will call you to confirm it."
   },
   "UserLayout": {
     "title": "My account",
@@ -672,5 +682,19 @@
       "phoneInvalid": "Invalid phone number",
       "termsRequired": "You must accept the terms"
     }
+  },
+  "RecentOrder": {
+    "banner": "Order {code} in progress: add this item straight to your order ({minutes} min left).",
+    "addToOrder": "Add to my order",
+    "added": "Item added to your order {code}. The cash-on-delivery amount has been updated.",
+    "addedAll": "Items added to your order {code}.",
+    "closed": "This order can no longer be changed: it is already being prepared. Please place a new order.",
+    "insufficientStock": "Not enough stock for this item.",
+    "failed": "Could not add the item to your order.",
+    "partial": "{added} item(s) added to your order {code}, but not all: {reason}",
+    "checkoutTitle": "You just placed order {code}",
+    "checkoutBody": "Add these items to that order instead of placing a new one: one delivery, one cash-on-delivery payment. Possible for {minutes} more min.",
+    "checkoutAdd": "Add to my order {code}",
+    "checkoutNew": "No, place a new order"
   }
 }

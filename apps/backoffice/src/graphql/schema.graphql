@@ -165,6 +165,27 @@ type Query {
 
   """Get dashboard statistics (legacy)"""
   oscarDashboardStats: DashboardStats!
+
+  """
+  Other orders from the same phone number placed within 24 hours of this one, oldest first.
+  """
+  relatedOrders(orderId: ID!): [RelatedOrder!]!
+
+  """
+  Orders (customer or delivery phone) and customers (own or address phone) whose number
+  contains the digits typed, whatever the formatting ("+213 661…", "0661…"). Empty when the
+  text is not a phone number (letters or fewer than 4 digits). At most 500 ids each.
+  """
+  phoneSearch(phone: String!): PhoneSearchResult!
+  returnReasons: [ReturnReason!]!
+
+  """
+  Units of each line that can still be returned (shipped minus already returned)
+  """
+  returnableLines(orderId: ID!): [ReturnableLine!]!
+
+  """Returns registered between from and to, per reason"""
+  returnStats(from: DateTime!, to: DateTime!): ReturnStats!
 }
 
 type Mutation {
@@ -687,6 +708,21 @@ type Mutation {
   order is returned.
   """
   modifyOrderGuided(input: ModifyOrderInput!): ModifyOrderResult!
+
+  """
+  Move every item of sourceOrderId into targetOrderId and cancel the source (reason
+  "Fusionnée dans la commande …"), in one transaction. Both orders must be unshipped
+  cash-on-delivery orders awaiting confirmation (PaymentAuthorized).
+  """
+  mergeOrders(targetOrderId: ID!, sourceOrderId: ID!): Order!
+
+  """
+  Register returned items on a shipped or delivered order. Recorded as a line cancellation
+  with reason "Retour — …" (stock restored once); defective items are written off when
+  restock is false. While cash on delivery is uncollected, the amount to collect follows
+  the new total; otherwise the amount to give back is noted on the order.
+  """
+  registerReturn(input: RegisterReturnInput!): Order!
 }
 
 input AdministratorListOptions {
@@ -1507,6 +1543,11 @@ type Order implements Node {
   """A summary of the taxes being applied to this Order"""
   taxSummary: [OrderTaxSummary!]!
   history(options: HistoryEntryListOptions): HistoryEntryList!
+
+  """
+  Number of other orders from the same phone number placed within 24 hours (possible duplicates).
+  """
+  relatedOrderCount: Int!
   customFields: OrderCustomFields
 }
 
@@ -1579,6 +1620,7 @@ input OrderFilterParameter {
   shippingWithTax: NumberOperators
   total: NumberOperators
   totalWithTax: NumberOperators
+  relatedOrderCount: NumberOperators
   _and: [OrderFilterParameter!]
   _or: [OrderFilterParameter!]
   customerNotes: StringOperators
@@ -1605,6 +1647,7 @@ input OrderSortParameter {
   shippingWithTax: SortOrder
   total: SortOrder
   totalWithTax: SortOrder
+  relatedOrderCount: SortOrder
   customerNotes: SortOrder
   adminNotes: SortOrder
   trackingNumber: SortOrder
@@ -6207,6 +6250,71 @@ input UpdateWilayaShippingPriceInput {
   Courier-office pickup price in minor units (centimes); null to stop offering it
   """
   officePrice: Int
+}
+
+"""Another order from the same phone number placed within 24 hours."""
+type RelatedOrder {
+  id: ID!
+  code: String!
+  state: String!
+  orderPlacedAt: DateTime!
+  totalWithTax: Money!
+  itemCount: Int!
+}
+
+"""
+Ids matching a phone search; the back-office adds them to its list filters as id IN (...).
+"""
+type PhoneSearchResult {
+  orderIds: [ID!]!
+  customerIds: [ID!]!
+}
+
+type ReturnReason {
+  code: String!
+  label: String!
+}
+
+type ReturnableLine {
+  orderLineId: ID!
+
+  """Units shipped and not yet returned"""
+  quantity: Int!
+}
+
+type ReturnReasonStats {
+  reason: String!
+  returns: Int!
+  units: Int!
+  value: Money!
+}
+
+type ReturnStats {
+  returns: Int!
+  units: Int!
+
+  """Value at the price paid"""
+  value: Money!
+  byReason: [ReturnReasonStats!]!
+}
+
+input ReturnLineInput {
+  orderLineId: ID!
+  quantity: Int!
+}
+
+input RegisterReturnInput {
+  orderId: ID!
+  lines: [ReturnLineInput!]!
+
+  """A code from returnReasons"""
+  reasonCode: String!
+
+  """Free text; required when reasonCode is OTHER"""
+  details: String
+
+  """Put the units back on sale (false for defective items: written off)"""
+  restock: Boolean!
 }
 
 input AdministratorFilterParameter {

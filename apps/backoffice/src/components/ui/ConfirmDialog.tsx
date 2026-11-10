@@ -13,6 +13,8 @@ interface ConfirmDialogProps {
   cancelText?: string;
   variant?: 'danger' | 'warning' | 'info';
   loading?: boolean;
+  /** Keeps the confirm button disabled, e.g. until a required field is filled. */
+  confirmDisabled?: boolean;
 }
 
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -25,6 +27,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   cancelText = 'Annuler',
   variant = 'danger',
   loading = false,
+  confirmDisabled = false,
 }) => {
   const iconColors = {
     danger: 'text-destructive',
@@ -55,7 +58,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         <Button variant="ghost" onClick={onClose} disabled={loading}>
           {cancelText}
         </Button>
-        <Button variant={buttonVariants[variant]} onClick={onConfirm} loading={loading}>
+        <Button variant={buttonVariants[variant]} onClick={onConfirm} loading={loading} disabled={confirmDisabled}>
           {confirmText}
         </Button>
       </ModalFooter>

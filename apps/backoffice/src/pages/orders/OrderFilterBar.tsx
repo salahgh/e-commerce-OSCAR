@@ -82,7 +82,7 @@ export const OrderFilterBar: React.FC<Props> = ({ state, onChange, onReset }) =>
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="N° de commande ou nom du client"
+            placeholder="N° de commande, nom ou téléphone du client"
             aria-label="Rechercher"
             className={cn(controlCls, 'w-full pl-9 pr-9')}
           />

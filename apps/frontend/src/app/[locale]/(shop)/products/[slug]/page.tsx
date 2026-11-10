@@ -23,6 +23,8 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { productSchema, breadcrumbSchema } from '@/lib/seo/schema';
 import { trackViewContent } from '@/lib/analytics';
 import { ProductGallery } from '@/components/product/ProductGallery';
+import { AddToRecentOrder } from '@/components/product/AddToRecentOrder';
+import { useRouter } from '@/i18n/routing';
 import { gallerySlides } from '@/lib/catalog/gallery-slides';
 import {
   optionGroupsOf,
@@ -79,6 +81,8 @@ export default function ProductPage() {
   });
 
   const { addToCart } = useCart();
+  const router = useRouter();
+  const [buying, setBuying] = React.useState(false);
   const toast = useToast();
   const wishlist = useWishlist();
 
@@ -143,11 +147,32 @@ export default function ProductPage() {
     .filter((p) => (relatedSeen.has(p.id) ? false : (relatedSeen.add(p.id), true)))
     .slice(0, 8);
 
-  async function handleAddToCart() {
-    if (!selectedVariant) return;
+  /** The chosen variant + quantity, or null (with a toast) when an option is missing. */
+  function selectedItem(): { productVariantId: string; quantity: number } | null {
+    if (!selectedVariant) return null;
     const missing = missingGroup(optionGroups, selections);
-    if (missing) return toast.error(selectGroupMessage(missing));
-    await addToCart(selectedVariant.id, quantity);
+    if (missing) {
+      toast.error(selectGroupMessage(missing));
+      return null;
+    }
+    return { productVariantId: selectedVariant.id, quantity };
+  }
+
+  async function handleAddToCart() {
+    const item = selectedItem();
+    if (item) await addToCart(item.productVariantId, item.quantity);
+  }
+
+  // "Acheter maintenant" used to behave exactly like "Ajouter au panier".
+  async function handleBuyNow() {
+    const item = selectedItem();
+    if (!item || buying) return;
+    setBuying(true);
+    try {
+      if (await addToCart(item.productVariantId, item.quantity, { openMiniCart: false })) router.push('/checkout');
+    } finally {
+      setBuying(false);
+    }
   }
 
   const localePath = (path: string) =>
@@ -244,6 +269,7 @@ export default function ProductPage() {
 
             {/* Actions */}
             <div className="flex w-full flex-col gap-4">
+              <AddToRecentOrder getItem={selectedItem} />
               <div className="flex w-full items-stretch gap-4">
                 <button
                   type="button"
@@ -278,8 +304,10 @@ export default function ProductPage() {
               </div>
               <button
                 type="button"
-                onClick={handleAddToCart}
-                className="flex w-full items-center justify-center rounded-lg border border-border-strong bg-white px-4 py-2 text-18 font-medium text-content-strong"
+                onClick={handleBuyNow}
+                disabled={buying}
+                aria-busy={buying || undefined}
+                className="flex w-full items-center justify-center rounded-lg border border-border-strong bg-white px-4 py-2 text-18 font-medium text-content-strong disabled:opacity-60"
               >
                 {t('buyNow')}
               </button>

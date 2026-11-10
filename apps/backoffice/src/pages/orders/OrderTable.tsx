@@ -115,6 +115,14 @@ export const OrderTable: React.FC<Props> = ({ orders, sort, dir, onSort, loading
                   >
                     {order.code}
                   </Link>
+                  {order.relatedOrderCount > 0 && (
+                    <span
+                      title="Autre(s) commande(s) du même numéro de téléphone en 24 h : doublon possible"
+                      className="ml-2 rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-400"
+                    >
+                      Doublon ? +{order.relatedOrderCount}
+                    </span>
+                  )}
                   <div className="text-xs text-muted-foreground">
                     {order.totalQuantity} article{order.totalQuantity > 1 ? 's' : ''}
                   </div>

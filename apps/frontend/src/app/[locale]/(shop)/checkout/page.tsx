@@ -15,6 +15,7 @@ import {
   useGetEligiblePaymentMethodsQuery,
   useTransitionOrderToStateMutation,
   useAddPaymentToOrderMutation,
+  useGetOrderByCodeLazyQuery,
 } from '@oscar/graphql-shop/generated';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDeliveryDestinations } from '@/hooks/useDeliveryDestinations';
@@ -23,6 +24,12 @@ import { useRouter, Link } from '@/i18n/routing';
 import { Alert, Button } from '@/components/ui';
 import { cn } from '@/lib/utils/cn';
 import { trackInitiateCheckout } from '@/lib/analytics';
+import { minutesLeft, saveRecentOrder } from '@/lib/checkout/recent-order';
+import { useRecentOrder } from '@/lib/checkout/use-recent-order';
+import { extendErrorMessage } from '@/components/product/AddToRecentOrder';
+
+/** Order states that mean checkout has not completed yet. */
+const UNPLACED_STATES = ['AddingItems', 'ArrangingPayment', 'Draft'];
 
 const inputCls =
   'w-full rounded-lg border border-hairline bg-white px-3.5 py-2.5 text-start text-16 text-accent shadow-sm placeholder:text-content-subtle focus:border-accent focus:outline-none';
@@ -112,7 +119,10 @@ export default function CheckoutPage() {
   const locale = params?.locale ?? 'fr';
   const router = useRouter();
 
-  const { cart, refetchCart } = useCart();
+  const { cart, refetchCart, clearCart, removeItem } = useCart();
+  const tRecent = useTranslations('RecentOrder');
+  const { recent, adding: addingToRecent, addItems: addToRecentOrder } = useRecentOrder();
+  const [recentDismissed, setRecentDismissed] = React.useState(false);
   const { customer, isAuthenticated, logout } = useAuth();
 
   // Once per checkout visit — the cart object keeps changing as shipping and
@@ -133,6 +143,10 @@ export default function CheckoutPage() {
   const [setShippingMethod] = useSetOrderShippingMethodMutation();
   const [transition] = useTransitionOrderToStateMutation();
   const [addPayment] = useAddPaymentToOrderMutation();
+  const [getOrderByCode] = useGetOrderByCodeLazyQuery({ fetchPolicy: 'network-only' });
+  // Synchronous lock: `submitting` only disables the button after a re-render,
+  // so a fast double tap could start two submissions.
+  const placingRef = React.useRef(false);
 
   const shippingQuery = useGetEligibleShippingMethodsQuery({ fetchPolicy: 'network-only' });
   const paymentQuery = useGetEligiblePaymentMethodsQuery({ fetchPolicy: 'network-only' });
@@ -283,14 +297,28 @@ export default function CheckoutPage() {
     }
   }
 
+  async function goToConfirmation(code: string) {
+    saveRecentOrder(code);
+    try {
+      await refetchCart();
+    } catch {
+      /* the confirmation page does not need the cart */
+    }
+    router.push(`/checkout/confirmation/${code}`);
+  }
+
   async function placeOrder() {
+    if (placingRef.current) return;
     setError(null);
     if (!ready) {
       setError(tErrors('addressFailed'));
       return;
     }
-    if (!selectedPayment) return;
+    if (!selectedPayment || !cart) return;
+    placingRef.current = true;
     setSubmitting(true);
+    const placingCode = cart.code;
+    let navigating = false;
     try {
       // Ensure address + shipping method are persisted before paying.
       await setShipping({ variables: { input: buildAddressInput() } });
@@ -303,16 +331,55 @@ export default function CheckoutPage() {
       const { data } = await addPayment({ variables: { input: { method: selectedPayment, metadata: {} } } });
       const resp = data?.addPaymentToOrder;
       if (resp?.__typename === 'Order') {
-        await refetchCart();
-        router.push(`/checkout/confirmation/${resp.code}`);
+        navigating = true;
+        await goToConfirmation(resp.code);
         return;
       }
       throw new Error((resp as { message?: string })?.message ?? tErrors('paymentFailed'));
     } catch (err) {
+      // On a dropped connection the order may well have been placed. Never tell
+      // the customer it failed (they would order again) without checking.
+      try {
+        const { data } = await getOrderByCode({ variables: { code: placingCode } });
+        const state = data?.orderByCode?.state;
+        if (state && !UNPLACED_STATES.includes(state)) {
+          navigating = true;
+          await goToConfirmation(placingCode);
+          return;
+        }
+      } catch {
+        /* fall through to the error */
+      }
       setError(err instanceof Error ? err.message : tErrors('paymentFailed'));
     } finally {
-      setSubmitting(false);
+      if (!navigating) {
+        placingRef.current = false;
+        setSubmitting(false);
+      }
     }
+  }
+
+  /** Put the whole cart into the order placed a few minutes ago instead of a new order. */
+  async function addCartToRecentOrder() {
+    if (!cart || placingRef.current) return;
+    setError(null);
+    const lines = cart.items;
+    const outcome = await addToRecentOrder(
+      lines.map((l) => ({ productVariantId: l.productVariantId, quantity: l.quantity })),
+    );
+    if (!outcome) {
+      setError(tRecent('closed'));
+      return;
+    }
+    if (outcome.ok) {
+      await clearCart();
+      router.push(`/checkout/confirmation/${outcome.code}`);
+      return;
+    }
+    // Lines already moved into the order must not be ordered a second time.
+    for (const line of lines.slice(0, outcome.added)) await removeItem(line.id);
+    const reason = extendErrorMessage(tRecent, outcome);
+    setError(outcome.added ? tRecent('partial', { added: outcome.added, code: outcome.code, reason }) : reason);
   }
 
   const subtotal = cart.subTotal + cart.discounts.reduce((s, d) => s + Math.abs(d.amountWithTax), 0);
@@ -349,7 +416,7 @@ export default function CheckoutPage() {
             <span className="font-dm">{formatDzdTotal(cart.total * 100, locale)}</span>
           </div>
 
-          <Button onClick={placeOrder} disabled={!selectedPayment} loading={submitting} fullWidth size="lg">
+          <Button onClick={placeOrder} disabled={!selectedPayment || addingToRecent} loading={submitting} fullWidth size="lg">
             {submitting ? tSummary('placing') : tSummary('placeOrder')}
           </Button>
         </aside>
@@ -361,6 +428,21 @@ export default function CheckoutPage() {
             <span>{t('backToCart')}</span>
           </Link>
 
+          {recent && !recentDismissed && (
+            <Alert intent="info" title={tRecent('checkoutTitle', { code: recent.code })}>
+              <div className="flex flex-col gap-3">
+                <p>{tRecent('checkoutBody', { minutes: minutesLeft(recent) })}</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={addCartToRecentOrder} loading={addingToRecent} disabled={submitting}>
+                    {tRecent('checkoutAdd', { code: recent.code })}
+                  </Button>
+                  <Button intent="secondary" onClick={() => setRecentDismissed(true)} disabled={addingToRecent}>
+                    {tRecent('checkoutNew')}
+                  </Button>
+                </div>
+              </div>
+            </Alert>
+          )}
           {error && <Alert intent="danger">{error}</Alert>}
           {staleSession && (
             <Alert intent="warning" title={tErrors('staleSessionTitle')}>

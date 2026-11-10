@@ -1,13 +1,18 @@
 import React, { useMemo } from 'react';
 import { useQuery } from '@apollo/client';
 import { ShoppingCart, AlertCircle, RotateCcw } from 'lucide-react';
-import { AdminOrdersDocument, AdminOrderTabCountsDocument } from '../../graphql/generated/graphql';
+import {
+  AdminOrdersDocument,
+  AdminOrderTabCountsDocument,
+  PhoneSearchDocument,
+} from '../../graphql/generated/graphql';
 import { Button } from '../../components/ui/Button';
 import { Spinner } from '../../components/ui/Spinner';
 import { Pagination } from '../../components/ui/Pagination';
 import {
   buildOrderListOptions,
   buildTabCountOptions,
+  looksLikePhone,
   toggleSort,
   PAGE_SIZES,
   type OrderTab,
@@ -24,16 +29,26 @@ import { OrderTable } from './OrderTable';
 export const OrderList: React.FC = () => {
   const { state, update, reset } = useOrderListParams();
 
-  const options = useMemo(() => buildOrderListOptions(state), [state]);
+  // A search that looks like a phone number also matches the customer's and the
+  // delivery phone, whatever their formatting (resolved to order ids server-side).
+  const phoneQuery = state.q.trim();
+  const isPhone = looksLikePhone(phoneQuery);
+  const phone = useQuery(PhoneSearchDocument, { variables: { phone: phoneQuery }, skip: !isPhone });
+  const phoneOrderIds = isPhone ? phone.data?.phoneSearch.orderIds : undefined;
+  const waitingForPhone = isPhone && phone.loading;
+
+  const options = useMemo(() => buildOrderListOptions(state, phoneOrderIds), [state, phoneOrderIds]);
   const { data, previousData, loading, error, refetch } = useQuery(AdminOrdersDocument, {
     variables: { options },
+    skip: waitingForPhone,
     fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-first',
   });
 
-  const countVars = useMemo(() => buildTabCountOptions(state), [state]);
+  const countVars = useMemo(() => buildTabCountOptions(state, phoneOrderIds), [state, phoneOrderIds]);
   const countsQuery = useQuery(AdminOrderTabCountsDocument, {
     variables: countVars,
+    skip: waitingForPhone,
     fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-first',
   });

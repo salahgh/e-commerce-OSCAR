@@ -139,3 +139,19 @@ query GetOrder($id: ID!) {
 query GetNextOrderStates {
   nextOrderStates
 }
+
+# Add an item to a cash-on-delivery order placed in the last 30 minutes
+# (instead of the customer placing a second order). Oscar plugin.
+mutation AddToPlacedOrder($orderCode: String!, $productVariantId: ID!, $quantity: Int!) {
+  addToPlacedOrder(orderCode: $orderCode, productVariantId: $productVariantId, quantity: $quantity) {
+    success
+    errorCode
+    message
+    order {
+      id
+      code
+      totalWithTax
+      totalQuantity
+    }
+  }
+}

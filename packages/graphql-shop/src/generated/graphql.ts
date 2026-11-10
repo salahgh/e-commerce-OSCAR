@@ -50,6 +50,15 @@ export type AddPaymentToOrderResult =
   | PaymentDeclinedError
   | PaymentFailedError;
 
+export type AddToPlacedOrderResult = {
+  __typename?: "AddToPlacedOrderResult";
+  /** NOT_FOUND | EXPIRED | NOT_EDITABLE | NOT_CASH_ON_DELIVERY | NOT_PLACED | INVALID_QUANTITY, or a Vendure error code such as INSUFFICIENT_STOCK_ERROR */
+  errorCode?: Maybe<Scalars["String"]["output"]>;
+  message?: Maybe<Scalars["String"]["output"]>;
+  order?: Maybe<Order>;
+  success: Scalars["Boolean"]["output"];
+};
+
 export type Address = Node & {
   __typename?: "Address";
   city?: Maybe<Scalars["String"]["output"]>;
@@ -1890,6 +1899,12 @@ export type Mutation = {
   addItemsToOrder: UpdateMultipleOrderItemsResult;
   /** Add a Payment to the Order */
   addPaymentToOrder: AddPaymentToOrderResult;
+  /**
+   * Add an item to a cash-on-delivery order placed in the last 30 minutes, instead of
+   * placing a second order. The order code is the guest's proof of ownership; a
+   * registered customer's order also requires their session.
+   */
+  addToPlacedOrder: AddToPlacedOrderResult;
   /** Adjusts an OrderLine. If custom fields are defined on the OrderLine entity, a third argument 'customFields' of type `OrderLineCustomFieldsInput` will be available. */
   adjustOrderLine: UpdateOrderItemsResult;
   /** Applies the given coupon code to the active Order */
@@ -2004,6 +2019,12 @@ export type MutationAddItemsToOrderArgs = {
 
 export type MutationAddPaymentToOrderArgs = {
   input: PaymentInput;
+};
+
+export type MutationAddToPlacedOrderArgs = {
+  orderCode: Scalars["String"]["input"];
+  productVariantId: Scalars["ID"]["input"];
+  quantity: Scalars["Int"]["input"];
 };
 
 export type MutationAdjustOrderLineArgs = {
@@ -6734,6 +6755,29 @@ export type GetNextOrderStatesQuery = {
   nextOrderStates: Array<string>;
 };
 
+export type AddToPlacedOrderMutationVariables = Exact<{
+  orderCode: Scalars["String"]["input"];
+  productVariantId: Scalars["ID"]["input"];
+  quantity: Scalars["Int"]["input"];
+}>;
+
+export type AddToPlacedOrderMutation = {
+  __typename?: "Mutation";
+  addToPlacedOrder: {
+    __typename?: "AddToPlacedOrderResult";
+    success: boolean;
+    errorCode?: string | null;
+    message?: string | null;
+    order?: {
+      __typename?: "Order";
+      id: string;
+      code: string;
+      totalWithTax: number;
+      totalQuantity: number;
+    } | null;
+  };
+};
+
 export type AssetFieldsFragment = {
   __typename?: "Asset";
   id: string;
@@ -10886,6 +10930,74 @@ export type GetNextOrderStatesSuspenseQueryHookResult = ReturnType<
 export type GetNextOrderStatesQueryResult = Apollo.QueryResult<
   GetNextOrderStatesQuery,
   GetNextOrderStatesQueryVariables
+>;
+export const AddToPlacedOrderDocument = gql`
+  mutation AddToPlacedOrder(
+    $orderCode: String!
+    $productVariantId: ID!
+    $quantity: Int!
+  ) {
+    addToPlacedOrder(
+      orderCode: $orderCode
+      productVariantId: $productVariantId
+      quantity: $quantity
+    ) {
+      success
+      errorCode
+      message
+      order {
+        id
+        code
+        totalWithTax
+        totalQuantity
+      }
+    }
+  }
+`;
+export type AddToPlacedOrderMutationFn = Apollo.MutationFunction<
+  AddToPlacedOrderMutation,
+  AddToPlacedOrderMutationVariables
+>;
+
+/**
+ * __useAddToPlacedOrderMutation__
+ *
+ * To run a mutation, you first call `useAddToPlacedOrderMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddToPlacedOrderMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addToPlacedOrderMutation, { data, loading, error }] = useAddToPlacedOrderMutation({
+ *   variables: {
+ *      orderCode: // value for 'orderCode'
+ *      productVariantId: // value for 'productVariantId'
+ *      quantity: // value for 'quantity'
+ *   },
+ * });
+ */
+export function useAddToPlacedOrderMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    AddToPlacedOrderMutation,
+    AddToPlacedOrderMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    AddToPlacedOrderMutation,
+    AddToPlacedOrderMutationVariables
+  >(AddToPlacedOrderDocument, options);
+}
+export type AddToPlacedOrderMutationHookResult = ReturnType<
+  typeof useAddToPlacedOrderMutation
+>;
+export type AddToPlacedOrderMutationResult =
+  Apollo.MutationResult<AddToPlacedOrderMutation>;
+export type AddToPlacedOrderMutationOptions = Apollo.BaseMutationOptions<
+  AddToPlacedOrderMutation,
+  AddToPlacedOrderMutationVariables
 >;
 export const GetProductsDocument = gql`
   query GetProducts($options: ProductListOptions) {

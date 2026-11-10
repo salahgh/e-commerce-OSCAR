@@ -9,6 +9,7 @@ import {
   buildOrderListOptions,
   buildTabCountOptions,
   toggleSort,
+  looksLikePhone,
 } from './order-list-params';
 
 const parse = (qs: string) => parseOrderListParams(new URLSearchParams(qs));
@@ -108,4 +109,26 @@ test('clicking a column header: new column gets its natural direction, same colu
   assert.deepEqual(toggleSort(DEFAULT_ORDER_LIST_STATE, 'customer'), { sort: 'customer', dir: 'asc' });
   assert.deepEqual(toggleSort(DEFAULT_ORDER_LIST_STATE, 'date'), { sort: 'date', dir: 'asc' });
   assert.deepEqual(toggleSort({ ...DEFAULT_ORDER_LIST_STATE, sort: 'date', dir: 'asc' }, 'date'), { sort: 'date', dir: 'desc' });
+});
+
+test('a phone search adds the matching order ids to the search alternatives (list and tab counts)', () => {
+  const state = { ...DEFAULT_ORDER_LIST_STATE, q: '0661 23 45 67' };
+  const o = buildOrderListOptions(state, ['8', '6']);
+  assert.deepEqual(o.filter?._or, [
+    { code: { contains: '0661 23 45 67' } },
+    { customerLastName: { contains: '0661 23 45 67' } },
+    { id: { in: ['8', '6'] } },
+  ]);
+  assert.deepEqual(buildTabCountOptions(state, ['8']).shipped.filter?._or?.[2], { id: { in: ['8'] } });
+  // No ids: nothing added (an empty IN list is never sent)
+  assert.equal(buildOrderListOptions(state, []).filter?._or?.length, 2);
+});
+
+test('looksLikePhone', () => {
+  assert.equal(looksLikePhone('0661234567'), true);
+  assert.equal(looksLikePhone('+213 661 23 45 67'), true);
+  assert.equal(looksLikePhone('4567'), true);
+  assert.equal(looksLikePhone('456'), false);
+  assert.equal(looksLikePhone('Amel'), false);
+  assert.equal(looksLikePhone('TXQ2BDS8'), false);
 });

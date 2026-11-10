@@ -10,6 +10,16 @@ import { WilayaShipping } from './entities/wilaya-shipping.entity';
 import { WilayaCommune } from './entities/wilaya-commune.entity';
 import { OscarAdminResolver } from './api/oscar-admin.resolver';
 import { OscarShopResolver } from './api/oscar-shop.resolver';
+import {
+  PhoneSearchAdminResolver,
+  RelatedOrdersAdminResolver,
+  RelatedOrdersOrderFieldResolver,
+  RelatedOrdersShopResolver,
+} from './api/related-orders.resolver';
+import { RelatedOrdersService } from './services/related-orders.service';
+import { PhoneSearchService } from './services/phone-search.service';
+import { OrderReturnsService } from './services/order-returns.service';
+import { OrderReturnsAdminResolver } from './api/order-returns.resolver';
 import { HealthController } from './api/health.controller';
 import { adminApiExtensions, shopApiExtensions } from './api/api-extensions';
 
@@ -33,16 +43,25 @@ import { adminApiExtensions, shopApiExtensions } from './api/api-extensions';
     OrderWilayaService,
     ShippingSetupService,
     OrderModificationService,
+    RelatedOrdersService,
+    PhoneSearchService,
+    OrderReturnsService,
   ],
   entities: [WilayaShipping, WilayaCommune],
   controllers: [HealthController],
   adminApiExtensions: {
     schema: adminApiExtensions,
-    resolvers: [OscarAdminResolver],
+    resolvers: [
+      OscarAdminResolver,
+      RelatedOrdersAdminResolver,
+      RelatedOrdersOrderFieldResolver,
+      PhoneSearchAdminResolver,
+      OrderReturnsAdminResolver,
+    ],
   },
   shopApiExtensions: {
     schema: shopApiExtensions,
-    resolvers: [OscarShopResolver],
+    resolvers: [OscarShopResolver, RelatedOrdersShopResolver],
   },
   configuration: config => {
     // Cash on delivery: ship before payment, settle the COD payment on delivery.
