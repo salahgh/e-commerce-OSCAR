@@ -68,6 +68,7 @@ import {
   CANCELLATION_REASONS,
   buildCancellationReason,
 } from '../../lib/cancellation-reason';
+import { shippedCancelWarning, shipmentActionsAllowed } from './order-cancel-rules';
 
 // Helper to get French translation from product translations
 const getProductNameFr = (translations: any[] | undefined): string => {
@@ -130,7 +131,8 @@ const ORDER_STATUS: Record<
     icon: <Truck className="h-4 w-4" />,
     color: 'text-yellow-400',
     bgColor: 'bg-yellow-500/20',
-    next: ['Shipped', 'PartiallyDelivered'],
+    // Cancellable: staff mark orders shipped once confirmed by phone (see order-cancel-rules.ts).
+    next: ['Shipped', 'PartiallyDelivered', 'Cancelled'],
   },
   Shipped: {
     label: 'Expédié',
@@ -138,7 +140,7 @@ const ORDER_STATUS: Record<
     icon: <Truck className="h-4 w-4" />,
     color: 'text-blue-400',
     bgColor: 'bg-blue-500/20',
-    next: ['PartiallyDelivered', 'Delivered'],
+    next: ['PartiallyDelivered', 'Delivered', 'Cancelled'],
   },
   PartiallyDelivered: {
     label: 'Partiellement livré',
@@ -1425,7 +1427,7 @@ export const OrderDetail: React.FC = () => {
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      {(FULFILLMENT_NEXT_STATES[f.state] ?? []).map((next) => (
+                      {(shipmentActionsAllowed(order.state) ? (FULFILLMENT_NEXT_STATES[f.state] ?? []) : []).map((next) => (
                         <PermissionGate key={next} permission="UpdateOrder" disableMode>
                           <Button
                             variant="secondary"
@@ -1549,6 +1551,9 @@ export const OrderDetail: React.FC = () => {
             <p className="text-foreground">
               Êtes-vous sûr de vouloir annuler cette commande? Cette action est irréversible.
             </p>
+            {shippedCancelWarning(order.state) && (
+              <p className="text-yellow-400 text-sm">{shippedCancelWarning(order.state)}</p>
+            )}
             <Select
               label="Raison d'annulation *"
               value={cancellationPreset}
