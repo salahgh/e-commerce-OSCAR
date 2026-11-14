@@ -1552,7 +1552,7 @@ export const OrderDetail: React.FC = () => {
               Êtes-vous sûr de vouloir annuler cette commande? Cette action est irréversible.
             </p>
             {shippedCancelWarning(order.state) && (
-              <p className="text-yellow-400 text-sm">{shippedCancelWarning(order.state)}</p>
+              <p className="text-warning text-sm">{shippedCancelWarning(order.state)}</p>
             )}
             <Select
               label="Raison d'annulation *"
